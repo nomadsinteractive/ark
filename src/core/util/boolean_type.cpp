@@ -135,11 +135,12 @@ sp<Boolean> BooleanType::negative(sp<Boolean> self)
 
 bool BooleanType::toBool(const sp<Boolean>& self)
 {
-    return self->val();
+    return val(self);
 }
 
 bool BooleanType::val(const sp<Boolean>& self)
 {
+    self->update(0);
     return self->val();
 }
 

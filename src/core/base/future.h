@@ -8,10 +8,10 @@
 namespace ark {
 
 //[[script::bindings::extends(Runnable)]]
-class ARK_API Future : public Runnable {
+class ARK_API Future final : public Runnable {
 public:
 //  [[script::bindings::auto]]
-    Future(sp<Boolean> canceled = nullptr, sp<Runnable> observer = nullptr, uint32_t countDown = 1);
+    Future(sp<Runnable> observer = nullptr, sp<Boolean> canceled = nullptr, uint32_t countDown = 1);
 
 //  [[script::bindings::auto]]
     void cancel();
@@ -28,9 +28,9 @@ public:
     void run() override;
 
 private:
+    sp<Runnable> _observer;
     SafeVar<Boolean> _done;
     SafeVar<Boolean> _canceled;
-    sp<Runnable> _observer;
     uint32_t _count_down;
 };
 

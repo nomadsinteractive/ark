@@ -5,7 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/v3.h"
+#include "graphics/base/mat.h"
 
 namespace ark {
 
@@ -16,6 +16,9 @@ public:
     static sp<Mat3> create(const V3& t, const V3& b, const V3& n);
 //[[script::bindings::constructor]]
     static sp<Mat3> create(sp<Vec3> t = nullptr, sp<Vec3> b = nullptr, sp<Vec3> n = nullptr);
+
+//  [[script::bindings::property]]
+    static M3 val(const sp<Mat3>& self);
 
 //[[script::bindings::operator(@)]]
     static sp<Mat3> matmul(sp<Mat3> lvalue, sp<Mat3> rvalue);

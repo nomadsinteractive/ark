@@ -5,8 +5,8 @@
 
 namespace ark {
 
-Future::Future(sp<Boolean> canceled, sp<Runnable> observer, const uint32_t countDown)
-    : _done(nullptr, false), _canceled(std::move(canceled), false), _observer(std::move(observer)), _count_down(countDown)
+Future::Future(sp<Runnable> observer, sp<Boolean> canceled, const uint32_t countDown)
+    : _observer(std::move(observer)), _done(nullptr, false), _canceled(std::move(canceled), false), _count_down(countDown)
 {
 }
 

@@ -16,6 +16,7 @@
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
+#include "core/util/boolean_type.h"
 #include "core/util/operators.h"
 
 #include "app/base/application_context.h"
@@ -313,6 +314,17 @@ sp<Numeric> NumericType::round(sp<Numeric> self)
 sp<Numeric> NumericType::integral(const sp<Numeric>& self, const sp<Numeric>& t)
 {
     return sp<Numeric>::make<Integral<float>>(self, t ? t : Ark::instance().appClock()->duration());
+}
+
+sp<Numeric> NumericType::distance(sp<Numeric> self, sp<Numeric> other)
+{
+    return absolute(sub(std::move(self), std::move(other)));
+}
+
+sp<Numeric> NumericType::distance2(sp<Numeric> self, sp<Numeric> other)
+{
+    const sp<Numeric> d1 = sub(std::move(self), std::move(other));
+    return mul(d1, d1);
 }
 
 NumericType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)

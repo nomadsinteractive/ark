@@ -117,6 +117,11 @@ public:
     static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
 
 //  [[script::bindings::classmethod]]
+    static sp<Numeric> distance(sp<Numeric> self, sp<Numeric> other);
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> distance2(sp<Numeric> self, sp<Numeric> other);
+
+//  [[script::bindings::classmethod]]
     static sp<Numeric> modFloor(const sp<Numeric>& self, const sp<Numeric>& mod);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> floor(sp<Numeric> self);

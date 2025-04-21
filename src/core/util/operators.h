@@ -43,6 +43,20 @@ public:
         }
     };
 
+    template<typename T> class AlmostEQ {
+    public:
+        AlmostEQ(const int32_t ulp)
+            : _ulp(ulp) {
+        }
+
+        bool operator()(T v1, T v2) {
+            return Math::almostEqual(v1, v2, _ulp);
+        }
+
+    private:
+        int32_t _ulp;
+    };
+
     template<typename T> class NE {
     public:
         bool operator()(T v1, T v2) {

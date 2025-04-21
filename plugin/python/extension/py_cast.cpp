@@ -175,11 +175,25 @@ sp<Vec4> PyCast::toVec4(PyObject* object)
     return toSharedPtrOrNull<Vec4>(object);
 }
 
+Optional<sp<Mat2>> PyCast::toMat2(PyObject* object)
+{
+    if(const Optional<M2> matrix = toCppObject<M2>(object))
+        return {sp<Mat2>::make<Mat2::Const>(matrix.value())};
+    return {toSharedPtrDefault<Mat2>(object)};
+}
+
+Optional<sp<Mat3>> PyCast::toMat3(PyObject* object)
+{
+    if(const Optional<M3> matrix = toCppObject<M3>(object))
+        return {sp<Mat3>::make<Mat3::Const>(matrix.value())};
+    return {toSharedPtrDefault<Mat3>(object)};
+}
+
 Optional<sp<Mat4>> PyCast::toMat4(PyObject* object)
 {
     if(const Optional<M4> matrix = toCppObject<M4>(object))
         return {sp<Mat4>::make<Mat4::Const>(matrix.value())};
-    return toSharedPtrDefault<Mat4>(object);
+    return {toSharedPtrDefault<Mat4>(object)};
 }
 
 Optional<sp<StringVar>> PyCast::toStringVar(PyObject* object)
@@ -422,6 +436,55 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V4> PyCast::toCppObject_impl<V4>(PyObj
     return {};
 }
 
+template<> ARK_PLUGIN_PYTHON_API Optional<M2> PyCast::toCppObject_impl<M2>(PyObject* object)
+{
+    if(PyTuple_Check(object) && PyTuple_Size(object) == 2)
+    {
+        M2 ret;
+        for(Py_ssize_t i = 0; i < 2; ++i)
+        {
+            PyObject* row = PyTuple_GetItem(object, i);
+            if(PyTuple_CheckExact(row))
+            {
+                float* fp = reinterpret_cast<float*>(&ret) + i * 2;
+                if(!PyArg_ParseTuple(row, "ff", fp, fp + 1))
+                {
+                    PyErr_Clear();
+                    break;
+                }
+            }
+            else
+                return {};
+        }
+        return {ret};
+    }
+    return {};
+}
+
+template<> ARK_PLUGIN_PYTHON_API Optional<M3> PyCast::toCppObject_impl<M3>(PyObject* object)
+{
+    if(PyTuple_Check(object) && PyTuple_Size(object) == 3)
+    {
+        M3 ret;
+        for(Py_ssize_t i = 0; i < 3; ++i)
+        {
+            PyObject* row = PyTuple_GetItem(object, i);
+            if(PyTuple_CheckExact(row))
+            {
+                float* fp = reinterpret_cast<float*>(&ret) + i * 3;
+                if(!PyArg_ParseTuple(row, "ffff", fp, fp + 1, fp + 2))
+                {
+                    PyErr_Clear();
+                    break;
+                }
+            }
+            else
+                return {};
+        }
+        return {ret};
+    }
+    return {};
+}
 template<> ARK_PLUGIN_PYTHON_API Optional<M4> PyCast::toCppObject_impl<M4>(PyObject* object)
 {
     if(PyTuple_Check(object) && PyTuple_Size(object) == 4)
@@ -440,11 +503,11 @@ template<> ARK_PLUGIN_PYTHON_API Optional<M4> PyCast::toCppObject_impl<M4>(PyObj
                 }
             }
             else
-                return Optional<M4>();
+                return {};
         }
         return ret;
     }
-    return Optional<M4>();
+    return {};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<Slice> PyCast::toCppObject_impl<Slice>(PyObject* object)
@@ -584,6 +647,24 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<V4>(const V4&
     PyTuple_SetItem(v4, 2, PyFloat_FromDouble(value.z()));
     PyTuple_SetItem(v4, 3, PyFloat_FromDouble(value.w()));
     return v4;
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<M2>(const M2& value)
+{
+    PyObject* m2 = PyTuple_New(2);
+    const V2* ptr = reinterpret_cast<const V2*>(&value);
+    for(Py_ssize_t i = 0; i < 2; ++i)
+        PyTuple_SetItem(m2, i, toPyObject_impl<V2>(*(ptr ++)));
+    return m2;
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<M3>(const M3& value)
+{
+    PyObject* m3 = PyTuple_New(3);
+    const V3* ptr = reinterpret_cast<const V3*>(&value);
+    for(Py_ssize_t i = 0; i < 3; ++i)
+        PyTuple_SetItem(m3, i, toPyObject_impl<V3>(*(ptr ++)));
+    return m3;
 }
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<M4>(const M4& value)

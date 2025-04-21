@@ -253,7 +253,7 @@ void RenderController::uploadBuffer(const Buffer& buffer, sp<Uploader> uploader,
 {
     ASSERT(uploader);
     if(!future)
-        future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer.delegate(), 1));
+        future = sp<Future>::make(nullptr, sp<Boolean>::make<BooleanByWeakRef<Buffer::Delegate>>(buffer.delegate(), 1));
     buffer.delegate()->setSize(uploader->size());
     Uploader& uploaderInstance = *uploader;
     sp<Updatable> updatable = strategy.has(enums::UPLOAD_STRATEGY_ON_CHANGE) ? sp<Updatable>::make<BufferUpdatable>(*this, std::move(uploader), buffer.delegate()) : sp<Updatable>();

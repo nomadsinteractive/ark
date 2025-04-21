@@ -344,6 +344,8 @@ private:
     static sp<Vec3> toVec3(PyObject* object);
     static sp<Vec4> toVec4(PyObject* object);
 
+    static Optional<sp<Mat2>> toMat2(PyObject* object);
+    static Optional<sp<Mat3>> toMat3(PyObject* object);
     static Optional<sp<Mat4>> toMat4(PyObject* object);
 
     static Optional<sp<Integer>> toInteger(PyObject* object);
@@ -400,6 +402,16 @@ template<> inline Optional<sp<Vec4>> PyCast::toSharedPtrImpl<Vec4>(PyObject* obj
 {
     sp<Vec4> vec4 = toVec4(object);
     return vec4 ? Optional<sp<Vec4>>(std::move(vec4)) : Optional<sp<Vec4>>();
+}
+
+template<> inline Optional<sp<Mat2>> PyCast::toSharedPtrImpl<Mat2>(PyObject* object)
+{
+    return toMat2(object);
+}
+
+template<> inline Optional<sp<Mat3>> PyCast::toSharedPtrImpl<Mat3>(PyObject* object)
+{
+    return toMat3(object);
 }
 
 template<> inline Optional<sp<Mat4>> PyCast::toSharedPtrImpl<Mat4>(PyObject* object)

@@ -513,7 +513,7 @@ class ApplicationBundle:
 
 
 class Future:
-    def __init__(self, canceled: Optional[Boolean] = None, observer: Optional[TYPE_RUNNABLE] = None, count_down: int = 1):
+    def __init__(self, observer: Optional[TYPE_RUNNABLE] = None, canceled: Optional[Boolean] = None, count_down: int = 1):
         pass
 
     @property
@@ -1062,7 +1062,7 @@ class Numeric(_Scalar):
     def synchronize(self, disposed: Boolean) -> 'Numeric':
         pass
 
-    def sod(self, s0: float, k: float, z: float = 1.0, r: float = 0, t: Optional['Numeric'] = None) -> 'Numeric':
+    def sod(self, s0: float, f: float, z: float = 1.0, r: float = 0, t: Optional['Numeric'] = None) -> 'Numeric':
         pass
 
     @staticmethod
@@ -1198,7 +1198,7 @@ class Vec2(_Var):
     def lerp(self, other, t: TYPE_NUMERIC) -> Self:
         pass
 
-    def sod(self, s0, k: float, z: float, r: float, t: Optional['Numeric'] = None) -> Self:
+    def sod(self, s0, f: float, z: float, r: float, t: Optional['Numeric'] = None) -> Self:
         pass
 
     def extend(self, v):

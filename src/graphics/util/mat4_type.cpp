@@ -64,6 +64,7 @@ sp<Mat4> Mat4Type::create(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w)
 
 M4 Mat4Type::val(const sp<Mat4>& self)
 {
+    self->update(0);
     return self->val();
 }
 
@@ -144,7 +145,7 @@ sp<Mat4> Mat4Type::inverse(sp<Mat4> self)
 
 sp<Mat4> Mat4Type::freeze(const sp<Mat4>& self)
 {
-    return sp<Mat4>::make<Mat4::Const>(self->val());
+    return sp<Mat4>::make<Mat4::Const>(val(self));
 }
 
 sp<Mat4> Mat4Type::dye(sp<Mat4> self, sp<Boolean> condition, String message)
