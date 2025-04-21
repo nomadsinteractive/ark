@@ -14,4 +14,9 @@ Transform2D::Transform2D(sp<Numeric> rotation, sp<Vec2> scale, sp<Vec2> translat
 {
 }
 
+sp<Transform> Transform2D::create(sp<Numeric> rotation, sp<Vec2> scale, sp<Vec2> translation)
+{
+    return sp<Transform>::make<Transform2D>(std::move(rotation), std::move(scale), std::move(translation));
+}
+
 }
