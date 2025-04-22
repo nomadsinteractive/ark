@@ -34,7 +34,7 @@ public:
         return add(Type<T>::id(), Box(std::move(trait)));
     }
 
-    Box& put(TypeId typeId, Box trait) {
+    Box& put(const TypeId typeId, Box trait) {
         Box& slot = _traits[typeId];
         slot = std::move(trait);
         return slot;
@@ -60,7 +60,7 @@ public:
         return optBox ? optBox->as<T>() : nullptr;
     }
 
-    Optional<Box> get(TypeId typeId) const {
+    Optional<Box> get(const TypeId typeId) const {
         const auto iter = _traits.find(typeId);
         return iter != _traits.end() ? Optional<Box>(iter->second) : Optional<Box>();
     }

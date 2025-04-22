@@ -33,6 +33,8 @@ TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
 TYPE_NAMED_HASH = Union[int, str]
 TYPE_RUNNABLE = Union["Runnable", Callable[[], None]]
 
+T = TypeVar('T')
+
 
 def logd(*args):
     print(*args)
@@ -3017,10 +3019,10 @@ class Entity:
     def add_component(self, component: Any):
         pass
 
-    def get_component(self, ctype: type):
+    def discard(self):
         pass
 
-    def discard(self):
+    def __getitem__(self, ctype: type[T]) -> Optional[T]:
         pass
 
 

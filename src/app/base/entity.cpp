@@ -62,26 +62,30 @@ Entity::Entity(Vector<Component> components)
         for(const auto& [k, v] : components)
         {
             _components.put(k.typeId(), k);
-            if(sp<Wirable::Niche> niche = k.as<Wirable::Niche>())
-                niches.push_back(std::move(niche));
-            if(const sp<Wirable> wirable = k.as<Wirable>())
-                if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
-                    _components.put(typeId, k);
+            if(!k.isEnum())
+            {
+                if(sp<Wirable::Niche> niche = k.as<Wirable::Niche>())
+                    niches.push_back(std::move(niche));
+                if(const sp<Wirable> wirable = k.as<Wirable>())
+                    if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
+                        _components.put(typeId, k);
+            }
         }
     }
 
     preWire();
     for(const auto& [k, v] : components)
-        if(const sp<Wirable> wirable = k.as<Wirable>())
-        {
-            Wirable::WiringContext nicheContext(_components, false);
-            if(v)
-                for(const sp<Wirable::Niche>& i : niches)
-                    if(const String value = Documents::getAttribute(v, i->name()))
-                        i->onPoll(nicheContext, value);
+        if(!k.isEnum())
+            if(const sp<Wirable> wirable = k.as<Wirable>())
+            {
+                Wirable::WiringContext nicheContext(_components, false);
+                if(v)
+                    for(const sp<Wirable::Niche>& i : niches)
+                        if(const String value = Documents::getAttribute(v, i->name()))
+                            i->onPoll(nicheContext, value);
 
-            wirable->onWire(nicheContext, k);
-        }
+                wirable->onWire(nicheContext, k);
+            }
 }
 
 Entity::~Entity()
