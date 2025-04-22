@@ -1,5 +1,6 @@
 #include "renderer/base/render_target.h"
 
+#include "shader.h"
 #include "core/base/bean_factory.h"
 #include "core/util/string_convert.h"
 
@@ -52,10 +53,16 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
     }
 
     sp<Renderer> renderer = _renderer.build(args);
-    sp<Renderer> renderLayer = _render_layer.build(args);
+    const sp<RenderLayer> renderLayer = _render_layer.build(args);
     ASSERT(renderer || renderLayer);
     CHECK(!(renderer && renderLayer), "Unimplemented");
-    return Ark::instance().renderController()->makeRenderTarget(renderer ? std::move(renderer) : std::move(renderLayer), std::move(configure));
+    if(renderLayer)
+    {
+        const auto& traits = renderLayer->_stub->_shader->pipelineDesciptor()->configuration()._traits;
+        if(traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
+            configure._depth_test_write_enabled = traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)._depth_test._write_enabled;
+    }
+    return Ark::instance().renderController()->makeRenderTarget(renderer ? std::move(renderer) : renderLayer.cast<Renderer>(), std::move(configure));
 }
 
 RenderTarget::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest)

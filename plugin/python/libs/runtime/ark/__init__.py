@@ -1833,9 +1833,6 @@ class RenderObject:
     def xyz(self) -> Tuple[float, float, float]:
         return 0, 0, 0
 
-    def absorb(self, o):
-        pass
-
     def discard(self):
         pass
 

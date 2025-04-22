@@ -39,6 +39,7 @@ public:
         ClearBitSet _clear_bits;
         Vector<sp<Texture>> _color_attachments;
         sp<Texture> _depth_stencil_attachment;
+        bool _depth_test_write_enabled = true;
     };
 
     RenderTarget(sp<Renderer> renderer, sp<Resource> resource);

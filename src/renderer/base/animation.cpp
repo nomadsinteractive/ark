@@ -12,11 +12,11 @@ namespace {
 
 struct AnimationSession {
 
-    AnimationSession(sp<Integer> tick, uint32_t durationInTicks, sp<Vector<AnimationFrame>> animationFrames)
+    AnimationSession(sp<Integer> tick, const uint32_t durationInTicks, sp<Vector<AnimationFrame>> animationFrames)
         : _tick(std::move(tick)), _duration_in_ticks(durationInTicks), _animation_frames(std::move(animationFrames)) {
     }
 
-    bool update(uint64_t timestamp) const
+    bool update(const uint64_t timestamp) const
     {
         return _tick->update(timestamp);
     }
@@ -33,12 +33,13 @@ private:
     sp<Vector<AnimationFrame>> _animation_frames;
 };
 
-struct LocalMatrix final : Mat4 {
-    LocalMatrix(sp<AnimationSession> session, uint32_t nodeIndex)
+class LocalMatrix final : public Mat4 {
+public:
+    LocalMatrix(sp<AnimationSession> session, const uint32_t nodeIndex)
         : _session(std::move(session)), _node_index(nodeIndex) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         return _session->update(timestamp);
     }
@@ -48,16 +49,18 @@ struct LocalMatrix final : Mat4 {
         return _session->currentFrame().at(_node_index);
     }
 
+private:
     sp<AnimationSession> _session;
     uint32_t _node_index;
 };
 
-struct GlobalMatrix final : Mat4 {
+class GlobalMatrix final : public Mat4 {
+public:
     GlobalMatrix(sp<AnimationSession> session, Vector<std::pair<int32_t, M4>> transformPath)
         : _session(std::move(session)), _transform_path(std::move(transformPath)) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         return _session->update(timestamp);
     }
@@ -70,6 +73,7 @@ struct GlobalMatrix final : Mat4 {
         return transform;
     }
 
+private:
     sp<AnimationSession> _session;
     Vector<std::pair<int32_t, M4>> _transform_path;
 };

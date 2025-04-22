@@ -164,7 +164,7 @@ VkRenderPass VKFramebuffer::Stub::acquire()
         depthAttachmentDescription.finalLayout = depthAttachmentDescription.initialLayout;
         attachmentDescriptions.push_back(depthAttachmentDescription);
     }
-    VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), _configure._depth_stencil_op == RenderTarget::ATTACHMENT_OP_BIT_LOAD ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+    VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), (_configure._depth_stencil_op == RenderTarget::ATTACHMENT_OP_BIT_LOAD && !_configure._depth_test_write_enabled) ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
                                                                                                                                                                                                 : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 
     VkSubpassDescription subpassDescription = {};

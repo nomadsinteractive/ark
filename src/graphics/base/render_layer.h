@@ -106,6 +106,7 @@ private:
 
     friend class Layer;
     friend class RenderLayerSnapshot;
+    friend class RenderTarget;
     friend class LayerContextSnapshot;
 };
 
