@@ -2,12 +2,10 @@
 
 #include "core/base/constants.h"
 #include "core/types/global.h"
-#include "core/util/log.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/components/render_object.h"
 #include "graphics/base/layer_context_snapshot.h"
-#include "graphics/util/renderable_type.h"
 
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/shader.h"
@@ -16,7 +14,7 @@ namespace ark {
 
 LayerContext::LayerContext(sp<Shader> shader, sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings)
     : _shader(std::move(shader)), _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(std::move(discarded), false),
-      _varyings(std::move(varyings)), _reload_requested(false)
+      _varyings(std::move(varyings))
 {
 }
 
@@ -66,16 +64,22 @@ void LayerContext::setModelLoader(sp<ModelLoader> modelLoader)
     _model_loader = std::move(modelLoader);
 }
 
-void LayerContext::add(sp<Renderable> renderable, sp<Updatable> updatable, sp<Boolean> discarded)
+void LayerContext::pushFront(sp<Renderable> renderable)
 {
-    _renderable_created.push_back(RenderableType::create(std::move(renderable), std::move(updatable), std::move(discarded)));
+    _created_push_front.push_back(std::move(renderable));
+}
+
+void LayerContext::pushBack(sp<Renderable> renderable)
+{
+    _created_push_back.push_back(std::move(renderable));
 }
 
 void LayerContext::clear()
 {
     for(auto& [i, j] : _renderables)
         j = Renderable::RENDERABLE_STATE_DISCARDED;
-    _renderable_created.clear();
+    _created_push_front.clear();
+    _created_push_back.clear();
 }
 
 void LayerContext::discard()
@@ -100,24 +104,33 @@ void LayerContext::markDirty()
 
 bool LayerContext::processNewCreated()
 {
-    if(_renderable_created.empty())
+    if(_created_push_front.empty() && _created_push_back.empty())
         return false;
 
-    for(sp<Renderable>& i : _renderable_created)
+    if(!_created_push_front.empty())
+    {
+        for(sp<Renderable>& i : _created_push_front)
+        {
+            addElementState(i.get());
+            _renderables.emplace_front(std::move(i), Renderable::State(Renderable::RENDERABLE_STATE_NEW));
+        }
+    }
+    for(sp<Renderable>& i : _created_push_back)
     {
         addElementState(i.get());
         _renderables.emplace_back(std::move(i), Renderable::State(Renderable::RENDERABLE_STATE_NEW));
     }
-    _renderable_created.clear();
+    _created_push_front.clear();
+    _created_push_back.clear();
     return true;
 }
 
-LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const PipelineLayout& pipelineInput)
+LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout)
 {
     const bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _discarded, _varyings);
     if(!_varyings)
-        _varyings = sp<Varyings>::make(pipelineInput);
-    return {dirty, _position.val(), _visible.val(), _discarded.val(), _varyings->snapshot(pipelineInput, renderRequest.allocator()), std::move(renderLayer)};
+        _varyings = sp<Varyings>::make(pipelineLayout);
+    return {dirty, _position.val(), _visible.val(), _discarded.val(), _varyings->snapshot(pipelineLayout, renderRequest.allocator()), std::move(renderLayer)};
 }
 
 LayerContext::ElementState& LayerContext::addElementState(void* key)

@@ -436,7 +436,7 @@ struct Text::Content {
             sp<Renderable> renderable = sp<Renderable>::make<RenderableCharacter>(_render_objects.at(i), hierarchy._child_nodes.at(i)._node, _layout_chars.at(i)._offset);
             if(_transform)
                 renderable = sp<Renderable>::make<RenderableWithTransform>(std::move(renderable), _transform);
-            _layer_context->add(std::move(renderable));
+            _layer_context->pushBack(std::move(renderable));
         }
 
         const sp<Layout> layout = makeTextLayout();

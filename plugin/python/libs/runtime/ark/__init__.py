@@ -110,6 +110,9 @@ class Enum:
     UPLOAD_PRIORITY_NORMAL = 1
     UPLOAD_PRIORITY_HIGH = 2
 
+    LAYER_PUSH_ORDER_BACK = 0
+    LAYER_PUSH_ORDER_FRONT = 1
+
     def __init__(self, value: int):
         pass
 
@@ -1866,7 +1869,7 @@ class Layer:
     def context(self) -> LayerContext:
         return LayerContext()
 
-    def add_render_object(self, render_object: RenderObject, discarded: Boolean = None):
+    def push_back(self, render_object: RenderObject, discarded: Boolean = None):
         pass
 
     def clear(self):

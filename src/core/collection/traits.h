@@ -40,7 +40,7 @@ public:
         return slot;
     }
 
-    Box& add(TypeId typeId, Box trait) {
+    Box& add(const TypeId typeId, Box trait) {
         Box& slot = _traits[typeId];
         if(slot) {
             Box& listBox = _traits[toVectorTypeId(typeId)];

@@ -20,7 +20,7 @@ public:
     Layer(sp<LayerContext> layerContext);
 
 // [[script::bindings::auto]]
-    void dispose();
+    void discard();
 
 //  [[script::bindings::property]]
     const sp<Shader>& shader() const;
@@ -41,10 +41,12 @@ public:
 //  [[script::bindings::property]]
     sp<ModelLoader> modelLoader() const;
 
+    void pushFront(sp<Renderable> renderable, sp<Boolean> discarded = nullptr);
+    void pushBack(sp<Renderable> renderable, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
-    void add(sp<Renderable> renderable, sp<Updatable> updatable = nullptr, sp<Boolean> discarded = nullptr);
+    void pushFront(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded = nullptr);
 //  [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded = nullptr);
+    void pushBack(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded = nullptr);
 //  [[script::bindings::auto]]
     void clear();
 

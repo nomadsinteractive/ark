@@ -274,7 +274,7 @@ void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<Tile>& tile, con
     if(targetTile)
         targetTile->dispose();
     if(_layer_context && renderableTile)
-        _layer_context->add(renderableTile);
+        _layer_context->pushBack(renderableTile);
     targetTile = std::move(renderableTile);
 }
 
@@ -298,7 +298,7 @@ void TilemapLayer::setLayerContext(sp<LayerContext> layerContext)
     _layer_context = std::move(layerContext);
     for(const sp<RenderableTile>& i : _layer_tiles)
         if(i)
-            _layer_context->add(i);
+            _layer_context->pushBack(i);
 }
 
 }

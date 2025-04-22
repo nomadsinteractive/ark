@@ -56,6 +56,12 @@ enum UploadPriority {
     UPLOAD_PRIORITY_COUNT
 };
 
+//[[script::bindings::enumeration(Enum)]]
+enum LayerPushOrder {
+    LAYER_PUSH_ORDER_BACK = 0,
+    LAYER_PUSH_ORDER_FRONT
+};
+
 enum RenderingBackendBit {
     RENDERING_BACKEND_AUTO = 0,
     RENDERING_BACKEND_BIT_OPENGL = 1 << 0,

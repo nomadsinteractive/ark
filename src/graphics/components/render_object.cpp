@@ -283,7 +283,11 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
 
     if(const auto layer = context.getComponent<Layer>())
     {
-        layer->addRenderObject(self.as<RenderObject>());
+        if(const enums::LayerPushOrder lpo = context.getEnum<enums::LayerPushOrder>(enums::LayerPushOrder::LAYER_PUSH_ORDER_BACK);
+            lpo == enums::LAYER_PUSH_ORDER_BACK)
+            layer->pushBack(self.as<RenderObject>());
+        else
+            layer->pushFront(self.as<RenderObject>());
 
         if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layer->shader() && layer->shader()->layout()->getAttribute("Id"))
             varyings()->setProperty(constants::ID, sp<Integer>::make<Integer::Const>(withId->id()));

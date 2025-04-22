@@ -40,7 +40,7 @@ void LevelLayer::createRenderObjects(const sp<Layer>& layer) const
 {
     for(const sp<LevelObject>& i : _objects)
         if(const sp<RenderObject>& ro = i->createRenderObject(); ro && layer)
-            layer->addRenderObject(ro);
+            layer->pushBack(ro);
 }
 
 void LevelLayer::createRigidbodies(const sp<Collider>& collider, const Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter) const

@@ -6,6 +6,7 @@
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/components/render_object.h"
+#include "graphics/util/renderable_type.h"
 
 #include "renderer/impl/model_loader/model_loader_cached.h"
 
@@ -21,7 +22,7 @@ Layer::Layer(sp<LayerContext> layerContext)
 {
 }
 
-void Layer::dispose()
+void Layer::discard()
 {
     _layer_context = nullptr;
 }
@@ -66,14 +67,24 @@ const sp<LayerContext>& Layer::context() const
     return _layer_context;
 }
 
-void Layer::add(sp<Renderable> renderable, sp<Updatable> updatable, sp<Boolean> discarded)
+void Layer::pushFront(sp<Renderable> renderable, sp<Boolean> discarded)
 {
-    _layer_context->add(std::move(renderable), std::move(updatable), std::move(discarded));
+    _layer_context->pushFront(RenderableType::create(std::move(renderable), nullptr, std::move(discarded)));
 }
 
-void Layer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded)
+void Layer::pushBack(sp<Renderable> renderable, sp<Boolean> discarded)
 {
-    _layer_context->add(renderObject, nullptr, discarded ? discarded : renderObject->discarded());
+    _layer_context->pushBack(RenderableType::create(std::move(renderable), nullptr, std::move(discarded)));
+}
+
+void Layer::pushFront(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded)
+{
+    _layer_context->pushFront(RenderableType::create(renderObject, nullptr, discarded ? discarded : renderObject->discarded()));
+}
+
+void Layer::pushBack(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded)
+{
+    _layer_context->pushBack(RenderableType::create(renderObject, nullptr, discarded ? discarded : renderObject->discarded()));
 }
 
 void Layer::clear()

@@ -37,7 +37,7 @@ void WithRenderable::onWire(const WiringContext& context, const Box& self)
                 r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(transform, node->localMatrix()) : transform);
             else if(node)
                 r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), sp<Mat4>::make<Mat4::Const>(node->localMatrix()));
-            layer->add(std::move(r), nullptr, discarded);
+            layer->pushBack(std::move(r), discarded);
         }
     }
 }

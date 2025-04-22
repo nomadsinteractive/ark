@@ -41,14 +41,16 @@ Entity::Entity(Traits components)
 {
     Wirable::WiringContext context(_components);
     for(const auto& [k, v] : _components.traits())
-        if(const sp<Wirable> wirable = v.as<Wirable>())
-            if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
-                _components.add(typeId, v);
+        if(!v.isEnum())
+            if(const sp<Wirable> wirable = v.as<Wirable>())
+                if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
+                    _components.add(typeId, v);
 
     preWire();
     for(const auto& [k, v] : _components.traits())
-        if(const sp<Wirable> wirable = v.as<Wirable>())
-            wirable->onWire(context, v);
+        if(!v.isEnum())
+            if(const sp<Wirable> wirable = v.as<Wirable>())
+                wirable->onWire(context, v);
 }
 
 Entity::Entity(Vector<Component> components)

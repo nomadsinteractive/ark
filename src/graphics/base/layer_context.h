@@ -1,7 +1,6 @@
 #pragma once
 
 #include <deque>
-#include <vector>
 
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
@@ -38,7 +37,8 @@ public:
     const sp<ModelLoader>& modelLoader() const;
     void setModelLoader(sp<ModelLoader> modelLoader);
 
-    void add(sp<Renderable> renderable, sp<Updatable> updatable = nullptr, sp<Boolean> discarded = nullptr);
+    void pushFront(sp<Renderable> renderable);
+    void pushBack(sp<Renderable> renderable);
     void clear();
     void discard();
 
@@ -49,7 +49,7 @@ public:
 
     bool processNewCreated();
 
-    LayerContextSnapshot snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const PipelineLayout& pipelineInput);
+    LayerContextSnapshot snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout);
 
     bool ensureState(void* stateKey);
     ElementState& addElementState(void* key);
@@ -64,10 +64,9 @@ private:
 
     sp<Varyings> _varyings;
 
-    bool _reload_requested;
-
     std::deque<std::pair<sp<Renderable>, Renderable::State>> _renderables;
-    Vector<sp<Renderable>> _renderable_created;
+    Vector<sp<Renderable>> _created_push_front;
+    Vector<sp<Renderable>> _created_push_back;
 
     HashMap<void*, ElementState> _element_states;
 

@@ -48,6 +48,10 @@ public:
             _intermedia_list.emplace_back(std::move(component));
         }
 
+        template<typename T> T getEnum(T defaultValue) const {
+            return _components.getEnum<T>(defaultValue);
+        }
+
     private:
         template<typename T> void setIntermediaComponent(sp<T> component) {
             if(!(_upload_on_close && _components.has<T>()))
