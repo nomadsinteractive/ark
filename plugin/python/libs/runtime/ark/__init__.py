@@ -2497,7 +2497,7 @@ class EventDispatcher(EventListener):
     def on_event(self, event):
         pass
 
-    def on_key_event(self, code, on_press: Optional[TYPE_RUNNABLE] = None, on_release: Optional[TYPE_RUNNABLE] = None, on_repeat: Optional[TYPE_RUNNABLE] = None):
+    def on_key_event(self, code, on_press: Optional[TYPE_RUNNABLE] = None, on_release: Optional[TYPE_RUNNABLE] = None, on_click: Optional[TYPE_RUNNABLE] = None, on_repeat: Optional[TYPE_RUNNABLE] = None):
         pass
 
     def on_motion_event(self, on_press: Optional[EventListener] = None, on_release: Optional[EventListener] = None, on_click: Optional[EventListener] = None, on_move: Optional[EventListener] = None):

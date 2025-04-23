@@ -10,9 +10,9 @@ EventDispatcher::EventDispatcher()
 {
 }
 
-void EventDispatcher::onKeyEvent(Event::Code code, sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat)
+void EventDispatcher::onKeyEvent(Event::Code code, sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onClick, sp<Runnable> onRepeat)
 {
-    _key_events[code].emplace(std::move(onPress), std::move(onRelease), std::move(onRepeat));
+    _key_events[code].emplace(std::move(onPress), std::move(onRelease), std::move(onClick), std::move(onRepeat));
 }
 
 void EventDispatcher::unKeyEvent(Event::Code code)
@@ -43,10 +43,7 @@ bool EventDispatcher::onEvent(const Event& event)
     if(const Event::Action action = event.action(); action == Event::ACTION_KEY_DOWN || action == Event::ACTION_KEY_UP || action == Event::ACTION_KEY_REPEAT)
     {
         if(const auto iter = _key_events.find(event.code()); iter != _key_events.end() && !iter->second.empty())
-        {
-            iter->second.top().onEvent(*this, event);
-            return true;
-        }
+            return iter->second.top().onEvent(event);
     }
     else if(action == Event::ACTION_DOWN || action == Event::ACTION_UP || action == Event::ACTION_MOVE || action == Event::ACTION_CANCEL)
     {
@@ -56,30 +53,47 @@ bool EventDispatcher::onEvent(const Event& event)
     return false;
 }
 
-EventDispatcher::KeyEventListener::KeyEventListener(sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat)
-    : _on_press(std::move(onPress)), _on_release(std::move(onRelease)), _on_repeat(std::move(onRepeat))
+EventDispatcher::KeyEventListener::KeyEventListener(sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onClick, sp<Runnable> onRepeat)
+    : _on_press(std::move(onPress)), _on_release(std::move(onRelease)), _on_click(std::move(onClick)), _on_repeat(std::move(onRepeat)), _on_press_timestamp(0)
 {
 }
 
-void EventDispatcher::KeyEventListener::onEvent(const EventDispatcher& dispatcher, const Event& event) const
+bool EventDispatcher::KeyEventListener::onEvent(const Event& event)
 {
     if(const Event::Action action = event.action(); action == Event::ACTION_KEY_DOWN)
     {
         if(_on_press)
+        {
             _on_press->run();
+            _on_press_timestamp = event.timestamp();
+            return true;
+        }
     }
     else if(action == Event::ACTION_KEY_UP)
     {
+        if(_on_click && (event.timestamp() - _on_press_timestamp) < 500000)
+        {
+            _on_click->run();
+            if(!_on_release)
+                return true;
+        }
         if(_on_release)
+        {
             _on_release->run();
+            return true;
+        }
     }
     else if(action == Event::ACTION_KEY_REPEAT)
     {
         if(_on_repeat)
+        {
             _on_repeat->run();
+            return true;
+        }
     }
     else
         DCHECK_WARN(false, "Unknown event: %d", event.action());
+    return false;
 }
 
 EventDispatcher::MotionEventListener::MotionEventListener(const sp<EventListener>& onPress, const sp<EventListener>& onRelease, const sp<EventListener>& onClick, const sp<EventListener>& onMove)

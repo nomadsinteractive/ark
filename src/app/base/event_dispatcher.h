@@ -16,7 +16,7 @@ public:
     EventDispatcher();
 
 //  [[script::bindings::auto]]
-    void onKeyEvent(Event::Code code, sp<Runnable> onPress = nullptr, sp<Runnable> onRelease = nullptr, sp<Runnable> onRepeat = nullptr);
+    void onKeyEvent(Event::Code code, sp<Runnable> onPress = nullptr, sp<Runnable> onRelease = nullptr, sp<Runnable> onClick = nullptr, sp<Runnable> onRepeat = nullptr);
 //  [[script::bindings::auto]]
     void unKeyEvent(Event::Code code);
 
@@ -31,17 +31,19 @@ public:
     bool onEvent(const Event& event) override;
 
 private:
-    class KeyEventListener {
+    class KeyEventListener final : public EventListener {
     public:
-        KeyEventListener(sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat);
+        KeyEventListener(sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onClick, sp<Runnable> onRepeat);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(KeyEventListener);
 
-        void onEvent(const EventDispatcher& dispatcher, const Event& event) const;
+        bool onEvent(const Event& event) override;
 
     private:
         sp<Runnable> _on_press;
         sp<Runnable> _on_release;
+        sp<Runnable> _on_click;
         sp<Runnable> _on_repeat;
+        uint64_t _on_press_timestamp;
     };
 
     class MotionEventListener {
