@@ -15,7 +15,6 @@ aux_source_directory(renderer LOCAL_SRC_LIST)
 aux_source_directory(widget LOCAL_SRC_LIST)
 
 ark_find_vcpkg_package(imgui LIBRARIES imgui::imgui)
-ark_find_vcpkg_package(imguizmo LIBRARIES imguizmo::imguizmo)
 
 ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(dear_imgui core ark::plugin::dear_imgui base renderer)

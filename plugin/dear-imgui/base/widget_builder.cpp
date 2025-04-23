@@ -1,7 +1,6 @@
 #include "dear-imgui/base/widget_builder.h"
 
 #include <imgui.h>
-#include <ImGuizmo.h>
 
 #include "core/base/string_buffer.h"
 #include "core/impl/variable/variable_wrapper.h"
@@ -298,106 +297,6 @@ bool Items_VectorGetter(void* data, int idx, const char** out_text)
     return true;
 }
 
-class GuizmoTransformEdit final : public Widget {
-public:
-    GuizmoTransformEdit(sp<Mat4::Impl> matrix, sp<Camera> camera)
-        : _matrix(std::move(matrix)), _camera(std::move(camera))
-    {
-    }
-
-    void render() override
-    {
-        static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
-        static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
-        ImGui::PushID(this);
-        if (ImGui::IsKeyPressed(ImGuiKey_T))
-            mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-        if (ImGui::IsKeyPressed(ImGuiKey_R))
-            mCurrentGizmoOperation = ImGuizmo::ROTATE;
-        if (ImGui::IsKeyPressed(ImGuiKey_E))
-            mCurrentGizmoOperation = ImGuizmo::SCALE;
-        if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
-            mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-        ImGui::SameLine();
-        if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
-            mCurrentGizmoOperation = ImGuizmo::ROTATE;
-        ImGui::SameLine();
-        if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
-            mCurrentGizmoOperation = ImGuizmo::SCALE;
-
-        M4 matrix = _matrix->val();
-        float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-        ImGuizmo::DecomposeMatrixToComponents(matrix.value(), matrixTranslation, matrixRotation, matrixScale);
-        ImGui::InputFloat3("Tr", matrixTranslation);
-        ImGui::InputFloat3("Rt", matrixRotation);
-        ImGui::InputFloat3("Sc", matrixScale);
-        ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, matrix.value());
-
-        if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-        {
-            if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-                mCurrentGizmoMode = ImGuizmo::LOCAL;
-            ImGui::SameLine();
-            if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-                mCurrentGizmoMode = ImGuizmo::WORLD;
-        }
-        const bool useSnap = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
-        ImGui::Text(useSnap ? "Snapping" : "(Hold Ctrl to snap)");
-        V2 snap;
-        switch(mCurrentGizmoOperation)
-        {
-        case ImGuizmo::TRANSLATE:
-            ImGui::InputFloat3("Snap", snap.value());
-            break;
-        case ImGuizmo::ROTATE:
-            ImGui::InputFloat("Angle Snap", snap.value());
-            break;
-        case ImGuizmo::SCALE:
-            ImGui::InputFloat("Scale Snap", snap.value());
-            break;
-        default:
-            break;
-        }
-        M4 cameraView = _camera->view()->val();
-        M4 cameraProjection = _camera->projection()->val();
-
-        const ImGuiIO& io = ImGui::GetIO();
-        ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-        ImGuizmo::Manipulate(cameraView.value(), cameraProjection.value(), mCurrentGizmoOperation, mCurrentGizmoMode, matrix.value(), nullptr, useSnap ? snap.value() : nullptr);
-        _matrix->set(matrix);
-        ImGui::PopID();
-    }
-
-private:
-    sp<Mat4::Impl> _matrix;
-    sp<Camera> _camera;
-};
-
-class GuizmoViewEdit final : public Widget {
-public:
-    GuizmoViewEdit(sp<Mat4::Impl> view, sp<Numeric> length, sp<Vec2> position, sp<Vec2> size, sp<Color> backgroundColor)
-        : _view(std::move(view)), _length(std::move(length)), _position(std::move(position)), _size(std::move(size)), _background_color(std::move(backgroundColor)) {
-    }
-
-    void render() override
-    {
-        const float length = _length->val();
-        const V2 position = _position->val();
-        const V2 size = _size->val();
-        const uint32_t bgcolor = _background_color ? _background_color->value() : 0;
-        M4 view = _view->val();
-        ImGuizmo::ViewManipulate(view.value(), length, ImVec2(position.x(), position.y()), ImVec2(size.x(), size.y()), bgcolor);
-        _view->set(view);
-    }
-
-private:
-    sp<Mat4::Impl> _view;
-    sp<Numeric> _length;
-    sp<Vec2> _position;
-    sp<Vec2> _size;
-    sp<Color> _background_color;
-};
-
 }
 
 WidgetBuilder::WidgetBuilder(const sp<Renderer>& imguiRenderer)
@@ -643,21 +542,6 @@ sp<Boolean> WidgetBuilder::beginTabItem(String label, const sp<Boolean>& pOpen, 
 void WidgetBuilder::endTabItem()
 {
     pop();
-}
-
-void WidgetBuilder::guizmoTransformEdit(const sp<Transform>& transform, sp<Camera> camera)
-{
-    sp<Mat4::Impl> matrix = sp<Mat4::Impl>::make(transform->val());
-    TransformType::reset(transform, matrix);
-    addWidget(sp<Widget>::make<GuizmoTransformEdit>(std::move(matrix), std::move(camera)));
-}
-
-void WidgetBuilder::guizmoViewEdit(const sp<Mat4>& view, sp<Numeric> length, sp<Vec2> position, sp<Vec2> size, sp<Color> backgroundColor)
-{
-    const sp<Mat4Wrapper>& viewWrapper = view.ensureInstance<Mat4Wrapper>("Cannot edit non-wrapped view matrix");
-    sp<Mat4::Impl> viewImpl = sp<Mat4::Impl>::make(viewWrapper->val());
-    viewWrapper->reset(viewImpl);
-    addWidget(sp<Widget>::make<GuizmoViewEdit>(std::move(viewImpl), std::move(length), std::move(position), std::move(size), std::move(backgroundColor)));
 }
 
 sp<Widget> WidgetBuilder::makeAboutWidget(sp<Boolean> isOpen)

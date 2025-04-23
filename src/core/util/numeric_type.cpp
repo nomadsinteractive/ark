@@ -292,18 +292,17 @@ sp<Numeric> NumericType::sod(sp<Numeric> self, const float s0, const float f, co
     return sp<Numeric>::make<SecondOrderDynamics<float>>(std::move(self), s0, std::move(t), f, z, r);
 }
 
-sp<Numeric> NumericType::modFloor(const sp<Numeric>& self, const sp<Numeric>& mod)
+sp<Numeric> NumericType::floor(sp<Numeric> self, sp<Numeric> mod)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::ModFloor<float>>>(self, mod);
-}
-
-sp<Numeric> NumericType::floor(sp<Numeric> self)
-{
+    if(mod)
+        return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::ModFloor<float>>>(std::move(self), std::move(mod));
     return sp<Numeric>::make<VariableOP1<float>>(Operators::Floor<float>(), std::move(self));
 }
 
-sp<Numeric> NumericType::ceil(sp<Numeric> self)
+sp<Numeric> NumericType::ceil(sp<Numeric> self, sp<Numeric> mod)
 {
+    if(mod)
+        return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::ModCeil<float>>>(std::move(self), std::move(mod));
     return sp<Numeric>::make<VariableOP1<float>>(Operators::Ceil<float>(), std::move(self));
 }
 

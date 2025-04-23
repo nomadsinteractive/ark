@@ -1,28 +1,7 @@
 import math
 
-from ark import Rotation, Vec3, Numeric, Vec4, Camera, Transform, Vec2, Color, RotationEuler, RotationAxisTheta
+from ark import Rotation, Vec3, Numeric, Vec4, RotationEuler, RotationAxisTheta
 from ark import dear_imgui
-
-
-class CameraEditor:
-    def __init__(self, camera: Camera):
-        self._camera = camera
-        self._length = Numeric(1)
-        self._position = Vec2(0, 0)
-        self._size = Vec2(100, 100)
-        self._background_color = Color(0.4, 0.4, 0.4, 1)
-
-    def build(self, builder: dear_imgui.WidgetBuilder):
-        builder.guizmo_view_edit(self._camera.view, self._length, self._position, self._size, self._background_color)
-
-
-class TransformEditor:
-    def __init__(self, transform: Transform, camera: Camera):
-        self._transform = transform
-        self._camera = camera
-
-    def build(self, builder: dear_imgui.WidgetBuilder):
-        builder.guizmo_transform_edit(self._transform, self._camera)
 
 
 class RotationEditor:

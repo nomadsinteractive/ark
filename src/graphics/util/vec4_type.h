@@ -120,14 +120,13 @@ public:
     static sp<Vec4> synchronize(sp<Vec4> self, sp<Boolean> canceled = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> modFloor(sp<Vec4> self, sp<Numeric> mod);
+    static sp<Vec4> floor(sp<Vec4> self, sp<Numeric> mod = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> modFloor(sp<Vec4> self, sp<Vec4> mod);
-
+    static sp<Vec4> floor(sp<Vec4> self, sp<Vec4> mod = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> floor(sp<Vec4> self);
+    static sp<Vec4> ceil(sp<Vec4> self, sp<Numeric> mod = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> ceil(sp<Vec4> self);
+    static sp<Vec4> ceil(sp<Vec4> self, sp<Vec4> mod = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Vec4> round(sp<Vec4> self);
 

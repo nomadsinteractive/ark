@@ -173,6 +173,13 @@ public:
         }
     };
 
+    template<typename T> class ModCeil {
+    public:
+        T operator()(const T& v1, const T& v2) {
+            return Math::modFloor(v1, v2) + v2;
+        }
+    };
+
     template<typename T> class Round {
     public:
         T operator()(T v1) {

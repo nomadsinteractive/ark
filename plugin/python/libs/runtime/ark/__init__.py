@@ -291,16 +291,10 @@ class _Var:
     def clamp(self, a, b):
         pass
 
-    def mod_floor(self, mod):
+    def floor(self, mod = None):
         pass
 
-    def mod_ceil(self, mod):
-        pass
-
-    def floor(self):
-        pass
-
-    def ceil(self):
+    def ceil(self, mod = None):
         pass
 
     def round(self):

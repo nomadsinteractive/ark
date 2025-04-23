@@ -227,24 +227,32 @@ public:
         return Ark::instance().renderController()->synchronize(std::move(self), std::move(canceled));
     }
 
-    static sp<VarType> floor(sp<VarType> self) {
+    static sp<VarType> floor(sp<VarType> self, sp<Numeric> mod) {
+        if(mod)
+            return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>(std::move(self), sp<IMPL>::make(std::move(mod)));
         return sp<VarType>::template make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Floor<float>, DIMENSION>(Operators::Floor<float>()), std::move(self));
     }
 
-    static sp<VarType> ceil(sp<VarType> self) {
+    static sp<VarType> floor(sp<VarType> self, sp<VarType> mod) {
+        if(mod)
+            return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>(std::move(self), std::move(mod));
+        return sp<VarType>::template make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Floor<float>, DIMENSION>(Operators::Floor<float>()), std::move(self));
+    }
+
+    static sp<VarType> ceil(sp<VarType> self, sp<Numeric> mod) {
+        if(mod)
+            return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModCeil<T>>>(std::move(self), sp<IMPL>::make(std::move(mod)));
+        return sp<VarType>::template make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Ceil<float>, DIMENSION>(Operators::Ceil<float>()), std::move(self));
+    }
+
+    static sp<VarType> ceil(sp<VarType> self, sp<VarType> mod) {
+        if(mod)
+            return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModCeil<T>>>(std::move(self), std::move(mod));
         return sp<VarType>::template make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Ceil<float>, DIMENSION>(Operators::Ceil<float>()), std::move(self));
     }
 
     static sp<VarType> round(sp<VarType> self) {
         return sp<VarType>::template make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Round<float>, DIMENSION>(Operators::Round<float>()), std::move(self));
-    }
-
-    static sp<VarType> modFloor(sp<VarType> self, sp<Numeric> mod) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>(std::move(self), sp<IMPL>::make(std::move(mod)));
-    }
-
-    static sp<VarType> modFloor(sp<VarType> self, sp<VarType> mod) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>(std::move(self), std::move(mod));
     }
 
     static sp<VarType> ifElse(sp<VarType> self, sp<Boolean> condition, sp<VarType> otherwise) {

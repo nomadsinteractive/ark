@@ -122,11 +122,9 @@ public:
     static sp<Numeric> distance2(sp<Numeric> self, sp<Numeric> other);
 
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> modFloor(const sp<Numeric>& self, const sp<Numeric>& mod);
+    static sp<Numeric> floor(sp<Numeric> self, sp<Numeric> mod = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> floor(sp<Numeric> self);
-//  [[script::bindings::classmethod]]
-    static sp<Numeric> ceil(sp<Numeric> self);
+    static sp<Numeric> ceil(sp<Numeric> self, sp<Numeric> mod = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> round(sp<Numeric> self);
 
