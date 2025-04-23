@@ -1327,9 +1327,9 @@ class Mat4(_Mat):
         pass
 
 
-class Translation:
+class Translation(Vec3):
     def __init__(self, translate: TYPE_VEC3):
-        pass
+        super().__init__(*translate)
 
     def reset(self, position: TYPE_VEC3):
         pass
@@ -1678,11 +1678,17 @@ class LevelObject:
     @property
     def scale(self) -> Optional[TYPE_FLOAT3]:
         pass
+
     @property
     def shape(self) -> Optional[TYPE_FLOAT3]:
         pass
+
     @property
     def rotation(self) -> Optional[TYPE_FLOAT4]:
+        pass
+
+    @property
+    def args(self) -> str:
         pass
 
     @property

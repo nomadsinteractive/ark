@@ -59,7 +59,7 @@ sp<Rigidbody> makeRigidBody(LevelLibrary& library, const sp<Collider>& collider,
 LevelObject::LevelObject(const sp<Level::Stub>& level, const document& manifest)
     : _level(level), _name(Documents::getAttribute(manifest, constants::NAME)), _type(TYPE_INSTANCE), _visible(Documents::getAttribute<bool>(manifest, constants::VISIBLE, true)),
       _position(Documents::getAttribute<V3>(manifest, constants::POSITION, V3())), _scale(Documents::getAttributeOptional<V3>(manifest, constants::SCALE)),
-      _rotation(Documents::getAttributeOptional<V4>(manifest, constants::ROTATION)), _instance_of(Documents::getAttribute<int32_t>(manifest, "instance-of", -1))
+      _rotation(Documents::getAttributeOptional<V4>(manifest, constants::ROTATION)), _args(Documents::getAttribute(manifest, "args")), _instance_of(Documents::getAttribute<int32_t>(manifest, "instance-of", -1))
 {
     if(const String clazz = Documents::getAttribute(manifest, constants::CLASS); clazz == "MESH")
         _type = TYPE_ELEMENT;
@@ -97,6 +97,11 @@ const Optional<V3>& LevelObject::scale() const
 const Optional<V4>& LevelObject::rotation() const
 {
     return _rotation;
+}
+
+const String& LevelObject::args() const
+{
+    return _args;
 }
 
 sp<LevelLibrary> LevelObject::library() const

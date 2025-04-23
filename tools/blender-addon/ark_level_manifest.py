@@ -11,7 +11,7 @@ from bpy_extras.io_utils import ExportHelper
 bl_info = {
     "name": "Ark Level Manifest",
     "author": "Nomads Interactive",
-    "version": (1, 0, 3),
+    "version": (1, 0, 4),
     "blender": (2, 81, 6),
     "location": "File > Export > Ark Level Manifest",
     "category": "Import-Export",
@@ -153,13 +153,13 @@ class ArkLayer:
 
 
 class ArkObject:
-    def __init__(self, scene: ArkScene, obj, export_name: bool, rigidbody_type: Optional[str] = None):
+    def __init__(self, scene: ArkScene, obj, export_name: bool):
         self._object = obj
         self._export_name = export_name
-        self._rigidbody_type = rigidbody_type
         self._class = obj.type if obj.type != 'EMPTY' else None
         self._position = obj.location
         self._scale = obj.scale
+        self._args = obj.get('args', None)
         if obj.rotation_mode == 'QUATERNION':
             self._rotation = obj.rotation_quaternion
         elif obj.rotation_mode == 'AXIS_ANGLE':
@@ -169,12 +169,15 @@ class ArkObject:
         self._instance_of = obj.instance_collection and scene.find_library(obj.instance_collection)
 
     def to_json(self, indent):
-        lines = [to_json_field_value('class', '"%s"' % self._class, indent + 1)] if self._class else []
+        lines = [to_json_field_value('class', f'"{self._class}"', indent + 1)] if self._class else []
         lines.extend([
             to_json_field_value('position', list(self._position), indent + 1),
             to_json_field_value('scale', list(self._scale), indent + 1),
             to_json_field_value('rotation', list(self._rotation), indent + 1)
         ])
+        if self._args is not None:
+            args = self._args.replace('"', r'\"')
+            lines.append(to_json_field_value('args', f'"{args}"', indent + 1))
         if self._instance_of:
             lines.append(to_json_field_value('instance-of', self._instance_of.id, indent + 1))
         return '{\n%s\n}' % ',\n'.join(lines)
@@ -184,8 +187,6 @@ class ArkObject:
 
         if self._class or self._export_name:
             writer.write_property('name', self._object.name)
-        if self._rigidbody_type:
-            writer.write_property('rigidbody_type', self._rigidbody_type)
 
         if self._class:
             writer.write_property('class', self._class)
@@ -201,6 +202,8 @@ class ArkObject:
         writer.write_property('visible', self._object.visible_get() and 'true' or 'false')
         if self._instance_of:
             writer.write_property('instance-of', self._instance_of.id)
+        if self._args is not None:
+            writer.write_property('args', self._args.replace('"', r'&quot;'))
 
         writer.end_element()
         return writer.to_str()
@@ -231,8 +234,6 @@ def on_file_selector_data_format_update(self, context):
 class ArkLayerProperty(bpy.types.PropertyGroup):
     name: StringProperty()
     export_names: BoolProperty(name="Export Names")
-    rigidbody_static: BoolProperty(name="Static Rigidbody Layer")
-    rigidbody_dynamic: BoolProperty(name="Dynamic Rigidbody Layer")
 
 
 bpy.utils.register_class(ArkLayerProperty)
@@ -248,8 +249,6 @@ def load_layer_property_items(layer_properties):
         prop = layer_properties.add()
         prop.name = i
         prop.export_names = False
-        prop.rigidbody_static = False
-        prop.rigidbody_dynamic = False
 
 
 class TOOL_UL_List(UIList):

@@ -37,6 +37,8 @@ public:
 //  [[script::bindings::property]]
     const Optional<V4>& rotation() const;
 //  [[script::bindings::property]]
+    const String& args() const;
+//  [[script::bindings::property]]
     sp<LevelLibrary> library() const;
 
 //  [[script::bindings::property]]
@@ -60,6 +62,7 @@ private:
     V3 _position;
     Optional<V3> _scale;
     Optional<V4> _rotation;
+    String _args;
     int32_t _instance_of;
 
     sp<RenderObject> _render_object;
