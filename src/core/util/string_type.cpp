@@ -18,8 +18,8 @@ namespace {
 
 class StringVarImpl final : public StringVar, Implements<StringVarImpl, StringVar> {
 public:
-    StringVarImpl(const StringView value)
-        : _value(value.data()) {
+    StringVarImpl(String value)
+        : _value(std::move(value)) {
     }
 
     bool update(const uint64_t timestamp) override {
@@ -146,14 +146,14 @@ template<typename T, typename... ARGS> sp<StringVar> toStringVar(const Box& box,
 
 }
 
-sp<StringVar> StringType::create(StringView value)
+sp<StringVar> StringType::create(String value)
 {
-    return sp<StringVar>::make<StringVarImpl>(value);
+    return sp<StringVar>::make<StringVarWrapper>(sp<StringVar>::make<StringVarImpl>(std::move(value)));
 }
 
 sp<StringVar> StringType::create(sp<Integer> value)
 {
-    return sp<StringVar>::make<StringVarInteger>(std::move(value));
+    return sp<StringVar>::make<StringVarWrapper>(sp<StringVar>::make<StringVarInteger>(std::move(value)));
 }
 
 sp<StringVar> StringType::create(sp<StringVar> value)
@@ -180,14 +180,14 @@ sp<StringVar> StringType::wrapped(const sp<StringVar>& self)
 
 void StringType::set(const sp<StringVar>& self, sp<StringVar> value)
 {
-    const sp<StringVarWrapper>& svw = self.ensureInstance<StringVarWrapper>();
+    const sp<StringVarWrapper>& svw = self.ensureInstance<StringVarWrapper>("Setting on an instance of non StringVarWrapper");
     svw->set(std::move(value));
 }
 
 void StringType::set(const sp<StringVar>& self, String value)
 {
-    const sp<StringVarImpl>& svi = self.ensureInstance<StringVarImpl>("Setting on an instance of non StringVarImpl");
-    svi->set(std::move(value));
+    const sp<StringVarWrapper>& svi = self.ensureInstance<StringVarWrapper>("Setting on an instance of non StringVarWrapper");
+    svi->set(sp<StringVar>::make<StringVarImpl>(std::move(value)));
 }
 
 sp<StringVar> StringType::ifElse(sp<StringVar> self, sp<Boolean> condition, sp<StringVar> negative)
@@ -197,7 +197,7 @@ sp<StringVar> StringType::ifElse(sp<StringVar> self, sp<Boolean> condition, sp<S
 
 sp<StringVar> StringType::freeze(const sp<StringVar>& self)
 {
-    return create(self->val());
+    return create(self->val().data());
 }
 
 sp<StringVar> StringType::format(const String& format, const Scope& kwargs)

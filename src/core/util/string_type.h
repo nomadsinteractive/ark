@@ -12,7 +12,7 @@ namespace ark {
 class ARK_API StringType {
 public:
 //  [[script::bindings::constructor]]
-    static sp<StringVar> create(StringView value);
+    static sp<StringVar> create(String value);
 //  [[script::bindings::constructor]]
     static sp<StringVar> create(sp<Integer> value);
 //  [[script::bindings::constructor]]
