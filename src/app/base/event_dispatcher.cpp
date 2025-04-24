@@ -10,12 +10,12 @@ EventDispatcher::EventDispatcher()
 {
 }
 
-void EventDispatcher::onKeyEvent(Event::Code code, sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onClick, sp<Runnable> onRepeat)
+void EventDispatcher::onKeyEvent(const Event::Code code, sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat)
 {
-    _key_events[code].emplace(std::move(onPress), std::move(onRelease), std::move(onClick), std::move(onRepeat));
+    _key_events[code].emplace(std::move(onPress), std::move(onRelease), std::move(onRepeat));
 }
 
-void EventDispatcher::unKeyEvent(Event::Code code)
+void EventDispatcher::unKeyEvent(const Event::Code code)
 {
     if(const auto iter = _key_events.find(code); iter != _key_events.end())
         if(!iter->second.empty())
@@ -53,8 +53,8 @@ bool EventDispatcher::onEvent(const Event& event)
     return false;
 }
 
-EventDispatcher::KeyEventListener::KeyEventListener(sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onClick, sp<Runnable> onRepeat)
-    : _on_press(std::move(onPress)), _on_release(std::move(onRelease)), _on_click(std::move(onClick)), _on_repeat(std::move(onRepeat)), _on_press_timestamp(0)
+EventDispatcher::KeyEventListener::KeyEventListener(sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat)
+    : _on_press(std::move(onPress)), _on_release(std::move(onRelease)), _on_repeat(std::move(onRepeat)), _on_press_timestamp(0)
 {
 }
 
@@ -71,12 +71,6 @@ bool EventDispatcher::KeyEventListener::onEvent(const Event& event)
     }
     else if(action == Event::ACTION_KEY_UP)
     {
-        if(_on_click && (event.timestamp() - _on_press_timestamp) < 500000)
-        {
-            _on_click->run();
-            if(!_on_release)
-                return true;
-        }
         if(_on_release)
         {
             _on_release->run();
@@ -96,8 +90,8 @@ bool EventDispatcher::KeyEventListener::onEvent(const Event& event)
     return false;
 }
 
-EventDispatcher::MotionEventListener::MotionEventListener(const sp<EventListener>& onPress, const sp<EventListener>& onRelease, const sp<EventListener>& onClick, const sp<EventListener>& onMove)
-    : _on_press(onPress), _on_release(onRelease), _on_click(onClick), _on_move(onMove), _pressed_x(0), _pressed_y(0)
+EventDispatcher::MotionEventListener::MotionEventListener(sp<EventListener> onPress, sp<EventListener> onRelease, sp<EventListener> onClick, sp<EventListener> onMove)
+    : _on_press(std::move(onPress)), _on_release(std::move(onRelease)), _on_click(std::move(onClick)), _on_move(std::move(onMove)), _pressed_x(0), _pressed_y(0)
 {
 }
 
