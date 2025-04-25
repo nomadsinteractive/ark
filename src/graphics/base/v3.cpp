@@ -5,17 +5,17 @@
 
 namespace ark {
 
-V3::V3(float v)
+V3::V3(const float v)
     : V2(v), _z(v)
 {
 }
 
-V3::V3(float x, float y, float z)
+V3::V3(const float x, const float y, const float z)
     : V2(x, y), _z(z)
 {
 }
 
-V3::V3(const V2& other, float z)
+V3::V3(const V2& other, const float z)
     : V2(other._x, other._y), _z(z)
 {
 }
@@ -69,37 +69,37 @@ V3& V3::operator /=(const V3& other)
 
 V3 operator +(const V3& lvalue, const V3& rvalue)
 {
-    return V3(lvalue._x + rvalue._x, lvalue._y + rvalue._y, lvalue._z + rvalue._z);
+    return {lvalue._x + rvalue._x, lvalue._y + rvalue._y, lvalue._z + rvalue._z};
 }
 
 V3 operator -(const V3& lvalue, const V3& rvalue)
 {
-    return V3(lvalue._x - rvalue._x, lvalue._y - rvalue._y, lvalue._z - rvalue._z);
+    return {lvalue._x - rvalue._x, lvalue._y - rvalue._y, lvalue._z - rvalue._z};
 }
 
 V3 operator *(const V3& lvalue, const V3& rvalue)
 {
-    return V3(lvalue._x * rvalue._x, lvalue._y * rvalue._y, lvalue._z * rvalue._z);
+    return {lvalue._x * rvalue._x, lvalue._y * rvalue._y, lvalue._z * rvalue._z};
 }
 
-V3 operator *(const V3& lvalue, float rvalue)
+V3 operator *(const V3& lvalue, const float rvalue)
 {
-    return V3(lvalue._x * rvalue, lvalue._y * rvalue, lvalue._z * rvalue);
+    return {lvalue._x * rvalue, lvalue._y * rvalue, lvalue._z * rvalue};
 }
 
-V3 operator *(float lvalue, const V3& rvalue)
+V3 operator *(const float lvalue, const V3& rvalue)
 {
-    return V3(rvalue._x * lvalue, rvalue._y * lvalue, rvalue._z * lvalue);
+    return {rvalue._x * lvalue, rvalue._y * lvalue, rvalue._z * lvalue};
 }
 
 V3 operator /(const V3& lvalue, const V3& rvalue)
 {
-    return V3(lvalue._x / rvalue._x, lvalue._y / rvalue._y, lvalue._z / rvalue._z);
+    return {lvalue._x / rvalue._x, lvalue._y / rvalue._y, lvalue._z / rvalue._z};
 }
 
 V3 operator /(const V3& lvalue, float rvalue)
 {
-    return V3(lvalue._x / rvalue, lvalue._y / rvalue, lvalue._z / rvalue);
+    return {lvalue._x / rvalue, lvalue._y / rvalue, lvalue._z / rvalue};
 }
 
 float V3::z() const
@@ -109,7 +109,7 @@ float V3::z() const
 
 V3 V3::operator -() const
 {
-    return V3(-_x, -_y, -_z);
+    return {-_x, -_y, -_z};
 }
 
 float V3::dot(const V3& other) const
@@ -122,25 +122,25 @@ float V3::hypot() const
     return Math::sqrt(_x * _x + _y * _y + _z * _z);
 }
 
-V4 V3::extend(float w) const
+V4 V3::extend(const float w) const
 {
-    return V4(_x, _y, _z, w);
+    return {_x, _y, _z, w};
 }
 
 V3 V3::floorDiv(const V3& other) const
 {
-    return V3(Math::floorDiv(_x, other._x), Math::floorDiv(_y, other._y), Math::floorDiv(_z, other._z));
+    return {Math::floorDiv(_x, other._x), Math::floorDiv(_y, other._y), Math::floorDiv(_z, other._z)};
 }
 
 V3 V3::normalize() const
 {
-    float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);
-    return V3(_x / length, _y / length, _z / length);
+    const float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);
+    return {_x / length, _y / length, _z / length};
 }
 
 V3 V3::cross(const V3& other) const
 {
-    return V3(_y * other._z - other._y * _z, _z * other._x - other._z * _x, _x * other._y - other._x * _y);
+    return {_y * other._z - other._y * _z, _z * other._x - other._z * _x, _x * other._y - other._x * _y};
 }
 
 }

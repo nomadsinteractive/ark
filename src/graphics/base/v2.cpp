@@ -86,12 +86,12 @@ V2 operator *(const V2& lvalue, const V2& rvalue)
     return {lvalue._x * rvalue._x, lvalue._y * rvalue._y};
 }
 
-V2 operator *(const V2& lvalue, float rvalue)
+V2 operator *(const V2& lvalue, const float rvalue)
 {
     return {lvalue._x * rvalue, lvalue._y * rvalue};
 }
 
-V2 operator *(float lvalue, const V2& rvalue)
+V2 operator *(const float lvalue, const V2& rvalue)
 {
     return {rvalue._x * lvalue, rvalue._y * lvalue};
 }

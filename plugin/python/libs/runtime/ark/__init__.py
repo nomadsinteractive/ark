@@ -2266,6 +2266,10 @@ class Math:
     def projectile(dx, dy, v, g, sid):
         return 0, 0
 
+    @staticmethod
+    def tanh(x):
+        return 0
+
 
 class Size(Vec3):
     def __init__(self, width: Union[float, Numeric], height: Union[float, Numeric], depth: Union[float, Numeric, None] = None):

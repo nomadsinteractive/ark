@@ -5,22 +5,22 @@
 
 namespace ark {
 
-V4::V4(float v)
+V4::V4(const float v)
     : V3(v), _w(v)
 {
 }
 
-V4::V4(float x, float y, float z, float w)
+V4::V4(const float x, const float y, const float z, const float w)
     : V3(x, y, z), _w(w)
 {
 }
 
-V4::V4(const V2& xy, float z, float w)
+V4::V4(const V2& xy, const float z, const float w)
     : V3(xy.x(), xy.y(), z), _w(w)
 {
 }
 
-V4::V4(const V3& xyz, float w)
+V4::V4(const V3& xyz, const float w)
     : V3(xyz), _w(w)
 {
 }
@@ -78,37 +78,37 @@ V4& V4::operator /=(const V4& other)
 
 V4 operator +(const V4& lvalue, const V4& rvalue)
 {
-    return V4(lvalue._x + rvalue._x, lvalue._y + rvalue._y, lvalue._z + rvalue._z, lvalue._w + rvalue._w);
+    return {lvalue._x + rvalue._x, lvalue._y + rvalue._y, lvalue._z + rvalue._z, lvalue._w + rvalue._w};
 }
 
 V4 operator -(const V4& lvalue, const V4& rvalue)
 {
-    return V4(lvalue._x - rvalue._x, lvalue._y - rvalue._y, lvalue._z - rvalue._z, lvalue._w - rvalue._w);
+    return {lvalue._x - rvalue._x, lvalue._y - rvalue._y, lvalue._z - rvalue._z, lvalue._w - rvalue._w};
 }
 
 V4 operator *(const V4& lvalue, const V4& rvalue)
 {
-    return V4(lvalue._x * rvalue._x, lvalue._y * rvalue._y, lvalue._z * rvalue._z, lvalue._w * rvalue._w);
+    return {lvalue._x * rvalue._x, lvalue._y * rvalue._y, lvalue._z * rvalue._z, lvalue._w * rvalue._w};
 }
 
-V4 operator *(const V4& lvalue, float rvalue)
+V4 operator *(const V4& lvalue, const float rvalue)
 {
-    return V4(lvalue._x * rvalue, lvalue._y * rvalue, lvalue._z * rvalue, lvalue._w * rvalue);
+    return {lvalue._x * rvalue, lvalue._y * rvalue, lvalue._z * rvalue, lvalue._w * rvalue};
 }
 
-V4 operator *(float a1, const V4& a2)
+V4 operator *(const float lvalue, const V4& rvalue)
 {
-    return V4(a2._x * a1, a2._y * a1, a2._z * a1, a2._w * a1);
+    return {rvalue._x * lvalue, rvalue._y * lvalue, rvalue._z * lvalue, rvalue._w * lvalue};
 }
 
 V4 operator /(const V4& lvalue, const V4& rvalue)
 {
-    return V4(lvalue._x / rvalue._x, lvalue._y / rvalue._y, lvalue._z / rvalue._z, lvalue._w / rvalue._w);
+    return {lvalue._x / rvalue._x, lvalue._y / rvalue._y, lvalue._z / rvalue._z, lvalue._w / rvalue._w};
 }
 
 V4 operator /(const V4& lvalue, float rvalue)
 {
-    return V4(lvalue._x / rvalue, lvalue._y / rvalue, lvalue._z / rvalue, lvalue._w / rvalue);
+    return {lvalue._x / rvalue, lvalue._y / rvalue, lvalue._z / rvalue, lvalue._w / rvalue};
 }
 
 float V4::w() const
@@ -118,7 +118,7 @@ float V4::w() const
 
 V4 V4::operator -() const
 {
-    return V4(-_x, -_y, -_z, -_w);
+    return {-_x, -_y, -_z, -_w};
 }
 
 float V4::dot(const V4& other) const
