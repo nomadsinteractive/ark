@@ -44,8 +44,10 @@ public:
     const HashMap<TypeId, sp<CollisionShape>>& collisionShapes() const;
     HashMap<TypeId, sp<CollisionShape>>& collisionShapes();
 
+    void markForDestroy(RigidbodyBullet& rigidbody) const;
+
 //  [[plugin::resource-loader]]
-    class BUILDER_IMPL1 : public Builder<ColliderBullet> {
+    class BUILDER_IMPL1 final : public Builder<ColliderBullet> {
     public:
         BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
@@ -60,7 +62,7 @@ public:
     };
 
 //  [[plugin::resource-loader("btWorld")]]
-    class BUILDER_IMPL2 : public Builder<Collider> {
+    class BUILDER_IMPL2 final : public Builder<Collider> {
     public:
         BUILDER_IMPL2(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 

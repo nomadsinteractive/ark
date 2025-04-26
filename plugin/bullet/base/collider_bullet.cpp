@@ -222,6 +222,7 @@ struct ColliderBullet::Stub final : Runnable {
     op<btDiscreteDynamicsWorld> _dynamics_world;
 
     FList<GhostObject, GhostObject::ListFilter> _ghost_objects;
+    Vector<sp<RigidbodyBullet::Stub>> _mark_for_destroy_rigidbodies;
 
     sp<Numeric> _app_clock_interval;
 };
@@ -278,7 +279,7 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
         _stub->_ghost_objects.emplace_back(GhostObject(std::move(originPosition), rotation, btRigidbodyDef));
         sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btRigidbodyDef), type, std::move(shape), std::move(cs), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
         sp<Rigidbody::Stub> stub = impl->stub();
-        return Rigidbody::Impl{std::move(stub), Box(std::move(impl))};
+        return {std::move(stub), Box(std::move(impl))};
     }
 
     btTransform btTrans;
@@ -296,7 +297,7 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
     sp<Vec4> btRotation = type == Rigidbody::BODY_TYPE_STATIC ? sp<Vec4>::make<Vec4::Const>(quat) : sp<Vec4>::make<DynamicRotation>(std::move(motionState));
     sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btRigidbodyDef), type, std::move(shape), std::move(cs), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
     sp<Rigidbody::Stub> stub = impl->stub();
-    return Rigidbody::Impl{std::move(stub), Box(std::move(impl))};
+    return {std::move(stub), Box(std::move(impl))};
 }
 
 sp<Shape> ColliderBullet::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)
@@ -369,9 +370,15 @@ HashMap<TypeId, sp<CollisionShape>>& ColliderBullet::collisionShapes()
     return _stub->_collision_shapes;
 }
 
+void ColliderBullet::markForDestroy(RigidbodyBullet& rigidbody) const
+{
+    if(rigidbody._bt_rigidbody_stub->_rigidbody->markForDestroy())
+        _stub->_mark_for_destroy_rigidbodies.emplace_back(std::move(rigidbody._bt_rigidbody_stub));
+}
+
 void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
 {
-    const ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
+    ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
     const uint64_t tick = Ark::instance().applicationContext()->renderController()->tick();
     for(const GhostObject& i : self->_stub->_ghost_objects)
     {
@@ -385,6 +392,12 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
         transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
         i._bt_rigidbody_ref->collisionObject()->setWorldTransform(transform);
     }
+
+    for(auto iter = self->_stub->_mark_for_destroy_rigidbodies.begin(); iter != self->_stub->_mark_for_destroy_rigidbodies.end(); )
+        if(sp<RigidbodyBullet::Stub>& i = *iter; i->_rigidbody->destroyCountDown(dynamicsWorld))
+            iter = self->_stub->_mark_for_destroy_rigidbodies.erase(iter);
+        else
+            ++ iter;
 }
 
 void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
@@ -428,21 +441,16 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
     {
         const sp<BtRigidbodyRef>& rigidBody = iter->first;
         ContactInfo& contactInfo = iter->second;
-        if(rigidBody->collisionObject() == nullptr)
-            contactInfo._last_tick.clear();
-        else
-        {
-            const RigidbodyBullet& obj = getRigidBodyFromCollisionObject(rigidBody->collisionObject());
-            for(const sp<BtRigidbodyRef>& i : contactInfo._last_tick)
-                if(i->collisionObject())
-                {
-                    if(contactInfo._current_tick.find(i) == contactInfo._current_tick.end())
-                        if(obj.collisionCallback())
-                            obj.collisionCallback()->onEndContact(getRigidBodyFromCollisionObject(i->collisionObject()).makeShadow());
-                }
+        const RigidbodyBullet& obj = getRigidBodyFromCollisionObject(rigidBody->collisionObject());
+        for(const sp<BtRigidbodyRef>& i : contactInfo._last_tick)
+            if(i->collisionObject())
+            {
+                if(contactInfo._current_tick.find(i) == contactInfo._current_tick.end())
+                    if(obj.collisionCallback())
+                        obj.collisionCallback()->onEndContact(getRigidBodyFromCollisionObject(i->collisionObject()).makeShadow());
+            }
 
-            contactInfo._last_tick = std::move(contactInfo._current_tick);
-        }
+        contactInfo._last_tick = std::move(contactInfo._current_tick);
         if(contactInfo._last_tick.empty())
             iter = self->_contact_infos.erase(iter);
         else

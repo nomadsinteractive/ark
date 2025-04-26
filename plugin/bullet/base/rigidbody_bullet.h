@@ -16,7 +16,7 @@ namespace ark::plugin::bullet {
 
 class ARK_PLUGIN_BULLET_API RigidbodyBullet final  {
 public:
-    RigidbodyBullet(ColliderBullet world, sp<BtRigidbodyRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
+    RigidbodyBullet(ColliderBullet& world, sp<BtRigidbodyRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
 
     void discard();
 
@@ -47,10 +47,12 @@ public:
 
 private:
     struct Stub {
-        Stub(ColliderBullet world, sp<CollisionShape> collisionShape, sp<BtRigidbodyRef> rigidBody);
+        Stub(ColliderBullet& world, sp<CollisionShape> collisionShape, sp<BtRigidbodyRef> rigidBody);
         ~Stub();
 
-        ColliderBullet _world;
+        void markForDestroy();
+
+        ColliderBullet& _world;
 
         sp<CollisionShape> _collision_shape;
         sp<BtRigidbodyRef> _rigidbody;
@@ -59,6 +61,8 @@ private:
 private:
     sp<Rigidbody::Stub> _rigidbody_stub;
     sp<Stub> _bt_rigidbody_stub;
+
+    friend class ColliderBullet;
 };
 
 }

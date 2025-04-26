@@ -10,20 +10,18 @@
 
 namespace ark::plugin::bullet {
 
-RigidbodyBullet::Stub::Stub(ColliderBullet world, sp<CollisionShape> collisionShape, sp<BtRigidbodyRef> rigidBody)
-    : _world(std::move(world)), _collision_shape(std::move(collisionShape)), _rigidbody(std::move(rigidBody))
+RigidbodyBullet::Stub::Stub(ColliderBullet& world, sp<CollisionShape> collisionShape, sp<BtRigidbodyRef> rigidBody)
+    : _world(world), _collision_shape(std::move(collisionShape)), _rigidbody(std::move(rigidBody))
 {
 }
 
 RigidbodyBullet::Stub::~Stub()
 {
-    btCollisionObject* collisionObject = _rigidbody->collisionObject();
-    _world.btDynamicWorld()->removeCollisionObject(collisionObject);
-    collisionObject->setUserPointer(nullptr);
-    _rigidbody->reset();
+    RigidbodyBullet* rigidbodyBullet = static_cast<RigidbodyBullet*>(_rigidbody->collisionObject()->getUserPointer());
+    _world.markForDestroy(*rigidbodyBullet);
 }
 
-RigidbodyBullet::RigidbodyBullet(ColliderBullet world, sp<BtRigidbodyRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
+RigidbodyBullet::RigidbodyBullet(ColliderBullet& world, sp<BtRigidbodyRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
     : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter))), _bt_rigidbody_stub(sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)))
 {
     _bt_rigidbody_stub->_rigidbody->collisionObject()->setUserPointer(this);
@@ -32,8 +30,7 @@ RigidbodyBullet::RigidbodyBullet(ColliderBullet world, sp<BtRigidbodyRef> rigidB
 void RigidbodyBullet::discard()
 {
     _rigidbody_stub->_ref->discard();
-    _bt_rigidbody_stub->_world.btDynamicWorld()->removeCollisionObject(_bt_rigidbody_stub->_rigidbody->collisionObject());
-    _bt_rigidbody_stub = nullptr;
+    _bt_rigidbody_stub->_world.markForDestroy(*this);
 }
 
 const sp<Ref>& RigidbodyBullet::ref() const

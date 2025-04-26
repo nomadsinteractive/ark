@@ -16,10 +16,12 @@ public:
     btRigidBody* rigidBody() const;
     btCollisionObject* collisionObject() const;
 
-    void reset();
+    bool markForDestroy();
+    bool destroyCountDown(btDynamicsWorld* dynamicsWorld);
 
 private:
     op<btCollisionObject> _collision_object;
+    int32_t _destruction_count_down;
 };
 
 }
