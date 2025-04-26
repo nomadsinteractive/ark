@@ -16,7 +16,6 @@ public:
     btRigidBody* rigidBody() const;
     btCollisionObject* collisionObject() const;
 
-    bool markForDestroy();
     bool destroyCountDown(btDynamicsWorld* dynamicsWorld);
 
 private:

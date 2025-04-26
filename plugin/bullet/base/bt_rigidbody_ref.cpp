@@ -3,7 +3,7 @@
 namespace ark::plugin::bullet {
 
 BtRigidbodyRef::BtRigidbodyRef(btCollisionObject* collisionObject)
-    : _collision_object(collisionObject), _destruction_count_down(-1)
+    : _collision_object(collisionObject), _destruction_count_down(2)
 {
 }
 
@@ -19,24 +19,13 @@ btCollisionObject* BtRigidbodyRef::collisionObject() const
     return _collision_object.get();
 }
 
-bool BtRigidbodyRef::markForDestroy()
-{
-    return false;
-    if(_destruction_count_down == -1)
-    {
-        _destruction_count_down = 2;
-        return true;
-    }
-    return false;
-}
-
 bool BtRigidbodyRef::destroyCountDown(btDynamicsWorld* dynamicsWorld)
 {
     ASSERT(_destruction_count_down >= 0);
     if(--_destruction_count_down <= 0)
     {
-        dynamicsWorld->removeCollisionObject(_collision_object.get());
         _collision_object->setUserPointer(nullptr);
+        dynamicsWorld->removeCollisionObject(_collision_object.get());
         _collision_object.reset();
         return true;
     }

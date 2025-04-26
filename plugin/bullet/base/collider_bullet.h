@@ -44,7 +44,7 @@ public:
     const HashMap<TypeId, sp<CollisionShape>>& collisionShapes() const;
     HashMap<TypeId, sp<CollisionShape>>& collisionShapes();
 
-    void markForDestroy(RigidbodyBullet& rigidbody) const;
+    void markForDestroy(sp<CollisionShape> collisionShape, sp<BtRigidbodyRef> rigidBody) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER_IMPL1 final : public Builder<ColliderBullet> {

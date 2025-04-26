@@ -17,12 +17,11 @@ RigidbodyBullet::Stub::Stub(ColliderBullet& world, sp<CollisionShape> collisionS
 
 RigidbodyBullet::Stub::~Stub()
 {
-    RigidbodyBullet* rigidbodyBullet = static_cast<RigidbodyBullet*>(_rigidbody->collisionObject()->getUserPointer());
-    _world.markForDestroy(*rigidbodyBullet);
+    _world.markForDestroy(std::move(_collision_shape), std::move(_rigidbody));
 }
 
 RigidbodyBullet::RigidbodyBullet(ColliderBullet& world, sp<BtRigidbodyRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
-    : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter))), _bt_rigidbody_stub(sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)))
+    : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter))), _bt_rigidbody_stub(sp<Stub>::make(world, std::move(collisionShape), std::move(rigidBody)))
 {
     _bt_rigidbody_stub->_rigidbody->collisionObject()->setUserPointer(this);
 }
@@ -30,7 +29,7 @@ RigidbodyBullet::RigidbodyBullet(ColliderBullet& world, sp<BtRigidbodyRef> rigid
 void RigidbodyBullet::discard()
 {
     _rigidbody_stub->_ref->discard();
-    _bt_rigidbody_stub->_world.markForDestroy(*this);
+    _bt_rigidbody_stub = nullptr;
 }
 
 const sp<Ref>& RigidbodyBullet::ref() const

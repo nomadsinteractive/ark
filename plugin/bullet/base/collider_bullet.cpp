@@ -222,7 +222,7 @@ struct ColliderBullet::Stub final : Runnable {
     op<btDiscreteDynamicsWorld> _dynamics_world;
 
     FList<GhostObject, GhostObject::ListFilter> _ghost_objects;
-    Vector<sp<RigidbodyBullet::Stub>> _mark_for_destroy_rigidbodies;
+    Vector<std::pair<sp<CollisionShape>, sp<BtRigidbodyRef>>> _mark_for_destroys;
 
     sp<Numeric> _app_clock_interval;
 };
@@ -370,10 +370,9 @@ HashMap<TypeId, sp<CollisionShape>>& ColliderBullet::collisionShapes()
     return _stub->_collision_shapes;
 }
 
-void ColliderBullet::markForDestroy(RigidbodyBullet& rigidbody) const
+void ColliderBullet::markForDestroy(sp<CollisionShape> collisionShape, sp<BtRigidbodyRef> rigidBody) const
 {
-    if(rigidbody._bt_rigidbody_stub->_rigidbody->markForDestroy())
-        _stub->_mark_for_destroy_rigidbodies.emplace_back(std::move(rigidbody._bt_rigidbody_stub));
+    _stub->_mark_for_destroys.emplace_back(std::move(collisionShape), std::move(rigidBody));
 }
 
 void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
@@ -393,9 +392,9 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
         i._bt_rigidbody_ref->collisionObject()->setWorldTransform(transform);
     }
 
-    for(auto iter = self->_stub->_mark_for_destroy_rigidbodies.begin(); iter != self->_stub->_mark_for_destroy_rigidbodies.end(); )
-        if(sp<RigidbodyBullet::Stub>& i = *iter; i->_rigidbody->destroyCountDown(dynamicsWorld))
-            iter = self->_stub->_mark_for_destroy_rigidbodies.erase(iter);
+    for(auto iter = self->_stub->_mark_for_destroys.begin(); iter != self->_stub->_mark_for_destroys.end(); )
+        if(const auto& i = *iter; i.second->destroyCountDown(dynamicsWorld))
+            iter = self->_stub->_mark_for_destroys.erase(iter);
         else
             ++ iter;
 }
