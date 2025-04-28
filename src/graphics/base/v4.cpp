@@ -131,6 +131,11 @@ float V4::hypot() const
     return Math::sqrt(_x * _x + _y * _y + _z * _z + _w * _w);
 }
 
+float V4::hypot2() const
+{
+    return _x * _x + _y * _y + _z * _z + _w * _w;
+}
+
 V4 V4::normalize() const
 {
     const float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);

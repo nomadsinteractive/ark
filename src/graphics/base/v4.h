@@ -36,6 +36,7 @@ public:
 
     float dot(const V4& other) const;
     float hypot() const;
+    float hypot2() const;
 
     V4 normalize() const;
     V4 floorDiv(const V4& other) const;

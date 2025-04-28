@@ -135,6 +135,10 @@ public:
         return sp<VariableOP1<float, T>>::make(Operators::Hypot<T>(), std::move(self));
     }
 
+    static sp<Numeric> hypot2(sp<VarType> self) {
+        return sp<VariableOP1<float, T>>::make(Operators::Hypot2<T>(), std::move(self));
+    }
+
     static void set(const sp<VariableWrapper<T>>& self, sp<VarType> val) {
         self->set(std::move(val));
     }

@@ -128,6 +128,13 @@ public:
         }
     };
 
+    template<typename T> class Hypot2 {
+    public:
+        float operator()(const T& v) {
+            return v.hypot2();
+        }
+    };
+
     template<typename T, typename P = T> class Mod {
     public:
         auto operator()(T v1, P v2)->decltype(v1 / v2) {

@@ -36,6 +36,7 @@ public:
 
     float dot(const V3& other) const;
     float hypot() const;
+    float hypot2() const;
 
     V4 extend(float w) const;
 

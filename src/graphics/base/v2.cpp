@@ -126,6 +126,11 @@ float V2::hypot() const
     return Math::sqrt(_x * _x + _y * _y);
 }
 
+float V2::hypot2() const
+{
+    return _x * _x + _y * _y;
+}
+
 V3 V2::extend(float z) const
 {
     return {_x, _y, z};

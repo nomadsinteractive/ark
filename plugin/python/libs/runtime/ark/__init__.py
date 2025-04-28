@@ -1191,6 +1191,9 @@ class Vec2(_Var):
     def hypot(self) -> Numeric:
         pass
 
+    def hypot2(self) -> Numeric:
+        pass
+
     def to_size(self) -> 'Size':
         pass
 

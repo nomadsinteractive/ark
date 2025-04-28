@@ -122,6 +122,11 @@ float V3::hypot() const
     return Math::sqrt(_x * _x + _y * _y + _z * _z);
 }
 
+float V3::hypot2() const
+{
+    return _x * _x + _y * _y + _z * _z;
+}
+
 V4 V3::extend(const float w) const
 {
     return {_x, _y, _z, w};

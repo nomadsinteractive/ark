@@ -63,6 +63,8 @@ public:
     static sp<Numeric> distance2(sp<Vec2> self, sp<Vec2> other);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> hypot(sp<Vec2> self);
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> hypot2(sp<Vec2> self);
 
 //  [[script::bindings::classmethod]]
     static void set(const sp<VariableWrapper<V2>>& self, sp<Vec2> val);
