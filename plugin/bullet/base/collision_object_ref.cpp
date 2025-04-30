@@ -24,8 +24,7 @@ btCollisionObject* CollisionObjectRef::collisionObject() const
 
 bool CollisionObjectRef::destroyCountDown(btDynamicsWorld* dynamicsWorld)
 {
-    const int32_t countDown = _collision_object->getUserIndex();
-    ASSERT(countDown >= 0);
+    const int32_t countDown = _collision_object->getUserIndex() - 1;
     if(countDown <= 0)
     {
         RigidbodyBullet::releaseCollisionObjectPointer(_collision_object->getUserPointer());
@@ -34,7 +33,7 @@ bool CollisionObjectRef::destroyCountDown(btDynamicsWorld* dynamicsWorld)
         _collision_object.reset();
         return true;
     }
-    _collision_object->setUserIndex(countDown - 1);
+    _collision_object->setUserIndex(countDown);
     return false;
 }
 
