@@ -6,7 +6,6 @@
 #include <limits>
 #include <type_traits>
 #include <utility>
-#include <vector>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -242,6 +241,7 @@ public:
     static uint32_t hash32(uint32_t x);
     static uint32_t hash64(uint64_t x);
 
+    static float normalize(float v1);
     static V2 normalize(const V2& v2);
     static V3 normalize(const V3& v3);
     static V4 normalize(const V4& v4);

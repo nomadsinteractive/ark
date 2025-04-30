@@ -9,7 +9,6 @@
 #include "core/impl/variable/at_most.h"
 #include "core/impl/variable/clamp.h"
 #include "core/impl/variable/fence.h"
-#include "core/impl/variable/variable_dirty.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_expect.h"
 #include "core/impl/variable/variable_wrapper.h"
@@ -175,11 +174,6 @@ sp<Boolean> IntegerType::eq(const sp<Integer>& self, const sp<Integer>& other)
 sp<Boolean> IntegerType::ne(const sp<Integer>& self, const sp<Integer>& other)
 {
     return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::NE<int32_t>>>(self, other);
-}
-
-sp<Boolean> IntegerType::dirty(sp<Integer> self)
-{
-    return sp<Boolean>::make<VariableDirty<int32_t>>(std::move(self));
 }
 
 int32_t IntegerType::val(const sp<Integer>& self)

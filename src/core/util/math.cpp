@@ -363,6 +363,11 @@ uint32_t Math::hash64(uint64_t x)
     return x;
 }
 
+float Math::normalize(const float v1)
+{
+    return v1 >= 0.0f ? 1.0f : -1.0f;
+}
+
 V2 Math::normalize(const V2& v2)
 {
     const glm::vec2 n = glm::normalize(glm::vec2(v2.x(), v2.y()));

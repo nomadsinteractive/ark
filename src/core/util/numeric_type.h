@@ -74,8 +74,6 @@ public:
     static sp<Boolean> eq(sp<Numeric> self, sp<Numeric> other);
 //  [[script::bindings::operator(!=)]]
     static sp<Boolean> ne(sp<Numeric> self, sp<Numeric> other);
-//  [[script::bindings::classmethod]]
-    static sp<Boolean> dirty(sp<Numeric> self);
 
 //  [[script::bindings::property]]
     static float val(const sp<Numeric>& self);
@@ -113,6 +111,9 @@ public:
     static sp<Numeric> ifElse(sp<Numeric> self, sp<Boolean> condition, sp<Numeric> negative);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
+
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> normalize(sp<Numeric> self);
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> distance(sp<Numeric> self, sp<Numeric> other);

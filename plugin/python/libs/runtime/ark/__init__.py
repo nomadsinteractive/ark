@@ -11,7 +11,7 @@ Use it for:
 """
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self
 
-_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
+_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', "Numeric", 'NarrowPhrase',
                            'Layer', 'Vec2', 'Vec3', 'Vec4', "Renderer", 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
                            'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings', 'View')
 
@@ -20,7 +20,7 @@ TYPE_INTEGER = Union[int, "Integer"]
 TYPE_BOOLEAN = Union[bool, "Boolean"]
 TYPE_ENUM = Union[int, 'Enum']
 TYPE_INT_OR_FLOAT = Union[int, float]
-TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
+TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, "Numeric"]
 TYPE_RECT = tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]
 TYPE_VEC2 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']
 TYPE_VEC3 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], 'Vec3']
@@ -1038,9 +1038,6 @@ class _Scalar(_Var):
     def fence(self, fence) -> Self:
         pass
 
-    def dirty(self) -> Boolean:
-        pass
-
 
 class Numeric(_Scalar):
     def __init__(self, val):
@@ -1049,21 +1046,20 @@ class Numeric(_Scalar):
     def approach(self, expectation) -> Self:
         pass
 
-    def integral(self, t: Optional['Numeric'] = None) -> 'Numeric':
+    def integral(self, t: Optional["Numeric"] = None) -> "Numeric":
         pass
 
-    def if_else(self, condition: Union[bool, Boolean], negative: Union[float, 'Numeric']) -> 'Numeric':
+    def if_else(self, condition: Union[bool, Boolean], negative: Union[float, "Numeric"]) -> "Numeric":
         pass
 
-    def synchronize(self, disposed: Boolean) -> 'Numeric':
+    def synchronize(self, discarded: Boolean) -> "Numeric":
         pass
 
-    def sod(self, s0: float, f: float, z: float = 1.0, r: float = 0, t: Optional['Numeric'] = None) -> 'Numeric':
+    def sod(self, s0: float, f: float, z: float = 1.0, r: float = 0, t: Optional["Numeric"] = None) -> "Numeric":
         pass
-
-    @staticmethod
-    def vibrate(s0: float, v0: float, s1: float, v1: float, duration: float, t=None):
-        return None
+    
+    def normalize(self) -> Self:
+        pass
 
     def __floordiv__(self, other):
         pass
@@ -1197,7 +1193,7 @@ class Vec2(_Var):
     def lerp(self, other, t: TYPE_NUMERIC) -> Self:
         pass
 
-    def sod(self, s0, f: float, z: float, r: float, t: Optional['Numeric'] = None) -> Self:
+    def sod(self, s0, f: float, z: float, r: float, t: Optional["Numeric"] = None) -> Self:
         pass
 
     def extend(self, v):
@@ -1642,7 +1638,7 @@ class LevelLibrary:
         pass
 
     @shape.setter
-    def shape(self, shape: Shape):
+    def shape(self, shape: "Shape"):
         pass
 
 
@@ -1936,7 +1932,7 @@ class Clock:
     def tick(self) -> int:
         return 0
 
-    def duration(self) -> 'Numeric':
+    def duration(self) -> "Numeric":
         pass
 
     def timeout(self, seconds: float) -> "Boolean":
