@@ -6,12 +6,12 @@
 
 namespace ark::plugin::bullet {
 
-class CollisionShape {
+class CollisionShapeRef {
 public:
-    CollisionShape(sp<btCollisionShape> shape, btScalar mass);
-    virtual ~CollisionShape() = default;
+    CollisionShapeRef(sp<btCollisionShape> shape, btScalar mass);
+    virtual ~CollisionShapeRef() = default;
 
-    const sp<btCollisionShape>& btShape() const;
+    btCollisionShape* btShape() const;
 
     btScalar mass() const;
     void setMass(btScalar mass);

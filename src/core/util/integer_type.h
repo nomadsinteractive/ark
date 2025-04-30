@@ -70,6 +70,8 @@ public:
     static sp<Boolean> eq(const sp<Integer>& self, const sp<Integer>& other);
 //  [[script::bindings::operator(!=)]]
     static sp<Boolean> ne(const sp<Integer>& self, const sp<Integer>& other);
+//  [[script::bindings::classmethod]]
+    static sp<Boolean> dirty(sp<Integer> self);
 
 //  [[script::bindings::property]]
     static int32_t val(const sp<Integer>& self);

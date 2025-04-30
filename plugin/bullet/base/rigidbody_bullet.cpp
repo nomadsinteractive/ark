@@ -5,94 +5,125 @@
 
 #include "app/components/shape.h"
 
-#include "bullet/base/collision_shape.h"
-#include "bullet/base/bt_rigidbody_ref.h"
+#include "bullet/base/collision_shape_ref.h"
+#include "bullet/base/collision_object_ref.h"
 
 namespace ark::plugin::bullet {
 
-RigidbodyBullet::Stub::Stub(ColliderBullet& world, sp<CollisionShape> collisionShape, sp<BtRigidbodyRef> rigidBody)
-    : _world(world), _collision_shape(std::move(collisionShape)), _rigidbody(std::move(rigidBody))
+RigidbodyBullet::Stub::Stub(ColliderBullet& world, sp<Rigidbody::Stub> rigidbodyStub, sp<CollisionObjectRef> rigidBody)
+    : _world(world), _rigidbody_stub(std::move(rigidbodyStub)), _collision_object_ref(std::move(rigidBody))
 {
 }
 
 RigidbodyBullet::Stub::~Stub()
 {
-    _world.markForDestroy(std::move(_collision_shape), std::move(_rigidbody));
+    markForDestroy();
 }
 
-RigidbodyBullet::RigidbodyBullet(ColliderBullet& world, sp<BtRigidbodyRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
-    : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter))), _bt_rigidbody_stub(sp<Stub>::make(world, std::move(collisionShape), std::move(rigidBody)))
+void RigidbodyBullet::Stub::markForDestroy()
 {
-    _bt_rigidbody_stub->_rigidbody->collisionObject()->setUserPointer(this);
+    if(_collision_object_ref)
+        _world.markForDestroy(std::move(_collision_object_ref));
 }
 
-void RigidbodyBullet::discard()
+RigidbodyBullet::RigidbodyBullet(sp<Stub> stub)
+    : _stub(std::move(stub))
 {
-    _rigidbody_stub->_ref->discard();
-    _bt_rigidbody_stub = nullptr;
+
+}
+
+RigidbodyBullet::RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
+    : _stub(sp<Stub>::make(world, sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter)), std::move(rigidBody)))
+{
+    _stub->_collision_object_ref->collisionObject()->setUserPointer(new WeakPtr<Stub>(_stub));
+}
+
+bool RigidbodyBullet::validate()
+{
+    if(!_stub)
+        return false;
+
+    if(_stub->_rigidbody_stub->_ref->isDiscarded())
+    {
+        _stub->markForDestroy();
+        _stub = nullptr;
+        return false;
+    }
+    return true;
 }
 
 const sp<Ref>& RigidbodyBullet::ref() const
 {
-    return _rigidbody_stub->_ref;
+    return _stub->_rigidbody_stub->_ref;
 }
 
 const sp<Rigidbody::Stub>& RigidbodyBullet::stub() const
 {
-    return _rigidbody_stub;
+    return _stub->_rigidbody_stub;
 }
 
 const sp<CollisionCallback>& RigidbodyBullet::collisionCallback() const
 {
-    return _rigidbody_stub->_collision_callback;
+    return _stub->_rigidbody_stub->_collision_callback;
 }
 
 Rigidbody RigidbodyBullet::makeShadow() const
 {
-    return {{_rigidbody_stub, nullptr}, true};
+    return {{_stub->_rigidbody_stub, nullptr}, true};
 }
 
 void RigidbodyBullet::applyCentralForce(const V3& force)
 {
-    _bt_rigidbody_stub->_rigidbody->rigidBody()->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
+    _stub->_collision_object_ref->rigidBody()->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
 }
 
 V3 RigidbodyBullet::linearVelocity() const
 {
-    const btVector3& velocity = _bt_rigidbody_stub->_rigidbody->rigidBody()->getLinearVelocity();
+    const btVector3& velocity = _stub->_collision_object_ref->rigidBody()->getLinearVelocity();
     return {velocity.x(), velocity.y(), velocity.z()};
 }
 
 void RigidbodyBullet::setLinearVelocity(const V3& velocity)
 {
-    _bt_rigidbody_stub->_rigidbody->rigidBody()->setActivationState(DISABLE_DEACTIVATION);
-    _bt_rigidbody_stub->_rigidbody->rigidBody()->setLinearVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
+    _stub->_collision_object_ref->rigidBody()->setActivationState(DISABLE_DEACTIVATION);
+    _stub->_collision_object_ref->rigidBody()->setLinearVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
 }
 
 float RigidbodyBullet::friction() const
 {
-    return _bt_rigidbody_stub->_rigidbody->collisionObject()->getFriction();
+    return _stub->_collision_object_ref->collisionObject()->getFriction();
 }
 
 void RigidbodyBullet::setFriction(float friction)
 {
-    _bt_rigidbody_stub->_rigidbody->collisionObject()->setFriction(friction);
+    _stub->_collision_object_ref->collisionObject()->setFriction(friction);
 }
 
 V3 RigidbodyBullet::angularFactor() const
 {
-    const btVector3& factor = _bt_rigidbody_stub->_rigidbody->rigidBody()->getAngularFactor();
+    const btVector3& factor = _stub->_collision_object_ref->rigidBody()->getAngularFactor();
     return {factor.x(), factor.y(), factor.z()};
 }
 
 void RigidbodyBullet::setAngularFactor(const V3& factor)
 {
-    _bt_rigidbody_stub->_rigidbody->rigidBody()->setAngularFactor(btVector3(factor.x(), factor.y(), factor.z()));
+    _stub->_collision_object_ref->rigidBody()->setAngularFactor(btVector3(factor.x(), factor.y(), factor.z()));
 }
 
-const sp<BtRigidbodyRef>& RigidbodyBullet::btRigidbodyRef() const
+const sp<CollisionObjectRef>& RigidbodyBullet::collisionObjectRef() const
 {
-    return _bt_rigidbody_stub->_rigidbody;
+    return _stub->_collision_object_ref;
+}
+
+RigidbodyBullet RigidbodyBullet::fromCollisionObjectPointer(void* ptr)
+{
+    const WeakPtr<Stub>& wp = *static_cast<WeakPtr<Stub>*>(ptr);
+    return {wp.lock()};
+}
+
+void RigidbodyBullet::releaseCollisionObjectPointer(void* ptr)
+{
+    delete static_cast<WeakPtr<Stub>*>(ptr);
 }
 
 }

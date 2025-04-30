@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/types/owned_ptr.h"
+#include "core/types/shared_ptr.h"
 
 #include "bullet/forwarding.h"
 
@@ -9,9 +10,9 @@
 
 namespace ark::plugin::bullet {
 
-class BtRigidbodyRef  {
+class CollisionObjectRef  {
 public:
-    BtRigidbodyRef(btCollisionObject* collisionObject);
+    CollisionObjectRef(btCollisionObject* collisionObject, sp<CollisionShapeRef> collisionShape);
 
     btRigidBody* rigidBody() const;
     btCollisionObject* collisionObject() const;
@@ -20,7 +21,7 @@ public:
 
 private:
     op<btCollisionObject> _collision_object;
-    int32_t _destruction_count_down;
+    sp<CollisionShapeRef> _collision_shape;
 };
 
 }

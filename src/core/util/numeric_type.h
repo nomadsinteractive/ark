@@ -74,6 +74,8 @@ public:
     static sp<Boolean> eq(sp<Numeric> self, sp<Numeric> other);
 //  [[script::bindings::operator(!=)]]
     static sp<Boolean> ne(sp<Numeric> self, sp<Numeric> other);
+//  [[script::bindings::classmethod]]
+    static sp<Boolean> dirty(sp<Numeric> self);
 
 //  [[script::bindings::property]]
     static float val(const sp<Numeric>& self);

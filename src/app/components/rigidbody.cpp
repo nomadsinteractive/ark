@@ -38,12 +38,12 @@ void Rigidbody::Stub::onEndContact(const Rigidbody& rigidBody) const
         _collision_callback->onEndContact(rigidBody);
 }
 
-Rigidbody::Rigidbody(BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded, Box impl, bool isShadow)
+Rigidbody::Rigidbody(BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded, Box impl, const bool isShadow)
     : _impl{sp<Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation)), std::move(impl)}, _is_shadow(isShadow)
 {
 }
 
-Rigidbody::Rigidbody(Impl impl, bool isShadow)
+Rigidbody::Rigidbody(Impl impl, const bool isShadow)
     : _impl(std::move(impl)), _is_shadow(isShadow)
 {
 }

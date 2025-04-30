@@ -22,7 +22,7 @@ public:
     };
 
 private:
-    sp<CollisionShape> makeCollisionShape(const Model& model);
+    sp<CollisionShapeRef> makeCollisionShape(const Model& model);
 
 private:
     sp<ModelLoader> _model_loader;

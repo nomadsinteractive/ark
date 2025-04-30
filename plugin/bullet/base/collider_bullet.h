@@ -41,10 +41,10 @@ public:
 
     btDiscreteDynamicsWorld* btDynamicWorld() const;
 
-    const HashMap<TypeId, sp<CollisionShape>>& collisionShapes() const;
-    HashMap<TypeId, sp<CollisionShape>>& collisionShapes();
+    const HashMap<TypeId, sp<CollisionShapeRef>>& collisionShapes() const;
+    HashMap<TypeId, sp<CollisionShapeRef>>& collisionShapes();
 
-    void markForDestroy(sp<CollisionShape> collisionShape, sp<BtRigidbodyRef> rigidBody) const;
+    void markForDestroy(sp<CollisionObjectRef> collisionBody) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER_IMPL1 final : public Builder<ColliderBullet> {
@@ -76,18 +76,18 @@ private:
     struct Stub;
 
     struct ContactInfo {
-        Set<sp<BtRigidbodyRef>> _last_tick;
-        Set<sp<BtRigidbodyRef>> _current_tick;
+        Set<sp<CollisionObjectRef>> _last_tick;
+        Set<sp<CollisionObjectRef>> _current_tick;
     };
 
     static void myInternalPreTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
     static void myInternalTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
 
-    void addTickContactInfo(const sp<BtRigidbodyRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<BtRigidbodyRef>& contact, const V3& cp, const V3& normal);
+    void addTickContactInfo(const sp<CollisionObjectRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<CollisionObjectRef>& contact, const V3& cp, const V3& normal);
 
 private:
     sp<Stub> _stub;
-    Map<sp<BtRigidbodyRef>, ContactInfo> _contact_infos;
+    Map<sp<CollisionObjectRef>, ContactInfo> _contact_infos;
 };
 
 }

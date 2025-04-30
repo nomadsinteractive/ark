@@ -10,16 +10,16 @@
 #include "renderer/base/vertex_writer.h"
 #include "renderer/inf/model_loader.h"
 
-#include "plugin/bullet/base/collision_shape.h"
+#include "plugin/bullet/base/collision_shape_ref.h"
 
 namespace ark::plugin::bullet {
 
 namespace {
 
-class BvhCollisionShape : public CollisionShape {
+class BvhCollisionShape : public CollisionShapeRef {
 public:
     BvhCollisionShape(sp<btCollisionShape> shape, btTriangleIndexVertexArray* tiva)
-        : CollisionShape(std::move(shape), 0), _tiva(tiva) {
+        : CollisionShapeRef(std::move(shape), 0), _tiva(tiva) {
     }
 
 private:
@@ -35,7 +35,7 @@ BvhRigidbodyImporter::BvhRigidbodyImporter(sp<ModelLoader> modelLoader)
 
 void BvhRigidbodyImporter::import(ColliderBullet& collider, const document& manifest)
 {
-    std::unordered_map<TypeId, sp<CollisionShape>>& shapes = collider.collisionShapes();
+    std::unordered_map<TypeId, sp<CollisionShapeRef>>& shapes = collider.collisionShapes();
     for(const document& i : manifest->children("model"))
     {
         const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
@@ -44,7 +44,7 @@ void BvhRigidbodyImporter::import(ColliderBullet& collider, const document& mani
     }
 }
 
-sp<CollisionShape> BvhRigidbodyImporter::makeCollisionShape(const Model& model)
+sp<CollisionShapeRef> BvhRigidbodyImporter::makeCollisionShape(const Model& model)
 {
     btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray();
     CHECK(!model.meshes().empty(), "This model has no meshes data");

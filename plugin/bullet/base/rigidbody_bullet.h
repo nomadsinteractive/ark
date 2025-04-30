@@ -16,9 +16,9 @@ namespace ark::plugin::bullet {
 
 class ARK_PLUGIN_BULLET_API RigidbodyBullet final  {
 public:
-    RigidbodyBullet(ColliderBullet& world, sp<BtRigidbodyRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
+    RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
 
-    void discard();
+    bool validate();
 
 //  [[script::bindings::auto]]
     void applyCentralForce(const V3& force);
@@ -43,24 +43,28 @@ public:
 
     Rigidbody makeShadow() const;
     const sp<CollisionCallback>& collisionCallback() const;
-    const sp<BtRigidbodyRef>& btRigidbodyRef() const;
+    const sp<CollisionObjectRef>& collisionObjectRef() const;
+
+    static RigidbodyBullet fromCollisionObjectPointer(void* ptr);
+    static void releaseCollisionObjectPointer(void* ptr);
 
 private:
     struct Stub {
-        Stub(ColliderBullet& world, sp<CollisionShape> collisionShape, sp<BtRigidbodyRef> rigidBody);
+        Stub(ColliderBullet& world, sp<Rigidbody::Stub> rigidbodyStub, sp<CollisionObjectRef> rigidBody);
         ~Stub();
 
         void markForDestroy();
 
         ColliderBullet& _world;
 
-        sp<CollisionShape> _collision_shape;
-        sp<BtRigidbodyRef> _rigidbody;
+        sp<Rigidbody::Stub> _rigidbody_stub;
+        sp<CollisionObjectRef> _collision_object_ref;
     };
 
+    RigidbodyBullet(sp<Stub> stub);
+
 private:
-    sp<Rigidbody::Stub> _rigidbody_stub;
-    sp<Stub> _bt_rigidbody_stub;
+    sp<Stub> _stub;
 
     friend class ColliderBullet;
 };

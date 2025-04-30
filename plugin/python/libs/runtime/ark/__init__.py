@@ -1038,6 +1038,9 @@ class _Scalar(_Var):
     def fence(self, fence) -> Self:
         pass
 
+    def dirty(self) -> Boolean:
+        pass
+
 
 class Numeric(_Scalar):
     def __init__(self, val):

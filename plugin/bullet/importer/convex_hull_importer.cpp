@@ -9,7 +9,7 @@
 #include "renderer/base/model.h"
 #include "renderer/inf/model_loader.h"
 
-#include "plugin/bullet/base/collision_shape.h"
+#include "plugin/bullet/base/collision_shape_ref.h"
 
 namespace ark::plugin::bullet {
 
@@ -20,7 +20,7 @@ ConvexHullRigidBodyImporter::ConvexHullRigidBodyImporter(sp<ModelLoader> modelLo
 
 void ConvexHullRigidBodyImporter::import(ColliderBullet& collider, const document& manifest)
 {
-    std::unordered_map<TypeId, sp<CollisionShape>>& shapes = collider.collisionShapes();
+    std::unordered_map<TypeId, sp<CollisionShapeRef>>& shapes = collider.collisionShapes();
     for(const document& i : manifest->children("model"))
     {
         const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
@@ -29,7 +29,7 @@ void ConvexHullRigidBodyImporter::import(ColliderBullet& collider, const documen
     }
 }
 
-sp<CollisionShape> ConvexHullRigidBodyImporter::makeCollisionShape(const Model& model, btScalar mass)
+sp<CollisionShapeRef> ConvexHullRigidBodyImporter::makeCollisionShape(const Model& model, btScalar mass)
 {
     const sp<btConvexHullShape> convexHullShape = sp<btConvexHullShape>::make();
 
@@ -40,7 +40,7 @@ sp<CollisionShape> ConvexHullRigidBodyImporter::makeCollisionShape(const Model& 
 
     convexHullShape->recalcLocalAabb();
     convexHullShape->optimizeConvexHull();
-    return sp<CollisionShape>::make(convexHullShape, mass);
+    return sp<CollisionShapeRef>::make(convexHullShape, mass);
 }
 
 ConvexHullRigidBodyImporter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

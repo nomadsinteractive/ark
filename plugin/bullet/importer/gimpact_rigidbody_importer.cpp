@@ -10,7 +10,7 @@
 #include "renderer/base/vertex_writer.h"
 #include "renderer/inf/model_loader.h"
 
-#include "plugin/bullet/base/collision_shape.h"
+#include "plugin/bullet/base/collision_shape_ref.h"
 
 #include "BulletCollision/Gimpact/btGImpactShape.h"
 #include "BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h"
@@ -19,17 +19,17 @@ namespace ark::plugin::bullet {
 
 namespace {
 
-class GImpactCollisionShape final : public CollisionShape {
+class GImpactCollisionShape final : public CollisionShapeRef {
 public:
     GImpactCollisionShape(sp<btCollisionShape> shape, btTriangleIndexVertexArray* tiva, btScalar mass)
-        : CollisionShape(std::move(shape), mass), _tiva(tiva) {
+        : CollisionShapeRef(std::move(shape), mass), _tiva(tiva) {
     }
 
 private:
     op<btTriangleIndexVertexArray> _tiva;
 };
 
-sp<CollisionShape> makeCollisionShape(const Model& model, btScalar mass)
+sp<CollisionShapeRef> makeCollisionShape(const Model& model, btScalar mass)
 {
     constexpr PHY_ScalarType indexType = sizeof(element_index_t) == 4 ? PHY_INTEGER : PHY_SHORT;
     btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray();
@@ -49,7 +49,7 @@ sp<CollisionShape> makeCollisionShape(const Model& model, btScalar mass)
     const sp<btGImpactMeshShape> gImpactShape = sp<btGImpactMeshShape>::make(tiva);
     gImpactShape->postUpdate();
     gImpactShape->updateBound();
-    return sp<CollisionShape>::make<GImpactCollisionShape>(gImpactShape, tiva, mass);
+    return sp<CollisionShapeRef>::make<GImpactCollisionShape>(gImpactShape, tiva, mass);
 }
 
 }
@@ -64,7 +64,7 @@ void GImpactRigidbodyImporter::import(ColliderBullet& collider, const document& 
     btCollisionDispatcher * dispatcher = static_cast<btCollisionDispatcher*>(collider.btDynamicWorld()->getDispatcher());
     btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher);
 
-    std::unordered_map<TypeId, sp<CollisionShape>>& shapes = collider.collisionShapes();
+    std::unordered_map<TypeId, sp<CollisionShapeRef>>& shapes = collider.collisionShapes();
     for(const document& i : manifest->children("model"))
     {
         const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
