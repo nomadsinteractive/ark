@@ -43,7 +43,7 @@ void Translation::reset(sp<Vec3> position)
 
 sp<Mat4> Translation::toMatrix() const
 {
-    return sp<VariableOP1<M4, V3>>::make(Translate(), _wrapped);
+    return sp<Mat4>::make<VariableOP1<M4, V3>>(Translate(), _wrapped);
 }
 
 }

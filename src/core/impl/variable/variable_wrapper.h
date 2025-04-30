@@ -39,17 +39,6 @@ public:
         _timestamp.markDirty();
     }
 
-    T fix() {
-        T val = this->_wrapped->val();
-        set(val);
-        return val;
-    }
-
-    void deferedUnref() {
-        if(this->_wrapped)
-            Ark::instance().deferUnref(std::move(this->_wrapped));
-    }
-
 private:
     Timestamp _timestamp;
 };

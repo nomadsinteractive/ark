@@ -63,12 +63,6 @@ void Vec2Impl::set(const V2& val)
     _y->set(val.y());
 }
 
-void Vec2Impl::fix()
-{
-    _x->fix();
-    _y->fix();
-}
-
 Vec2Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
 {
     factory.expand(expr, _x, _y);

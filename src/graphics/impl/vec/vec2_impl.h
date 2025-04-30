@@ -28,7 +28,6 @@ public:
     const sp<NumericWrapper>& y() const;
 
     void set(const V2& val);
-    void fix();
 
 //  [[plugin::builder("vec2")]]
     class BUILDER final : public Builder<Vec2> {
@@ -57,7 +56,6 @@ public:
 private:
     sp<NumericWrapper> _x;
     sp<NumericWrapper> _y;
-
 };
 
 }

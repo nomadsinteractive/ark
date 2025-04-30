@@ -9,22 +9,22 @@ namespace ark {
 
 namespace {
 
-class TBNMat4 : public Mat4 {
+class TBNMat4 final : public Mat4 {
 public:
-    TBNMat4(const sp<Vec4>& t, const sp<Vec4>& b, const sp<Vec4>& n, const sp<Vec4>& w)
-        : _t(t), _b(b), _n(n), _w(w) {
+    TBNMat4(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w)
+        : _t(std::move(t)), _b(std::move(b)), _n(std::move(n)), _w(std::move(w)) {
     }
 
-    virtual M4 val() override {
+    M4 val() override {
         return toMatrix(_t->val(), _b->val(), _n->val(), _w->val());
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         return UpdatableUtil::update(timestamp, _t, _b, _n, _w);
     }
 
     static M4 toMatrix(const V4& t, const V4& b, const V4& n, const V4& w) {
-        float values[16] = {t.x(), b.x(), n.x(), w.x(), t.y(), b.y(), n.y(), w.y(), t.z(), b.z(), n.z(), w.z(), t.w(), b.w(), n.w(), w.w()};
+        const float values[16] = {t.x(), b.x(), n.x(), w.x(), t.y(), b.y(), n.y(), w.y(), t.z(), b.z(), n.z(), w.z(), t.w(), b.w(), n.w(), w.w()};
         return M4(values);
     }
 
@@ -75,11 +75,6 @@ void Mat4Impl::set(const M4& mat)
 void Mat4Impl::set(sp<Mat4> mat)
 {
     _impl->set(std::move(mat));
-}
-
-void Mat4Impl::fix()
-{
-    _impl->fix();
 }
 
 }

@@ -95,8 +95,6 @@ public:
     static void set(const sp<NumericWrapper>& self, sp<Numeric> value);
 
 //  [[script::bindings::classmethod]]
-    static float fix(const sp<Numeric>& self);
-//  [[script::bindings::classmethod]]
     static sp<Numeric> freeze(const sp<Numeric>& self);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> wrap(sp<Numeric> self);

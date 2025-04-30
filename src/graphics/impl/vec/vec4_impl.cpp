@@ -67,14 +67,6 @@ void Vec4Impl::set(const V4& val)
     _w->set(val.w());
 }
 
-void Vec4Impl::fix()
-{
-    _x->fix();
-    _y->fix();
-    _z->fix();
-    _w->fix();
-}
-
 Vec4Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _x(factory.getBuilder<Numeric>(manifest, "x")), _y(factory.getBuilder<Numeric>(manifest, "y")), _z(factory.getBuilder<Numeric>(manifest, "z")), _w(factory.getBuilder<Numeric>(manifest, "w")),
       _value(factory.getBuilder<Vec4>(manifest, "value"))

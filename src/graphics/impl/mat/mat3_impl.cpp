@@ -23,7 +23,7 @@ public:
         return M3(values);
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         return UpdatableUtil::update(timestamp, _t, _b, _n);
     }
 
@@ -35,11 +35,9 @@ private:
 
 }
 
-Mat3Impl::Mat3Impl() noexcept
-    : _impl(sp<VariableWrapper<M3>>::make(M3()))
+Mat3Impl::Mat3Impl(const M3& mat) noexcept
+    : _impl(sp<VariableWrapper<M3>>::make(mat))
 {
-    float values[9] = {1.0f, 0, 0, 0, 1.0f, 0, 0, 0, 1.0f};
-    _impl->set(values);
 }
 
 Mat3Impl::Mat3Impl(const V3& t, const V3& b, const V3& n) noexcept
@@ -62,11 +60,6 @@ M3 Mat3Impl::val()
 bool Mat3Impl::update(uint64_t timestamp)
 {
     return _impl->update(timestamp);
-}
-
-void Mat3Impl::fix()
-{
-    _impl->fix();
 }
 
 }

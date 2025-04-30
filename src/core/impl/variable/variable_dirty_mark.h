@@ -20,13 +20,12 @@ public:
 
     bool update(uint64_t timestamp) override {
         this->_wrapped->update(timestamp);
-        if(_wrapper.wrapped().get() == this) {
+        DCHECK(_wrapper.wrapped().get() == this, "Trying to overwrite a wrapper which doesn't contain myself");
+        if(!_timestamp.update(timestamp)) {
             sp<Variable<T>> delegate = std::move(this->_wrapped);
             _wrapper.reset(std::move(delegate));
         }
-        else
-            WARN("Trying to overwrite a wrapper which doesn't contain myself");
-        return _timestamp.update(timestamp);
+        return true;
     }
 
     static void markDirty(Wrapper<Variable<T>>& wrapper, sp<Variable<T>> delegate) {

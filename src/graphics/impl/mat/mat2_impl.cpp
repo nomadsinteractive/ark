@@ -9,20 +9,20 @@ namespace ark {
 
 namespace {
 
-class TBMat2 : public Mat2 {
+class TBMat2 final : public Mat2 {
 public:
     TBMat2(const sp<Vec2>& t, const sp<Vec2>& b)
         : _t(t), _b(b) {
     }
 
-    virtual M2 val() override {
+    M2 val() override {
         const V2 t = _t->val();
         const V2 b = _b->val();
         const float values[4] = {t.x(), b.x(), t.y(), b.y()};
         return M2(values);
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return UpdatableUtil::update(timestamp, _t, _b);
     }
 
@@ -33,17 +33,15 @@ private:
 
 }
 
-Mat2Impl::Mat2Impl() noexcept
-    : _impl(sp<VariableWrapper<M2>>::make(M2()))
+Mat2Impl::Mat2Impl(const M2& mat) noexcept
+    : _impl(sp<VariableWrapper<M2>>::make(mat))
 {
-    float values[4] = {1.0f, 0, 0, 1.0f};
-    _impl->set(values);
 }
 
 Mat2Impl::Mat2Impl(const V2& t, const V2& b) noexcept
     : Mat2Impl()
 {
-    float values[4] = {t.x(), b.x(), t.y(), b.y()};
+    const float values[4] = {t.x(), b.x(), t.y(), b.y()};
     _impl->set(M2(values));
 }
 
@@ -60,11 +58,6 @@ M2 Mat2Impl::val()
 bool Mat2Impl::update(uint64_t timestamp)
 {
     return _impl->update(timestamp);
-}
-
-void Mat2Impl::fix()
-{
-    _impl->fix();
 }
 
 }

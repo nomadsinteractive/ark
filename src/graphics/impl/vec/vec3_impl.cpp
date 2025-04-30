@@ -61,13 +61,6 @@ void Vec3Impl::set(const V3& val)
     _z->set(val.z());
 }
 
-void Vec3Impl::fix()
-{
-    _x->fix();
-    _y->fix();
-    _z->fix();
-}
-
 Vec3Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _x(factory.ensureBuilder<Numeric>(manifest, "x")), _y(factory.getBuilder<Numeric>(manifest, "y")), _z(factory.getBuilder<Numeric>(manifest, "z"))
 {

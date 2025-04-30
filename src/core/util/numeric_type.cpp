@@ -219,15 +219,6 @@ void NumericType::set(const sp<NumericWrapper>& self, sp<Numeric> value)
     self->set(std::move(value));
 }
 
-float NumericType::fix(const sp<Numeric>& self)
-{
-    const sp<NumericWrapper> iw = self.asInstance<NumericWrapper>();
-    DCHECK_WARN(iw, "Calling fix on non-NumericWrapper has no effect.");
-    if(iw)
-        return iw->fix();
-    return 0;
-}
-
 sp<Numeric> NumericType::freeze(const sp<Numeric>& self)
 {
     return sp<Numeric>::make<NumericWrapper>(val(self));

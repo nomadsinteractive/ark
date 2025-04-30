@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_MAT_MAT4_H_
-#define ARK_GRAPHICS_IMPL_MAT_MAT4_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/inf/variable.h"
@@ -19,18 +18,14 @@ public:
     Mat4Impl(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w) noexcept;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mat4Impl);
 
-    virtual M4 val() override;
-    virtual bool update(uint64_t timestamp) override;
+    M4 val() override;
+    bool update(uint64_t timestamp) override;
 
     void set(const M4& mat);
     void set(sp<Mat4> mat);
-
-    void fix();
 
 private:
     sp<VariableWrapper<M4>> _impl;
 };
 
 }
-
-#endif

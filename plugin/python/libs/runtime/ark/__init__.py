@@ -279,9 +279,6 @@ class _Var:
     def set(self, v):
         pass
 
-    def fix(self):
-        pass
-
     def freeze(self):
         pass
 
