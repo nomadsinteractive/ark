@@ -1,7 +1,7 @@
 #include "core/base/observer.h"
 
+#include "core/base/future.h"
 #include "core/base/with_timestamp.h"
-#include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 
 namespace ark {
@@ -10,25 +10,24 @@ namespace {
 
 class Signal final : public Boolean, public Runnable {
 public:
-    Signal(const bool value, const bool signalValue)
-        : _value(value), _signal_value(signalValue) {
+    Signal(const bool value)
+        : _value(value) {
     }
 
     void run() override {
-        _value.reset(_signal_value);
+        _value.reset(!_value.value());
     }
 
     bool val() override {
         return _value.value();
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         return _value.update(timestamp);
     }
 
 private:
     WithTimestamp<bool> _value;
-    bool _signal_value;
 };
 
 }
@@ -40,26 +39,25 @@ void Observer::run()
 
 void Observer::notify()
 {
-    Vector<Callback> callbacks = std::move(_callbacks);
-    for(auto& [func, oneshot, owned, triggerAfter] : callbacks)
+    Vector<sp<Future>> futureCallbacks = std::move(_future_callbacks);
+    for(sp<Future>& future : futureCallbacks)
     {
-        if(triggerAfter < 2)
-            func->run();
-        if(triggerAfter > 1 || !(oneshot || (owned && func.unique())))
-            _callbacks.push_back({std::move(func), oneshot, owned, triggerAfter ? triggerAfter - 1 : 0});
+        future->notify();
+        if(!future->isDoneOrCanceled()->val())
+            _future_callbacks.push_back(std::move(future));
     }
 }
 
-void Observer::addCallback(sp<Runnable> callback, const bool oneshot, const uint32_t countDown)
+void Observer::addFutureCallback(sp<Future> future)
 {
-    ASSERT(callback);
-    _callbacks.push_back({std::move(callback), oneshot, false, countDown});
+    ASSERT(future);
+    _future_callbacks.emplace_back(std::move(future));
 }
 
-sp<Boolean> Observer::addBooleanSignal(bool value, const bool oneshot)
+sp<Boolean> Observer::addBooleanSignal(bool value)
 {
-    sp<Signal> signal = sp<Signal>::make(value, !value);
-    _callbacks.push_back({signal, oneshot, true, 1});
+    sp<Signal> signal = sp<Signal>::make(value);
+    _future_callbacks.emplace_back(sp<Future>::make(signal));
     return signal;
 }
 

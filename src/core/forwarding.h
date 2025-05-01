@@ -15,7 +15,6 @@ template<typename T> class Array;
 template<typename T> class IBuilder;
 template<typename T> class Dictionary;
 template<typename T> class Duck;
-template<typename T> class Expectation;
 template<typename T> class Global;
 template<typename T> class Importer;
 template<typename T> class Optional;

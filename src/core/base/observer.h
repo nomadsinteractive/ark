@@ -19,20 +19,12 @@ public:
 //  [[script::bindings::auto]]
     void notify();
 //  [[script::bindings::auto]]
-    void addCallback(sp<Runnable> callback, bool oneshot = false, uint32_t countDown = 1);
+    void addFutureCallback(sp<Future> future);
 //  [[script::bindings::auto]]
-    sp<Boolean> addBooleanSignal(bool value = false, bool oneshot = true);
+    sp<Boolean> addBooleanSignal(bool value = false);
 
 private:
-    struct Callback {
-        sp<Runnable> _func;
-        bool _oneshot;
-        bool _owned;
-        uint32_t _count_down;
-    };
-
-private:
-    Vector<Callback> _callbacks;
+    Vector<sp<Future>> _future_callbacks;
 };
 
 }

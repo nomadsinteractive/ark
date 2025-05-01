@@ -438,13 +438,13 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
     {
         const sp<CollisionObjectRef>& rigidBody = iter->first;
         ContactInfo& contactInfo = iter->second;
-        if(RigidbodyBullet obj = getRigidBodyFromCollisionObject(rigidBody->collisionObject()); obj.validate())
+        if(RigidbodyBullet obj = getRigidBodyFromCollisionObject(rigidBody->collisionObject()); obj.validate() && obj.collisionCallback())
             for(const sp<CollisionObjectRef>& i : contactInfo._last_tick)
                 if(i->collisionObject())
                 {
                     if(contactInfo._current_tick.find(i) == contactInfo._current_tick.end())
-                        if(obj.collisionCallback())
-                            obj.collisionCallback()->onEndContact(getRigidBodyFromCollisionObject(i->collisionObject()).makeShadow());
+                        if(RigidbodyBullet obj2 = getRigidBodyFromCollisionObject(i->collisionObject()); obj2.validate())
+                            obj.collisionCallback()->onEndContact(obj2.makeShadow());
                 }
 
         contactInfo._last_tick = std::move(contactInfo._current_tick);
@@ -460,7 +460,8 @@ void ColliderBullet::addTickContactInfo(const sp<CollisionObjectRef>& rigidBody,
     ContactInfo& contactInfo = _contact_infos[rigidBody];
     contactInfo._current_tick.insert(contact);
     if(contactInfo._last_tick.find(contact) == contactInfo._last_tick.end())
-        callback->onBeginContact(getRigidBodyFromCollisionObject(contact->collisionObject()).makeShadow(), CollisionManifold(cp, normal));
+        if(RigidbodyBullet obj = getRigidBodyFromCollisionObject(contact->collisionObject()); obj.validate())
+            callback->onBeginContact(obj.makeShadow(), CollisionManifold(cp, normal));
 }
 
 ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

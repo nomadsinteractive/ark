@@ -29,7 +29,6 @@ void RigidbodyBullet::Stub::markForDestroy()
 RigidbodyBullet::RigidbodyBullet(sp<Stub> stub)
     : _stub(std::move(stub))
 {
-
 }
 
 RigidbodyBullet::RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
@@ -40,7 +39,7 @@ RigidbodyBullet::RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> r
 
 bool RigidbodyBullet::validate()
 {
-    if(!_stub)
+    if(!_stub || !_stub->_collision_object_ref)
         return false;
 
     if(_stub->_rigidbody_stub->_ref->isDiscarded())

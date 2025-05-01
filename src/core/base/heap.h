@@ -3,9 +3,7 @@
 #include <execution>
 #include <limits>
 #include <list>
-#include <map>
 #include <queue>
-#include <unordered_set>
 
 #include "core/collection/bitwise_trie.h"
 #include "core/types/optional.h"
@@ -261,10 +259,10 @@ public:
         SizeType _allocation_units;
         SizeType _allocation_units_max;
 
-        std::unordered_set<SizeType> _allocated;
-        std::unordered_set<SizeType> _recycled;
+        HashSet<SizeType> _allocated;
+        HashSet<SizeType> _recycled;
 
-        std::vector<sp<Fragment>> _fragments;
+        Vector<sp<Fragment>> _fragments;
     };
 
 public:
@@ -334,7 +332,7 @@ private:
 private:
     MemoryType _memory;
     FragmentTrie _fragment_trie;
-    std::map<SizeType, sp<Fragment>> _fragments;
+    Map<SizeType, sp<Fragment>> _fragments;
     std::list<sp<Strategy>> _strategies;
 
     SizeType _size;

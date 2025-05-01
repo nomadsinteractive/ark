@@ -889,10 +889,10 @@ class Observer(Runnable):
     def __init__(self):
         pass
 
-    def update(self):
+    def notify(self):
         pass
 
-    def add_callback(self, callback: Callable, oneshot: bool = False, trigger_after: int = 1):
+    def add_future_callback(self, future: Future):
         pass
 
 
@@ -1028,6 +1028,10 @@ class String:
 
 
 class _Scalar(_Var):
+
+    @property
+    def observer(self) -> Optional[Observer]:
+        return None
 
     def at_least(self, least) -> Self:
         pass

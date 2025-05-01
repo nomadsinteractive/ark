@@ -204,12 +204,12 @@ sp<Observer> NumericType::observer(const sp<Numeric>& self)
     return wo ? wo->observer() : nullptr;
 }
 
-void NumericType::set(const sp<Numeric::Impl>& self, float value)
+void NumericType::set(const sp<Numeric::Impl>& self, const float value)
 {
     self->set(value);
 }
 
-void NumericType::set(const sp<NumericWrapper>& self, float value)
+void NumericType::set(const sp<NumericWrapper>& self, const float value)
 {
     self->set(value);
 }

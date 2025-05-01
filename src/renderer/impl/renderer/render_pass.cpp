@@ -20,8 +20,8 @@ enums::DrawProcedure toDrawProcedure(const Buffer& indexBuffer, const Buffer& in
 
 }
 
-RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, const enums::DrawMode drawMode, const enums::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers, Buffer indirectBuffer)
-    : _shader(std::move(shader)), _index_buffer(std::move(indexBuffer)), _draw_count(std::move(drawCount)), _draw_procedure(drawProcedure), _indirect_buffer(std::move(indirectBuffer)),
+RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> offset, sp<Integer> drawCount, const enums::DrawMode drawMode, const enums::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers, Buffer indirectBuffer)
+    : _shader(std::move(shader)), _index_buffer(std::move(indexBuffer)), _offset(std::move(offset)), _draw_count(std::move(drawCount)), _draw_procedure(drawProcedure), _indirect_buffer(std::move(indirectBuffer)),
       _pipeline_bindings(_shader->makeBindings(std::move(vertexBuffer), drawMode, drawProcedure, std::move(instanceBuffers)))
 {
     CHECK(drawProcedure != enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT || indirectBuffer, "Must provide an indirectBuffer in DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT rendering mode");
@@ -39,7 +39,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/, co
             break;
         case enums::DRAW_PROCEDURE_DRAW_INSTANCED:
         {
-            drawParam = DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_index_buffer.size() / sizeof(element_index_t)), _pipeline_bindings->makeInstanceBufferSnapshots()};
+            drawParam = DrawingParams::DrawElementsInstanced{static_cast<uint32_t>(_offset.val()), static_cast<uint32_t>(_index_buffer.size() / sizeof(element_index_t)), _pipeline_bindings->makeInstanceBufferSnapshots()};
             break;
         }
         case enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
@@ -58,7 +58,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/, co
 
 RenderPass::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _shader(factory.ensureBuilder<Shader>(manifest, constants::SHADER)), _vertex_buffer(factory.ensureBuilder<Buffer>(manifest, "vertex-buffer")), _index_buffer(factory.getBuilder<Buffer>(manifest, "index-buffer")),
-      _indirect_buffer(factory.getBuilder<Buffer>(manifest, "indirect-buffer")), _draw_count(factory.ensureBuilder<Integer>(manifest, "draw-count")),
+      _indirect_buffer(factory.getBuilder<Buffer>(manifest, "indirect-buffer")), _offset(factory.getBuilder<Integer>(manifest, "offset")), _draw_count(factory.ensureBuilder<Integer>(manifest, "draw-count")),
       _mode(Documents::getAttribute<enums::DrawMode>(manifest, "mode", enums::DRAW_MODE_TRIANGLES)), _draw_precedure(Documents::getAttribute<enums::DrawProcedure>(manifest, "draw-precedure", enums::DRAW_PROCEDURE_AUTO))
 {
     for(const document& i : manifest->children("buffer"))
@@ -77,7 +77,7 @@ sp<Renderer> RenderPass::BUILDER::build(const Scope& args)
     Buffer indexBuffer = _index_buffer ? std::move(*_index_buffer->build(args)) : Buffer();
     Buffer indirectBuffer = _indirect_buffer ? std::move(*_indirect_buffer->build(args)) : Buffer();
     enums::DrawProcedure renderPrecedure = _draw_precedure == enums::DRAW_PROCEDURE_AUTO ? toDrawProcedure(indexBuffer, indirectBuffer, instanceBuffers) : _draw_precedure;
-    return sp<Renderer>::make<RenderPass>(_shader->build(args), _vertex_buffer->build(args), std::move(indexBuffer), _draw_count->build(args), _mode, renderPrecedure, instanceBuffers, std::move(indirectBuffer));
+    return sp<Renderer>::make<RenderPass>(_shader->build(args), _vertex_buffer->build(args), std::move(indexBuffer), _offset.build(args), _draw_count->build(args), _mode, renderPrecedure, instanceBuffers, std::move(indirectBuffer));
 }
 
 }
