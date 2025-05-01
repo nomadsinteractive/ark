@@ -892,6 +892,9 @@ class Observer(Runnable):
     def notify(self):
         pass
 
+    def add_callback(self, callback: TYPE_RUNNABLE):
+        pass
+
     def add_future_callback(self, future: Future):
         pass
 

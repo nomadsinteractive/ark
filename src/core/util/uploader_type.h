@@ -14,33 +14,27 @@ namespace ark {
 class ARK_API UploaderType {
 public:
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(sp<ByteArray> value, size_t size = 0);
+    static sp<Uploader> create(sp<ByteArray> value);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(sp<FloatArray> value, size_t size = 0);
+    static sp<Uploader> create(sp<FloatArray> value);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(sp<IntArray> value, size_t size = 0);
+    static sp<Uploader> create(sp<IntArray> value);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(sp<Integer> value, size_t size = 0);
+    static sp<Uploader> create(sp<Integer> value);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(sp<Numeric> value, size_t size = 0);
+    static sp<Uploader> create(sp<Numeric> value);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(sp<Vec2> value, size_t size = 0);
+    static sp<Uploader> create(sp<Vec2> value);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(sp<Vec3> value, size_t size = 0);
+    static sp<Uploader> create(sp<Vec3> value);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(sp<Vec4> value, size_t size = 0);
+    static sp<Uploader> create(sp<Vec4> value);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(Map<size_t, sp<Uploader>> value, size_t size = 0);
+    static sp<Uploader> create(Vector<sp<Mat4>> value);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(Vector<sp<Mat4>> value, size_t size = 0);
+    static sp<Uploader> create(Vector<sp<Uploader>> value);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(Vector<sp<Uploader>> value, size_t size = 0);
-//  [[script::bindings::constructor]]
-    static sp<Uploader> create(Vector<V3> value, size_t size = 0);
-//  [[script::bindings::constructor]]
-    static sp<Uploader> create(Vector<V4> value, size_t size = 0);
-//  [[script::bindings::constructor]]
-    static sp<Uploader> create(Vector<uint32_t> value, size_t size = 0);
+    static sp<Uploader> create(Vector<uint32_t> value);
 
 //  [[script::bindings::classmethod]]
     static Vector<uint8_t> toBytes(Uploader& self);

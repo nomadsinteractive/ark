@@ -48,6 +48,11 @@ void Observer::notify()
     }
 }
 
+void Observer::addCallback(sp<Runnable> callback)
+{
+    addFutureCallback(sp<Future>::make(std::move(callback), nullptr, 0));
+}
+
 void Observer::addFutureCallback(sp<Future> future)
 {
     ASSERT(future);

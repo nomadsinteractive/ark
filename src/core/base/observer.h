@@ -19,6 +19,8 @@ public:
 //  [[script::bindings::auto]]
     void notify();
 //  [[script::bindings::auto]]
+    void addCallback(sp<Runnable> callback);
+//  [[script::bindings::auto]]
     void addFutureCallback(sp<Future> future);
 //  [[script::bindings::auto]]
     sp<Boolean> addBooleanSignal(bool value = false);
