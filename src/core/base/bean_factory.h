@@ -63,7 +63,9 @@ private:
         BuilderType createBuilder(BeanFactory& factory, const String& className, const document& doc, const bool wrapBuilder) const {
             const String& id = Documents::getAttribute(doc, constants::ID);
             const String& wrappedId = wrapBuilder ? id : "";
-            if(const String& ref = Documents::getAttribute(doc, constants::REF); className.empty() && ref) {
+            const String& ref = Documents::getAttribute(doc, constants::REF);
+            CHECK(!(className && ref), "Both \"class\" and \"ref\" defined in \"%s\", typically it is a mistake.", Documents::toString(doc).c_str());
+            if(className.empty() && ref) {
                 const Identifier f = Identifier::parse(ref);
                 if(f.isRef()) {
                     if(f.package().empty() && (f.ref() == id || ref == id))

@@ -1349,16 +1349,7 @@ class Uploader:
     def reserve(self, size: int) -> Self:
         pass
 
-    def remap(self, size: int, offset: int = 0) -> Self:
-        pass
-
     def repeat(self, length: int, stride: int = 0) -> Self:
-        pass
-
-    def put(self, offset: int, input_: 'Uploader'):
-        pass
-
-    def remove(self, offset: int):
         pass
 
     def wrap(self) -> 'Uploader':
@@ -1372,6 +1363,12 @@ class Uploader:
 
     def dye(self, message: str) -> Self:
         return self
+
+    def __setitem__(self, offset: int, uploader: "Uploader"):
+        pass
+
+    def __delitem__(self, offset: int):
+        pass
 
 
 class AnimationInput(Uploader):

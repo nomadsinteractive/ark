@@ -1,6 +1,7 @@
 #include "app/view/view.h"
 
 #include "core/base/bean_factory.h"
+#include "core/components/discarded.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/updatable/updatable_once_per_frame.h"
 #include "core/types/global.h"

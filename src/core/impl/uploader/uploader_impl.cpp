@@ -86,11 +86,7 @@ size_t UploaderImpl::calculateUploaderSize()
 {
     size_t size = 0;
     for(const UploaderStub& i : _uploaders)
-    {
-        size_t maxSize = i._offset + i._uploader->size();
-        if(maxSize > size)
-            size = maxSize;
-    }
+        size = std::max(i._offset + i._uploader->size(), size);
     return size;
 }
 

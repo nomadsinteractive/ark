@@ -512,7 +512,10 @@ public:
                 j.upload(graphicsContext);
                 DCHECK(j.id(), "Invaild Instance Buffer: %d", i);
             }
-            GL_CHECK_ERROR(glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count));
+            if(param._start > 0)
+                GL_CHECK_ERROR(glDrawElementsInstancedBaseInstance(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count, param._start));
+            else
+                GL_CHECK_ERROR(glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count));
         }
     }
 

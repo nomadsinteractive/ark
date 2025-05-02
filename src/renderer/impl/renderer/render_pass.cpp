@@ -72,12 +72,12 @@ sp<Renderer> RenderPass::BUILDER::build(const Scope& args)
 {
     Vector<std::pair<uint32_t, Buffer>> instanceBuffers;
     for(const auto& [i, j] : _instance_buffers)
-        instanceBuffers.emplace_back(i, std::move(*j->build(args)));
+        instanceBuffers.emplace_back(i, j->build(args));
 
     Buffer indexBuffer = _index_buffer ? std::move(*_index_buffer->build(args)) : Buffer();
     Buffer indirectBuffer = _indirect_buffer ? std::move(*_indirect_buffer->build(args)) : Buffer();
     enums::DrawProcedure renderPrecedure = _draw_precedure == enums::DRAW_PROCEDURE_AUTO ? toDrawProcedure(indexBuffer, indirectBuffer, instanceBuffers) : _draw_precedure;
-    return sp<Renderer>::make<RenderPass>(_shader->build(args), _vertex_buffer->build(args), std::move(indexBuffer), _offset.build(args), _draw_count->build(args), _mode, renderPrecedure, instanceBuffers, std::move(indirectBuffer));
+    return sp<Renderer>::make<RenderPass>(_shader->build(args), _vertex_buffer->build(args), std::move(indexBuffer), _offset.build(args), _draw_count->build(args), _mode, renderPrecedure, std::move(instanceBuffers), std::move(indirectBuffer));
 }
 
 }

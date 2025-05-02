@@ -4,6 +4,7 @@
 
 #include "core/ark.h"
 #include "core/base/resource_loader.h"
+#include "core/components/discarded.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
 #include "core/util/log.h"

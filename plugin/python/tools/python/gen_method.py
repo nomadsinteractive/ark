@@ -490,14 +490,18 @@ class GenSubscribableMethod(GenMethod):
         except AttributeError:
             return create_overloaded_method_type(type(self), is_static=m1.is_static, operator=m1.operator)(m1, m2)
 
-    def _gen_calling_statement(self, genclass, argnames):
-        if self._is_static:
-            return '%s::%s(%s);' % (genclass.classname, self._name, f'unpacked{", " if argnames else ""}{argnames}')
-        return super()._gen_calling_statement(genclass, argnames)
+    def _gen_calling_statement(self, genclass, argnames) -> str:
+        calling_statement = '%s::%s(%s);' % (genclass.classname, self._name, f'unpacked{", " if argnames else ""}{argnames}') if self._is_static else super()._gen_calling_statement(genclass, argnames)
+        if self._is_set_func:
+            for i in genclass.subscribe_methods():
+                if i.operator == 'del':
+                    argnames = argnames.split(',')[0].strip()
+                    return f'if(arg1)\n{INDENT * 2}{calling_statement}\n{INDENT}else\n{INDENT * 2}{i._gen_calling_statement(genclass, argnames)}'
+        return calling_statement
 
 
 class GenMappingMethod(GenSubscribableMethod):
-    def __init__(self, name, args, return_type, operator, is_static):
+    def __init__(self, name: str, args, return_type: str, operator: str, is_static: bool):
         super().__init__(name, args, return_type, operator, is_static)
 
     def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):

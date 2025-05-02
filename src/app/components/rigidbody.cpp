@@ -3,6 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/ref_manager.h"
 #include "core/base/string.h"
+#include "core/components/discarded.h"
 #include "core/components/tags.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"

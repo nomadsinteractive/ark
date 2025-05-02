@@ -1,11 +1,10 @@
 #include "renderer/base/render_target.h"
 
-#include "shader.h"
 #include "core/base/bean_factory.h"
 #include "core/util/string_convert.h"
 
-#include "renderer/base/render_engine.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/shader.h"
 #include "renderer/inf/renderer_factory.h"
 
 namespace ark {
@@ -57,11 +56,8 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
     ASSERT(renderer || renderLayer);
     CHECK(!(renderer && renderLayer), "Unimplemented");
     if(renderLayer)
-    {
-        const auto& traits = renderLayer->_stub->_shader->pipelineDesciptor()->configuration()._traits;
-        if(traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
+        if(const auto& traits = renderLayer->_stub->_shader->pipelineDesciptor()->configuration()._traits; traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
             configure._depth_test_write_enabled = traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)._depth_test._write_enabled;
-    }
     return Ark::instance().renderController()->makeRenderTarget(renderer ? std::move(renderer) : renderLayer.cast<Renderer>(), std::move(configure));
 }
 

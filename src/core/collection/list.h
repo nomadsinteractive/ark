@@ -7,7 +7,6 @@
 #include "core/inf/variable.h"
 #include "core/collection/iterable.h"
 #include "core/types/safe_var.h"
-#include "core/components/discarded.h"
 #include "core/components/visibility.h"
 
 namespace ark {

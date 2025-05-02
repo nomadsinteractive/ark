@@ -11,7 +11,7 @@ UploaderSnapshot::UploaderSnapshot(Uploader& delegate)
 {
     size_t s = 0;
     for(const auto& [k, v] : _strips)
-        s += v.size();
+        s = std::max(s, k + v.size());
 
     _size = std::max(s, delegate.size());
 }

@@ -48,13 +48,11 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Uploader> reserve(sp<Uploader> self, size_t size);
 //  [[script::bindings::classmethod]]
-    static sp<Uploader> remap(sp<Uploader> self, size_t size, size_t offset = 0);
-//  [[script::bindings::classmethod]]
     static sp<Uploader> repeat(sp<Uploader> self, size_t length, size_t stride = 0);
 
-//  [[script::bindings::classmethod]]
-    static void put(const sp<Uploader>& self, size_t offset, sp<Uploader> input);
-//  [[script::bindings::classmethod]]
+//  [[script::bindings::map(set)]]
+    static void put(const sp<Uploader>& self, size_t offset, sp<Uploader> uploader);
+//  [[script::bindings::map(del)]]
     static void remove(const sp<Uploader>& self, size_t offset);
 //  [[script::bindings::classmethod]]
     static void markDirty(const sp<Uploader>& self);

@@ -1,5 +1,6 @@
 #include "graphics/components/with_renderable.h"
 
+#include "core/components/discarded.h"
 #include "core/components/with_id.h"
 #include "core/util/documents.h"
 

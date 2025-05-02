@@ -64,7 +64,7 @@ private:
 class WritableSnapshot final : public Writable {
 public:
 
-    uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
+    uint32_t write(const void* buffer, const uint32_t size, const uint32_t offset) override {
         const auto iter = _records.lower_bound(offset);
         if(iter != _records.begin() && !_records.empty())
             if(const auto previter = std::prev(iter); previter->first + previter->second.size() == offset)
@@ -86,7 +86,7 @@ public:
 
 class WritableRangeSnapshot final : public Writable {
 public:
-    uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
+    uint32_t write(const void* buffer, const uint32_t size, const uint32_t offset) override {
         const auto iter = _records.lower_bound(offset);
         if(iter != _records.begin() && !_records.empty())
             if(const auto previter = std::prev(iter); previter->first + previter->second == offset)
@@ -127,7 +127,7 @@ private:
 
 sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 {
-    return self.ensureInstance<UploaderImpl>("This object is not a InputImpl instance. Use \"reserve\" method to create an InputImpl instance.");
+    return self.ensureInstance<UploaderImpl>("This object is not a UploaderImpl instance. Use \"reserve\" method to create an UploaderImpl instance.");
 }
 
 }
@@ -248,18 +248,10 @@ sp<Uploader> UploaderType::reserve(sp<Uploader> self, size_t size)
         return self;
 
     ASSERT(size >= self->size());
-    sp<UploaderImpl> inputImpl = sp<UploaderImpl>::make(size);
+    sp<UploaderImpl> uploaderImpl = sp<UploaderImpl>::make(size);
     if(self->size() > 0)
-        inputImpl->put(0,  std::move(self));
-    return inputImpl;
-}
-
-sp<Uploader> UploaderType::remap(sp<Uploader> self, const size_t size, const size_t offset)
-{
-    sp<UploaderImpl> inputImpl = sp<UploaderImpl>::make(size);
-    if(self->size() > 0)
-        inputImpl->put(offset,  std::move(self));
-    return inputImpl;
+        uploaderImpl->put(0,  std::move(self));
+    return uploaderImpl;
 }
 
 sp<Uploader> UploaderType::repeat(sp<Uploader> self, const size_t length, const size_t stride)
@@ -267,9 +259,9 @@ sp<Uploader> UploaderType::repeat(sp<Uploader> self, const size_t length, const 
     return sp<Uploader>::make<UploaderRepeat>(std::move(self), length, stride);
 }
 
-void UploaderType::put(const sp<Uploader>& self, const size_t offset, sp<Uploader> input)
+void UploaderType::put(const sp<Uploader>& self, const size_t offset, sp<Uploader> uploader)
 {
-    ensureImpl(self)->put(offset, std::move(input));
+    ensureImpl(self)->put(offset, std::move(uploader));
 }
 
 void UploaderType::remove(const sp<Uploader>& self, const size_t offset)
