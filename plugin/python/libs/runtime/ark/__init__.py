@@ -9,7 +9,7 @@ Use it for:
 3. Unit test(maybe)
 
 """
-from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self
+from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self, Sequence
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', "Numeric", 'NarrowPhrase',
                            'Layer', 'Vec2', 'Vec3', 'Vec4', "Renderer", 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
@@ -912,7 +912,7 @@ class Renderer:
     PRIORITY_RENDER_LAYER = 30
     PRIORITY_CONTROL = 50
 
-    def __init__(self, delegate: Optional["Renderer"] | list["Renderer"] = None):
+    def __init__(self, delegate: Optional["Renderer"] | Sequence["Renderer"] = None):
         self._delegate = delegate
 
     def add_renderer(self, renderer: "Renderer", *traits):

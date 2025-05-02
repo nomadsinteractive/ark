@@ -5,14 +5,14 @@
 #include "core/base/bean_factory.h"
 #include "core/collection/traits.h"
 #include "core/inf/debris.h"
-#include "../impl/builder/safe_builder.h"
+#include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
 class ARK_API ResourceLoader {
 private:
-    template<typename T> class BuilderRefs : public BoxBundle {
+    template<typename T> class BuilderRefs final : public BoxBundle {
     public:
         BuilderRefs(const BeanFactory& beanFactory)
             : _bean_factory(beanFactory) {
@@ -21,7 +21,7 @@ private:
         Box get(const String& refid) override {
             const SafeBuilder<T> builder = getBuilder(Identifier::parseRef(refid));
             sp<T> ptr = builder.build({});
-            DCHECK(ptr, "ResourceLoader has no object referred as \"%s\"", refid.c_str());
+            CHECK(ptr, "ResourceLoader has no object referred as \"%s\"", refid.c_str());
             return Box(std::move(ptr));
         }
 
@@ -34,22 +34,23 @@ private:
             const auto iter = _builders.find(id.ref());
             if(iter != _builders.end())
                 return iter->second;
+
             SafeBuilder<T>& builder = _builders[id.ref()];
             builder = _bean_factory.createBuilderByRef<sp<T>>(id);
+            CHECK(builder, "ResourceLoader can not create a builder for \"%s\"", id.ref().c_str());
             return builder;
         }
 
     private:
         BeanFactory _bean_factory;
-        HashMap<String, SafeBuilder<T>> _builders;
-
+        Map<String, SafeBuilder<T>> _builders;
     };
 
-    class PackageRefs : public BoxBundle {
+    class PackageRefs final : public BoxBundle {
     public:
         PackageRefs(const BeanFactory& beanFactory);
 
-        virtual Box get(const String& name) override;
+        Box get(const String& name) override;
 
     private:
         BeanFactory _bean_factory;
@@ -80,7 +81,7 @@ public:
     BeanFactory& beanFactory();
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<ResourceLoader> {
+    class BUILDER final : public Builder<ResourceLoader> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ApplicationContext>& applicationContext);
 
@@ -93,7 +94,7 @@ public:
     };
 
 //  [[plugin::resource-loader::by-value]]
-    class DICTIONARY : public Builder<ResourceLoader> {
+    class DICTIONARY final : public Builder<ResourceLoader> {
     public:
         DICTIONARY(BeanFactory& factory, const String& value, const sp<ApplicationContext>& applicationContext);
 

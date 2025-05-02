@@ -37,8 +37,11 @@ public:
 
     bool update(const uint64_t timestamp) override {
         bool dirty = false;
+        _size = 0;
         for(Node& i : _uploaders) {
             i._dirty = i._uploader->update(timestamp) || i._dirty;
+            i._offset = _size;
+            _size += i._uploader->size();
             if(i._dirty && !dirty)
                 dirty = true;
         }

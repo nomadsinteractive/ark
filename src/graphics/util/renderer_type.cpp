@@ -22,7 +22,7 @@ sp<Renderer> RendererType::create(Vector<sp<Renderer>> delegate)
     const sp<RenderGroup> rendererGroup = sp<RenderGroup>::make();
     for(sp<Renderer>& i : delegate)
         rendererGroup->addRenderer(std::move(i), {});
-    return wrap(rendererGroup);
+    return rendererGroup;
 }
 
 void RendererType::addRenderer(const sp<Renderer>& self, sp<Renderer> renderer, const Traits& traits)
