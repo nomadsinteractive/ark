@@ -25,7 +25,7 @@ public:
     void upload(GraphicsContext& graphicsContext) override;
     ResourceRecycleFunc recycle() override;
 
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
+    void bind(GraphicsContext& graphicsContext, const PipelineContext& pipelineContext);
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
@@ -66,7 +66,7 @@ private:
     Map<enums::ShaderStageBit, String> _stages;
 
     Vector<sp<VKBuffer>> _ubos;
-    Vector<sp<Boolean>> _texture_observers;
+    Vector<sp<Boolean>> _rebind_signals;
 
     bool _rebind_needed;
     bool _is_compute_pipeline;

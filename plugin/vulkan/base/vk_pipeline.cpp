@@ -332,15 +332,14 @@ ResourceRecycleFunc VKPipeline::recycle()
     };
 }
 
-void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+void VKPipeline::bind(GraphicsContext& graphicsContext, const PipelineContext& pipelineContext)
 {
-    const PipelineDescriptor& pipelineDescriptor = drawingContext._bindings->pipelineDescriptor();
     _rebind_needed = shouldRebind(graphicsContext.tick()) || _rebind_needed;
 
     if(_rebind_needed)
         setupDescriptorSet(graphicsContext);
 
-    bindUBOShapshots(graphicsContext, drawingContext._buffer_snapshot->_ubos);
+    bindUBOShapshots(graphicsContext, pipelineContext._buffer_snapshot->_ubos);
     _rebind_needed = false;
 }
 
@@ -355,7 +354,7 @@ void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
 void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
     DCHECK(_is_compute_pipeline, "Not a compute pipeline");
-    bindUBOShapshots(graphicsContext, computeContext._buffer_snapshot->_ubos);
+    bind(graphicsContext, computeContext);
     buildComputeCommandBuffer(graphicsContext, computeContext);
 }
 
@@ -437,13 +436,13 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
         }
     }
 
-    uint32_t binding = 0;
+    _rebind_signals.clear();
     for(const PipelineLayout::SSBO& i : pipelineDescriptor.layout()->ssbos())
     {
-        binding = std::max<uint32_t>(binding, i._binding._location);
         if(shouldStageNeedBinding(i._stages))
         {
             const sp<VKBuffer> sbo = i._buffer.delegate();
+            _rebind_signals.push_back(sbo->observer().addBooleanSignal());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                               _descriptor_sets.at(0),
                                               VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
@@ -452,7 +451,6 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
         }
     }
 
-    _texture_observers.clear();
     for(const auto& [i, bindingSet] : _pipeline_bindings.samplers())
         if(shouldStageNeedBinding(bindingSet._stages))
         {
@@ -460,7 +458,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
             if(i)
             {
                 const sp<VKTexture> texture = i->delegate();
-                _texture_observers.push_back(texture->observer().addBooleanSignal());
+                _rebind_signals.push_back(texture->observer().addBooleanSignal());
                 if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
                     writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                                   _descriptor_sets.at(2),
@@ -469,6 +467,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
                                                   &texture->vkDescriptor()));
             }
         }
+
     for(const auto& [i, bindingSet] : _pipeline_bindings.images())
         if(shouldStageNeedBinding(bindingSet._stages))
         {
@@ -476,7 +475,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
             if(i)
             {
                 const sp<VKTexture> texture = i->delegate();
-                _texture_observers.push_back(texture->observer().addBooleanSignal());
+                _rebind_signals.push_back(texture->observer().addBooleanSignal());
                 if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
                     writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                                   _descriptor_sets.at(2),
@@ -655,7 +654,7 @@ bool VKPipeline::shouldRebind(const uint64_t tick) const
     for(const auto& [i, bindingSet] : _pipeline_bindings.images())
         if(i->update(tick))
             rebindNeeded = true;
-    for(const sp<Boolean>& i : _texture_observers)
+    for(const sp<Boolean>& i : _rebind_signals)
         if(i->val())
             rebindNeeded = true;
     return rebindNeeded;
