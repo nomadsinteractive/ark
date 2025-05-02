@@ -335,7 +335,7 @@ ResourceRecycleFunc VKPipeline::recycle()
 void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     const PipelineDescriptor& pipelineDescriptor = drawingContext._bindings->pipelineDescriptor();
-    _rebind_needed = shouldRebind(graphicsContext.tick(), pipelineDescriptor) || _rebind_needed;
+    _rebind_needed = shouldRebind(graphicsContext.tick()) || _rebind_needed;
 
     if(_rebind_needed)
         setupDescriptorSet(graphicsContext);
@@ -646,7 +646,7 @@ bool VKPipeline::shouldStageNeedBinding(const enums::ShaderStageSet stages) cons
     return _is_compute_pipeline ? stages.has(enums::SHADER_STAGE_BIT_COMPUTE) : (stages.has(enums::SHADER_STAGE_BIT_VERTEX) || stages.has(enums::SHADER_STAGE_BIT_FRAGMENT));
 }
 
-bool VKPipeline::shouldRebind(const uint64_t tick, const PipelineDescriptor& pipelineDescriptor) const
+bool VKPipeline::shouldRebind(const uint64_t tick) const
 {
     bool rebindNeeded = false;
     for(const auto& [i, bindingSet] : _pipeline_bindings.samplers())

@@ -47,7 +47,7 @@ private:
     void bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots) const;
 
     bool shouldStageNeedBinding(enums::ShaderStageSet stages) const;
-    bool shouldRebind(uint64_t tick, const PipelineDescriptor& pipelineDescriptor) const;
+    bool shouldRebind(uint64_t tick) const;
 
 private:
     enums::DrawMode _draw_mode;

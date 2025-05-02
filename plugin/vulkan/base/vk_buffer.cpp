@@ -12,7 +12,7 @@
 namespace ark::plugin::vulkan {
 
 VKBuffer::VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, const VkBufferUsageFlags usageFlags, const VkMemoryPropertyFlags memoryPropertyFlags)
-    : _renderer(std::move(renderer)), _recycler(std::move(recycler)), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags), _descriptor{}, _memory_requirements{}
+    : Delegate(), _renderer(std::move(renderer)), _recycler(std::move(recycler)), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags), _descriptor{}, _memory_requirements{}
 {
 }
 
@@ -30,20 +30,20 @@ void VKBuffer::upload(GraphicsContext& /*graphicsContext*/)
 {
 }
 
-void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
+void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader)
 {
-    ensureSize(graphicsContext, input.size());
+    ensureSize(graphicsContext, uploader.size());
     if(isHostVisible())
     {
-        UploaderType::writeTo(input, _memory->map());
+        UploaderType::writeTo(uploader, _memory->map());
         if(!isHostCoherent())
             VKUtil::checkResult(flush());
         _memory->unmap();
     }
-    else if(const auto records = UploaderType::recordRanges(input); !records.empty())
+    else if(const auto records = UploaderType::recordRanges(uploader); !records.empty())
     {
         VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        stagingBuffer.uploadBuffer(graphicsContext, input);
+        stagingBuffer.uploadBuffer(graphicsContext, uploader);
 
         std::vector<VkBufferCopy> copyRegions;
         copyRegions.reserve(records.size());
@@ -121,7 +121,7 @@ void VKBuffer::allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRe
     _memory = _renderer->heap()->allocate(graphicsContext, memReqs, _memory_property_flags);
 }
 
-void VKBuffer::ensureSize(GraphicsContext& graphicsContext, size_t size)
+void VKBuffer::ensureSize(GraphicsContext& graphicsContext, const size_t size)
 {
     if(!_memory || _memory.size() < size)
     {
