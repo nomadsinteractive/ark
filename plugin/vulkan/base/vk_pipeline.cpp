@@ -63,7 +63,7 @@ struct VKDrawElementsInstanced final : VKPipeline::BakedRenderer {
             VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
             vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
         }
-        vkCmdDrawIndexed(commandBuffer, param._count, drawingContext._draw_count, param._start, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, param._count, drawingContext._draw_count, 0, 0, param._start);
     }
 };
 
