@@ -64,7 +64,7 @@ private:
             const String& id = Documents::getAttribute(doc, constants::ID);
             const String& wrappedId = wrapBuilder ? id : "";
             const String& ref = Documents::getAttribute(doc, constants::REF);
-            CHECK(!(className && ref), "Both \"class\" and \"ref\" defined in \"%s\", typically it is a mistake.", Documents::toString(doc).c_str());
+            CHECK(!(className && ref && className == Documents::getAttribute(doc, constants::CLASS)), "Both \"class\" and \"ref\" defined in \"%s\", typically it is a mistake.", Documents::toString(doc).c_str());
             if(className.empty() && ref) {
                 const Identifier f = Identifier::parse(ref);
                 if(f.isRef()) {
