@@ -23,7 +23,10 @@ RigidbodyBullet::Stub::~Stub()
 void RigidbodyBullet::Stub::markForDestroy()
 {
     if(_collision_object_ref)
+    {
+        _collision_object_ref->collisionObject()->setUserPointer(new Stub(_world, _rigidbody_stub, nullptr));
         _world.markForDestroy(std::move(_collision_object_ref));
+    }
 }
 
 RigidbodyBullet::RigidbodyBullet(sp<Stub> stub)
@@ -34,21 +37,25 @@ RigidbodyBullet::RigidbodyBullet(sp<Stub> stub)
 RigidbodyBullet::RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
     : _stub(sp<Stub>::make(world, sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter)), std::move(rigidBody)))
 {
-    _stub->_collision_object_ref->collisionObject()->setUserPointer(new WeakPtr<Stub>(_stub));
+    _stub->_collision_object_ref->collisionObject()->setUserPointer(_stub.get());
 }
 
-bool RigidbodyBullet::validate()
+bool RigidbodyBullet::validate() const
 {
-    if(!_stub || !_stub->_collision_object_ref)
+    if(!(_stub && _stub->_collision_object_ref))
         return false;
 
     if(_stub->_rigidbody_stub->_ref->isDiscarded())
     {
         _stub->markForDestroy();
-        _stub = nullptr;
         return false;
     }
     return true;
+}
+
+bool RigidbodyBullet::unique() const
+{
+    return _stub.unique();
 }
 
 const sp<Ref>& RigidbodyBullet::ref() const
@@ -93,7 +100,7 @@ float RigidbodyBullet::friction() const
     return _stub->_collision_object_ref->collisionObject()->getFriction();
 }
 
-void RigidbodyBullet::setFriction(float friction)
+void RigidbodyBullet::setFriction(const float friction)
 {
     _stub->_collision_object_ref->collisionObject()->setFriction(friction);
 }
@@ -116,13 +123,14 @@ const sp<CollisionObjectRef>& RigidbodyBullet::collisionObjectRef() const
 
 RigidbodyBullet RigidbodyBullet::fromCollisionObjectPointer(void* ptr)
 {
-    const WeakPtr<Stub>& wp = *static_cast<WeakPtr<Stub>*>(ptr);
-    return {wp.lock()};
+    if(ptr)
+        return RigidbodyBullet(sp<Stub>(std::shared_ptr<Stub>(static_cast<Stub*>(ptr), [](RigidbodyBullet::Stub*) {}), Class::ensureClass<Stub>()));
+    return {nullptr};
 }
 
 void RigidbodyBullet::releaseCollisionObjectPointer(void* ptr)
 {
-    delete static_cast<WeakPtr<Stub>*>(ptr);
+    delete static_cast<Stub*>(ptr);
 }
 
 }

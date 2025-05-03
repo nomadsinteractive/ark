@@ -4,8 +4,8 @@
 
 namespace ark::plugin::bullet {
 
-CollisionObjectRef::CollisionObjectRef(btCollisionObject* collisionObject, sp<CollisionShapeRef> collisionShape)
-    : _collision_object(collisionObject), _collision_shape(std::move(collisionShape))
+CollisionObjectRef::CollisionObjectRef(btCollisionObject* collisionObject, sp<CollisionShapeRef> collisionShape, sp<btMotionState> motionState)
+    : _collision_object(collisionObject), _collision_shape(std::move(collisionShape)), _motion_state(std::move(motionState))
 {
     _collision_object->setUserIndex(2);
 }

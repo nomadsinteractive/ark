@@ -18,7 +18,8 @@ class ARK_PLUGIN_BULLET_API RigidbodyBullet final  {
 public:
     RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
 
-    bool validate();
+    bool validate() const;
+    bool unique() const;
 
 //  [[script::bindings::auto]]
     void applyCentralForce(const V3& force);
