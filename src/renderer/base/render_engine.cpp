@@ -11,7 +11,7 @@
 namespace ark {
 
 RenderEngine::RenderEngine(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory)
-    : _coordinate_system(renderer._coordinate_system == Ark::COORDINATE_SYSTEM_DEFAULT ? rendererFactory->features()._default_coordinate_system : renderer._coordinate_system), _renderer_factory(std::move(rendererFactory)),
+    : _coordinate_system(renderer._coordinate_system == enums::COORDINATE_SYSTEM_DEFAULT ? rendererFactory->features()._default_coordinate_system : renderer._coordinate_system), _renderer_factory(std::move(rendererFactory)),
       _render_context(_renderer_factory->createRenderEngineContext(renderer))
 {
 }
@@ -21,7 +21,7 @@ enums::RendererVersion RenderEngine::version() const
     return _render_context->version();
 }
 
-Ark::RendererCoordinateSystem RenderEngine::coordinateSystem() const
+enums::CoordinateSystem RenderEngine::coordinateSystem() const
 {
     return _renderer_factory->features()._default_coordinate_system;
 }
@@ -41,24 +41,24 @@ const Viewport& RenderEngine::viewport() const
     return _render_context->viewport();
 }
 
-float RenderEngine::toLayoutDirection(float direction) const
+float RenderEngine::toLayoutDirection(const float direction) const
 {
-    return _coordinate_system == Ark::COORDINATE_SYSTEM_RHS ? -direction : direction;
+    return _coordinate_system == enums::COORDINATE_SYSTEM_RHS ? -direction : direction;
 }
 
 bool RenderEngine::isLHS() const
 {
-    return _coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
+    return _coordinate_system == enums::COORDINATE_SYSTEM_LHS;
 }
 
 bool RenderEngine::isBackendLHS() const
 {
-    return _renderer_factory->features()._default_coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
+    return _renderer_factory->features()._default_coordinate_system == enums::COORDINATE_SYSTEM_LHS;
 }
 
 bool RenderEngine::isYUp() const
 {
-    return coordinateSystem() == Ark::COORDINATE_SYSTEM_RHS;
+    return coordinateSystem() == enums::COORDINATE_SYSTEM_RHS;
 }
 
 bool RenderEngine::isViewportFlipped() const
@@ -68,16 +68,16 @@ bool RenderEngine::isViewportFlipped() const
 
 V2 RenderEngine::toLHSPosition(const V2& position) const
 {
-    if(_coordinate_system == Ark::COORDINATE_SYSTEM_RHS)
+    if(_coordinate_system == enums::COORDINATE_SYSTEM_RHS)
         return {position.x(), _render_context->viewport().height() - position.y()};
     return position;
 }
 
-Rect RenderEngine::toRendererRect(const Rect& scissor, Ark::RendererCoordinateSystem cs) const
+Rect RenderEngine::toRendererRect(const Rect& scissor, const enums::CoordinateSystem cs) const
 {
     Rect s(scissor);
     s.scale(_render_context->displayUnit());
-    if(coordinateSystem() != (cs == Ark::COORDINATE_SYSTEM_DEFAULT ? _coordinate_system : cs))
+    if(coordinateSystem() != (cs == enums::COORDINATE_SYSTEM_DEFAULT ? _coordinate_system : cs))
         s.vflip(static_cast<float>(_render_context->displayResolution().height));
     return s;
 }

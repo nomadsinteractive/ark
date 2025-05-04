@@ -248,9 +248,9 @@ private:
     sp<ApplicationContext> _application_context;
 };
 
-V2 toFragCoordXY(const V2& xy, Ark::RendererCoordinateSystem rcs, float surfaceHeight)
+V2 toFragCoordXY(const V2& xy, enums::CoordinateSystem rcs, float surfaceHeight)
 {
-    if(rcs == Ark::COORDINATE_SYSTEM_RHS)
+    if(rcs == enums::COORDINATE_SYSTEM_RHS)
         return {xy.x(), surfaceHeight - xy.y()};
     return xy;
 }
@@ -409,7 +409,7 @@ void SDLApplication::pollEvents(uint64_t timestamp)
     else if(!textInputEnabled && SDL_IsTextInputActive())
         SDL_StopTextInput();
 
-    const Ark::RendererCoordinateSystem rcs = _application_context->renderController()->renderEngine()->rendererFactory()->features()._default_coordinate_system;
+    const enums::CoordinateSystem rcs = _application_context->renderController()->renderEngine()->rendererFactory()->features()._default_coordinate_system;
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {

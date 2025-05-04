@@ -142,7 +142,7 @@ void setVersion(enums::RendererVersion version, RenderEngineContext& vkContext)
 }
 
 RendererFactoryBgfx::RendererFactoryBgfx()
-    : RendererFactory({{enums::RENDERING_BACKEND_ALL}, Ark::COORDINATE_SYSTEM_RHS, false, 16})
+    : RendererFactory({{enums::RENDERING_BACKEND_ALL}, enums::COORDINATE_SYSTEM_RHS, false, 16})
 {
 }
 
@@ -192,9 +192,9 @@ sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(const Buffer::Usage usage
     return nullptr;
 }
 
-sp<Camera::Delegate> RendererFactoryBgfx::createCamera(Ark::RendererCoordinateSystem rcs)
+sp<Camera::Delegate> RendererFactoryBgfx::createCamera(enums::CoordinateSystem rcs)
 {
-    return rcs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
+    return rcs == enums::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
 sp<RenderTarget> RendererFactoryBgfx::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)

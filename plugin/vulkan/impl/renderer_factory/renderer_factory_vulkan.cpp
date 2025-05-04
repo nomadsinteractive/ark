@@ -47,7 +47,7 @@ void setVersion(const enums::RendererVersion version, RenderEngineContext& vkCon
 }
 
 RendererFactoryVulkan::RendererFactoryVulkan()
-    : RendererFactory({{enums::RENDERING_BACKEND_BIT_VULKAN}, Ark::COORDINATE_SYSTEM_LHS, true, sizeof(float)}), _renderer(sp<VKRenderer>::make())
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_VULKAN}, enums::COORDINATE_SYSTEM_LHS, true, sizeof(float)}), _renderer(sp<VKRenderer>::make())
 {
 }
 
@@ -93,9 +93,9 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(const Buffer::Usage usa
     return sp<VKBuffer>::make(_renderer, Ark::instance().renderController()->recycler(), usageFlags, flags);
 }
 
-sp<Camera::Delegate> RendererFactoryVulkan::createCamera(const Ark::RendererCoordinateSystem rcs)
+sp<Camera::Delegate> RendererFactoryVulkan::createCamera(const enums::CoordinateSystem rcs)
 {
-    return rcs == Ark::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>();
+    return rcs == enums::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>();
 }
 
 sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)

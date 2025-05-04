@@ -1,5 +1,7 @@
 #include "renderer/base/drawing_context.h"
 
+#include "core/ark.h"
+
 #include "pipeline_descriptor.h"
 #include "graphics/inf/render_command.h"
 

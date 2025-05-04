@@ -72,10 +72,10 @@ M4 changeProjectionHandSide(const M4& projection, bool flipx, bool flipy, bool f
 
 struct CameraDelegateCHS final : Camera::Delegate {
 
-    CameraDelegateCHS(Ark::RendererCoordinateSystem rcs, sp<Delegate> delegate, bool flipx, bool flipy)
+    CameraDelegateCHS(enums::CoordinateSystem rcs, sp<Delegate> delegate, bool flipx, bool flipy)
         : _rcs(rcs), _delegate(std::move(delegate)), _flipx(flipx), _flipy(flipy)
     {
-        ASSERT(_rcs == Ark::COORDINATE_SYSTEM_LHS || _rcs == Ark::COORDINATE_SYSTEM_RHS);
+        ASSERT(_rcs == enums::COORDINATE_SYSTEM_LHS || _rcs == enums::COORDINATE_SYSTEM_RHS);
     }
 
     M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override
@@ -90,8 +90,8 @@ struct CameraDelegateCHS final : Camera::Delegate {
 
     M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override
     {
-        const bool needFlipY = (_rcs == Ark::COORDINATE_SYSTEM_LHS ? bottom < top : bottom > top) != _flipy;
-        const bool needFlipZ = (_rcs == Ark::COORDINATE_SYSTEM_LHS ? clipNear < clipFar : clipNear > clipFar) != needFlipY;
+        const bool needFlipY = (_rcs == enums::COORDINATE_SYSTEM_LHS ? bottom < top : bottom > top) != _flipy;
+        const bool needFlipZ = (_rcs == enums::COORDINATE_SYSTEM_LHS ? clipNear < clipFar : clipNear > clipFar) != needFlipY;
         const M4 m = _delegate->ortho(left, right, bottom, top, clipNear, clipFar);
         return changeProjectionHandSide(m, false, needFlipY, needFlipZ);
     }
@@ -101,7 +101,7 @@ struct CameraDelegateCHS final : Camera::Delegate {
         return changeProjectionHandSide(_delegate->perspective(fov, aspect, clipNear, clipFar), _flipx, _flipy, false);
     }
 
-    Ark::RendererCoordinateSystem _rcs;
+    enums::CoordinateSystem _rcs;
     sp<Delegate> _delegate;
     bool _flipx;
     bool _flipy;
@@ -413,22 +413,22 @@ const Constants& Ark::constants()
     return ensure<Constants>();
 }
 
-Camera Ark::createCamera(RendererCoordinateSystem cs) const
+Camera Ark::createCamera(enums::CoordinateSystem cs) const
 {
     const RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
-    if(cs == COORDINATE_SYSTEM_DEFAULT)
+    if(cs == enums::COORDINATE_SYSTEM_DEFAULT)
         cs = _manifest->renderer()._coordinate_system;
-    if(cs == COORDINATE_SYSTEM_DEFAULT)
+    if(cs == enums::COORDINATE_SYSTEM_DEFAULT)
         cs = rendererFactory.features()._default_coordinate_system;
     return createCamera(cs, false, false);
 }
 
-Camera Ark::createCamera(RendererCoordinateSystem cs, bool flip) const
+Camera Ark::createCamera(enums::CoordinateSystem cs, bool flip) const
 {
     return createCamera(cs, flip, flip);
 }
 
-Camera Ark::createCamera(RendererCoordinateSystem cs, bool flipx, bool flipy) const
+Camera Ark::createCamera(enums::CoordinateSystem cs, bool flipx, bool flipy) const
 {
     RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
     sp<Camera::Delegate> cameraDelegate = rendererFactory.createCamera(cs);

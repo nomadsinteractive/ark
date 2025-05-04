@@ -2,8 +2,8 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/base/bit_set.h"
 #include "core/base/class_manager.h"
+#include "core/base/enum.h"
 #include "core/base/string.h"
 #include "core/collection/traits.h"
 #include "core/types/shared_ptr.h"
@@ -18,12 +18,6 @@ namespace ark {
 
 class ARK_API Ark {
 public:
-    enum RendererCoordinateSystem {
-        COORDINATE_SYSTEM_DEFAULT = 0,
-        COORDINATE_SYSTEM_LHS = -1,
-        COORDINATE_SYSTEM_RHS = 1
-    };
-
     Ark(int32_t argc, const char** argv);
     ~Ark();
 
@@ -65,9 +59,9 @@ public:
 
     const Constants& constants();
 
-    Camera createCamera(RendererCoordinateSystem cs = COORDINATE_SYSTEM_DEFAULT) const;
-    Camera createCamera(RendererCoordinateSystem cs, bool flip) const;
-    Camera createCamera(RendererCoordinateSystem cs, bool flipx, bool flipy) const;
+    Camera createCamera(enums::CoordinateSystem cs = enums::COORDINATE_SYSTEM_DEFAULT) const;
+    Camera createCamera(enums::CoordinateSystem cs, bool flip) const;
+    Camera createCamera(enums::CoordinateSystem cs, bool flipx, bool flipy) const;
 
     op<ApplicationProfiler::Tracer> makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category = ApplicationProfiler::CATEGORY_DEFAULT) const;
     op<ApplicationProfiler::Logger> makeProfilerLogger(const char* func, const char* filename, int32_t lineno, const char* name) const;

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "core/ark.h"
 #include "core/forwarding.h"
-#include "core/inf/uploader.h"
+#include "core/base/enum.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
@@ -58,9 +57,9 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Camera();
+    Camera(enums::CoordinateSystem cs = enums::COORDINATE_SYSTEM_DEFAULT);
     Camera(const Camera& other);
-    Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view = nullptr, sp<Mat4> projection = nullptr);
+    Camera(enums::CoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view = nullptr, sp<Mat4> projection = nullptr);
 
 //  [[script::bindings::auto]]
     void ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip);
@@ -113,7 +112,7 @@ public:
     struct Stub;
 
 private:
-    Ark::RendererCoordinateSystem _coordinate_system;
+    enums::CoordinateSystem _coordinate_system;
     sp<Delegate> _delegate;
 
     sp<Mat4Wrapper> _view;

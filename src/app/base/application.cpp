@@ -77,12 +77,12 @@ sp<Size> getSurfaceSize(const ApplicationManifest& applicationManifest)
     return sp<Size>::make(resolution.x() * scale, resolution.y() * scale);
 }
 
-Viewport getViewport(const ApplicationManifest& applicationManifest, const Ark::RendererCoordinateSystem coordinateSystem)
+Viewport getViewport(const ApplicationManifest& applicationManifest, const enums::CoordinateSystem coordinateSystem)
 {
     const V2& resolution = applicationManifest.rendererResolution();
-    if(coordinateSystem == Ark::COORDINATE_SYSTEM_RHS)
+    if(coordinateSystem == enums::COORDINATE_SYSTEM_RHS)
         return {0, resolution.y(), resolution.x(), 0, -1.0f, 1.0f};
-    DASSERT(coordinateSystem == Ark::COORDINATE_SYSTEM_LHS);
+    DASSERT(coordinateSystem == enums::COORDINATE_SYSTEM_LHS);
     return {0, 0, resolution.x(), resolution.y(), -1.0f, 1.0f};
 }
 

@@ -52,7 +52,7 @@ int32_t toClearMaskBits(const RenderTarget::Configure& configure)
 }
 
 RendererFactoryOpenGL::RendererFactoryOpenGL()
-    : RendererFactory({{enums::RENDERING_BACKEND_BIT_OPENGL}, Ark::COORDINATE_SYSTEM_RHS, true, sizeof(float)})
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_OPENGL}, enums::COORDINATE_SYSTEM_RHS, true, sizeof(float)})
 {
 }
 
@@ -88,9 +88,9 @@ sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(const Buffer::Usage usa
     return sp<Buffer::Delegate>::make<GLBuffer>(usage, Ark::instance().renderController()->recycler());
 }
 
-sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(Ark::RendererCoordinateSystem rcs)
+sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(enums::CoordinateSystem rcs)
 {
-    return rcs == Ark::COORDINATE_SYSTEM_LHS ?  sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
+    return rcs == enums::COORDINATE_SYSTEM_LHS ?  sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
 sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)

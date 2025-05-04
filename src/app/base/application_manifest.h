@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bit_set.h"
@@ -71,7 +70,7 @@ public:
 
         enums::RenderingBackendBit _backend;
         enums::RendererVersion _version;
-        Ark::RendererCoordinateSystem _coordinate_system;
+        enums::CoordinateSystem _coordinate_system;
 
         bool _vsync;
         V2 _resolution;

@@ -12,7 +12,7 @@ public:
 
     sp<RenderEngineContext> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) override;
     sp<Buffer::Delegate> createBuffer(Buffer::Usage usage) override;
-    sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem rcs) override;
+    sp<Camera::Delegate> createCamera(enums::CoordinateSystem rcs) override;
     sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure) override;
     sp<PipelineFactory> createPipelineFactory() override;
     sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;

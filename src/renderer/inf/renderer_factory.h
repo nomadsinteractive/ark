@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/ark.h"
 #include "core/base/api.h"
 #include "core/base/bit_set_types.h"
 
@@ -20,7 +19,7 @@ class ARK_API RendererFactory {
 public:
     struct Features {
         enums::RenderingBackendSet _supported_backends;
-        Ark::RendererCoordinateSystem _default_coordinate_system;
+        enums::CoordinateSystem _default_coordinate_system;
         bool _can_draw_element_incremental;
         uint32_t _attribute_alignment;
     };
@@ -39,7 +38,7 @@ public:
 
     virtual sp<RenderEngineContext> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) = 0;
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Usage usage) = 0;
-    virtual sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem rcs = Ark::COORDINATE_SYSTEM_DEFAULT) = 0;
+    virtual sp<Camera::Delegate> createCamera(enums::CoordinateSystem cs = enums::COORDINATE_SYSTEM_DEFAULT) = 0;
     virtual sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;
     virtual sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) = 0;

@@ -1,5 +1,7 @@
 #include "dear-imgui/base/renderer_context.h"
 
+#include "core/ark.h"
+
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"

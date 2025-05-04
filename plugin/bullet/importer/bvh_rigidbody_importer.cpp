@@ -2,6 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/dom/dom_document.h"
+#include "core/types/owned_ptr.h"
 #include "core/util/documents.h"
 
 #include "renderer/base/buffer.h"

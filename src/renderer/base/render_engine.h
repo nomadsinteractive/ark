@@ -17,7 +17,6 @@ typedef struct _NSWindow NSWindow;
 #endif
 #endif
 
-#include "core/ark.h"
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
@@ -64,7 +63,7 @@ public:
     RenderEngine(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory);
 
     enums::RendererVersion version() const;
-    Ark::RendererCoordinateSystem coordinateSystem() const;
+    enums::CoordinateSystem coordinateSystem() const;
 
     const sp<RendererFactory>& rendererFactory() const;
     const sp<RenderEngineContext>& context() const;
@@ -80,7 +79,7 @@ public:
     V2 toNDC(float viewportX, float viewportY) const;
     V2 toLHSPosition(const V2& position) const;
 
-    Rect toRendererRect(const Rect& scissor, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;
+    Rect toRendererRect(const Rect& scissor, enums::CoordinateSystem cs = enums::COORDINATE_SYSTEM_DEFAULT) const;
 
     void onSurfaceCreated();
 
@@ -92,7 +91,7 @@ public:
 
 private:
     PlatformInfo _info;
-    Ark::RendererCoordinateSystem _coordinate_system;
+    enums::CoordinateSystem _coordinate_system;
 
     sp<RendererFactory> _renderer_factory;
     sp<PipelineFactory> _pipeline_factory;

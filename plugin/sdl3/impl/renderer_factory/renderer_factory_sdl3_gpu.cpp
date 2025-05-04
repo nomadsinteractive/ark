@@ -254,7 +254,7 @@ private:
 }
 
 RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
-    : RendererFactory({{enums::RENDERING_BACKEND_BIT_DIRECT_X, enums::RENDERING_BACKEND_BIT_METAL}, Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_DIRECT_X, enums::RENDERING_BACKEND_BIT_METAL}, enums::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
 {
 }
 
@@ -299,9 +299,9 @@ sp<Buffer::Delegate> RendererFactorySDL3_GPU::createBuffer(const Buffer::Usage u
     return nullptr;
 }
 
-sp<Camera::Delegate> RendererFactorySDL3_GPU::createCamera(const Ark::RendererCoordinateSystem rcs)
+sp<Camera::Delegate> RendererFactorySDL3_GPU::createCamera(const enums::CoordinateSystem rcs)
 {
-    return rcs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
+    return rcs == enums::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
 sp<RenderTarget> RendererFactorySDL3_GPU::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)

@@ -26,8 +26,8 @@ const sp<Resource>& RenderTarget::resource() const
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _renderer(factory.getBuilder<Renderer>(manifest, constants::RENDERER)), _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)),
-      _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)), _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_CLEAR, ATTACHMENT_OP_BIT_STORE})),
-      _depth_stencil_op(Documents::getAttribute<AttachmentOp>(manifest, "depth-stencil-op", {ATTACHMENT_OP_BIT_CLEAR, ATTACHMENT_OP_BIT_STORE}))
+      _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)), _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_LOAD, ATTACHMENT_OP_BIT_STORE})),
+      _depth_stencil_op(Documents::getAttribute<AttachmentOp>(manifest, "depth-stencil-op", {ATTACHMENT_OP_BIT_LOAD, ATTACHMENT_OP_BIT_STORE}))
 {
     for(const document& i : manifest->children(constants::TEXTURE))
         _attachments.emplace_back(factory.ensureBuilder<Texture>(i), i);

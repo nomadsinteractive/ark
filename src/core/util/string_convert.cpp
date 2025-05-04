@@ -91,12 +91,13 @@ template<> enums::RendererVersion StringConvert::eval<enums::RendererVersion>(co
     return enums::RENDERER_VERSION_AUTO;
 }
 
-template<> Ark::RendererCoordinateSystem StringConvert::eval<Ark::RendererCoordinateSystem>(const String& str)
+template<> enums::CoordinateSystem StringConvert::eval<enums::CoordinateSystem>(const String& repr)
 {
-    if(str.toLower() == "lhs")
-        return Ark::COORDINATE_SYSTEM_LHS;
-    DCHECK(str == "rhs", "Unknow RendererCoordinateSystem: \"%s, supported values are [\"lhs\", \"rhs\"]", str.c_str());
-    return Ark::COORDINATE_SYSTEM_RHS;
+    constexpr enums::LookupTable<enums::CoordinateSystem, 2> table ={{
+        {"lhs", enums::COORDINATE_SYSTEM_LHS},
+        {"rhs", enums::COORDINATE_SYSTEM_LHS}
+    }};
+    return enums::lookup(table, repr.toLower());
 }
 
 template<> ARK_API String StringConvert::repr<uint32_t>(const uint32_t& val)
