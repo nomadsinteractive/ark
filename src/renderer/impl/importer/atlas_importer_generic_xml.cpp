@@ -10,7 +10,7 @@
 
 namespace ark {
 
-AtlasImporterGenericXML::AtlasImporterGenericXML(String src, float px, float py)
+AtlasImporterGenericXML::AtlasImporterGenericXML(String src, const float px, const float py)
     : _src(std::move(src)), _px(px), _py(py)
 {
 }
@@ -55,7 +55,7 @@ AtlasImporterGenericXML::BUILDER::BUILDER(BeanFactory& factory, const document& 
 
 sp<AtlasImporter> AtlasImporterGenericXML::BUILDER::build(const Scope& args)
 {
-    return sp<AtlasImporterGenericXML>::make(_src->build(args), _px, _py);
+    return sp<AtlasImporter>::make<AtlasImporterGenericXML>(_src->build(args), _px, _py);
 }
 
 }

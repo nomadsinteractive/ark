@@ -14,6 +14,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/impl/importer/atlas_importer_generic_xml.h"
 #include "renderer/impl/vertices/vertices_nine_patch_quads_lhs.h"
 #include "renderer/impl/vertices/vertices_nine_patch_quads_rhs.h"
 #include "renderer/impl/vertices/vertices_nine_patch_triangle_strips_lhs.h"
@@ -49,7 +50,7 @@ public:
         return _delegate->download(graphicsContext, bitmap);
     }
 
-    void uploadBitmap(GraphicsContext& /*graphicsContext*/, const Bitmap& bitmap, const std::vector<ark::sp<ByteArray>>& imagedata) override {
+    void uploadBitmap(GraphicsContext& /*graphicsContext*/, const Bitmap& bitmap, const Vector<sp<ByteArray>>& imagedata) override {
         _bitmap = sp<Bitmap>::make(bitmap.width(), bitmap.height(), bitmap.rowBytes(), bitmap.channels(), imagedata.at(0));
     }
 
@@ -76,23 +77,13 @@ Atlas::Atlas(sp<Texture> texture)
 {
 }
 
-void Atlas::loadItem(const document& manifest)
+Atlas::Atlas(sp<Texture> texture, const String& src)
+    : _texture(std::move(texture))
 {
-    CHECK(manifest->name() == "item", "No rule to import item \"%s\"", Documents::toString(manifest).c_str());
-    const int32_t type = Documents::getAttribute<int32_t>(manifest, constants::TYPE, 0);
-    const float px = Documents::getAttribute<float>(manifest, "pivot-x", 0);
-    const float py = Documents::getAttribute<float>(manifest, "pivot-x", 0);
-    if(has(type))
-    {
-        const Item& item = at(type);
-        _items[type] = {item._ux, item._uy, item._vx, item._vy, Rect(-px, -py, 1.0f - px, 1.0f - py), item._size, V2(px, py)};
-    }
+    if(src.endsWith(".xml"))
+        addImporter(sp<AtlasImporter>::make<AtlasImporterGenericXML>("", 0.5f, 0.5f), Ark::instance().openAsset(src));
     else
-    {
-        const Rect r = Rect::parse(manifest);
-        add(type, static_cast<uint32_t>(r.left()), static_cast<uint32_t>(r.top()), static_cast<uint32_t>(r.right()), static_cast<uint32_t>(r.bottom()),
-            Rect(0, 0, 1.0f, 1.0f), V2(r.width(), r.height()), V2(px, py));
-    }
+        FATAL("Unimplemented atlas importer for this kind of asset: %s", src.c_str());
 }
 
 const sp<Texture>& Atlas::texture() const
@@ -158,7 +149,7 @@ Traits& Atlas::attachments()
     return _attachments;
 }
 
-void Atlas::add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot)
+void Atlas::add(const int32_t id, const uint32_t ux, const uint32_t uy, const uint32_t vx, const uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot)
 {
     _items[id] = makeItem(ux, uy, vx, vy, bounds, size, pivot);
 }
@@ -171,7 +162,7 @@ const Atlas::Item& Atlas::at(const NamedHash& resid) const
     return iter->second;
 }
 
-Rect Atlas::getItemBounds(int32_t id) const
+Rect Atlas::getItemBounds(const int32_t id) const
 {
     const Item& item = at(id);
     const float nw = _texture->width() / static_cast<float>(UV_NORMALIZE_RANGE);
@@ -179,17 +170,17 @@ Rect Atlas::getItemBounds(int32_t id) const
     return {item._ux * nw, item._vy * nh, item._vx * nw, item._uy * nh};
 }
 
-uint16_t Atlas::unnormalize(float v)
+uint16_t Atlas::unnormalize(const float v)
 {
     return std::min<uint16_t>(v * UV_NORMALIZE_RANGE, UV_NORMALIZE_RANGE);
 }
 
-uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)
+uint16_t Atlas::unnormalize(const uint32_t x, const uint32_t s)
 {
     return static_cast<uint16_t>(std::min<uint32_t>(x * UV_NORMALIZE_RANGE / s, UV_NORMALIZE_RANGE));
 }
 
-Atlas::Item Atlas::makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const
+Atlas::Item Atlas::makeItem(const uint32_t ux, const uint32_t uy, const uint32_t vx, const uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const
 {
     const uint16_t l = unnormalize(ux, static_cast<uint32_t>(_texture->width()));
     const uint16_t t = unnormalize(uy, static_cast<uint32_t>(_texture->height()));
@@ -220,14 +211,14 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
     }
 }
 
-void Atlas::AttachmentNinePatch::add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas)
+void Atlas::AttachmentNinePatch::add(const int32_t type, const uint32_t textureWidth, const uint32_t textureHeight, const Rect& paddings, const Atlas& atlas)
 {
     const Rect bounds = atlas.getItemBounds(type);
     const Rect ninePatches(paddings.left(), paddings.top(), bounds.width() - paddings.right(), bounds.height() - paddings.bottom());
     addNinePatch(type, textureWidth, textureHeight, ninePatches, bounds);
 }
 
-void Atlas::AttachmentNinePatch::addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Atlas& atlas)
+void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, const uint32_t textureWidth, const uint32_t textureHeight, const Rect& ninePatch, const Atlas& atlas)
 {
     addNinePatch(type, textureWidth, textureHeight, ninePatch, atlas.getItemBounds(type).translate(1, 1));
 }

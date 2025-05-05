@@ -15,23 +15,24 @@ PyListDuckType::PyListDuckType(PyInstance instance)
 
 void PyListDuckType::to(sp<Vec2>& inst)
 {
-    inst = PyCast::ensureSharedPtr<Vec2>(_instance.pyObject());
+    inst = PyCast::toSharedPtrOrNull<Vec2>(_instance.pyObject());
 }
 
 void PyListDuckType::to(sp<Vec3>& inst)
 {
-    inst = PyCast::ensureSharedPtr<Vec3>(_instance.pyObject());
+    inst = PyCast::toSharedPtrOrNull<Vec3>(_instance.pyObject());
 }
 
 void PyListDuckType::to(sp<Vec4>& inst)
 {
-    inst = PyCast::ensureSharedPtr<Vec4>(_instance.pyObject());
+    inst = PyCast::toSharedPtrOrNull<Vec4>(_instance.pyObject());
 }
 
 void PyListDuckType::to(sp<Size>& inst)
 {
     const Py_ssize_t size = PyObject_Size(_instance.pyObject());
-    CHECK(size == 2 || size == 3, "Size must be 2 or 3 sequence object");
+    if(size != 2 && size != 3)
+        return;
     inst = size == 2 ? Vec2Type::toSize(PyCast::ensureSharedPtr<Vec2>(_instance.pyObject())) : Vec3Type::toSize(PyCast::ensureSharedPtr<Vec3>(_instance.pyObject()));
 }
 

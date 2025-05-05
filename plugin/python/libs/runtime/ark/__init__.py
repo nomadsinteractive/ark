@@ -12,7 +12,7 @@ Use it for:
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self, Sequence
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', "Numeric", 'NarrowPhrase',
-                           'Layer', 'Vec2', 'Vec3', 'Vec4', "Renderer", 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
+                           'Layer', "Vec2", "Vec3", "Vec4", "Renderer", 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
                            'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings', 'View')
 
 
@@ -22,14 +22,15 @@ TYPE_ENUM = Union[int, 'Enum']
 TYPE_INT_OR_FLOAT = Union[int, float]
 TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, "Numeric"]
 TYPE_RECT = tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]
-TYPE_VEC2 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']
-TYPE_VEC3 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], 'Vec3']
-TYPE_VEC4 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC],'Vec4']
+TYPE_VEC2 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC], "Vec2"]
+TYPE_VEC3 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], "Vec3"]
+TYPE_VEC4 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], "Vec4"]
 TYPE_RECTI = tuple[int, int, int, int]
 TYPE_FLOAT2 = tuple[float, float]
 TYPE_FLOAT3 = tuple[float, float, float]
 TYPE_FLOAT4 = tuple[float, float, float, float]
 TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
+TYPE_MAT4 = Union["Mat4", TYPE_M4]
 TYPE_NAMED_HASH = Union[int, str]
 TYPE_RUNNABLE = Union["Runnable", Callable[[], None]]
 
@@ -665,7 +666,7 @@ class ApplicationFacade:
         return Numeric(0)
 
     @property
-    def cursor_position(self) -> 'Vec2':
+    def cursor_position(self) -> "Vec2":
         return Vec2(0, 0)
 
     @property
@@ -712,7 +713,7 @@ class ApplicationFacade:
     def argv(self) -> List[str]:
         return []
 
-    def to_frag_coord(self, xy: 'Vec2', resolution: Optional['Size'] = None) -> 'Vec2':
+    def to_frag_coord(self, xy: "Vec2", resolution: Optional['Size'] = None) -> "Vec2":
         pass
 
     def add_string_bundle(self, name: str, string_bundle: 'StringBundle'):
@@ -965,15 +966,15 @@ class Camera:
         pass
 
     @property
-    def position(self) -> Optional['Vec3']:
+    def position(self) -> Optional["Vec3"]:
         return None
 
     @property
-    def target(self) -> Optional['Vec3']:
+    def target(self) -> Optional["Vec3"]:
         return None
 
     @property
-    def up(self) -> Optional['Vec3']:
+    def up(self) -> Optional["Vec3"]:
         return None
 
     @property
@@ -1011,7 +1012,7 @@ class Camera:
     def to_world_position(self, screen_position: TYPE_VEC3) -> TYPE_VEC3:
         pass
 
-    def to_viewport_position(self, position: TYPE_VEC3) -> 'Vec3':
+    def to_viewport_position(self, position: TYPE_VEC3) -> "Vec3":
         pass
 
 
@@ -1147,7 +1148,7 @@ class Vec2(_Var):
         return self._y
 
     @property
-    def xy(self) -> 'Vec2':
+    def xy(self) -> "Vec2":
         return self
 
     @xy.setter
@@ -1177,10 +1178,10 @@ class Vec2(_Var):
     def synchronize(self, discarded: Optional[Boolean] = None) -> Self:
         return self
 
-    def attract(self, s0: Union[tuple, 'Vec2'], duration: float, t: Optional[Numeric] = None) -> Self:
+    def attract(self, s0: Union[tuple, "Vec2"], duration: float, t: Optional[Numeric] = None) -> Self:
         return self
 
-    def fence(self, plane: Union['Vec3', tuple], observer: Union[Observer, Callable[[], None]]) -> Self:
+    def fence(self, plane: Union["Vec3", tuple], observer: Union[Observer, Callable[[], None]]) -> Self:
         return self
 
     def atan2(self) -> Numeric:
@@ -1248,17 +1249,17 @@ class Vec3(Vec2):
         pass
 
     @property
-    def xyz(self) -> 'Vec3':
+    def xyz(self) -> "Vec3":
         return self
 
     @xyz.setter
     def xyz(self, v):
         pass
 
-    def cross(self, other) -> 'Vec3':
+    def cross(self, other) -> "Vec3":
         pass
 
-    def extend(self, w: Union[float, Numeric]) -> 'Vec4':
+    def extend(self, w: Union[float, Numeric]) -> "Vec4":
         pass
 
 

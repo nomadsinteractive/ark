@@ -13,7 +13,7 @@ class ARK_API Strings {
 public:
     static sp<IBuilder<String>> load(const String& resid);
 
-    static String loadFromReadable(const sp<Readable>& readable);
+    static String loadFromReadable(Readable& readable);
 
     static String unwrap(const String& str, char open, char close);
 

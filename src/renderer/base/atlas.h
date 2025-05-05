@@ -19,6 +19,8 @@ namespace ark {
 class ARK_API Atlas {
 public:
     Atlas(sp<Texture> texture);
+//  [[script::bindings::auto]]
+    Atlas(sp<Texture> texture, const String& src);
 
     struct Item {
         uint16_t _ux, _uy;
@@ -27,8 +29,6 @@ public:
         V2 _size;
         V2 _pivot;
     };
-
-    void loadItem(const document& manifest);
 
 //  [[script::bindings::property]]
     const sp<Texture>& texture() const;
@@ -101,7 +101,7 @@ public:
 
     private:
         SafeBuilder<Texture> _texture;
-        std::vector<sp<Builder<AtlasImporter>>> _importers;
+        Vector<sp<Builder<AtlasImporter>>> _importers;
     };
 
 private:

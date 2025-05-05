@@ -8,18 +8,18 @@
 
 namespace ark {
 
-class AtlasImporterGenericXML : public AtlasImporter {
+class AtlasImporterGenericXML final : public AtlasImporter {
 public:
     AtlasImporterGenericXML(String src, float px, float py);
 
-    virtual void import(Atlas& atlas, const sp<Readable>& readable) override;
+    void import(Atlas& atlas, const sp<Readable>& readable) override;
 
 //  [[plugin::builder("generic-xml")]]
-    class BUILDER : public Builder<AtlasImporter> {
+    class BUILDER final : public Builder<AtlasImporter> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<AtlasImporter> build(const Scope& args) override;
+        sp<AtlasImporter> build(const Scope& args) override;
 
     private:
         sp<Builder<String>> _src;

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_URL_H_
-#define ARK_CORE_BASE_URL_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/string.h"
@@ -23,9 +22,6 @@ private:
 private:
     String _protocol;
     String _path;
-
 };
 
 }
-
-#endif

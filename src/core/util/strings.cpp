@@ -116,12 +116,12 @@ sp<IBuilder<String>> Strings::load(const String& resid)
     return sp<IBuilder<String>>::make<StringBuilderImpl3>(resid);
 }
 
-String Strings::loadFromReadable(const sp<Readable>& readable)
+String Strings::loadFromReadable(Readable& readable)
 {
     std::stringstream sb;
     uint32_t len;
     char buffer[4096];
-    while((len = readable->read(buffer, sizeof(buffer))) != 0)
+    while((len = readable.read(buffer, sizeof(buffer))) != 0)
         sb.write(buffer, len);
     return {sb.str().c_str()};
 }
