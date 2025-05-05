@@ -126,8 +126,8 @@ constexpr char sclipNearclipFarPlaneWarning[] = "ClipNear: %.2f, ClipFar: %.2f. 
 
 }
 
-Camera::Camera(const enums::CoordinateSystem cs)
-    : Camera(Ark::instance().createCamera(cs))
+Camera::Camera(const enums::CoordinateSystem coordinateSystem)
+    : Camera(Ark::instance().createCamera(coordinateSystem))
 {
 }
 
@@ -139,8 +139,8 @@ Camera::Camera(const Camera& other)
     _stub->_up.reset(sp<Vec3>::make<Vec3::Const>(other._stub->_up.val()));
 }
 
-Camera::Camera(const enums::CoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view, sp<Mat4> projection)
-    : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Mat4>::make<Mat4Wrapper>(view ? std::move(view) : Mat4Type::create())), _projection(sp<Mat4>::make<Mat4Wrapper>(projection ? std::move(projection) : Mat4Type::create())),
+Camera::Camera(const enums::CoordinateSystem coordinateSystem, sp<Delegate> delegate, sp<Mat4> view, sp<Mat4> projection)
+    : _coordinate_system(coordinateSystem), _delegate(std::move(delegate)), _view(sp<Mat4>::make<Mat4Wrapper>(view ? std::move(view) : Mat4Type::create())), _projection(sp<Mat4>::make<Mat4Wrapper>(projection ? std::move(projection) : Mat4Type::create())),
       _vp(sp<Mat4>::make<Mat4Wrapper>(Mat4Type::matmul(_projection.cast<Mat4>(), _view.cast<Mat4>()))), _stub(sp<Stub>::make())
 {
     CHECK(_coordinate_system == enums::COORDINATE_SYSTEM_LHS || _coordinate_system == enums::COORDINATE_SYSTEM_RHS, "Camera's coordinate system should be either LHS or RHS");

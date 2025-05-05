@@ -57,9 +57,9 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Camera(enums::CoordinateSystem cs = enums::COORDINATE_SYSTEM_DEFAULT);
+    Camera(enums::CoordinateSystem coordinateSystem = enums::COORDINATE_SYSTEM_DEFAULT);
     Camera(const Camera& other);
-    Camera(enums::CoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view = nullptr, sp<Mat4> projection = nullptr);
+    Camera(enums::CoordinateSystem coordinateSystem, sp<Delegate> delegate, sp<Mat4> view = nullptr, sp<Mat4> projection = nullptr);
 
 //  [[script::bindings::auto]]
     void ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip);

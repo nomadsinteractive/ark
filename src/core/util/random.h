@@ -1,16 +1,16 @@
-#ifndef ARK_CORE_UTIL_RANDOM_H_
-#define ARK_CORE_UTIL_RANDOM_H_
+#pragma once
 
 #include <random>
 
 #include "core/base/api.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 
 class ARK_API Random {
 public:
 //  [[script::bindings::auto]]
-    Random(uint32_t seed = std::random_device()());
+    Random(uint32_t seed = std::random_device()(), bool nonvolatile = true);
 
 //  [[script::bindings::property]]
     uint32_t seed() const;
@@ -18,14 +18,14 @@ public:
     void setSeed(uint32_t seed);
 
 //  [[script::bindings::auto]]
-    float randf();
+    uint32_t rand() const;
 //  [[script::bindings::auto]]
-    sp<Numeric> randv();
+    float randf() const;
 
 //  [[script::bindings::auto]]
-    sp<Integer> rand(int32_t a, int32_t b);
+    sp<Integer> randint(int32_t a, int32_t b) const;
 //  [[script::bindings::auto]]
-    sp<Integer> rand(const sp<Integer>& a, const sp<Integer>& b);
+    sp<Integer> randint(const sp<Integer>& a, const sp<Integer>& b) const;
 
 //  [[script::bindings::auto]]
     sp<Numeric> uniform(float a, float b);
@@ -39,9 +39,8 @@ public:
 
 private:
     uint32_t _seed;
-    std::mt19937 _generator;
+    bool _nonvolatile;
+    sp<std::mt19937> _generator;
 };
 
 }
-
-#endif

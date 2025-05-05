@@ -115,6 +115,10 @@ class Enum:
     LAYER_PUSH_ORDER_BACK = 0
     LAYER_PUSH_ORDER_FRONT = 1
 
+    COORDINATE_SYSTEM_DEFAULT = 0
+    COORDINATE_SYSTEM_LHS = -1
+    COORDINATE_SYSTEM_RHS = 1
+
     def __init__(self, value: int):
         pass
 
@@ -957,7 +961,7 @@ class ResourceLoader:
 
 
 class Camera:
-    def __init__(self):
+    def __init__(self, coordinate_system: int = 0):
         pass
 
     @property
@@ -2159,7 +2163,7 @@ class Transform3D(Transform):
 
 
 class Random:
-    def __init__(self, seed: Optional[int] = None):
+    def __init__(self, seed: Optional[int] = None, nonvolatile: bool = True):
         self._seed = seed
 
     @property
@@ -2170,16 +2174,19 @@ class Random:
     def seed(self, seed):
         self._seed = seed
 
+    def rand(self) -> int:
+        return 0
+
     def randf(self) -> float:
         return 0
 
-    def randv(self) -> Numeric:
-        return 0
+    def randint(self, a: TYPE_INTEGER, b: TYPE_INTEGER) -> Integer:
+        return Integer(0)
 
-    def uniform(self, a: Union[float, Numeric], b: Union[float, Numeric]) -> Numeric:
+    def uniform(self, a: TYPE_NUMERIC, b: TYPE_NUMERIC) -> Numeric:
         return Numeric(0)
 
-    def normal(self, a: Union[float, Numeric], b: Union[float, Numeric]) -> Numeric:
+    def normal(self, a: TYPE_NUMERIC, b: TYPE_NUMERIC) -> Numeric:
         return Numeric(0)
 
 
