@@ -116,8 +116,8 @@ class Enum:
     LAYER_PUSH_ORDER_FRONT = 1
 
     COORDINATE_SYSTEM_DEFAULT = 0
-    COORDINATE_SYSTEM_LHS = -1
-    COORDINATE_SYSTEM_RHS = 1
+    COORDINATE_SYSTEM_LHS = 1
+    COORDINATE_SYSTEM_RHS = 2
 
     def __init__(self, value: int):
         pass

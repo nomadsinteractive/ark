@@ -65,8 +65,8 @@ enum LayerPushOrder {
 //[[script::bindings::enumeration(Enum)]]
 enum CoordinateSystem {
     COORDINATE_SYSTEM_DEFAULT = 0,
-    COORDINATE_SYSTEM_LHS = -1,
-    COORDINATE_SYSTEM_RHS = 1
+    COORDINATE_SYSTEM_LHS = 1,
+    COORDINATE_SYSTEM_RHS = 2
 };
 
 enum RenderingBackendBit {
