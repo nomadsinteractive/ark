@@ -73,13 +73,6 @@ public:
         return toSharedPtrImpl<T>(object);
     }
 
-    template<typename T> static sp<T> toSharedPtrOrNull(PyObject* object) {
-        if(PyBridge::isPyNone(object))
-            return nullptr;
-        Optional<sp<T>> opt = toSharedPtrDefault<T>(object);
-        return opt ? opt.value() : nullptr;
-    }
-
     template<typename T> static sp<T> ensureSharedPtr(PyObject* object) {
         Optional<sp<T>> opt = toSharedPtr<T>(object);
         CHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(object)->tp_name, Class::ensureClass<T>()->name());
@@ -118,6 +111,13 @@ public:
 private:
     template<typename T> static Optional<sp<T>> toSharedPtrImpl(PyObject* object) {
         return toSharedPtrDefault<T>(object);
+    }
+
+    template<typename T> static sp<T> toSharedPtrOrNull(PyObject* object) {
+        if(PyBridge::isPyNone(object))
+            return nullptr;
+        Optional<sp<T>> opt = toSharedPtrDefault<T>(object);
+        return opt ? opt.value() : nullptr;
     }
 
     template<typename T> static Optional<sp<T>> toSharedPtrDefault(PyObject* object) {

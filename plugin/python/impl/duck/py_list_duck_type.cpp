@@ -15,17 +15,20 @@ PyListDuckType::PyListDuckType(PyInstance instance)
 
 void PyListDuckType::to(sp<Vec2>& inst)
 {
-    inst = PyCast::toSharedPtrOrNull<Vec2>(_instance.pyObject());
+    if(Optional<sp<Vec2>> opt = PyCast::toSharedPtr<Vec2>(_instance.pyObject()))
+        inst = std::move(opt.value());
 }
 
 void PyListDuckType::to(sp<Vec3>& inst)
 {
-    inst = PyCast::toSharedPtrOrNull<Vec3>(_instance.pyObject());
+    if(Optional<sp<Vec3>> opt = PyCast::toSharedPtr<Vec3>(_instance.pyObject()))
+        inst = std::move(opt.value());
 }
 
 void PyListDuckType::to(sp<Vec4>& inst)
 {
-    inst = PyCast::toSharedPtrOrNull<Vec4>(_instance.pyObject());
+    if(Optional<sp<Vec4>> opt = PyCast::toSharedPtr<Vec4>(_instance.pyObject()))
+        inst = std::move(opt.value());
 }
 
 void PyListDuckType::to(sp<Size>& inst)
