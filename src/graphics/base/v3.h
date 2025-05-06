@@ -34,7 +34,6 @@ public:
 
     V3 operator -() const;
 
-    float dot(const V3& other) const;
     float hypot() const;
     float hypot2() const;
 

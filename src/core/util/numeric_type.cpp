@@ -16,6 +16,7 @@
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
+#include "core/impl/variable/variable_tracking.h"
 #include "core/util/boolean_type.h"
 #include "core/util/operators.h"
 
@@ -274,6 +275,13 @@ String NumericType::str(const sp<Numeric>& self)
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)
 {
     return sp<Numeric>::make<Lerp<float, float>>(self, b, t);
+}
+
+sp<Numeric> NumericType::track(sp<Numeric> self, float s0, float speed, float snapDistance2, sp<Numeric> t)
+{
+    if(!t)
+        t = Ark::instance().appClock()->duration();
+    return sp<Numeric>::make<VariableTracking<float>>(std::move(self), std::move(t), s0, speed, snapDistance2);
 }
 
 sp<Numeric> NumericType::sod(sp<Numeric> self, const float s0, const float f, const float z, const float r, sp<Numeric> t)

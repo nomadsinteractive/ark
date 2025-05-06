@@ -112,11 +112,6 @@ V3 V3::operator -() const
     return {-_x, -_y, -_z};
 }
 
-float V3::dot(const V3& other) const
-{
-    return _x * other._x + _y * other._y + _z * other._z;
-}
-
 float V3::hypot() const
 {
     return Math::sqrt(_x * _x + _y * _y + _z * _z);

@@ -1058,9 +1058,6 @@ class Numeric(_Scalar):
     def __init__(self, val):
         pass
 
-    def approach(self, expectation) -> Self:
-        pass
-
     def integral(self, t: Optional["Numeric"] = None) -> "Numeric":
         pass
 
@@ -1068,6 +1065,9 @@ class Numeric(_Scalar):
         pass
 
     def synchronize(self, discarded: Boolean) -> "Numeric":
+        pass
+
+    def track(self, s0: float, speed: float, snap_distance2: float, t: Optional["Numeric"] = None) -> "Numeric":
         pass
 
     def sod(self, s0: float, f: float, z: float = 1.0, r: float = 0, t: Optional["Numeric"] = None) -> "Numeric":

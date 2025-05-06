@@ -101,8 +101,8 @@ public:
 
     template<typename T, typename P = T> class Dot {
     public:
-        auto operator()(const T& v1, const P& v2)->decltype(v1.dot(v2)) {
-            return v1.dot(v2);
+        float operator()(const T v1, const P v2) {
+            return Math::dot(v1, v2);
         }
     };
 
@@ -115,9 +115,9 @@ public:
 
     template<typename T, typename P = T> class Distance2 {
     public:
-        float operator()(const T& v1, const P& v2) {
+        float operator()(const T v1, const P v2) {
             const auto d = v1 - v2;
-            return d.dot(d);
+            return Math::hypot2(d);
         }
     };
 

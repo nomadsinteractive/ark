@@ -116,11 +116,6 @@ float V2::y() const
     return _y;
 }
 
-float V2::dot(const V2& other) const
-{
-    return _x * other._x + _y * other._y;
-}
-
 float V2::hypot() const
 {
     return Math::sqrt(_x * _x + _y * _y);

@@ -33,7 +33,7 @@ public:
 
 private:
     float getPlaneDistance(const V2& pos) const {
-        return V3(pos.x(), pos.y(), 1.0f).dot(_plane->val());
+        return Math::dot({pos.x(), pos.y(), 1.0f}, _plane->val());
     }
 
 private:

@@ -11,7 +11,6 @@
 #include "core/impl/variable/fence.h"
 #include "core/impl/variable/variable_dirty.h"
 #include "core/impl/variable/variable_dyed.h"
-#include "core/impl/variable/variable_expect.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
@@ -258,11 +257,6 @@ int32_t IntegerType::toRepeat(const String& repeat)
 sp<Integer> IntegerType::repeat(Vector<int32_t> array, IntegerType::Repeat repeat, sp<Observer> observer)
 {
     return sp<Integer>::make<IntegerByArray>(sp<IntArray>::make<IntArray::Vector>(std::move(array)), repeat, std::move(observer));
-}
-
-sp<Integer> IntegerType::expect(sp<Integer> self, sp<Boolean> expectation, sp<Observer> observer)
-{
-    return sp<Integer>::make<VariableExpect<int32_t>>(std::move(self), std::move(expectation), std::move(observer));
 }
 
 sp<Integer> IntegerType::atLeast(sp<Integer> self, sp<Integer> a1, sp<Observer> observer)

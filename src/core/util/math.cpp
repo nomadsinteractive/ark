@@ -214,17 +214,17 @@ float Math::round(const float x)
     return std::round(x);
 }
 
-V2 Math::round(const V2& x)
+V2 Math::round(const V2 x)
 {
     return {std::round(x.x()), std::round(x.y())};
 }
 
-V3 Math::round(const V3& x)
+V3 Math::round(const V3 x)
 {
     return {std::round(x.x()), std::round(x.y()), std::round(x.z())};
 }
 
-V4 Math::round(const V4& x)
+V4 Math::round(const V4 x)
 {
     return {std::round(x.x()), std::round(x.y()), std::round(x.z()), std::round(x.w())};
 }
@@ -368,25 +368,65 @@ float Math::normalize(const float v1)
     return v1 >= 0.0f ? 1.0f : -1.0f;
 }
 
-V2 Math::normalize(const V2& v2)
+V2 Math::normalize(const V2 v2)
 {
     const glm::vec2 n = glm::normalize(glm::vec2(v2.x(), v2.y()));
     return {n.x, n.y};
 }
 
-V3 Math::normalize(const V3& v3)
+V3 Math::normalize(const V3 v3)
 {
     const glm::vec3 n = glm::normalize(glm::vec3(v3.x(), v3.y(), v3.z()));
     return {n.x, n.y, n.z};
 }
 
-V4 Math::normalize(const V4& v4)
+V4 Math::normalize(const V4 v4)
 {
     const glm::vec4 n = glm::normalize(glm::vec4(v4.x(), v4.y(), v4.z(), v4.w()));
     return {n.x, n.y, n.z, n.w};
 }
 
-V4 Math::slerp(const V4& x, const V4& y, const float t)
+float Math::dot(const float a, const float b)
+{
+    return a * b;
+}
+
+float Math::dot(const V2 a, const V2 b)
+{
+    return a.x() * b.x() + a.y() * b.y();
+}
+
+float Math::dot(const V3 a, const V3 b)
+{
+    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
+}
+
+float Math::dot(const V4 a, const V4 b)
+{
+    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z() + a.w() * b.w();
+}
+
+float Math::hypot2(const float v1)
+{
+    return v1 * v1;
+}
+
+float Math::hypot2(const V2 v2)
+{
+    return v2.x() * v2.x() + v2.y() * v2.y();
+}
+
+float Math::hypot2(const V3 v3)
+{
+    return v3.x() * v3.x() + v3.y() * v3.y() + v3.z() * v3.z();
+}
+
+float Math::hypot2(const V4 v4)
+{
+    return v4.x() * v4.x() + v4.y() * v4.y() + v4.z() * v4.z() + v4.w() * v4.w();
+}
+
+V4 Math::slerp(const V4 x, const V4 y, const float t)
 {
     const glm::quat n = glm::slerp(glm::quat(x.w(), x.x(), x.y(), x.z()), glm::quat(y.w(), y.x(), y.y(), y.z()), t);
     return {n.x, n.y, n.z, n.w};

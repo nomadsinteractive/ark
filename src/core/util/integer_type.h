@@ -101,9 +101,6 @@ public:
     static sp<Integer> freeze(const sp<Integer>& self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Integer> expect(sp<Integer> self, sp<Boolean> expectation, sp<Observer> observer = nullptr);
-
-//  [[script::bindings::classmethod]]
     static sp<Integer> atLeast(sp<Integer> self, sp<Integer> a1, sp<Observer> observer = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Integer> atMost(sp<Integer> self, sp<Integer> a1, sp<Observer> observer = nullptr);

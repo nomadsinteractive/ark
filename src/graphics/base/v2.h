@@ -39,7 +39,6 @@ public:
     float x() const;
     float y() const;
 
-    float dot(const V2& other) const;
     float hypot() const;
     float hypot2() const;
 

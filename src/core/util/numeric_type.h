@@ -133,6 +133,8 @@ public:
     static sp<Numeric> lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t);
 
 //  [[script::bindings::classmethod]]
+    static sp<Numeric> track(sp<Numeric> self, float s0, float speed, float snapDistance2, sp<Numeric> t = nullptr);
+//  [[script::bindings::classmethod]]
     static sp<Numeric> sod(sp<Numeric> self, float s0, float f, float z = 1.0, float r = 0, sp<Numeric> t = nullptr);
 
 //  [[script::bindings::classmethod]]

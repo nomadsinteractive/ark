@@ -184,11 +184,6 @@ public:
 
     static int32_t floor(float x);
 
-    static float round(float x);
-    static V2 round(const V2& x);
-    static V3 round(const V3& x);
-    static V4 round(const V4& x);
-
 //  [[script::bindings::auto]]
     static int32_t rand();
 //  [[script::bindings::auto]]
@@ -241,12 +236,27 @@ public:
     static uint32_t hash32(uint32_t x);
     static uint32_t hash64(uint64_t x);
 
-    static float normalize(float v1);
-    static V2 normalize(const V2& v2);
-    static V3 normalize(const V3& v3);
-    static V4 normalize(const V4& v4);
+    static float round(float x);
+    static V2 round(V2 x);
+    static V3 round(V3 x);
+    static V4 round(V4 x);
 
-    static V4 slerp(const V4& x, const V4& y, float t);
+    static float normalize(float v1);
+    static V2 normalize(V2 v2);
+    static V3 normalize(V3 v3);
+    static V4 normalize(V4 v4);
+
+    static float dot(float a, float b);
+    static float dot(V2 a, V2 b);
+    static float dot(V3 a, V3 b);
+    static float dot(V4 a, V4 b);
+
+    static float hypot2(float v1);
+    static float hypot2(V2 v2);
+    static float hypot2(V3 v3);
+    static float hypot2(V4 v4);
+
+    static V4 slerp(V4 x, V4 y, float t);
 
     static constexpr float PI = 3.14159265358979323846f;
     static constexpr float PI_HALF = PI / 2.0f;

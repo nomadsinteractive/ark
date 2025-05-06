@@ -34,7 +34,6 @@ public:
     float w() const;
     V4 operator -() const;
 
-    float dot(const V4& other) const;
     float hypot() const;
     float hypot2() const;
 
