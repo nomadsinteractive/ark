@@ -6,7 +6,35 @@
 #include "graphics/components/layer.h"
 #include "graphics/base/render_layer.h"
 
+#include "renderer/inf/draw_decorator.h"
+
 namespace ark {
+
+namespace {
+
+class DrawDecoratorGroupWrapper final : public DrawDecorator {
+public:
+    DrawDecoratorGroupWrapper(const sp<DrawDecorator>& preDraw, const sp<DrawDecorator>& postDraw)
+        : _draw_decorator_pre_draw(preDraw), _draw_decorator_post_draw(postDraw) {
+    }
+
+    void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
+    {
+        if(_draw_decorator_pre_draw)
+            _draw_decorator_pre_draw->preDraw(graphicsContext, context);
+    }
+
+    void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
+    {
+        if(_draw_decorator_post_draw)
+            _draw_decorator_post_draw->postDraw(graphicsContext, context);
+    }
+
+    sp<DrawDecorator> _draw_decorator_pre_draw;
+    sp<DrawDecorator> _draw_decorator_post_draw;
+};
+
+}
 
 template<typename T, RendererType::Priority P> struct RenderGroup::BUILDER::Phrase {
 
@@ -21,10 +49,33 @@ template<typename T, RendererType::Priority P> struct RenderGroup::BUILDER::Phra
 
 void RenderGroup::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
-    CHECK(!drawDecorator, "Unimplemented");
-    for(auto& [k, v] : _phrases)
-        for(const sp<Renderer>& i : v.update(renderRequest.timestamp()))
-            i->render(renderRequest, position, nullptr);
+    if(drawDecorator)
+    {
+        sp<Renderer> firstRenderer, lastRenderer;
+        sp<DrawDecoratorGroupWrapper> firstDrawDecorator;
+        for(auto& [k, v] : _phrases)
+            for(const sp<Renderer>& i : v.update(renderRequest.timestamp()))
+            {
+                if(!firstRenderer)
+                {
+                    firstDrawDecorator = sp<DrawDecoratorGroupWrapper>::make(drawDecorator, drawDecorator);
+                    i->render(renderRequest, position, firstDrawDecorator);
+                    firstRenderer = i;
+                }
+                else if(lastRenderer)
+                    lastRenderer->render(renderRequest, position, nullptr);
+                lastRenderer = i;
+            }
+        if(firstRenderer && firstRenderer != lastRenderer)
+        {
+            firstDrawDecorator->_draw_decorator_post_draw = nullptr;
+            lastRenderer->render(renderRequest, position, sp<DrawDecorator>::make<DrawDecoratorGroupWrapper>(nullptr, drawDecorator));
+        }
+    }
+    else
+        for(auto& [k, v] : _phrases)
+            for(const sp<Renderer>& i : v.update(renderRequest.timestamp()))
+                i->render(renderRequest, position, nullptr);
 }
 
 void RenderGroup::addRenderer(sp<Renderer> renderer, const Traits& traits)
