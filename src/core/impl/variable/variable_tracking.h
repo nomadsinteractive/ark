@@ -22,7 +22,11 @@ public:
             _t0 = t1;
             return dirty;
         }
-        const float distance = std::is_same_v<T, float> ? std::abs(vec) : Math::sqrt(distance2);
+        float distance;
+        if constexpr(std::is_same_v<T, float>)
+            distance = std::abs(vec);
+        else
+            distance = Math::sqrt(distance2);
         const T n = vec / distance;
         _value += n * std::min((t1 - _t0) * _speed,  distance);
         _t0 = t1;

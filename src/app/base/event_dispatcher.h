@@ -15,6 +15,11 @@ public:
 //  [[script::bindings::auto]]
     EventDispatcher();
 
+//  [[script::bindings::property]]
+    bool locked() const;
+//  [[script::bindings::property]]
+    void setLocked(bool locked);
+
 //  [[script::bindings::auto]]
     void onKeyEvent(Event::Code code, sp<Runnable> onPress = nullptr, sp<Runnable> onRelease = nullptr, sp<Runnable> onRepeat = nullptr);
 //  [[script::bindings::auto]]
@@ -64,6 +69,7 @@ private:
 
 private:
     float _motion_click_range;
+    bool _locked;
 
     Map<Event::Code, std::stack<KeyEventListener>> _key_events;
     std::stack<MotionEventListener> _motion_events;

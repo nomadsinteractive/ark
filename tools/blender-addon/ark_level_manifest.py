@@ -84,6 +84,7 @@ class ArkScene:
         self._libraries = [ArkInstanceCollection(i, j) for i, j in enumerate(instance_collections)]
         collections_not_excluded = [i.collection for i in layer_collection.children if not i.exclude]
         self._layers = [ArkLayer(self, i, layer_properties[i.name]) for i in collections_not_excluded if not i.library]
+        self._filename = bpy.path.basename(bpy.data.filepath)
 
     def find_library(self, collection):
         for i in self._libraries:
@@ -96,7 +97,10 @@ class ArkScene:
         return ',\n'.join(lines)
 
     def to_xml(self, indent):
-        lines = ['<?xml version="1.0" encoding="utf-8"?>', '%s<scene>' % (_INDENT_BLOCK * indent)]
+        lines = [
+            '<?xml version="1.0" encoding="utf-8"?>',
+            '<!-- Exported from "%s" by ArkLevelManifest addon -->' % self._filename,
+            '%s<scene>' % (_INDENT_BLOCK * indent)]
         lines.extend(i.to_xml(indent + 1) for i in self._libraries)
         lines.extend(i.to_xml(indent + 1) for i in self._layers)
         lines.append('%s</scene>' % (_INDENT_BLOCK * indent))

@@ -121,7 +121,9 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec2> lerp(sp<Vec2> self, sp<Vec2> b, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> sod(sp<Vec2> self, const V2& s0, float f, float z = 1.0f, float r = 0, sp<Numeric> t = nullptr);
+    static sp<Vec2> track(sp<Vec2> self, V2 s0, float speed, float snapDistance2, sp<Numeric> t = nullptr);
+//  [[script::bindings::classmethod]]
+    static sp<Vec2> sod(sp<Vec2> self, V2 s0, float f, float z = 1.0f, float r = 0, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Vec2> dye(sp<Vec2> self, sp<Boolean> c = nullptr, String message = "");
 

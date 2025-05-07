@@ -6,8 +6,18 @@
 namespace ark {
 
 EventDispatcher::EventDispatcher()
-    : _motion_click_range(50.0f)
+    : _motion_click_range(50.0f), _locked(false)
 {
+}
+
+bool EventDispatcher::locked() const
+{
+    return _locked;
+}
+
+void EventDispatcher::setLocked(const bool locked)
+{
+    _locked = locked;
 }
 
 void EventDispatcher::onKeyEvent(const Event::Code code, sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat)
@@ -40,16 +50,17 @@ float EventDispatcher::motionClickRange() const
 
 bool EventDispatcher::onEvent(const Event& event)
 {
-    if(const Event::Action action = event.action(); action == Event::ACTION_KEY_DOWN || action == Event::ACTION_KEY_UP || action == Event::ACTION_KEY_REPEAT)
-    {
-        if(const auto iter = _key_events.find(event.code()); iter != _key_events.end() && !iter->second.empty())
-            return iter->second.top().onEvent(event);
-    }
-    else if(action == Event::ACTION_DOWN || action == Event::ACTION_UP || action == Event::ACTION_MOVE || action == Event::ACTION_CANCEL)
-    {
-        if(!_motion_events.empty())
-            return _motion_events.top().onEvent(*this, event);
-    }
+    if(!_locked)
+        if(const Event::Action action = event.action(); action == Event::ACTION_KEY_DOWN || action == Event::ACTION_KEY_UP || action == Event::ACTION_KEY_REPEAT)
+        {
+            if(const auto iter = _key_events.find(event.code()); iter != _key_events.end() && !iter->second.empty())
+                return iter->second.top().onEvent(event);
+        }
+        else if(action == Event::ACTION_DOWN || action == Event::ACTION_UP || action == Event::ACTION_MOVE || action == Event::ACTION_CANCEL)
+        {
+            if(!_motion_events.empty())
+                return _motion_events.top().onEvent(*this, event);
+        }
     return false;
 }
 

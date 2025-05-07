@@ -1208,7 +1208,10 @@ class Vec2(_Var):
     def lerp(self, other, t: TYPE_NUMERIC) -> Self:
         pass
 
-    def sod(self, s0, f: float, z: float, r: float, t: Optional["Numeric"] = None) -> Self:
+    def track(self, s0, speed: float, snap_distance2: float, t: Optional[Numeric] = None) -> Self:
+        pass
+
+    def sod(self, s0, f: float, z: float = 1, r: float = 0, t: Optional[Numeric] = None) -> Self:
         pass
 
     def extend(self, v):
@@ -2508,6 +2511,14 @@ class EventListener:
 class EventDispatcher(EventListener):
     def __init__(self):
         super().__init__(None)
+
+    @property
+    def locked(self) -> bool:
+        return False
+
+    @locked.setter
+    def locked(self, locked: bool):
+        pass
 
     def on_event(self, event):
         pass
