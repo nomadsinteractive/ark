@@ -34,13 +34,9 @@ public:
 
     V3 operator -() const;
 
-    float hypot() const;
-    float hypot2() const;
-
     V4 extend(float w) const;
 
     V3 floorDiv(const V3& other) const;
-    V3 normalize() const;
 
     V3 cross(const V3& other) const;
 

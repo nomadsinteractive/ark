@@ -108,8 +108,8 @@ public:
 
     template<typename T, typename P = T> class Distance {
     public:
-        float operator()(const T& v1, const P& v2) {
-            return (v1 - v2).hypot();
+        float operator()(const T v1, const P v2) {
+            return Math::hypot(v1 - v2);
         }
     };
 
@@ -123,15 +123,15 @@ public:
 
     template<typename T> class Hypot {
     public:
-        float operator()(const T& v) {
-            return v.hypot();
+        float operator()(const T v) {
+            return Math::hypot(v);
         }
     };
 
     template<typename T> class Hypot2 {
     public:
-        float operator()(const T& v) {
-            return v.hypot2();
+        float operator()(const T v) {
+            return Math::hypot2(v);
         }
     };
 
@@ -287,12 +287,12 @@ public:
 
     template<typename T> class Normalize {
     public:
-        T operator()(const T& v) {
+        T operator()(const T v) {
             return Math::normalize(v);
         }
     };
 
-    template<typename T, typename OP> class Builder : public ark::Builder<Variable<T>> {
+    template<typename T, typename OP> class Builder final : public ark::Builder<Variable<T>> {
     public:
         typedef sp<ark::Builder<Variable<T>>> BuilderType;
 
@@ -300,7 +300,7 @@ public:
             : _a1(a1), _a2(a2) {
         }
 
-        virtual sp<Variable<T>> build(const Scope& args) override {
+        sp<Variable<T>> build(const Scope& args) override {
             return sp<VariableOP2<sp<Variable<T>>, sp<Variable<T>>, OP>>::make(_a1->build(args), _a2->build(args));
         }
 

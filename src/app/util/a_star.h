@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "core/types/optional.h"
+#include "core/util/math.h"
 
 #include "graphics/base/v3.h"
 
@@ -68,7 +69,7 @@ private:
 
     float getHeuristicValue(T& from) const {
         const V3 d = from.position() - _goal.position();
-        return d.hypot();
+        return Math::hypot(d);
     }
 
 private:

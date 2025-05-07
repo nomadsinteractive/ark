@@ -31,11 +31,11 @@ void toRayC2(const V2& from, const V2& to, c2Ray& ray)
 {
     const V2 delta = to - from;
     ray.p = { from.x(), from.y() };
-    if(delta.hypot() > 0.01f)
+    if(Math::hypot(delta) > 0.01f)
     {
-        const V2 nd = delta.normalize();
+        const V2 nd = Math::normalize(delta);
         ray.d = { nd.x(), nd.y() };
-        ray.t = delta.hypot();
+        ray.t = Math::hypot(delta);
     }
     else
     {

@@ -34,10 +34,6 @@ public:
     float w() const;
     V4 operator -() const;
 
-    float hypot() const;
-    float hypot2() const;
-
-    V4 normalize() const;
     V4 floorDiv(const V4& other) const;
 
     V3 toNonHomogeneous() const;

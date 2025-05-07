@@ -39,14 +39,10 @@ public:
     float x() const;
     float y() const;
 
-    float hypot() const;
-    float hypot2() const;
-
     V3 extend(float z) const;
     V4 extend(const V2& zw) const;
 
     V2 floorDiv(const V2& other) const;
-    V2 normalize() const;
 
     const float* value() const;
     float* value();

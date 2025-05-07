@@ -268,49 +268,49 @@ sp<Numeric> Math::sqrt(sp<Numeric> x)
     return sp<Numeric>::make<VariableOP1<float>>(static_cast<float(*)(float)>(Math::sqrt), std::move(x));
 }
 
-float Math::distance(const V2& lvalue, const V2& rvalue)
+float Math::distance(const V2 a, const V2 b)
 {
-    return (lvalue - rvalue).hypot();
+    return hypot(a - b);
 }
 
-float Math::distance(const V3& lvalue, const V3& rvalue)
+float Math::distance(const V3 a, const V3 b)
 {
-    return (lvalue - rvalue).hypot();
+    return hypot(a - b);
 }
 
-float Math::distance(const V4& lvalue, const V4& rvalue)
+float Math::distance(const V4 a, const V4 b)
 {
-    return (lvalue - rvalue).hypot();
+    return hypot(a - b);
 }
 
-sp<Numeric> Math::distance(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
+sp<Numeric> Math::distance(sp<Vec2> a, sp<Vec2> b)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Distance<V2>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Distance<V2>>>(std::move(a), std::move(b));
 }
 
-sp<Numeric> Math::distance(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
+sp<Numeric> Math::distance(sp<Vec3> a, sp<Vec3> b)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Distance<V3>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Distance<V3>>>(std::move(a), std::move(b));
 }
 
-sp<Numeric> Math::distance(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
+sp<Numeric> Math::distance(sp<Vec4> a, sp<Vec4> b)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Distance<V4>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Distance<V4>>>(std::move(a), std::move(b));
 }
 
-sp<Numeric> Math::dot(sp<Vec2> lvalue, sp<Vec2> rvalue)
+sp<Numeric> Math::dot(sp<Vec2> a, sp<Vec2> b)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Dot<V2>>>(std::move(lvalue), std::move(rvalue));
+    return sp<Numeric>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Dot<V2>>>(std::move(a), std::move(b));
 }
 
-sp<Numeric> Math::dot(sp<Vec3> lvalue, sp<Vec3> rvalue)
+sp<Numeric> Math::dot(sp<Vec3> a, sp<Vec3> b)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Dot<V3>>>(std::move(lvalue), std::move(rvalue));
+    return sp<Numeric>::make<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Dot<V3>>>(std::move(a), std::move(b));
 }
 
-sp<Numeric> Math::dot(sp<Vec4> lvalue, sp<Vec4> rvalue)
+sp<Numeric> Math::dot(sp<Vec4> a, sp<Vec4> b)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Dot<V4>>>(std::move(lvalue), std::move(rvalue));
+    return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Dot<V4>>>(std::move(a), std::move(b));
 }
 
 float Math::lerp(const float a, const float b, const float t)
@@ -404,6 +404,26 @@ float Math::dot(const V3 a, const V3 b)
 float Math::dot(const V4 a, const V4 b)
 {
     return a.x() * b.x() + a.y() * b.y() + a.z() * b.z() + a.w() * b.w();
+}
+
+float Math::hypot(const float v1)
+{
+    return v1;
+}
+
+float Math::hypot(const V2 v2)
+{
+    return sqrt(hypot2(v2));
+}
+
+float Math::hypot(const V3 v3)
+{
+    return sqrt(hypot2(v3));
+}
+
+float Math::hypot(const V4 v4)
+{
+    return sqrt(hypot2(v4));
 }
 
 float Math::hypot2(const float v1)

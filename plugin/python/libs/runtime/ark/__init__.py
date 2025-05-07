@@ -2873,6 +2873,12 @@ class State:
     def active(self) -> bool:
         return False
 
+    def activate(self):
+        pass
+
+    def deactivate(self):
+        pass
+
 
 class StateMachine:
     def __init__(self, entry: State):

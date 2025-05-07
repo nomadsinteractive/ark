@@ -112,16 +112,6 @@ V3 V3::operator -() const
     return {-_x, -_y, -_z};
 }
 
-float V3::hypot() const
-{
-    return Math::sqrt(_x * _x + _y * _y + _z * _z);
-}
-
-float V3::hypot2() const
-{
-    return _x * _x + _y * _y + _z * _z;
-}
-
 V4 V3::extend(const float w) const
 {
     return {_x, _y, _z, w};
@@ -130,12 +120,6 @@ V4 V3::extend(const float w) const
 V3 V3::floorDiv(const V3& other) const
 {
     return {Math::floorDiv(_x, other._x), Math::floorDiv(_y, other._y), Math::floorDiv(_z, other._z)};
-}
-
-V3 V3::normalize() const
-{
-    const float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);
-    return {_x / length, _y / length, _z / length};
 }
 
 V3 V3::cross(const V3& other) const

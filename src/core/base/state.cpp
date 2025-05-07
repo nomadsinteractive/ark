@@ -3,7 +3,6 @@
 #include "core/base/state_action.h"
 #include "core/base/state_action_strand.h"
 #include "core/inf/runnable.h"
-#include "core/util/log.h"
 
 namespace ark {
 
