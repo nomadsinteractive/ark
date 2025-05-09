@@ -29,7 +29,7 @@ struct View::Stub final : Updatable {
     {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         if(_hierarchy)
         {
@@ -39,11 +39,9 @@ struct View::Stub final : Updatable {
         return UpdatableUtil::update(timestamp, _layout_node->_layout_param, _position, _discarded);
     }
 
-    void dispose()
+    void discard()
     {
         _discarded.reset(sp<Boolean>::make<Boolean::Const>(true));
-        _layout_node->_layout_param = nullptr;
-        _layout_node = nullptr;
     }
 
     bool isDiscarded() const
@@ -52,7 +50,7 @@ struct View::Stub final : Updatable {
         return _discarded.val() || (parentStub ? parentStub->isDiscarded() : !_top_view);
     }
 
-    V3 getTopViewOffsetPosition(bool includePaddings) const
+    V3 getTopViewOffsetPosition(const bool includePaddings) const
     {
         const Layout::Node& layoutNode = _layout_node;
         const V3 layoutOffset(layoutNode.offsetPosition(), 0);
@@ -198,7 +196,7 @@ View::View(sp<LayoutParam> layoutParam, String name, sp<Vec3> position, sp<Boole
 
 View::~View()
 {
-    _stub->dispose();
+    _stub->discard();
 }
 
 TypeId View::onPoll(WiringContext& context)
@@ -223,7 +221,7 @@ void View::onPoll(WiringContext& context, const StringView value)
     context.setComponent(view);
 }
 
-bool View::update(uint64_t timestamp) const
+bool View::update(const uint64_t timestamp) const
 {
     return _updatable_view->update(timestamp);
 }

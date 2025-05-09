@@ -8,7 +8,7 @@ namespace ark {
 template<typename T> class VariableTracking final : public Variable<T> {
 public:
     VariableTracking(sp<Variable<T>> target, sp<Numeric> t, const T s0, const float speed, const float snapDistance2)
-        :  _target(std::move(target)), _t(std::move(t)), _value(s0), _speed(speed), _snap_distance2(snapDistance2) {
+        :  _target(std::move(target)), _t(std::move(t)), _value(s0), _speed(speed), _snap_distance2(snapDistance2), _t0(0) {
     }
 
     bool update(uint64_t timestamp) override {
@@ -28,7 +28,7 @@ public:
         else
             distance = Math::sqrt(distance2);
         const T n = vec / distance;
-        _value += n * std::min((t1 - _t0) * _speed,  distance);
+        _value += n * std::min((t1 - _t0) * _speed, distance);
         _t0 = t1;
         return true;
     }
@@ -40,11 +40,10 @@ public:
 private:
     sp<Variable<T>> _target;
     sp<Numeric> _t;
-    float _speed;
-
     T _value;
-    float _t0;
+    float _speed;
     float _snap_distance2;
+    float _t0;
 };
 
 }
