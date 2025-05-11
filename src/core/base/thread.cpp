@@ -34,7 +34,7 @@ const sp<Runnable>& Thread::entry() const
 
 void Thread::setEntry(const sp<Runnable>& entry) const
 {
-    DCHECK(!entry || _stub->_state == THREAD_STATE_NONE, "Cannot set entry after thread being started");
+    CHECK(!entry || _stub->_state == THREAD_STATE_NONE, "Cannot set entry after thread being started");
     _stub->_entry = entry;
 }
 
@@ -116,41 +116,35 @@ Thread::Stub::~Stub()
 
 void Thread::Stub::start(const sp<Stub>& self)
 {
-    DCHECK(_state == THREAD_STATE_NONE && _entry, "Illegal state(%d). Could not start thread", _state);
-    LOGD("");
+    CHECK(_state == THREAD_STATE_NONE && _entry, "Illegal state(%d). Could not start thread", _state);
     _thread = std::thread(_thread_main_entry, Thread(self));
 }
 
 void Thread::Stub::resume()
 {
-    DCHECK(_state == THREAD_STATE_PAUSED || _state == THREAD_STATE_NONE, "Illegal state(%d). Could not resume thread", _state);
-    LOGD("");
+    CHECK(_state == THREAD_STATE_PAUSED || _state == THREAD_STATE_NONE, "Illegal state(%d). Could not resume thread", _state);
     _state = THREAD_STATE_RUNNING;
 }
 
 void Thread::Stub::pause()
 {
-    DCHECK(_state == THREAD_STATE_RUNNING, "Illegal state(%d). Could not pause thread", _state);
-    LOGD("");
+    CHECK(_state == THREAD_STATE_RUNNING, "Illegal state(%d). Could not pause thread", _state);
     _state = THREAD_STATE_PAUSED;
 }
 
 void Thread::Stub::terminate()
 {
-    LOGD("");
     _state = THREAD_STATE_TERMINATED;
 }
 
 void Thread::Stub::join()
 {
-    DCHECK(_thread.joinable(), "Illegal state. Could not join thread");
-    LOGD("");
+    CHECK(_thread.joinable(), "Illegal state. Could not join thread");
     _thread.join();
 }
 
 void Thread::Stub::detach()
 {
-    LOGD("");
     if(_thread.joinable())
         _thread.detach();
 }
