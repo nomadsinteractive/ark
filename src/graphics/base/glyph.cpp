@@ -1,10 +1,37 @@
 #include "graphics/base/glyph.h"
 
+#include "graphics/base/font.h"
 #include "graphics/components/render_object.h"
 #include "graphics/components/size.h"
 #include "graphics/util/vec3_type.h"
 
 namespace ark {
+
+namespace {
+
+class GlyphRenderObjectType final : public Integer {
+public:
+    GlyphRenderObjectType(sp<Integer> type, sp<Font> font)
+        : _type(std::move(type)), _font(std::move(font))
+    {
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        return _type->update(timestamp);
+    }
+
+    int32_t val() override
+    {
+        return _font->combine(_type->val());
+    }
+
+private:
+    sp<Integer> _type;
+    sp<Font> _font;
+};
+
+}
 
 Glyph::Glyph(sp<Integer> type, sp<Font> font, sp<Vec3> position, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
     : _type(std::move(type)), _font(std::move(font)), _position(std::move(position)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible)), _discarded(std::move(discarded)), _character(0)
@@ -53,7 +80,7 @@ const sp<Boolean>& Glyph::visible() const
 
 sp<RenderObject> Glyph::toRenderObject() const
 {
-    return sp<RenderObject>::make(_type, _position, sp<Size>::make(_content_size.x(), _content_size.y()), _transform, _varyings, _visible, _discarded);
+    return sp<RenderObject>::make(_font ? sp<Integer>::make<GlyphRenderObjectType>(_type, _font) : _type, _position, sp<Size>::make(_content_size.x(), _content_size.y()), _transform, _varyings, _visible, _discarded);
 }
 
 wchar_t Glyph::character() const
@@ -61,7 +88,7 @@ wchar_t Glyph::character() const
     return _character;
 }
 
-void Glyph::setCharacter(wchar_t character)
+void Glyph::setCharacter(const wchar_t character)
 {
     _character = character;
 }

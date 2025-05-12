@@ -67,7 +67,7 @@ constexpr uint32_t UV_NORMALIZE_RANGE = std::numeric_limits<uint16_t>::max();
 
 Rect toUVRect(const Atlas::Item& item)
 {
-    return Rect(item._ux / static_cast<float>(UV_NORMALIZE_RANGE), item._uy / static_cast<float>(UV_NORMALIZE_RANGE), item._vx / static_cast<float>(UV_NORMALIZE_RANGE), item._vy / static_cast<float>(UV_NORMALIZE_RANGE));
+    return Rect(item._uv._ux / static_cast<float>(UV_NORMALIZE_RANGE), item._uv._uy / static_cast<float>(UV_NORMALIZE_RANGE), item._uv._vx / static_cast<float>(UV_NORMALIZE_RANGE), item._uv._vy / static_cast<float>(UV_NORMALIZE_RANGE));
 }
 
 }
@@ -151,7 +151,17 @@ Traits& Atlas::attachments()
 
 void Atlas::add(const int32_t id, const uint32_t ux, const uint32_t uy, const uint32_t vx, const uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot)
 {
-    _items[id] = makeItem(ux, uy, vx, vy, bounds, size, pivot);
+    const UV uv = toUV(ux, uy, vx, vy, static_cast<uint32_t>(_texture->width()), static_cast<uint32_t>(_texture->height()));
+    _items[id] = toItem(uv, bounds, size, pivot);
+}
+
+Atlas::UV Atlas::toUV(const uint32_t ux, const uint32_t uy, const uint32_t vx, const uint32_t vy, const uint32_t width, const uint32_t height)
+{
+    const uint16_t l = unnormalize(ux, width);
+    const uint16_t t = unnormalize(uy, height);
+    const uint16_t r = unnormalize(vx, width);
+    const uint16_t b = unnormalize(vy, height);
+    return {l, b, r, t};
 }
 
 const Atlas::Item& Atlas::at(const NamedHash& resid) const
@@ -167,7 +177,7 @@ Rect Atlas::getItemBounds(const int32_t id) const
     const Item& item = at(id);
     const float nw = _texture->width() / static_cast<float>(UV_NORMALIZE_RANGE);
     const float nh = _texture->height() / static_cast<float>(UV_NORMALIZE_RANGE);
-    return {item._ux * nw, item._vy * nh, item._vx * nw, item._uy * nh};
+    return {item._uv._ux * nw, item._uv._vy * nh, item._uv._vx * nw, item._uv._uy * nh};
 }
 
 uint16_t Atlas::unnormalize(const float v)
@@ -180,13 +190,9 @@ uint16_t Atlas::unnormalize(const uint32_t x, const uint32_t s)
     return static_cast<uint16_t>(std::min<uint32_t>(x * UV_NORMALIZE_RANGE / s, UV_NORMALIZE_RANGE));
 }
 
-Atlas::Item Atlas::makeItem(const uint32_t ux, const uint32_t uy, const uint32_t vx, const uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const
+Atlas::Item Atlas::toItem(const UV uv, const Rect& bounds, const V2& size, const V2& pivot)
 {
-    const uint16_t l = unnormalize(ux, static_cast<uint32_t>(_texture->width()));
-    const uint16_t t = unnormalize(uy, static_cast<uint32_t>(_texture->height()));
-    const uint16_t r = unnormalize(vx, static_cast<uint32_t>(_texture->width()));
-    const uint16_t b = unnormalize(vy, static_cast<uint32_t>(_texture->height()));
-    return {l, b, r, t, Rect(bounds.left() - pivot.x(), bounds.top() - pivot.y(), bounds.right() - pivot.x(), bounds.bottom() - pivot.y()), size, pivot};
+    return {uv, Rect(bounds.left() - pivot.x(), bounds.top() - pivot.y(), bounds.right() - pivot.x(), bounds.bottom() - pivot.y()), size, pivot};
 }
 
 void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)

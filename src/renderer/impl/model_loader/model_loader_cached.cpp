@@ -14,7 +14,7 @@ sp<DrawingContextComposer> ModelLoaderCached::makeRenderCommandComposer(const Sh
     return _delegate->makeRenderCommandComposer(shader);
 }
 
-sp<Model> ModelLoaderCached::loadModel(int32_t type)
+sp<Model> ModelLoaderCached::loadModel(const int32_t type)
 {
     if(const auto iter = _cached_models.find(type); !(iter == _cached_models.end() || iter->second->isDiscarded()))
         return iter->second;

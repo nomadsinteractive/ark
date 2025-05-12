@@ -26,21 +26,20 @@
 namespace ark {
 
 ModelLoaderText::ModelLoaderText(sp<Alphabet> alphabet, sp<Atlas> atlas, const Font& font)
-    : ModelLoader(enums::DRAW_MODE_TRIANGLES, atlas->texture(), MODEL_TRAIT_DISALLOW_CACHE), _alphabet(std::move(alphabet)), _atlas(std::move(atlas)), _glyph_attachment(_atlas->attachments().ensure<AtlasGlyphAttachment>(*_atlas)),
-      _default_glyph_bundle(_glyph_attachment->ensureGlyphBundle(_alphabet, font))
+    : ModelLoader(enums::DRAW_MODE_TRIANGLES, atlas->texture(), MODEL_TRAIT_DISALLOW_CACHE), _alphabet(std::move(alphabet)), _atlas(std::move(atlas)), _glyph_attachment(_atlas->attachments().ensure<AtlasGlyphAttachment>(*_atlas)), _default_font(font)
 {
 }
 
 sp<DrawingContextComposer> ModelLoaderText::makeRenderCommandComposer(const Shader& shader)
 {
-    _default_glyph_bundle->_is_lhs = shader.camera().isLHS();
+    _default_glyph_bundle = _glyph_attachment->ensureGlyphBundle(_alphabet, _default_font, shader.camera().isLHS());
     return Ark::instance().renderController()->makeDrawElementsIncremental(Global<Constants>()->MODEL_UNIT_QUAD_RHS);
 }
 
-sp<Model> ModelLoaderText::loadModel(int32_t type)
+sp<Model> ModelLoaderText::loadModel(const int32_t type)
 {
     const auto [font, unicode] = Font::partition(type);
-    const sp<GlyphBundle>& glyphBundle = font ? _glyph_attachment->ensureGlyphBundle(_alphabet, font) : _default_glyph_bundle;
+    const sp<GlyphBundle>& glyphBundle = font ? _glyph_attachment->ensureGlyphBundle(_alphabet, font, _default_glyph_bundle->_is_lhs) : _default_glyph_bundle;
     const GlyphModel& glyph = glyphBundle->ensureGlyphModel(Ark::instance().appClock()->tick(), unicode, true);
     return glyph._model;
 }
@@ -55,19 +54,19 @@ sp<ModelLoader> ModelLoaderText::BUILDER::build(const Scope& args)
     return sp<ModelLoader>::make<ModelLoaderText>(_alphabet->build(args), _atlas->build(args), *_font->build(args));
 }
 
-ModelLoaderText::GlyphBundle::GlyphBundle(AtlasGlyphAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font& font)
-    : _atlas_attachment(atlasAttachment), _alphabet(std::move(alphabet)), _font(font), _unit_glyph_model(Global<Constants>()->MODEL_UNIT_QUAD_RHS), _is_lhs(false)
+ModelLoaderText::GlyphBundle::GlyphBundle(AtlasGlyphAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font& font, const bool isLHS)
+    : _atlas_attachment(atlasAttachment), _alphabet(std::move(alphabet)), _font(font), _unit_glyph_model(Global<Constants>()->MODEL_UNIT_QUAD_RHS), _is_lhs(isLHS)
 {
     ASSERT(_font);
 }
 
-bool ModelLoaderText::GlyphBundle::prepareOne(const uint64_t timestamp, int32_t c, int32_t ckey)
+bool ModelLoaderText::GlyphBundle::prepareOne(const uint64_t timestamp, const int32_t c, const int32_t ckey)
 {
     if(Optional<Alphabet::Metrics> optMetrics = _alphabet->measure(c))
     {
-        const auto& [width, height, bitmap_width, bitmap_height, bitmap_x, bitmap_y] = optMetrics.value();
+        const auto& [width, height, bitmapWidth, bitmapHeight, bitmap_x, bitmap_y] = optMetrics.value();
         CHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
-        const MaxRectsBinPack::Rect packedBounds = _atlas_attachment._bin_pack.Insert(bitmap_width + 2, bitmap_height + 2, MaxRectsBinPack::RectBestShortSideFit);
+        const MaxRectsBinPack::Rect packedBounds = _atlas_attachment._bin_pack.Insert(bitmapWidth + 2, bitmapHeight + 2, MaxRectsBinPack::RectBestShortSideFit);
         if(packedBounds.height == 0)
             return false;
 
@@ -75,10 +74,13 @@ bool ModelLoaderText::GlyphBundle::prepareOne(const uint64_t timestamp, int32_t 
         const uint32_t cy = packedBounds.y + 1;
         _alphabet->draw(c, _atlas_attachment._glyph_bitmap, cx, cy);
 
-        const float bottom = static_cast<float>(_is_lhs ? bitmap_y : height - bitmap_height - bitmap_y) / bitmap_height;
+        const float bottom = static_cast<float>(_is_lhs ? bitmap_y : height - bitmapHeight - bitmap_y) / bitmapHeight;
         const Rect bounds(0, bottom, 1.0f, bottom + 1.0f);
-        const V2 charSize(static_cast<float>(bitmap_width), static_cast<float>(bitmap_height));
-        Atlas::Item item = _atlas_attachment._atlas.makeItem(cx, cy, cx + bitmap_width, cy + bitmap_height, bounds, charSize, V2(0));
+        const V2 charSize(static_cast<float>(bitmapWidth), static_cast<float>(bitmapHeight));
+        const uint32_t textureWidth = _atlas_attachment._glyph_bitmap->width();
+        const uint32_t textureHeight = _atlas_attachment._glyph_bitmap->height();
+        const Atlas::UV uv = Atlas::toUV(cx, cy, cx + bitmapWidth, cy + bitmapHeight, textureWidth, textureHeight);
+        Atlas::Item item = _atlas_attachment._atlas.toItem(uv, bounds, charSize, V2(0));
         const V3 xyz(static_cast<float>(bitmap_x), static_cast<float>(bitmap_y), 0);
         sp<Boundaries> content = sp<Boundaries>::make(V3(0), V3(charSize, 0));
         sp<Boundaries> occupies = sp<Boundaries>::make(-xyz, V3(static_cast<float>(width), static_cast<float>(height), 0) - xyz);
@@ -101,18 +103,19 @@ void ModelLoaderText::GlyphBundle::reload(const uint64_t timestamp)
         if(timestamp - v._timestamp < 1000000)
             reloadVector.push_back(k);
     }
+    _glyphs.clear();
 
     _alphabet->setFont(_font);
     for(const int32_t i : reloadVector)
         ensureGlyphModel(timestamp, i, false);
 }
 
-const ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(const uint64_t timestamp, const int32_t c, const bool oneshot)
+const ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(const uint64_t timestamp, const int32_t c, const bool reload)
 {
     const auto iter = _glyphs.find(c);
     if(iter == _glyphs.end())
     {
-        if(oneshot)
+        if(reload)
             _alphabet->setFont(_font);
 
         while(!prepareOne(timestamp, c, c))
@@ -123,7 +126,7 @@ const ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphMode
             _atlas_attachment.resize(width, height);
         }
 
-        if(oneshot)
+        if(reload)
             _atlas_attachment.reloadTexture();
     }
     GlyphModel& gm = iter == _glyphs.end() ? _glyphs[c] : iter->second;
@@ -137,11 +140,11 @@ ModelLoaderText::AtlasGlyphAttachment::AtlasGlyphAttachment(Atlas& atlas)
     initialize(_atlas.width(), _atlas.height());
 }
 
-const sp<ModelLoaderText::GlyphBundle>& ModelLoaderText::AtlasGlyphAttachment::ensureGlyphBundle(sp<Alphabet> alphabet, const Font& font)
+const sp<ModelLoaderText::GlyphBundle>& ModelLoaderText::AtlasGlyphAttachment::ensureGlyphBundle(sp<Alphabet> alphabet, const Font& font, bool isLHS)
 {
     sp<GlyphBundle>& glyphBundle = _glyph_bundles[font];
     if(!glyphBundle)
-        glyphBundle = sp<GlyphBundle>::make(*this, std::move(alphabet), font);
+        glyphBundle = sp<GlyphBundle>::make(*this, std::move(alphabet), font, isLHS);
     return glyphBundle;
 }
 

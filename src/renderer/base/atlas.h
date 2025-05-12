@@ -22,9 +22,13 @@ public:
 //  [[script::bindings::auto]]
     Atlas(sp<Texture> texture, const String& src);
 
-    struct Item {
+    struct UV {
         uint16_t _ux, _uy;
         uint16_t _vx, _vy;
+    };
+
+    struct Item {
+        UV _uv;
         Rect _bounds;
         V2 _size;
         V2 _pivot;
@@ -59,10 +63,12 @@ public:
     HashMap<HashId, Item>& items();
 
     void add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot);
-    Item makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const;
 
     const Item& at(const NamedHash& resid) const;
     Rect getItemBounds(int32_t id) const;
+
+    static UV toUV(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, uint32_t width, uint32_t height);
+    static Item toItem(UV uv, const Rect& bounds, const V2& size, const V2& pivot);
 
     static uint16_t unnormalize(float v);
     static uint16_t unnormalize(uint32_t x, uint32_t s);
@@ -93,7 +99,7 @@ public:
     };
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Atlas> {
+    class BUILDER final : public Builder<Atlas> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 

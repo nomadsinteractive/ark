@@ -50,7 +50,7 @@ Font::Style Font::style() const
     return _style;
 }
 
-uint32_t Font::combine(uint32_t unicode) const
+uint32_t Font::combine(const uint32_t unicode) const
 {
     ASSERT(unicode < 0x33000);
     return unicode | (_size._value & FONT_SIZE_VALUE_MASK) << FONT_SIZE_VALUE_BIT_SHIFT | (_size._unit & 1) << FONT_SIZE_UNIT_BIT_SHIFT | (_style & FONT_STYLE_MASK) << FONT_STYLE_BIT_SHIFT;
@@ -67,7 +67,7 @@ bool Font::operator<(const Font& other) const
     return _style < other._style;
 }
 
-std::pair<Font, uint32_t> Font::partition(uint32_t combined)
+std::pair<Font, uint32_t> Font::partition(const uint32_t combined)
 {
     const uint32_t unicode = combined & UNICODE_MASK;
     const uint32_t sizeValue = (combined >> FONT_SIZE_VALUE_BIT_SHIFT) & FONT_SIZE_VALUE_MASK;

@@ -230,11 +230,10 @@ Renderable::StateBits RenderObject::updateState(const RenderRequest& renderReque
 {
     bool dirty = _timestamp.update(renderRequest.timestamp());
     if((_discarded.update(renderRequest.timestamp()) || dirty) && _discarded.val())
-        return Renderable::RENDERABLE_STATE_DISCARDED;
+        return RENDERABLE_STATE_DISCARDED;
 
     dirty = UpdatableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || dirty;
-    return static_cast<Renderable::StateBits>((_type->val() == -1 ? Renderable::RENDERABLE_STATE_DISCARDED : 0) | (dirty ? Renderable::RENDERABLE_STATE_DIRTY : 0) |
-                                              (_visible.val() ? Renderable::RENDERABLE_STATE_VISIBLE : 0));
+    return static_cast<StateBits>((dirty ? RENDERABLE_STATE_DIRTY : 0) | (_visible.val() ? RENDERABLE_STATE_VISIBLE : 0));
 }
 
 Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)

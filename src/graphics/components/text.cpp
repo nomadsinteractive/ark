@@ -12,15 +12,16 @@
 #include "core/util/string_type.h"
 #include "core/util/updatable_util.h"
 
-#include "graphics/base/layer_context.h"
+#include "graphics/base/font.h"
 #include "graphics/base/glyph.h"
+#include "graphics/base/layer_context.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_request.h"
+#include "graphics/base/v3.h"
 #include "graphics/components/layout_param.h"
 #include "graphics/components/render_object.h"
 #include "graphics/components/size.h"
 #include "graphics/components/translation.h"
-#include "graphics/base/v3.h"
 #include "graphics/impl/glyph_maker/glyph_maker_span.h"
 #include "graphics/impl/renderable/renderable_with_transform.h"
 #include "graphics/inf/glyph_maker.h"
@@ -36,7 +37,6 @@
 
 #include "app/base/application_context.h"
 #include "app/view/view.h"
-#include "graphics/base/font.h"
 
 namespace ark {
 

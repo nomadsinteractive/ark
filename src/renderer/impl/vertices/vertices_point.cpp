@@ -18,7 +18,7 @@ void VerticesPoint::write(VertexWriter& buf, const V3& /*size*/)
 {
     buf.next();
     buf.writePosition(V3(0));
-    buf.writeTexCoordinate(static_cast<uint16_t>((_atlas_item._ux + _atlas_item._vx) / 2), static_cast<uint16_t>((_atlas_item._uy + _atlas_item._vy) / 2));
+    buf.writeTexCoordinate(static_cast<uint16_t>((_atlas_item._uv._ux + _atlas_item._uv._vx) / 2), static_cast<uint16_t>((_atlas_item._uv._uy + _atlas_item._uv._vy) / 2));
 }
 
 }

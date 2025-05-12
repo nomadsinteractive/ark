@@ -45,7 +45,7 @@ private:
     };
 
     struct GlyphBundle {
-        GlyphBundle(AtlasGlyphAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font& font);
+        GlyphBundle(AtlasGlyphAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font& font, bool isLHS);
 
         const GlyphModel& ensureGlyphModel(uint64_t timestamp, int32_t c, bool reload);
 
@@ -67,7 +67,7 @@ private:
     struct AtlasGlyphAttachment {
         AtlasGlyphAttachment(Atlas& atlas);
 
-        const sp<GlyphBundle>& ensureGlyphBundle(sp<Alphabet> alphabet, const Font& font);
+        const sp<GlyphBundle>& ensureGlyphBundle(sp<Alphabet> alphabet, const Font& font, bool isLHS);
 
         Atlas& _atlas;
 
@@ -87,6 +87,7 @@ private:
     sp<Alphabet> _alphabet;
     sp<Atlas> _atlas;
     sp<AtlasGlyphAttachment> _glyph_attachment;
+    Font _default_font;
     sp<GlyphBundle> _default_glyph_bundle;
 };
 

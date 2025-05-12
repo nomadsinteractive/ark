@@ -5,7 +5,7 @@
 namespace ark {
 
 VerticesQuadLHS::VerticesQuadLHS(const Atlas::Item& quad)
-    : Vertices(4), _bounds(quad._bounds), _ux(quad._ux), _uy(quad._uy), _vx(quad._vx), _vy(quad._vy)
+    : Vertices(4), _bounds(quad._bounds), _ux(quad._uv._ux), _uy(quad._uv._uy), _vx(quad._uv._vx), _vy(quad._uv._vy)
 {
 }
 
