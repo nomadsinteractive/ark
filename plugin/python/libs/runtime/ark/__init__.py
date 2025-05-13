@@ -2962,8 +2962,13 @@ class LayoutParam:
     FLEX_WRAP_WRAP = 1
     FLEX_WRAP_WRAP_REVERSE = 2
 
+    def __init__(self, width: LayoutLength, height: LayoutLength):
+        pass
+
 
 class View:
+    def __init__(self, layout_param: LayoutParam, name: str = '', position: Optional[TYPE_VEC3] = None, discarded: Optional[Boolean] = None):
+        pass
 
     @property
     def discarded(self) -> Boolean:
@@ -2971,12 +2976,15 @@ class View:
 
     @property
     def layout_param(self) -> LayoutParam:
-        return LayoutParam()
+        return None
 
     def add_view(self, view: "View"):
         pass
 
     def find_view(self, name: str) -> Optional["View"]:
+        pass
+
+    def make_boundaries(self) -> Boundaries:
         pass
 
 

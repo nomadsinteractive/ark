@@ -280,7 +280,7 @@ void View::addView(sp<View> view, sp<Boolean> discarded)
             layoutTopView->_hierarchy->markHierarchyDirty();
 }
 
-sp<View> View::findView(StringView name) const
+sp<View> View::findView(const StringView name) const
 {
     if(_stub->_hierarchy)
         for(const sp<View>& i : _stub->_hierarchy->updateChildren())

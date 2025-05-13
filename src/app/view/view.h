@@ -18,7 +18,8 @@ namespace ark {
 
 class ARK_API View final : public Wirable, public Wirable::Niche {
 public:
-    View(sp<LayoutParam> layoutParam, String name, sp<Vec3> position = nullptr, sp<Boolean> discarded = nullptr);
+//  [[script::bindings::auto]]
+    View(sp<LayoutParam> layoutParam, String name = "", sp<Vec3> position = nullptr, sp<Boolean> discarded = nullptr);
     ~View() override;
 
     TypeId onPoll(WiringContext& context) override;
@@ -50,6 +51,7 @@ public:
 //  [[script::bindings::auto]]
     sp<View> findView(StringView name) const;
 
+//  [[script::bindings::auto]]
     sp<Boundaries> makeBoundaries();
 
     const sp<ViewHierarchy>& hierarchy() const;

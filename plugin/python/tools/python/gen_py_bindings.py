@@ -26,7 +26,7 @@ RICH_COMPARE_OPS = {
 }
 
 ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+]]\s+)*'
-METHOD_PATTERN = r'([^(\r\n]+)\(([^\r\n]*)\)[^;\r\n]*;'
+METHOD_PATTERN = r'([^(\r\n]+)\(([^;]*)\)[^;\r\n]*;'
 DECLARATION_PATTERN = r'(static\s+)?(const\s+)?([\w\s]+);'
 
 AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration(?:\(([\w_]+)\))?]]\s*enum\s+(\w+)\s*{([^}]+)};')
