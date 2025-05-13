@@ -244,7 +244,9 @@ public:
         const LayoutParam& layoutParam = _hierarchy._node->_layout_param;
         ASSERT(layoutParam.width().type() != LayoutLength::LENGTH_TYPE_PERCENTAGE && layoutParam.height().type() != LayoutLength::LENGTH_TYPE_PERCENTAGE);
         doUpdate(_hierarchy, timestamp);
-        YGNodeCalculateLayout(_yg_node, layoutParam.contentWidth(), layoutParam.contentHeight(), YGDirectionLTR);
+        const float availableWidth = layoutParam.width().isAuto() ? YGUndefined : layoutParam.contentWidth();
+        const float availableHeight = layoutParam.height().isAuto() ? YGUndefined : layoutParam.contentHeight();
+        YGNodeCalculateLayout(_yg_node, availableWidth, availableHeight, YGDirectionLTR);
         updateLayoutResult(_hierarchy);
         return YGNodeIsDirty(_yg_node);
     }

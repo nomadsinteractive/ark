@@ -135,10 +135,6 @@ public:
 
     bool isWrapContent() const;
 
-    bool isMatchParent() const;
-    bool isWidthMatchParent() const;
-    bool isHeightMatchParent() const;
-
 //  [[plugin::builder]]
     class BUILDER final : public Builder<LayoutParam> {
     public:

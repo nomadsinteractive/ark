@@ -53,7 +53,7 @@ LayoutLength::LayoutLength(const String& value, const LengthType type)
 }
 
 LayoutLength::LayoutLength(sp<Numeric> value, const LengthType type)
-    : _value(std::move(value)), _type(type)
+    : _value(std::move(value)), _type(type == LENGTH_TYPE_AUTO ? LENGTH_TYPE_PIXEL : type)
 {
 }
 
@@ -75,6 +75,11 @@ LayoutLength::LengthType LayoutLength::type() const
 float LayoutLength::toPixelLength(const float parentLength) const
 {
     return _type == LENGTH_TYPE_PIXEL ? _value.val() : _value.val() * parentLength / 100.0f;
+}
+
+bool LayoutLength::isAuto() const
+{
+    return _type == LENGTH_TYPE_AUTO;
 }
 
 bool LayoutLength::isMatchParent() const

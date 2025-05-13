@@ -24,7 +24,7 @@ public:
 //  [[script::bindings::auto]]
     LayoutLength(const String& value, LayoutLength::LengthType type = LayoutLength::LENGTH_TYPE_AUTO);
 //  [[script::bindings::auto]]
-    LayoutLength(sp<Numeric> value, LayoutLength::LengthType type = LayoutLength::LENGTH_TYPE_PIXEL);
+    LayoutLength(sp<Numeric> value, LayoutLength::LengthType type = LayoutLength::LENGTH_TYPE_AUTO);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutLength);
 
     bool update(uint64_t timestamp) const;
@@ -36,6 +36,7 @@ public:
 
     float toPixelLength(float parentLength) const;
 
+    bool isAuto() const;
     bool isMatchParent() const;
 
 //  [[plugin::builder]]

@@ -223,21 +223,6 @@ bool LayoutParam::isWrapContent() const
     return _flex_wrap == FLEX_WRAP_WRAP || _flex_wrap == FLEX_WRAP_WRAP_REVERSE;
 }
 
-bool LayoutParam::isMatchParent() const
-{
-    return isWidthMatchParent() || isHeightMatchParent();
-}
-
-bool LayoutParam::isWidthMatchParent() const
-{
-    return _width.isMatchParent();
-}
-
-bool LayoutParam::isHeightMatchParent() const
-{
-    return _height.isMatchParent();
-}
-
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _width(factory.getIBuilder<LayoutLength>(manifest, constants::WIDTH)), _height(factory.getIBuilder<LayoutLength>(manifest, constants::HEIGHT)), _layout(factory.getBuilder<Layout>(manifest, constants::LAYOUT)),
       _flex_direction(Documents::getAttribute<FlexDirection>(manifest, "flex-direction", FLEX_DIRECTION_ROW)), _flex_wrap(Documents::getAttribute<FlexWrap>(manifest, "flex-wrap", FLEX_WRAP_NOWRAP)),
