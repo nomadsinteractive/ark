@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
@@ -22,7 +20,7 @@ public:
     bool updateDescendantLayout(uint64_t timestamp);
     bool updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp);
 
-    const std::vector<sp<View>>& updateChildren();
+    const Vector<sp<View>>& updateChildren();
     void markHierarchyDirty();
 
     void addView(sp<View> view);
@@ -36,8 +34,8 @@ private:
     sp<Layout> _layout;
     sp<Updatable> _updatable_layout;
 
-    std::vector<sp<View>> _children;
-    std::vector<sp<View>> _incremental;
+    Vector<sp<View>> _children;
+    Vector<sp<View>> _incremental;
 
     Timestamp _timestamp;
 };

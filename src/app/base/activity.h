@@ -55,7 +55,7 @@ public:
     const sp<View>& view() const;
 
 //  [[script::bindings::auto]]
-    void addView(sp<View> view, sp<Boolean> discarded = nullptr);
+    void addView(sp<View> view);
 
 //  [[script::bindings::auto]]
     void addEntity(sp<Entity> entity);

@@ -211,12 +211,12 @@ void updateLayoutResult(const Layout::Hierarchy& hierarchy)
     layoutNode.setPaddings(V4(YGNodeLayoutGetPadding(ygNode, YGEdgeTop), YGNodeLayoutGetPadding(ygNode, YGEdgeRight),
                               YGNodeLayoutGetPadding(ygNode, YGEdgeBottom), YGNodeLayoutGetPadding(ygNode, YGEdgeLeft)));
     layoutNode.setOffsetPosition(V2(YGNodeLayoutGetLeft(ygNode), YGNodeLayoutGetTop(ygNode)));
-    layoutNode.setSize({YGNodeLayoutGetWidth(ygNode), YGNodeLayoutGetHeight(ygNode)});
+    layoutNode.setSize(V2(YGNodeLayoutGetWidth(ygNode), YGNodeLayoutGetHeight(ygNode)));
     for(const Layout::Hierarchy& i : hierarchy._child_nodes)
         updateLayoutResult(i);
 }
 
-void doUpdate(const Layout::Hierarchy& hierarchy, uint64_t timestamp)
+void doUpdate(const Layout::Hierarchy& hierarchy, const uint64_t timestamp)
 {
     const Layout::Node& layoutNode = hierarchy._node;
     YGNodeRef ygNode = static_cast<YGNodeRef>(layoutNode._tag);

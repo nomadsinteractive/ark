@@ -120,12 +120,13 @@ sp<View::Stub> findLayoutTopView(sp<View::Stub> stub)
 
 template<size_t IDX> class LayoutSize final : public Numeric {
 public:
-    LayoutSize(sp<View::Stub> stub)
-        : _stub(std::move(stub)) {
+    LayoutSize(sp<View::Stub> stub, sp<Updatable> updatable)
+        : _stub(std::move(stub)), _updatable(std::move(updatable)) {
     }
 
-    bool update(uint64_t timestamp) override {
-        return _stub->_layout_node ? _stub->_layout_node->size().update(timestamp) : false;
+    bool update(const uint64_t timestamp) override {
+        const bool dirty = _updatable->update(timestamp);
+        return _stub->_layout_node ? _stub->_layout_node->size().update(timestamp) | dirty : dirty;
     }
 
     float val() override {
@@ -138,6 +139,7 @@ public:
 
 private:
     sp<View::Stub> _stub;
+    sp<Updatable> _updatable;
 };
 
 class LayoutPosition final : public Vec3 {
@@ -147,7 +149,7 @@ public:
     {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         return _updatable->update(timestamp);
     }
@@ -177,7 +179,7 @@ public:
     {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         const sp<View::Stub> stub = findLayoutTopView(_stub);
         return stub ? stub->update(timestamp) : false;
@@ -253,25 +255,20 @@ void View::setLayoutParam(sp<LayoutParam> layoutParam)
 
 const sp<Vec3>& View::layoutPosition()
 {
-    if(!_updatable_layout)
-        _updatable_layout = sp<Updatable>::make<UpdatableOncePerFrame>(sp<Updatable>::make<UpdatableLayoutTopView>(_stub));
     if(!_layout_position)
-        _layout_position = sp<LayoutPosition>::make(_stub, _updatable_layout);
+        _layout_position = sp<LayoutPosition>::make(_stub, ensureUpdatableLayout());
     return _layout_position;
 }
 
 const sp<Size>& View::layoutSize()
 {
     if(!_layout_size)
-        _layout_size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), Global<Constants>()->NUMERIC_ZERO);
+        _layout_size = sp<Size>::make(sp<LayoutSize<0>>::make(_stub, ensureUpdatableLayout()), sp<LayoutSize<1>>::make(_stub, ensureUpdatableLayout()), Global<Constants>()->NUMERIC_ZERO);
     return _layout_size;
 }
 
-void View::addView(sp<View> view, sp<Boolean> discarded)
+void View::addView(sp<View> view)
 {
-    if(discarded)
-        view->setDiscarded(std::move(discarded));
-
     view->setParent(*this);
     _stub->ensureViewHierarchy().addView(std::move(view));
 
@@ -306,6 +303,13 @@ const sp<ViewHierarchy>& View::hierarchy() const
 void View::setParent(const View& view)
 {
     _stub->_parent_stub = view._stub;
+}
+
+sp<Updatable>& View::ensureUpdatableLayout()
+{
+    if(!_updatable_layout)
+        _updatable_layout = sp<Updatable>::make<UpdatableOncePerFrame>(sp<Updatable>::make<UpdatableLayoutTopView>(_stub));
+    return _updatable_layout;
 }
 
 void View::markAsTopView()

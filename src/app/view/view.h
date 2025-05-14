@@ -47,7 +47,7 @@ public:
     const sp<Size>& layoutSize();
 
 //  [[script::bindings::auto]]
-    void addView(sp<View> view, sp<Boolean> discarded = nullptr);
+    void addView(sp<View> view);
 //  [[script::bindings::auto]]
     sp<View> findView(StringView name) const;
 
@@ -87,6 +87,8 @@ public:
     struct Stub;
 
 private:
+    sp<Updatable>& ensureUpdatableLayout();
+
     void markAsTopView();
 
 protected:

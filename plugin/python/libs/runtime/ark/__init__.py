@@ -2976,7 +2976,15 @@ class View:
 
     @property
     def layout_param(self) -> LayoutParam:
-        return None
+        pass
+
+    @property
+    def layout_position(self) -> Vec3:
+        pass
+
+    @property
+    def layout_size(self) -> Size:
+        pass
 
     def add_view(self, view: "View"):
         pass

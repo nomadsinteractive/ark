@@ -1,9 +1,9 @@
 #include "app/view/view_hierarchy.h"
 
 #include "graphics/base/render_request.h"
-
 #include "graphics/inf/layout.h"
 #include "graphics/components/layout_param.h"
+
 #include "app/view/view.h"
 
 namespace ark {
@@ -42,7 +42,7 @@ bool ViewHierarchy::updateHierarchy()
         else
         {
             if(i->hierarchy())
-                i->hierarchy()->updateHierarchy();
+                hierarchyChanged |= i->hierarchy()->updateHierarchy();
 
             ++iter;
         }
@@ -80,7 +80,7 @@ bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t ti
     return updateDescendantLayout(timestamp) || hierarchyDirty;
 }
 
-const std::vector<sp<View>>& ViewHierarchy::updateChildren()
+const Vector<sp<View>>& ViewHierarchy::updateChildren()
 {
     for(sp<View>& i : _incremental)
         _children.push_back(std::move(i));

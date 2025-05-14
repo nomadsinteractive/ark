@@ -104,9 +104,9 @@ const sp<View>& Activity::view() const
     return _view;
 }
 
-void Activity::addView(sp<View> view, sp<Boolean> discarded)
+void Activity::addView(sp<View> view)
 {
-    _view->addView(std::move(view), std::move(discarded));
+    _view->addView(std::move(view));
 }
 
 void Activity::addEntity(sp<Entity> entity)

@@ -32,10 +32,11 @@ Size::Size(sp<Numeric> width, sp<Numeric> height, sp<Numeric> depth)
 
 V3 Size::val()
 {
+    update(0);
     return _impl->val();
 }
 
-bool Size::update(uint64_t timestamp)
+bool Size::update(const uint64_t timestamp)
 {
     return _impl->update(timestamp);
 }
@@ -45,7 +46,7 @@ float Size::widthAsFloat() const
     return _impl->x()->val();
 }
 
-void Size::setWidth(float width)
+void Size::setWidth(const float width)
 {
     _impl->x()->set(width);
 }
@@ -60,7 +61,7 @@ float Size::heightAsFloat() const
     return _impl->y()->val();
 }
 
-void Size::setHeight(float height)
+void Size::setHeight(const float height)
 {
     _impl->y()->set(height);
 }
@@ -75,7 +76,7 @@ float Size::depthAsFloat() const
     return _impl->z()->val();
 }
 
-void Size::setDepth(float depth)
+void Size::setDepth(const float depth)
 {
     _impl->z()->set(depth);
 }
@@ -109,7 +110,7 @@ void Size::reset(const Size& other)
 
 sp<Size> Size::freeze()
 {
-    return sp<Size>::make(_impl->val());
+    return sp<Size>::make(val());
 }
 
 const sp<Vec3Impl>& Size::impl() const
