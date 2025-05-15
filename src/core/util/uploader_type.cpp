@@ -17,6 +17,23 @@ namespace ark {
 
 namespace {
 
+class UploaderEmpty final : public Uploader {
+public:
+    UploaderEmpty()
+        : Uploader(0)
+    {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return false;
+    }
+
+    void upload(Writable& buf) override
+    {
+    }
+};
+
 class UploaderList final : public Uploader {
 private:
     struct Node {
@@ -134,7 +151,7 @@ sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 
 sp<Uploader> UploaderType::create(sp<ByteArray> value)
 {
-    return sp<Uploader>::make<UploaderArray<uint8_t>>(std::move(value));
+    return value ? sp<Uploader>::make<UploaderArray<uint8_t>>(std::move(value)) : sp<Uploader>::make<UploaderEmpty>();
 }
 
 sp<Uploader> UploaderType::create(sp<FloatArray> value)

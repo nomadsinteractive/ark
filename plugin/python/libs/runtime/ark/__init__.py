@@ -1351,7 +1351,7 @@ class Translation(Vec3):
 
 
 class Uploader:
-    def __init__(self, delegate: Union[Numeric, Vec2, Vec3, Vec4, list[_Mat], list[tuple], list[int], list['Uploader'], Any], size: int = 0):
+    def __init__(self, delegate: Union[Numeric, Vec2, Vec3, Vec4, list[_Mat], list[tuple], list[int], list['Uploader'], Any] = None):
         pass
 
     @property

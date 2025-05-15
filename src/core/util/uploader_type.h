@@ -14,7 +14,7 @@ namespace ark {
 class ARK_API UploaderType {
 public:
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(sp<ByteArray> value);
+    static sp<Uploader> create(sp<ByteArray> value = nullptr);
 //  [[script::bindings::constructor]]
     static sp<Uploader> create(sp<FloatArray> value);
 //  [[script::bindings::constructor]]
