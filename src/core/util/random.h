@@ -25,17 +25,17 @@ public:
 //  [[script::bindings::auto]]
     sp<Integer> randint(int32_t a, int32_t b) const;
 //  [[script::bindings::auto]]
-    sp<Integer> randint(const sp<Integer>& a, const sp<Integer>& b) const;
+    sp<Integer> randint(sp<Integer> a, sp<Integer> b) const;
 
 //  [[script::bindings::auto]]
     sp<Numeric> uniform(float a, float b);
 //  [[script::bindings::auto]]
-    sp<Numeric> uniform(const sp<Numeric>& a, const sp<Numeric>& b);
+    sp<Numeric> uniform(sp<Numeric> a, sp<Numeric> b);
 
 //  [[script::bindings::auto]]
     sp<Numeric> normal(float a, float b);
 //  [[script::bindings::auto]]
-    sp<Numeric> normal(const sp<Numeric>& a, const sp<Numeric>& b);
+    sp<Numeric> normal(sp<Numeric> a, sp<Numeric> b);
 
 private:
     uint32_t _seed;

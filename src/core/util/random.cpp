@@ -120,15 +120,15 @@ sp<Integer> Random::randint(const int32_t a, const int32_t b) const
     return g;
 }
 
-sp<Integer> Random::randint(const sp<Integer>& a, const sp<Integer>& b) const
+sp<Integer> Random::randint(sp<Integer> a, sp<Integer> b) const
 {
-    sp<Integer> g = sp<Integer>::make<DynamicDistribution<std::uniform_int_distribution<int32_t>, int32_t>>(a, b, _generator);
+    sp<Integer> g = sp<Integer>::make<DynamicDistribution<std::uniform_int_distribution<int32_t>, int32_t>>(std::move(a), std::move(b), _generator);
     if(_nonvolatile)
         return toNonvolatile<int32_t>(std::move(g));
     return g;
 }
 
-sp<Numeric> Random::uniform(float a, float b)
+sp<Numeric> Random::uniform(const float a, const float b)
 {
     sp<Numeric> g = sp<Numeric>::make<Distribution<std::uniform_real_distribution<float>, float>>(std::uniform_real_distribution<float>(a, b), _generator);
     if(_nonvolatile)
@@ -136,15 +136,15 @@ sp<Numeric> Random::uniform(float a, float b)
     return g;
 }
 
-sp<Numeric> Random::uniform(const sp<Numeric>& a, const sp<Numeric>& b)
+sp<Numeric> Random::uniform(sp<Numeric> a, sp<Numeric> b)
 {
-    sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::uniform_real_distribution<float>, float>>(a, b, _generator);
+    sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::uniform_real_distribution<float>, float>>(std::move(a), std::move(b), _generator);
     if(_nonvolatile)
         return toNonvolatile<float>(std::move(g));
     return g;
 }
 
-sp<Numeric> Random::normal(float a, float b)
+sp<Numeric> Random::normal(const float a, const float b)
 {
     sp<Numeric> g = sp<Numeric>::make<Distribution<std::normal_distribution<float>, float>>(std::normal_distribution<float>(a, b), _generator);
     if(_nonvolatile)
@@ -152,9 +152,9 @@ sp<Numeric> Random::normal(float a, float b)
     return g;
 }
 
-sp<Numeric> Random::normal(const sp<Numeric>& a, const sp<Numeric>& b)
+sp<Numeric> Random::normal(sp<Numeric> a, sp<Numeric> b)
 {
-    sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::normal_distribution<float>>>(a, b, _generator);
+    sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::normal_distribution<float>>>(std::move(a), std::move(b), _generator);
     if(_nonvolatile)
         return toNonvolatile<float>(std::move(g));
     return g;

@@ -74,9 +74,7 @@ bool PyInstance::hasAttr(const char* name) const
 
 PyInstance PyInstance::getAttr(const char* name) const
 {
-    const sp<PyInstanceRef> attr = sp<PyInstanceRef>::make(PyObject_GetAttrString(_ref->instance(), name), true);
-    PythonExtension::instance().referenceManager()->track(attr);
-    return attr;
+    return {sp<PyInstanceRef>::make(PyObject_GetAttrString(_ref->instance(), name), true)};
 }
 
 PyObject* PyInstance::call(PyObject* args) const

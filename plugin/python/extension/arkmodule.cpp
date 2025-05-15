@@ -38,8 +38,8 @@ PyObject* ark_log(const Log::LogLevel level, PyObject* args)
             Log::log(level, "Python", "None");
         else
         {
-            PyInstance varargs = PyInstance::steal(PyTuple_GetSlice(args, 1, size));
-            PyInstance formatted = PyInstance::steal(size > 1 ? PyUnicode_Format(pyContent.pyObject(), varargs.pyObject()) : PyObject_Str(pyContent.pyObject()));
+            const PyInstance varargs = PyInstance::steal(PyTuple_GetSlice(args, 1, size));
+            const PyInstance formatted = PyInstance::steal(size > 1 ? PyUnicode_Format(pyContent.pyObject(), varargs.pyObject()) : PyObject_Str(pyContent.pyObject()));
             CHECK(formatted, "Unsatisfied format: %s", PyCast::toString(pyContent.pyObject()).c_str());
             const String content = PyCast::toString(formatted.pyObject());
             Log::log(level, "Python", content.c_str());
@@ -150,6 +150,11 @@ PyObject* ark_getRefManager(PyObject* /*self*/, PyObject* /*args*/)
     return PyCast::toPyObject(PythonExtension::instance().referenceManager());
 }
 
+PyObject* ark_getApplicationFacade(PyObject* /*self*/, PyObject* /*args*/)
+{
+    return PyCast::toPyObject(Ark::instance().applicationContext()->applicationFacade());
+}
+
 PyObject* ark_trace_(PyObject* /*self*/, PyObject* /*args*/)
 {
     TRACE(true, "");
@@ -171,6 +176,7 @@ PyMethodDef ARK_METHODS[] = {
     {"dir_separator",  ark_dirSeparator, METH_VARARGS, "dir_separator"},
     {"is_ndc_y_up",  ark_is_NDC_Y_Up, METH_VARARGS, "is_ndc_y_up"},
     {"get_ref_manager",  ark_getRefManager, METH_VARARGS, "get_ref_manager"},
+    {"facade",  ark_getApplicationFacade, METH_VARARGS, "get ApplicationFacade interface"},
     {"__trace__",  ark_trace_, METH_VARARGS, "__trace__"},
     {nullptr, nullptr, 0, nullptr}
 };

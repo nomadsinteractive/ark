@@ -70,6 +70,10 @@ def get_ref_manager():
     return None
 
 
+def facade() -> "ApplicationFacade":
+    return None
+
+
 def build_type() -> int:
     return 0
 
