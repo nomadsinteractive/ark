@@ -1526,6 +1526,8 @@ class Node:
 
 
 class Boundaries:
+    def __init__(self, aabb_min: Optional[TYPE_VEC3], aabb_max: Optional[TYPE_VEC3], size: Optional["Size"]):
+        pass
 
     @property
     def aabb_min(self) -> Vec3:
@@ -2583,8 +2585,16 @@ class Text:
         pass
 
     @property
-    def transform(self) -> Optional[Mat4]:
+    def boundaries(self) -> Optional[Boundaries]:
+        return None
+
+    @boundaries.setter
+    def boundaries(self, boundaries: Optional[Boundaries]):
         pass
+
+    @property
+    def transform(self) -> Optional[Mat4]:
+        return None
 
     @transform.setter
     def transform(self, transform: Optional[Mat4]):

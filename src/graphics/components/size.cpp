@@ -32,7 +32,6 @@ Size::Size(sp<Numeric> width, sp<Numeric> height, sp<Numeric> depth)
 
 V3 Size::val()
 {
-    update(0);
     return _impl->val();
 }
 

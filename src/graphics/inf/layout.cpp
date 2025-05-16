@@ -73,7 +73,7 @@ void Layout::Node::setSize(const V2& size)
     _size.reset(size);
 }
 
-bool Layout::Node::update(uint32_t timestamp)
+bool Layout::Node::update(const uint32_t timestamp)
 {
     const bool dirty = UpdatableUtil::update(timestamp, _layout_param->margins(), _layout_param->paddings(), _offset_position);
     if(dirty)
