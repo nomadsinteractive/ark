@@ -11,7 +11,8 @@ namespace ark {
 
 class ARK_API Arena final : public Wirable::Niche {
 public:
-    Arena(sp<RenderGroup> renderGroup, sp<ResourceLoader> resourceLoader);
+//  [[script::bindings::auto]]
+    Arena(sp<ResourceLoader> resourceLoader);
 
 //  [[script::bindings::property]]
     const sp<BoxBundle>& layers() const;

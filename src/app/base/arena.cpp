@@ -9,7 +9,6 @@
 namespace ark {
 
 struct Arena::Stub {
-    sp<RenderGroup> _render_group;
     sp<ResourceLoader> _resource_loader;
 
     Map<String, sp<Layer>> _layers;
@@ -72,8 +71,8 @@ private:
     sp<Stub> _stub;
 };
 
-Arena::Arena(sp<RenderGroup> renderGroup, sp<ResourceLoader> resourceLoader)
-    : Niche("layer-name"), _stub(sp<Stub>::make(Stub{std::move(renderGroup), std::move(resourceLoader)})), _layers(sp<LayerBundle>::make(_stub)), _render_layers(sp<RenderLayerBundle>::make(_stub))
+Arena::Arena(sp<ResourceLoader> resourceLoader)
+    : Niche("layer-name"), _stub(sp<Stub>::make(Stub{std::move(resourceLoader)})), _layers(sp<LayerBundle>::make(_stub)), _render_layers(sp<RenderLayerBundle>::make(_stub))
 {
 }
 

@@ -592,7 +592,7 @@ class Buffer:
     def id(self) -> int:
         return 0
 
-    def upload(self, uploader: 'Uploader', future: Optional[Future] = None):
+    def upload(self, uploader: "Uploader", future: Optional[Future] = None):
         pass
 
     def synchronize(self, offset: int, size: int, cancelled: "Boolean") -> ByteArray:
@@ -638,17 +638,17 @@ class Texture:
 
 class RenderController:
 
-    def upload_buffer(self, buffer: Buffer, uploader: 'Uploader', upload_strategy: int, future: Optional[Future] = None,
+    def upload_buffer(self, buffer: Buffer, uploader: "Uploader", upload_strategy: int, future: Optional[Future] = None,
                       upload_priority: int = Enum.UPLOAD_PRIORITY_NORMAL):
         pass
 
-    def make_buffer(self, buffer_type: int, buffer_usage: int, uploader: Optional['Uploader'], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
+    def make_buffer(self, buffer_type: int, buffer_usage: int, uploader: Optional["Uploader"], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
         pass
 
-    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_BIT_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
+    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_BIT_DYNAMIC, uploader: Optional["Uploader"] = None) -> Buffer:
         pass
 
-    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_BIT_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
+    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_BIT_DYNAMIC, uploader: Optional["Uploader"] = None) -> Buffer:
         pass
 
     def create_texture2d(self, bitmap: 'Bitmap', texture_format: int = Texture.FORMAT_AUTO, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY,
@@ -1351,7 +1351,7 @@ class Translation(Vec3):
 
 
 class Uploader:
-    def __init__(self, delegate: Union[Numeric, Vec2, Vec3, Vec4, list[_Mat], list[tuple], list[int], list['Uploader'], Any] = None):
+    def __init__(self, value: Union[Numeric, Vec2, Vec3, Vec4, list[_Mat], list[tuple], list[int], list["Uploader"], Any] = None):
         pass
 
     @property
@@ -1364,10 +1364,10 @@ class Uploader:
     def repeat(self, length: int, stride: int = 0) -> Self:
         pass
 
-    def wrap(self) -> 'Uploader':
+    def wrap(self) -> "Uploader":
         pass
 
-    def reset(self, delegate: 'Uploader'):
+    def reset(self, value: "Uploader"):
         pass
 
     def mark_dirty(self):

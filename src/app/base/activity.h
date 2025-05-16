@@ -26,21 +26,11 @@ public:
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
     bool onEvent(const Event& event) override;
 
-    sp<Entity> makeEntity(Traits components = {}) const;
-
 //  [[script::bindings::auto]]
     sp<Arena> makeArena() const;
 
-//  [[script::bindings::auto]]
-    Box getReference(const String& id) const;
-
 //  [[script::bindings::property]]
     const sp<ResourceLoader>& resourceLoader() const;
-
-//  [[script::bindings::property]]
-    sp<BoxBundle> refs() const;
-//  [[script::bindings::property]]
-    sp<BoxBundle> packages() const;
 
 //  [[script::bindings::auto]]
     void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
@@ -57,9 +47,6 @@ public:
 //  [[script::bindings::auto]]
     void addView(sp<View> view);
 
-//  [[script::bindings::auto]]
-    void addEntity(sp<Entity> entity);
-
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Activity> {
     public:
@@ -73,7 +60,6 @@ public:
         SafeBuilder<ResourceLoader> _resource_loader;
         builder<View> _root_view;
         builder<RenderGroup> _render_group;
-        Vector<builder<Entity>> _entities;
     };
 
 private:
@@ -81,7 +67,6 @@ private:
     sp<RenderGroup> _render_group;
     sp<ResourceLoader> _resource_loader;
     op<EventListenerList> _event_listeners;
-    Vector<sp<Entity>> _entities;
 };
 
 }

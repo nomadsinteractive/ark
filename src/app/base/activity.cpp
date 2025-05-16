@@ -43,38 +43,15 @@ bool Activity::onEvent(const Event& event)
     return _event_listeners->onEvent(event);
 }
 
-sp<Entity> Activity::makeEntity(Traits components) const
-{
-    components.put(_resource_loader);
-    return sp<Entity>::make(std::move(components));
-}
-
 sp<Arena> Activity::makeArena() const
 {
-    return sp<Arena>::make(_render_group, _resource_loader);
-}
-
-Box Activity::getReference(const String& id) const
-{
-    return _resource_loader->refs()->get(id);
+    return sp<Arena>::make(_resource_loader);
 }
 
 const sp<ResourceLoader>& Activity::resourceLoader() const
 {
     CHECK(_resource_loader, "Trying to get ResourceLoader on a discarded Activity");
     return _resource_loader;
-}
-
-sp<BoxBundle> Activity::refs() const
-{
-    CHECK(_resource_loader, "Trying to get ResourceLoader on a discarded Activity");
-    return _resource_loader->refs();
-}
-
-sp<BoxBundle> Activity::packages() const
-{
-    CHECK(_resource_loader, "Trying to get ResourceLoader on a discarded Activity");
-    return _resource_loader->packages();
 }
 
 void Activity::addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
@@ -109,14 +86,9 @@ void Activity::addView(sp<View> view)
     _view->addView(std::move(view));
 }
 
-void Activity::addEntity(sp<Entity> entity)
-{
-    _entities.push_back(std::move(entity));
-}
-
 Activity::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _resource_loader(factory.getBuilder<ResourceLoader>(manifest, "resource-loader")),
-      _root_view(factory.ensureBuilder<View>(manifest, "root-view")), _render_group(factory.ensureBuilder<RenderGroup>(manifest)), _entities(factory.makeBuilderList<Entity>(manifest, constants::ENTITY))
+      _root_view(factory.ensureBuilder<View>(manifest, "root-view")), _render_group(factory.ensureBuilder<RenderGroup>(manifest))
 {
 }
 
@@ -134,9 +106,6 @@ sp<Activity> Activity::BUILDER::build(const Scope& args)
         else if(name == constants::VIEW)
             activity->addView(factory.ensure<View>(i, args));
     }
-
-    for(const builder<Entity>& i : _entities)
-        activity->addEntity(i->build(args));
 
     return activity;
 }

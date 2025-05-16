@@ -46,17 +46,6 @@ private:
         Map<String, SafeBuilder<T>> _builders;
     };
 
-    class PackageRefs final : public BoxBundle {
-    public:
-        PackageRefs(const BeanFactory& beanFactory);
-
-        Box get(const String& name) override;
-
-    private:
-        BeanFactory _bean_factory;
-        HashMap<String, sp<ResourceLoader>> _packages;
-    };
-
 public:
     ResourceLoader(const BeanFactory& beanFactory);
     ~ResourceLoader();
@@ -69,11 +58,6 @@ public:
         const Identifier id = name.at(0) == Identifier::ID_TYPE_REFERENCE ? Identifier::parse(name) : Identifier::parseRef(name);
         return _builder_refs.ensure<BuilderRefs<T>>(_bean_factory)->getBuilder(id).build(args);
     }
-
-//  [[script::bindings::property]]
-    sp<BoxBundle> refs() const;
-//  [[script::bindings::property]]
-    sp<BoxBundle> packages() const;
 
     void import(const document& manifest, BeanFactory& beanFactory);
 
@@ -108,8 +92,6 @@ public:
 private:
     BeanFactory _bean_factory;
     Traits _builder_refs;
-
-    sp<PackageRefs> _packages;
 };
 
 }

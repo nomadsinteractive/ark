@@ -12,23 +12,13 @@
 namespace ark {
 
 ResourceLoader::ResourceLoader(const BeanFactory& beanFactory)
-    : _bean_factory(beanFactory), _packages(sp<PackageRefs>::make(beanFactory))
+    : _bean_factory(beanFactory)
 {
 }
 
 ResourceLoader::~ResourceLoader()
 {
     LOGD("");
-}
-
-sp<BoxBundle> ResourceLoader::refs() const
-{
-    return _bean_factory.references();
-}
-
-sp<BoxBundle> ResourceLoader::packages() const
-{
-    return _packages;
 }
 
 void ResourceLoader::import(const document& manifest, BeanFactory& parent)
@@ -76,24 +66,6 @@ ResourceLoader::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& v
 sp<ResourceLoader> ResourceLoader::DICTIONARY::build(const Scope& args)
 {
     return _application_context->createResourceLoader(_src, args);
-}
-
-ResourceLoader::PackageRefs::PackageRefs(const BeanFactory& beanFactory)
-    : _bean_factory(beanFactory)
-{
-}
-
-Box ResourceLoader::PackageRefs::get(const String& name)
-{
-    const auto iter = _packages.find(name);
-    if(iter != _packages.end())
-        return Box(iter->second);
-
-    sp<BeanFactory> package = _bean_factory.getPackage(name);
-    DCHECK(package, "ResourceLoader has no package named \"%s\"", name.c_str());
-    const sp<ResourceLoader> resourceLoader = sp<ResourceLoader>::make(std::move(package));
-    _packages.insert(std::make_pair(name, resourceLoader));
-    return Box(resourceLoader);
 }
 
 }

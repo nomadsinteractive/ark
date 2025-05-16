@@ -11,7 +11,7 @@ namespace ark {
 /*
 
 class BoxBundle {
-    [[script::bindings::getprop]]
+    [[script::bindings::map(get)]]
     virtual Box get(const String& name) override;
 };
 
