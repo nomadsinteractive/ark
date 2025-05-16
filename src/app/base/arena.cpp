@@ -4,7 +4,6 @@
 #include "core/inf/dictionary.h"
 
 #include "graphics/base/render_layer.h"
-#include "graphics/impl/renderer/render_group.h"
 
 namespace ark {
 

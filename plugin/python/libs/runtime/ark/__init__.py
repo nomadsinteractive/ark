@@ -1894,6 +1894,8 @@ class Layer:
 
 
 class Arena:
+    def __init__(self, resource_loader: ResourceLoader):
+        pass
 
     @property
     def layers(self):
