@@ -35,7 +35,7 @@ public:
         T r;
         int32_t depth = 0;
         StringBuffer sb;
-        for(char c : str._str) {
+        for(const char c : str._str) {
             if(c == sep && depth == 0) {
                 r.push_back(sb.str());
                 sb.clear();
@@ -49,8 +49,7 @@ public:
                 DCHECK(depth >= 0, "Open close mismatch: %s", str.c_str());
             }
         }
-        String tail = sb.str();
-        if(tail)
+        if(String tail = sb.str())
             r.push_back(std::move(tail));
         return r;
     }

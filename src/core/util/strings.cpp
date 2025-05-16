@@ -101,93 +101,11 @@ private:
     Vector<sp<IBuilder<String>>> _builders;
 };
 
-}
-
-sp<IBuilder<String>> Strings::load(const String& resid)
-{
-    if(!resid || resid.find('{') != String::npos)
-        return sp<IBuilder<String>>::make<StringBuilderImpl3>(resid);
-
-    const Identifier id = Identifier::parse(resid, Identifier::ID_TYPE_AUTO, false);
-    if(id.isRef())
-        return sp<IBuilder<String>>::make<StringBuilderImpl1>(id.package(), id.ref());
-    if(id.isArg())
-        return sp<IBuilder<String>>::make<StringBuilderImpl2>(id.arg());
-    return sp<IBuilder<String>>::make<StringBuilderImpl3>(resid);
-}
-
-String Strings::loadFromReadable(Readable& readable)
-{
-    std::stringstream sb;
-    uint32_t len;
-    char buffer[4096];
-    while((len = readable.read(buffer, sizeof(buffer))) != 0)
-        sb.write(buffer, len);
-    return {sb.str().c_str()};
-}
-
-String Strings::unwrap(const String& str, const char open, const char close)
-{
-    if(!str.empty() && str.at(0) == open && str.at(str.length() - 1) == close)
-        return str.substr(1, str.length() - 1);
-    return str;
-}
-
-void Strings::parentheses(const String& expr, String& lvalue, String& remaining)
-{
-    const size_t pos = parentheses(expr, 0);
-    lvalue = expr.substr(1, pos);
-    remaining = expr.substr(pos + 1).strip();
-}
-
-size_t Strings::parentheses(const String& expr, size_t start, char open, char close)
-{
-    DCHECK(expr.length() > start, "Illegal expression: unexpected end");
-    CHECK(expr.at(start) == open, "Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
-    const size_t size = expr.length();
-    int32_t count = 1;
-    for(size_t i = start + 1; i < size; i++)
-    {
-        char c = expr.at(i);
-        if(c == open)
-            count++;
-        else if(c == close && --count == 0)
-            return i;
-    }
-    FATAL("Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
-    return 0;
-}
-
-bool Strings::parseArrayAndIndex(const String& expr, String& name, int32_t& index)
-{
-    const auto s1 = expr.find('[');
-    if(s1 == String::npos)
-        return false;
-    const auto s2 = expr.find(']');
-    if(s2 == String::npos)
-        return false;
-
-    name = expr.substr(0, s1 - 1);
-    index = eval<int32_t>(expr.substr(s1 + 1, s2));
-    return true;
-}
-
-Map<String, String> Strings::parseProperties(const String& str, char delim, char equal)
-{
-    Map<String, String> properties;
-    Vector<String> elems = str.split(delim);
-    for(const String& i : elems)
-    {
-        const auto [key, value] = i.cut(equal);
-        properties[key] = value ? value.value() : "";
-    }
-    return properties;
-}
 
 typedef unsigned char byte_t;
 
 // Reference: http://en.wikipedia.org/wiki/Utf8
-static const byte_t cUtf8Limits[] =
+constexpr byte_t cUtf8Limits[] =
 {
     0xC0, // Start of a 2-byte sequence
     0xE0, // Start of a 3-byte sequence
@@ -309,7 +227,6 @@ bool utf16ToUtf8(char* dest, size_t& destLen, const wchar_t* src, size_t maxSrcL
 
     while(true)
     {
-        uint32_t value;
         size_t numAdds;
 
         if(srcPos == maxSrcLen || src[srcPos] == L'\0')
@@ -323,7 +240,7 @@ bool utf16ToUtf8(char* dest, size_t& destLen, const wchar_t* src, size_t maxSrcL
             return true;
         }
 
-        value = src[srcPos++];
+        uint32_t value = src[srcPos++];
 
         if(value < 0x80)   // 0-127, US-ASCII (single byte)
         {
@@ -365,7 +282,7 @@ bool utf16ToUtf8(char* dest, size_t& destLen, const wchar_t* src, size_t maxSrcL
     return false;
 }
 
-bool wStrToUtf8(const wchar_t* wideStr, size_t maxCount, String& utf8Str)
+bool wStrToUtf8(const wchar_t* wideStr, const size_t maxCount, String& utf8Str)
 {
     size_t destLen = 0;
 
@@ -388,6 +305,89 @@ bool wStrToUtf8(const std::wstring& wideStr, String& utf8Str)
     return wStrToUtf8(wideStr.c_str(), wideStr.size(), utf8Str);
 }
 
+}
+
+sp<IBuilder<String>> Strings::load(const String& resid)
+{
+    if(!resid || resid.find('{') != String::npos)
+        return sp<IBuilder<String>>::make<StringBuilderImpl3>(resid);
+
+    const Identifier id = Identifier::parse(resid, Identifier::ID_TYPE_AUTO, false);
+    if(id.isRef())
+        return sp<IBuilder<String>>::make<StringBuilderImpl1>(id.package(), id.ref());
+    if(id.isArg())
+        return sp<IBuilder<String>>::make<StringBuilderImpl2>(id.arg());
+    return sp<IBuilder<String>>::make<StringBuilderImpl3>(resid);
+}
+
+String Strings::loadFromReadable(Readable& readable)
+{
+    std::stringstream sb;
+    uint32_t len;
+    char buffer[4096];
+    while((len = readable.read(buffer, sizeof(buffer))) != 0)
+        sb.write(buffer, len);
+    return {sb.str().c_str()};
+}
+
+String Strings::unwrap(const String& str, const char open, const char close)
+{
+    if(!str.empty() && str.at(0) == open && str.at(str.length() - 1) == close)
+        return str.substr(1, str.length() - 1);
+    return str;
+}
+
+void Strings::parentheses(const String& expr, String& lvalue, String& remaining)
+{
+    const size_t pos = parentheses(expr, 0);
+    lvalue = expr.substr(1, pos);
+    remaining = expr.substr(pos + 1).strip();
+}
+
+size_t Strings::parentheses(const String& expr, size_t start, char open, char close)
+{
+    DCHECK(expr.length() > start, "Illegal expression: unexpected end");
+    CHECK(expr.at(start) == open, "Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
+    const size_t size = expr.length();
+    int32_t count = 1;
+    for(size_t i = start + 1; i < size; i++)
+    {
+        char c = expr.at(i);
+        if(c == open)
+            count++;
+        else if(c == close && --count == 0)
+            return i;
+    }
+    FATAL("Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
+    return 0;
+}
+
+bool Strings::parseArrayAndIndex(const String& expr, String& name, int32_t& index)
+{
+    const auto s1 = expr.find('[');
+    if(s1 == String::npos)
+        return false;
+    const auto s2 = expr.find(']');
+    if(s2 == String::npos)
+        return false;
+
+    name = expr.substr(0, s1 - 1);
+    index = eval<int32_t>(expr.substr(s1 + 1, s2));
+    return true;
+}
+
+Map<String, String> Strings::parseProperties(const String& str, char delim, char equal)
+{
+    Map<String, String> properties;
+    Vector<String> elems = str.split(delim);
+    for(const String& i : elems)
+    {
+        const auto [key, value] = i.cut(equal);
+        properties[key] = value ? value.value() : "";
+    }
+    return properties;
+}
+
 String Strings::toUTF8(const std::wstring& text)
 {
     String utf8;
@@ -404,8 +404,7 @@ std::wstring Strings::fromUTF8(const StringView text)
 
 bool Strings::splitFunction(const String& expr, String& func, String& args)
 {
-    const auto idx = expr.find('(');
-    if(idx && idx != String::npos)
+    if(const auto idx = expr.find('('); idx && idx != String::npos)
     {
         func = expr.substr(0, idx);
         args = expr.substr(idx + 1, expr.length() - 1);
@@ -452,7 +451,7 @@ String Strings::svprintf(const char* format, va_list args)
     return String(lpstr); // We don't want the '\0' inside
 }
 
-String Strings::dumpMemory(const uint8_t* memory, size_t length)
+String Strings::dumpMemory(const uint8_t* memory, const size_t length)
 {
     constexpr char padding[] = "         ";
     StringBuffer sb;
