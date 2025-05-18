@@ -146,6 +146,7 @@ public:
         seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
 
+//  [[script::bindings::auto]]
     static uint32_t log2(uint32_t x);
 
     static int32_t abs(int32_t x);

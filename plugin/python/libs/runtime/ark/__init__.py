@@ -306,6 +306,12 @@ class _Var:
     def round(self):
         pass
 
+    def distance(self, other) -> "Numeric":
+        pass
+
+    def distance2(self, other) -> "Numeric":
+        pass
+
     def if_else(self, condition, otherwise):
         pass
 
@@ -517,7 +523,7 @@ class ApplicationBundle:
         pass
 
 
-class Future:
+class Future(Runnable):
     def __init__(self, observer: Optional[TYPE_RUNNABLE] = None, canceled: Optional[Boolean] = None, count_down: int = 1):
         pass
 
@@ -1192,12 +1198,6 @@ class Vec2(_Var):
         pass
 
     def normalize(self):
-        pass
-
-    def distance(self, other) -> Numeric:
-        pass
-
-    def distance2(self, other) -> Numeric:
         pass
 
     def hypot(self) -> Numeric:
