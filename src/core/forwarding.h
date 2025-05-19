@@ -89,6 +89,7 @@ class Runnable;
 class Scope;
 class Slice;
 class State;
+class StateLink;
 class StateMachine;
 class Storage;
 class String;

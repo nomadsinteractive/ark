@@ -7,20 +7,25 @@
 
 namespace ark {
 
-StateMachine::StateMachine(sp<State> entry)
+struct StateMachine::Stub {
+
+    Vector<sp<State>> _states;
+
+};
+
+StateMachine::StateMachine(sp<Stub> stub)
+    : _stub(std::move(stub))
 {
-    if(entry)
-        doActive(std::move(entry));
 }
 
-void StateMachine::reset(sp<State> state)
+StateMachine::StateMachine()
+    : _stub(sp<Stub>::make())
 {
-    for(const sp<State>& i : _active_states)
-        if(i != state)
-            i->deactivate();
+}
 
-    _active_states.clear();
-    doActive(std::move(state));
+void StateMachine::addState(sp<State> state) const
+{
+    _stub->_states.push_back(std::move(state));
 }
 
 void StateMachine::doActionActivate(const StateAction& action)

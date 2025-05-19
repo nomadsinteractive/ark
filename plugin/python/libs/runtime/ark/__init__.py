@@ -2892,6 +2892,9 @@ class StateAction:
 
 
 class State:
+    LINK_TYPE_SUPPORT = 0
+    LINK_TYPE_PROPAGATE = 1
+    LINK_TYPE_TRANSIT = 2
 
     def __init__(self, on_activate: Optional[Runnable] = None, on_deactivate: Optional[Runnable] = None):
         pass
@@ -2906,12 +2909,15 @@ class State:
     def deactivate(self):
         pass
 
-
-class StateMachine:
-    def __init__(self, entry: State):
+    def create_link(self, link_type: int, next_state: "State"):
         pass
 
-    def reset(self, state: State):
+
+class StateMachine:
+    def __init__(self):
+        pass
+
+    def add_state(self, state: State):
         pass
 
 
