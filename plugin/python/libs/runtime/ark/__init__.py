@@ -2844,53 +2844,6 @@ class Collider:
         pass
 
 
-class StateActionStrand:
-    def __init__(self, start: "State", end: "State"):
-        pass
-
-
-class StateAction:
-
-    def __init__(self, state_machine: "StateMachine", strand: StateActionStrand, on_activate: Optional[Runnable] = None, on_deactivate: Optional[Runnable] = None):
-        pass
-
-    @property
-    def strand(self) -> StateActionStrand:
-        pass
-
-    @property
-    def start(self) -> "State":
-        pass
-
-    @property
-    def end(self) -> "State":
-        pass
-
-    @property
-    def on_activate(self) -> Optional[Runnable]:
-        pass
-
-    @on_activate.setter
-    def on_activate(self, on_activate: Optional[Runnable]):
-        pass
-
-    @property
-    def on_deactivate(self) -> Optional[Runnable]:
-        pass
-
-    @on_deactivate.setter
-    def on_deactivate(self, on_deactivate: Optional[Runnable]):
-        pass
-
-    @property
-    def activate(self) -> Runnable:
-        pass
-
-    @property
-    def deactivate(self) -> Runnable:
-        pass
-
-
 class State:
     LINK_TYPE_SUPPORT = 0
     LINK_TYPE_PROPAGATE = 1

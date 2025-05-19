@@ -51,6 +51,7 @@ float EventDispatcher::motionClickRange() const
 bool EventDispatcher::onEvent(const Event& event)
 {
     if(!_locked)
+    {
         if(const Event::Action action = event.action(); action == Event::ACTION_KEY_DOWN || action == Event::ACTION_KEY_UP || action == Event::ACTION_KEY_REPEAT)
         {
             if(const auto iter = _key_events.find(event.code()); iter != _key_events.end() && !iter->second.empty())
@@ -61,6 +62,7 @@ bool EventDispatcher::onEvent(const Event& event)
             if(!_motion_events.empty())
                 return _motion_events.top().onEvent(*this, event);
         }
+    }
     return false;
 }
 

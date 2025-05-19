@@ -1,12 +1,15 @@
 #include "core/base/state.h"
 
-#include "core/base/state_action.h"
-#include "core/base/state_action_strand.h"
-#include "core/base/state_link.h"
 #include "core/inf/runnable.h"
 
 namespace ark {
 
+struct State::Link {
+    LinkType _link_type;
+    State& _start;
+    State& _end;
+};
+    
 State::State(sp<Runnable> onActivate, sp<Runnable> onDeactivate)
     : _on_activate(std::move(onActivate)), _on_deactivate(std::move(onDeactivate)), _active(false), _suppressed(false)
 {
@@ -20,11 +23,11 @@ bool State::active() const
 void State::activate()
 {
     uint32_t numOfSupportStates = 0;
-    for(const sp<StateLink>& i : _in_links)
-        if(i->linkType() == LINK_TYPE_SUPPORT)
+    for(const sp<Link>& i : _in_links)
+        if(i->_link_type == LINK_TYPE_SUPPORT)
         {
             numOfSupportStates ++;
-            if(i->start().active())
+            if(i->_start.active())
             {
                 doActivate();
                 break;
@@ -35,13 +38,13 @@ void State::activate()
 
     if(_active)
     {
-        for(const sp<StateLink>& i : _in_links)
-            if(i->linkType() == LINK_TYPE_TRANSIT)
-                i->start().suppress();
+        for(const sp<Link>& i : _in_links)
+            if(i->_link_type == LINK_TYPE_TRANSIT)
+                i->_start.suppress();
 
-        for(const sp<StateLink>& i : _out_links)
-            if(i->linkType() == LINK_TYPE_PROPAGATE && !i->end().active())
-                i->start().doActivate();
+        for(const sp<Link>& i : _out_links)
+            if(i->_link_type == LINK_TYPE_PROPAGATE)
+                i->_end.propagate(*this);
     }
 }
 
@@ -50,18 +53,18 @@ void State::deactivate()
     CHECK_WARN(_active, "State is not active");
     doDeactivate();
 
-    for(const sp<StateLink>& i : _in_links)
-        if(i->linkType() == LINK_TYPE_TRANSIT && !i->start().active())
-            i->start().unsuppress();
+    for(const sp<Link>& i : _in_links)
+        if(i->_link_type == LINK_TYPE_TRANSIT && !i->_start.active())
+            i->_start.unsuppress();
 
-    for(const sp<StateLink>& i : _out_links)
-        if(i->linkType() == LINK_TYPE_PROPAGATE)
-            i->end().backPropagate(*this);
+    for(const sp<Link>& i : _out_links)
+        if(i->_link_type == LINK_TYPE_PROPAGATE)
+            i->_end.backPropagate(*this);
 }
 
 void State::createLink(const LinkType linkType, State& nextState)
 {
-    sp<StateLink> link = sp<StateLink>::make(linkType, *this, nextState);
+    sp<Link> link = sp<Link>::make(Link{linkType, *this, nextState});
     nextState._in_links.emplace_back(link);
     _out_links.push_back(std::move(link));
 }
@@ -70,8 +73,9 @@ void State::suppress()
 {
     if(_active)
     {
-        _suppressed = true;
         doDeactivate();
+        _suppressed = true;
+        _active = true;
     }
 }
 
@@ -85,14 +89,24 @@ void State::unsuppress()
     }
 }
 
+void State::propagate(const State& activated)
+{
+    if(!_active)
+        doActivate();
+
+    for(const sp<Link>& i : _in_links)
+        if(i->_link_type == LINK_TYPE_PROPAGATE && &activated != &i->_start)
+            i->_start.suppress();
+}
+
 void State::backPropagate(const State& deactivated)
 {
     bool active = false;
-    for(const sp<StateLink>& i : _in_links)
-        if(i->linkType() == LINK_TYPE_PROPAGATE && &deactivated != &i->start())
+    for(const sp<Link>& i : _in_links)
+        if(i->_link_type == LINK_TYPE_PROPAGATE && &deactivated != &i->_start)
         {
-            i->start().unsuppress();
-            active |= i->start().active();
+            i->_start.unsuppress();
+            active |= i->_start.active();
         }
     if(_active && !active)
         doDeactivate();

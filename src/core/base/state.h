@@ -33,10 +33,14 @@ public:
 private:
     void suppress();
     void unsuppress();
+
+    void propagate(const State& activated);
     void backPropagate(const State& deactivated);
 
     void doActivate();
     void doDeactivate();
+
+    struct Link;
 
 private:
     sp<Runnable> _on_activate;
@@ -44,8 +48,8 @@ private:
     bool _active;
     bool _suppressed;
 
-    Vector<sp<StateLink>> _in_links;
-    Vector<sp<StateLink>> _out_links;
+    Vector<sp<Link>> _in_links;
+    Vector<sp<Link>> _out_links;
 };
 
 }
