@@ -60,6 +60,7 @@ private:
 
         sp<Rigidbody::Stub> _rigidbody_stub;
         sp<CollisionObjectRef> _collision_object_ref;
+        bool _marked_for_destroy;
     };
 
     RigidbodyBullet(sp<Stub> stub);

@@ -11,7 +11,7 @@
 namespace ark::plugin::bullet {
 
 RigidbodyBullet::Stub::Stub(ColliderBullet& world, sp<Rigidbody::Stub> rigidbodyStub, sp<CollisionObjectRef> rigidBody)
-    : _world(world), _rigidbody_stub(std::move(rigidbodyStub)), _collision_object_ref(std::move(rigidBody))
+    : _world(world), _rigidbody_stub(std::move(rigidbodyStub)), _collision_object_ref(std::move(rigidBody)), _marked_for_destroy(false)
 {
 }
 
@@ -22,10 +22,11 @@ RigidbodyBullet::Stub::~Stub()
 
 void RigidbodyBullet::Stub::markForDestroy()
 {
-    if(_collision_object_ref)
+    if(!_marked_for_destroy && _collision_object_ref)
     {
+        _marked_for_destroy = true;
         _collision_object_ref->collisionObject()->setUserPointer(new Stub(_world, _rigidbody_stub, nullptr));
-        _world.markForDestroy(std::move(_collision_object_ref));
+        _world.markForDestroy(_collision_object_ref);
     }
 }
 
@@ -42,7 +43,7 @@ RigidbodyBullet::RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> r
 
 bool RigidbodyBullet::validate() const
 {
-    if(!(_stub && _stub->_collision_object_ref))
+    if(_stub->_marked_for_destroy || !_stub->_collision_object_ref)
         return false;
 
     if(_stub->_rigidbody_stub->_ref->isDiscarded())

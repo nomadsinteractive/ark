@@ -15,11 +15,11 @@ struct Arena::Stub {
 
     sp<Layer> getLayer(const String& name)
     {
-        const auto [layerName, renderLayerName] = name.cut('@');
-        const auto iter = _layers.find(layerName);
+        const auto iter = _layers.find(name);
         if(iter == _layers.end())
         {
             sp<Layer> layer;
+            const auto [layerName, renderLayerName] = name.cut('@');
             if(renderLayerName)
                 layer = getRenderLayer(renderLayerName.value())->makeLayer();
             else
@@ -27,7 +27,7 @@ struct Arena::Stub {
                 layer = _resource_loader->load<Layer>(layerName, {});
                 CHECK(layer, "Cannot get Layer \"%s\"", name.c_str());
             }
-            _layers.insert(std::make_pair(layerName, layer));
+            _layers.insert(std::make_pair(name, layer));
             return layer;
         }
         return iter->second;

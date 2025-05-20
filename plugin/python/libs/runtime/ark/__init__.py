@@ -318,27 +318,6 @@ class _Var:
     def __int__(self) -> int:
         return 0
 
-    def __add__(self, other: TYPE_NUMERIC | TYPE_INTEGER | Self) -> Self:
-        return 0
-
-    def __radd__(self, other):
-        pass
-
-    def __mul__(self, other: TYPE_NUMERIC | TYPE_INTEGER | Self) -> Self:
-        pass
-
-    def __rmul__(self, other):
-        pass
-
-    def __sub__(self, other: TYPE_NUMERIC | TYPE_INTEGER | Self) -> Self:
-        pass
-
-    def __rsub__(self, other):
-        pass
-
-    def __truediv__(self, other: TYPE_NUMERIC | TYPE_INTEGER | Self) -> Self:
-        pass
-
     def __mod__(self, other):
         pass
 
@@ -1063,6 +1042,27 @@ class _Scalar(_Var):
     def dirty(self) -> Boolean:
         pass
 
+    def __add__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        return 0
+
+    def __sub__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        pass
+
+    def __mul__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        pass
+
+    def __radd__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        return 0
+
+    def __rsub__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        pass
+
+    def __rmul__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        pass
+
+    def __truediv__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        pass
+
 
 class Numeric(_Scalar):
     def __init__(self, val):
@@ -1219,6 +1219,27 @@ class Vec2(_Var):
         pass
 
     def extend(self, v):
+        pass
+
+    def __add__(self, other: TYPE_VEC2 | TYPE_VEC3 | TYPE_VEC4) -> Self:
+        return 0
+
+    def __sub__(self, other: TYPE_VEC2 | TYPE_VEC3 | TYPE_VEC4) -> Self:
+        pass
+
+    def __mul__(self, other: TYPE_NUMERIC | TYPE_INTEGER | TYPE_VEC2 | TYPE_VEC3 | TYPE_VEC4) -> Self:
+        pass
+
+    def __radd__(self, other: TYPE_VEC2 | TYPE_VEC3 | TYPE_VEC4) -> Self:
+        return 0
+
+    def __rsub__(self, other: TYPE_VEC2 | TYPE_VEC3 | TYPE_VEC4) -> Self:
+        pass
+
+    def __rmul__(self, other: TYPE_NUMERIC | TYPE_INTEGER | TYPE_VEC2 | TYPE_VEC3 | TYPE_VEC4) -> Self:
+        pass
+
+    def __truediv__(self, other: TYPE_NUMERIC | TYPE_INTEGER | TYPE_VEC2 | TYPE_VEC3 | TYPE_VEC4) -> Self:
         pass
 
     def __iter__(self):
@@ -1765,7 +1786,7 @@ class Level:
 
 
 class RenderObject:
-    def __init__(self, type: TYPE_NAMED_HASH, position: Optional[TYPE_VEC3] = None, size: Optional[TYPE_VEC3] = None, transform=None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, discarded: Optional[Boolean] = None):
+    def __init__(self, type: TYPE_NAMED_HASH, position: Optional[TYPE_VEC3] = None, size: Optional[TYPE_VEC3] = None, transform=None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, discarded: TYPE_BOOLEAN = None):
         self._position = position
         self._size = size
         self._transform = transform

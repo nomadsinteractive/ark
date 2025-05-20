@@ -275,7 +275,7 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
     if(sp<Varyings> varyings = context.getComponent<Varyings>())
         setVaryings(std::move(varyings));
 
-    if(sp<Boolean> discarded = context.getComponent<Discarded>())
+    if(sp<Boolean> discarded = context.getComponent<Discarded>(); discarded && !_discarded)
         setDiscarded(std::move(discarded));
 
     if(auto tags = context.getComponent<Tags>())
