@@ -2,6 +2,7 @@
 
 #include "core/base/allocator.h"
 #include "core/base/bean_factory.h"
+#include "core/base/named_hash.h"
 #include "core/inf/uploader.h"
 #include "core/inf/variable.h"
 #include "core/impl/writable/writable_memory.h"
@@ -253,7 +254,7 @@ Varyings::Divided Varyings::Snapshot::getDivided(uint32_t divisor) const
 void Varyings::Snapshot::snapshotSubProperties(const Map<String, sp<Varyings>>& subProperties, const PipelineLayout& pipelineInput, Allocator& allocator)
 {
     for(const auto& [i, j] : subProperties)
-        _sub_properties[i.hash()] = j->snapshot(pipelineInput, allocator);
+        _sub_properties[NamedHash(i).hash()] = j->snapshot(pipelineInput, allocator);
 }
 
 Varyings::Divided::Divided()

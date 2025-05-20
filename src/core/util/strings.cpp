@@ -344,20 +344,16 @@ void Strings::parentheses(const String& expr, String& lvalue, String& remaining)
     remaining = expr.substr(pos + 1).strip();
 }
 
-size_t Strings::parentheses(const String& expr, size_t start, char open, char close)
+size_t Strings::parentheses(const String& expr, const size_t start, const char open, const char close, int32_t count)
 {
-    DCHECK(expr.length() > start, "Illegal expression: unexpected end");
-    CHECK(expr.at(start) == open, "Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
+    CHECK(expr.length() > start, "Illegal expression: unexpected end");
+    CHECK(count > 0 || expr.at(0) == open, "Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
     const size_t size = expr.length();
-    int32_t count = 1;
-    for(size_t i = start + 1; i < size; i++)
-    {
-        char c = expr.at(i);
-        if(c == open)
+    for(size_t i = start; i < size; i++)
+        if(const char c = expr.at(i); c == open)
             count++;
         else if(c == close && --count == 0)
             return i;
-    }
     FATAL("Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
     return 0;
 }

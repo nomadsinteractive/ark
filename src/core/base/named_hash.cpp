@@ -7,9 +7,9 @@ namespace ark {
 namespace {
 
 struct HashNames {
-    std::unordered_map<HashId, String> _hash_names;
+    HashMap<HashId, String> _hash_names;
 
-    const String& findName(HashId id) const
+    const String& findName(const HashId id) const
     {
         if(const auto iter = _hash_names.find(id); iter != _hash_names.end())
             return iter->second;

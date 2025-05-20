@@ -18,7 +18,7 @@ public:
     static String unwrap(const String& str, char open, char close);
 
     static void parentheses(const String& expr, String& lvalue, String& remaining);
-    static size_t parentheses(const String& expr, size_t start, char open = '(', char close = ')');
+    static size_t parentheses(const String& expr, size_t start, char open = '(', char close = ')', int count = 0);
 
     static bool parseArrayAndIndex(const String& expr, String& name, int32_t& index);
 

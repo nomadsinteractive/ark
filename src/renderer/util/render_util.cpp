@@ -296,6 +296,8 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
         return {layoutType, name, Attribute::TYPE_UBYTE, type, 1, false};
     if(type == "mat4")
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 16, false};
+    if(type == "ivec2")
+        return {layoutType, name, Attribute::TYPE_INT, type, 2, false};
     if(type == "ivec4")
         return {layoutType, name, Attribute::TYPE_INT, type, 4, false};
     if(type == "uvec4")

@@ -46,10 +46,8 @@ constexpr char ANNOTATION_FRAG_COLOR[] = "f_FragColor";
 
 size_t parseFunctionBody(const String& s, String& body)
 {
-    const String::size_type pos = s.find('{');
-    DCHECK(pos != String::npos, "Cannot parse function body: %s", s.c_str());
-    const size_t end = Strings::parentheses(s, pos, '{', '}');
-    body = s.substr(pos + 1, end - 1).strip();
+    const size_t end = Strings::parentheses(s, 0, '{', '}', 1);
+    body = s.substr(0, end - 1).strip();
     return end + 1;
 }
 
@@ -109,7 +107,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 
     CHECK_WARN(source.search(REGEX_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
 
-    static const std::regex FUNC_PATTERN(R"((vec4|void)\s+ark_main\((.*)\))");
+    static const std::regex FUNC_PATTERN(R"((vec4|void)\s+ark_main\(([^{]*)\)[\s\r\n]*\{)");
 
     source.search(FUNC_PATTERN, [this] (const std::smatch& m)->bool {
         const String prefix = m.prefix().str();
@@ -426,6 +424,7 @@ void ShaderPreprocessor::addInclude(const String& filepath)
 ShaderPreprocessor::Function::Function(String name, String params, String returnType, String body, sp<String> placeHolder)
     : _name(std::move(name)), _params(std::move(params)), _return_type(std::move(returnType)), _body(std::move(body)), _place_hoder(std::move(placeHolder))
 {
+    DTRACE(_params == "vec3 worldPosition, vec3 worldNormal, in divisor(1) int materialId, in divisor(1) float alpha, in divisor(1) uint id, in divisor(1) uint collisionFilter, in divisor(1", "AB");
 }
 
 void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContext)

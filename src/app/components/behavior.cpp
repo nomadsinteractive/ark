@@ -135,16 +135,16 @@ sp<Runnable> Behavior::subscribe(const StringView name)
 
 sp<Runnable> Behavior::createRunnable(const StringView name)
 {
-    if(Box function = _interpreter->attr(_delegate, name))
-        return doCreateRunnable(std::move(function));
-    return nullptr;
+    Box function = _interpreter->attr(_delegate, name);
+    CHECK(function, "Object has no attribute \"%s\"", name.data());
+    return doCreateRunnable(std::move(function));
 }
 
 sp<CollisionCallback> Behavior::createCollisionCallback(const StringView onBeginContact, const StringView onEndContact)
 {
     sp<Method> onBeginContactMethod = getMethod(onBeginContact);
     sp<Method> onEndContactMethod = getMethod(onEndContact);
-    CHECK_WARN(onBeginContactMethod || onEndContactMethod, "Behavior has neither method defined(\"%s\", \"%s\")", onBeginContact.data(), onEndContact.data());
+    CHECK(onBeginContactMethod || onEndContactMethod, "Behavior has neither method defined(\"%s\", \"%s\")", onBeginContact.data(), onEndContact.data());
     return sp<CollisionCallback>::make<CollisionCallbackImpl>(std::move(onBeginContactMethod), std::move(onEndContactMethod));
 }
 

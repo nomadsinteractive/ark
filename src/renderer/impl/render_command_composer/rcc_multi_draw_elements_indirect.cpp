@@ -1,5 +1,6 @@
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
 
+#include "core/base/named_hash.h"
 #include "core/impl/writable/writable_with_offset.h"
 #include "graphics/base/material.h"
 
@@ -263,7 +264,7 @@ void RCCMultiDrawElementsIndirect::ModelInstance::toDynamicLayout()
 void RCCMultiDrawElementsIndirect::ModelInstance::setNodeTransform(const size_t nodeId, const M4& transform)
 {
     const auto iter = _node_layout_instances.find(nodeId);
-    ASSERT(iter != _node_layout_instances.end());
+    CHECK(iter != _node_layout_instances.end(), "Node(%s) does not exist", NamedHash::reverse(nodeId).c_str());
     ASSERT(iter->second._node_transform);
     iter->second._node_transform->set(transform);
 }
