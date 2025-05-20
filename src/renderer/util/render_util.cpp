@@ -300,6 +300,8 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
         return {layoutType, name, Attribute::TYPE_INT, type, 2, false};
     if(type == "ivec4")
         return {layoutType, name, Attribute::TYPE_INT, type, 4, false};
+    if(type == "uvec2")
+        return {layoutType, name, Attribute::TYPE_UINT, type, 2, false};
     if(type == "uvec4")
         return {layoutType, name, Attribute::TYPE_UINT, type, 4, false};
     DFATAL("Unknown attribute type \"%s\"", type.c_str());
