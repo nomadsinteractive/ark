@@ -55,6 +55,16 @@ public:
     static sp<Vec3> xyz(sp<Vec3> self);
 //  [[script::bindings::property]]
     static sp<Vec2> xy(sp<Vec3> self);
+//  [[script::bindings::property]]
+    static sp<Vec2> xz(sp<Vec3> self);
+//  [[script::bindings::property]]
+    static sp<Vec2> yx(sp<Vec3> self);
+//  [[script::bindings::property]]
+    static sp<Vec2> yz(sp<Vec3> self);
+//  [[script::bindings::property]]
+    static sp<Vec2> zx(sp<Vec3> self);
+//  [[script::bindings::property]]
+    static sp<Vec2> zy(sp<Vec3> self);
 
 //  [[script::bindings::property]]
     static sp<Numeric> x(const sp<Vec3>& self);

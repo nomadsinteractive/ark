@@ -2,7 +2,6 @@
 
 #include "core/base/ref_manager.h"
 #include "core/types/global.h"
-#include "core/util/log.h"
 
 namespace ark {
 
@@ -15,7 +14,6 @@ Ref::~Ref()
 {
     if(_id)
         Global<RefManager>()->recycle(_id);
-    LOGD("Ref(%d) destroyed", id());
 }
 
 Ref::operator bool() const

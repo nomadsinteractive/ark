@@ -209,8 +209,28 @@ public:
         return sp<Vec2>::make<VecSubscribed<V2, T>>(std::move(self), std::array<uint8_t, 2>{0, 1});
     }
 
+    static sp<Vec2> xz(const sp<VarType>& self) {
+        CHECK(2 < DIMENSION, "Index z(3) out of bounds");
+        return sp<Vec2>::make<VecSubscribed<V2, T>>(std::move(self), std::array<uint8_t, 2>{0, 2});
+    }
+
     static sp<Vec2> yx(const sp<VarType>& self) {
         return sp<Vec2>::make<VecSubscribed<V2, T>>(std::move(self), std::array<uint8_t, 2>{1, 0});
+    }
+
+    static sp<Vec2> yz(const sp<VarType>& self) {
+        CHECK(2 < DIMENSION, "Index z(3) out of bounds");
+        return sp<Vec2>::make<VecSubscribed<V2, T>>(std::move(self), std::array<uint8_t, 2>{1, 2});
+    }
+
+    static sp<Vec2> zx(const sp<VarType>& self) {
+        CHECK(2 < DIMENSION, "Index z(3) out of bounds");
+        return sp<Vec2>::make<VecSubscribed<V2, T>>(std::move(self), std::array<uint8_t, 2>{2, 0});
+    }
+
+    static sp<Vec2> zy(const sp<VarType>& self) {
+        CHECK(2 < DIMENSION, "Index z(3) out of bounds");
+        return sp<Vec2>::make<VecSubscribed<V2, T>>(std::move(self), std::array<uint8_t, 2>{2, 1});
     }
 
     static sp<Vec3> xyz(sp<VarType> self) {

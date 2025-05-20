@@ -52,6 +52,23 @@ String findNearestAttribute(const PipelineLayout& shaderLayout, const String& na
     return nearest;
 }
 
+String getAllAttribute(const PipelineLayout& shaderLayout)
+{
+    bool first = true;
+    StringBuffer sb;
+    for(const auto& [i, j] : shaderLayout.streamLayouts())
+        if(i != 0)
+            for(const String& k : j.attributes().keys())
+            {
+                if(first)
+                    first = false;
+                else
+                    sb << ", ";
+                sb << "\"" << k << "\"";
+            }
+    return sb.str();
+}
+
 template<typename T, typename... Args> void setVaryingProperties(Varyings& varyings, const String& name, const Box& value)
 {
     if(sp<Variable<T>> var = value.as<Variable<T>>())
@@ -173,7 +190,7 @@ Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineLayout, Allo
         for(auto& [i, j] : _slots)
         {
             Optional<const Attribute&> attr = pipelineLayout.getAttribute(i);
-            CHECK(attr, "Varying has no attribute \"%s\". Did you mean \"%s\"?", i.c_str(), findNearestAttribute(pipelineLayout, i).c_str());
+            CHECK(attr, "Varying has no attribute \"%s\". Did you mean \"%s\" in [%s]?", i.c_str(), findNearestAttribute(pipelineLayout, i).c_str(), getAllAttribute(pipelineLayout).c_str());
             j._divisor = attr->divisor();
             j._offset = attr->offset();
         }
