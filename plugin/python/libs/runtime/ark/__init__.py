@@ -356,6 +356,9 @@ class Boolean(_Var):
     def negative(self) -> "Boolean":
         pass
 
+    def expect(self, expectation: TYPE_BOOLEAN, future: "Future") -> Self:
+        return self
+
     def __or__(self, other) -> "Boolean":
         pass
 
@@ -1063,6 +1066,8 @@ class _Scalar(_Var):
     def __truediv__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
         pass
 
+    def __pow__(self, power: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        pass
 
 class Numeric(_Scalar):
     def __init__(self, val):

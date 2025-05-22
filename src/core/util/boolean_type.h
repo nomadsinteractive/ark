@@ -35,6 +35,9 @@ public:
     static sp<Boolean> negative(sp<Boolean> self);
 
 //  [[script::bindings::classmethod]]
+    static sp<Boolean> expect(sp<Boolean> self, sp<Boolean> expectation, sp<Future> future);
+
+//  [[script::bindings::classmethod]]
     static void set(const sp<BooleanWrapper>& self, sp<Boolean> value);
 //  [[script::bindings::classmethod]]
     static void set(const sp<BooleanWrapper>& self, bool value);

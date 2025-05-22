@@ -4,6 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/expression.h"
 #include "core/impl/variable/variable_dyed.h"
+#include "core/impl/variable/variable_expect.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/inf/array.h"
@@ -131,6 +132,11 @@ sp<Boolean> BooleanType::__or__(sp<Boolean> self, sp<Boolean> rvalue)
 sp<Boolean> BooleanType::negative(sp<Boolean> self)
 {
     return sp<Boolean>::make<VariableOP1<bool>>(Operators::Not<bool>(), std::move(self));
+}
+
+sp<Boolean> BooleanType::expect(sp<Boolean> self, sp<Boolean> expectation, sp<Future> future)
+{
+    return sp<Boolean>::make<VariableExpect<bool>>(std::move(self), std::move(expectation), std::move(future));
 }
 
 bool BooleanType::toBool(const sp<Boolean>& self)
