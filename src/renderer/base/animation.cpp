@@ -13,7 +13,9 @@ namespace {
 struct AnimationSession {
 
     AnimationSession(sp<Integer> tick, const uint32_t durationInTicks, sp<Vector<AnimationFrame>> animationFrames)
-        : _tick(std::move(tick)), _duration_in_ticks(durationInTicks), _animation_frames(std::move(animationFrames)) {
+        : _tick(std::move(tick)), _duration_in_ticks(durationInTicks), _animation_frames(std::move(animationFrames))
+    {
+        ASSERT(_duration_in_ticks);
     }
 
     bool update(const uint64_t timestamp) const

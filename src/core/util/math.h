@@ -47,10 +47,12 @@ public:
     }
 
     template<typename T, typename U> static std::remove_reference_t<T> floorMod_sfinae(T value, U mod, std::enable_if_t<std::is_integral_v<T> && std::is_integral_v<U>>*) {
+        ASSERT(mod != 0);
         return (value % static_cast<T>(mod) + static_cast<T>(mod)) % static_cast<T>(mod);
     }
 
     template<typename T, typename U> static std::remove_reference_t<T> floorMod_sfinae(T value, U mod, ...) {
+        ASSERT(mod != 0);
         return value - std::floor(value / mod);
     }
 
