@@ -9,7 +9,7 @@ Use it for:
 3. Unit test(maybe)
 
 """
-from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self, Sequence
+from typing import Callable, Type, TypeVar, Union, Optional, Tuple, Any, Self, Sequence
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', "Numeric", 'NarrowPhrase',
                            'Layer', "Vec2", "Vec3", "Vec4", "Renderer", 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
@@ -702,7 +702,7 @@ class ApplicationFacade:
         self._activity = activity
 
     @property
-    def argv(self) -> List[str]:
+    def argv(self) -> list[str]:
         return []
 
     def to_frag_coord(self, xy: "Vec2", resolution: Optional['Size'] = None) -> "Vec2":
@@ -735,7 +735,7 @@ class ApplicationFacade:
     def get_string(self, resid: str, def_value: Optional[str] = None) -> str:
         pass
 
-    def get_string_array(self, resid: str) -> List[str]:
+    def get_string_array(self, resid: str) -> list[str]:
         pass
 
     def exit(self):
@@ -2390,7 +2390,7 @@ class Tileset:
         self._tile_size = tile_size
 
     @property
-    def tiles(self) -> Dict[int, Tile]:
+    def tiles(self) -> dict[int, Tile]:
         return {}
 
     @property
@@ -2493,7 +2493,7 @@ class Tilemap:
         pass
 
     @property
-    def layers(self) -> List[TilemapLayer]:
+    def layers(self) -> list[TilemapLayer]:
         return []
 
     @property
@@ -2638,7 +2638,7 @@ class StringBundle:
     def get_string(self, resid: str) -> str:
         return ''
 
-    def get_string_array(self, resid: str) -> List[str]:
+    def get_string_array(self, resid: str) -> list[str]:
         return []
 
 
@@ -2866,7 +2866,7 @@ class Collider:
     def create_shape(self, shape_id: TYPE_NAMED_HASH, size: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None) -> Shape:
         pass
 
-    def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> List[RayCastManifold]:
+    def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> list[RayCastManifold]:
         pass
 
 
