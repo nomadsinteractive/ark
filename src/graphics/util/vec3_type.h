@@ -22,21 +22,25 @@ public:
 
 /**
 //  [[script::bindings::operator(+)]]
-    static sp<Vec3> add(const sp<Vec3>& lvalue, sp<Vec3> rvalue);
+    static sp<Vec3> add(sp<Vec3> a, sp<Vec3> b);
 //  [[script::bindings::operator(-)]]
-    static sp<Vec3> sub(const sp<Vec3>& lvalue, sp<Vec3> rvalue);
+    static sp<Vec3> sub(sp<Vec3> a, sp<Vec3> b);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec3> mul(const sp<Vec3>& lvalue, sp<Vec3> rvalue);
+    static sp<Vec3> mul(sp<Vec3> a, sp<Vec3> b);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec3> mul(const sp<Vec3>& lvalue, float rvalue);
+    static sp<Vec3> mul(sp<Vec3> a, sp<Numeric> b);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec3> mul(const sp<Vec3>& lvalue, sp<Numeric> rvalue);
+    static sp<Vec3> mul(sp<Vec3> a, float b);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec3> mul(sp<Numeric> a, sp<Vec3> b);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec3> mul(float a, sp<Vec3> b);
 //  [[script::bindings::operator(/)]]
-    static sp<Vec3> truediv(const sp<Vec3>& lvalue, sp<Numeric> rvalue);
+    static sp<Vec3> truediv(sp<Vec3> a, sp<Numeric> b);
 //  [[script::bindings::operator(/)]]
-    static sp<Vec3> truediv(const sp<Vec3>& lvalue, sp<Vec3> rvalue);
+    static sp<Vec3> truediv(sp<Vec3> a, sp<Vec3> b);
 //  [[script::bindings::operator(//)]]
-    static sp<Vec3> floordiv(const sp<Vec3>& self, sp<Vec3> rvalue);
+    static sp<Vec3> floordiv(sp<Vec3> self, sp<Vec3> b);
 //  [[script::bindings::operator(neg)]]
     static sp<Vec3> negative(sp<Vec3> self);
 //  [[script::bindings::operator(abs)]]

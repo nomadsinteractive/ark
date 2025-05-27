@@ -38,68 +38,72 @@ public:
         return self->val();
     }
 
-    static sp<VarType> add(sp<VarType> lvalue, const T& rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, T, Operators::Add<T>>>(std::move(lvalue), rvalue);
+    static sp<VarType> add(sp<VarType> a, const T b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, T, Operators::Add<T>>>(std::move(a), b);
     }
 
-    static sp<VarType> add(sp<VarType> lvalue, sp<VarType> rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::Add<T>>>(std::move(lvalue), std::move(rvalue));
+    static sp<VarType> add(sp<VarType> a, sp<VarType> b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::Add<T>>>(std::move(a), std::move(b));
     }
 
-    static sp<VarType> sub(sp<VarType> lvalue, const T& rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, T, Operators::Sub<T>>>(std::move(lvalue), rvalue);
+    static sp<VarType> sub(sp<VarType> a, const T b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, T, Operators::Sub<T>>>(std::move(a), b);
     }
 
-    static sp<VarType> sub(sp<VarType> lvalue, sp<VarType> rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::Sub<T>>>(std::move(lvalue), std::move(rvalue));
+    static sp<VarType> sub(sp<VarType> a, sp<VarType> b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::Sub<T>>>(std::move(a), std::move(b));
     }
 
-    static sp<VarType> mul(sp<VarType> lvalue, const T& rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, T, Operators::Mul<T>>>(std::move(lvalue), rvalue);
+    static sp<VarType> mul(sp<VarType> a, const T b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, T, Operators::Mul<T>>>(std::move(a), b);
     }
 
-    static sp<VarType> mul(sp<VarType> lvalue, sp<VarType> rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::Mul<T>>>(std::move(lvalue), std::move(rvalue));
+    static sp<VarType> mul(sp<VarType> a, sp<VarType> b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::Mul<T>>>(std::move(a), std::move(b));
     }
 
-    static sp<VarType> mul(sp<VarType> lvalue, float rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, float, Operators::Mul<T, float>>>(std::move(lvalue), rvalue);
+    static sp<VarType> mul(sp<VarType> a, const float b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, float, Operators::Mul<T, float>>>(std::move(a), b);
     }
 
-    static sp<VarType> mul(sp<Numeric> lvalue, sp<VarType> rvalue) {
-        return mul(std::move(rvalue), std::move(lvalue));
+    static sp<VarType> mul(sp<Numeric> a, sp<VarType> b) {
+        return mul(std::move(b), std::move(a));
     }
 
-    static sp<VarType> mul(sp<VarType> lvalue, sp<Numeric> rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<Numeric>, Operators::Mul<T, float>>>(std::move(lvalue), std::move(rvalue));
+    static sp<VarType> mul(const float a, sp<VarType> b) {
+        return mul(std::move(b), a);
     }
 
-    static sp<VarType> truediv(sp<VarType> lvalue, sp<VarType> rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::Div<T>>>(std::move(lvalue), std::move(rvalue));
+    static sp<VarType> mul(sp<VarType> a, sp<Numeric> b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<Numeric>, Operators::Mul<T, float>>>(std::move(a), std::move(b));
     }
 
-    static sp<VarType> truediv(sp<VarType> lvalue, const T& rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, T, Operators::Div<T>>>(std::move(lvalue), std::move(rvalue));
+    static sp<VarType> truediv(sp<VarType> a, sp<VarType> b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::Div<T>>>(std::move(a), std::move(b));
     }
 
-    static sp<VarType> truediv(sp<VarType> lvalue, sp<Numeric> rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<Numeric>, Operators::Div<T, float>>>(std::move(lvalue), std::move(rvalue));
+    static sp<VarType> truediv(sp<VarType> a, const T b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, T, Operators::Div<T>>>(std::move(a), b);
     }
 
-    static sp<VarType> floordiv(sp<VarType> lvalue, float rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, T, Operators::FloorDiv<T>>>(std::move(lvalue), T(rvalue));
+    static sp<VarType> truediv(sp<VarType> a, sp<Numeric> b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<Numeric>, Operators::Div<T, float>>>(std::move(a), std::move(b));
     }
 
-    static sp<VarType> floordiv(sp<VarType> lvalue, sp<Numeric> rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::FloorDiv<T>>>(std::move(lvalue), sp<IMPL>::make(std::move(rvalue)));
+    static sp<VarType> floordiv(sp<VarType> a, const float b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, T, Operators::FloorDiv<T>>>(std::move(a), T(b));
     }
 
-    static sp<VarType> floordiv(sp<VarType> lvalue, sp<VarType> rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::FloorDiv<T>>>(std::move(lvalue), std::move(rvalue));
+    static sp<VarType> floordiv(sp<VarType> a, sp<Numeric> b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::FloorDiv<T>>>(std::move(a), sp<IMPL>::make(std::move(b)));
     }
 
-    static sp<VarType> truediv(sp<VarType> lvalue, float rvalue) {
-        return sp<VarType>::template make<VariableOP2<sp<VarType>, float, Operators::Div<T, float>>>(std::move(lvalue), rvalue);
+    static sp<VarType> floordiv(sp<VarType> a, sp<VarType> b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::FloorDiv<T>>>(std::move(a), std::move(b));
+    }
+
+    static sp<VarType> truediv(sp<VarType> a, float b) {
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, float, Operators::Div<T, float>>>(std::move(a), b);
     }
 
     static sp<VarType> negative(sp<VarType> self) {
