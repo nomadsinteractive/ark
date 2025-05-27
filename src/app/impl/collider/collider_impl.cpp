@@ -61,13 +61,13 @@ public:
         return false;
     }
 
-    void collisionTest(ColliderImpl::Stub& collider, const V3& position, const V3& size, const std::set<BroadPhrase::CandidateIdType>& removingIds)
+    void collisionTest(ColliderImpl::Stub& collider, const V3& position, const V3& size, const Set<BroadPhrase::CandidateIdType>& removingIds)
     {
         if(_rigidbody_stub->_ref->isDiscarded())
             return doDispose(collider);
 
         BroadPhrase::Result result;
-        std::unordered_set<BroadPhrase::CandidateIdType> dynamicCandidates;
+        HashSet<BroadPhrase::CandidateIdType> dynamicCandidates;
 
         {
             DPROFILER_TRACE("BroadPhrase");
@@ -116,6 +116,7 @@ public:
     V3 linearVelocity() const override
     {
         FATAL("Unimplemented");
+        return V3(0);
     }
 
     void setLinearVelocity(const V3& velocity) override
@@ -130,8 +131,8 @@ public:
 
     sp<Rigidbody::Stub> _rigidbody_stub;
     const ColliderImpl::Stub& _collider_stub;
-    std::set<BroadPhrase::CandidateIdType> _dynamic_contacts;
-    std::set<BroadPhrase::CandidateIdType> _static_contacts;
+    Set<BroadPhrase::CandidateIdType> _dynamic_contacts;
+    Set<BroadPhrase::CandidateIdType> _static_contacts;
 
     RigidbodyDef _body_def;
 
@@ -139,7 +140,7 @@ public:
     bool _size_updated;
 };
 
-ColliderImpl::ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase, RenderController& renderController)
+ColliderImpl::ColliderImpl(Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase, RenderController& renderController)
     : _stub(sp<Stub>::make(std::move(broadPhrases), std::move(narrowPhrase)))
 {
     renderController.addPreComposeUpdatable(_stub, sp<BooleanByWeakRef<Stub>>::make(_stub, 1));
@@ -158,12 +159,12 @@ sp<Shape> ColliderImpl::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec
     return sp<Shape>::make(type, std::move(size), std::move(origin));
 }
 
-std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
+Vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
 {
     return _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()), collisionFilter);
 }
 
-ColliderImpl::Stub::Stub(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase)
+ColliderImpl::Stub::Stub(Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase)
     : _broad_phrases(std::move(broadPhrases)), _narrow_phrase(std::move(narrowPhrase))
 {
 }
@@ -268,9 +269,9 @@ sp<ColliderImpl::RigidbodyImpl> ColliderImpl::Stub::createRigidBody(Rigidbody::B
     return rigidBody;
 }
 
-std::vector<sp<Ref>> ColliderImpl::Stub::toRigidBodyRefs(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet, uint32_t filter) const
+Vector<sp<Ref>> ColliderImpl::Stub::toRigidBodyRefs(const HashSet<BroadPhrase::CandidateIdType>& candidateSet, uint32_t filter) const
 {
-    std::vector<sp<Ref>> rigidBodies;
+    Vector<sp<Ref>> rigidBodies;
     for(BroadPhrase::CandidateIdType i : candidateSet)
         if(const auto iter = _rigid_bodies.find(i); iter != _rigid_bodies.end())
             if(const sp<Ref>& ref = iter->second; !ref->isDiscarded() && ref->instance<RigidbodyImpl>()._rigidbody_stub->_type & filter)
@@ -278,9 +279,9 @@ std::vector<sp<Ref>> ColliderImpl::Stub::toRigidBodyRefs(const std::unordered_se
     return rigidBodies;
 }
 
-std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet) const
+Vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(const HashSet<BroadPhrase::CandidateIdType>& candidateSet) const
 {
-    std::vector<BroadPhrase::Candidate> candidates;
+    Vector<BroadPhrase::Candidate> candidates;
     RefManager& refManager = Global<RefManager>();
     for(const BroadPhrase::CandidateIdType i : candidateSet)
     {
@@ -290,9 +291,9 @@ std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(
     return candidates;
 }
 
-std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V2& to, const sp<CollisionFilter>& collisionFilter) const
+Vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V2& to, const sp<CollisionFilter>& collisionFilter) const
 {
-    std::vector<RayCastManifold> manifolds;
+    Vector<RayCastManifold> manifolds;
     const BroadPhrase::Result result = broadPhraseRayCast(V3(from.x(), from.y(), 0), V3(to.x(), to.y(), 0), collisionFilter);
 
     const NarrowPhrase::Ray ray = _narrow_phrase->toRay(from, to);
@@ -315,10 +316,10 @@ std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V
     return manifolds;
 }
 
-void ColliderImpl::Stub::resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, std::set<BroadPhrase::CandidateIdType>& c)
+void ColliderImpl::Stub::resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const Vector<BroadPhrase::Candidate>& candidates, Set<BroadPhrase::CandidateIdType>& c)
 {
-    std::set<BroadPhrase::CandidateIdType> contacts = std::move(c);
-    std::set<BroadPhrase::CandidateIdType> contactsOut;
+    Set<BroadPhrase::CandidateIdType> contacts = std::move(c);
+    Set<BroadPhrase::CandidateIdType> contactsOut;
     RefManager& refManager = Global<RefManager>();
     for(const BroadPhrase::Candidate& i : candidates)
     {
@@ -370,7 +371,7 @@ ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, c
 
 sp<Collider> ColliderImpl::BUILDER::build(const Scope& args)
 {
-    std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases;
+    Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases;
     for(const auto& [i, j] : _broad_phrases)
         broadPhrases.emplace_back(i->build(args), j.build(args));
     return sp<ColliderImpl>::make(std::move(broadPhrases), _narrow_phrase->build(args), _render_controller);
