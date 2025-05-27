@@ -175,7 +175,9 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                     writer.next();
                     if(hasModelMatrix)
                     {
-                        const M4 modelMatrix = MatrixUtil::translate({}, snapshot._position) * MatrixUtil::scale(snapshot._transform->toMatrix(snapshot._transform_snapshot), toScale(snapshot._size, metrics)) * nodeInstance->globalTransform();
+                        const bool visible = snapshot._state.has(Renderable::RENDERABLE_STATE_VISIBLE);
+                        const M4 modelMatrix = visible ? MatrixUtil::translate({}, snapshot._position) * MatrixUtil::scale(snapshot._transform->toMatrix(snapshot._transform_snapshot), toScale(snapshot._size, metrics)) * nodeInstance->globalTransform()
+                                                       : MatrixUtil::scale(M4(), V3(0));
                         writer.writeAttribute(modelMatrix, Attribute::USAGE_MODEL_MATRIX);
                     }
                     if(hasMaterialId && mesh->material())

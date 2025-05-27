@@ -16,8 +16,8 @@ public:
 //  [[script::bindings::auto]]
     Visibility(const sp<Boolean>& visible);
 
-    virtual bool val() override;
-    virtual bool update(uint64_t timestamp) override;
+    bool val() override;
+    bool update(uint64_t timestamp) override;
 
 //  [[script::bindings::auto]]
     void show();
@@ -28,14 +28,12 @@ public:
 //  [[script::bindings::auto]]
     void set(const sp<Boolean>& visible);
 
-    const sp<Boolean>& delegate() const;
-
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Visibility> {
+    class DICTIONARY final : public Builder<Visibility> {
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 
-        virtual sp<Visibility> build(const Scope& args);
+        sp<Visibility> build(const Scope& args) override;
 
     private:
         sp<Builder<Boolean>> _visible;

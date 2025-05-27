@@ -272,6 +272,9 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
             setTransform(sp<Transform>::make<Transform3D>(std::move(rotation)));
     }
 
+    if(const sp<Visibility> visibility = context.getComponent<Visibility>(); visibility && !_visible)
+        setVisible(visibility);
+
     if(sp<Varyings> varyings = context.getComponent<Varyings>())
         setVaryings(std::move(varyings));
 

@@ -3083,6 +3083,10 @@ class Entity:
     def discarded(self) -> Discarded:
         pass
 
+    @property
+    def tag(self) -> Any:
+        pass
+
     def add_component(self, component: Any):
         pass
 
