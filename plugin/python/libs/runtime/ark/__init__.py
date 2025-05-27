@@ -2725,6 +2725,20 @@ class Shape:
         return None
 
 
+class RigidbodyController:
+
+    @property
+    def linear_velocity(self) -> TYPE_FLOAT3:
+        return 0, 0, 0
+
+    @linear_velocity.setter
+    def linear_velocity(self, linear_velocity: TYPE_FLOAT3):
+        pass
+
+    def apply_central_impulse(self, impulse: TYPE_FLOAT3):
+        pass
+
+
 class Rigidbody:
     BODY_TYPE_NONE = 0
     BODY_TYPE_KINEMATIC = 1
@@ -2800,6 +2814,10 @@ class Rigidbody:
 
     @tag.setter
     def tag(self, tag):
+        pass
+
+    @property
+    def controller(self) -> RigidbodyController:
         pass
 
     def discard(self):

@@ -214,15 +214,20 @@ void RigidbodyBox2D::setAngularVelocity(float omega)
     _stub->body()->SetAngularVelocity(omega);
 }
 
-V2 RigidbodyBox2D::linearVelocity() const
+V3 RigidbodyBox2D::linearVelocity() const
 {
     const b2Vec2 velocity = _stub->body()->GetLinearVelocity();
-    return V2(velocity.x, velocity.y);
+    return {velocity.x, velocity.y, 0};
 }
 
-void RigidbodyBox2D::setLinearVelocity(const V2& velocity)
+void RigidbodyBox2D::setLinearVelocity(const V3& velocity)
 {
     _stub->body()->SetLinearVelocity(b2Vec2(velocity.x(), velocity.y()));
+}
+
+void RigidbodyBox2D::applyCentralImpulse(const V3& impulse)
+{
+    _stub->body()->ApplyLinearImpulseToCenter(b2Vec2(impulse.x(), impulse.y()), true);
 }
 
 float RigidbodyBox2D::gravityScale() const

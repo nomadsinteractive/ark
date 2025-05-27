@@ -276,7 +276,7 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
         sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btGhostObjectRef), type, std::move(shape), std::move(position), rotation, std::move(collisionFilter), std::move(discarded));
         _stub->_ghost_objects.emplace_back(GhostObject(std::move(originPosition), std::move(rotation), *impl));
         sp<Rigidbody::Stub> stub = impl->stub();
-        return {std::move(stub), Box(std::move(impl))};
+        return {std::move(stub), nullptr, impl};
     }
 
     btTransform btTrans;
@@ -292,9 +292,9 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
     sp<CollisionObjectRef> btRigidbodyRef = makeRigidBody(btDynamicWorld(), std::move(cs), motionState, type, mass, collisionFilter);
     sp<Vec3> btPosition = type == Rigidbody::BODY_TYPE_STATIC ? sp<Vec3>::make<Vec3::Const>(pos - origin) : sp<Vec3>::make<DynamicPosition>(motionState, origin);
     sp<Vec4> btRotation = type == Rigidbody::BODY_TYPE_STATIC ? sp<Vec4>::make<Vec4::Const>(quat) : sp<Vec4>::make<DynamicRotation>(std::move(motionState));
-    sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btRigidbodyRef), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
+    sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btRigidbodyRef), type, std::move(shape), std::move(btPosition), std::move(btRotation), std::move(collisionFilter), std::move(discarded));
     sp<Rigidbody::Stub> stub = impl->stub();
-    return {std::move(stub), Box(std::move(impl))};
+    return {std::move(stub), nullptr, impl};
 }
 
 sp<Shape> ColliderBullet::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)

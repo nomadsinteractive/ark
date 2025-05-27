@@ -38,6 +38,7 @@ class Model;
 class RayCastManifold;
 class RendererWithState;
 class Rigidbody;
+class RigidbodyController;
 class RigidbodyDef;
 class SearchingNodeProvider;
 class Shape;

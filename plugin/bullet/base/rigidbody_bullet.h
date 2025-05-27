@@ -7,6 +7,7 @@
 #include "graphics/forwarding.h"
 
 #include "app/components/rigidbody.h"
+#include "app/inf/rigidbody_controller.h"
 
 #include "bullet/api.h"
 #include "bullet/base/collider_bullet.h"
@@ -14,29 +15,24 @@
 
 namespace ark::plugin::bullet {
 
-class ARK_PLUGIN_BULLET_API RigidbodyBullet final  {
+class ARK_PLUGIN_BULLET_API RigidbodyBullet final : public RigidbodyController {
 public:
     RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
 
     bool validate() const;
     bool unique() const;
 
-//  [[script::bindings::auto]]
     void applyCentralForce(const V3& force);
 
-//  [[script::bindings::property]]
-    V3 linearVelocity() const;
-//  [[script::bindings::property]]
-    void setLinearVelocity(const V3& velocity);
+    V3 linearVelocity() const override;
+    void setLinearVelocity(const V3& velocity) override;
 
-//  [[script::bindings::property]]
+    void applyCentralImpulse(const V3& impulse) override;
+
     float friction() const;
-//  [[script::bindings::property]]
     void setFriction(float friction);
 
-//  [[script::bindings::property]]
     V3 angularFactor() const;
-//  [[script::bindings::property]]
     void setAngularFactor(const V3& factor);
 
     const sp<Ref>& ref() const;

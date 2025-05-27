@@ -96,6 +96,11 @@ void RigidbodyBullet::setLinearVelocity(const V3& velocity)
     _stub->_collision_object_ref->rigidBody()->setLinearVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
 }
 
+void RigidbodyBullet::applyCentralImpulse(const V3& impulse)
+{
+    _stub->_collision_object_ref->rigidBody()->applyCentralImpulse(btVector3(impulse.x(), impulse.y(), impulse.z()));
+}
+
 float RigidbodyBullet::friction() const
 {
     return _stub->_collision_object_ref->collisionObject()->getFriction();

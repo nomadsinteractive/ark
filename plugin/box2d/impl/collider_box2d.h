@@ -21,8 +21,6 @@
 
 namespace ark::plugin::box2d {
 
-//[[script::bindings::extends(Collider)]]
-//[[script::bindings::name("World")]]
 class ARK_PLUGIN_BOX2D_API ColliderBox2D final : public Runnable, public Collider, Implements<ColliderBox2D, Runnable, Collider> {
 public:
     typedef Importer<ColliderBox2D> RigidBodyImporter;
@@ -42,17 +40,12 @@ public:
     b2Body* createBody(const b2BodyDef& bodyDef) const;
     b2Body* createBody(Rigidbody::BodyType type, const V3& position, const V3& size, const BodyCreateInfo& createInfo) const;
 
-//  [[script::bindings::auto]]
     float toPixelX(float meterX) const;
-//  [[script::bindings::auto]]
     float toPixelY(float meterY) const;
 
-//  [[script::bindings::auto]]
     float toMeterX(float pixelX) const;
-//  [[script::bindings::auto]]
     float toMeterY(float pixelY) const;
 
-//  [[script::bindings::property]]
     int32_t bodyCount() const;
 
     void track(const sp<Joint::Stub>& joint) const;
@@ -62,7 +55,7 @@ public:
     public:
         BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<ColliderBox2D> build(const Scope& args) override;
+        sp<ColliderBox2D> build(const Scope& args) override;
 
     private:
         void createBody(Rigidbody::BodyType type, const sp<ColliderBox2D>& world, const document& manifest, const Scope& args);
@@ -113,7 +106,7 @@ private:
     struct Stub : public Runnable {
         Stub(const b2Vec2& gravity, const V2& pixelPerMeter);
 
-        virtual void run() override;
+        void run() override;
 
         float _ppm_x;
         float _ppm_y;

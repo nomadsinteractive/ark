@@ -62,7 +62,7 @@ Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shap
             fixture->SetFilterData(filter);
     }
 
-    return {body->rigidbodyStub(), ark::Box(body)};
+    return {body->rigidbodyStub(), nullptr, body};
 }
 
 sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)

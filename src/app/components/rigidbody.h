@@ -46,11 +46,12 @@ public:
 
     struct Impl {
         sp<Stub> _stub;
-        Box _instance;
+        sp<Collider> _collider;
+        sp<RigidbodyController> _controller;
     };
 
 public:
-    Rigidbody(BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded, Box impl, bool isShadow = false);
+    Rigidbody(BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded, sp<RigidbodyController> controller, bool isShadow = false);
     Rigidbody(Impl impl, bool isShadow);
     ~Rigidbody() override;
 
@@ -89,7 +90,7 @@ public:
     void setTag(Box tag);
 
 //  [[script::bindings::property]]
-    const Box& impl() const;
+    const sp<RigidbodyController>& controller() const;
 
     void onBeginContact(const Rigidbody& rigidbody, const CollisionManifold& manifold) const;
     void onEndContact(const Rigidbody& rigidbody) const;

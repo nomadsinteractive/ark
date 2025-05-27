@@ -20,6 +20,7 @@
 #include "app/inf/broad_phrase.h"
 #include "app/inf/narrow_phrase.h"
 #include "app/components/shape.h"
+#include "app/inf/rigidbody_controller.h"
 #include "app/util/rigid_body_def.h"
 
 namespace ark {
@@ -33,14 +34,14 @@ bool collisionFilterTest(const sp<CollisionFilter>& cf1, const sp<CollisionFilte
 
 }
 
-class ColliderImpl::RigidbodyImpl {
+class ColliderImpl::RigidbodyImpl : public RigidbodyController {
 public:
     RigidbodyImpl(const ColliderImpl::Stub& stub, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
         : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter))), _collider_stub(stub), _position_updated(true), _size_updated(false)
     {
     }
 
-    bool update(uint64_t timestamp)
+    bool update(const uint64_t timestamp)
     {
         if(const SafeVar<Vec3>& size = _rigidbody_stub->_shape->size())
             _size_updated = size.update(timestamp) | _size_updated;
@@ -112,6 +113,21 @@ public:
         return {Rigidbody::Impl{_rigidbody_stub, nullptr}, true};
     }
 
+    V3 linearVelocity() const override
+    {
+        FATAL("Unimplemented");
+    }
+
+    void setLinearVelocity(const V3& velocity) override
+    {
+        FATAL("Unimplemented");
+    }
+
+    void applyCentralImpulse(const V3& impulse) override
+    {
+        FATAL("Unimplemented");
+    }
+
     sp<Rigidbody::Stub> _rigidbody_stub;
     const ColliderImpl::Stub& _collider_stub;
     std::set<BroadPhrase::CandidateIdType> _dynamic_contacts;
@@ -132,9 +148,9 @@ ColliderImpl::ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFi
 Rigidbody::Impl ColliderImpl::createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
 {
     CHECK(type == Rigidbody::BODY_TYPE_KINEMATIC || type == Rigidbody::BODY_TYPE_DYNAMIC || type == Rigidbody::BODY_TYPE_STATIC || type == Rigidbody::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
-    sp<RigidbodyImpl> rigidbodyImpl = _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
+    const sp<RigidbodyImpl> rigidbodyImpl = _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
     sp<Rigidbody::Stub> stub = rigidbodyImpl->_rigidbody_stub;
-    return Rigidbody::Impl{std::move(stub), Box(std::move(rigidbodyImpl))};
+    return Rigidbody::Impl{std::move(stub), nullptr, rigidbodyImpl};
 }
 
 sp<Shape> ColliderImpl::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)

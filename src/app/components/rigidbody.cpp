@@ -19,6 +19,8 @@
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
 #include "app/util/collider_type.h"
+#include "graphics/base/transform_3d.h"
+#include "graphics/components/render_object.h"
 
 namespace ark {
 
@@ -39,8 +41,8 @@ void Rigidbody::Stub::onEndContact(const Rigidbody& rigidBody) const
         _collision_callback->onEndContact(rigidBody);
 }
 
-Rigidbody::Rigidbody(BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded, Box impl, const bool isShadow)
-    : _impl{sp<Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation)), std::move(impl)}, _is_shadow(isShadow)
+Rigidbody::Rigidbody(BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded, sp<RigidbodyController> controller, const bool isShadow)
+    : _impl{sp<Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation)), nullptr, std::move(controller)}, _is_shadow(isShadow)
 {
 }
 
@@ -73,17 +75,24 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
 
     if(auto shape = context.getComponent<Shape>())
     {
-        const sp<Collider> collider = _impl._instance.as<Collider>();
+        const sp<Collider> collider = _impl._collider;
         ASSERT(shape->type().hash() != Shape::TYPE_NONE);
         ASSERT(collider);
         ASSERT(_is_shadow);
-        Impl impl = std::move(_impl);
+        const Impl impl = std::move(_impl);
         _impl = collider->createBody(impl._stub->_type, std::move(shape), impl._stub->_position.wrapped(), impl._stub->_rotation.wrapped(), std::move(impl._stub->_collision_filter), impl._stub->_ref->discarded().wrapped());
         _impl._stub->_collision_callback = std::move(impl._stub->_collision_callback);
         _impl._stub->_collision_filter = std::move(impl._stub->_collision_filter);
         _impl._stub->_tags = std::move(impl._stub->_tags);
         _is_shadow = false;
     }
+
+    if(type() == BODY_TYPE_DYNAMIC)
+        if(const sp<RenderObject> renderObject = context.getComponent<RenderObject>())
+        {
+            renderObject->setPosition(position().toVar());
+            renderObject->setTransform(sp<Transform>::make<Transform3D>(rotation().toVar(), nullptr, nullptr));
+        }
 
     if(!_impl._stub->_collision_callback)
         if(auto collisionCallback = context.getComponent<CollisionCallback>())
@@ -156,9 +165,9 @@ void Rigidbody::setTag(Box tag)
         _impl._stub->_tags = sp<Tags>::make(std::move(tag));
 }
 
-const Box& Rigidbody::impl() const
+const sp<RigidbodyController>& Rigidbody::controller() const
 {
-    return _impl._instance;
+    return _impl._controller;
 }
 
 sp<Rigidbody> Rigidbody::makeShadow() const
