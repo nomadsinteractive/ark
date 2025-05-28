@@ -1069,6 +1069,9 @@ class _Scalar(_Var):
     def __pow__(self, power: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
         pass
 
+    def __abs__(self) -> Self:
+        pass
+
 class Numeric(_Scalar):
     def __init__(self, val):
         pass
