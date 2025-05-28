@@ -273,17 +273,21 @@ class ConsoleWindow(Window):
         def _callback():
             result = cmd() if callable(cmd) else cmd
             if result is None:
-                return close_main_window()
-
-            if isinstance(result, Window):
+                close_main_window()
+            elif isinstance(result, Window):
                 result.show()
+            elif isinstance(result, dear_imgui.Widget):
+                self._create_sub_panel(sub_tab_panel, result)
             elif not isinstance(result, bool):
-                builder = dear_imgui.WidgetBuilder(self._imgui)
-                builder.separator()
-                builder.add_widget(self._make_tab_panel_widget(ConsoleCommand('', result), tab_panel))
-                sub_tab_panel.reset(builder.make_widget())
+                self._create_sub_panel(sub_tab_panel, self._make_tab_panel_widget(ConsoleCommand('', result), tab_panel))
 
         return _callback
+
+    def _create_sub_panel(self, sub_tab_panel: dear_imgui.Widget, widget: dear_imgui.Widget):
+        builder = dear_imgui.WidgetBuilder(self._imgui)
+        builder.separator()
+        builder.add_widget(widget)
+        sub_tab_panel.reset(builder.make_widget())
 
 
 class PropertiesWindow(Window):
@@ -396,6 +400,9 @@ class MarkStudio:
     @property
     def discarded(self) -> Boolean:
         return self._discarded
+
+    def make_widget_builder(self) -> dear_imgui.WidgetBuilder:
+        return dear_imgui.WidgetBuilder(self._imgui)
 
     def show_properties(self, properties: Any = None, **kwargs):
         if kwargs:
