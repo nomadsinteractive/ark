@@ -17,7 +17,7 @@ public:
 
     virtual Rigidbody::Impl createBody(Rigidbody::BodyType bodyType, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr) = 0;
     virtual sp<Shape> createShape(const NamedHash& type, sp<Vec3> size = nullptr, sp<Vec3> origin = nullptr) = 0;
-    virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
+    virtual Vector<RayCastManifold> rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
 
 };
 

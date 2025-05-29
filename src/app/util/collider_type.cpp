@@ -23,7 +23,7 @@ sp<Shape> ColliderType::createShape(const sp<Collider>& self, const NamedHash& t
     return self->createShape(type, std::move(size), std::move(origin));
 }
 
-std::vector<RayCastManifold> ColliderType::rayCast(const sp<Collider>& self, const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
+Vector<RayCastManifold> ColliderType::rayCast(const sp<Collider>& self, const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
 {
     return self->rayCast(from, to, collisionFilter);
 }

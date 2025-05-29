@@ -70,7 +70,7 @@ sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, sp<Vec3> size, 
     return sp<ark::Shape>::make(type, std::move(size), std::move(origin));
 }
 
-std::vector<RayCastManifold> ColliderBox2D::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& /*collisionFilter*/)
+Vector<RayCastManifold> ColliderBox2D::rayCast(V3 from, V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
     DFATAL("Unimplemented");
     return {};

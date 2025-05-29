@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_set>
-
 #include "core/inf/updatable.h"
 #include "core/inf/variable.h"
 #include "core/impl/builder/safe_builder.h"
@@ -23,7 +21,7 @@ public:
 
     Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded) override;
     sp<Shape> createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin) override;
-    Vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
+    Vector<RayCastManifold> rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER final : public Builder<Collider> {
@@ -38,7 +36,6 @@ public:
         sp<RenderController> _render_controller;
     };
 
-public:
     class RigidbodyImpl;
 
     struct Stub final : Updatable {

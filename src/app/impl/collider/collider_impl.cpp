@@ -34,9 +34,9 @@ bool collisionFilterTest(const sp<CollisionFilter>& cf1, const sp<CollisionFilte
 
 }
 
-class ColliderImpl::RigidbodyImpl : public RigidbodyController {
+class ColliderImpl::RigidbodyImpl final : public RigidbodyController {
 public:
-    RigidbodyImpl(const ColliderImpl::Stub& stub, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
+    RigidbodyImpl(const Stub& stub, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
         : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter))), _collider_stub(stub), _position_updated(true), _size_updated(false)
     {
     }
@@ -61,7 +61,7 @@ public:
         return false;
     }
 
-    void collisionTest(ColliderImpl::Stub& collider, const V3& position, const V3& size, const Set<BroadPhrase::CandidateIdType>& removingIds)
+    void collisionTest(Stub& collider, const V3& position, const V3& size, const Set<BroadPhrase::CandidateIdType>& removingIds)
     {
         if(_rigidbody_stub->_ref->isDiscarded())
             return doDispose(collider);
@@ -87,7 +87,7 @@ public:
         }
     }
 
-    void doDispose(ColliderImpl::Stub& stub)
+    void doDispose(Stub& stub)
     {
         stub.requestRigidBodyRemoval(_rigidbody_stub->_ref->id());
     }
@@ -130,7 +130,7 @@ public:
     }
 
     sp<Rigidbody::Stub> _rigidbody_stub;
-    const ColliderImpl::Stub& _collider_stub;
+    const Stub& _collider_stub;
     Set<BroadPhrase::CandidateIdType> _dynamic_contacts;
     Set<BroadPhrase::CandidateIdType> _static_contacts;
 
@@ -159,7 +159,7 @@ sp<Shape> ColliderImpl::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec
     return sp<Shape>::make(type, std::move(size), std::move(origin));
 }
 
-Vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
+Vector<RayCastManifold> ColliderImpl::rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter)
 {
     return _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()), collisionFilter);
 }
@@ -249,7 +249,7 @@ bool ColliderImpl::Stub::update(uint64_t timestamp)
     return true;
 }
 
-void ColliderImpl::Stub::requestRigidBodyRemoval(int32_t rigidBodyId)
+void ColliderImpl::Stub::requestRigidBodyRemoval(const int32_t rigidBodyId)
 {
     _phrase_dispose.insert(rigidBodyId);
 }

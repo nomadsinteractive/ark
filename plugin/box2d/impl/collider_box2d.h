@@ -33,7 +33,7 @@ public:
 
     Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<ark::Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr) override;
     sp<ark::Shape> createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin) override;
-    std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
+    Vector<RayCastManifold> rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
 
     b2World& world() const;
 

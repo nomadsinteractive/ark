@@ -330,7 +330,7 @@ void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<Colli
     }
 }
 
-Vector<RayCastManifold> ColliderBullet::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& /*collisionFilter*/)
+Vector<RayCastManifold> ColliderBullet::rayCast(V3 from, V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
     const btVector3 btFrom(from.x(), from.y(), from.z());
     const btVector3 btTo(to.x(), to.y(), to.z());
@@ -339,7 +339,7 @@ Vector<RayCastManifold> ColliderBullet::rayCast(const V3& from, const V3& to, co
 
     _stub->_dynamics_world->rayTest(btVector3(from.x(), from.y(), from.z()), btVector3(to.x(), to.y(), to.z()), allHitResults);
 
-    std::vector<RayCastManifold> manifolds;
+    Vector<RayCastManifold> manifolds;
     if(allHitResults.hasHit())
     {
         for(int32_t i = 0; i < allHitResults.m_hitFractions.size(); ++i)

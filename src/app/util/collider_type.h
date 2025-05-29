@@ -20,7 +20,7 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Shape> createShape(const sp<Collider>& self, const NamedHash& type, sp<Vec3> size = nullptr, sp<Vec3> origin = nullptr);
 //  [[script::bindings::classmethod]]
-    static std::vector<RayCastManifold> rayCast(const sp<Collider>& self, const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr);
+    static Vector<RayCastManifold> rayCast(const sp<Collider>& self, const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr);
 
 };
 
