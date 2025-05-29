@@ -165,8 +165,8 @@ class GenMethod(object):
     def check_argument_type(self):
         return True
 
-    def _gen_calling_statement(self, genclass, argnames):
-        return 'unpacked->%s(%s);' % (self._name, argnames)
+    def _gen_calling_statement(self, genclass, argvalues: list[str]):
+        return 'unpacked->%s(%s);' % (self._name, ', '.join(argvalues))
 
     def _gen_calling_body(self, genclass, calling_lines):
         return calling_lines
@@ -247,8 +247,7 @@ class GenMethod(object):
             f'constexpr static auto {self._name}_r = ark::plugin::python::PyCast::RuntimeFuncWrapper<decltype(&{self._name}), {self._name}>;'
         ]
 
-    @staticmethod
-    def _gen_convert_args_code(lines, argdeclare, optional_check=False):
+    def gen_convert_args_code(self, genclass, lines: list[str], argdeclare: list[str], optional_check: bool = False):
         if argdeclare:
             lines.extend(argdeclare)
 
@@ -275,14 +274,14 @@ class GenMethod(object):
         if self._self_argument:
             if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>', f'{genclass.binding_classname}&', 'Box'):
                 self_type_checks.append(f'unpacked.isInstance<{acg.get_shared_ptr_type(self._self_argument.accept_type)}>()')
-        self._gen_convert_args_code(bodylines, argdeclare, optional_check)
+        self.gen_convert_args_code(genclass, bodylines, argdeclare, optional_check)
 
         if check_args and args:
             bodylines.append("if(%s) %s;" % (' || '.join([f'!obj{i}' for i, j in args]), self.err_return_value))
 
         r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
         argtypes = [' '.join(i.gen_declare(self, 't', 't').split('=')[0].strip().split()[:-1]) for i in self._arguments]
-        argvalues = ', '.join(gen_method_call_arg(f'obj{i}.value()' if optional_check and i in args_set else f'obj{i}', j, argtypes[i]) for i, j in enumerate(self._arguments))
+        argvalues = list(gen_method_call_arg(f'obj{i}.value()' if optional_check and i in args_set else f'obj{i}', j, argtypes[i]) for i, j in enumerate(self._arguments))
         callstatement = self._gen_calling_statement(genclass, argvalues)
         py_return = self.gen_py_return()
         pyret = ['return 0;'] if py_return == 'int' else self.gen_return_statement(r, py_return)
@@ -343,7 +342,7 @@ class GenGetPropMethod(GenMethod):
     def _gen_parse_tuple_code(self, lines, declares, args):
         pass
 
-    def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
+    def gen_convert_args_code(self, genclass, lines, argdeclare, optional_check=False):
         if argdeclare:
             arg0 = self._arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
@@ -425,10 +424,10 @@ class GenOperatorMethod(GenMethod):
     def gen_py_argc(self):
         return len(self._arguments)
 
-    def _gen_calling_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argvalues: list[str]):
         if self._is_static:
-            return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
-        return super()._gen_calling_statement(genclass, argnames)
+            return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join(argvalues))
+        return super()._gen_calling_statement(genclass, argvalues)
 
     def gen_return_statement(self, return_type, py_return):
         if self._operator in ('+=', '-=', '*=', '/='):
@@ -457,11 +456,11 @@ class GenOperatorMethod(GenMethod):
 
 
 class GenSubscribableMethod(GenMethod):
-    def __init__(self, name, args, return_type, operator, is_static):
+    def __init__(self, name, args, return_type, operator, is_static: bool):
         self._operator = operator
         self._is_static = is_static
         self._is_len_func = operator == 'len'
-        self._is_set_func = len(args) == 3
+        self._is_set_func = operator == 'set'
         super().__init__(name, args[1:] if self._is_static else args, return_type, is_static)
 
     @property
@@ -481,7 +480,7 @@ class GenSubscribableMethod(GenMethod):
     def gen_py_return(self):
         if self._is_len_func:
             return 'Py_ssize_t'
-        return 'int32_t' if len(self._arguments) == 2 else super().gen_py_return()
+        return 'int32_t' if self.operator in ('set', 'del') else super().gen_py_return()
 
     def overload(self, m1, m2):
         try:
@@ -490,26 +489,30 @@ class GenSubscribableMethod(GenMethod):
         except AttributeError:
             return create_overloaded_method_type(type(self), is_static=m1.is_static, operator=m1.operator)(m1, m2)
 
-    def _gen_calling_statement(self, genclass, argnames) -> str:
-        calling_statement = '%s::%s(%s);' % (genclass.classname, self._name, f'unpacked{", " if argnames else ""}{argnames}') if self._is_static else super()._gen_calling_statement(genclass, argnames)
+    def _gen_calling_statement(self, genclass, argvalues: list[str]) -> str:
+        calling_statement = '%s::%s(%s);' % (genclass.classname, self._name, ', '.join(['unpacked'] + argvalues)) if self._is_static else super()._gen_calling_statement(genclass, argvalues)
         if self._is_set_func:
             for i in genclass.subscribe_methods():
                 if i.operator == 'del':
-                    argnames = argnames.split(',')[0].strip()
-                    return f'if(arg1)\n{INDENT * 2}{calling_statement}\n{INDENT}else\n{INDENT * 2}{i._gen_calling_statement(genclass, argnames)}'
+                    return f'if(arg1)\n{INDENT * 2}{calling_statement}\n{INDENT}else\n{INDENT * 2}{i._gen_calling_statement(genclass, [argvalues[0].strip()])}'
         return calling_statement
 
 
 class GenMappingMethod(GenSubscribableMethod):
     def __init__(self, name: str, args, return_type: str, operator: str, is_static: bool):
         super().__init__(name, args, return_type, operator, is_static)
+        self._set_arg1_convert_code = None
 
-    def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
+    def gen_convert_args_code(self, genclass, lines: list[str], argdeclare: list[str], optional_check: bool = False):
+        has_del_method = any(i.operator == 'del' for i in genclass.subscribe_methods())
         if argdeclare and not self._is_len_func:
             for i, j in enumerate(self._arguments):
                 meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
                 ga = GenArgument(j.index, j.accept_type, j.default_value, meta, str(j))
-                lines.append(ga.gen_declare(self, f'obj{i}', f'arg{i}', False, optional_check))
+                if has_del_method and self._is_set_func and i == 1:
+                    self._set_arg1_convert_code = ga.gen_declare(self, f'obj{i}', f'arg{i}', False, optional_check).partition('=')[2].strip(' ;')
+                else:
+                    lines.append(ga.gen_declare(self, f'obj{i}', f'arg{i}', False, optional_check))
 
     def gen_py_arguments(self):
         self_arg = f'Instance* self'
@@ -519,12 +522,17 @@ class GenMappingMethod(GenSubscribableMethod):
         argc = self.gen_py_argc()
         return f'{self_arg}, {", ".join("PyObject* arg%d" % i for i in range(argc))}'
 
+    def _gen_calling_statement(self, genclass, argvalues: list[str]) -> str:
+        if self._set_arg1_convert_code:
+            return super()._gen_calling_statement(genclass, argvalues[:1] + [self._set_arg1_convert_code])
+        return super()._gen_calling_statement(genclass, argvalues)
+
 
 class GenSequenceMethod(GenSubscribableMethod):
     def __init__(self, name, args, return_type, operator, is_static):
         super().__init__(name, args, return_type, operator, is_static)
 
-    def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
+    def gen_convert_args_code(self, genclass, lines, argdeclare, optional_check=False):
         if argdeclare and not self._is_len_func:
             arg0 = self._arguments[0]
             lines.append(f'{arg0.accept_type} obj0 = static_cast<{arg0.accept_type}>(arg0);')

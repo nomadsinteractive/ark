@@ -19,6 +19,8 @@ public:
     Box getTag(uint64_t typeId) const;
 //  [[script::bindings::map(set)]]
     void setTag(uint64_t typeId, Box tag);
+//  [[script::bindings::map(del)]]
+    void removeTag(uint64_t typeId);
 
     void traverse(const Visitor& visitor) override;
 

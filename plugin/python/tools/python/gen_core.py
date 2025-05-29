@@ -217,7 +217,7 @@ class GenArgument:
             return f'{varname} && {ARK_PY_ARGUMENT_TYPE_CHECKERS[self._accept_type].check(varname, is_overloaded_func)}'
         return None
 
-    def gen_declare(self, gen_method, objname, argname, extract_cast=False, optional_check=False):
+    def gen_declare(self, gen_method, objname, argname, extract_cast: bool = False, optional_check: bool = False):
         typename = self._meta.cast_signature
         if self._meta.is_base_type:
             return '%s %s = %s;' % (typename, objname, gen_cast_call(typename, argname))
@@ -244,7 +244,7 @@ class GenArgument:
         functype = acg.get_template_type(typename, 'Optional') if is_optional_type else typename
         return self._gen_var_declare(typename, objname, to_cpp_object, functype, argname, False, optional_check)
 
-    def _gen_var_declare(self, typename, varname, funcname, functype, argname, extract_cast=False, optional_check=False):
+    def _gen_var_declare(self, typename, varname, funcname: str, functype: str, argname, extract_cast: bool = False, optional_check: bool = False):
         if optional_check:
             typename = f'Optional<{typename}>'
         if self._default_value and (self._accept_type.startswith('sp<') or self._meta.parse_signature == 'O'):
@@ -284,7 +284,7 @@ def create_overloaded_method_type(base_type, **kwargs):
 
             m0 = self._overloaded_methods[0]
             not_overloaded_declar = [j.gen_declare(self, 'obj%d' % i, 'arg%d' % i, not m0.check_argument_type) for i, j in enumerate(not_overloaded_args) if j]
-            self._gen_convert_args_code(lines, not_overloaded_declar)
+            self.gen_convert_args_code(genclass, lines, not_overloaded_declar)
             for i in self._overloaded_methods:
                 type_checks = [k.gen_type_check('arg%d' % j, True) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
                 lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j]) or ['true']), '{'])

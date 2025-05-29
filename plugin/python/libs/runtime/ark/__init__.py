@@ -400,6 +400,9 @@ class Tags:
     def __setitem__(self, key: Any, value: Any):
         pass
 
+    def __delitem__(self, key):
+        pass
+
 
 class Json:
     def __init__(self):

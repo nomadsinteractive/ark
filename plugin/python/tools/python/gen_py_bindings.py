@@ -205,7 +205,7 @@ def gen_body_source(filename, output_dir, output_file, namespaces, modulename, r
     add_types = '\n    '.join([f'moduletypes.push_back({i});' for i in gen_module_type_declarations(modulename, results)])
     lines.append('\n' + '''void __init_%s__(PyObject* module)
 {
-    std::vector<PyArkType*> moduletypes;
+    Vector<PyArkType*> moduletypes;
     ark::plugin::python::PythonExtension& pi = ark::plugin::python::PythonExtension::instance();
     %s
     for(PyArkType* i : moduletypes)
@@ -317,10 +317,10 @@ class GenConstructorMethod(GenMethod):
         self._funcname = name
         self._is_static = is_static
 
-    def _gen_calling_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argvalues: list[str]):
         if self._is_static:
-            return 'self->box = new Box(%s::%s(%s));' % (genclass.classname, self._funcname, argnames)
-        return 'self->box = new Box(sp<%s>::make(%s));' % (self._funcname, argnames)
+            return 'self->box = new Box(%s::%s(%s));' % (genclass.classname, self._funcname, ', '.join(argvalues))
+        return 'self->box = new Box(sp<%s>::make(%s));' % (self._funcname, ', '.join(argvalues))
 
     def gen_py_return(self):
         return 'int'
@@ -354,7 +354,7 @@ class GenPropertyMethod(GenMethod):
     def _gen_parse_tuple_code(self, lines, declares, args):
         pass
 
-    def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
+    def gen_convert_args_code(self, genclass, lines, argdeclare, optional_check=False):
         if argdeclare:
             arg0 = self._arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
@@ -380,12 +380,12 @@ class GenPropertyMethod(GenMethod):
         else:
             property_def[1] = f'(getter) {func}'
 
-    def _gen_calling_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argvalues: list[str]):
         self_statement = self.gen_self_statement(genclass)
         if self._is_static:
-            lines = ['%s::%s(%s%s);' % (genclass.classname, self._name, self_statement, argnames and ', ' + argnames)]
+            lines = ['%s::%s(%s);' % (genclass.classname, self._name, ', '.join([self_statement] + argvalues))]
         else:
-            lines = ['%s->%s(%s);' % (self_statement, self._name, argnames)]
+            lines = ['%s->%s(%s);' % (self_statement, self._name, ', '.join(argvalues))]
         return '\n    '.join(lines)
 
     def _ensure_property_def(self, properties):
@@ -416,8 +416,8 @@ class GenLoaderMethod(GenMethod):
     def gen_py_method_def(self, genclass):
         return self.gen_py_method_def_tp(genclass)
 
-    def _gen_calling_statement(self, genclass, argnames):
-        return 'PythonExtension::instance().ensurePyArkType(reinterpret_cast<PyObject*>(self))->load(*self, "%s", %s);' % (self._name, argnames)
+    def _gen_calling_statement(self, genclass, argvalues: list[str]):
+        return 'PythonExtension::instance().ensurePyArkType(reinterpret_cast<PyObject*>(self))->load(*self, "%s", %s);' % (self._name, ', '.join(argvalues))
 
     def need_unpack_statement(self):
         return False
@@ -445,8 +445,8 @@ class GenStaticMethod(GenMethod):
     def need_unpack_statement(self):
         return False
 
-    def _gen_calling_statement(self, genclass, argnames):
-        return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
+    def _gen_calling_statement(self, genclass, argvalues: list[str]):
+        return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join(argvalues))
 
 
 class GenStaticMemberMethod(GenMethod):
@@ -458,8 +458,8 @@ class GenStaticMemberMethod(GenMethod):
     def gen_py_method_def(self, genclass):
         return self.gen_py_method_def_tp(genclass)
 
-    def _gen_calling_statement(self, genclass, argnames):
-        return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
+    def _gen_calling_statement(self, genclass, argvalues: list[str]):
+        return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join([self.gen_self_statement(genclass)] + argvalues))
 
 
 class GenRichCompareMethod(GenMethod):
@@ -472,11 +472,11 @@ class GenRichCompareMethod(GenMethod):
     def gen_py_return(self):
         return 'PyObject*'
 
-    def _gen_calling_statement(self, genclass, argnames):
-        return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
+    def _gen_calling_statement(self, genclass, argvalues: list[str]):
+        return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join([self.gen_self_statement(genclass)] + argvalues))
 
     @staticmethod
-    def _gen_convert_args_code(lines, argdeclare, optional_check=False):
+    def gen_convert_args_code(lines, genclass, argdeclare, optional_check=False):
         pass
 
     def _gen_parse_tuple_code(self, lines, declares, args):
@@ -490,7 +490,7 @@ class GenRichCompareMethod(GenMethod):
         return self._operator
 
 
-class GenClass(object):
+class GenClass:
     def __init__(self, filename: str, class_name: str, has_debris: bool = False):
         self._py_src_name = f'py_ark_{acg.camel_case_to_snake_case(class_name)}_type'
         self._py_class_name = f'PyArk{class_name}Type'

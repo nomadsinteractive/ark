@@ -20,6 +20,12 @@ void Tags::setTag(const uint64_t typeId, Box tag)
     _tags[typeId] = std::move(tag);
 }
 
+void Tags::removeTag(const uint64_t typeId)
+{
+    if(const auto iter = _tags.find(typeId); iter != _tags.end())
+        _tags.erase(iter);
+}
+
 Box Tags::getTag(const uint64_t typeId) const
 {
     if(const auto iter = _tags.find(typeId); iter != _tags.end())
