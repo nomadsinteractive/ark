@@ -1048,16 +1048,16 @@ class _Scalar(_Var):
     def __add__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
         return 0
 
-    def __sub__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
-        pass
-
-    def __mul__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
-        pass
-
     def __radd__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
         return 0
 
+    def __sub__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        pass
+
     def __rsub__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        pass
+
+    def __mul__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
         pass
 
     def __rmul__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
@@ -1066,11 +1066,15 @@ class _Scalar(_Var):
     def __truediv__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
         pass
 
+    def __rtruediv__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+        pass
+
     def __pow__(self, power: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
         pass
 
     def __abs__(self) -> Self:
         pass
+
 
 class Numeric(_Scalar):
     def __init__(self, val):
