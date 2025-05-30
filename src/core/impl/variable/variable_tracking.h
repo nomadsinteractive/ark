@@ -13,26 +13,27 @@ public:
     }
 
     bool update(uint64_t timestamp) override {
-        const bool dirty = _target->update(timestamp);
-        if(_future && _future->isDoneOrCanceled())
-            return dirty;
+        if(_future && _future->isDoneOrCanceled()->val())
+            return false;
 
+        const bool dirty = _target->update(timestamp);
         const float t1 = _t->val();
         const T targetValue = _target->val();
         const T vec = targetValue - _value;
-        const float distance2 = Math::hypot2(vec);
         float distance;
         if constexpr(std::is_same_v<T, float>)
             distance = std::abs(vec);
         else
-            distance = Math::sqrt(distance2);
+            distance = Math::sqrt(Math::hypot2(vec));
         if(distance > _distance) {
             const T n = vec / distance;
             _value += n * std::min((t1 - _t0) * _speed, distance);
             _t0 = t1;
         }
-        else if(_future)
+        else if(_future) {
             _future->notify();
+            return dirty;
+        }
         return true;
     }
 
