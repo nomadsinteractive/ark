@@ -304,10 +304,10 @@ public:
         return sp<VarType>::template make<Lerp<T, float>>(std::move(self), std::move(b), std::move(t));
     }
 
-    static sp<VarType> track(sp<VarType> self, const T s0, const float speed, const float snapDistance2, sp<Numeric> t) {
+    static sp<VarType> track(sp<VarType> self, const T s0, const float speed, const float distance, sp<Future> future, sp<Numeric> t) {
         if(!t)
             t = Ark::instance().appClock()->duration();
-        return sp<VarType>::template make<VariableTracking<T>>(std::move(self), std::move(t), s0, speed, snapDistance2);
+        return sp<VarType>::template make<VariableTracking<T>>(std::move(self), std::move(t), s0, speed, distance, std::move(future));
     }
 
     static sp<VarType> sod(sp<VarType> self, const T s0, const float f, const float z, const float r, sp<Numeric> t) {

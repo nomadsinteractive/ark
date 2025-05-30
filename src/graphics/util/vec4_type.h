@@ -135,7 +135,7 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec4> lerp(sp<Vec4> self, sp<Vec4> b, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> track(sp<Vec4> self, V4 s0, float speed, float snapDistance2, sp<Numeric> t = nullptr);
+    static sp<Vec4> track(sp<Vec4> self, V4 s0, float speed, float distance, sp<Future> future = nullptr, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Vec4> sod(sp<Vec4> self, V4 s0, float f, float z = 1.0f, float r = 0, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]

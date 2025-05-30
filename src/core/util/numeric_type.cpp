@@ -277,11 +277,11 @@ sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, con
     return sp<Numeric>::make<Lerp<float, float>>(self, b, t);
 }
 
-sp<Numeric> NumericType::track(sp<Numeric> self, float s0, float speed, float snapDistance2, sp<Numeric> t)
+sp<Numeric> NumericType::track(sp<Numeric> self, float s0, float speed, float distance, sp<Future> future, sp<Numeric> t)
 {
     if(!t)
         t = Ark::instance().appClock()->duration();
-    return sp<Numeric>::make<VariableTracking<float>>(std::move(self), std::move(t), s0, speed, snapDistance2);
+    return sp<Numeric>::make<VariableTracking<float>>(std::move(self), std::move(t), s0, speed, distance, std::move(future));
 }
 
 sp<Numeric> NumericType::sod(sp<Numeric> self, const float s0, const float f, const float z, const float r, sp<Numeric> t)

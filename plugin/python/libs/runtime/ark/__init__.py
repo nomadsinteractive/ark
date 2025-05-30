@@ -1086,16 +1086,16 @@ class Numeric(_Scalar):
     def integral(self, t: Optional["Numeric"] = None) -> "Numeric":
         pass
 
-    def if_else(self, condition: Union[bool, Boolean], negative: Union[float, "Numeric"]) -> "Numeric":
+    def if_else(self, condition: Union[bool, Boolean], negative: Union[float, "Numeric"]) -> Self:
         pass
 
     def synchronize(self, discarded: Boolean) -> "Numeric":
         pass
 
-    def track(self, s0: float, speed: float, snap_distance2: float, t: Optional["Numeric"] = None) -> "Numeric":
+    def track(self, s0: float, speed: float, distance: float, future: Optional[Future] = None, t: Optional["Numeric"] = None) -> Self:
         pass
 
-    def sod(self, s0: float, f: float, z: float = 1.0, r: float = 0, t: Optional["Numeric"] = None) -> "Numeric":
+    def sod(self, s0: float, f: float, z: float = 1.0, r: float = 0, t: Optional["Numeric"] = None) -> Self:
         pass
     
     def normalize(self) -> Self:
@@ -1227,7 +1227,7 @@ class Vec2(_Var):
     def lerp(self, other, t: TYPE_NUMERIC) -> Self:
         pass
 
-    def track(self, s0, speed: float, snap_distance2: float, t: Optional[Numeric] = None) -> Self:
+    def track(self, s0, speed: float, distance: float, future: Optional[Future] = None, t: Optional[Numeric] = None) -> Self:
         pass
 
     def sod(self, s0, f: float, z: float = 1, r: float = 0, t: Optional[Numeric] = None) -> Self:
