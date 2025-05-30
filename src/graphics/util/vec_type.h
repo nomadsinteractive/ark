@@ -156,9 +156,8 @@ public:
         ensureImpl(self)->set(val);
     }
 
-    static sp<Numeric> x(const sp<VarType>& self) {
-        const sp<IMPL> impl = self.template asInstance<IMPL>();
-        return impl ? static_cast<sp<Numeric>>(impl->x()) : sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(0), self);
+    static sp<Numeric> x(sp<VarType> self) {
+        return sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(0), std::move(self));
     }
 
     static void setX(const sp<VarType>& self, float x) {
@@ -170,8 +169,7 @@ public:
     }
 
     static sp<Numeric> y(const sp<VarType>& self) {
-        const sp<IMPL> impl = self.template asInstance<IMPL>();
-        return impl ? static_cast<sp<Numeric>>(impl->y()) : sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(1), self);
+        return sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(1), std::move(self));
     }
 
     static void setY(const sp<VarType>& self, float y) {
@@ -183,12 +181,9 @@ public:
     }
 
     static sp<Numeric> z(const sp<VarType>& self) {
-        if constexpr(DIMENSION > 2) {
-            const sp<IMPL> impl = toImpl(self);
-            return impl ? static_cast<sp<Numeric>>(impl->z()) : sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(2), self);
-        }
-        else
-            FATAL("You shouldn't be here");
+        if constexpr(DIMENSION > 2)
+            return sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(2), std::move(self));
+        FATAL("You shouldn't be here");
         return nullptr;
     }
 

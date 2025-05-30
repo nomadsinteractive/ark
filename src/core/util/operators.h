@@ -273,11 +273,11 @@ public:
 
     template<typename T, typename U> class Subscript {
     public:
-        Subscript(int32_t idx)
+        Subscript(const int32_t idx)
             : _idx(idx) {
         }
 
-        U operator()(const T& val) {
+        U operator()(T val) {
             return static_cast<U>(val[_idx]);
         }
 
