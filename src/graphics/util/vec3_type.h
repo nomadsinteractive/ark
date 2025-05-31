@@ -73,21 +73,9 @@ public:
 //  [[script::bindings::property]]
     static sp<Numeric> x(const sp<Vec3>& self);
 //  [[script::bindings::property]]
-    static void setX(const sp<Vec3>& self, float x);
-//  [[script::bindings::property]]
-    static void setX(const sp<Vec3>& self, sp<Numeric> x);
-//  [[script::bindings::property]]
     static sp<Numeric> y(const sp<Vec3>& self);
 //  [[script::bindings::property]]
-    static void setY(const sp<Vec3>& self, float y);
-//  [[script::bindings::property]]
-    static void setY(const sp<Vec3>& self, sp<Numeric> y);
-//  [[script::bindings::property]]
     static sp<Numeric> z(const sp<Vec3>& self);
-//  [[script::bindings::property]]
-    static void setZ(const sp<Vec3>& self, float z);
-//  [[script::bindings::property]]
-    static void setZ(const sp<Vec3>& self, sp<Numeric> z);
 
 //  [[script::bindings::seq(len)]]
     static size_t len(const sp<Vec3>& self);

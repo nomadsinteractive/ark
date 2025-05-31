@@ -160,24 +160,8 @@ public:
         return sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(0), std::move(self));
     }
 
-    static void setX(const sp<VarType>& self, float x) {
-        ensureImpl(self)->x()->set(x);
-    }
-
-    static void setX(const sp<VarType>& self, sp<Numeric> x) {
-        ensureImpl(self)->x()->set(std::move(x));
-    }
-
     static sp<Numeric> y(const sp<VarType>& self) {
         return sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(1), std::move(self));
-    }
-
-    static void setY(const sp<VarType>& self, float y) {
-        ensureImpl(self)->y()->set(y);
-    }
-
-    static void setY(const sp<VarType>& self, sp<Numeric> y) {
-        ensureImpl(self)->y()->set(std::move(y));
     }
 
     static sp<Numeric> z(const sp<VarType>& self) {
@@ -185,13 +169,6 @@ public:
             return sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(2), std::move(self));
         FATAL("You shouldn't be here");
         return nullptr;
-    }
-
-    template<typename U> static void setZ(const sp<VarType>& self, U z) {
-        if constexpr(DIMENSION > 2)
-            ensureImpl(self)->z()->set(std::move(z));
-        else
-            FATAL("You shouldn't be here");
     }
 
     static size_t len(const sp<VarType>& /*self*/) {

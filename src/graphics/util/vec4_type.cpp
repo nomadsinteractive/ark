@@ -26,16 +26,6 @@ sp<Numeric> Vec4Type::w(const sp<Vec4>& self)
     return impl ? static_cast<sp<Numeric>>(impl->w()) : sp<Numeric>::make<VariableOP1<float, V4>>(Operators::Subscript<V4, float>(3), self);
 }
 
-void Vec4Type::setW(const sp<Vec4>& self, const float w)
-{
-    ensureImpl(self)->w()->set(w);
-}
-
-void Vec4Type::setW(const sp<Vec4>& self, sp<Numeric> w)
-{
-    ensureImpl(self)->w()->set(std::move(w));
-}
-
 sp<Vec4> Vec4Type::xyzw(sp<Vec4> self)
 {
     return self;

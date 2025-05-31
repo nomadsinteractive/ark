@@ -73,21 +73,9 @@ public:
 //  [[script::bindings::property]]
     static sp<Numeric> x(const sp<Vec4>& self);
 //  [[script::bindings::property]]
-    static void setX(const sp<Vec4>& self, float x);
-//  [[script::bindings::property]]
-    static void setX(const sp<Vec4>& self, sp<Numeric> x);
-//  [[script::bindings::property]]
     static sp<Numeric> y(const sp<Vec4>& self);
 //  [[script::bindings::property]]
-    static void setY(const sp<Vec4>& self, float y);
-//  [[script::bindings::property]]
-    static void setY(const sp<Vec4>& self, sp<Numeric> y);
-//  [[script::bindings::property]]
     static sp<Numeric> z(const sp<Vec4>& self);
-//  [[script::bindings::property]]
-    static void setZ(const sp<Vec4>& self, float z);
-//  [[script::bindings::property]]
-    static void setZ(const sp<Vec4>& self, sp<Numeric> z);
 
 //  [[script::bindings::seq(len)]]
     static size_t len(const sp<Vec4>& self);
@@ -96,10 +84,6 @@ public:
 **/
 //  [[script::bindings::property]]
     static sp<Numeric> w(const sp<Vec4>& self);
-//  [[script::bindings::property]]
-    static void setW(const sp<Vec4>& self, float w);
-//  [[script::bindings::property]]
-    static void setW(const sp<Vec4>& self, sp<Numeric> w);
 
 //  [[script::bindings::property]]
     static sp<Vec4> xyzw(sp<Vec4> self);

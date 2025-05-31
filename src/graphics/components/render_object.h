@@ -30,30 +30,6 @@ public:
     void setType(sp<Integer> type);
 
 //  [[script::bindings::property]]
-    float x() const;
-//  [[script::bindings::property]]
-    void setX(float x);
-//  [[script::bindings::property]]
-    void setX(const sp<Numeric>& x);
-//  [[script::bindings::property]]
-    float y() const;
-//  [[script::bindings::property]]
-    void setY(float y);
-//  [[script::bindings::property]]
-    void setY(const sp<Numeric>& y);
-//  [[script::bindings::property]]
-    float z() const;
-//  [[script::bindings::property]]
-    void setZ(float z);
-//  [[script::bindings::property]]
-    void setZ(const sp<Numeric>& z);
-
-//  [[script::bindings::property]]
-    V2 xy() const;
-//  [[script::bindings::property]]
-    V3 xyz() const;
-
-//  [[script::bindings::property]]
     sp<Vec3> position();
 //  [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
@@ -99,7 +75,7 @@ public:
     bool isVisible() const;
 
     StateBits updateState(const RenderRequest& renderRequest) override;
-    Renderable::Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
 
     void onWire(const WiringContext& context, const Box& self) override;
 

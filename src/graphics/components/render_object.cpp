@@ -69,68 +69,6 @@ void RenderObject::setType(sp<Integer> type)
     _timestamp.markDirty();
 }
 
-float RenderObject::x() const
-{
-    return _position.val().x();
-}
-
-void RenderObject::setX(float x)
-{
-    Vec3Type::setX(_position.ensure(), x);
-    _timestamp.markDirty();
-}
-
-void RenderObject::setX(const sp<Numeric>& x)
-{
-    Vec3Type::setX(_position.ensure(), x);
-    _timestamp.markDirty();
-}
-
-float RenderObject::y() const
-{
-    return _position.val().y();
-}
-
-void RenderObject::setY(float y)
-{
-    Vec3Type::setY(_position.ensure(), y);
-    _timestamp.markDirty();
-}
-
-void RenderObject::setY(const sp<Numeric>& y)
-{
-    Vec3Type::setY(_position.ensure(), y);
-    _timestamp.markDirty();
-}
-
-float RenderObject::z() const
-{
-    return _position.val().z();
-}
-
-void RenderObject::setZ(float z)
-{
-    Vec3Type::setZ(_position.ensure(), z);
-    _timestamp.markDirty();
-}
-
-void RenderObject::setZ(const sp<Numeric>& z)
-{
-    Vec3Type::setZ(_position.ensure(), z);
-    _timestamp.markDirty();
-}
-
-V2 RenderObject::xy() const
-{
-    const V3 xyz = _position.val();
-    return V2(xyz.x(), xyz.y());
-}
-
-V3 RenderObject::xyz() const
-{
-    return _position.val();
-}
-
 sp<Vec3> RenderObject::position()
 {
     return _position.ensure();

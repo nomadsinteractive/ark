@@ -1,13 +1,10 @@
-#ifndef ARK_RENDERER_OPENGL_UTIL_FREETYPES_H_
-#define ARK_RENDERER_OPENGL_UTIL_FREETYPES_H_
+#pragma once
 
 #include <stdint.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "core/base/api.h"
-#include "core/types/shared_ptr.h"
 #include "core/inf/readable.h"
 
 #include "graphics/forwarding.h"
@@ -27,20 +24,7 @@ public:
     static int32_t ftCalculateBaseLinePosition(FT_Face face);
 
 private:
-    class FTReadableStream {
-    public:
-        FTReadableStream(sp<Readable> readable);
-        sp<Readable> _readable;
-    };
-
-private:
-    static unsigned long ftStreamIOFunc(FT_Stream stream, unsigned long offset, unsigned char*  buffer, unsigned long count);
-    static void ftStreamCloseFunc(FT_Stream stream);
-
-private:
     FT_Library _library;
 };
 
 }
-
-#endif
