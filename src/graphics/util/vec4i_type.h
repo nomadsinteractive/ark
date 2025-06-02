@@ -27,7 +27,6 @@ public:
 //  [[script::bindings::seq(get)]]
     static Optional<int32_t> getItem(const sp<Vec4i>& self, ptrdiff_t index);
 
-
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Vec4i> {
     public:

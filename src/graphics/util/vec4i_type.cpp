@@ -75,7 +75,7 @@ sp<Vec4i> Vec4iType::BUILDER::build(const Scope& args)
 {
     if(_value)
         return _value->build(args);
-    return Vec4iType::create(_x.build(args), _y.build(args), _z.build(args), _w.build(args));
+    return create(_x.build(args), _y.build(args), _z.build(args), _w.build(args));
 }
 
 Vec4iType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
@@ -85,7 +85,7 @@ Vec4iType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
 
 sp<Vec4i> Vec4iType::DICTIONARY::build(const Scope& args)
 {
-    return Vec4iType::create(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
+    return create(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }
 
     

@@ -1150,8 +1150,13 @@ class Discarded(Boolean):
         return False
 
 
+class Vec2i:
+    def __init__(self, x: TYPE_INTEGER, y: Optional[TYPE_INTEGER] = None):
+        pass
+
+
 class Vec4i:
-    def __init__(self, x: TYPE_INTEGER, y: TYPE_INTEGER, z: TYPE_INTEGER, w: TYPE_INTEGER):
+    def __init__(self, x: TYPE_INTEGER, y: Optional[TYPE_INTEGER] = None, z: Optional[TYPE_INTEGER] = None, w: Optional[TYPE_INTEGER] = None):
         pass
 
 

@@ -85,7 +85,7 @@ template<typename T, typename... Args> void setVaryingProperties(Varyings& varyi
 Varyings::Varyings(const Scope& kwargs)
 {
     for(const auto& [k, v] : kwargs.variables())
-        setVaryingProperties<float, int32_t, V2, V3, V4, V4i, M3, M4>(*this, k, v);
+        setVaryingProperties<float, int32_t, V2, V3, V4, V2i, V4i, M3, M4>(*this, k, v);
 }
 
 Varyings::Varyings(const PipelineLayout& pipelineLayout)
@@ -156,6 +156,11 @@ void Varyings::setProperty(const String& name, sp<Vec3> var)
 void Varyings::setProperty(const String& name, sp<Vec4> var)
 {
     setProperty<V4>(name, std::move(var));
+}
+
+void Varyings::setProperty(const String& name, sp<Vec2i> var)
+{
+    setProperty<V2i>(name, std::move(var));
 }
 
 void Varyings::setProperty(const String& name, sp<Vec4i> var)

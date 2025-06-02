@@ -89,6 +89,8 @@ public:
 //  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Vec4> var);
 //  [[script::bindings::setprop]]
+    void setProperty(const String& name, sp<Vec2i> var);
+//  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Vec4i> var);
 //  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Mat4> var);
