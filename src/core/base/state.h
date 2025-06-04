@@ -20,6 +20,8 @@ public:
 
 //  [[script::bindings::property]]
     bool active() const;
+//  [[script::bindings::property]]
+    void setActive(bool active);
 
 //  [[script::bindings::auto]]
     void activate();

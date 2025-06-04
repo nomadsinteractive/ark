@@ -38,8 +38,8 @@ private:
 
 }
 
-Generator::Generator(const NoiseType type, const int32_t seed, const float frequence)
-    : _seed(seed), _frequency(frequence)
+Generator::Generator(const NoiseType type, const int32_t seed, const float frequency)
+    : _seed(seed), _frequency(frequency)
 {
     if(type == NOISE_TYPE_CELLULAR)
         _source_generator = FastNoise::New<FastNoise::CellularDistance>();

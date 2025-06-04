@@ -20,6 +20,14 @@ bool State::active() const
     return _active && !_suppressed;
 }
 
+void State::setActive(const bool active)
+{
+    if(active && !_active)
+        activate();
+    else if(!active && _active)
+        deactivate();
+}
+
 void State::activate()
 {
     uint32_t numOfSupportStates = 0;
