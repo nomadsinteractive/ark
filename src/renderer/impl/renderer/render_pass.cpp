@@ -33,6 +33,8 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/, co
     DrawingParams drawParam = DrawingParams::DrawElements{0};
     switch(_draw_procedure)
     {
+        case enums::DRAW_PROCEDURE_AUTO:
+            break;
         case enums::DRAW_PROCEDURE_DRAW_ARRAYS:
             break;
         case enums::DRAW_PROCEDURE_DRAW_ELEMENTS:

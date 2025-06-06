@@ -47,7 +47,7 @@ private:
 
 }
 
-DrawDecoratorFactoryCompute::DrawDecoratorFactoryCompute(sp<PipelineLayout> pipelineLayout, const std::array<uint32_t, 3> numWorkGroups, const bool atPostDraw)
+DrawDecoratorFactoryCompute::DrawDecoratorFactoryCompute(sp<PipelineLayout> pipelineLayout, const V3i numWorkGroups, const bool atPostDraw)
     : _pipeline_layout(std::move(pipelineLayout)), _num_work_groups(numWorkGroups), _at_post_draw(atPostDraw)
 {
 }

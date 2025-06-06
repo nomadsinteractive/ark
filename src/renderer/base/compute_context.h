@@ -12,12 +12,12 @@ namespace ark {
 
 class ARK_API ComputeContext : public PipelineContext {
 public:
-    ComputeContext(sp<PipelineBindings> pipelineBindings, sp<RenderBufferSnapshot> bufferSnapshot, std::array<uint32_t, 3> numWorkGroups);
+    ComputeContext(sp<PipelineBindings> pipelineBindings, sp<RenderBufferSnapshot> bufferSnapshot, V3i numWorkGroups);
     DEFAULT_COPY_AND_ASSIGN(ComputeContext);
 
     sp<RenderCommand> toComputeCommand();
 
-    std::array<uint32_t, 3> _num_work_groups;
+    V3i _num_work_groups;
 };
 
 }

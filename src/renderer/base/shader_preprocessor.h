@@ -213,7 +213,7 @@ public:
 
     Map<String, PipelineLayout::Binding> _ssbos;
 
-    Optional<std::array<uint32_t, 3>> _compute_local_sizes;
+    Optional<V3i> _compute_local_sizes;
 
     DeclarationList _declaration_ins;
     DeclarationList _declaration_outs;

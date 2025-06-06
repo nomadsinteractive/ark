@@ -620,7 +620,7 @@ class Texture:
         return 0
 
     @property
-    def size(self) -> 'Size':
+    def size(self) -> "Size":
         return Size(0, 0)
 
     def reset(self, texture: "Texture"):
@@ -1152,6 +1152,11 @@ class Discarded(Boolean):
 
 class Vec2i:
     def __init__(self, x: TYPE_INTEGER, y: Optional[TYPE_INTEGER] = None):
+        pass
+
+
+class Vec3i:
+    def __init__(self, x: TYPE_INTEGER, y: Optional[TYPE_INTEGER] = None, z: Optional[TYPE_INTEGER] = None):
         pass
 
 

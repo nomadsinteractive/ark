@@ -50,7 +50,7 @@ public:
         const sp<Snippet> snippet = sp<SnippetTest>::make();
         const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(vert.value(), frag.value());
 
-        const sp<PipelineDescriptor> pipelineDescriptor = sp<PipelineDescriptor>::make(Camera::createDefaultCamera(), buildingContext, PipelineDescriptor::Configuration{{}, nullptr, std::move(snippet)});
+        const sp<PipelineDescriptor> pipelineDescriptor = sp<PipelineDescriptor>::make(Camera::createDefaultCamera(), buildingContext, PipelineDescriptor::Configuration{{}, nullptr, nullptr, std::move(snippet)});
         const sp<PipelineLayout>& pipelineLayout = pipelineDescriptor->layout();
 
         TESTCASE_VALIDATE(pipelineLayout->getStreamLayout(0).stride() != 0);

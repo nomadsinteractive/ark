@@ -130,6 +130,7 @@ public:
     struct Configuration {
         PipelineTraitTable _traits;
         sp<Vec4> _scissor;
+        sp<Vec3i> _num_work_groups;
         sp<Snippet> _snippet;
         sp<DrawDecoratorFactory> _draw_decorator_factory;
 
@@ -141,6 +142,7 @@ public:
 
         private:
             SafeBuilder<Vec4> _scissor;
+            SafeBuilder<Vec3i> _num_work_groups;
             PipelineTraitTable _traits;
         };
     };

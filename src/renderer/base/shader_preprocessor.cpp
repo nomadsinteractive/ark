@@ -165,12 +165,12 @@ void ShaderPreprocessor::parseDeclarations()
         const auto localSizeTraveller = [this] (const std::smatch& m)
         {
             _compute_local_sizes = {{1, 1, 1}};
-            std::array<uint32_t, 3>& localSizes = _compute_local_sizes.value();
+            V3i& localSizes = _compute_local_sizes.value();
             for(const String& i : String(m[1].str()).split(','))
                 if(const auto [k, v] = i.cut('='); v)
                 {
                     const uint32_t workGroup = k.strip().at(StringView("local_size_").size()) - 'x';
-                    const uint32_t size = Strings::eval<uint32_t>(v.value());
+                    const int32_t size = Strings::eval<int32_t>(v.value());
                     localSizes[workGroup] = size;
                 }
             return true;

@@ -117,14 +117,12 @@ PipelineDescriptor::PipelineDescriptor(Camera camera, sp<PipelineBuildingContext
       _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _definitions(_building_context->toDefinitions())
 {
     _configuration._snippet = createSnippet(_camera, std::move(_configuration._snippet), _building_context);
-    if(const op<ShaderPreprocessor>& computeStage = _building_context->computingStage(); computeStage && !_building_context->renderStages().empty())
+    if(const op<ShaderPreprocessor>& computeStage = _building_context->computingStage())
     {
-        std::array<uint32_t, 3> numWorkGroupsArray = {1, 1, 1};
-        if(const String numWorkGroupsAttr = Documents::getAttribute(computeStage->_manifest, "num-work-groups"))
+        V3i numWorkGroupsArray;
+        if(_configuration._num_work_groups)
         {
-            const Vector<String> numWorkGroups = numWorkGroupsAttr.split(',');
-            for(size_t i = 0; i < std::min(numWorkGroups.size(), numWorkGroupsArray.size()); ++i)
-                numWorkGroupsArray[i] = Strings::eval<uint32_t>(numWorkGroups.at(i));
+            numWorkGroupsArray = _configuration._num_work_groups->val();
         }
         else
         {
@@ -235,7 +233,7 @@ Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> PipelineDescriptor
 }
 
 PipelineDescriptor::Configuration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
+    : _scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _num_work_groups(factory.getBuilder<Vec3i>(manifest, "num-work-groups"))
 {
     for(const document& i : manifest->children("trait"))
         _traits.push_back(Documents::ensureAttribute<TraitType>(i, constants::TYPE), toPipelineTraitMeta(i));
@@ -243,7 +241,7 @@ PipelineDescriptor::Configuration::BUILDER::BUILDER(BeanFactory& factory, const 
 
 PipelineDescriptor::Configuration PipelineDescriptor::Configuration::BUILDER::build(const Scope& args) const
 {
-    return {_traits, _scissor.build(args)};
+    return {_traits, _scissor.build(args), _num_work_groups.build(args)};
 }
 
 template<> ARK_API PipelineDescriptor::TraitType StringConvert::eval<PipelineDescriptor::TraitType>(const String& str)
