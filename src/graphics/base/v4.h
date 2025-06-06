@@ -10,8 +10,8 @@ class ARK_API V4 : public V3 {
 public:
     explicit V4(float v = 0);
     V4(float x, float y, float z, float w);
-    V4(const V2& xy, float z, float w);
-    V4(const V3& xyz, float w);
+    V4(V2 xy, float z, float w);
+    V4(V3 xyz, float w);
     V4(const std::initializer_list<float>& values);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V4);
 

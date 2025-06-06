@@ -77,7 +77,7 @@ template<> ARK_API RenderTarget::ClearBitSet StringConvert::eval<RenderTarget::C
             {"none", RenderTarget::CLEAR_BIT_NONE},
             {"color", RenderTarget::CLEAR_BIT_COLOR},
             {"depth", RenderTarget::CLEAR_BIT_DEPTH},
-            {"stencil", RenderTarget::CLEAR_BIT_COLOR},
+            {"stencil", RenderTarget::CLEAR_BIT_STENCIL},
             {"all", RenderTarget::CLEAR_BIT_ALL}
         }};
     return RenderTarget::ClearBitSet::toBitSet(str, clearBits);

@@ -15,12 +15,12 @@ V4::V4(const float x, const float y, const float z, const float w)
 {
 }
 
-V4::V4(const V2& xy, const float z, const float w)
+V4::V4(const V2 xy, const float z, const float w)
     : V3(xy.x(), xy.y(), z), _w(w)
 {
 }
 
-V4::V4(const V3& xyz, const float w)
+V4::V4(const V3 xyz, const float w)
     : V3(xyz), _w(w)
 {
 }

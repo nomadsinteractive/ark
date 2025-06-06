@@ -18,8 +18,8 @@ namespace ark::plugin::opengl {
 namespace {
 
 struct PreDrawElementsToFBO final : RenderCommand {
-    PreDrawElementsToFBO(sp<GLFramebuffer> fbo, int32_t width, int32_t height, uint32_t drawBufferCount, int32_t clearMask)
-        : _fbo(std::move(fbo)), _width(width), _height(height), _clear_mask(clearMask), _clear_color_value(0, 0, 0, 1), _clear_depth_value(1.0f),
+    PreDrawElementsToFBO(sp<GLFramebuffer> fbo, const int32_t width, const int32_t height, const uint32_t drawBufferCount, const int32_t clearMask)
+        : _fbo(std::move(fbo)), _width(width), _height(height), _clear_mask(clearMask), _clear_color_value(0, 0, 0, 0), _clear_depth_value(1.0f),
           _clear_stencil_value(0), _draw_buffer_count(drawBufferCount) {
     }
 

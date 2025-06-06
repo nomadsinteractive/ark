@@ -296,8 +296,9 @@ Vector<sp<Material>> loadMaterials(const tinygltf::Model& gltfModel, const Mater
 			material->roughness()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor), 0, 0, 0)));
 			material->metallic()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor), 0, 0, 0)));
 
-			const Vector<double>& emission = gltfMaterial.emissiveFactor;
-			material->emission()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(emission.at(0)), static_cast<float>(emission.at(1)), static_cast<float>(emission.at(2)), 0)));
+			const Vector<double>& emissionFactor = gltfMaterial.emissiveFactor;
+			const V3 emission(emissionFactor.at(0), emissionFactor.at(1), emissionFactor.at(2));
+			material->emission()->setColor(sp<Vec4>::make<Vec4::Const>(V4(emission, Math::hypot2(emission) > 0 ? 1.0f : 0.0f)));
 		}
 	}
 	return materials;
@@ -322,7 +323,7 @@ tinygltf::Model loadGltfModel(const String& src)
 
 	CHECK(gltfModel.scenes.size() == 1, "\"%s\" must have only one scene, but this file has %d", src.c_str(), gltfModel.scenes.size());
 
-	std::set<HashId> nameHashes;
+	Set<HashId> nameHashes;
 	for(const tinygltf::Node& i : gltfModel.nodes)
 	{
 		HashId nameHash = string_hash(i.name.c_str());
