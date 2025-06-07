@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/types/shared_ptr.h"
@@ -43,6 +41,7 @@ public:
         explicit operator bool() const;
 
         void setUniform1i(GLint x) const;
+        void setUniform2i(GLint x, GLint y) const;
         void setUniform1f(GLfloat x) const;
         void setUniform2f(GLfloat x, GLfloat y) const;
         void setUniform3f(GLfloat x, GLfloat y, GLfloat z) const;

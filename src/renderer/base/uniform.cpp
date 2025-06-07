@@ -11,12 +11,18 @@ namespace ark {
 
 namespace {
 
-String toDeclaredType(Uniform::Type type)
+String toDeclaredType(const Uniform::Type type)
 {
     switch(type) {
         case Uniform::TYPE_I1V:
         case Uniform::TYPE_I1:
             return "int";
+        case Uniform::TYPE_I2V:
+        case Uniform::TYPE_I2:
+            return "ivec2";
+        case Uniform::TYPE_I4V:
+        case Uniform::TYPE_I4:
+            return "ivec4";
         case Uniform::TYPE_F1V:
         case Uniform::TYPE_F1:
             return "float";
@@ -92,7 +98,7 @@ size_t Uniform::size() const
     return s;
 }
 
-static Optional<Uniform::Type> vecToUniformType(const String& declaredType, const String& vecPrefix, Uniform::Type baseType)
+static Optional<Uniform::Type> vecToUniformType(const String& declaredType, const String& vecPrefix, const Uniform::Type baseType)
 {
     if(declaredType.startsWith(vecPrefix) && declaredType.length() == vecPrefix.length() + 1)
     {
@@ -100,7 +106,7 @@ static Optional<Uniform::Type> vecToUniformType(const String& declaredType, cons
         CHECK(vs >= 0 && vs < 4, "Unknow type %s", declaredType.c_str());
         return static_cast<Uniform::Type>(baseType + vs);
     }
-    return Optional<Uniform::Type>();
+    return {};
 }
 
 Uniform::Type Uniform::toType(const String& declaredType)
@@ -115,15 +121,6 @@ Uniform::Type Uniform::toType(const String& declaredType)
         return typeOpt.value();
     if(const Optional<Type> typeOpt = vecToUniformType(declaredType, "uvec", TYPE_I1))
         return typeOpt.value();
-    if(declaredType.startsWith("v") && (declaredType.size() == 3 || declaredType.size() == 4))
-    {
-        const int32_t vs = declaredType.at(1) - '1';
-        const char ts = declaredType.at(2);
-        CHECK(vs >= 0 && vs < 4 && (ts == 'i' || ts == 'f'), "Unknow type %s", declaredType.c_str());
-        if(declaredType.endsWith("v"))
-            return ts == 'f' ? static_cast<Type>(TYPE_F1V + vs) : static_cast<Type>(TYPE_I1V + vs);
-        return ts == 'f' ? static_cast<Type>(TYPE_F1 + vs) : static_cast<Type>(TYPE_I1 + vs);
-    }
     if(declaredType == "mat4")
         return TYPE_MAT4;
     if(declaredType == "mat4fv")

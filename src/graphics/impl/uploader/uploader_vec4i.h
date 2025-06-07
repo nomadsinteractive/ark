@@ -9,7 +9,7 @@ namespace ark {
 
 class UploaderVec4i {
 public:
-    //  [[plugin::builder::by-value("vec4i")]]
+//  [[plugin::builder::by-value("ivec4")]]
     class BUILDER final : public Builder<Uploader> {
     public:
         BUILDER(BeanFactory& factory, const String& value);

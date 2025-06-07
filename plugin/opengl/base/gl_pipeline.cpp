@@ -169,32 +169,36 @@ struct GLPipeline::Stub {
         switch(uniform.type()) {
             case Uniform::TYPE_I1:
                 DCHECK(size == 4, "Wrong uniform1i size: %d", size);
-            glUniform.setUniform1i(*reinterpret_cast<const int32_t*>(ptr));
+                glUniform.setUniform1i(*reinterpret_cast<const int32_t*>(ptr));
+            break;
+            case Uniform::TYPE_I2:
+                DCHECK(size == 8, "Wrong uniform2i size: %d", size);
+                glUniform.setUniform2i(*reinterpret_cast<const int32_t*>(ptr), *(reinterpret_cast<const int32_t*>(ptr) + 1));
             break;
             case Uniform::TYPE_F1:
                 DCHECK(size == 4, "Wrong uniform1f size: %d", size);
-            glUniform.setUniform1f(ptrf[0]);
+                glUniform.setUniform1f(ptrf[0]);
             break;
             case Uniform::TYPE_F2:
                 DCHECK(size == 8, "Wrong uniform2f size: %d", size);
-            glUniform.setUniform2f(ptrf[0], ptrf[1]);
+                glUniform.setUniform2f(ptrf[0], ptrf[1]);
             break;
             case Uniform::TYPE_F3:
                 DCHECK(size >= 12, "Wrong uniform3f size: %d", size);
-            glUniform.setUniform3f(ptrf[0], ptrf[1], ptrf[2]);
+                glUniform.setUniform3f(ptrf[0], ptrf[1], ptrf[2]);
             break;
             case Uniform::TYPE_F4:
                 DCHECK(size == 16, "Wrong uniform4f size: %d", size);
-            glUniform.setUniform4f(ptrf[0], ptrf[1], ptrf[2], ptrf[3]);
+                glUniform.setUniform4f(ptrf[0], ptrf[1], ptrf[2], ptrf[3]);
             break;
             case Uniform::TYPE_F4V:
                 DCHECK(size % 16 == 0, "Wrong uniform4fv size: %d", size);
-            glUniform.setUniform4fv(size / 16, ptrf);
+                glUniform.setUniform4fv(size / 16, ptrf);
             break;
             case Uniform::TYPE_MAT4:
             case Uniform::TYPE_MAT4V:
                 DCHECK(size % 64 == 0, "Wrong mat4fv size: %d", size);
-            glUniform.setUniformMatrix4fv(size / 64, GL_FALSE, ptrf);
+                glUniform.setUniformMatrix4fv(size / 64, GL_FALSE, ptrf);
             break;
             case Uniform::TYPE_IMAGE2D:
             case Uniform::TYPE_UIMAGE2D:
@@ -886,6 +890,11 @@ GLPipeline::GLUniform::operator bool() const
 void GLPipeline::GLUniform::setUniform1i(const GLint x) const
 {
     GL_CHECK_ERROR(glUniform1i(_location, x));
+}
+
+void GLPipeline::GLUniform::setUniform2i(const GLint x, const GLint y) const
+{
+    GL_CHECK_ERROR(glUniform2i(_location, x, y));
 }
 
 void GLPipeline::GLUniform::setUniform1f(const GLfloat x) const
