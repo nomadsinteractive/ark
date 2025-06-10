@@ -56,7 +56,6 @@ private:
     sp<Recycler> _recycler;
     sp<VKRenderer> _renderer;
     sp<VKDescriptorPool> _descriptor_pool;
-    sp<BakedRenderer> _baked_renderer;
 
     VkPipelineLayout _layout;
     Vector<VkDescriptorSetLayout> _descriptor_set_layouts;
@@ -70,6 +69,8 @@ private:
 
     bool _rebind_needed;
     bool _is_compute_pipeline;
+
+    sp<BakedRenderer> _baked_renderer;
 };
 
 }

@@ -268,19 +268,24 @@ VertexLayout setupVertexLayout(const PipelineLayout& pipelineLayout)
     return vertexLayout;
 }
 
+bool testComputePipeline(const Map<enums::ShaderStageBit, String>& stages)
+{
+    for(const auto& i : stages)
+        if(i.first == enums::SHADER_STAGE_BIT_COMPUTE)
+        {
+            CHECK(stages.size() == 1, "Compute stage is exclusive");
+            return true;
+        }
+
+    return false;
+}
+
 }
 
 VKPipeline::VKPipeline(const PipelineBindings& pipelineBindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<enums::ShaderStageBit, String> stages)
-    : _draw_mode(pipelineBindings.drawMode()), _pipeline_bindings(pipelineBindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(pipelineBindings)), _layout(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)),
-      _rebind_needed(true), _is_compute_pipeline(false)
+    : _draw_mode(pipelineBindings.drawMode()), _pipeline_bindings(pipelineBindings), _recycler(recycler), _renderer(renderer), _layout(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)),
+      _rebind_needed(true), _is_compute_pipeline(testComputePipeline(_stages)), _baked_renderer(_is_compute_pipeline ? nullptr : makeBakedRenderer(pipelineBindings))
 {
-    for(const auto& i : _stages)
-        if(i.first == enums::SHADER_STAGE_BIT_COMPUTE)
-        {
-            _is_compute_pipeline = true;
-            CHECK(_stages.size() == 1, "Compute stage is exclusive");
-            break;
-        }
 }
 
 VKPipeline::~VKPipeline()
