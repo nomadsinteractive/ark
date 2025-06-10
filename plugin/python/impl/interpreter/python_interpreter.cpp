@@ -195,7 +195,7 @@ PyObject* PythonInterpreter::arkModule()
     return _ark_module;
 }
 
-const std::vector<String>& PythonInterpreter::paths() const
+const Vector<String>& PythonInterpreter::paths() const
 {
     return _paths;
 }

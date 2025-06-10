@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include <Python.h>
 
 #include "core/ark.h"
@@ -27,7 +25,7 @@ public:
     Box attr(const Box& obj, StringView name) override;
 
     PyObject* arkModule();
-    const std::vector<String>& paths() const;
+    const Vector<String>& paths() const;
 
 //  [[plugin::builder("python")]]
     class BUILDER final : public Builder<Interpreter> {
@@ -42,7 +40,7 @@ public:
 
 private:
     std::wstring _name;
-    std::vector<String> _paths;
+    Vector<String> _paths;
     PyObject* _ark_module;
 };
 

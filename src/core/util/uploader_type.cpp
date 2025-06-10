@@ -45,29 +45,32 @@ private:
 public:
     UploaderList(Vector<sp<Uploader>> uploaders)
         : Uploader(0) {
-        for(sp<Uploader>& i : uploaders) {
+        for(sp<Uploader>& i : uploaders)
+        {
             const size_t size = i->size();
             _uploaders.push_back({_size, std::move(i), true});
             _size += size;
         }
     }
 
-    bool update(const uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override
+    {
         bool dirty = false;
         _size = 0;
-        for(Node& i : _uploaders) {
-            i._dirty = i._uploader->update(timestamp) || i._dirty;
+        for(Node& i : _uploaders)
+        {
+            i._dirty = i._uploader->update(timestamp) || i._dirty || i._offset != _size;
             i._offset = _size;
             _size += i._uploader->size();
-            if(i._dirty && !dirty)
-                dirty = true;
+            dirty = i._dirty || dirty;
         }
         return dirty;
     }
 
     void upload(Writable& buf) override {
         for(Node& i : _uploaders)
-            if(i._dirty) {
+            if(i._dirty)
+            {
                 WritableWithOffset wwo(buf, i._offset);
                 i._uploader->upload(wwo);
                 i._dirty = false;
@@ -81,13 +84,17 @@ private:
 class WritableSnapshot final : public Writable {
 public:
 
-    uint32_t write(const void* buffer, const uint32_t size, const uint32_t offset) override {
+    uint32_t write(const void* buffer, const uint32_t size, const uint32_t offset) override
+    {
+        if(size == 0)
+            return size;
+
         const auto iter = _records.lower_bound(offset);
         if(iter != _records.begin() && !_records.empty())
             if(const auto previter = std::prev(iter); previter->first + previter->second.size() == offset)
             {
                 Vector<uint8_t>& prev = previter->second;
-                size_t prevsize = prev.size();
+                const size_t prevsize = prev.size();
                 prev.resize(prevsize + size);
                 memcpy(prev.data() + prevsize, buffer, size);
                 return size;
@@ -103,7 +110,11 @@ public:
 
 class WritableRangeSnapshot final : public Writable {
 public:
-    uint32_t write(const void* buffer, const uint32_t size, const uint32_t offset) override {
+    uint32_t write(const void* buffer, const uint32_t size, const uint32_t offset) override
+    {
+        if(size == 0)
+            return size;
+
         const auto iter = _records.lower_bound(offset);
         if(iter != _records.begin() && !_records.empty())
             if(const auto previter = std::prev(iter); previter->first + previter->second == offset)
