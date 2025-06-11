@@ -10,7 +10,7 @@ namespace ark {
 class ARK_API Arena final : public Wirable::Niche {
 public:
 //  [[script::bindings::auto]]
-    Arena(sp<ResourceLoader> resourceLoader);
+    Arena(sp<ResourceLoader> resourceLoader, sp<Renderer> renderer = nullptr);
 
 //  [[script::bindings::property]]
     const sp<BoxBundle>& layers() const;

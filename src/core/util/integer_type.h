@@ -23,11 +23,13 @@ public:
     };
 
 //  [[script::bindings::constructor]]
+    static sp<Integer> create(int32_t value);
+//  [[script::bindings::constructor]]
+    static sp<Integer> create(const NamedHash& value);
+//  [[script::bindings::constructor]]
     static sp<Integer> create(sp<Integer> value);
 //  [[script::bindings::constructor]]
     static sp<Integer> create(sp<Numeric> value);
-//  [[script::bindings::constructor]]
-    static sp<Integer> create(int32_t value);
 
 //  [[script::bindings::operator(+)]]
     static sp<Integer> add(sp<Integer> lhs, sp<Integer> rhs);
@@ -89,11 +91,11 @@ public:
     static sp<Integer> repeat(Vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE, sp<Observer> observer = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static void set(const sp<Integer::Impl>& self, int32_t value);
+    static void set(const sp<Integer>& self, int32_t value);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<IntegerWrapper>& self, int32_t value);
+    static void set(const sp<Integer>& self, const NamedHash& value);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<IntegerWrapper>& self, const sp<Integer>& value);
+    static void set(const sp<Integer>& self, sp<Integer> value);
 
 //  [[script::bindings::classmethod]]
     static sp<Integer> wrap(const sp<Integer>& self);

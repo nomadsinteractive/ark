@@ -31,7 +31,7 @@ TYPE_FLOAT3 = tuple[float, float, float]
 TYPE_FLOAT4 = tuple[float, float, float, float]
 TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
 TYPE_MAT4 = Union["Mat4", TYPE_M4]
-TYPE_NAMED_HASH = Union[int, str]
+TYPE_NAMED_HASH = Union[int, str, "NamedHash"]
 TYPE_RUNNABLE = Union["Runnable", Callable[[], None]]
 
 T = TypeVar('T')
@@ -1112,7 +1112,7 @@ class Integer(_Scalar):
     REPEAT_LAST = 8
     REPEAT_NOTIFY = 16
 
-    def __init__(self, value: Union[int, "Integer", Numeric, list["Integer"]]):
+    def __init__(self, value: Union[TYPE_NAMED_HASH, "Integer", Numeric]):
         super().__init__(value)
 
     @staticmethod
@@ -1942,7 +1942,7 @@ class Layer:
 
 
 class Arena:
-    def __init__(self, resource_loader: ResourceLoader):
+    def __init__(self, resource_loader: ResourceLoader, renderer: Optional[Renderer] = None):
         pass
 
     @property
@@ -1954,9 +1954,9 @@ class Arena:
         pass
 
 
-class Activity:
+class Activity(Renderer):
     def __init__(self):
-        pass
+        super().__init__()
 
     def add_renderer(self, renderer: Renderer, *traits):
         pass

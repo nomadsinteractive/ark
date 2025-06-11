@@ -4,6 +4,7 @@
 #include "core/base/clock.h"
 #include "core/base/constants.h"
 #include "core/base/expression.h"
+#include "core/base/named_hash.h"
 #include "core/impl/integer/integer_by_array.h"
 #include "core/impl/variable/at_least.h"
 #include "core/impl/variable/at_most.h"
@@ -60,6 +61,16 @@ private:
 
 }
 
+sp<Integer> IntegerType::create(int32_t value)
+{
+    return sp<Integer>::make<IntegerWrapper>(value);
+}
+
+sp<Integer> IntegerType::create(const NamedHash& value)
+{
+    return sp<Integer>::make<IntegerWrapper>(static_cast<int32_t>(value.hash()));
+}
+
 sp<Integer> IntegerType::create(sp<Integer> value)
 {
     return sp<Integer>::make<IntegerWrapper>(std::move(value));
@@ -69,11 +80,6 @@ sp<Integer> IntegerType::create(sp<Numeric> value)
 {
     sp<Integer> casted = sp<VariableOP1<int32_t, float>>::make(Operators::Cast<float, int32_t>(), std::move(value));
     return sp<Integer>::make<IntegerWrapper>(std::move(casted));
-}
-
-sp<Integer> IntegerType::create(int32_t value)
-{
-    return sp<Integer>::make<IntegerWrapper>(value);
 }
 
 sp<Integer> IntegerType::add(sp<Integer> lhs, sp<Integer> rhs)
@@ -206,19 +212,22 @@ sp<Observer> IntegerType::observer(const sp<Integer>& self)
     return wo ? wo->observer() : nullptr;
 }
 
-void IntegerType::set(const sp<Integer::Impl>& self, int32_t value)
+void IntegerType::set(const sp<Integer>& self, const int32_t value)
 {
-    self->set(value);
+    const sp<IntegerWrapper> nw = self.ensureInstance<IntegerWrapper>("Must be an IntegerWrapper instance(result of a wrap() function call) to set its value");
+    nw->set(value);
 }
 
-void IntegerType::set(const sp<IntegerWrapper>& self, int32_t value)
+void IntegerType::set(const sp<Integer>& self, const NamedHash& value)
 {
-    self->set(value);
+    const sp<IntegerWrapper> nw = self.ensureInstance<IntegerWrapper>("Must be an IntegerWrapper instance(result of a wrap() function call) to set its value");
+    nw->set(value.hash());
 }
 
-void IntegerType::set(const sp<IntegerWrapper>& self, const sp<Integer>& delegate)
+void IntegerType::set(const sp<Integer>& self, sp<Integer> value)
 {
-    self->set(delegate);
+    const sp<IntegerWrapper> nw = self.ensureInstance<IntegerWrapper>("Must be an IntegerWrapper instance(result of a wrap() function call) to set its value");
+    nw->set(std::move(value));
 }
 
 sp<Integer> IntegerType::wrap(const sp<Integer>& self)

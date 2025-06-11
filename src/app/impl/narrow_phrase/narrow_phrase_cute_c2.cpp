@@ -102,13 +102,13 @@ ShapeCuteC2 makeCapsuleShapeImpl(const V2& p1, const V2& p2, float radius)
 
 NarrowPhraseCuteC2::NarrowPhraseCuteC2(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
-    float ppu = Documents::getAttribute<float>(manifest, "ppu", 1.0f);
+    const float ppu = Documents::getAttribute<float>(manifest, "ppu", 1.0f);
 
     loadShapes(manifest, ppu);
     for(const document& i : manifest->children("import"))
     {
         const String& src = Documents::ensureAttribute(i, constants::SRC);
-        document content = resourceLoaderContext->documents()->get(src);
+        const document content = resourceLoaderContext->documents()->get(src);
         loadShapes(content->ensureChild("bodies"), ppu);
     }
 }

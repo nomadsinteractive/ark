@@ -16,18 +16,18 @@ public:
     sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder::by-value("nine-patch-quads")]]
-    class BUILDER : public Builder<ModelLoader> {
+    class BUILDER final : public Builder<ModelLoader> {
     public:
         BUILDER(BeanFactory& factory, const String& atlas);
 
-        virtual sp<ModelLoader> build(const Scope& args) override;
+        sp<ModelLoader> build(const Scope& args) override;
 
     private:
         sp<Builder<Atlas>> _atlas;
     };
 
 //  [[plugin::builder("nine-patch-quads")]]
-    class BUILDER_IMPL : public Builder<ModelLoader> {
+    class BUILDER_IMPL final : public Builder<ModelLoader> {
     public:
         BUILDER_IMPL(BeanFactory& factory, const document& manifest);
 

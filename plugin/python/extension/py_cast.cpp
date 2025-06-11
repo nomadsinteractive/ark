@@ -37,17 +37,10 @@ template<typename T> Optional<T> toCppInteger(PyObject* object)
 {
     if(PyLong_Check(object))
     {
-        if constexpr(sizeof(T) == sizeof(uint64_t))
-        {
-            if constexpr(std::is_unsigned_v<T>)
-                return {PyLong_AsUnsignedLongLong(object)};
-            else
-                return {PyLong_AsLongLong(object)};
-        }
         if constexpr(std::is_unsigned_v<T>)
-            return {static_cast<T>(PyLong_AsUnsignedLong(object))};
+            return {static_cast<T>(PyLong_AsUnsignedLongLong(object))};
         else
-            return {static_cast<T>(PyLong_AsLong(object))};
+            return {static_cast<T>(PyLong_AsLongLong(object))};
     }
 
     if(PyIndex_Check(object))

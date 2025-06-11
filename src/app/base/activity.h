@@ -14,6 +14,7 @@
 
 namespace ark {
 
+//[[script::bindings::extends(Renderer)]]
 class ARK_API Activity final : public EventListener, public Renderer, public Renderer::Group {
 public:
 //  [[script::bindings::auto]]
