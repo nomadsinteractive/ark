@@ -57,9 +57,9 @@ enum UploadPriority {
 };
 
 //[[script::bindings::enumeration(Enum)]]
-enum LayerPushOrder {
-    LAYER_PUSH_ORDER_BACK = 0,
-    LAYER_PUSH_ORDER_FRONT
+enum InsertPosition {
+    INSERT_POSITION_BACK = 0,
+    INSERT_POSITION_FRONT
 };
 
 //[[script::bindings::enumeration(Enum)]]

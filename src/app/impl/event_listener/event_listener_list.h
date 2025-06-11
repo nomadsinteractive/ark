@@ -8,7 +8,10 @@ namespace ark {
 
 class EventListenerList final : public EventListener {
 public:
+
     virtual bool onEvent(const Event& event);
+
+    void addEventListener(sp<EventListener> eventListener, const Traits& traits);
 
     void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
     void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);

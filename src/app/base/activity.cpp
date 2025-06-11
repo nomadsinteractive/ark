@@ -8,18 +8,18 @@
 #include "graphics/base/render_layer.h"
 
 #include "app/base/application_context.h"
-#include "app/base/arena.h"
-#include "app/base/entity.h"
 #include "app/impl/event_listener/event_listener_list.h"
-#include "app/view/view.h"
-
 
 namespace ark {
 
-Activity::Activity(sp<View> view, sp<RenderGroup> renderGroup, sp<ResourceLoader> resourceLoader)
-    : _view(std::move(view)), _render_group(std::move(renderGroup)), _resource_loader(std::move(resourceLoader)), _event_listeners(new EventListenerList())
+Activity::Activity()
+    : Activity(sp<RenderGroup>::make())
 {
-    _view->markAsTopView();
+}
+
+Activity::Activity(sp<RenderGroup> renderGroup)
+    : _render_group(renderGroup ? std::move(renderGroup) : sp<RenderGroup>::make()), _event_listeners(new EventListenerList())
+{
 }
 
 Activity::~Activity()
@@ -34,7 +34,6 @@ void Activity::addRenderer(sp<Renderer> renderer, const Traits& traits)
 
 void Activity::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
-    ASSERT(_view);
     _render_group->render(renderRequest, position, drawDecorator);
 }
 
@@ -43,25 +42,9 @@ bool Activity::onEvent(const Event& event)
     return _event_listeners->onEvent(event);
 }
 
-sp<Arena> Activity::makeArena() const
+void Activity::addEventListener(sp<EventListener> eventListener, const Traits& traits)
 {
-    return sp<Arena>::make(_resource_loader);
-}
-
-const sp<ResourceLoader>& Activity::resourceLoader() const
-{
-    CHECK(_resource_loader, "Trying to get ResourceLoader on a discarded Activity");
-    return _resource_loader;
-}
-
-void Activity::addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
-{
-    _event_listeners->addEventListener(std::move(eventListener), std::move(discarded));
-}
-
-void Activity::pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
-{
-    _event_listeners->pushEventListener(std::move(eventListener), std::move(discarded));
+    _event_listeners->addEventListener(std::move(eventListener), traits);
 }
 
 void Activity::addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded)
@@ -71,43 +54,14 @@ void Activity::addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded)
     _render_group->add(RendererType::PRIORITY_RENDER_LAYER, std::move(renderLayer), std::move(discarded));
 }
 
-void Activity::setView(sp<View> view)
-{
-    _view = std::move(view);
-}
-
-const sp<View>& Activity::view() const
-{
-    return _view;
-}
-
-void Activity::addView(sp<View> view)
-{
-    _view->addView(std::move(view));
-}
-
 Activity::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _factory(factory), _manifest(manifest), _resource_loader(factory.getBuilder<ResourceLoader>(manifest, "resource-loader")),
-      _root_view(factory.ensureBuilder<View>(manifest, "root-view")), _render_group(factory.ensureBuilder<RenderGroup>(manifest))
+    : _render_group(factory.ensureBuilder<RenderGroup>(manifest))
 {
 }
 
 sp<Activity> Activity::BUILDER::build(const Scope& args)
 {
-    sp<ResourceLoader> r1 = _resource_loader.build(args);
-    sp<ResourceLoader> resourceLoader = r1 ? std::move(r1) : sp<ResourceLoader>::make(_factory);
-    BeanFactory& factory = resourceLoader->beanFactory();
-    sp<Activity> activity = sp<Activity>::make(_root_view->build(args), _render_group->build(args), std::move(resourceLoader));
-
-    for(const document& i : _manifest->children())
-    {
-        if(const String& name = i->name(); name == constants::EVENT_LISTENER)
-            activity->addEventListener(factory.ensure<EventListener>(i, args));
-        else if(name == constants::VIEW)
-            activity->addView(factory.ensure<View>(i, args));
-    }
-
-    return activity;
+    return sp<Activity>::make(_render_group->build(args));
 }
 
 }

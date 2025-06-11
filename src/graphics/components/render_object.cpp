@@ -224,8 +224,8 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
 
     if(const auto layer = context.getComponent<Layer>())
     {
-        if(const enums::LayerPushOrder lpo = context.getEnum<enums::LayerPushOrder>(enums::LayerPushOrder::LAYER_PUSH_ORDER_BACK);
-            lpo == enums::LAYER_PUSH_ORDER_BACK)
+        if(const enums::InsertPosition lpo = context.getEnum<enums::InsertPosition>(enums::InsertPosition::INSERT_POSITION_BACK);
+            lpo == enums::INSERT_POSITION_BACK)
             layer->pushBack(self.as<RenderObject>());
         else
             layer->pushFront(self.as<RenderObject>());

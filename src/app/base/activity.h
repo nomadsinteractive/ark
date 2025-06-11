@@ -9,7 +9,6 @@
 #include "graphics/inf/renderer.h"
 #include "graphics/impl/renderer/render_group.h"
 
-#include "core/base/resource_loader.h"
 #include "app/forwarding.h"
 #include "app/inf/event_listener.h"
 
@@ -17,35 +16,21 @@ namespace ark {
 
 class ARK_API Activity final : public EventListener, public Renderer, public Renderer::Group {
 public:
-    Activity(sp<View> view, sp<RenderGroup> renderGroup, sp<ResourceLoader> resourceLoader);
+//  [[script::bindings::auto]]
+    Activity();
+    Activity(sp<RenderGroup> renderGroup);
     ~Activity() override;
 
 //  [[script::bindings::auto]]
     void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
+//  [[script::bindings::auto]]
+    void addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded = nullptr);
 
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
     bool onEvent(const Event& event) override;
 
 //  [[script::bindings::auto]]
-    sp<Arena> makeArena() const;
-
-//  [[script::bindings::property]]
-    const sp<ResourceLoader>& resourceLoader() const;
-
-//  [[script::bindings::auto]]
-    void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
-//  [[script::bindings::auto]]
-    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
-//  [[script::bindings::auto]]
-    void addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded = nullptr);
-
-//  [[script::bindings::property]]
-    void setView(sp<View> view);
-//  [[script::bindings::property]]
-    const sp<View>& view() const;
-
-//  [[script::bindings::auto]]
-    void addView(sp<View> view);
+    void addEventListener(sp<EventListener> eventListener, const Traits& traits);
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Activity> {
@@ -55,15 +40,11 @@ public:
         sp<Activity> build(const Scope& args) override;
 
     private:
-        BeanFactory _factory;
-        document _manifest;
-        SafeBuilder<ResourceLoader> _resource_loader;
         builder<View> _root_view;
         builder<RenderGroup> _render_group;
     };
 
 private:
-    sp<View> _view;
     sp<RenderGroup> _render_group;
     sp<ResourceLoader> _resource_loader;
     op<EventListenerList> _event_listeners;

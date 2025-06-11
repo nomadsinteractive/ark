@@ -4,8 +4,6 @@
 #include "core/base/plugin_manager.h"
 #include "core/types/shared_ptr.h"
 
-#include "app/base/activity.h"
-
 #include "python/impl/interpreter/python_interpreter.h"
 #include "python/extension/python_extension.h"
 
@@ -19,24 +17,10 @@ using namespace ark::plugin::python;
 
 namespace {
 
-PyMethodDef ARK_BULLET_METHODS[] = {
-    {NULL, NULL, 0, NULL}
-};
-
 class BulletPybindingsPlugin final : public Plugin {
 public:
     BulletPybindingsPlugin()
         : Plugin("bullet-pybindings", Plugin::PLUGIN_TYPE_CORE) {
-    }
-
-    void createScriptModule(Interpreter& script) override {
-        PythonExtension::instance().addModulePlugin<BulletPybindingsPlugin>(*this, script, "bullet", "ark.bullet module", ARK_BULLET_METHODS);
-        {
-            PyArkType* pyResourceLoaderType = PythonExtension::instance().getPyArkType<ResourceLoader>();
-            std::map<TypeId, PyArkType::LoaderFunction>& loader = pyResourceLoaderType->ensureLoader("load");
-            loader[Type<ColliderBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<ResourceLoader>()->load<ColliderBullet>(id, args)); };
-            loader[Type<RigidbodyBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<ResourceLoader>()->load<RigidbodyBullet>(id, args)); };
-        }
     }
 
     void initialize(PyObject* bulletmodule) {

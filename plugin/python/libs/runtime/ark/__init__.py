@@ -117,8 +117,8 @@ class Enum:
     UPLOAD_PRIORITY_NORMAL = 1
     UPLOAD_PRIORITY_HIGH = 2
 
-    LAYER_PUSH_ORDER_BACK = 0
-    LAYER_PUSH_ORDER_FRONT = 1
+    INSERT_POSITION_BACK = 0
+    INSERT_POSITION_FRONT = 1
 
     COORDINATE_SYSTEM_DEFAULT = 0
     COORDINATE_SYSTEM_LHS = 1
@@ -1955,43 +1955,16 @@ class Arena:
 
 
 class Activity:
-
-    @property
-    def layers(self):
-        return None
-
-    @property
-    def render_layers(self):
-        return None
-
-    @property
-    def packages(self):
-        return None
-
-    @property
-    def refs(self):
-        return None
-
-    def get_reference(self, name: str):
+    def __init__(self):
         pass
-
-    @property
-    def resource_loader(self):
-        return None
 
     def add_renderer(self, renderer: Renderer, *traits):
-        pass
-
-    def add_view(self, view: 'View', discarded: Optional[Boolean] = None):
         pass
 
     def add_render_layer(self, render_layer: Renderer, discarded: Optional[Boolean] = None):
         pass
 
-    def add_event_listener(self, event_listener: Union[Callable[["Event"], bool], 'EventListener'], priority: int = 0):
-        pass
-
-    def make_arena(self) -> Arena:
+    def add_event_listener(self, event_listener: Union[Callable[["Event"], bool], "EventListener"], *traits):
         pass
 
 
