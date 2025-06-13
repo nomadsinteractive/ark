@@ -27,9 +27,8 @@
 #include "graphics/inf/glyph_maker.h"
 #include "graphics/inf/layout.h"
 #include "graphics/util/mat4_type.h"
-#include "graphics/util/vec3_type.h"
+#include "graphics/util/vec2_type.h"
 
-#include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/resource_loader_context.h"
@@ -127,6 +126,26 @@ void doFlowLayout(const Vector<Layout::Hierarchy>& childNodes, const float lette
         flowX += letterSpacing + node.size()->x();
     }
 }
+
+class LayoutNodeSize final : public Vec2 {
+public:
+    LayoutNodeSize(sp<Layout::Node> layoutNode)
+        : _layout_node(std::move(layoutNode)) {
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        return _layout_node->size().update(timestamp);
+    }
+
+    V2 val() override
+    {
+        return _layout_node->size().val();
+    }
+
+private:
+    sp<Layout::Node> _layout_node;
+};
 
 class RenderableCharacter final : public Renderable {
 public:
@@ -230,8 +249,8 @@ private:
 
 class UpdatableParagraph final : public Updatable {
 public:
-    UpdatableParagraph(Layout::Hierarchy hierarchy, const float letterSpacing, LayoutLength lineHeight, sp<Numeric> layoutWidth, sp<Size> textSize)
-        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _line_height(lineHeight.isAuto() ? LayoutLength(100, LayoutLength::LENGTH_TYPE_PERCENTAGE) : std::move(lineHeight)), _line_indent(0), _layout_width(std::move(layoutWidth)), _text_size(std::move(textSize))
+    UpdatableParagraph(Layout::Hierarchy hierarchy, const float letterSpacing, LayoutLength lineHeight, sp<Numeric> layoutWidth, sp<Layout::Node> layoutNode)
+        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _line_height(lineHeight.isAuto() ? LayoutLength(100, LayoutLength::LENGTH_TYPE_PERCENTAGE) : std::move(lineHeight)), _line_indent(0), _layout_width(std::move(layoutWidth)), _layout_node(std::move(layoutNode))
     {
         doParagraphLayout();
     }
@@ -281,8 +300,8 @@ public:
             ++ end;
         }
 
-        _text_size->setWidth(width);
-        _text_size->setHeight(flowy + charMaxHeight);
+        _layout_node->setAutoWidth(width);
+        _layout_node->setAutoHeight(flowy + charMaxHeight);
     }
 
     void place(const Vector<Layout::Hierarchy>& childNodes, const size_t begin, const size_t end, float& flowx, float& flowy) const
@@ -301,13 +320,13 @@ private:
     LayoutLength _line_height;
     float _line_indent;
     sp<Numeric> _layout_width;
-    sp<Size> _text_size;
+    sp<Layout::Node> _layout_node;
 };
 
 class LayoutLabel final : public Layout {
 public:
-    LayoutLabel(const float letterSpacing)
-        : _letter_spacing(letterSpacing) {
+    LayoutLabel(const float letterSpacing, sp<Node> layoutNode)
+        : _letter_spacing(letterSpacing), _layout_node(std::move(layoutNode)) {
     }
 
     sp<Updatable> inflate(Hierarchy hierarchy) override
@@ -331,25 +350,26 @@ public:
 
 private:
     float _letter_spacing;
+    sp<Node> _layout_node;
 };
 
 class LayoutParagraph final : public Layout {
 public:
-    LayoutParagraph(const float letterSpacing, LayoutLength lineHeight, sp<Numeric> layoutWidth, sp<Size> textSize)
-        : _letter_spacing(letterSpacing), _line_height(std::move(lineHeight)), _layout_width(std::move(layoutWidth)), _text_size(std::move(textSize))
+    LayoutParagraph(const float letterSpacing, LayoutLength lineHeight, sp<Numeric> layoutWidth, sp<Node> layoutNode)
+        : _letter_spacing(letterSpacing), _line_height(std::move(lineHeight)), _layout_width(std::move(layoutWidth)), _layout_node(std::move(layoutNode))
     {
     }
 
     sp<Updatable> inflate(Hierarchy hierarchy) override
     {
-        return sp<Updatable>::make<UpdatableParagraph>(std::move(hierarchy), _letter_spacing, _line_height, _layout_width, _text_size);
+        return sp<Updatable>::make<UpdatableParagraph>(std::move(hierarchy), _letter_spacing, _line_height, _layout_width, _layout_node);
     }
 
 private:
     float _letter_spacing;
     LayoutLength _line_height;
     sp<Numeric> _layout_width;
-    sp<Size> _text_size;
+    sp<Node> _layout_node;
 };
 
 }
@@ -358,8 +378,9 @@ struct Text::Content {
     Content(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, const float letterSpacing, LayoutLength lineHeight, const float lineIndent)
         : _render_layer(std::move(renderLayer)), _text(text ? std::move(text) : StringType::create()), _position(std::move(position)), _layout_param(std::move(layoutParam)),
           _glyph_maker(std::move(glyphMaker)), _transform(std::move(transform)), _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)),
-          _line_height(std::move(lineHeight)), _line_indent(lineIndent), _size(sp<Size>::make(0.0f, 0.0f))
+          _line_height(std::move(lineHeight)), _line_indent(lineIndent)
     {
+        setLayoutNode(sp<Layout::Node>::make(_layout_param));
         setText(Strings::fromUTF8(_text->val()));
     }
 
@@ -406,8 +427,9 @@ struct Text::Content {
     void updateLayoutSize() const
     {
         const V2 size = doAutoWidthLayout();
-        _size->setWidth(size.x());
-        _size->setHeight(size.y());
+        _layout_node->setSize(size);
+        _layout_node->setAutoWidth(size.x());
+        _layout_node->setAutoHeight(size.y());
     }
 
     void createLayerContent()
@@ -444,15 +466,15 @@ struct Text::Content {
 
     sp<Layout> makeTextLayout() const
     {
-        if(_layout_param && _layout_param->isWrapContent())
-            return sp<Layout>::make<LayoutParagraph>(_letter_spacing, _line_height, _boundaries ? sp<Numeric>::make<BoundariesWidth>(_boundaries) : _layout_param->width().value().toVar(), _size);
+        if(_layout_param && _layout_param->isWrapContent() && !_layout_param->width().isAuto())
+            return sp<Layout>::make<LayoutParagraph>(_letter_spacing, _line_height, _boundaries ? sp<Numeric>::make<BoundariesWidth>(_boundaries) : _layout_param->width().value().toVar(), _layout_node);
 
-        return sp<Layout>::make<LayoutLabel>(_letter_spacing);
+        return sp<Layout>::make<LayoutLabel>(_letter_spacing, _layout_node);
     }
 
     Layout::Hierarchy makeHierarchy()
     {
-        Layout::Hierarchy hierarchy = {sp<Layout::Node>::make(_layout_param)};
+        Layout::Hierarchy hierarchy = {_layout_node};
         hierarchy._node->setSize(_size->val());
         for(Character& i : _layout_chars)
         {
@@ -472,10 +494,17 @@ struct Text::Content {
         _timestamp.markDirty();
     }
 
+    void setLayoutNode(sp<Layout::Node> layoutNode)
+    {
+        _size = Vec2Type::toSize(sp<Vec2>::make<LayoutNodeSize>(layoutNode));
+        _layout_node = std::move(layoutNode);
+    }
+
     sp<RenderLayer> _render_layer;
     sp<StringVar> _text;
     SafeVar<Vec3> _position;
     sp<LayoutParam> _layout_param;
+    sp<Layout::Node> _layout_node;
     sp<GlyphMaker> _glyph_maker;
     sp<Mat4> _transform;
 
@@ -528,13 +557,7 @@ void Text::onWire(const WiringContext& context, const Box& self)
         sp<LayoutParam> layoutParam = view->layoutParam();
         sp<Boundaries> boundaries = view->makeBoundaries();
         _content->rewireBoundaries(std::move(boundaries), false);
-        if(!layoutParam->isWrapContent())
-        {
-            if(layoutParam->width().type() == LayoutLength::LENGTH_TYPE_AUTO)
-                layoutParam->setWidth({size()->width(), LayoutLength::LENGTH_TYPE_PIXEL});
-            if(layoutParam->height().type() == LayoutLength::LENGTH_TYPE_AUTO)
-                layoutParam->setHeight({size()->height(), LayoutLength::LENGTH_TYPE_PIXEL});
-        }
+        _content->setLayoutNode(view->layoutNode());
         _content->_layout_param = std::move(layoutParam);
     }
     else if(sp<Vec3> translation = context.getComponent<Translation>(); translation && !_content->_position)

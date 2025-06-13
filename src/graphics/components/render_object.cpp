@@ -195,8 +195,6 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
         setPosition(view->layoutPosition());
         setSize(view->layoutSize());
     }
-    else if(const auto boundaries = context.getComponent<Boundaries>())
-        setPosition(boundaries->center());
     else if(sp<Vec3> translation = context.getComponent<Translation>())
         setPosition(std::move(translation));
 

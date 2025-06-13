@@ -15,11 +15,11 @@ public:
     }
 
     void run() override {
-        _value.reset(!_value.value());
+        _value.reset(!_value.val());
     }
 
     bool val() override {
-        return _value.value();
+        return _value.val();
     }
 
     bool update(const uint64_t timestamp) override {

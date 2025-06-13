@@ -7,7 +7,7 @@
 namespace ark {
 
 Layout::Node::Node(sp<LayoutParam> layoutParam, void* tag)
-    : _layout_param(std::move(layoutParam)), _tag(tag)
+    : _layout_param(std::move(layoutParam)), _tag(tag), _auto_width(0), _auto_height(0)
 {
     if(_layout_param)
         setSize(V2(_layout_param->contentWidth(), _layout_param->contentHeight()));
@@ -71,6 +71,26 @@ const WithTimestamp<V2>& Layout::Node::size() const
 void Layout::Node::setSize(const V2& size)
 {
     _size.reset(size);
+}
+
+const WithTimestamp<float>& Layout::Node::autoWidth() const
+{
+    return _auto_width;
+}
+
+void Layout::Node::setAutoWidth(const float autoWidth)
+{
+    _auto_width.reset(autoWidth);
+}
+
+const WithTimestamp<float>& Layout::Node::autoHeight() const
+{
+    return _auto_height;
+}
+
+void Layout::Node::setAutoHeight(const float autoHeight)
+{
+    _auto_height.reset(autoHeight);
 }
 
 bool Layout::Node::update(const uint32_t timestamp)

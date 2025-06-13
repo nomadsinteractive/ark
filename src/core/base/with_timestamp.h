@@ -20,7 +20,7 @@ public:
         return _value;
     }
 
-    T value() const {
+    T val() const {
         return _value;
     }
 

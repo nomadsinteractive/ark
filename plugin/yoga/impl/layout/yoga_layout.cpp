@@ -126,24 +126,27 @@ YGNodeRef doInflate(const YogaConfig& config, const Layout::Hierarchy& hierarchy
     return ygNode;
 }
 
-template<typename T, typename U> Optional<T> updateVar(uint64_t timestamp, U& var, bool& dirty)
+template<typename T, typename U> Optional<T> updateVar(uint64_t timestamp, U& var)
 {
     if(!timestamp || var.update(timestamp))
-    {
-        dirty = true;
-        return var.val();
-    }
+        return {var.val()};
     return {};
 }
 
-bool updateLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, const uint64_t timestamp)
+bool updateLayoutParam(const Layout::Node& layoutNode, YGNodeRef node, const uint64_t timestamp)
 {
-    bool dirty = false;
-    if(const Optional<float> width = updateVar<float>(timestamp, layoutParam.width().value(), dirty))
+    const LayoutParam& layoutParam = layoutNode._layout_param;
+
+    if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_AUTO)
     {
-        if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_AUTO)
+        if(const Optional<float> autoWidth = updateVar<float>(timestamp, layoutNode.autoWidth()); autoWidth && autoWidth.value() > 0)
+            YGNodeStyleSetWidth(node, autoWidth.value());
+        else
             YGNodeStyleSetWidthAuto(node);
-        else if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_PIXEL)
+    }
+    else if(const Optional<float> width = updateVar<float>(timestamp, layoutParam.width().value()))
+    {
+        if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_PIXEL)
             YGNodeStyleSetWidth(node, width.value());
         else
         {
@@ -152,11 +155,16 @@ bool updateLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, const uin
         }
     }
 
-    if(const Optional<float> height = updateVar<float>(timestamp, layoutParam.height().value(), dirty))
+    if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_AUTO)
     {
-        if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_AUTO)
+        if(const Optional<float> autoHeight = updateVar<float>(timestamp, layoutNode.autoHeight()); autoHeight && autoHeight.value() > 0)
+            YGNodeStyleSetHeight(node, autoHeight.value());
+        else
             YGNodeStyleSetHeightAuto(node);
-        else if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_PIXEL)
+    }
+    else if(const Optional<float> height = updateVar<float>(timestamp, layoutParam.height().value()))
+    {
+        if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_PIXEL)
             YGNodeStyleSetHeight(node, height.value());
         else
         {
@@ -168,7 +176,7 @@ bool updateLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, const uin
     YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));
     YGNodeStyleSetFlexGrow(node, layoutParam.flexGrow());
 
-    if(const Optional<float> flexBasis = updateVar<float, const SafeVar<Numeric>>(timestamp, layoutParam.flexBasis(), dirty))
+    if(const Optional<float> flexBasis = updateVar<float, const SafeVar<Numeric>>(timestamp, layoutParam.flexBasis()))
     {
         if(layoutParam.flexBasisType() == LayoutLength::LENGTH_TYPE_AUTO)
             YGNodeStyleSetFlexBasisAuto(node);
@@ -195,7 +203,6 @@ bool updateLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, const uin
             YGNodeStyleSetMargin(node, YGEdgeRight, margins.y());
             YGNodeStyleSetMargin(node, YGEdgeBottom, margins.z());
             YGNodeStyleSetMargin(node, YGEdgeLeft, margins.w());
-            dirty = true;
         }
 
     if(layoutParam.paddings())
@@ -206,9 +213,9 @@ bool updateLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, const uin
             YGNodeStyleSetPadding(node, YGEdgeRight, paddings.y());
             YGNodeStyleSetPadding(node, YGEdgeBottom, paddings.z());
             YGNodeStyleSetPadding(node, YGEdgeLeft, paddings.w());
-            dirty = true;
         }
-    return dirty;
+
+    return YGNodeIsDirty(node);
 }
 
 void updateLayoutResult(const Layout::Hierarchy& hierarchy)
@@ -230,7 +237,7 @@ bool doUpdate(const Layout::Hierarchy& hierarchy, const uint64_t timestamp)
     YGNodeRef ygNode = static_cast<YGNodeRef>(layoutNode._tag);
 
     if(layoutNode._layout_param)
-        dirty = updateLayoutParam(layoutNode._layout_param, ygNode, timestamp);
+        dirty = updateLayoutParam(layoutNode, ygNode, timestamp);
 
     for(const Layout::Hierarchy& i : hierarchy._child_nodes)
         dirty = doUpdate(i, timestamp) | dirty;

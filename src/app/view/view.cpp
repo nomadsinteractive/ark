@@ -67,7 +67,7 @@ struct View::Stub final : Updatable {
             return V3();
 
         const V3 position = _position->val();
-        const V2 layoutSize = _layout_node->size().value();
+        const V2 layoutSize = _layout_node->size().val();
         return {position.x() - layoutSize.x() / 2, position.y() - layoutSize.y() / 2, position.z()};
     }
 
@@ -203,7 +203,6 @@ View::~View()
 
 TypeId View::onPoll(WiringContext& context)
 {
-    context.setComponent(makeBoundaries());
     context.setComponent(sp<Translation>::make(layoutPosition()));
     context.setComponent(layoutSize());
     context.setComponent(sp<Shape>::make(Shape::TYPE_AABB, layoutSize()));
