@@ -173,26 +173,33 @@ private:
     V2 _offset_position;
 };
 
-class UpdatableFlexStart final : public Updatable {
+class UpdatableLabel : public Updatable {
+public:
+    UpdatableLabel(Layout::Hierarchy hierarchy, const float letterSpacing)
+        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing) {
+    }
+
+protected:
+    Layout::Hierarchy _hierarchy;
+    float _letter_spacing;
+};
+
+class UpdatableFlexStart final : public UpdatableLabel {
 public:
     UpdatableFlexStart(Layout::Hierarchy hierarchy, const float letterSpacing)
-        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing) {
+        : UpdatableLabel(std::move(hierarchy), letterSpacing) {
     }
 
     bool update(uint64_t timestamp) override {
         doFlowLayout(_hierarchy._child_nodes, _letter_spacing, 0, 0);
         return false;
     }
-
-private:
-    Layout::Hierarchy _hierarchy;
-    float _letter_spacing;
 };
 
-class UpdatableCenter final : public Updatable {
+class UpdatableCenter final : public UpdatableLabel {
 public:
     UpdatableCenter(Layout::Hierarchy hierarchy, Size size, const float letterSpacing)
-        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _size(std::move(size)) {
+        : UpdatableLabel(std::move(hierarchy), letterSpacing), _size(std::move(size)) {
     }
 
     bool update(uint64_t timestamp) override {
@@ -203,15 +210,13 @@ public:
     }
 
 private:
-    Layout::Hierarchy _hierarchy;
-    float _letter_spacing;
     Size _size;
 };
 
-class UpdatableFlexEnd final : public Updatable {
+class UpdatableFlexEnd final : public UpdatableLabel {
 public:
     UpdatableFlexEnd(Layout::Hierarchy hierarchy, Size size, const float letterSpacing)
-        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _size(std::move(size)) {
+        : UpdatableLabel(std::move(hierarchy), letterSpacing), _size(std::move(size)) {
     }
 
     bool update(uint64_t timestamp) override {
@@ -222,8 +227,6 @@ public:
     }
 
 private:
-    Layout::Hierarchy _hierarchy;
-    float _letter_spacing;
     Size _size;
 };
 
@@ -249,10 +252,11 @@ private:
 
 class UpdatableParagraph final : public Updatable {
 public:
-    UpdatableParagraph(Layout::Hierarchy hierarchy, const float letterSpacing, LayoutLength lineHeight, sp<Numeric> layoutWidth, sp<Layout::Node> layoutNode)
-        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _line_height(lineHeight.isAuto() ? LayoutLength(100, LayoutLength::LENGTH_TYPE_PERCENTAGE) : std::move(lineHeight)), _line_indent(0), _layout_width(std::move(layoutWidth)), _layout_node(std::move(layoutNode))
+    UpdatableParagraph(Layout::Hierarchy hierarchy, const float letterSpacing, LayoutLength lineHeight, sp<Numeric> layoutWidth, Layout::Node& layoutNode)
+        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _line_height(lineHeight.isAuto() ? LayoutLength(100, LayoutLength::LENGTH_TYPE_PERCENTAGE) : std::move(lineHeight)), _line_indent(0), _layout_width(std::move(layoutWidth)), _auto_height(sp<Numeric>::make<Numeric::Impl>(0))
     {
-        doParagraphLayout();
+        layoutNode.setAutoHeight(_auto_height);
+        update(Timestamp::now());
     }
 
     bool update(const uint64_t timestamp) override
@@ -300,8 +304,7 @@ public:
             ++ end;
         }
 
-        _layout_node->setAutoWidth(width);
-        _layout_node->setAutoHeight(flowy + charMaxHeight);
+        _auto_height->set(flowy + charMaxHeight);
     }
 
     void place(const Vector<Layout::Hierarchy>& childNodes, const size_t begin, const size_t end, float& flowx, float& flowy) const
@@ -320,7 +323,7 @@ private:
     LayoutLength _line_height;
     float _line_indent;
     sp<Numeric> _layout_width;
-    sp<Layout::Node> _layout_node;
+    sp<Numeric::Impl> _auto_height;
 };
 
 class LayoutLabel final : public Layout {
@@ -428,8 +431,6 @@ struct Text::Content {
     {
         const V2 size = doAutoWidthLayout();
         _layout_node->setSize(size);
-        _layout_node->setAutoWidth(size.x());
-        _layout_node->setAutoHeight(size.y());
     }
 
     void createLayerContent()

@@ -1,5 +1,6 @@
 #include "renderer/util/primitive_model_factory.h"
 
+#include "core/ark.h"
 #include "core/util/uploader_type.h"
 
 #include "graphics/base/boundaries.h"

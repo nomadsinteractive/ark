@@ -19,7 +19,7 @@ sp<Mat3> Mat3Type::create(sp<Vec3> t, sp<Vec3> b, sp<Vec3> n)
 
 M3 Mat3Type::val(const sp<Mat3>& self)
 {
-    self->update(0);
+    self->update(Timestamp::now());
     return self->val();
 }
 

@@ -51,7 +51,7 @@ sp<Vec4i> Vec4iType::create(sp<Integer> x, sp<Integer> y, sp<Integer> z, sp<Inte
 
 V4i Vec4iType::val(const sp<Vec4i>& self)
 {
-    self->update(0);
+    self->update(Timestamp::now());
     return self->val();
 }
 

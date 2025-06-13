@@ -34,10 +34,10 @@ public:
         const WithTimestamp<V2>& size() const;
         void setSize(const V2& size);
 
-        const WithTimestamp<float>& autoWidth() const;
-        void setAutoWidth(float autoWidth);
-        const WithTimestamp<float>& autoHeight() const;
-        void setAutoHeight(float autoHeight);
+        const sp<Numeric>& autoWidth() const;
+        void setAutoWidth(sp<Numeric> autoWidth);
+        const sp<Numeric>& autoHeight() const;
+        void setAutoHeight(sp<Numeric> autoHeight);
 
         bool update(uint32_t timestamp);
 
@@ -49,8 +49,8 @@ public:
         V4 _margins;
         WithTimestamp<V2> _offset_position;
         WithTimestamp<V2> _size;
-        WithTimestamp<float> _auto_width;
-        WithTimestamp<float> _auto_height;
+        sp<Numeric> _auto_width;
+        sp<Numeric> _auto_height;
     };
 
     struct Hierarchy {

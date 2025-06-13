@@ -146,7 +146,7 @@ bool BooleanType::toBool(const sp<Boolean>& self)
 
 bool BooleanType::val(const sp<Boolean>& self)
 {
-    self->update(0);
+    self->update(Timestamp::now());
     return self->val();
 }
 

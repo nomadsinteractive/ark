@@ -1,5 +1,6 @@
 #include "renderer/base/render_target.h"
 
+#include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/util/string_convert.h"
 

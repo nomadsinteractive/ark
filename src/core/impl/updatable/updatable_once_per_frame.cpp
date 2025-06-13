@@ -9,9 +9,6 @@ UpdatableOncePerFrame::UpdatableOncePerFrame(sp<Updatable> delegate)
 
 bool UpdatableOncePerFrame::update(const uint64_t timestamp)
 {
-    if(timestamp == 0)
-        return _delegate->update(timestamp);
-
     if(timestamp <= _last_update_timestamp)
         return _last_update_value;
 

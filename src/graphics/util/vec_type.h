@@ -34,7 +34,7 @@ public:
     };
 
     static T val(const sp<VarType>& self) {
-        self->update(0);
+        self->update(Timestamp::now());
         return self->val();
     }
 

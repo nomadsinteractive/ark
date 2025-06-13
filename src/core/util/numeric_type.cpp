@@ -182,7 +182,7 @@ sp<Boolean> NumericType::dirty(sp<Numeric> self)
 
 float NumericType::val(const sp<Numeric>& self)
 {
-    self->update(0);
+    self->update(Timestamp::now());
     return self->val();
 }
 

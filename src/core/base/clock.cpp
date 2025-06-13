@@ -43,17 +43,17 @@ private:
 
 }
 
-class Clock::Ticker : public Variable<uint64_t>, public Wrapper<Variable<uint64_t>> {
+class Clock::Ticker final : public Variable<uint64_t>, public Wrapper<Variable<uint64_t>> {
 public:
     Ticker(sp<Variable<uint64_t>> delegate)
         : Wrapper(std::move(delegate)), _bypass(0), _paused(0) {
     }
 
-    virtual uint64_t val() override {
+    uint64_t val() override {
         return _paused ? _paused : _wrapped->val() - _bypass;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         return _paused ? false : _wrapped->update(timestamp);
     }
 

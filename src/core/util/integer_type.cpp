@@ -189,7 +189,7 @@ sp<Boolean> IntegerType::dirty(sp<Integer> self)
 
 int32_t IntegerType::val(const sp<Integer>& self)
 {
-    self->update(0);
+    self->update(Timestamp::now());
     return self->val();
 }
 

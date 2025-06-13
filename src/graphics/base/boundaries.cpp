@@ -114,7 +114,7 @@ sp<Boolean> Boundaries::ptin(sp<Vec3> point) const
     return sp<Boolean>::make<InBoundaries>(std::move(point), _aabb_min, _aabb_max);
 }
 
-bool Boundaries::update(uint64_t timestamp) const
+bool Boundaries::update(const uint64_t timestamp) const
 {
     return UpdatableUtil::update(timestamp, _aabb_max, _aabb_min, _size);
 }

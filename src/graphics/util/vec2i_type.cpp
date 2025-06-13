@@ -49,7 +49,7 @@ sp<Vec2i> Vec2iType::create(sp<Integer> x, sp<Integer> y)
 
 V2i Vec2iType::val(const sp<Vec2i>& self)
 {
-    self->update(0);
+    self->update(Timestamp::now());
     return self->val();
 }
 

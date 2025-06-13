@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bit_set.h"
@@ -121,7 +120,7 @@ public:
     GraphicsBufferAllocator& gba();
 
     uint64_t updateTick();
-    uint64_t tick() const;
+    uint64_t timestamp() const;
 
 private:
     class RenderResource {
@@ -185,11 +184,11 @@ private:
     D_FList<sp<Runnable>> _on_pre_render_runnable;
 
     Vector<Box> _defered_instances;
-    std::map<uint32_t, sp<PrimitiveIndexBuffer>> _shared_primitive_index_buffer;
+    Map<uint32_t, sp<PrimitiveIndexBuffer>> _shared_primitive_index_buffer;
 
     GraphicsBufferAllocator _gba;
 
-    uint64_t _tick;
+    uint64_t _timestamp;
 
     friend class TextureBundle;
 };

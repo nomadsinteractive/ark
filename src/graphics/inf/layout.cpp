@@ -73,24 +73,24 @@ void Layout::Node::setSize(const V2& size)
     _size.reset(size);
 }
 
-const WithTimestamp<float>& Layout::Node::autoWidth() const
+const sp<Numeric>& Layout::Node::autoWidth() const
 {
     return _auto_width;
 }
 
-void Layout::Node::setAutoWidth(const float autoWidth)
+void Layout::Node::setAutoWidth(sp<Numeric> autoWidth)
 {
-    _auto_width.reset(autoWidth);
+    _auto_width = std::move(autoWidth);
 }
 
-const WithTimestamp<float>& Layout::Node::autoHeight() const
+const sp<Numeric>& Layout::Node::autoHeight() const
 {
     return _auto_height;
 }
 
-void Layout::Node::setAutoHeight(const float autoHeight)
+void Layout::Node::setAutoHeight(sp<Numeric> autoHeight)
 {
-    _auto_height.reset(autoHeight);
+    _auto_height = std::move(autoHeight);
 }
 
 bool Layout::Node::update(const uint32_t timestamp)

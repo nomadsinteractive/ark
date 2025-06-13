@@ -1,5 +1,6 @@
 #include "renderer/base/texture.h"
 
+#include "core/ark.h"
 #include "core/inf/array.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/util/string_convert.h"

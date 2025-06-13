@@ -64,7 +64,7 @@ sp<Mat4> Mat4Type::create(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w)
 
 M4 Mat4Type::val(const sp<Mat4>& self)
 {
-    self->update(0);
+    self->update(Timestamp::now());
     return self->val();
 }
 

@@ -1,5 +1,6 @@
 #include "graphics/base/render_layer.h"
 
+#include "core/ark.h"
 #include "core/base/observer.h"
 
 #include "graphics/base/camera.h"

@@ -133,14 +133,17 @@ template<typename T, typename U> Optional<T> updateVar(uint64_t timestamp, U& va
     return {};
 }
 
-bool updateLayoutParam(const Layout::Node& layoutNode, YGNodeRef node, const uint64_t timestamp)
+bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, const uint64_t timestamp)
 {
     const LayoutParam& layoutParam = layoutNode._layout_param;
 
     if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_AUTO)
     {
-        if(const Optional<float> autoWidth = updateVar<float>(timestamp, layoutNode.autoWidth()); autoWidth && autoWidth.value() > 0)
-            YGNodeStyleSetWidth(node, autoWidth.value());
+        if(layoutNode.autoWidth())
+        {
+            if(const Optional<float> width = updateVar<float>(timestamp, *layoutNode.autoWidth()))
+                YGNodeStyleSetWidth(node, width.value());
+        }
         else
             YGNodeStyleSetWidthAuto(node);
     }
@@ -157,8 +160,11 @@ bool updateLayoutParam(const Layout::Node& layoutNode, YGNodeRef node, const uin
 
     if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_AUTO)
     {
-        if(const Optional<float> autoHeight = updateVar<float>(timestamp, layoutNode.autoHeight()); autoHeight && autoHeight.value() > 0)
-            YGNodeStyleSetHeight(node, autoHeight.value());
+        if(layoutNode.autoHeight())
+        {
+            if(const Optional<float> height = updateVar<float>(timestamp, *layoutNode.autoHeight()))
+                YGNodeStyleSetHeight(node, height.value());
+        }
         else
             YGNodeStyleSetHeightAuto(node);
     }
@@ -234,7 +240,7 @@ bool doUpdate(const Layout::Hierarchy& hierarchy, const uint64_t timestamp)
 {
     bool dirty = false;
     const Layout::Node& layoutNode = hierarchy._node;
-    YGNodeRef ygNode = static_cast<YGNodeRef>(layoutNode._tag);
+    const YGNodeRef ygNode = static_cast<YGNodeRef>(layoutNode._tag);
 
     if(layoutNode._layout_param)
         dirty = updateLayoutParam(layoutNode, ygNode, timestamp);
@@ -268,7 +274,7 @@ public:
         const float availableHeight = layoutParam.height().isAuto() ? YGUndefined : layoutParam.contentHeight();
         YGNodeCalculateLayout(_yg_node, availableWidth, availableHeight, YGDirectionLTR);
         updateLayoutResult(_hierarchy);
-        return YGNodeIsDirty(_yg_node);
+        return true;
     }
 
 private:

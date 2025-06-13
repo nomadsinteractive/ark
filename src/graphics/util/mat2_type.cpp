@@ -36,7 +36,7 @@ sp<Mat2> Mat2Type::create(const sp<Vec2>& t, const sp<Vec2>& b)
 
 M2 Mat2Type::val(const sp<Mat2>& self)
 {
-    self->update(0);
+    self->update(Timestamp::now());
     return self->val();
 }
 

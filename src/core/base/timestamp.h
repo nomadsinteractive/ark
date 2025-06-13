@@ -13,6 +13,8 @@ public:
     void markClean();
     void markDirty();
 
+    static uint64_t now();
+
 private:
     mutable uint64_t _last_modified;
 };

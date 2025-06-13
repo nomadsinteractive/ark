@@ -1,6 +1,6 @@
 #include "core/base/constants.h"
 
-#include "app/base/application_context.h"
+#include "core/ark.h"
 #include "core/util/uploader_type.h"
 
 #include "graphics/base/boundaries.h"
@@ -12,6 +12,8 @@
 #include "renderer/impl/vertices/vertices_point.h"
 #include "renderer/impl/vertices/vertices_quad_lhs.h"
 #include "renderer/impl/vertices/vertices_quad_rhs.h"
+
+#include "app/base/application_context.h"
 
 namespace ark {
 

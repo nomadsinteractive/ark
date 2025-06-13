@@ -50,7 +50,7 @@ sp<Vec3i> Vec3iType::create(sp<Integer> x, sp<Integer> y, sp<Integer> z)
 
 V3i Vec3iType::val(const sp<Vec3i>& self)
 {
-    self->update(0);
+    self->update(Timestamp::now());
     return self->val();
 }
 

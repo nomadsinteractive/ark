@@ -6,16 +6,14 @@
 #include <thread>
 #include <miniaudio.h>
 
-#include "app/base/application_context.h"
+#include "core/ark.h"
 #include "core/base/future.h"
 #include "core/inf/executor.h"
 #include "core/inf/readable.h"
 #include "core/inf/runnable.h"
-#include "core/impl/executor/executor_thread_pool.h"
 #include "core/util/log.h"
 
-#include "renderer/base/resource_loader_context.h"
-
+#include "app/base/application_context.h"
 #include "app/util/audio_mixer.h"
 
 
@@ -25,9 +23,9 @@ static ma_result _decoder_read_proc(ma_decoder* pDecoder, void* pBufferOut, size
 static ma_result _decoder_seek_proc(ma_decoder* pDecoder, ma_int64 byteOffset, ma_seek_origin origin);
 static void _data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount);
 
-class AudioPlayerMiniAudio::MADevice : public Runnable {
+class AudioPlayerMiniAudio::MADevice final : public Runnable {
 public:
-    MADevice(uint32_t channels, uint32_t sampleRate)
+    MADevice(const uint32_t channels, const uint32_t sampleRate)
         : _audio_mixer(sp<AudioMixer>::make(channels * sampleRate)) {
         _device_config = ma_device_config_init(ma_device_type_playback);
         _device_config.playback.format   = ma_format_s16;

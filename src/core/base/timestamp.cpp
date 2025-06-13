@@ -1,6 +1,10 @@
 #include "core/base/timestamp.h"
 
+#include "core/ark.h"
+
 #include <limits>
+
+#include "renderer/base/render_controller.h"
 
 namespace ark {
 
@@ -11,9 +15,6 @@ Timestamp::Timestamp()
 
 bool Timestamp::update(const uint64_t timestamp) const
 {
-    if(timestamp == 0)
-        return true;
-
     if(_last_modified >= timestamp)
     {
         _last_modified = timestamp;
@@ -30,6 +31,11 @@ void Timestamp::markClean()
 void Timestamp::markDirty()
 {
     _last_modified = std::numeric_limits<uint64_t>::max();
+}
+
+uint64_t Timestamp::now()
+{
+    return Ark::instance().renderController()->timestamp();
 }
 
 }

@@ -407,13 +407,13 @@ GraphicsBufferAllocator& RenderController::gba()
 
 uint64_t RenderController::updateTick()
 {
-    _tick = _clock->val();
-    return _tick;
+    _timestamp = _clock->val();
+    return _timestamp;
 }
 
-uint64_t RenderController::tick() const
+uint64_t RenderController::timestamp() const
 {
-    return _tick;
+    return _timestamp;
 }
 
 RenderController::RenderResource::RenderResource(sp<Resource> resource, sp<Future> future)
