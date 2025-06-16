@@ -137,7 +137,7 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
 {
     const LayoutParam& layoutParam = layoutNode._layout_param;
 
-    if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_AUTO)
+    if(layoutParam.width().isAuto())
     {
         if(layoutNode.autoWidth())
         {
@@ -158,7 +158,7 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
         }
     }
 
-    if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_AUTO)
+    if(layoutParam.height().isAuto())
     {
         if(layoutNode.autoHeight())
         {

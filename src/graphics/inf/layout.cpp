@@ -7,7 +7,7 @@
 namespace ark {
 
 Layout::Node::Node(sp<LayoutParam> layoutParam, void* tag)
-    : _layout_param(std::move(layoutParam)), _tag(tag), _auto_width(0), _auto_height(0)
+    : _layout_param(std::move(layoutParam)), _tag(tag)
 {
     if(_layout_param)
         setSize(V2(_layout_param->contentWidth(), _layout_param->contentHeight()));
@@ -95,11 +95,12 @@ void Layout::Node::setAutoHeight(sp<Numeric> autoHeight)
 
 bool Layout::Node::update(const uint32_t timestamp)
 {
-    const bool dirty = UpdatableUtil::update(timestamp, _layout_param->margins(), _layout_param->paddings(), _offset_position);
-    if(dirty)
+    const bool dirty = UpdatableUtil::update(timestamp,_offset_position, _size);
+    if(_layout_param && UpdatableUtil::update(timestamp, _layout_param->margins(), _layout_param->paddings()))
     {
-        _paddings = _layout_param->paddings().val();
         _margins = _layout_param->margins().val();
+        _paddings = _layout_param->paddings().val();
+        return true;
     }
     return dirty;
 }
