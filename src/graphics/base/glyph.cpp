@@ -34,7 +34,7 @@ private:
 }
 
 Glyph::Glyph(sp<Integer> type, sp<Font> font, sp<Vec3> position, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
-    : _type(std::move(type)), _font(std::move(font)), _position(std::move(position)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible)), _discarded(std::move(discarded)), _character(0)
+    : _type(std::move(type)), _font(std::move(font)), _position(std::move(position)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible)), _discarded(std::move(discarded))
 {
 }
 
@@ -85,12 +85,7 @@ sp<RenderObject> Glyph::toRenderObject() const
 
 wchar_t Glyph::character() const
 {
-    return _character;
-}
-
-void Glyph::setCharacter(const wchar_t character)
-{
-    _character = character;
+    return static_cast<wchar_t>(_type->val());
 }
 
 const V2& Glyph::occupySize() const

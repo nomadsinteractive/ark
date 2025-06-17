@@ -33,7 +33,6 @@ public:
     sp<RenderObject> toRenderObject() const;
 
     wchar_t character() const;
-    void setCharacter(wchar_t character);
 
 //  [[script::bindings::property]]
     const V2& occupySize() const;
@@ -51,7 +50,6 @@ private:
     sp<Boolean> _visible;
     sp<Boolean> _discarded;
 
-    wchar_t _character;
     V2 _occupy_size;
     V2 _content_size;
 

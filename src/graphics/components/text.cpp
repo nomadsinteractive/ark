@@ -22,7 +22,7 @@
 #include "graphics/components/render_object.h"
 #include "graphics/components/size.h"
 #include "graphics/components/translation.h"
-#include "graphics/impl/glyph_maker/glyph_maker_span.h"
+#include "graphics/impl/glyph_maker/glyph_maker_font.h"
 #include "graphics/impl/renderable/renderable_with_transform.h"
 #include "graphics/inf/glyph_maker.h"
 #include "graphics/inf/layout.h"
@@ -107,15 +107,6 @@ Vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoader& m
         }
     }
     return layoutChars;
-}
-
-GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text)
-{
-    GlyphContents glyphs = gm.makeGlyphs(text);
-    CHECK(glyphs.size() == text.size(), "Bad GlyphMaker result returned, size mismatch(%d, %d), text: %s", glyphs.size(), text.size(), Strings::toUTF8(text).c_str());
-    for(size_t i = 0; i < text.size(); ++i)
-        glyphs.at(i)->setCharacter(text.at(i));
-    return glyphs;
 }
 
 class LayoutNodeSize final : public Vec2 {
@@ -465,7 +456,7 @@ struct Text::Content {
 
     void createContent()
     {
-        _glyphs = makeGlyphs(_glyph_maker, _text_unicode);
+        _glyphs = _glyph_maker->makeGlyphs(_text_unicode);
         _layout_chars = toLayoutCharacters(_glyphs, _render_layer->modelLoader());
         createLayerContent();
     }
@@ -595,7 +586,7 @@ private:
 };
 
 Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, float letterSpacing, LayoutLength lineHeight, float lineIndent)
-    : _content(sp<Content>::make(std::move(renderLayer), std::move(text), std::move(position), std::move(layoutParam), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>(std::move(nullptr)), std::move(transform), letterSpacing, std::move(lineHeight), lineIndent))
+    : _content(sp<Content>::make(std::move(renderLayer), std::move(text), std::move(position), std::move(layoutParam), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerFont>(nullptr), std::move(transform), letterSpacing, std::move(lineHeight), lineIndent))
 {
 }
 
@@ -703,7 +694,7 @@ sp<Text> Text::BUILDER::build(const Scope& args)
 {
     sp<GlyphMaker> glyphMaker = _glyph_maker.build(args);
     float letterSpacing = _letter_spacing ? _letter_spacing.build(args)->val() : 0.0f;
-    return sp<Text>::make(_render_layer->build(args), _text.build(args), _position.build(args), _layout_param.build(args), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>(_font.build(args)), _transform.build(args), letterSpacing, _line_height.build(args), _line_indent);
+    return sp<Text>::make(_render_layer->build(args), _text.build(args), _position.build(args), _layout_param.build(args), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerFont>(_font.build(args)), _transform.build(args), letterSpacing, _line_height.build(args), _line_indent);
 }
 
 Text::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)

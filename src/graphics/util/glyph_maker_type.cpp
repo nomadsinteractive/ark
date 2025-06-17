@@ -1,9 +1,8 @@
 #include "graphics/util/glyph_maker_type.h"
 
-#include "core/base/bean_factory.h"
-#include "core/base/constants.h"
-
 #include "graphics/base/glyph.h"
+#include "graphics/impl/glyph_maker/glyph_maker_font.h"
+#include "graphics/impl/glyph_maker/glyph_maker_span.h"
 
 #include "renderer/components/varyings.h"
 
@@ -39,7 +38,7 @@ private:
 class GlyphMakerTextColor final : public GlyphMaker {
 public:
     GlyphMakerTextColor(sp<GlyphMaker> delegate, sp<Vec4> color)
-        : _delegate(std::move(delegate)), _varyings(sp<Varyings>::make()), _color(std::move(color))
+        : _delegate(delegate ? std::move(delegate) : sp<GlyphMaker>::make<GlyphMakerFont>(nullptr)), _varyings(sp<Varyings>::make()), _color(std::move(color))
     {
         _varyings->setProperty("Color", _color);
     }
@@ -63,14 +62,23 @@ private:
 
 }
 
-GlyphMakerType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _font(factory.getBuilder<Font>(manifest, constants::FONT)), _text_color(factory.getBuilder<Vec4>(manifest, constants::TEXT_COLOR))
+sp<GlyphMaker> GlyphMakerType::create(sp<Font> font, sp<Vec4> color)
 {
+    ASSERT(font);
+    if(color)
+        return sp<GlyphMaker>::make<GlyphMakerImpl>(std::move(font), std::move(color));
+
+    return sp<GlyphMaker>::make<GlyphMakerFont>(std::move(font));
 }
 
-sp<GlyphMaker> GlyphMakerType::BUILDER::build(const Scope& args)
+sp<GlyphMaker> GlyphMakerType::setColor(sp<GlyphMaker> self, sp<Vec4> c)
 {
-    return sp<GlyphMaker>::make<GlyphMakerImpl>(_font.build(args), _text_color.build(args));
+    return sp<GlyphMaker>::make<GlyphMakerTextColor>(std::move(self), std::move(c));
+}
+
+sp<GlyphMaker> GlyphMakerType::setSpans(sp<GlyphMaker> self, Map<String, sp<GlyphMaker>> spans)
+{
+    return sp<GlyphMaker>::make<GlyphMakerSpan>(std::move(self), std::move(spans));
 }
 
 }

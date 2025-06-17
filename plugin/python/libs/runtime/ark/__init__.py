@@ -33,6 +33,7 @@ TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
 TYPE_MAT4 = Union["Mat4", TYPE_M4]
 TYPE_NAMED_HASH = Union[int, str, "NamedHash"]
 TYPE_RUNNABLE = Union["Runnable", Callable[[], None]]
+TYPE_STRING = Union[str, "String"]
 
 T = TypeVar('T')
 
@@ -1019,14 +1020,14 @@ class String:
     def val(self) -> str:
         return ''
 
-    def set(self, val: str):
+    def set(self, val: TYPE_STRING):
         pass
 
-    def if_else(self, condition: "Boolean", negative: Union[str, 'String']) -> 'String':
+    def if_else(self, condition: "Boolean", negative: TYPE_STRING) -> Self:
         pass
 
     @staticmethod
-    def format(msg: str, **kwargs) -> 'String':
+    def format(msg: str, **kwargs) -> "String":
         pass
 
 
@@ -2572,6 +2573,17 @@ class Glyph:
     @property
     def transform(self) -> Optional[Transform]:
         return None
+
+
+class GlyphMaker:
+    def __init__(self, font: Font, color: Optional[TYPE_VEC4] = None):
+        pass
+
+    def set_color(self, color: TYPE_VEC4) -> Self:
+        pass
+
+    def set_spans(self, spans: dict[str, "GlyphMaker"]) -> Self:
+        pass
 
 
 class Text:
