@@ -20,7 +20,7 @@ public:
                     _components.add(i.typeId(), std::move(i));
 
                 for(auto& [k, v] : _intermedia_map)
-                    _components.put(k, std::move(v));
+                    _components.add(k, std::move(v));
             }
         }
 

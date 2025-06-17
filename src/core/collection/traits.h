@@ -30,8 +30,8 @@ public:
     template<typename T> Box& put(sp<T> trait) {
         return put(Type<T>::id(), Box(std::move(trait)));
     }
-    template<typename T> Box& add(sp<T> trait) {
-        return add(Type<T>::id(), Box(std::move(trait)));
+    template<typename T> void add(sp<T> trait) {
+        add(Type<T>::id(), Box(std::move(trait)));
     }
 
     Box& put(const TypeId typeId, Box trait) {
@@ -40,19 +40,19 @@ public:
         return slot;
     }
 
-    Box& add(const TypeId typeId, Box trait) {
-        Box& slot = _traits[typeId];
-        if(slot) {
+    void add(const TypeId typeId, Box trait) {
+        if(_traits.find(typeId) != _traits.end()) {
             Box& listBox = _traits[toVectorTypeId(typeId)];
             sp<Vector<Box>> list = listBox.toPtr<Vector<Box>>();
             if(!list) {
                 list = sp<Vector<Box>>::make();
+                list->push_back(_traits[typeId]);
                 listBox = Box(list);
             }
-            list->push_back(trait);
+            list->push_back(std::move(trait));
         }
-        slot = std::move(trait);
-        return slot;
+        else
+            _traits[typeId] = std::move(trait);
     }
 
     template<typename T> sp<T> get() const {

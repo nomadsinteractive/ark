@@ -61,14 +61,14 @@ Entity::Entity(Vector<Component> components)
         Wirable::WiringContext context(_components);
         for(const auto& [k, v] : components)
         {
-            _components.put(k.typeId(), k);
+            _components.add(k.typeId(), k);
             if(!k.isEnum())
             {
                 if(sp<Wirable::Niche> niche = k.as<Wirable::Niche>())
                     niches.push_back(std::move(niche));
                 if(const sp<Wirable> wirable = k.as<Wirable>())
                     if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
-                        _components.put(typeId, k);
+                        _components.add(typeId, k);
             }
         }
     }
@@ -127,11 +127,11 @@ void Entity::addComponent(Box component)
 
     if(const sp<Wirable> wirable = component.as<Wirable>())
         if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
-            _components.put(typeId, component);
+            _components.add(typeId, component);
     if(const sp<Wirable> wirable = component.as<Wirable>())
         wirable->onWire(context, component);
 
-    _components.put(component.typeId(), std::move(component));
+    _components.add(component.typeId(), std::move(component));
 }
 
 bool Entity::hasComponent(const TypeId typeId) const
@@ -142,6 +142,18 @@ bool Entity::hasComponent(const TypeId typeId) const
 Optional<Box> Entity::getComponent(const TypeId typeId) const
 {
     return _components.get(typeId);
+}
+
+Vector<Box> Entity::getComponentList(const TypeId typeId) const
+{
+    Optional<Box> vectorTrait = _components.get(toVectorTypeId(typeId));
+    if(!vectorTrait)
+    {
+        Optional<Box> cmp = _components.get(typeId);
+        CHECK(cmp, "Entity has no component list for type: %d", Class::ensureClass(typeId)->name());
+        return {std::move(cmp.value())};
+    }
+    return vectorTrait.value().toPtr<Vector<Box>>();
 }
 
 Box Entity::tag() const

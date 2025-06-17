@@ -478,15 +478,9 @@ struct Text::Content {
         return {flowx, lineHeight};
     }
 
-    void updateLayoutSize() const
-    {
-        const V2 size = doAutoWidthLayout();
-        _layout_info->_layout_node->setSize(size);
-    }
-
     void createLayerContent()
     {
-        updateLayoutSize();
+        doAutoWidthLayout();
 
         _render_objects.clear();
         for(const sp<Glyph>& i : _glyphs)

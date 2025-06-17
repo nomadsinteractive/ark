@@ -48,6 +48,8 @@ public:
     void addComponent(Box component);
 //  [[script::bindings::map(get)]]
     Optional<Box> getComponent(TypeId typeId) const;
+//  [[script::bindings::auto]]
+    Vector<Box> getComponentList(TypeId typeId) const;
 
 //  [[script::bindings::property]]
     Box tag() const;

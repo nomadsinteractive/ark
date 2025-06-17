@@ -2998,6 +2998,10 @@ class View:
     def discarded(self) -> Boolean:
         return Boolean(False)
 
+    @discarded.setter
+    def discarded(self, discarded: Boolean):
+        pass
+
     @property
     def layout_param(self) -> LayoutParam:
         pass
@@ -3093,6 +3097,9 @@ class Entity:
         pass
 
     def add_component(self, component: Any):
+        pass
+
+    def get_component_list(self, ctype: type[T]) -> list[T]:
         pass
 
     def discard(self):

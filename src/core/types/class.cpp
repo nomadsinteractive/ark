@@ -49,12 +49,12 @@ const Set<TypeId>& Class::implements() const
     return _implements;
 }
 
-bool Class::is(TypeId id) const
+bool Class::is(const TypeId id) const
 {
     return _id == id;
 }
 
-bool Class::isInstance(TypeId id) const
+bool Class::isInstance(const TypeId id) const
 {
     return id == _id || _implements.find(id) != _implements.end();
 }

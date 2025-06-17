@@ -45,7 +45,6 @@ public:
         return addClass(Type<T>::id(), name, std::move(impl));
     }
 
-private:
     template<typename T, typename... Args> void setImplementation() {
         _implements.insert(Type<T>::id());
         if constexpr(sizeof...(Args) > 0)
