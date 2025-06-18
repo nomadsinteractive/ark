@@ -88,7 +88,7 @@ private:
 };
 
 Arena::Arena(sp<ResourceLoader> resourceLoader, sp<Renderer> renderer)
-    : Niche("layer-name"), _stub(sp<Stub>::make(std::move(resourceLoader), std::move(renderer))), _layers(sp<LayerBundle>::make(_stub)), _render_layers(sp<RenderLayerBundle>::make(_stub))
+    : _stub(sp<Stub>::make(std::move(resourceLoader), std::move(renderer))), _layers(sp<LayerBundle>::make(_stub)), _render_layers(sp<RenderLayerBundle>::make(_stub))
 {
 }
 
@@ -102,11 +102,14 @@ const sp<BoxBundle>& Arena::renderLayers() const
     return _render_layers;
 }
 
-void Arena::onPoll(Wirable::WiringContext& context, const StringView value)
+void Arena::onPoll(Wirable::WiringContext& context, const document& component)
 {
-    sp<Layer> layer = _stub->getLayer(value.data());
-    CHECK(layer, "Layer(%s) not found", value.data());
-    context.setComponent(std::move(layer));
+    if(const String layerName = Documents::getAttribute(component, "layer-name"))
+    {
+        sp<Layer> layer = _stub->getLayer(layerName);
+        CHECK(layer, "Layer(%s) not found", layerName.c_str());
+        context.setComponent(std::move(layer));
+    }
 }
 
 }

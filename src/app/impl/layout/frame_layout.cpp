@@ -19,9 +19,9 @@ public:
         Layout::Node& rootNode = _hierarchy._node;
         bool dirty = rootNode.update(timestamp);
         for(const Layout::Hierarchy& i : _hierarchy._child_nodes)
-            if(i._node->_layout_param->update(timestamp))
+            if(i._node->update(timestamp))
             {
-                i._node->setSize(LayoutUtil::calcItemSize(i._node->_layout_param, rootNode));
+                i._node->setSize(LayoutUtil::calcItemSize(i._node, rootNode));
 
                 float offsetX = LayoutUtil::calcItemOffsetX(LayoutUtil::toAlign(i._node->_layout_param->justifyContent()), rootNode, i._node);
                 float offsetY = LayoutUtil::calcItemOffsetY(i._node->_layout_param->alignSelf(), rootNode, i._node);

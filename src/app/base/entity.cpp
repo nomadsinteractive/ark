@@ -81,8 +81,7 @@ Entity::Entity(Vector<Component> components)
                 Wirable::WiringContext nicheContext(_components, false);
                 if(v)
                     for(const sp<Wirable::Niche>& i : niches)
-                        if(const String value = Documents::getAttribute(v, i->name()))
-                            i->onPoll(nicheContext, value);
+                        i->onPoll(nicheContext, v);
 
                 wirable->onWire(nicheContext, k);
             }

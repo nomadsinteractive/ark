@@ -20,7 +20,7 @@ LayoutParam::LayoutParam(LayoutLength width, LayoutLength height, sp<Layout> lay
 {
 }
 
-bool LayoutParam::update(uint64_t timestamp)
+bool LayoutParam::update(const uint64_t timestamp)
 {
     const bool dirty = _timestamp.update(timestamp);
     return UpdatableUtil::update(timestamp, _width, _height, _margins, _paddings, _flex_basis) || dirty;

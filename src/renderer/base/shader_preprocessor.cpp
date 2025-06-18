@@ -424,7 +424,6 @@ void ShaderPreprocessor::addInclude(const String& filepath)
 ShaderPreprocessor::Function::Function(String name, String params, String returnType, String body, sp<String> placeHolder)
     : _name(std::move(name)), _params(std::move(params)), _return_type(std::move(returnType)), _body(std::move(body)), _place_hoder(std::move(placeHolder))
 {
-    DTRACE(_params == "vec3 worldPosition, vec3 worldNormal, in divisor(1) int materialId, in divisor(1) float alpha, in divisor(1) uint id, in divisor(1) uint collisionFilter, in divisor(1", "AB");
 }
 
 void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContext)

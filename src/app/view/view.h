@@ -25,11 +25,14 @@ public:
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context, const Box& self) override;
 
-    void onPoll(WiringContext& context, StringView value) override;
+    void onPoll(WiringContext& context, const document& component) override;
 
     bool update(uint64_t timestamp) const;
 
     const sp<Layout::Node>& layoutNode() const;
+
+//  [[script::bindings::property]]
+    const String& name() const;
 
 //  [[script::bindings::property]]
     const SafeVar<Boolean>& discarded() const;

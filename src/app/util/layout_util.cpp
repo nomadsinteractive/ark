@@ -75,7 +75,7 @@ LayoutParam::Align LayoutUtil::toAlign(const LayoutParam::JustifyContent justify
     return LayoutParam::ALIGN_FLEX_START;
 }
 
-float LayoutUtil::calcItemOffsetX(LayoutParam::Align align, const Layout::Node& rootNode, Layout::Node& item)
+float LayoutUtil::calcItemOffsetX(const LayoutParam::Align align, const Layout::Node& rootNode, Layout::Node& item)
 {
     float offset = 0;
     switch (align) {
@@ -121,17 +121,22 @@ float LayoutUtil::calcItemOffsetY(LayoutParam::Align align, const Layout::Node& 
     return offset;
 }
 
-V2 LayoutUtil::calcItemSize(const LayoutParam& layoutParam, const Layout::Node& parent)
+V2 LayoutUtil::calcItemSize(const Layout::Node& node, const Layout::Node& parent)
 {
     float width = 0;
     float height = 0;
+    const LayoutParam& layoutParam = *node._layout_param;
 
-    if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_PIXEL)
+    if(layoutParam.width().isAuto())
+        width = node.autoWidth() ? node.autoWidth()->val() : 0;
+    else if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_PIXEL)
         width = layoutParam.width().value().val();
     else if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE)
         width = layoutParam.width().value().val() * parent.size()->x() * 0.01f;
 
-    if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_PIXEL)
+    if(layoutParam.height().isAuto())
+        height = node.autoHeight() ? node.autoHeight()->val() : 0;
+    else if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_PIXEL)
         height = layoutParam.height().value().val();
     else if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE)
         height = layoutParam.height().value().val() * parent.size()->y() * 0.01f;

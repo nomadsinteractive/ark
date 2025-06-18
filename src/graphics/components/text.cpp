@@ -389,7 +389,7 @@ public:
 
     sp<Updatable> inflate(Hierarchy hierarchy) override
     {
-        if(hierarchy._node->_layout_param)
+        if(hierarchy._node->_layout_param && false)
         {
             const LayoutParam& lp = hierarchy._node->_layout_param;
             Size size(lp.width().value().val(), lp.height().value().val());

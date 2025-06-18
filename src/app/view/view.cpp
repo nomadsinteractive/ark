@@ -7,6 +7,7 @@
 #include "core/types/global.h"
 #include "core/util/math.h"
 #include "core/util/updatable_util.h"
+#include "core/util/log.h"
 
 #include "graphics/components/layer.h"
 #include "graphics/components/layout_param.h"
@@ -192,7 +193,7 @@ private:
 }
 
 View::View(sp<LayoutParam> layoutParam, String name, sp<Vec3> position, sp<Boolean> discarded)
-    : Niche("view-name"), _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(position), std::move(discarded))), _updatable_view(sp<Updatable>::make<UpdatableOncePerFrame>(_stub))
+    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(position), std::move(discarded))), _updatable_view(sp<Updatable>::make<UpdatableOncePerFrame>(_stub))
 {
 }
 
@@ -215,11 +216,14 @@ void View::onWire(const WiringContext& context, const Box& self)
         setDiscarded(std::move(discarded));
 }
 
-void View::onPoll(WiringContext& context, const StringView value)
+void View::onPoll(WiringContext& context, const document& component)
 {
-    const sp<View> view = findView(value);
-    view->onPoll(context);
-    context.setComponent(view);
+    if(const String& viewName = Documents::getAttribute(component, "view-name"))
+    {
+        const sp<View> view = findView(viewName);
+        view->onPoll(context);
+        context.setComponent(view);
+    }
 }
 
 bool View::update(const uint64_t timestamp) const
@@ -230,6 +234,11 @@ bool View::update(const uint64_t timestamp) const
 const sp<Layout::Node>& View::layoutNode() const
 {
     return _stub->_layout_node;
+}
+
+const String& View::name() const
+{
+    return _stub->_name;
 }
 
 const SafeVar<Boolean>& View::discarded() const

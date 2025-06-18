@@ -67,18 +67,9 @@ public:
 
     class Niche {
     public:
-        Niche(String name)
-            : _name(std::move(name)) {
-        }
         virtual ~Niche() = default;
 
-        virtual void onPoll(WiringContext& context, StringView value) = 0;
-
-        [[nodiscard]]
-        const String& name() const { return _name; }
-
-    protected:
-        String _name;
+        virtual void onPoll(WiringContext& context, const document& component) = 0;
     };
 
     virtual ~Wirable() = default;

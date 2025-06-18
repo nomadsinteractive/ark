@@ -17,7 +17,7 @@ public:
 //  [[script::bindings::property]]
     const sp<BoxBundle>& renderLayers() const;
 
-    void onPoll(Wirable::WiringContext& context, StringView value) override;
+    void onPoll(Wirable::WiringContext& context, const document& component) override;
 
 private:
     struct Stub;
