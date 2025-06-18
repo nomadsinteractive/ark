@@ -62,7 +62,7 @@ bool isCJK(const int32_t c)
 
 bool isWordBreaker(const wchar_t c)
 {
-    return c != '_' && !std::iswalpha(c);
+    return std::iswblank(c);
 }
 
 V2 getCharacterOffset(const Model& model)
@@ -339,7 +339,7 @@ public:
         {
             const Character& currentChar = *static_cast<Character*>(i._node->_tag);
             charMaxHeight = std::max(currentChar._glyph->occupySize().y(), charMaxHeight);
-            if(const bool allowLineBreak = currentChar._is_cjk || currentChar._is_word_break; end == childNodes.size() || allowLineBreak)
+            if(const bool allowLineBreak = currentChar._is_cjk || currentChar._is_word_break || end == childNodes.size())
             {
                 const float beginWidth = begin > 0 ? static_cast<Character*>(childNodes.at(begin - 1)._node->_tag)->_width_integral : 0;
                 if(const float placingWidth = currentChar._width_integral - beginWidth; flowx + placingWidth > boundary && allowLineBreak)

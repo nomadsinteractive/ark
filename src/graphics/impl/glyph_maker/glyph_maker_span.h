@@ -1,3 +1,5 @@
+#pragma once
+
 #include "core/types/shared_ptr.h"
 
 #include "graphics/inf/glyph_maker.h"
@@ -16,4 +18,3 @@ private:
 };
 
 }
-
