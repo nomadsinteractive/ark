@@ -16,10 +16,9 @@ class ARK_API Vec2Impl final : public Vec2 {
 public:
     Vec2Impl() noexcept;
     Vec2Impl(float x, float y) noexcept;
-    Vec2Impl(const V2& xy) noexcept;
     Vec2Impl(sp<Numeric> v) noexcept;
     Vec2Impl(sp<Numeric> x, sp<Numeric> y) noexcept;
-    Vec2Impl(Vec2& other) noexcept;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Vec2Impl);
 
     V2 val() override;
     bool update(uint64_t timestamp) override;
@@ -27,7 +26,7 @@ public:
     const sp<NumericWrapper>& x() const;
     const sp<NumericWrapper>& y() const;
 
-    void set(const V2& val);
+    void set(V2 val) const;
 
 //  [[plugin::builder("vec2")]]
     class BUILDER final : public Builder<Vec2> {

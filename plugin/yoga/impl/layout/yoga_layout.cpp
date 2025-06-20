@@ -17,7 +17,7 @@ namespace ark::plugin::yoga {
 
 namespace {
 
-YGFlexDirection toYGFlexDirection(LayoutParam::FlexDirection flexDirection)
+YGFlexDirection toYGFlexDirection(const LayoutParam::FlexDirection flexDirection)
 {
     switch(flexDirection)
     {
@@ -34,7 +34,7 @@ YGFlexDirection toYGFlexDirection(LayoutParam::FlexDirection flexDirection)
     return YGFlexDirectionColumn;
 }
 
-YGWrap toYGWrap(LayoutParam::FlexWrap flexWrap)
+YGWrap toYGWrap(const LayoutParam::FlexWrap flexWrap)
 {
     switch(flexWrap)
     {
@@ -49,7 +49,7 @@ YGWrap toYGWrap(LayoutParam::FlexWrap flexWrap)
     return YGWrapNoWrap;
 }
 
-YGJustify toYGJustify(LayoutParam::JustifyContent justifyContent)
+YGJustify toYGJustify(const LayoutParam::JustifyContent justifyContent)
 {
     switch(justifyContent)
     {
@@ -70,7 +70,7 @@ YGJustify toYGJustify(LayoutParam::JustifyContent justifyContent)
     return YGJustifyFlexStart;
 }
 
-YGAlign toYGAlign(LayoutParam::Align align)
+YGAlign toYGAlign(const LayoutParam::Align align)
 {
     switch(align)
     {

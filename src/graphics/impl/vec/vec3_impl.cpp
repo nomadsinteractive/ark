@@ -6,6 +6,7 @@
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/v3.h"
+#include "graphics/util/vec3_type.h"
 
 namespace ark {
 
@@ -54,7 +55,7 @@ const sp<NumericWrapper>& Vec3Impl::z() const
     return _z;
 }
 
-void Vec3Impl::set(const V3& val)
+void Vec3Impl::set(const V3 val) const
 {
     _x->set(val.x());
     _y->set(val.y());
@@ -68,7 +69,7 @@ Vec3Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Vec3> Vec3Impl::BUILDER::build(const Scope& args)
 {
-    return sp<Vec3>::make<Vec3Impl>(_x.build(args), _y.build(args), _z.build(args));
+    return Vec3Type::create(_x.build(args), _y.build(args), _z.build(args));
 }
 
 Vec3Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
@@ -83,9 +84,7 @@ sp<Vec3> Vec3Impl::DICTIONARY::build(const Scope& args)
     sp<Numeric> y = _y->build(args);
     sp<Numeric> z = _z->build(args);
     CHECK(x, "Cannot build Vec3 from \"%s\"", _expr.c_str());
-    if(!y && !z)
-        return sp<Vec3>::make<Vec3Impl>(x, x, x);
-    return sp<Vec3>::make<Vec3Impl>(std::move(x), std::move(y), std::move(z));
+    return Vec3Type::create(std::move(x), std::move(y), std::move(z));
 }
 
 }

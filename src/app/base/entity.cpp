@@ -112,6 +112,7 @@ const sp<Ref>& Entity::ref() const
 void Entity::discard()
 {
     _ref->discard();
+    _components.get<Discarded>()->discard();
     _components.traits().clear();
 }
 

@@ -4,6 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/updatable_util.h"
+#include "graphics/util/vec2_type.h"
 
 namespace ark {
 
@@ -17,11 +18,6 @@ Vec2Impl::Vec2Impl(float x, float y) noexcept
 {
 }
 
-Vec2Impl::Vec2Impl(const V2& xy) noexcept
-    : Vec2Impl(xy.x(), xy.y())
-{
-}
-
 Vec2Impl::Vec2Impl(sp<Numeric> v) noexcept
     : _x(sp<NumericWrapper>::make(v)), _y(sp<NumericWrapper>::make(std::move(v)))
 {
@@ -29,11 +25,6 @@ Vec2Impl::Vec2Impl(sp<Numeric> v) noexcept
 
 Vec2Impl::Vec2Impl(sp<Numeric> x, sp<Numeric> y) noexcept
     : _x(sp<NumericWrapper>::make(std::move(x))), _y(sp<NumericWrapper>::make(std::move(y)))
-{
-}
-
-Vec2Impl::Vec2Impl(Vec2& other) noexcept
-    : Vec2Impl(other.val())
 {
 }
 
@@ -57,7 +48,7 @@ const sp<NumericWrapper>& Vec2Impl::y() const
     return _y;
 }
 
-void Vec2Impl::set(const V2& val)
+void Vec2Impl::set(const V2 val) const
 {
     _x->set(val.x());
     _y->set(val.y());
@@ -70,9 +61,7 @@ Vec2Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
 
 sp<Vec2> Vec2Impl::DICTIONARY::build(const Scope& args)
 {
-    const sp<Numeric> x = _x->build(args);
-    const sp<Numeric> y = _y->build(args);
-    return sp<Vec2>::make<Vec2Impl>(x, y ? y : x);
+    return Vec2Type::create(_x->build(args), _y->build(args));
 }
 
 Vec2Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -82,7 +71,7 @@ Vec2Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Vec2> Vec2Impl::BUILDER::build(const Scope& args)
 {
-    return sp<Vec2>::make<Vec2Impl>(_x->build(args), _y.build(args));
+    return Vec2Type::create(_x->build(args), _y.build(args));
 }
 
 }

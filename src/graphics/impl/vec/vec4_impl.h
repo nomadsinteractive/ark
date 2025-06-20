@@ -28,7 +28,7 @@ public:
     const sp<NumericWrapper>& z() const;
     const sp<NumericWrapper>& w() const;
 
-    void set(const V4& val);
+    void set(V4 val) const;
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Vec4> {

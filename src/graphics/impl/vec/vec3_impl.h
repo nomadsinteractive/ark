@@ -27,7 +27,7 @@ public:
     const sp<NumericWrapper>& y() const;
     const sp<NumericWrapper>& z() const;
 
-    void set(const V3& val);
+    void set(V3 val) const;
 
 //  [[plugin::builder("vec3")]]
     class BUILDER final : public Builder<Vec3> {

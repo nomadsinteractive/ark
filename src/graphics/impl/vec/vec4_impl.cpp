@@ -6,6 +6,7 @@
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/color.h"
+#include "graphics/util/vec4_type.h"
 
 namespace ark {
 
@@ -59,7 +60,7 @@ const sp<NumericWrapper>& Vec4Impl::w() const
     return _w;
 }
 
-void Vec4Impl::set(const V4& val)
+void Vec4Impl::set(const V4 val) const
 {
     _x->set(val.x());
     _y->set(val.y());
@@ -69,7 +70,7 @@ void Vec4Impl::set(const V4& val)
 
 Vec4Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _x(factory.getBuilder<Numeric>(manifest, "x")), _y(factory.getBuilder<Numeric>(manifest, "y")), _z(factory.getBuilder<Numeric>(manifest, "z")), _w(factory.getBuilder<Numeric>(manifest, "w")),
-      _value(factory.getBuilder<Vec4>(manifest, "value"))
+      _value(factory.getBuilder<Vec4>(manifest, constants::VALUE))
 {
     CHECK_WARN(manifest->name() == "vec4" || manifest->name() == "color", "Vec4 meta data name should be ['vec4', 'color'], not \"%s\"", manifest->name().c_str());
 }
@@ -78,7 +79,7 @@ sp<Vec4> Vec4Impl::BUILDER::build(const Scope& args)
 {
     if(_value)
         return _value->build(args);
-    return sp<Vec4>::make<Vec4Impl>(_x.build(args), _y.build(args), _z.build(args), _w.build(args));
+    return Vec4Type::create(_x.build(args), _y.build(args), _z.build(args), _w.build(args));
 }
 
 Vec4Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
@@ -94,7 +95,7 @@ sp<Vec4> Vec4Impl::DICTIONARY::build(const Scope& args)
 {
     if(_is_color)
         return sp<Vec4>::make<Color>(_color);
-    return sp<Vec4>::make<Vec4Impl>(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
+    return Vec4Type::create(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }
 
 }
