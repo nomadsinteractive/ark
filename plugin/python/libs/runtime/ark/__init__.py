@@ -2314,7 +2314,7 @@ class Math:
 
 
 class Size(Vec3):
-    def __init__(self, width: Union[float, Numeric], height: Union[float, Numeric], depth: Union[float, Numeric, None] = None):
+    def __init__(self, width: TYPE_NUMERIC, height: TYPE_NUMERIC, depth: Optional[TYPE_NUMERIC] = None):
         super().__init__(width, height, depth)
 
     @property
@@ -2322,7 +2322,7 @@ class Size(Vec3):
         return self.x
 
     @width.setter
-    def width(self, width: Union[float, Numeric]):
+    def width(self, width: TYPE_NUMERIC):
         pass
 
     @property
@@ -2330,7 +2330,7 @@ class Size(Vec3):
         return self.y
 
     @height.setter
-    def height(self, height: Union[float, Numeric]):
+    def height(self, height: TYPE_NUMERIC):
         pass
 
     @property
@@ -2338,7 +2338,10 @@ class Size(Vec3):
         return self.z
 
     @depth.setter
-    def depth(self, depth: Union[float, Numeric]):
+    def depth(self, depth: TYPE_NUMERIC):
+        pass
+
+    def reset(self, other: "Size"):
         pass
 
 

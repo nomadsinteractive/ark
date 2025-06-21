@@ -70,7 +70,6 @@ bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t ti
         {
             _updatable_layout = _layout->inflate(toLayoutHierarchy(layoutNode));
             _timestamp.markClean();
-            timestamp = 0;
         }
         hierarchyDirty = true;
     }

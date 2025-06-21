@@ -3,11 +3,9 @@
 #include "core/base/bean_factory.h"
 #include "core/components/discarded.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
-#include "core/impl/updatable/updatable_once_per_frame.h"
 #include "core/types/global.h"
 #include "core/util/math.h"
 #include "core/util/updatable_util.h"
-#include "core/util/log.h"
 
 #include "graphics/components/layer.h"
 #include "graphics/components/layout_param.h"
@@ -193,7 +191,7 @@ private:
 }
 
 View::View(sp<LayoutParam> layoutParam, String name, sp<Vec3> position, sp<Boolean> discarded)
-    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(position), std::move(discarded))), _updatable_view(sp<Updatable>::make<UpdatableOncePerFrame>(_stub))
+    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(position), std::move(discarded)))
 {
 }
 
@@ -228,7 +226,7 @@ void View::onPoll(WiringContext& context, const document& component)
 
 bool View::update(const uint64_t timestamp) const
 {
-    return _updatable_view->update(timestamp);
+    return _stub->update(timestamp);
 }
 
 const sp<Layout::Node>& View::layoutNode() const
@@ -316,7 +314,7 @@ void View::setParent(const View& view)
 sp<Updatable>& View::ensureUpdatableLayout()
 {
     if(!_updatable_layout)
-        _updatable_layout = sp<Updatable>::make<UpdatableOncePerFrame>(sp<Updatable>::make<UpdatableLayoutTopView>(_stub));
+        _updatable_layout = sp<Updatable>::make<UpdatableLayoutTopView>(_stub);
     return _updatable_layout;
 }
 

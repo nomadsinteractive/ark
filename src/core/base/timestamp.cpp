@@ -9,7 +9,7 @@
 namespace ark {
 
 Timestamp::Timestamp()
-    : _last_modified(0)
+    : _last_modified(std::numeric_limits<uint64_t>::max())
 {
 }
 

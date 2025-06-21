@@ -109,6 +109,7 @@ void Size::reset(const Size& other)
 
 sp<Size> Size::freeze()
 {
+    _impl->update(Timestamp::now());
     return sp<Size>::make(val());
 }
 

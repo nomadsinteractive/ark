@@ -96,7 +96,6 @@ private:
 
 protected:
     sp<Stub> _stub;
-    sp<Updatable> _updatable_view;
     sp<Updatable> _updatable_layout;
 
     sp<Vec3> _layout_position;

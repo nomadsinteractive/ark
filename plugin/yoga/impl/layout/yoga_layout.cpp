@@ -201,25 +201,23 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
     YGNodeStyleSetAlignSelf(node, toYGAlign(layoutParam.alignSelf()));
     YGNodeStyleSetAlignContent(node, toYGAlign(layoutParam.alignContent()));
 
-    if(layoutParam.margins())
-        if(!timestamp || layoutParam.margins().update(timestamp))
-        {
-            const V4 margins = layoutParam.margins().val();
-            YGNodeStyleSetMargin(node, YGEdgeTop, margins.x());
-            YGNodeStyleSetMargin(node, YGEdgeRight, margins.y());
-            YGNodeStyleSetMargin(node, YGEdgeBottom, margins.z());
-            YGNodeStyleSetMargin(node, YGEdgeLeft, margins.w());
-        }
+    if(layoutParam.margins() && layoutParam.margins().update(timestamp))
+    {
+        const V4 margins = layoutParam.margins().val();
+        YGNodeStyleSetMargin(node, YGEdgeTop, margins.x());
+        YGNodeStyleSetMargin(node, YGEdgeRight, margins.y());
+        YGNodeStyleSetMargin(node, YGEdgeBottom, margins.z());
+        YGNodeStyleSetMargin(node, YGEdgeLeft, margins.w());
+    }
 
-    if(layoutParam.paddings())
-        if(!timestamp || layoutParam.paddings().update(timestamp))
-        {
-            const V4 paddings = layoutParam.paddings().val();
-            YGNodeStyleSetPadding(node, YGEdgeTop, paddings.x());
-            YGNodeStyleSetPadding(node, YGEdgeRight, paddings.y());
-            YGNodeStyleSetPadding(node, YGEdgeBottom, paddings.z());
-            YGNodeStyleSetPadding(node, YGEdgeLeft, paddings.w());
-        }
+    if(layoutParam.paddings() && layoutParam.paddings().update(timestamp))
+    {
+        const V4 paddings = layoutParam.paddings().val();
+        YGNodeStyleSetPadding(node, YGEdgeTop, paddings.x());
+        YGNodeStyleSetPadding(node, YGEdgeRight, paddings.y());
+        YGNodeStyleSetPadding(node, YGEdgeBottom, paddings.z());
+        YGNodeStyleSetPadding(node, YGEdgeLeft, paddings.w());
+    }
 
     return YGNodeIsDirty(node);
 }
