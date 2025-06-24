@@ -48,15 +48,6 @@ bool hasInjected()
     return false;
 }
 
-void addScopeToDict(PyObject* dict, const Scope& scope)
-{
-    for(const auto& [name, box] : scope.variables())
-    {
-        PyObject* pyInstance = PythonExtension::instance().toPyObject(box);
-        PyDict_SetItemString(dict, name.c_str(), pyInstance);
-    }
-}
-
 PyObject* argumentsToTuple(const Interpreter::Arguments& args)
 {
     PyObject* tuple = PyTuple_New(args.size());
@@ -142,7 +133,7 @@ void PythonInterpreter::initialize()
         i.createScriptModule(*this);
 }
 
-void PythonInterpreter::execute(const sp<Asset>& source, const Scope& vars)
+void PythonInterpreter::execute(const sp<Asset>& source)
 {
     DCHECK_THREAD_FLAG();
     PyObject* m = PyImport_AddModule("__main__");
@@ -150,7 +141,6 @@ void PythonInterpreter::execute(const sp<Asset>& source, const Scope& vars)
 
     PyObject* globals = PyModule_GetDict(m);
     LOGD("run script, location: %s", source->location().c_str());
-    addScopeToDict(globals, vars);
     const PyInstance co = PyInstance::steal(Py_CompileStringExFlags(Strings::loadFromReadable(source->open()).c_str(), source->location().c_str(), Py_file_input, nullptr, -1));
     const PyInstance v = PyInstance::steal(PyEval_EvalCode(co.pyObject(), globals, globals));
     if(v.isNullptr() || v.pyObject() == nullptr)

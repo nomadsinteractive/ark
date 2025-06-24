@@ -375,7 +375,7 @@ void ColliderBullet::markForDestroy(sp<CollisionObjectRef> collisionBody) const
 void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
 {
     const ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
-    const uint64_t tick = Ark::instance().applicationContext()->renderController()->timestamp();
+    const uint64_t tick = Ark::instance().applicationContext()->timestamp();
     for(const GhostObject& i : self->_stub->_ghost_objects)
     {
         i._position.update(tick);

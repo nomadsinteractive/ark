@@ -4,7 +4,7 @@
 
 #include <limits>
 
-#include "renderer/base/render_controller.h"
+#include "app/base/application_context.h"
 
 namespace ark {
 
@@ -35,7 +35,7 @@ void Timestamp::markDirty()
 
 uint64_t Timestamp::now()
 {
-    return Ark::instance().renderController()->timestamp();
+    return Ark::instance().applicationContext()->timestamp();
 }
 
 }

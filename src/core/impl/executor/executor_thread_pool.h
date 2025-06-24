@@ -13,7 +13,7 @@ class ExecutorThreadPool final : public Executor {
 public:
     ExecutorThreadPool(sp<Executor> exceptionExecutor = nullptr, uint32_t capacity = 0);
 
-    void execute(sp<Runnable> task) override;
+    void execute(const sp<Runnable>& task) override;
 
     sp<ExecutorWorkerThread> obtainWorkerThread();
 

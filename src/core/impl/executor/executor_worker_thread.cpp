@@ -16,9 +16,9 @@ ExecutorWorkerThread::~ExecutorWorkerThread()
     terminate();
 }
 
-void ExecutorWorkerThread::execute(sp<Runnable> task)
+void ExecutorWorkerThread::execute(const sp<Runnable>& task)
 {
-    _worker->_pending_tasks.push(std::move(task));
+    _worker->_pending_tasks.push(task);
     _thread.notify();
 }
 

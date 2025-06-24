@@ -434,7 +434,6 @@ struct Text::Content {
         : _render_layer(std::move(renderLayer)), _text(text ? std::move(text) : StringType::create()), _position(std::move(position)), _layout_info(sp<LayoutInfo>::make(std::move(layoutParam), letterSpacing, lineIndent, std::move(lineHeight))),
           _glyph_maker(std::move(glyphMaker)), _transform(std::move(transform))
     {
-        setText(Strings::fromUTF8(_text->val()));
     }
 
     bool update(const uint64_t timestamp)
@@ -666,6 +665,7 @@ void Text::show(sp<Boolean> discarded)
 {
     hide();
 
+    _content->update(Timestamp::now());
     _render_batch = sp<RenderBatch>::make<RenderBatchContent>(_content, discarded ? std::move(discarded) : sp<Boolean>::make<BooleanByWeakRef<Content>>(_content, 0));
     _content->_render_layer->addRenderBatch(_render_batch);
 }

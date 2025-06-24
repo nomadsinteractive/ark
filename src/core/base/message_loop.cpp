@@ -135,7 +135,7 @@ void MessageLoop::runScheduledTask(Vector<sp<Runnable>> scheduled) const
         if(scheduled.size() == 1)
             _executor->execute(scheduled.at(0));
         else
-            _executor->execute(sp<RunnableComposite>::make(std::move(scheduled)));
+            _executor->execute(sp<Runnable>::make<RunnableComposite>(std::move(scheduled)));
     }
 }
 

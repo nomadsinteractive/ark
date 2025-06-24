@@ -28,7 +28,6 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
     const sp<ResourceLoader>& appResourceLoader = applicationContext->resourceLoader();
     DASSERT(appResourceLoader);
 
-    const sp<Scope> vars = sp<Scope>::make();
     sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface);
     applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color(0, 0, 0)));
 
@@ -37,12 +36,11 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
         applicationFacade->setActivity(std::move(activity));
 
     applicationContext->_application_facade = applicationFacade;
-    vars->put("_application", Box(std::move(applicationFacade)));
 
     bool defaultEventListenerSet = false;
     for(const document& i : appManifest->children("script"))
     {
-        ScriptTag script(_application_context->interpreter(), i, vars);
+        ScriptTag script(_application_context->interpreter(), i);
         if(script._on == SCRIPT_RUN_ON_CREATE)
             script.run();
         else if(script._on == SCRIPT_RUN_ON_EVENT)
@@ -72,10 +70,10 @@ void ApplicationDelegateImpl::onResume()
             i.run();
 }
 
-ApplicationDelegateImpl::ScriptTag::ScriptTag(sp<Interpreter> interpreter, const document& manifest, sp<Scope> vars)
+ApplicationDelegateImpl::ScriptTag::ScriptTag(sp<Interpreter> interpreter, const document& manifest)
     : _on(Documents::getAttribute(manifest, "on", SCRIPT_RUN_ON_CREATE)),
       _function_name(Documents::getAttribute(manifest, "function")),
-      _interpreter(std::move(interpreter)), _vars(std::move(vars))
+      _interpreter(std::move(interpreter))
 {
     if(const String src = Documents::getAttribute(manifest, constants::SRC))
     {
@@ -88,7 +86,7 @@ void ApplicationDelegateImpl::ScriptTag::run() const
 {
     DASSERT(_interpreter);
     if(_source)
-        _interpreter->execute(_source, _vars);
+        _interpreter->execute(_source);
     if(_function_name)
     {
         const Interpreter::Arguments args;

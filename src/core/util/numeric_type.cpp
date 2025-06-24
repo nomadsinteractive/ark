@@ -1,5 +1,6 @@
 #include "core/util/numeric_type.h"
 
+#include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
 #include "core/base/wrapper.h"

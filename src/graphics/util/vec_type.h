@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/forwarding.h"
+#include "core/ark.h"
 #include "core/base/api.h"
 #include "core/base/clock.h"
 #include "core/impl/variable/variable_dyed.h"

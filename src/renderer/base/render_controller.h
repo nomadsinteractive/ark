@@ -119,9 +119,6 @@ public:
 
     GraphicsBufferAllocator& gba();
 
-    uint64_t updateTick();
-    uint64_t timestamp() const;
-
 private:
     class RenderResource {
     public:
@@ -170,7 +167,6 @@ private:
     sp<Recycler> _recycler;
     sp<Dictionary<bitmap>> _bitmap_loader;
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
-    sp<Variable<uint64_t>> _clock;
 
     LFQueue<UploadingRenderResource> _uploading_resources;
 
@@ -187,8 +183,6 @@ private:
     Map<uint32_t, sp<PrimitiveIndexBuffer>> _shared_primitive_index_buffer;
 
     GraphicsBufferAllocator _gba;
-
-    uint64_t _timestamp;
 
     friend class TextureBundle;
 };

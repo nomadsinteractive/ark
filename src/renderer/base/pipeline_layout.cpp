@@ -247,11 +247,11 @@ void PipelineLayout::UBO::doSnapshot(const uint64_t timestamp, const bool force)
     for(size_t i = 0; i < uniforms.size(); ++i)
     {
         const Uniform& uniform = uniforms.at(i);
-        const sp<Uploader>& input = uniform.uploader();
-        bool dirty = input && input->update(timestamp);
+        const sp<Uploader>& uploader = uniform.uploader();
+        const bool dirty = uploader && uploader->update(timestamp);
         dirtyFlags[i] = static_cast<uint8_t>(force || dirty);
-        if(dirtyFlags[i] && input)
-            UploaderType::writeTo(input, buf);
+        if(dirtyFlags[i] && uploader)
+            UploaderType::writeTo(uploader, buf);
         buf += uniform.size();
     }
 }

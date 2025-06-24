@@ -2,10 +2,13 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/named_hash.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
+
+#include "graphics/forwarding.h"
 
 namespace ark {
 
@@ -85,8 +88,6 @@ public:
 //  [[script::bindings::property]]
     static sp<Observer> observer(const sp<Integer>& self);
 
-//  [[script::bindings::auto]]
-    static int32_t toRepeat(const String& repeat);
 //  [[script::bindings::auto]]
     static sp<Integer> repeat(Vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE, sp<Observer> observer = nullptr);
 

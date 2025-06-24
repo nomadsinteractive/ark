@@ -77,7 +77,7 @@ private:
     uint64_t _paused;
 };
 
-Clock::Interval::Interval(uint64_t usec)
+Clock::Interval::Interval(const uint64_t usec)
     : _usec(usec)
 {
 }
@@ -114,8 +114,8 @@ void Clock::Elapsing::reset()
 
 Clock::Interval Clock::Elapsing::elapsed()
 {
-    uint64_t tick = _ticker->val();
-    uint64_t interval = _last_tick ? tick - _last_tick : 0;
+    const uint64_t tick = _ticker->val();
+    const uint64_t interval = _last_tick ? tick - _last_tick : 0;
     _last_tick = tick;
     return interval;
 }

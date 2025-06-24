@@ -6,7 +6,6 @@
 #include "core/inf/variable.h"
 #include "core/util/documents.h"
 #include "core/util/string_convert.h"
-#include "core/util/strings.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/components/size.h"

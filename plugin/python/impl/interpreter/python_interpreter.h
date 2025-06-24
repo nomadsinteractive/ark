@@ -20,7 +20,7 @@ public:
 
     void initialize() override;
 
-    void execute(const sp<Asset>& source, const Scope& vars) override;
+    void execute(const sp<Asset>& source) override;
     Box call(const Box& func, const Arguments& args) override;
     Box attr(const Box& obj, StringView name) override;
 

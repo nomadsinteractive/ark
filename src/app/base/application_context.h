@@ -43,6 +43,7 @@ public:
     const sp<Clock>& appClock() const;
     const sp<Numeric::Impl>& appClockInterval() const;
     const sp<Vec2Impl>& cursorPosition() const;
+    uint64_t timestamp() const;
 
     bool onEvent(const Event& event);
 
@@ -87,6 +88,22 @@ private:
     sp<ResourceLoader> createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
     document createResourceLoaderManifest(const document& manifest) const;
 
+    struct AppClock {
+        AppClock();
+
+        sp<Variable<uint64_t>> _steady;
+
+        sp<Variable<uint64_t>::Impl> _tick;
+        sp<Numeric::Impl> _interval;
+
+        sp<Clock> _clock;
+
+        uint64_t _next_timestamp;
+        uint64_t _timestamp;
+
+        uint64_t onTick();
+    };
+
     class Ticker;
     class ExecutorWorkerStrategy;
 
@@ -100,10 +117,8 @@ private:
     sp<ApplicationFacade> _application_facade;
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
-    sp<Variable<uint64_t>::Impl> _app_clock_ticker;
-    sp<Numeric::Impl> _app_clock_interval;
     sp<Clock> _sys_clock;
-    sp<Clock> _app_clock;
+    sp<AppClock> _app_clock;
     sp<ExecutorWorkerStrategy> _worker_strategy;
 
     sp<Executor> _executor_main;

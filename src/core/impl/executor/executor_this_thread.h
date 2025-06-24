@@ -4,10 +4,10 @@
 
 namespace ark {
 
-class ExecutorThisThread : public Executor {
+class ExecutorThisThread final : public Executor {
 public:
 
-    void execute(sp<Runnable> task) override;
+    void execute(const sp<Runnable>& task) override;
 
 };
 

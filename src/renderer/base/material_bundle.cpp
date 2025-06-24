@@ -1,7 +1,7 @@
 #include "renderer/base/material_bundle.h"
 
+#include "core/ark.h"
 #include "core/base/bean_factory.h"
-#include "core/inf/variable.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/documents.h"
 
@@ -14,7 +14,7 @@ namespace ark {
 
 namespace {
 
-Table<String, sp<Material>> _to_material_map(const Vector<sp<Material>>& materials)
+Table<String, sp<Material>> toMaterialMap(const Vector<sp<Material>>& materials)
 {
     Table<String, sp<Material>> materialMap;
     for(const sp<Material>& i : materials)
@@ -25,7 +25,7 @@ Table<String, sp<Material>> _to_material_map(const Vector<sp<Material>>& materia
 }
 
 MaterialBundle::MaterialBundle(const Vector<sp<Material>>& materials)
-    : MaterialBundle(_to_material_map(materials), std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>())
+    : MaterialBundle(toMaterialMap(materials), std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>())
 {
 }
 

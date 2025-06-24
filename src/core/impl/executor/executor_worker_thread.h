@@ -18,18 +18,17 @@ public:
         virtual void onStart() = 0;
         virtual void onExit() = 0;
 
-        virtual uint64_t onBusy() = 0;
-        virtual uint64_t onIdle(Thread& thread) = 0;
+        virtual void onBusy() = 0;
+        virtual void onIdle(Thread& thread) = 0;
 
         virtual void onException(const std::exception& e) = 0;
-
     };
 
 public:
     ExecutorWorkerThread(sp<Strategy> strategy, String name);
     ~ExecutorWorkerThread() override;
 
-    void execute(sp<Runnable> task) override;
+    void execute(const sp<Runnable>& task) override;
     void terminate() const;
     void tryJoin() const;
 

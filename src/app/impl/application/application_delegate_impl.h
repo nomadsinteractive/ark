@@ -30,7 +30,7 @@ public:
 
 private:
     struct ScriptTag {
-        ScriptTag(sp<Interpreter> interpreter, const document& manifest, sp<Scope> vars);
+        ScriptTag(sp<Interpreter> interpreter, const document& manifest);
 
         void run() const;
 
@@ -41,7 +41,6 @@ private:
         sp<Asset> _source;
 
         sp<Interpreter> _interpreter;
-        sp<Scope> _vars;
     };
 
 private:

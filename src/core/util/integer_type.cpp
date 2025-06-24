@@ -31,7 +31,7 @@ public:
         updateSubscription();
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         const bool indexDirty = _index->update(timestamp);
         if(indexDirty)
             updateSubscription();
@@ -40,10 +40,6 @@ public:
 
     int32_t val() override {
         return _subscribed->val();
-    }
-
-    const Vector<sp<Integer>>& values() const {
-        return _values;
     }
 
 private:
@@ -238,29 +234,6 @@ sp<Integer> IntegerType::wrap(const sp<Integer>& self)
 sp<Integer> IntegerType::freeze(const sp<Integer>& self)
 {
     return sp<Integer>::make<Integer::Const>(val(self));
-}
-
-int32_t IntegerType::toRepeat(const String& repeat)
-{
-    int32_t action = 0, flags = 0;
-    for(const String& i : repeat.split('|'))
-    {
-        const String s = i.strip().toLower();
-        if(s == "none")
-            action = IntegerType::REPEAT_NONE;
-        else if(s == "reverse")
-            action = IntegerType::REPEAT_REVERSE;
-        else if(s == "last")
-            flags |= IntegerType::REPEAT_LAST;
-        else if(s == "loop")
-            flags |= IntegerType::REPEAT_LOOP;
-        else
-        {
-            CHECK(s == "notify", "Unknow Repeat: \"%s, supported enums are [\"none\", \"last\", \"reverse\", \"loop\", \"notify\"]", s.c_str());
-            flags |= IntegerType::REPEAT_NOTIFY;
-        }
-    }
-    return static_cast<Repeat>(action | flags);
 }
 
 sp<Integer> IntegerType::repeat(Vector<int32_t> array, IntegerType::Repeat repeat, sp<Observer> observer)

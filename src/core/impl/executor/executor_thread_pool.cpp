@@ -48,18 +48,16 @@ public:
          -- _stub->_worker_count;
     }
 
-    uint64_t onBusy() override
+    void onBusy() override
     {
         _idled_cycle = 0;
-        return 0;
     }
 
-    uint64_t onIdle(Thread& thread) override
+    void onIdle(Thread& thread) override
     {
         _idled_cycle ++;
         if(_idled_cycle > 20000 && _stub->_worker_count.load(std::memory_order_relaxed) > _stub->_capacity)
             thread.terminate();
-        return 20000;
     }
 
     void onException(const std::exception& e) override
@@ -88,9 +86,9 @@ ExecutorThreadPool::ExecutorThreadPool(sp<Executor> exceptionExecutor, const uin
 {
 }
 
-void ExecutorThreadPool::execute(sp<Runnable> task)
+void ExecutorThreadPool::execute(const sp<Runnable>& task)
 {
-    obtainWorkerThread()->execute(std::move(task));
+    obtainWorkerThread()->execute(task);
 }
 
 sp<ExecutorWorkerThread> ExecutorThreadPool::obtainWorkerThread()

@@ -27,18 +27,18 @@ namespace {
 
 class WritableIndice final : public Writable {
 public:
-    WritableIndice(size_t size)
+    WritableIndice(const size_t size)
         : _hash(0), _indices(size) {
     }
 
-    uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
-        _hash = _hash * 101 + RenderUtil::hash(reinterpret_cast<const element_index_t*>(buffer), size / sizeof(element_index_t));
+    uint32_t write(const void* buffer, const uint32_t size, const uint32_t offset) override {
+        _hash = _hash * 101 + RenderUtil::hash(static_cast<const element_index_t*>(buffer), size / sizeof(element_index_t));
         memcpy(_indices.data() + offset, buffer, size);
         return size;
     }
 
     uint32_t _hash;
-    std::vector<element_index_t> _indices;
+    Vector<element_index_t> _indices;
 };
 
 class ResourceUploadBufferSnapshot final : public Resource {
@@ -85,7 +85,7 @@ private:
 
 class UploaderConcat final : public Uploader {
 public:
-    UploaderConcat(size_t primitiveCount, size_t vertexCount, std::vector<element_index_t> indices)
+    UploaderConcat(size_t primitiveCount, size_t vertexCount, Vector<element_index_t> indices)
         : Uploader(primitiveCount * indices.size() * sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices)) {
     }
 
@@ -93,7 +93,7 @@ public:
         const size_t length = _indices.size();
         const size_t size = length * sizeof(element_index_t);
         size_t offset = 0;
-        std::vector<element_index_t> indices(_indices);
+        Vector<element_index_t> indices(_indices);
         element_index_t* buf = indices.data();
 
         for(size_t i = 0; i < _primitive_count; ++i, offset += size)
@@ -112,13 +112,13 @@ public:
 private:
     size_t _primitive_count;
     size_t _vertex_count;
-    std::vector<element_index_t> _indices;
+    Vector<element_index_t> _indices;
 
 };
 
 class UploaderDegenerate final : public Uploader {
 public:
-    UploaderDegenerate(size_t primitiveCount, size_t vertexCount, std::vector<element_index_t> indices)
+    UploaderDegenerate(const size_t primitiveCount, const size_t vertexCount, Vector<element_index_t> indices)
         : Uploader(((indices.size() + 2) * primitiveCount - 2) *  sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices)) {
     }
 
@@ -126,7 +126,7 @@ public:
         const size_t length = _indices.size();
         const size_t size = length * sizeof(element_index_t);
         uint32_t offset = 0;
-        std::vector<element_index_t> indices(length + 2);
+        Vector<element_index_t> indices(length + 2);
         element_index_t* buf = indices.data();
         memcpy(buf, _indices.data(), size);
 
@@ -152,13 +152,12 @@ public:
 private:
     size_t _primitive_count;
     size_t _vertex_count;
-    std::vector<element_index_t> _indices;
-
+    Vector<element_index_t> _indices;
 };
 
 }
 
-RenderController::PrimitiveIndexBuffer::PrimitiveIndexBuffer(std::vector<element_index_t> modelIndices, size_t modelVertexCount, bool degenerate, size_t primitiveCount)
+RenderController::PrimitiveIndexBuffer::PrimitiveIndexBuffer(Vector<element_index_t> modelIndices, const size_t modelVertexCount, const bool degenerate, const size_t primitiveCount)
     : _model_indices(std::move(modelIndices)), _model_vertex_count(modelVertexCount), _primitive_count(primitiveCount), _degenerate(degenerate)
 {
 }
@@ -173,7 +172,7 @@ size_t RenderController::PrimitiveIndexBuffer::upload(RenderController& renderCo
 
 Buffer::Snapshot RenderController::PrimitiveIndexBuffer::snapshot(RenderController& renderController, size_t primitiveCountRequired)
 {
-    const size_t warningLimit = 20000;
+    constexpr size_t warningLimit = 20000;
     DCHECK_WARN(primitiveCountRequired < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you know what you're doing", primitiveCountRequired, warningLimit);
     const size_t size = (_degenerate ? (_model_indices.size() + 2) * primitiveCountRequired - 2 : _model_indices.size() * primitiveCountRequired) * sizeof(element_index_t);
     if(_primitive_count < primitiveCountRequired)
@@ -188,7 +187,7 @@ Buffer::Snapshot RenderController::PrimitiveIndexBuffer::snapshot(RenderControll
 }
 
 RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-    : _render_engine(renderEngine), _recycler(sp<Recycler>::make()), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _clock(Platform::getSteadyClock()), _gba(*this)
+    : _render_engine(renderEngine), _recycler(sp<Recycler>::make()), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _gba(*this)
 {
 }
 
@@ -325,7 +324,7 @@ sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveI
     indicesUploader->upload(writer);
 
     const uint32_t hash = writer._hash;
-    std::vector<element_index_t> indices = std::move(writer._indices);
+    Vector<element_index_t> indices = std::move(writer._indices);
     if(const auto iter = _shared_primitive_index_buffer.find(hash); iter != _shared_primitive_index_buffer.end())
         return iter->second;
 
@@ -403,17 +402,6 @@ void RenderController::deferUnref(Box box)
 GraphicsBufferAllocator& RenderController::gba()
 {
     return _gba;
-}
-
-uint64_t RenderController::updateTick()
-{
-    _timestamp = _clock->val();
-    return _timestamp;
-}
-
-uint64_t RenderController::timestamp() const
-{
-    return _timestamp;
 }
 
 RenderController::RenderResource::RenderResource(sp<Resource> resource, sp<Future> future)
