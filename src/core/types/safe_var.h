@@ -50,11 +50,6 @@ public:
         return this->_stub->_delegate;
     }
 
-    sp<T> ensure() {
-        this->_stub->ensure();
-        return this->_stub;
-    }
-
     void reset(sp<T> delegate) {
         this->_stub->reset(std::move(delegate));
     }
@@ -64,7 +59,8 @@ public:
     }
 
 private:
-    struct Stub final : Variable<ValType> {
+    class Stub final : public Variable<ValType> {
+    public:
         Stub(sp<T> delegate, ValType defaultVal) noexcept
             : _delegate(std::move(delegate)), _default_val(std::move(defaultVal)) {
         }
@@ -86,16 +82,6 @@ private:
             _default_val = std::move(value);
             _delegate = nullptr;
             _timestamp.markDirty();
-        }
-
-        void ensure() {
-            if(!_delegate) {
-                if constexpr(std::is_abstract_v<T>)
-                    _delegate = sp<WrapperType>::make(_default_val);
-                else
-                    _delegate = sp<T>::make(_default_val);
-                _timestamp.markDirty();
-            }
         }
 
         sp<T> _delegate;

@@ -7,7 +7,7 @@
 
 namespace ark {
 
-class RenderableWithUpdatable : public Wrapper<Renderable>, public Renderable {
+class RenderableWithUpdatable final : public Wrapper<Renderable>, public Renderable {
 public:
     RenderableWithUpdatable(sp<Renderable> delegate, sp<Updatable> updatable);
 

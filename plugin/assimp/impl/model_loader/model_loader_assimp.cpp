@@ -17,7 +17,6 @@
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/model.h"
 #include "renderer/base/node.h"
-#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"

@@ -30,7 +30,7 @@ public:
     void setType(sp<Integer> type);
 
 //  [[script::bindings::property]]
-    sp<Vec3> position();
+    sp<Vec3> position() const;
 //  [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
 //  [[script::bindings::property]]
@@ -52,12 +52,12 @@ public:
     void setTag(Box tag);
 
 //  [[script::bindings::property]]
-    sp<Boolean> discarded();
+    sp<Boolean> discarded() const;
 //  [[script::bindings::property]]
     void setDiscarded(sp<Boolean> discarded);
 
 //  [[script::bindings::property]]
-    sp<Boolean> visible();
+    sp<Boolean> visible() const;
 //  [[script::bindings::property]]
     void setVisible(bool visible);
 //  [[script::bindings::property]]
@@ -92,18 +92,8 @@ public:
         SafeBuilder<Size> _size;
         SafeBuilder<Transform> _transform;
         SafeBuilder<Varyings> _varyings;
+        SafeBuilder<Boolean> _visible;
         SafeBuilder<Boolean> _discarded;
-    };
-
-//  [[plugin::builder("render_object")]]
-    class BUILDER_RENDERABLE final : public Builder<Renderable> {
-    public:
-        BUILDER_RENDERABLE(BeanFactory& factory, const document& manifest);
-
-        sp<Renderable> build(const Scope& args) override;
-
-    private:
-        BUILDER _builder_impl;
     };
 
 //  [[plugin::builder("with-render-object")]]

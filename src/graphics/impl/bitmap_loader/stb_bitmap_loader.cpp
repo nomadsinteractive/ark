@@ -24,38 +24,38 @@ struct STBUserCallback {
     }
 };
 
-static int _stb_read_callback(void* user, char *data,int size)
+int _stb_read_callback(void* user, char *data, const int size)
 {
-    STBUserCallback* u = reinterpret_cast<STBUserCallback*>(user);
+    const STBUserCallback* u = static_cast<STBUserCallback*>(user);
     return static_cast<int>(u->_readable->read(data, static_cast<uint32_t>(size)));
 }
 
-static void _stb_skip_callback(void* user, int n)
+void _stb_skip_callback(void* user, const int n)
 {
-    STBUserCallback* u = reinterpret_cast<STBUserCallback*>(user);
+    const STBUserCallback* u = static_cast<STBUserCallback*>(user);
     u->_readable->seek(n, SEEK_CUR);
 }
 
-static int _stb_eof_callback(void *user)
+int _stb_eof_callback(void *user)
 {
-    STBUserCallback* u = reinterpret_cast<STBUserCallback*>(user);
+    const STBUserCallback* u = static_cast<STBUserCallback*>(user);
     return static_cast<int>(u->_eof);
 }
 
-class STBImageByteArray : public Array<uint8_t> {
+class STBImageByteArray final : public Array<uint8_t> {
 public:
-    STBImageByteArray(void* array, size_t length)
+    STBImageByteArray(void* array, const size_t length)
         : _array(array), _length(length) {
     }
     ~STBImageByteArray() {
         stbi_image_free(_array);
     }
 
-    virtual uint8_t* buf() override {
+    uint8_t* buf() override {
         return reinterpret_cast<uint8_t*>(_array);
     }
 
-    virtual size_t length() override {
+    size_t length() override {
         return _length;
     }
 
@@ -83,19 +83,19 @@ bitmap STBBitmapLoader::load(const sp<Readable>& readable)
     int width, height, channels;
     if(_just_decode_bounds)
     {
-        int ret = stbi_info_from_callbacks(&callback, &user, &width, &height, &channels);
+        const int ret = stbi_info_from_callbacks(&callback, &user, &width, &height, &channels);
         DCHECK(ret, "stbi_info_from_callbacks failure: %s", stbi_failure_reason());
         return bitmap::make(width, height, 0, channels, false);
     }
 
-    uint32_t componentSize = stbi_is_hdr_from_callbacks(&callback, &user) ? 4 : 1;
+    const uint32_t componentSize = stbi_is_hdr_from_callbacks(&callback, &user) ? 4 : 1;
     readable->seek(0, SEEK_SET);
     void* bytes = componentSize == 1 ? reinterpret_cast<void*>(stbi_load_from_callbacks(&callback, &user, &width, &height, &channels, 0))
                                      : reinterpret_cast<void*>(stbi_loadf_from_callbacks(&callback, &user, &width, &height, &channels, 0));
     DCHECK(bytes, "stbi_load_from_callbacks failure: %s", stbi_failure_reason());
 
     uint32_t stride = width * channels * componentSize;
-    return bitmap::make(width, height, stride, static_cast<uint8_t>(channels), sp<STBImageByteArray>::make(bytes, stride * height));
+    return bitmap::make(width, height, stride, static_cast<uint8_t>(channels), sp<ByteArray>::make<STBImageByteArray>(bytes, stride * height));
 }
 
 }

@@ -1,13 +1,11 @@
 #pragma once
 
-#include "core/base/wrapper.h"
-
 #include "graphics/forwarding.h"
 #include "graphics/inf/renderable.h"
 
 namespace ark {
 
-class RenderableNone : public Renderable {
+class RenderableNone final : public Renderable {
 public:
 
     StateBits updateState(const RenderRequest& renderRequest) override;

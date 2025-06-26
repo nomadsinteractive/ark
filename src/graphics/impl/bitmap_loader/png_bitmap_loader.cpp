@@ -2,8 +2,6 @@
 
 #ifdef ARK_USE_LIBPNG
 
-#include <stdlib.h>
-
 #include <png.h>
 
 #include "core/inf/readable.h"
@@ -15,7 +13,7 @@ namespace ark {
 
 static void _png_readable_read_fn(png_structp png_ptr, png_bytep buffer, png_size_t size)
 {
-    Readable* readable = reinterpret_cast<Readable*>(png_get_io_ptr(png_ptr));
+    Readable* readable = static_cast<Readable*>(png_get_io_ptr(png_ptr));
     readable->read(buffer, size);
 }
 

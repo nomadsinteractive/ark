@@ -70,7 +70,6 @@ PythonInterpreter::PythonInterpreter(StringView name, const document& libraries)
     : _name(Strings::fromUTF8(name))
 {
     PyImport_AppendInittab("ark", PyInit_ark);
-#ifndef ARK_FLAG_PUBLISHING_BUILD
     PyImport_AppendInittab("_ctypes", PyInit__ctypes);
     PyImport_AppendInittab("_decimal", PyInit__decimal);
     PyImport_AppendInittab("_socket", PyInit__socket);
@@ -78,7 +77,6 @@ PythonInterpreter::PythonInterpreter(StringView name, const document& libraries)
     PyImport_AppendInittab("pyexpat", PyInit_pyexpat);
 #ifdef WIN32
    PyImport_AppendInittab("_overlapped", PyInit__overlapped);
-#endif
 #endif
     if(!hasInjected())
     {

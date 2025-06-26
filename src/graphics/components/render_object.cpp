@@ -69,9 +69,9 @@ void RenderObject::setType(sp<Integer> type)
     _timestamp.markDirty();
 }
 
-sp<Vec3> RenderObject::position()
+sp<Vec3> RenderObject::position() const
 {
-    return _position.ensure();
+    return _position.toVar();
 }
 
 void RenderObject::setPosition(sp<Vec3> position)
@@ -111,9 +111,9 @@ void RenderObject::setTag(Box tag)
         _tags = sp<Tags>::make(std::move(tag));
 }
 
-sp<Boolean> RenderObject::discarded()
+sp<Boolean> RenderObject::discarded() const
 {
-    return _discarded.ensure();
+    return _discarded.toVar();
 }
 
 void RenderObject::setDiscarded(sp<Boolean> discarded)
@@ -122,14 +122,14 @@ void RenderObject::setDiscarded(sp<Boolean> discarded)
     _timestamp.markDirty();
 }
 
-sp<Boolean> RenderObject::visible()
+sp<Boolean> RenderObject::visible() const
 {
-    return _visible.ensure();
+    return _visible.toVar();
 }
 
-void RenderObject::setVisible(bool visible)
+void RenderObject::setVisible(const bool visible)
 {
-    _visible.reset(sp<Boolean::Const>::make(visible));
+    _visible.reset(sp<Boolean>::make<Boolean::Const>(visible));
     _timestamp.markDirty();
 }
 
@@ -141,7 +141,7 @@ void RenderObject::setVisible(sp<Boolean> visible)
 
 void RenderObject::discard()
 {
-    setDiscarded(sp<Boolean::Const>::make(true));
+    setDiscarded(sp<Boolean>::make<Boolean::Const>(true));
 }
 
 void RenderObject::show()
@@ -174,7 +174,7 @@ Renderable::StateBits RenderObject::updateState(const RenderRequest& renderReque
     return static_cast<StateBits>((dirty ? RENDERABLE_STATE_DIRTY : 0) | (_visible.val() ? RENDERABLE_STATE_VISIBLE : 0));
 }
 
-Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
+Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const StateBits state)
 {
     const int32_t typeId = _type->val();
     sp<Model> model = snapshotContext._render_layer.modelLoader()->loadModel(typeId);
@@ -231,23 +231,13 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _type(factory.getBuilder<Integer>(manifest, constants::TYPE)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _size(factory.getBuilder<Size>(manifest, constants::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, constants::TRANSFORM)), _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)),
-      _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED))
+      _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED))
 {
 }
 
 sp<RenderObject> RenderObject::BUILDER::build(const Scope& args)
 {
-    return sp<RenderObject>::make(_type.build(args), _position.build(args), _size.build(args), _transform.build(args), _varyings.build(args), nullptr, _discarded.build(args));
-}
-
-RenderObject::BUILDER_RENDERABLE::BUILDER_RENDERABLE(BeanFactory& factory, const document& manifest)
-    : _builder_impl(factory, manifest)
-{
-}
-
-sp<Renderable> RenderObject::BUILDER_RENDERABLE::build(const Scope& args)
-{
-    return _builder_impl.build(args);
+    return sp<RenderObject>::make(_type.build(args), _position.build(args), _size.build(args), _transform.build(args), _varyings.build(args), _visible.build(args), _discarded.build(args));
 }
 
 RenderObject::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
