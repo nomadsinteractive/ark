@@ -42,13 +42,24 @@ public:
     BitSet operator |(const BitSet other) const {
         return BitSet(_bits | other.bits());
     }
+    BitSet operator |=(const T other) {
+        _bits |= toConvertableType(other);
+    }
+    BitSet operator |=(const BitSet other) {
+        _bits |= other.bits();
+    }
     BitSet operator &(const T other) const {
         return BitSet(_bits & other);
     }
     BitSet operator &(const BitSet other) const {
         return BitSet(_bits & other.bits());
     }
-
+    BitSet operator &=(const T other) {
+        _bits &= toConvertableType(other);
+    }
+    BitSet operator &=(const BitSet other) {
+        _bits &= other.bits();
+    }
     convertable_type bits() const {
         return _bits;
     }
@@ -81,6 +92,9 @@ public:
     }
 
 private:
+    template<typename... Args> constexpr static convertable_type toConvertableType(const BitSet value, Args... args) {
+        return toConvertableType(static_cast<T>(value._bits), args...);
+    }
     template<typename... Args> constexpr static convertable_type toConvertableType(const T value, Args... args) {
         if constexpr(sizeof...(args) != 0) {
             if constexpr(SHIFT)

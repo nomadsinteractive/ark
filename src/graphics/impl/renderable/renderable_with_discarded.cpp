@@ -9,16 +9,16 @@ RenderableWithDiscarded::RenderableWithDiscarded(sp<Renderable> delegate, sp<Boo
 {
 }
 
-Renderable::StateBits RenderableWithDiscarded::updateState(const RenderRequest& renderRequest)
+Renderable::State RenderableWithDiscarded::updateState(const RenderRequest& renderRequest)
 {
-    StateBits stateBits = _wrapped->updateState(renderRequest);
+    const State state = _wrapped->updateState(renderRequest);
     _discarded->update(renderRequest.timestamp());
     if(_discarded->val())
-        return static_cast<StateBits>(RENDERABLE_STATE_DISCARDED | stateBits);
-    return stateBits;
+        return state | RENDERABLE_STATE_DISCARDED;
+    return state;
 }
 
-Renderable::Snapshot RenderableWithDiscarded::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
+Renderable::Snapshot RenderableWithDiscarded::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state)
 {
     return _wrapped->snapshot(snapshotContext, renderRequest, state);
 }

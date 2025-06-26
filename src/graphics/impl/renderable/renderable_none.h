@@ -8,8 +8,8 @@ namespace ark {
 class RenderableNone final : public Renderable {
 public:
 
-    StateBits updateState(const RenderRequest& renderRequest) override;
-    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
+    State updateState(const RenderRequest& renderRequest) override;
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, State state) override;
 
 };
 

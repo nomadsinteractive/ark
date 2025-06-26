@@ -123,7 +123,7 @@ const sp<Vertices>& Model::vertices() const
     return _vertices;
 }
 
-element_index_t Model::writeIndices(element_index_t* buf, element_index_t baseIndex) const
+element_index_t Model::writeIndices(element_index_t* buf, const element_index_t baseIndex) const
 {
     UploaderType::writeTo(_indices, buf);
     const element_index_t length = static_cast<element_index_t>(_indices->size() / sizeof(element_index_t));

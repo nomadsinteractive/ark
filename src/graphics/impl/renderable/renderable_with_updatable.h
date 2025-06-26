@@ -11,8 +11,8 @@ class RenderableWithUpdatable final : public Wrapper<Renderable>, public Rendera
 public:
     RenderableWithUpdatable(sp<Renderable> delegate, sp<Updatable> updatable);
 
-    StateBits updateState(const RenderRequest& renderRequest) override;
-    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
+    State updateState(const RenderRequest& renderRequest) override;
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, State state) override;
 
 private:
     sp<Updatable> _updatable;

@@ -124,7 +124,7 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
     {
         Renderable& renderable = iter->first;
         Renderable::State& s = iter->second;
-        s.reset(renderable.updateState(renderRequest));
+        s = {renderable.updateState(renderRequest), static_cast<Renderable::StateBits>(s.bits() & (Renderable::RENDERABLE_STATE_NEW | Renderable::RENDERABLE_STATE_DISCARDED))};
         if(Renderable::State state = s; !state || state.has(Renderable::RENDERABLE_STATE_DISCARDED))
         {
             LOGD("delete: %p", &renderable);
@@ -146,7 +146,7 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
 
             const auto fiter = layerContext._element_states.find(&renderable);
             DASSERT(fiter != layerContext._element_states.end());
-            _elements.emplace_back(renderable, layerSnapshot, fiter->second, Renderable::Snapshot{state.stateBits()});
+            _elements.emplace_back(renderable, layerSnapshot, fiter->second, Renderable::Snapshot{state});
 
             ++iter;
         }
@@ -170,11 +170,11 @@ RenderLayerSnapshot::Element::Element(Renderable& renderable, const LayerContext
 {
 }
 
-const Renderable::Snapshot& RenderLayerSnapshot::Element::ensureSnapshot(const RenderRequest& renderRequest, bool reload)
+const Renderable::Snapshot& RenderLayerSnapshot::Element::ensureSnapshot(const RenderRequest& renderRequest, const bool reload)
 {
     if(reload)
         _snapshot._state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
-    _snapshot =_renderable.snapshot(_layer_context, renderRequest, _snapshot._state.stateBits());
+    _snapshot =_renderable.snapshot(_layer_context, renderRequest, _snapshot._state);
     ASSERT(_snapshot._model);
     _snapshot._position += _layer_context._position;
     _snapshot.applyVaryings(_layer_context._varyings);

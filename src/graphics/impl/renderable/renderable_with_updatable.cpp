@@ -10,15 +10,15 @@ RenderableWithUpdatable::RenderableWithUpdatable(sp<Renderable> delegate, sp<Upd
 {
 }
 
-Renderable::StateBits RenderableWithUpdatable::updateState(const RenderRequest& renderRequest)
+Renderable::State RenderableWithUpdatable::updateState(const RenderRequest& renderRequest)
 {
-    StateBits stateBits = _wrapped->updateState(renderRequest);
+    const State state = _wrapped->updateState(renderRequest);
     if(_updatable->update(renderRequest.timestamp()))
-        return static_cast<StateBits>(RENDERABLE_STATE_DIRTY | stateBits);
-    return stateBits;
+        return state | RENDERABLE_STATE_DIRTY;
+    return state;
 }
 
-Renderable::Snapshot RenderableWithUpdatable::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
+Renderable::Snapshot RenderableWithUpdatable::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state)
 {
     return _wrapped->snapshot(snapshotContext, renderRequest, state);
 }

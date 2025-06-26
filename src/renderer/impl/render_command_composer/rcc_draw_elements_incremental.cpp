@@ -14,7 +14,7 @@
 
 namespace ark {
 
-sp<PipelineBindings> RCCDrawElementsIncremental::makePipelineBindings(const Shader& shader, RenderController& renderController, enums::DrawMode renderMode)
+sp<PipelineBindings> RCCDrawElementsIncremental::makePipelineBindings(const Shader& shader, RenderController& renderController, const enums::DrawMode renderMode)
 {
     _strips = renderController.gba().makeStrips(shader.layout()->getStreamLayout(0).stride());
     _indices = renderController.makeIndexBuffer();
@@ -51,20 +51,20 @@ DrawingContext RCCDrawElementsIncremental::compose(const RenderRequest& renderRe
     if(hasNewCreatedSnapshot || !snapshot._elements_deleted.empty())
     {
         element_index_t offset = 0;
-        std::vector<element_index_t> indices(snapshot._index_count);
+        Vector<element_index_t> indices(snapshot._index_count);
         for(const RenderLayerSnapshot::Element& i : snapshot._elements)
         {
-            Model& model = i._snapshot._model;
+            const Model& model = i._snapshot._model;
             if(i._snapshot._state.has(Renderable::RENDERABLE_STATE_VISIBLE))
                 offset += model.writeIndices(indices.data() + offset, i._element_state._index.value());
             else
                 offset += static_cast<element_index_t>(model.indices()->size() / sizeof(element_index_t));
         }
-        indexUploader = sp<UploaderArray<element_index_t>>::make(std::move(indices));
+        indexUploader = sp<Uploader>::make<UploaderArray<element_index_t>>(std::move(indices));
     }
 
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
-    return snapshot.toDrawingContext(renderRequest, buf.vertices().toSnapshot(vertices), _indices.snapshot(indexUploader), snapshot._index_count, DrawingParams::DrawElements{0});
+    return snapshot.toDrawingContext(renderRequest, buf.vertices().toSnapshot(vertices), _indices.snapshot(std::move(indexUploader)), snapshot._index_count, DrawingParams::DrawElements{0});
 }
 
 }

@@ -35,12 +35,12 @@ struct TilemapLayer::RenderableTile final : Renderable {
         ASSERT(_renderable);
     }
 
-    StateBits updateState(const RenderRequest& renderRequest) override
+    State updateState(const RenderRequest& renderRequest) override
     {
-        return _renderable ? _renderable->updateState(renderRequest) : RENDERABLE_STATE_DISCARDED;
+        return _renderable ? _renderable->updateState(renderRequest) : State(RENDERABLE_STATE_DISCARDED);
     }
 
-    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state) override
     {
         if(!_renderable)
             return {RENDERABLE_STATE_NONE};

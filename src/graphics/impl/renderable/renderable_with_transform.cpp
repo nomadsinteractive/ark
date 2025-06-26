@@ -45,14 +45,14 @@ RenderableWithTransform::RenderableWithTransform(sp<Renderable> delegate, sp<Mat
 {
 }
 
-Renderable::StateBits RenderableWithTransform::updateState(const RenderRequest& renderRequest)
+Renderable::State RenderableWithTransform::updateState(const RenderRequest& renderRequest)
 {
     const bool dirty = _transform->update(renderRequest.timestamp());
-    const StateBits stateBits = _wrapped->updateState(renderRequest);
-    return dirty ? static_cast<StateBits>(stateBits | RENDERABLE_STATE_DIRTY) : stateBits;
+    const State state = _wrapped->updateState(renderRequest);
+    return dirty ? state | RENDERABLE_STATE_DIRTY : state;
 }
 
-Renderable::Snapshot RenderableWithTransform::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
+Renderable::Snapshot RenderableWithTransform::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state)
 {
     Snapshot snapshot = _wrapped->snapshot(snapshotContext, renderRequest, state);
     snapshot._transform = sp<Transform>::make<TransformMatrix>(std::move(snapshot._transform), _transform->val(), -snapshot._position);

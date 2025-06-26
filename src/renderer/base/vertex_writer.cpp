@@ -6,8 +6,8 @@
 
 namespace ark {
 
-VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride)
-    : VertexWriter(attributes, doTransform, sp<WriterMemory>::make(ptr, size, stride))
+VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, const bool doTransform, uint8_t* ptr, size_t size, size_t stride)
+    : VertexWriter(attributes, doTransform, sp<Writer>::make<WriterMemory>(ptr, size, stride))
 {
 }
 
@@ -16,18 +16,18 @@ VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, b
 {
 }
 
-bool VertexWriter::hasAttribute(int32_t name) const
+bool VertexWriter::hasAttribute(const int32_t name) const
 {
     return _attribute_offsets._offsets[name] >= 0;
 }
 
-void VertexWriter::writePosition(const V3& position)
+void VertexWriter::writePosition(const V3 position)
 {
     DASSERT(!_do_transform || _transform_snapshot);
     _writer->writeObject<V3>(_visible ? (_do_transform ? (_transform->transform(*_transform_snapshot, {position, 1.0f}).toNonHomogeneous() + _translate) : position) : V3());
 }
 
-void VertexWriter::writeTexCoordinate(uint16_t u, uint16_t v)
+void VertexWriter::writeTexCoordinate(const uint16_t u, const uint16_t v)
 {
     const uint16_t uv[2] = {u, v};
     writeAttribute(uv, Attribute::USAGE_TEX_COORD);
@@ -53,17 +53,17 @@ void VertexWriter::setRenderable(const Renderable::Snapshot& renderObject)
     _visible = renderObject._state.has(Renderable::RENDERABLE_STATE_VISIBLE);
 }
 
-void VertexWriter::writeNormal(const V3& normal)
+void VertexWriter::writeNormal(const V3 normal)
 {
     writeAttribute(normal, Attribute::USAGE_NORMAL);
 }
 
-void VertexWriter::writeTangent(const V3& tangent)
+void VertexWriter::writeTangent(const V3 tangent)
 {
     writeAttribute(tangent, Attribute::USAGE_TANGENT);
 }
 
-void VertexWriter::writeBitangent(const V3& bitangent)
+void VertexWriter::writeBitangent(const V3 bitangent)
 {
     writeAttribute(bitangent, Attribute::USAGE_BITANGENT);
 }

@@ -154,31 +154,21 @@ void RenderObject::hide()
     setVisible(false);
 }
 
-bool RenderObject::isDiscarded() const
-{
-    return _type->val() < 0 || _discarded.val();
-}
-
-bool RenderObject::isVisible() const
-{
-    return _visible.val();
-}
-
-Renderable::StateBits RenderObject::updateState(const RenderRequest& renderRequest)
+Renderable::State RenderObject::updateState(const RenderRequest& renderRequest)
 {
     bool dirty = _timestamp.update(renderRequest.timestamp());
     if((_discarded.update(renderRequest.timestamp()) || dirty) && _discarded.val())
-        return RENDERABLE_STATE_DISCARDED;
+        return {RENDERABLE_STATE_DISCARDED};
 
     dirty = UpdatableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || dirty;
-    return static_cast<StateBits>((dirty ? RENDERABLE_STATE_DIRTY : 0) | (_visible.val() ? RENDERABLE_STATE_VISIBLE : 0));
+    return {dirty ? RENDERABLE_STATE_DIRTY : RENDERABLE_STATE_NONE, _visible.val() ? RENDERABLE_STATE_VISIBLE : RENDERABLE_STATE_NONE};
 }
 
-Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const StateBits state)
+Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state)
 {
     const int32_t typeId = _type->val();
     sp<Model> model = snapshotContext._render_layer.modelLoader()->loadModel(typeId);
-    if(state & RENDERABLE_STATE_DIRTY)
+    if(state.has(RENDERABLE_STATE_DIRTY))
         return {state, typeId, std::move(model), _position.val(), _size.val(), _transform, _transform->snapshot(), _varyings ? _varyings->snapshot(snapshotContext.pipelineInput(), renderRequest.allocator()) : Varyings::Snapshot()};
     return {state, typeId, std::move(model)};
 }

@@ -71,11 +71,8 @@ public:
 //  [[script::bindings::auto]]
     void hide();
 
-    bool isDiscarded() const;
-    bool isVisible() const;
-
-    StateBits updateState(const RenderRequest& renderRequest) override;
-    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
+    State updateState(const RenderRequest& renderRequest) override;
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, State state) override;
 
     void onWire(const WiringContext& context, const Box& self) override;
 

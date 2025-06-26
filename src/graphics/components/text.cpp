@@ -135,14 +135,14 @@ public:
         : _delegate(std::move(delegate)), _layout_node(std::move(layoutNode)), _offset_position(offsetPosition) {
     }
 
-    StateBits updateState(const RenderRequest& renderRequest) override {
-        StateBits stateBits = _delegate->updateState(renderRequest);
+    State updateState(const RenderRequest& renderRequest) override {
+        const State state = _delegate->updateState(renderRequest);
         if(_layout_node->update(renderRequest.timestamp()))
-            stateBits = static_cast<StateBits>(stateBits | RENDERABLE_STATE_DIRTY);
-        return stateBits;
+            return state | RENDERABLE_STATE_DIRTY;
+        return state;
     }
 
-    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override {
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state) override {
         Snapshot snapshot = _delegate->snapshot(snapshotContext, renderRequest, state);
         snapshot._position += V3((_layout_node->offsetPosition() + _offset_position), 0);
         snapshot._size = snapshot._size;

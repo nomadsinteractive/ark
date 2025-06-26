@@ -4,14 +4,14 @@
 
 namespace ark {
 
-Renderable::StateBits RenderableNone::updateState(const RenderRequest& renderRequest)
+Renderable::State RenderableNone::updateState(const RenderRequest& renderRequest)
 {
-    return Renderable::RENDERABLE_STATE_NONE;
+    return {RENDERABLE_STATE_NONE};
 }
 
-Renderable::Snapshot RenderableNone::snapshot(const LayerContextSnapshot& /*snapshotContext*/, const RenderRequest& /*renderRequest*/, StateBits /*state*/)
+Renderable::Snapshot RenderableNone::snapshot(const LayerContextSnapshot& /*snapshotContext*/, const RenderRequest& /*renderRequest*/, State /*state*/)
 {
-    return {Renderable::RENDERABLE_STATE_NONE};
+    return {RENDERABLE_STATE_NONE};
 }
 
 }

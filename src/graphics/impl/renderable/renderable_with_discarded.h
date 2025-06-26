@@ -11,8 +11,8 @@ class RenderableWithDiscarded final : public Wrapper<Renderable>, public Rendera
 public:
     RenderableWithDiscarded(sp<Renderable> delegate, sp<Boolean> discarded);
 
-    StateBits updateState(const RenderRequest& renderRequest) override;
-    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
+    State updateState(const RenderRequest& renderRequest) override;
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, State state) override;
 
 private:
     sp<Boolean> _discarded;

@@ -11,8 +11,8 @@ class RenderableWithVisible final : public Wrapper<Renderable>, public Renderabl
 public:
     RenderableWithVisible(sp<Renderable> delegate, sp<Boolean> visible);
 
-    StateBits updateState(const RenderRequest& renderRequest) override;
-    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
+    State updateState(const RenderRequest& renderRequest) override;
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, State state) override;
 
 private:
     sp<Boolean> _visible;

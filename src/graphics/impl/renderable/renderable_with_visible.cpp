@@ -11,15 +11,15 @@ RenderableWithVisible::RenderableWithVisible(sp<Renderable> delegate, sp<Boolean
 }
 
 
-Renderable::StateBits RenderableWithVisible::updateState(const RenderRequest& renderRequest)
+Renderable::State RenderableWithVisible::updateState(const RenderRequest& renderRequest)
 {
     State state = _wrapped->updateState(renderRequest);
     if(_visible->update(renderRequest.timestamp()) && !_visible->val())
         state.set(RENDERABLE_STATE_VISIBLE, false);
-    return state.stateBits();
+    return static_cast<StateBits>(state.bits());
 }
 
-Renderable::Snapshot RenderableWithVisible::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
+Renderable::Snapshot RenderableWithVisible::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state)
 {
     return _wrapped->snapshot(snapshotContext, renderRequest, state);
 }
