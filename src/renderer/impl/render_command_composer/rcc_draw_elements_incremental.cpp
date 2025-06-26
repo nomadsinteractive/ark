@@ -24,7 +24,7 @@ sp<PipelineBindings> RCCDrawElementsIncremental::makePipelineBindings(const Shad
 DrawingContext RCCDrawElementsIncremental::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
-    bool hasNewCreatedSnapshot = false;
+    bool reloadIndices = false;
 
     for(const LayerContext::ElementState& i : snapshot._elements_deleted)
         if(i._index)
@@ -33,13 +33,13 @@ DrawingContext RCCDrawElementsIncremental::compose(const RenderRequest& renderRe
     for(const RenderLayerSnapshot::Element& i : snapshot._elements)
     {
         const Renderable::State& s = i._snapshot._state;
-        if(const bool isStateNew = s.has(Renderable::RENDERABLE_STATE_NEW); isStateNew || s.has(Renderable::RENDERABLE_STATE_DIRTY))
+        if(const bool hasStateNew = s.has(Renderable::RENDERABLE_STATE_NEW); hasStateNew || s.has(Renderable::RENDERABLE_STATE_DIRTY))
         {
-            Model& model = i._snapshot._model;
+            const Model& model = i._snapshot._model;
             const uint32_t vertexCount = static_cast<uint32_t>(model.vertexCount());
-            if(isStateNew)
+            if(hasStateNew)
             {
-                hasNewCreatedSnapshot = true;
+                reloadIndices = true;
                 i._element_state._index = _strips->allocate(vertexCount);
             }
             VertexWriter writer = buf.makeVertexWriter(renderRequest, vertexCount, i._element_state._index.value());
@@ -48,7 +48,7 @@ DrawingContext RCCDrawElementsIncremental::compose(const RenderRequest& renderRe
     }
 
     sp<Uploader> indexUploader;
-    if(hasNewCreatedSnapshot || !snapshot._elements_deleted.empty())
+    if(reloadIndices || !snapshot._elements_deleted.empty())
     {
         element_index_t offset = 0;
         Vector<element_index_t> indices(snapshot._index_count);

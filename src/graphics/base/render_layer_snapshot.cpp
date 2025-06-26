@@ -124,8 +124,10 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
     {
         Renderable& renderable = iter->first;
         Renderable::State& s = iter->second;
-        s = {renderable.updateState(renderRequest), static_cast<Renderable::StateBits>(s.bits() & (Renderable::RENDERABLE_STATE_NEW | Renderable::RENDERABLE_STATE_DISCARDED))};
-        if(Renderable::State state = s; !state || state.has(Renderable::RENDERABLE_STATE_DISCARDED))
+        const Renderable::State newState = renderable.updateState(renderRequest);
+        const bool visibilityChanged = s.has(Renderable::RENDERABLE_STATE_VISIBLE) != newState.has(Renderable::RENDERABLE_STATE_VISIBLE);
+        s = {newState, static_cast<Renderable::StateBits>(s.bits() & (Renderable::RENDERABLE_STATE_NEW | Renderable::RENDERABLE_STATE_DISCARDED))};
+        if(Renderable::State state = s; state.has(Renderable::RENDERABLE_STATE_DISCARDED))
         {
             LOGD("delete: %p", &renderable);
             verticesDirty = true;
@@ -134,6 +136,8 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
         }
         else
         {
+            if(visibilityChanged)
+                state.set(Renderable::RENDERABLE_STATE_NEW, true);
             if(reload)
                 state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
             if(state.has(Renderable::RENDERABLE_STATE_VISIBLE))

@@ -43,7 +43,7 @@ struct TilemapLayer::RenderableTile final : Renderable {
     Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state) override
     {
         if(!_renderable)
-            return {RENDERABLE_STATE_NONE};
+            return {RENDERABLE_STATE_DISCARDED};
 
         const V3 tileTranslate = _position + V3(0, 0, _stub->_zorder);
         Snapshot snapshot = _renderable->snapshot(snapshotContext, renderRequest, state);
