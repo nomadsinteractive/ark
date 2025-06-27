@@ -1,10 +1,10 @@
 #include "sdl3/impl/application/application_sdl3.h"
 
-#ifdef ARK_USE_OPEN_GL
+#ifdef ARK_BUILD_PLUGIN_OPENGL
 #include <SDL3/SDL_opengl.h>
 #endif
 
-#ifdef ARK_USE_VULKAN
+#ifdef ARK_BUILD_PLUGIN_VULKAN
 #include <SDL3/SDL_vulkan.h>
 #endif
 

@@ -12,7 +12,7 @@
 #include <libproc.h>
 #endif
 
-#ifdef ARK_USE_OPEN_GL
+#ifdef ARK_BUILD_PLUGIN_OPENGL
 #include <glbinding/gl/gl.h>
 #include <glbinding/Binding.h>
 #endif
@@ -124,7 +124,7 @@ void Platform::sysCall(int32_t /*id*/, const String& /*value*/)
 
 void Platform::glInitialize()
 {
-#ifdef ARK_USE_OPEN_GL
+#ifdef ARK_BUILD_PLUGIN_OPENGL
     glbinding::Binding::initialize(nullptr);
 #endif
 }

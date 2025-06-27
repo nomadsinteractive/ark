@@ -1,9 +1,9 @@
-if(ARK_USE_OPEN_GL)
+if(ARK_BUILD_PLUGIN_OPENGL)
     find_package(OpenGL REQUIRED)
     ark_find_vcpkg_package(glbinding LIBRARIES glbinding::glbinding glbinding::glbinding-aux)
 endif()
 
-if(ARK_USE_VULKAN)
+if(ARK_BUILD_PLUGIN_VULKAN)
     ark_find_vcpkg_package(Threads MODULE_MODE LIBRARIES Threads::Threads)
     ark_compile_definitions(-DVK_USE_PLATFORM_MACOS_MVK)
     find_package(Vulkan REQUIRED)

@@ -11,7 +11,7 @@ ark_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(impl/application_profiler LOCAL_SRC_LIST)
 
-if(ARK_USE_VULKAN)
+if(ARK_BUILD_PLUGIN_VULKAN)
     set(OPTICK_USE_VULKAN ON)
 endif()
 

@@ -177,7 +177,7 @@ void BooleanType::set(const sp<BooleanWrapper>& self, const bool value)
 sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String message)
 {
 #ifdef ARK_FLAG_PUBLISHING_BUILD
-    LOGW("Dyeing is a debugging technique, which should not be used in publish builds");
+    WARN("Dyeing is a debugging technique, which should not be used in publish builds");
     return self;
 #endif
     return sp<Boolean>::make<VariableDyed<bool>>(std::move(self), std::move(condition), std::move(message));

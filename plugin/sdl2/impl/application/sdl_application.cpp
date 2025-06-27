@@ -2,11 +2,11 @@
 
 #include <SDL2/SDL.h>
 
-#ifdef ARK_USE_OPEN_GL
+#ifdef ARK_BUILD_PLUGIN_OPENGL
 #include <SDL2/SDL_opengl.h>
 #endif
 
-#ifdef ARK_USE_VULKAN
+#ifdef ARK_BUILD_PLUGIN_VULKAN
 #include <SDL2/SDL_vulkan.h>
 #endif
 

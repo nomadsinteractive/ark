@@ -21,7 +21,7 @@
 #include "platform/android/util/jni_util.h"
 #include "platform/android/util/font_config.h"
 
-#ifdef ARK_USE_VULKAN
+#ifdef ARK_BUILD_PLUGIN_VULKAN
 #include "platform/vulkan/vulkan.h"
 #endif
 
@@ -113,7 +113,7 @@ void Platform::glInitialize()
 
 void Platform::vkInitialize()
 {
-#ifdef ARK_USE_VULKAN
+#ifdef ARK_BUILD_PLUGIN_VULKAN
 	platform::android::vkInitialize();
 #endif
 }

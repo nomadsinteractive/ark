@@ -18,7 +18,7 @@ ark_link_libraries(log android GLESv3)
 
 add_library(pthread platform/android/impl/dummy_pthread.cpp)
 
-if(ARK_USE_VULKAN)
+if(ARK_BUILD_PLUGIN_VULKAN)
     ark_compile_definitions(-DVK_USE_PLATFORM_ANDROID_KHR)
     aux_source_directory(platform/android/platform/vulkan LOCAL_SRC_LIST)
 endif()

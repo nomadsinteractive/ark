@@ -4,8 +4,6 @@ project(ark VERSION 0.9.6)
 
 include(CMakeDependentOption)
 
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libs")
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
@@ -17,10 +15,11 @@ set(ARK_PLUGIN_DIR ${ARK_SRC_DIR}/plugin)
 
 set(ARK_RUNTIME_SHARED_LIBRARY ${PROJECT_NAME})
 set(ARK_RUNTIME_STATIC_LIBRARY ${PROJECT_NAME}_static)
-set(TESTCASES_EXECUTABLE ${PROJECT_NAME}-testcases)
+set(ARK_EXECUTABLE_NAME ${PROJECT_NAME} CACHE STRING "Executable filename")
+set(ARK_EXECUTABLE_ICON "" CACHE FILEPATH "Executable file icon path")
+set(ARK_TESTCASES_EXECUTABLE_NAME ${PROJECT_NAME}-testcases)
 
 set(ARK_INCLUDE_DIRS ${ARK_SRC_DIR} ${ARK_SRC_DIR}/src ${ARK_SRC_DIR}/platform/${SYSTEM} ${ARK_SRC_DIR}/platform/any)
-set(ARK_LIBRARIES ${ARK_RUNTIME_SHARED_LIBRARY})
 set(ARK_STATIC_LIBRARIES ${ARK_RUNTIME_STATIC_LIBRARY})
 
 include(${ARK_TOOLS_DIR}/core.cmake)
@@ -34,8 +33,7 @@ set(ARK_SYSTEM_NAME ${SYSTEM} CACHE STRING "Target system name of ARK was built 
 ark_add_resource_dir(src platform plugin tools test samples)
 ark_add_resource_file(ark-config.cmake.in README.md LICENSE vcpkg.json)
 
-option(ARK_BUILD_STATIC_LIBRARY "Build static library" OFF)
-option(ARK_BUILD_SAMPLES "Build samples" ON)
+ark_compile_definition_option(ARK_USE_STATIC_RUNTIME_LIBRARY "Use ark static runtime library" OFF)
 ark_compile_definition_option(ARK_BUILD_TESTS "Build testcases" ON)
 
 option(ARK_BUILD_PLUGIN_FMOD "Build fmod plugin" OFF)
@@ -48,10 +46,7 @@ endif()
 ark_compile_definition_option(ARK_USE_LIBPNG "Use libpng decoding library" ON)
 ark_compile_definition_option(ARK_USE_STB_IMAGE "Use stb image decoding library" ON)
 
-ark_compile_definition_option(ARK_USE_OPEN_GL "Use OpenGL rendering library" ON)
-ark_compile_definition_option(ARK_USE_VULKAN  "Use Vulkan rendering library" OFF)
-
-ark_compile_definition_option(ARK_FLAG_PUBLISHING_BUILD "This is a release build for publishing. Disabling all the unnecessary modules" OFF)
+ark_compile_definition_option(ARK_FLAG_PUBLISHING_BUILD "This is a build for publishing. Disabling all unnecessary modules" OFF)
 
 list(APPEND LOCAL_INCLUDE_DIRS .)
 list(APPEND LOCAL_INCLUDE_DIRS src)
@@ -218,54 +213,33 @@ if(ARK_BUILD_TESTS)
     list(APPEND TEST_SRC_LIST ${GENERATED_RUN_TESTS})
 endif()
 
-ark_add_shared_library(${ARK_RUNTIME_SHARED_LIBRARY} ${LOCAL_SHARED_LIBRARY_DEPENDENCIES} ${TEST_SRC_LIST})
-target_compile_definitions(${ARK_RUNTIME_SHARED_LIBRARY} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
-target_link_libraries(${ARK_RUNTIME_SHARED_LIBRARY} PRIVATE ${ARK_DEPENDENCY_3RDPARTY_LIBRARIES})
-
-if(ARK_BUILD_TESTS AND NOT ARK_BUILD_STATIC_LIBRARY)
-    ark_add_executable(${TESTCASES_EXECUTABLE} test/main.cpp ${ARK_RUNTIME_SHARED_LIBRARY})
-endif()
-
-if(ARK_BUILD_STATIC_LIBRARY)
+if(ARK_USE_STATIC_RUNTIME_LIBRARY)
+    set(ARK_LIBRARIES ${ARK_RUNTIME_STATIC_LIBRARY})
     ark_add_static_library(${ARK_RUNTIME_STATIC_LIBRARY} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} ${TEST_SRC_LIST})
-    target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
-    target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PUBLIC -DARK_BUILD_STATIC)
-    if(ARK_BUILD_TESTS)
-        ark_add_executable(${TESTCASES_EXECUTABLE} test/main.cpp ${ARK_RUNTIME_STATIC_LIBRARY} ${ARK_DEPENDENCY_LIBRARIES})
-    endif()
+else()
+    set(ARK_LIBRARIES ${ARK_RUNTIME_SHARED_LIBRARY})
+    ark_add_shared_library(${ARK_RUNTIME_SHARED_LIBRARY} ${LOCAL_SHARED_LIBRARY_DEPENDENCIES} ${TEST_SRC_LIST})
 endif()
 
-ark_export_libraries(${ARK_LIBRARIES})
+target_compile_definitions(${ARK_LIBRARIES} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
+target_link_libraries(${ARK_LIBRARIES} PRIVATE ${ARK_DEPENDENCY_3RDPARTY_LIBRARIES} ${ARK_STATIC_PLUGINS})
+
+if(ARK_BUILD_TESTS)
+    ark_add_executable(${ARK_TESTCASES_EXECUTABLE_NAME} test/main.cpp ${ARK_LIBRARIES} ${ARK_DEPENDENCY_LIBRARIES})
+endif()
 
 if(NOT ANDROID AND NOT IOS)
-    set(LAUNCHER_NAME ${PROJECT_NAME}-launcher)
-    ark_add_executable(${LAUNCHER_NAME} src/app/main/main.cpp)
-    set_target_properties(${LAUNCHER_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
-    if(MSVC)
-        set_target_properties(${LAUNCHER_NAME} PROPERTIES LINK_FLAGS "/PDB:${LAUNCHER_NAME}.pdb" )
+    set(LOCAL_LAUNCHER_NAME ${PROJECT_NAME}-launcher)
+    set(LOCAL_GENERATED_SRC_LIST)
+    if(ARK_EXECUTABLE_ICON)
+        if(WIN32)
+            ark_add_generated_file(tools/python/gen_rc.py ${ARK_GENERATED_FILE_DIRECTORY}/ark.rc ${CMAKE_SOURCE_DIR} ${ARK_EXECUTABLE_ICON} -i ${ARK_EXECUTABLE_ICON})
+        endif()
     endif()
-    target_link_libraries(${LAUNCHER_NAME} PRIVATE ${ARK_LIBRARIES})
+    ark_add_executable(${LOCAL_LAUNCHER_NAME} src/app/main/main.cpp ${LOCAL_GENERATED_SRC_LIST})
+    set_target_properties(${LOCAL_LAUNCHER_NAME} PROPERTIES OUTPUT_NAME ${ARK_EXECUTABLE_NAME})
+    if(MSVC)
+        set_target_properties(${LOCAL_LAUNCHER_NAME} PROPERTIES LINK_FLAGS "/PDB:${ARK_EXECUTABLE_NAME}.pdb" )
+    endif()
+    target_link_libraries(${LOCAL_LAUNCHER_NAME} PRIVATE ${ARK_LIBRARIES})
 endif()
-
-configure_file(ark-config.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-config.cmake" @ONLY)
-
-if(ARK_BUILD_STATIC_LIBRARY)
-    ark_export_libraries(${ARK_STATIC_LIBRARIES} ${ARK_DEPENDENCY_LIBRARIES})
-    list(REMOVE_DUPLICATES ARK_EXPORT_LIBRARIES)
-endif()
-
-export(TARGETS ${ARK_EXPORT_LIBRARIES} FILE "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-targets.cmake")
-
-if(WIN32 AND NOT CYGWIN)
-  set(DEF_INSTALL_CMAKE_DIR CMake)
-else()
-  set(DEF_INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME})
-endif()
-set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
-
-install(TARGETS ${ARK_RUNTIME_SHARED_LIBRARY}
-        EXPORT  ark-targets
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static)
-install(EXPORT ark-targets DESTINATION ${INSTALL_CMAKE_DIR})

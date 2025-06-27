@@ -1,7 +1,6 @@
 #include "python/impl/interpreter/python_interpreter.h"
 
 #include "core/base/plugin_manager.h"
-#include "core/base/scope.h"
 #include "core/base/thread.h"
 #include "core/inf/asset.h"
 #include "core/types/global.h"
@@ -18,7 +17,6 @@ extern "C" {
 #endif
 
 PyMODINIT_FUNC PyInit_ark();
-#ifndef ARK_FLAG_PUBLISHING_BUILD
 PyMODINIT_FUNC PyInit__ctypes(void);
 PyMODINIT_FUNC PyInit__decimal(void);
 PyMODINIT_FUNC PyInit__socket(void);
@@ -26,7 +24,6 @@ PyMODINIT_FUNC PyInit_select(void);
 PyMODINIT_FUNC PyInit_pyexpat(void);
 #ifdef WIN32
 PyMODINIT_FUNC PyInit__overlapped(void);
-#endif
 #endif
 
 PyAPI_DATA(const struct _frozen *) _PyImport_FrozenBootstrap;
@@ -188,7 +185,7 @@ const Vector<String>& PythonInterpreter::paths() const
     return _paths;
 }
 
-PythonInterpreter::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& manifest)
+PythonInterpreter::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& manifest)
     : _manifest(manifest)
 {
 }
