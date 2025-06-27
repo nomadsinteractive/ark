@@ -32,7 +32,7 @@ struct View::Stub final : Updatable {
     {
         if(_hierarchy)
         {
-            const bool positionDirty = _position ? _position->update(timestamp) : false;
+            const bool positionDirty = _position.update(timestamp);
             return _hierarchy->updateLayout(_layout_node, timestamp) || positionDirty;
         }
         return UpdatableUtil::update(timestamp, _layout_node->_layout_param, _position, _discarded);
@@ -54,18 +54,18 @@ struct View::Stub final : Updatable {
         const Layout::Node& layoutNode = _layout_node;
         const V3 layoutOffset(layoutNode.offsetPosition(), 0);
         const sp<Stub> parentStub = _parent_stub.lock();
-        V3 offset = (parentStub ? parentStub->getTopViewOffsetPosition(false) : getViewPosition()) + layoutOffset;
+        V3 offset = (parentStub ? parentStub->getTopViewOffsetPosition(false) : getOffsetPosition()) + layoutOffset;
         if(includePaddings)
             offset += V3(layoutNode.paddings().w(), layoutNode.paddings().x(), 0);
         return layoutNode._layout_param->offset().val() + offset;
     }
 
-    V3 getViewPosition() const
+    V3 getOffsetPosition() const
     {
         if(!_position)
             return V3();
 
-        const V3 position = _position->val();
+        const V3 position = _position.val();
         const V2 layoutSize = _layout_node->size().val();
         return {position.x() - layoutSize.x() / 2, position.y() - layoutSize.y() / 2, position.z()};
     }
@@ -89,7 +89,7 @@ struct View::Stub final : Updatable {
     sp<ViewHierarchy> _hierarchy;
     sp<Layout::Node> _layout_node;
 
-    sp<Vec3> _position;
+    SafeVar<Vec3> _position;
     SafeVar<Boolean> _discarded;
 
     WeakPtr<Stub> _parent_stub;
@@ -202,7 +202,6 @@ View::~View()
 
 TypeId View::onPoll(WiringContext& context)
 {
-    context.setComponent(sp<Translation>::make(layoutPosition()));
     context.setComponent(layoutSize());
     context.setComponent(sp<Shape>::make(Shape::TYPE_AABB, layoutSize()));
     return constants::TYPE_ID_NONE;
@@ -210,6 +209,9 @@ TypeId View::onPoll(WiringContext& context)
 
 void View::onWire(const WiringContext& context, const Box& self)
 {
+    if(sp<Vec3> translation = context.getComponent<Translation>())
+        _stub->_position.reset(std::move(translation));
+
     if(sp<Boolean> discarded = context.getComponent<Discarded>())
         setDiscarded(std::move(discarded));
 }

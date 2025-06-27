@@ -1102,6 +1102,9 @@ class Numeric(_Scalar):
     def normalize(self) -> Self:
         pass
 
+    def lerp(self, b: TYPE_NUMERIC, t: TYPE_NUMERIC) -> Self:
+        pass
+
     def __floordiv__(self, other):
         pass
 
