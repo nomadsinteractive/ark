@@ -52,7 +52,7 @@ public:
 
 //  [[script::bindings::loader]]
     template<typename T> sp<T> load(const String& name, const Scope& args) {
-        DCHECK(name, "Empty name");
+        CHECK(name, "Empty name");
         if(name.at(0) == '#')
             return _bean_factory.getBuilder<T>(name.substr(1))->build(args);
         const Identifier id = name.at(0) == Identifier::ID_TYPE_REFERENCE ? Identifier::parse(name) : Identifier::parseRef(name);

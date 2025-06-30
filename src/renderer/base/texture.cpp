@@ -152,7 +152,7 @@ const sp<Texture::Delegate>& Texture::delegate() const
 void Texture::reset(const Texture& texture)
 {
     _stub->_delegate = texture._stub->_delegate;
-    _stub->_size = texture._stub->_size;
+    _stub->_size->reset(*texture._stub->_size->freeze());
     _stub->_timestamp.markDirty();
 }
 
@@ -168,10 +168,11 @@ bool Texture::update(const uint64_t timestamp) const
 
 template<> ARK_API Texture::Type StringConvert::eval<Texture::Type>(const String& str)
 {
-    if(str == "cubemap")
-        return Texture::TYPE_CUBEMAP;
-    DCHECK(str == "2d", "Unknow texture type: %s", str.c_str());
-    return Texture::TYPE_2D;
+    constexpr enums::LookupTable<Texture::Type, 2> table = {{
+        {"2d", Texture::TYPE_2D},
+        {"cubemap", Texture::TYPE_CUBEMAP}
+    }};
+    return enums::lookup(table, str);
 }
 
 template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const String& str)
@@ -243,27 +244,17 @@ template<> ARK_API Texture::Feature StringConvert::eval<Texture::Feature>(const 
 
 template<> ARK_API Texture::Filter StringConvert::eval<Texture::Filter>(const String& str)
 {
-    if(str)
-    {
-        if(str == "nearest")
-            return Texture::FILTER_NEAREST;
-        if(str == "linear")
-            return Texture::FILTER_LINEAR;
-        if(str == "linear_mipmap")
-            return Texture::FILTER_LINEAR_MIPMAP;
-        if(str == "clamp_to_edge")
-            return Texture::FILTER_CLAMP_TO_EDGE;
-        if(str == "clamp_to_border")
-            return Texture::FILTER_CLAMP_TO_BORDER;
-        if(str == "mirrored_repeat")
-            return Texture::FILTER_MIRRORED_REPEAT;
-        if(str == "repeat")
-            return Texture::FILTER_REPEAT;
-        if(str == "mirror_clamp_to_edge")
-            return Texture::FILTER_MIRROR_CLAMP_TO_EDGE;
-    }
-    DFATAL("Unknow TextureParameter: %s", str.c_str());
-    return Texture::FILTER_NEAREST;
+    constexpr enums::LookupTable<Texture::Filter, 8> table = {{
+        {"nearest", Texture::FILTER_NEAREST},
+        {"linear", Texture::FILTER_LINEAR},
+        {"linear_mipmap", Texture::FILTER_LINEAR_MIPMAP},
+        {"clamp_to_edge", Texture::FILTER_CLAMP_TO_EDGE},
+        {"clamp_to_border", Texture::FILTER_CLAMP_TO_BORDER},
+        {"mirrored_repeat", Texture::FILTER_MIRRORED_REPEAT},
+        {"repeat", Texture::FILTER_REPEAT},
+        {"mirror_clamp_to_edge", Texture::FILTER_MIRROR_CLAMP_TO_EDGE}
+    }};
+    return enums::lookup(table, str);
 }
 
 Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
