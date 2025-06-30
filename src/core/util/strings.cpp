@@ -327,7 +327,7 @@ String Strings::loadFromReadable(Readable& readable)
     char buffer[4096];
     while((len = readable.read(buffer, sizeof(buffer))) != 0)
         sb.write(buffer, len);
-    return {sb.str().c_str()};
+    return {sb.str()};
 }
 
 String Strings::unwrap(const String& str, const char open, const char close)

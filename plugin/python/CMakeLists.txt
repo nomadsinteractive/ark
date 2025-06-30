@@ -14,15 +14,6 @@ endforeach()
 
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
-#if(ARK_BUILD_STATIC_PLUGINS)
-#    set(BUILD_SHARED OFF)
-#    ark_compile_definitions(-DPy_NO_ENABLE_SHARED)
-#    list(APPEND ARK_PYTHON_LIBRARIES libpython-static)
-#else()
-#    set(BUILD_SHARED ON)
-#    list(APPEND ARK_PYTHON_LIBRARIES libpython-shared)
-#endif()
-
 get_filename_component(PLUGIN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
 
 set(ARK_PYTHON_SRC_DIR 3rdparty/Python)

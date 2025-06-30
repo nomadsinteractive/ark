@@ -108,12 +108,12 @@ public:
         return 0;
     }
 
-    static Span toBytes(const sp<Array<T>>& self) {
-        return Span(reinterpret_cast<const char*>(self->buf()), self->size());
+    static BytesView toBytes(const sp<Array<T>>& self) {
+        return BytesView(reinterpret_cast<uint8_t*>(self->buf()), self->size());
     }
 
     static sp<ByteArray> toByteArray(sp<Array<T>> self) {
-        return sp<typename ByteArray::Casted<T>>::make(std::move(self));
+        return sp<ByteArray>::make<ByteArray::Casted<T>>(std::move(self));
     }
 
     static sp<Array<T>> intertwine(Array<T>& self, const Vector<sp<Array<T>>>& components) {

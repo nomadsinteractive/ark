@@ -42,12 +42,14 @@ public:
     static sp<ByteArray> intertwine(ByteArray& self, const Vector<sp<ByteArray>>& components);
 
 //  [[script::bindings::classmethod]]
-    static Span toBytes(const sp<ByteArray>& self);
+    static BytesView toBytes(const sp<ByteArray>& self);
 
 //  [[script::bindings::operator(str)]]
     static String str(const sp<ByteArray>& self);
 */
 
+//  [[script::bindings::classmethod]]
+    static String toString(const sp<ByteArray>& self);
 //  [[script::bindings::classmethod]]
     static sp<Integer> toInteger(sp<ByteArray> self);
 //  [[script::bindings::classmethod]]

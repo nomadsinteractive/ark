@@ -63,7 +63,7 @@ uint32_t Bitmap::rowBytes() const
     return _row_bytes;
 }
 
-Span Bitmap::bytes() const
+BytesView Bitmap::bytes() const
 {
     return _byte_array->toBytes();
 }

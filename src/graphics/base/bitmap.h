@@ -37,7 +37,7 @@ public:
     uint32_t rowBytes() const;
 
 //  [[script::bindings::property]]
-    Span bytes() const;
+    BytesView bytes() const;
 
 //  [[script::bindings::property]]
     const sp<ByteArray>& byteArray() const;

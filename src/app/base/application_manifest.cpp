@@ -167,8 +167,7 @@ template<> ARK_API ApplicationManifest::WindowFlags StringConvert::eval<Applicat
 }
 
 ApplicationManifest::Asset::Asset(const document& manifest)
-    : _protocol(Documents::getAttribute(manifest, "protocol")), _root(Documents::getAttribute(manifest, "root", "/")),
-      _src(Documents::getAttribute(manifest, constants::SRC))
+    : _root(Documents::getAttribute(manifest, "root", "/")), _src(Documents::getAttribute(manifest, constants::SRC))
 {
 }
 

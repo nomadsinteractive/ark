@@ -88,9 +88,15 @@ private:
     void doUpdate()
     {
         if constexpr(std::is_same_v<T, String>)
-            _formatted = fmt::format(_format.c_str(), _value->val().c_str());
+        {
+            const char* arg1 = _value->val().c_str();
+            _formatted = fmt::vformat(_format.c_str(), fmt::make_format_args("arg1", arg1));
+        }
         else
-            _formatted = fmt::format(_format.c_str(), _value->val());
+        {
+            const T arg1 = _value->val();
+            _formatted = fmt::vformat(_format.c_str(), fmt::make_format_args("arg1", arg1));
+        }
     }
 
 private:

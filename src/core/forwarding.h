@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <map>
+#include <span>
 #include <set>
 #include <vector>
 #include <unordered_map>
@@ -138,8 +139,7 @@ typedef sp<IndexArray> indexarray;
 typedef sp<FloatArray> floatarray;
 
 typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
-//TODO: change to std::span when c++20 or above arrives
-typedef std::string_view Span;
+typedef std::span<uint8_t> BytesView;
 
 typedef Loader<document> DocumentLoader;
 typedef LoaderBundle<document> DocumentLoaderBundle;

@@ -14,10 +14,10 @@ public:
     const String& protocol() const;
     const String& path() const;
 
+    String toString() const;
+
 private:
     void parse(const String& url);
-
-    String lstrip(const String& url, String::size_type offset) const;
 
 private:
     String _protocol;

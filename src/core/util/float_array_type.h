@@ -43,7 +43,7 @@ public:
     static sp<FloatArray> intertwine(FloatArray& self, const Vector<sp<FloatArray>>& components);
 
 //  [[script::bindings::classmethod]]
-    static Span toBytes(const sp<FloatArray>& self);
+    static BytesView toBytes(const sp<FloatArray>& self);
 //  [[script::bindings::classmethod]]
     static sp<ByteArray> toByteArray(sp<FloatArray> self);
 

@@ -694,6 +694,11 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<StringView>(c
     return PyUnicode_FromString(strview.data());
 }
 
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<BytesView>(const BytesView& bytes)
+{
+    return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+}
+
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<NamedHash>(const NamedHash& obj)
 {
     return toPyObject<sp<NamedHash>>(sp<NamedHash>::make(obj));

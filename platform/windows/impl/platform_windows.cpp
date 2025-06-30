@@ -4,14 +4,11 @@
 #include <shlwapi.h>
 #include <shlobj.h>
 
-#include <glbinding/gl/gl.h>
 #include <glbinding/Binding.h>
 
-#include "core/inf/variable.h"
 #include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
 #include "core/impl/asset_bundle/asset_bundle_directory.h"
 
-#include "graphics/base/font.h"
 #include "graphics/impl/alphabet/alphabet_true_type.h"
 
 #pragma comment(lib, "shlwapi.lib")
@@ -27,9 +24,9 @@ void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* cont
 sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
 {
     if(isDirectory(path))
-        return sp<AssetBundleWithFallback>::make(sp<AssetBundleDirectory>::make(appPath), sp<AssetBundleDirectory>::make(path));
+        return sp<AssetBundle>::make<AssetBundleWithFallback>(sp<AssetBundle>::make<AssetBundleDirectory>(appPath), sp<AssetBundle>::make<AssetBundleDirectory>(path));
     if(isDirectory(appPath))
-        return sp<AssetBundleDirectory>::make(appPath);
+        return sp<AssetBundle>::make<AssetBundleDirectory>(appPath);
     return nullptr;
 }
 
@@ -137,12 +134,12 @@ void* Platform::dlOpen(const char* name)
 
 void* Platform::dlSymbol(void* library, const String& symbolName)
 {
-    return GetProcAddress(reinterpret_cast<HMODULE>(library), symbolName.c_str());
+    return GetProcAddress(static_cast<HMODULE>(library), symbolName.c_str());
 }
 
 void Platform::dlClose(void* library)
 {
-    FreeLibrary(reinterpret_cast<HMODULE>(library));
+    FreeLibrary(static_cast<HMODULE>(library));
 }
 
 void Platform::detachCurrentThread()

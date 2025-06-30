@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_READABLE_BYTEARRAY_READABLE_H_
-#define ARK_CORE_IMPL_READABLE_BYTEARRAY_READABLE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/inf/readable.h"
@@ -7,13 +6,13 @@
 
 namespace ark {
 
-class ARK_API BytearrayReadable : public Readable {
+class ARK_API BytearrayReadable final : public Readable {
 public:
-    BytearrayReadable(const bytearray& array);
+    BytearrayReadable(bytearray array);
 
-    virtual uint32_t read(void* buffer, uint32_t size) override;
-    virtual int32_t seek(int32_t position, int32_t whence) override;
-    virtual int32_t remaining() override;
+    uint32_t read(void* buffer, uint32_t size) override;
+    int32_t seek(int32_t position, int32_t whence) override;
+    int32_t remaining() override;
 
 private:
     bytearray _bytearray;
@@ -21,5 +20,3 @@ private:
 };
 
 }
-
-#endif

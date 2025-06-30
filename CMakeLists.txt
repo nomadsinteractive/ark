@@ -4,7 +4,7 @@ project(ark VERSION 0.9.6)
 
 include(CMakeDependentOption)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
 
@@ -31,7 +31,7 @@ find_package(Python COMPONENTS Interpreter)
 set(ARK_SYSTEM_NAME ${SYSTEM} CACHE STRING "Target system name of ARK was built for")
 
 ark_add_resource_dir(src platform plugin tools test samples)
-ark_add_resource_file(ark-config.cmake.in README.md LICENSE vcpkg.json)
+ark_add_resource_file(README.md LICENSE vcpkg.json)
 
 ark_compile_definition_option(ARK_USE_STATIC_RUNTIME_LIBRARY "Use ark static runtime library" OFF)
 ark_compile_definition_option(ARK_BUILD_TESTS "Build testcases" ON)

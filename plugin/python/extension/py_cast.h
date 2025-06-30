@@ -237,7 +237,7 @@ private:
     template<typename T> static PyObject* toPyObject_sfinae(const T& ptr, typename T::OPT_TYPE*) {
         return ptr ? toPyObject(ptr.value()) : PyBridge::incRefNone();
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& iterable, std::enable_if_t<!(std::is_same_v<T, std::string> || std::is_same_v<T, std::wstring> || std::is_same_v<T, Span>), decltype(iterable.begin())>*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T& iterable, std::enable_if_t<!(std::is_same_v<T, std::string> || std::is_same_v<T, std::wstring> || std::is_same_v<T, StringView> || std::is_same_v<T, BytesView>), decltype(iterable.begin())>*) {
         return fromIterable_sfinae<T>(iterable, nullptr);
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_enum_v<T>>*) {
@@ -350,7 +350,6 @@ private:
 
     static Optional<sp<Integer>> toInteger(PyObject* object);
     static Optional<sp<Runnable>> toRunnable(PyObject* object);
-    static sp<CollisionCallback> toCollisionCallback(PyObject* object);
     static sp<EventListener> toEventListener(PyObject* object);
 };
 

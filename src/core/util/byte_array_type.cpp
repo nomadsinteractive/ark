@@ -1,5 +1,6 @@
 #include "core/util/byte_array_type.h"
 
+#include "strings.h"
 #include "core/inf/array.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
@@ -49,6 +50,11 @@ private:
     T _value;
 };
 
+}
+
+String ByteArrayType::toString(const sp<ByteArray>& self)
+{
+    return Strings::toUTF8(Strings::fromUTF8({reinterpret_cast<const char*>(self->buf()), self->length()}));
 }
 
 sp<Integer> ByteArrayType::toInteger(sp<ByteArray> self)

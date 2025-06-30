@@ -10,13 +10,13 @@
 
 namespace ark {
 
-class AssetBundleZipFile : public AssetBundle {
+class AssetBundleZipFile final : public AssetBundle {
 public:
     AssetBundleZipFile(sp<Readable> zipReadable, const String& zipLocation);
 
-    virtual sp<Asset> getAsset(const String& name) override;
-    virtual sp<AssetBundle> getBundle(const String& path) override;
-    virtual std::vector<ark::sp<Asset>> listAssets(const String& regex) override;
+    sp<Asset> getAsset(const String& name) override;
+    sp<AssetBundle> getBundle(const String& path) override;
+    Vector<sp<Asset>> listAssets(const String& regex) override;
 
     bool hasEntry(const String& name) const;
 
@@ -44,7 +44,6 @@ public:
     };
 
     sp<Stub> _stub;
-
 };
 
 }

@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/base/bit_set.h"
 #include "core/base/string.h"
+#include "core/base/url.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -49,9 +50,8 @@ public:
     };
 
     struct Asset {
-        String _protocol;
         String _root;
-        String _src;
+        URL _src;
 
         Asset(const document& manifest);
         DEFAULT_COPY_AND_ASSIGN(Asset);

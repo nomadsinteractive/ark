@@ -11,7 +11,7 @@ namespace ark {
 
 namespace {
 
-class ReadableZipFile : public Readable {
+class ReadableZipFile final : public Readable {
 public:
     ReadableZipFile(const sp<AssetBundleZipFile::Stub>& stub, zip_file_t* zf)
         : _stub(stub), _zip_file(zf){
@@ -21,15 +21,15 @@ public:
         zip_fclose(_zip_file);
     }
 
-    virtual uint32_t read(void* buffer, uint32_t bufferSize) override {
+    uint32_t read(void* buffer, uint32_t bufferSize) override {
         return static_cast<uint32_t>(zip_fread(_zip_file, buffer, bufferSize));
     }
 
-    virtual int32_t seek(int32_t position, int32_t whence) override {
+    int32_t seek(int32_t position, int32_t whence) override {
         return zip_fseek(_zip_file, position, whence);
     }
 
-    virtual int32_t remaining() override {
+    int32_t remaining() override {
         DFATAL("Unimplemented");
         return 0;
     }
@@ -39,17 +39,17 @@ private:
     zip_file_t* _zip_file;
 };
 
-class AssetZipEntry : public Asset {
+class AssetZipEntry final : public Asset {
 public:
-    AssetZipEntry(const sp<AssetBundleZipFile::Stub>& stub, const String& location, zip_file_t* zf)
-        : _stub(stub), _location(location), _zip_file(zf){
+    AssetZipEntry(const sp<AssetBundleZipFile::Stub>& stub, String location, zip_file_t* zf)
+        : _stub(stub), _location(std::move(location)), _zip_file(zf){
     }
 
-    virtual sp<Readable> open() override {
-        return sp<ReadableZipFile>::make(_stub, _zip_file);
+    sp<Readable> open() override {
+        return sp<Readable>::make<ReadableZipFile>(_stub, _zip_file);
     }
 
-    virtual String location() override {
+    String location() override {
         return _location;
     }
 
@@ -57,21 +57,20 @@ private:
     sp<AssetBundleZipFile::Stub> _stub;
     String _location;
     zip_file_t* _zip_file;
-
 };
 
 }
 
 static zip_int64_t _local_zip_source_callback(void *userdata, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 {
-    AssetBundleZipFile::Stub* stub = reinterpret_cast<AssetBundleZipFile::Stub*>(userdata);
+    const AssetBundleZipFile::Stub* stub = static_cast<AssetBundleZipFile::Stub*>(userdata);
     switch(cmd)
     {
     case ZIP_SOURCE_TELL:
         return stub->position();
     case ZIP_SOURCE_STAT:
     {
-        zip_stat_t* stat = reinterpret_cast<zip_stat_t*>(data);
+        zip_stat_t* stat = static_cast<zip_stat_t*>(data);
         zip_stat_init(stat);
         stat->valid = ZIP_STAT_SIZE;
         stat->size = stub->size();
@@ -108,19 +107,19 @@ AssetBundleZipFile::AssetBundleZipFile(sp<Readable> zipReadable, const String& z
 
 sp<Asset> AssetBundleZipFile::getAsset(const String& name)
 {
-    zip_int64_t idx = zip_name_locate(_stub->archive(), name.c_str(), 0);
+    const zip_int64_t idx = zip_name_locate(_stub->archive(), name.c_str(), 0);
     zip_file_t* zf = idx >= 0 ? zip_fopen_index(_stub->archive(), static_cast<zip_uint64_t>(idx), 0) : nullptr;
     if(zf)
-        return sp<AssetZipEntry>::make(_stub, Strings::sprintf("%s/%s", _stub->location().c_str(), name.c_str()), zf);
+        return sp<Asset>::make<AssetZipEntry>(_stub, Strings::sprintf("%s/%s", _stub->location().c_str(), name.c_str()), zf);
     return nullptr;
 }
 
 sp<AssetBundle> AssetBundleZipFile::getBundle(const String& path)
 {
-    return sp<AssetBundleWithPrefix>::make(sp<AssetBundleZipFile>::make(*this), path.endsWith("/") ? path : path + "/");
+    return sp<AssetBundle>::make<AssetBundleWithPrefix>(sp<AssetBundle>::make<AssetBundleZipFile>(*this), path.endsWith("/") ? path : path + "/");
 }
 
-std::vector<ark::sp<Asset>> AssetBundleZipFile::listAssets(const String& regex)
+Vector<sp<Asset>> AssetBundleZipFile::listAssets(const String& regex)
 {
     DFATAL("Unimplemented");
     return {};

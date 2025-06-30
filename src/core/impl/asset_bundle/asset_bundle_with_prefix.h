@@ -1,5 +1,4 @@
-#ifndef ARK_IMPL_ASSET_BUNDLE_WITH_PREFIX_H_
-#define ARK_IMPL_ASSET_BUNDLE_WITH_PREFIX_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/string.h"
@@ -8,13 +7,13 @@
 
 namespace ark {
 
-class AssetBundleWithPrefix : public AssetBundle {
+class AssetBundleWithPrefix final : public AssetBundle {
 public:
     AssetBundleWithPrefix(sp<AssetBundle> delegate, String prefix);
 
-    virtual sp<Asset> getAsset(const String& name) override;
-    virtual sp<AssetBundle> getBundle(const String& path) override;
-    virtual std::vector<ark::sp<Asset>> listAssets(const String& regex) override;
+    sp<Asset> getAsset(const String& name) override;
+    sp<AssetBundle> getBundle(const String& path) override;
+    Vector<sp<Asset>> listAssets(const String& regex) override;
 
 private:
     sp<AssetBundle> _delegate;
@@ -23,5 +22,3 @@ private:
 };
 
 }
-
-#endif

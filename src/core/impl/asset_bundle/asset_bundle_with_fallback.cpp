@@ -21,9 +21,9 @@ sp<AssetBundle> AssetBundleWithFallback::getBundle(const String& path)
     return assetBundle ? assetBundle : _fallback->getBundle(path);
 }
 
-std::vector<sp<Asset>> AssetBundleWithFallback::listAssets(const String& regex)
+Vector<sp<Asset>> AssetBundleWithFallback::listAssets(const String& regex)
 {
-    std::vector<sp<Asset>> assets = _delegate->listAssets(regex);
+    Vector<sp<Asset>> assets = _delegate->listAssets(regex);
     return assets.size() > 0 ? assets : _fallback->listAssets(regex);
 }
 

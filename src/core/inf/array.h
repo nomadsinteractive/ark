@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include "core/forwarding.h"
+#include "core/base/api.h"
 
 namespace ark {
 
@@ -23,8 +24,8 @@ public:
         return buf()[i];
     }
 
-    Span toBytes() {
-        return Span(reinterpret_cast<const char*>(buf()), size());
+    BytesView toBytes() {
+        return BytesView(static_cast<uint8_t*>(buf()), size());
     }
 
     class iterator {
@@ -133,7 +134,7 @@ public:
     }
 
     T& at(size_t i) {
-        DASSERT(i < _length);
+        ASSERT(i < _length);
         return _data[i];
     }
 

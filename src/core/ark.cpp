@@ -187,17 +187,21 @@ sp<RenderEngine> createRenderEngine(BeanFactory& beanFactory, const ApplicationM
 
 class Ark::ArkAssetBundle {
 public:
-    ArkAssetBundle(const sp<AssetBundle>& builtInAssetBundle, BeanFactory& factory, const std::vector<ApplicationManifest::Asset>& assets)
-        : _builtin_asset_bundle(builtInAssetBundle) {
-        for(const ApplicationManifest::Asset& i : assets) {
-            if(sp<AssetBundle> assetBundle = createAsset(factory, i))
+    ArkAssetBundle(const sp<AssetBundle>& builtInAssetBundle, const Vector<ApplicationManifest::Asset>& assets)
+        : _builtin_asset_bundle(builtInAssetBundle)
+    {
+        for(const ApplicationManifest::Asset& i : assets)
+        {
+            if(sp<AssetBundle> assetBundle = createAsset(i))
                 _mounts.push_front(Mounted(i, std::move(assetBundle)));
         }
     }
 
-    sp<Asset> getAsset(const String& name) const {
+    sp<Asset> getAsset(const String& name) const
+    {
         const URL url(name);
-        for(const Mounted& i : _mounts) {
+        for(const Mounted& i : _mounts)
+        {
             if(sp<Asset> asset = i.getAsset(url))
                 return asset;
         }
@@ -219,18 +223,18 @@ public:
     }
 
 private:
-    sp<AssetBundle> createAsset(BeanFactory& factory, const ApplicationManifest::Asset& manifest) const
+    sp<AssetBundle> createAsset(const ApplicationManifest::Asset& manifest) const
     {
-        sp<AssetBundle> asset = manifest._protocol.empty() ? _builtin_asset_bundle->getBundle(manifest._src) :
-                                                             factory.build<AssetBundle>(manifest._protocol, manifest._src, {});
-        CHECK_WARN(asset, "Unable to load AssetBundle, protocol: %s, src: %s", manifest._protocol.c_str(), manifest._src.c_str());
+        const String filepath = manifest._src.protocol() == "external" ? Platform::getExternalStoragePath(manifest._src.path()) : manifest._src.path();
+        sp<AssetBundle> asset = _builtin_asset_bundle->getBundle(filepath);
+        CHECK_WARN(asset, "Unable to load AssetBundle, src: %s", manifest._src.toString().c_str());
         return asset;
     }
 
     class Mounted {
     public:
         Mounted(const ApplicationManifest::Asset& manifest, sp<AssetBundle> asset)
-            : _root(manifest._protocol, manifest._root), _asset_bundle(std::move(asset)) {
+            : _root(manifest._src.protocol(), manifest._root), _asset_bundle(std::move(asset)) {
         }
 
         sp<Asset> getAsset(const URL& url) const
@@ -320,7 +324,7 @@ void Ark::initialize(sp<ApplicationManifest> manifest)
     loadPlugins(_manifest);
 
     sp<BeanFactory> factory = createBeanFactory(sp<Dictionary<document>>::make<DictionaryImpl<document>>());
-    _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->application()._dir), factory, _manifest->assets());
+    _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->application()._dir), _manifest->assets());
     sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
     sp<RenderEngine> renderEngine = createRenderEngine(factory, _manifest->renderer());
     _application_context = createApplicationContext(_manifest, std::move(applicationBundle), std::move(renderEngine));

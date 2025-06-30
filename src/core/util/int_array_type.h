@@ -44,7 +44,7 @@ public:
     static sp<IntArray> intertwine(IntArray& self, const Vector<sp<IntArray>>& components);
 
 //  [[script::bindings::classmethod]]
-    static Span toBytes(const sp<IntArray>& self);
+    static BytesView toBytes(const sp<IntArray>& self);
 
 //  [[script::bindings::operator(str)]]
     static String str(const sp<IntArray>& self);
