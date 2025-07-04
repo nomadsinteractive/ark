@@ -36,17 +36,6 @@ public:
 
 }
 
-template<typename T, RendererType::Priority P> struct RenderGroup::BUILDER::Phrase {
-
-    Phrase(BeanFactory& beanFactory, const document& manifest)
-        : _renderer(beanFactory.ensureBuilder<T>(manifest)), _priority(Documents::getAttribute<RendererType::Priority>(manifest, "priority", P))
-    {
-    }
-
-    sp<Builder<T>> _renderer;
-    RendererType::Priority _priority;
-};
-
 void RenderGroup::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
     if(drawDecorator)

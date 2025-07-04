@@ -1,8 +1,7 @@
 #pragma once
 
-#include <vector>
-
 #include "core/forwarding.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/inf/render_command.h"
 #include "graphics/forwarding.h"
@@ -17,7 +16,7 @@ public:
     void draw(GraphicsContext& graphicsContext) override;
 
 private:
-    std::vector<sp<RenderCommand>> _commands;
+    Vector<sp<RenderCommand>> _commands;
 };
 
 }

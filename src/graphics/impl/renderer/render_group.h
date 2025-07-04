@@ -1,8 +1,10 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/base/bean_factory.h"
 #include "core/collection/list.h"
 #include "core/inf/builder.h"
+#include "core/util/documents.h"
 
 #include "graphics/inf/renderer.h"
 #include "graphics/util/renderer_type.h"
@@ -25,7 +27,15 @@ public:
         sp<RenderGroup> build(const Scope& args) override;
 
     private:
-        template<typename T, RendererType::Priority P> struct Phrase;
+        template<typename T, RendererType::Priority P> struct Phrase {
+            Phrase(BeanFactory& beanFactory, const document& manifest)
+                : _renderer(beanFactory.ensureBuilder<T>(manifest)), _priority(Documents::getAttribute<RendererType::Priority>(manifest, "priority", P))
+            {
+            }
+
+            sp<Builder<T>> _renderer;
+            RendererType::Priority _priority;
+        };
         Vector<Phrase<Renderer, RendererType::PRIORITY_DEFAULT>> _renderers;
         Vector<Phrase<RenderLayer, RendererType::PRIORITY_RENDER_LAYER>> _render_layers;
     };
