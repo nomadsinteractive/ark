@@ -7,10 +7,11 @@
 #include "core/util/log.h"
 
 #include "python/extension/python_extension.h"
-#include "python/extension/ark_py_importlib.h"
 #include "python/extension/py_cast.h"
 #include "python/extension/py_instance.h"
 
+#include "python/extension/py__ark_bootstrap.h"
+#include "python/libs/runtime/py__ark_audit.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +28,8 @@ PyMODINIT_FUNC PyInit__overlapped(void);
 #endif
 
 PyAPI_DATA(const struct _frozen *) _PyImport_FrozenBootstrap;
+PyAPI_DATA(const struct _frozen *) PyImport_FrozenModules;
+
 #ifdef __cplusplus
 }
 #endif
@@ -35,13 +38,39 @@ namespace ark::plugin::python {
 
 namespace {
 
-_frozen _injected_frozen[10];
+_frozen _import_frozen_bootstrap[10];
+_frozen _import_frozen_modules[16];
 
-bool hasInjected()
+bool preInitialize()
 {
-    for(const _frozen* pt = _PyImport_FrozenBootstrap, *i = _injected_frozen; pt->name; pt ++, i ++)
+    for(const _frozen* pt = _PyImport_FrozenBootstrap, *i = _import_frozen_bootstrap; pt->name; pt ++, i ++)
         if(strcmp(pt->name, "_frozen_importlib_org") == 0)
             return true;
+
+    PyImport_AppendInittab("ark", PyInit_ark);
+    PyImport_AppendInittab("_ctypes", PyInit__ctypes);
+    PyImport_AppendInittab("_decimal", PyInit__decimal);
+    PyImport_AppendInittab("_socket", PyInit__socket);
+    PyImport_AppendInittab("select", PyInit_select);
+    PyImport_AppendInittab("pyexpat", PyInit_pyexpat);
+#ifdef WIN32
+    PyImport_AppendInittab("_overlapped", PyInit__overlapped);
+#endif
+
+    memset(_import_frozen_modules, 0, sizeof(_import_frozen_modules));
+    size_t i = 0;
+    if(PyImport_FrozenModules)
+        while(PyImport_FrozenModules[i].name)
+        {
+            _import_frozen_modules[i] = PyImport_FrozenModules[i];
+            ++i;
+        }
+
+    if(i < sizeof(_import_frozen_modules) / sizeof(_frozen))
+    {
+        _import_frozen_modules[i] = {"_ark_audit", _Py_M___ark_audit, sizeof(_Py_M___ark_audit), 0, nullptr};
+        PyImport_FrozenModules = _import_frozen_modules;
+    }
     return false;
 }
 
@@ -63,35 +92,26 @@ PyInstance getMainModuleAttr(const char* name)
 
 }
 
-PythonInterpreter::PythonInterpreter(StringView name, const document& libraries)
-    : _name(Strings::fromUTF8(name))
+PythonInterpreter::PythonInterpreter(const StringView name, const document& libraries)
+    : _name(Strings::fromUTF8(name)), _ark_module(nullptr), _ark_audit_module(nullptr)
 {
-    PyImport_AppendInittab("ark", PyInit_ark);
-    PyImport_AppendInittab("_ctypes", PyInit__ctypes);
-    PyImport_AppendInittab("_decimal", PyInit__decimal);
-    PyImport_AppendInittab("_socket", PyInit__socket);
-    PyImport_AppendInittab("select", PyInit_select);
-    PyImport_AppendInittab("pyexpat", PyInit_pyexpat);
-#ifdef WIN32
-   PyImport_AppendInittab("_overlapped", PyInit__overlapped);
-#endif
-    if(!hasInjected())
+    if(!preInitialize())
     {
-        memset(_injected_frozen, 0, sizeof(_injected_frozen));
-        for(_frozen* pt = const_cast<_frozen*>(_PyImport_FrozenBootstrap), *i = _injected_frozen; pt->name; pt ++, i ++)
+        memset(_import_frozen_bootstrap, 0, sizeof(_import_frozen_bootstrap));
+        for(_frozen* pt = const_cast<_frozen*>(_PyImport_FrozenBootstrap), *i = _import_frozen_bootstrap; pt->name; pt ++, i ++)
         {
             *i = *pt;
             if(strcmp(pt->name, "_frozen_importlib") == 0)
             {
-                i->code = _Py_M__ark_importlib;
-                i->size = sizeof(_Py_M__ark_importlib);
+                i->code = _Py_M___ark_bootstrap;
+                i->size = sizeof(_Py_M___ark_bootstrap);
                 i->get_code = nullptr;
                 i++;
                 *i = *pt;
                 i->name = "_frozen_importlib_org";
             }
         }
-        _PyImport_FrozenBootstrap = _injected_frozen;
+        _PyImport_FrozenBootstrap = _import_frozen_bootstrap;
     }
     for(const document& i : libraries->children("library"))
     {
@@ -112,6 +132,7 @@ PythonInterpreter::PythonInterpreter(StringView name, const document& libraries)
 PythonInterpreter::~PythonInterpreter()
 {
     Py_XDECREF(_ark_module);
+    Py_XDECREF(_ark_audit_module);
     Py_Finalize();
 }
 
@@ -122,6 +143,11 @@ void PythonInterpreter::initialize()
     Py_InitializeEx(0);
     _ark_module = PyImport_ImportModule("ark");
     Py_XINCREF(_ark_module);
+
+#ifdef ARK_FLAG_PUBLISHING_BUILD
+    _ark_audit_module = PyImport_ImportModule("_ark_audit");
+    Py_XINCREF(_ark_audit_module);
+#endif
 
     const Global<PluginManager> pluginManager;
     for(Plugin& i : pluginManager->plugins())

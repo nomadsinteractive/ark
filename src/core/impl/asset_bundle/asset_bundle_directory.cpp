@@ -30,16 +30,16 @@ sp<AssetBundle> AssetBundleDirectory::getBundle(const String& path)
     return nullptr;
 }
 
-std::vector<sp<Asset>> AssetBundleDirectory::listAssets(const String& regex)
+Vector<sp<Asset>> AssetBundleDirectory::listAssets(const String& regex)
 {
-    std::vector<sp<Asset>> assets;
+    Vector<sp<Asset>> assets;
     if(Platform::isDirectory(_directory))
     {
         const std::regex namePattern(regex.c_str());
         for(const std::filesystem::path& i : std::filesystem::directory_iterator(_directory.c_str()))
         {
             if(regex.empty() || std::regex_match(i.filename().string(), namePattern))
-                assets.push_back(sp<AssetFile>::make(i.string()));
+                assets.push_back(sp<Asset>::make<AssetFile>(i.string()));
         }
     }
     return assets;

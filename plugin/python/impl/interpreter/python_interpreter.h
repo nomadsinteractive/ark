@@ -42,6 +42,7 @@ private:
     std::wstring _name;
     Vector<String> _paths;
     PyObject* _ark_module;
+    PyObject* _ark_audit_module;
 };
 
 }

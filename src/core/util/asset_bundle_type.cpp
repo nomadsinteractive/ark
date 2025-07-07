@@ -139,24 +139,4 @@ sp<AssetBundle> AssetBundleType::createAssetBundle(const String& filepath)
     return nullptr;
 }
 
-AssetBundleType::FILE_DICTIONARY::FILE_DICTIONARY(BeanFactory& /*factory*/, const String& src)
-    : _src(src)
-{
-}
-
-sp<AssetBundle> AssetBundleType::FILE_DICTIONARY::build(const Scope& /*args*/)
-{
-    return AssetBundleType::createAssetBundle(_src);
-}
-
-AssetBundleType::EXTERNAL_DICTIONARY::EXTERNAL_DICTIONARY(BeanFactory& /*factory*/, const String& src)
-    : _src(Platform::getExternalStoragePath(src))
-{
-}
-
-sp<AssetBundle> AssetBundleType::EXTERNAL_DICTIONARY::build(const Scope& /*args*/)
-{
-    return AssetBundleType::createAssetBundle(_src);
-}
-
 }

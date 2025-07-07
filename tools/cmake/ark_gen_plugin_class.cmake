@@ -15,9 +15,6 @@ macro(_ark_gen_plugin_class_impl NAME TYPE NAME_SPACE FILE_NAME BUILT_IN)
         COMMAND ${Python_EXECUTABLE} ${ARK_SRC_DIR}/tools/python/gen_plugin_class.py ${PARAM_NAME} -t ${TYPE} ${PARAM_NAME_SPACE} -o ${LOCAL_PLUGIN_FILE_NAME} ${LOCAL_OPTION_B} ${ARGN}
         DEPENDS ${FILE_DEPENDS} ${ARK_SRC_DIR}/tools/python/gen_plugin_class.py
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-    if(MSVC)
-        set_source_files_properties(${LOCAL_PLUGIN_FILE_NAME}.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
-    endif()
 
     list(APPEND LOCAL_GENERATED_SRC_LIST ${LOCAL_PLUGIN_FILE_NAME}.h)
     list(APPEND LOCAL_GENERATED_SRC_LIST ${LOCAL_PLUGIN_FILE_NAME}.cpp)

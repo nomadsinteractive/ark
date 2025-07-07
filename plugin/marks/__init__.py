@@ -22,7 +22,8 @@ def import_pydevd_module():
     try:
         import pydevd_pycharm
         return pydevd_pycharm
-    except ImportError:
+    except ImportError as e:
+        loge(e)
         try:
             import pydevd
             return pydevd

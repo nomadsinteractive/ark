@@ -1,5 +1,4 @@
-#ifndef ARK_IMPL_ASSET_BUNDLE_DIRECTORY_H_
-#define ARK_IMPL_ASSET_BUNDLE_DIRECTORY_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/string.h"
@@ -7,19 +6,16 @@
 
 namespace ark {
 
-class AssetBundleDirectory : public AssetBundle {
+class AssetBundleDirectory final : public AssetBundle {
 public:
     AssetBundleDirectory(String directory);
 
-    virtual sp<Asset> getAsset(const String& name) override;
-    virtual sp<AssetBundle> getBundle(const String& path) override;
-    virtual std::vector<sp<Asset>> listAssets(const String& regex) override;
+    sp<Asset> getAsset(const String& name) override;
+    sp<AssetBundle> getBundle(const String& path) override;
+    Vector<sp<Asset>> listAssets(const String& regex) override;
 
 private:
     String _directory;
-
 };
 
 }
-
-#endif

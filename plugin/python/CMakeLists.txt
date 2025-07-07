@@ -48,6 +48,11 @@ if(WIN32)
     ark_link_libraries(ws2_32 iphlpapi)
 endif()
 
+list(APPEND LOCAL_FROZEN_MODULES
+    libs/runtime/_ark_audit.py
+    extension/_ark_bootstrap.py
+)
+
 if(NOT (ANDROID OR IOS))
     if(ARK_USE_STATIC_TRIPLET)
         ark_compile_definitions(-DPy_NO_ENABLE_SHARED)
@@ -60,7 +65,13 @@ if(NOT (ANDROID OR IOS))
     endif()
     target_compile_definitions(_freeze_module PRIVATE Py_BUILD_CORE Py_BUILD_CORE_MODULE)
     target_link_libraries(_freeze_module PRIVATE ${ARK_PYTHON_LIBRARIES})
-    ark_add_generated_file(_freeze_module ${CMAKE_CURRENT_SOURCE_DIR}/extension/ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py ark_importlib _ark_bootstrap.py)
+
+    foreach(LOCAL_FM IN LISTS LOCAL_FROZEN_MODULES)
+        get_filename_component(LOCAL_FM_NAME ${LOCAL_FM} NAME_WLE)
+        get_filename_component(LOCAL_FM_DIR ${LOCAL_FM} DIRECTORY)
+        ark_add_generated_file(_freeze_module ${CMAKE_CURRENT_SOURCE_DIR}/${LOCAL_FM_DIR}/py_${LOCAL_FM_NAME}.h ${CMAKE_CURRENT_SOURCE_DIR}/${LOCAL_FM_DIR} ${LOCAL_FM} ${LOCAL_FM_NAME} ${LOCAL_FM_NAME}.py)
+    endforeach()
+
 endif()
 
 ark_setup_tools(ark_gen_plugin_class)
