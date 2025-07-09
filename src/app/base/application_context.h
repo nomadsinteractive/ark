@@ -47,10 +47,10 @@ public:
 
     bool onEvent(const Event& event);
 
-    void addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelled);
+    void addPreComposeRunnable(sp<Runnable> runnable, sp<Boolean> cancelled);
 
-    void addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
-    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+    void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
+    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
     void setDefaultEventListener(sp<EventListener> eventListener);
 
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);

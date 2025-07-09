@@ -3128,8 +3128,12 @@ class WithId:
 
 
 class CollisionCallback:
-    pass
 
+    def on_begin_contact(self, rigidbody: Rigidbody, collision_manifold: CollisionManifold):
+        pass
+
+    def on_end_contact(self, rigidbody: Rigidbody):
+        pass
 
 
 class PathFinder:

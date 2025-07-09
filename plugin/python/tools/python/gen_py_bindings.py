@@ -34,7 +34,7 @@ AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property]]\s+%s' 
 AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_SETPROP_PATTERN = re.compile(r'\[\[script::bindings::setprop]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader]]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*{')
-AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor|interface)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_AS_MAPPING_PATTERN = re.compile(r'\[\[script::bindings::map\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_AS_SEQUENCE_PATTERN = re.compile(r'\[\[script::bindings::seq\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)]]\s+%s%s' % (ANNOTATION_PATTERN, METHOD_PATTERN))
@@ -161,7 +161,7 @@ ${0}
 
 
 def gen_module_type_declarations(modulename, results):
-    line_pattern = 'pi.pyModuleAddType<%s, %s>(module, "%s", "%s", %s, Py_TPFLAGS_DEFAULT%s)'
+    line_pattern = 'pi.pyModuleAddType<%s, %s>(module, "%s", "%s", %s, %s)'
     genclasses = list(results.values())
     class_names = set(i.binding_classname for i in genclasses)
     class_declared = set()
@@ -172,8 +172,12 @@ def gen_module_type_declarations(modulename, results):
         genclasses = genclasses[1:]
         if not i.base_classname or i.base_classname in class_declared or i.base_classname not in class_names:
             base_type = 'pi.getPyArkType<%s>()->getPyTypeObject()' % i.base_classname if i.base_classname else 'nullptr'
-            declarations.append(line_pattern % (i.py_class_name, i.binding_classname, modulename, i.name, base_type,
-                                                '|Py_TPFLAGS_HAVE_GC' if i.has_debris else ''))
+            flags = ['Py_TPFLAGS_DEFAULT']
+            if i.is_interface:
+                flags.append('Py_TPFLAGS_BASETYPE')
+            if i.has_debris:
+                flags.append('Py_TPFLAGS_HAVE_GC')
+            declarations.append(line_pattern % (i.py_class_name, i.binding_classname, modulename, i.name, base_type, '|'.join(flags)))
             class_declared.add(i.binding_classname)
         else:
             assert len(genclasses) != 0
@@ -203,7 +207,7 @@ def gen_body_source(filename, output_dir, output_file, namespaces, modulename, r
         return None
 
     add_types = '\n    '.join([f'moduletypes.push_back({i});' for i in gen_module_type_declarations(modulename, results)])
-    lines.append('\n' + '''void __init_%s__(PyObject* module)
+    lines.append('''\nvoid __init_%s__(PyObject* module)
 {
     Vector<PyArkType*> moduletypes;
     ark::plugin::python::PythonExtension& pi = ark::plugin::python::PythonExtension::instance();
@@ -294,9 +298,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
 }''', py_class_name=genclass.py_class_name)
     lines.append('\n' + constructor)
     method_definitions = [(i, i.gen_definition(genclass)) for i in genclass.methods]
-    lines.extend(
-        '\n' + methoddefinition % (i.gen_py_return(), i.name, i.gen_py_arguments(), j) for i, j in method_definitions if
-        j)
+    lines.extend('\n' + methoddefinition % (i.gen_py_return(), i.name, i.gen_py_arguments(), j) for i, j in method_definitions if j)
 
 
 def gen_py_binding_cpp(name, namespaces, includes, lines):
@@ -422,8 +424,8 @@ class GenLoaderMethod(GenMethod):
     def need_unpack_statement(self):
         return False
 
-    def gen_loader_statement(self, classname, beanname, methodname):
-        return acg.format('loader[Type<${beanname}>::id()] = PyArk${classname}_${methodname}Function<${beanname}>;', classname=classname, beanname=beanname, methodname=methodname)
+    def gen_loader_statement(self, classname: str, beanname: str, methodname: str):
+        return f'loader[Type<{beanname}>::id()] = PyArk{classname}_{methodname}Function<{beanname}>;'
 
 
 class GenMemberMethod(GenMethod):
@@ -432,6 +434,17 @@ class GenMemberMethod(GenMethod):
 
     def gen_py_method_def(self, genclass):
         return self.gen_py_method_def_tp(genclass)
+
+
+class GenInterfaceMethod(GenMethod):
+    def __init__(self, name, args, return_type):
+        GenMethod.__init__(self, name, args, return_type)
+
+    def gen_py_method_def(self, genclass):
+        return self.gen_py_method_def_tp(genclass)
+
+    def gen_definition(self, genclass):
+        return 'return PyBridge::incRefNone();'
 
 
 class GenStaticMethod(GenMethod):
@@ -602,6 +615,10 @@ class GenClass:
     def sequence_methods(self):
         return self.find_methods_by_type(GenSequenceMethod)
 
+    @property
+    def is_interface(self) -> bool:
+        return bool(self.find_methods_by_type(GenInterfaceMethod))
+
     def find_methods_by_type(self, method_type):
         return [i for i in self._methods if isinstance(i, method_type)]
 
@@ -683,6 +700,8 @@ def main(params, paths):
             genmethod = GenConstructorMethod(name, args, is_static)
         elif is_static and method_modifier == 'classmethod':
             genmethod = GenStaticMemberMethod(name, args, return_type)
+        elif method_modifier == 'interface':
+            genmethod = GenInterfaceMethod(name, args, return_type)
         else:
             genmethod = GenMemberMethod(name, args, return_type)
         genclass.add_method(genmethod)

@@ -298,19 +298,19 @@ bool ApplicationContext::onEvent(const Event& event)
     return _event_listeners.onEvent(event) || (_default_event_listener && _default_event_listener->onEvent(event));
 }
 
-void ApplicationContext::addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelled)
+void ApplicationContext::addPreComposeRunnable(sp<Runnable> runnable, sp<Boolean> cancelled)
 {
-    _render_controller->addPreComposeRunnable(std::move(task), std::move(cancelled));
+    _render_controller->addPreComposeRunnable(std::move(runnable), std::move(cancelled));
 }
 
-void ApplicationContext::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+void ApplicationContext::addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
-    _event_listeners.addEventListener(std::move(eventListener), std::move(disposed));
+    _event_listeners.addEventListener(std::move(eventListener), std::move(discarded));
 }
 
-void ApplicationContext::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+void ApplicationContext::pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
-    _event_listeners.pushEventListener(std::move(eventListener), std::move(disposed));
+    _event_listeners.pushEventListener(std::move(eventListener), std::move(discarded));
 }
 
 void ApplicationContext::setDefaultEventListener(sp<EventListener> eventListener)

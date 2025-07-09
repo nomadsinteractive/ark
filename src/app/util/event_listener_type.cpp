@@ -2,7 +2,6 @@
 
 #include "core/components/discarded.h"
 
-#include "app/base/event.h"
 #include "app/impl/event_listener/event_listener_list.h"
 #include "app/impl/event_listener/event_listener_wrapper.h"
 

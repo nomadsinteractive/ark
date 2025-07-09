@@ -202,7 +202,7 @@ const Vector<String>& ApplicationFacade::argv() const
 
 void ApplicationFacade::addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelled)
 {
-    _context->addPreRenderTask(std::move(task), std::move(cancelled));
+    _context->addPreComposeRunnable(std::move(task), std::move(cancelled));
 }
 
 void ApplicationFacade::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
