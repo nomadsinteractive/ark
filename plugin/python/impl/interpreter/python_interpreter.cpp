@@ -98,7 +98,9 @@ PythonInterpreter::PythonInterpreter(const StringView name, const document& libr
     if(!preInitialize())
     {
         memset(_import_frozen_bootstrap, 0, sizeof(_import_frozen_bootstrap));
-        for(_frozen* pt = const_cast<_frozen*>(_PyImport_FrozenBootstrap), *i = _import_frozen_bootstrap; pt->name; pt ++, i ++)
+
+        _frozen *i = _import_frozen_bootstrap;
+        for(const _frozen* pt = _PyImport_FrozenBootstrap; pt->name; pt++, i++)
         {
             *i = *pt;
             if(strcmp(pt->name, "_frozen_importlib") == 0)

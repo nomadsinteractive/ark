@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include <chrono>
+#include <list>
 #include <map>
 #include <span>
 #include <set>
@@ -36,6 +37,7 @@ template<typename T> class WeakPtr;
 template<typename T> class Wrapper;
 
 template <typename T> using Vector = std::vector<T>;
+template <typename T> using List = std::list<T>;
 template <typename T> using Set = std::set<T>;
 template <typename T, typename H = std::hash<T>> using HashSet = std::unordered_set<T, H>;
 

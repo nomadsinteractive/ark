@@ -1,11 +1,8 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/base/scope.h"
 #include "core/base/string.h"
 #include "core/forwarding.h"
-
-#include "graphics/forwarding.h"
 
 #include "app/base/application_delegate.h"
 #include "app/forwarding.h"

@@ -34,11 +34,11 @@ public:
 //  [[script::bindings::operator(@)]]
     static sp<Vec4> matmul(sp<Mat4> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(@)]]
-    static sp<Vec4> matmul(sp<Mat4> lvalue, const V4& rvalue);
+    static sp<Vec4> matmul(sp<Mat4> lvalue, V4 rvalue);
 //  [[script::bindings::operator(@)]]
     static sp<Vec3> matmul(sp<Mat4> lvalue, sp<Vec3> rvalue);
 //  [[script::bindings::operator(@)]]
-    static sp<Vec3> matmul(sp<Mat4> lvalue, const V3& rvalue);
+    static sp<Vec3> matmul(sp<Mat4> lvalue, V3 rvalue);
 
 //  [[script::bindings::classmethod]]
     static sp<Mat4> rotate(sp<Mat4> self, sp<Vec4> quaternion);

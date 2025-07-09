@@ -188,25 +188,6 @@ int32_t IntegerType::val(const sp<Integer>& self)
     return self->val();
 }
 
-sp<Integer> IntegerType::delegate(const sp<Integer>& self)
-{
-    const sp<IntegerWrapper>& iw = self.asInstance<IntegerWrapper>();
-    DCHECK_WARN(iw, "Non-IntegerWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
-    return iw ? iw->wrapped() : nullptr;
-}
-
-void IntegerType::setDelegate(const sp<Integer>& self, const sp<Integer>& delegate)
-{
-    const sp<IntegerWrapper> iw = self.ensureInstance<IntegerWrapper>("Must be an IntegerWrapper instance to set its delegate attribute");
-    iw->set(delegate);
-}
-
-sp<Observer> IntegerType::observer(const sp<Integer>& self)
-{
-    const sp<WithObserver> wo = self.asInstance<WithObserver>();
-    return wo ? wo->observer() : nullptr;
-}
-
 void IntegerType::set(const sp<Integer>& self, const int32_t value)
 {
     const sp<IntegerWrapper> nw = self.ensureInstance<IntegerWrapper>("Must be an IntegerWrapper instance(result of a wrap() function call) to set its value");

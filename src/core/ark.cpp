@@ -191,10 +191,8 @@ public:
         : _builtin_asset_bundle(builtInAssetBundle)
     {
         for(const ApplicationManifest::Asset& i : assets)
-        {
-            if(sp<AssetBundle> assetBundle = createAsset(i))
+            if(sp<AssetBundle> assetBundle = createAssetBundle(i))
                 _mounts.push_front(Mounted(i, std::move(assetBundle)));
-        }
     }
 
     sp<Asset> getAsset(const String& name) const
@@ -223,18 +221,18 @@ public:
     }
 
 private:
-    sp<AssetBundle> createAsset(const ApplicationManifest::Asset& manifest) const
+    sp<AssetBundle> createAssetBundle(const ApplicationManifest::Asset& manifest) const
     {
         const String filepath = manifest._src.protocol() == "external" ? Platform::getExternalStoragePath(manifest._src.path()) : manifest._src.path();
-        sp<AssetBundle> asset = _builtin_asset_bundle->getBundle(filepath);
-        CHECK_WARN(asset, "Unable to load AssetBundle, src: %s", manifest._src.toString().c_str());
-        return asset;
+        sp<AssetBundle> assetBundle = _builtin_asset_bundle->getBundle(filepath);
+        CHECK_WARN(assetBundle, "Unable to load AssetBundle, src: %s", manifest._src.toString().c_str());
+        return assetBundle;
     }
 
     class Mounted {
     public:
-        Mounted(const ApplicationManifest::Asset& manifest, sp<AssetBundle> asset)
-            : _root(manifest._src.protocol(), manifest._root), _asset_bundle(std::move(asset)) {
+        Mounted(const ApplicationManifest::Asset& manifest, sp<AssetBundle> assetBundle)
+            : _root(manifest._src.protocol(), manifest._root), _asset_bundle(std::move(assetBundle)) {
         }
 
         sp<Asset> getAsset(const URL& url) const
@@ -278,7 +276,7 @@ private:
         sp<AssetBundle> _asset_bundle;
     };
 
-    std::list<Mounted> _mounts;
+    List<Mounted> _mounts;
     sp<AssetBundle> _builtin_asset_bundle;
 };
 

@@ -25,7 +25,7 @@ public:
 //  [[script::bindings::operator(*)]]
     static sp<Vec2> mul(const sp<Mat2>& lvalue, const sp<Vec2>& rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec2> mul(const sp<Mat2>& lvalue, const V2& rvalue);
+    static sp<Vec2> mul(const sp<Mat2>& lvalue, V2 rvalue);
 
 //  [[script::bindings::classmethod]]
     static sp<Mat2> rotate(const sp<Mat2>& self, const sp<Numeric>& radians);

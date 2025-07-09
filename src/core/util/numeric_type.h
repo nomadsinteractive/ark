@@ -23,27 +23,27 @@ public:
     static sp<NumericWrapper> create(float value);
 
 //  [[script::bindings::operator(+)]]
-    static sp<Numeric> add(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
+    static sp<Numeric> add(sp<Numeric> lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(+)]]
-    static sp<Numeric> add(const sp<Numeric>& lvalue, float rvalue);
+    static sp<Numeric> add(sp<Numeric> lhs, float rhs);
 //  [[script::bindings::operator(+)]]
-    static sp<Numeric> add(float lvalue, const sp<Numeric>& rvalue);
+    static sp<Numeric> add(float lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(-)]]
-    static sp<Numeric> sub(sp<Numeric> lvalue, sp<Numeric> rvalue);
+    static sp<Numeric> sub(sp<Numeric> lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(-)]]
-    static sp<Numeric> sub(sp<Numeric> lvalue, float rvalue);
+    static sp<Numeric> sub(sp<Numeric> lhs, float rhs);
 //  [[script::bindings::operator(-)]]
-    static sp<Numeric> sub(float lvalue, sp<Numeric> rvalue);
+    static sp<Numeric> sub(float lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(*)]]
-    static sp<Numeric> mul(sp<Numeric> lvalue, sp<Numeric> rvalue);
+    static sp<Numeric> mul(sp<Numeric> lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(*)]]
-    static sp<Numeric> mul(sp<Numeric> lvalue, float rvalue);
+    static sp<Numeric> mul(sp<Numeric> lhs, float rhs);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec2> mul(sp<Numeric> lvalue, sp<Vec2> rvalue);
+    static sp<Vec2> mul(sp<Numeric> lhs, sp<Vec2> rhs);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec3> mul(sp<Numeric> lvalue, sp<Vec3> rvalue);
+    static sp<Vec3> mul(sp<Numeric> lhs, sp<Vec3> rhs);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec4> mul(sp<Numeric> lvalue, sp<Vec4> rvalue);
+    static sp<Vec4> mul(sp<Numeric> lhs, sp<Vec4> rhs);
 //  [[script::bindings::operator(/)]]
     static sp<Numeric> truediv(sp<Numeric> lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(//)]]
@@ -82,13 +82,6 @@ public:
 
 //  [[script::bindings::property]]
     static float val(const sp<Numeric>& self);
-//  [[script::bindings::property]]
-    static sp<Numeric> delegate(const sp<Numeric>& self);
-//  [[script::bindings::property]]
-    static void setDelegate(const sp<Numeric>& self, const sp<Numeric>& delegate);
-
-//  [[script::bindings::property]]
-    static sp<Observer> observer(const sp<Numeric>& self);
 
 //  [[script::bindings::classmethod]]
     static void set(const sp<Numeric::Impl>& self, float value);
@@ -107,13 +100,13 @@ public:
     static sp<Numeric> synchronize(sp<Numeric> self, sp<Boolean> canceled = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> atLeast(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer = nullptr);
+    static sp<Numeric> atLeast(sp<Numeric> self, sp<Numeric> a1, sp<Runnable> callback = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> atMost(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer = nullptr);
+    static sp<Numeric> atMost(sp<Numeric> self, sp<Numeric> a1, sp<Runnable> callback = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> clamp(sp<Numeric> self, sp<Numeric> min, sp<Numeric> max, sp<Observer> observer = nullptr);
+    static sp<Numeric> clamp(sp<Numeric> self, sp<Numeric> min, sp<Numeric> max, sp<Runnable> callback = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> fence(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer = nullptr);
+    static sp<Numeric> fence(sp<Numeric> self, sp<Numeric> a1, sp<Runnable> callback = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> ifElse(sp<Numeric> self, sp<Boolean> condition, sp<Numeric> negative);
 //  [[script::bindings::classmethod]]

@@ -6,16 +6,14 @@
 
 namespace ark {
 
-class ARK_API WithObserver {
+class ARK_API WithCallback {
 public:
-    WithObserver(sp<Observer> observer);
-
-    const sp<Observer>& observer();
+    WithCallback(sp<Runnable> callback);
 
     void notify() const;
 
 private:
-    sp<Observer> _observer;
+    sp<Runnable> _callback;
 };
 
 }

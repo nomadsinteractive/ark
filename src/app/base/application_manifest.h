@@ -106,11 +106,10 @@ public:
 
 private:
     String _name;
-
     String _asset_dir;
 
-    std::vector<Asset> _assets;
-    std::vector<String> _plugins;
+    Vector<Asset> _assets;
+    Vector<String> _plugins;
 
     Application _application;
     Window _window;

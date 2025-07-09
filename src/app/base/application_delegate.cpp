@@ -1,12 +1,12 @@
 #include "app/base/application_delegate.h"
 
+#include "core/inf/interpreter.h"
+
 #include "graphics/inf/render_view.h"
 
 #include "app/base/application.h"
 #include "app/base/application_context.h"
-#include "app/base/application_manifest.h"
 #include "app/base/surface.h"
-#include "core/inf/interpreter.h"
 
 namespace ark {
 

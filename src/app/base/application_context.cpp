@@ -164,7 +164,7 @@ void ApplicationContext::initialize(const document& manifest)
     _message_loop_app = makeMessageLoop(_app_clock->_clock);
 
     if(const document& interpreter = ark.manifest()->interpreter())
-        _interpreter = _resource_loader->beanFactory().build<Interpreter>(interpreter, Scope());
+        _interpreter = _resource_loader->beanFactory().build<Interpreter>(interpreter, {});
     else
         _interpreter = sp<Interpreter>::make<NoneInterpreter>();
 }

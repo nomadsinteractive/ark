@@ -49,7 +49,7 @@ sp<Vec2> Mat2Type::mul(const sp<Mat2>& lvalue, const sp<Vec2>& rvalue)
     return sp<Vec2>::make<VariableOP2<sp<Mat2>, sp<Vec2>, Operators::Mul<M2, V2>>>(lvalue, rvalue);
 }
 
-sp<Vec2> Mat2Type::mul(const sp<Mat2>& lvalue, const V2& rvalue)
+sp<Vec2> Mat2Type::mul(const sp<Mat2>& lvalue, const V2 rvalue)
 {
     return sp<Vec2>::make<VariableOP2<sp<Mat2>, V2, Operators::Mul<M3, V2>>>(lvalue, rvalue);
 }

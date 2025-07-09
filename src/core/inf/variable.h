@@ -64,26 +64,4 @@ private:
     T _value;
 };
 
-template<typename T> class Variable<T>::ByUpdate : public Variable<T> {
-public:
-    ByUpdate(T value)
-        : _value(std::move(value)) {
-    }
-
-    T val() override {
-        return _value;
-    }
-
-    bool update(uint64_t timestamp) override {
-        return doUpdate(timestamp, _value);
-    }
-
-protected:
-    virtual bool doUpdate(uint64_t /*timestamp*/, T& value) = 0;
-
-protected:
-    T _value;
-};
-
-
 }

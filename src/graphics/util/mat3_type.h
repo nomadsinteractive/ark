@@ -25,11 +25,11 @@ public:
 //  [[script::bindings::operator(@)]]
     static sp<Vec3> matmul(sp<Mat3> lvalue, sp<Vec3> rvalue);
 //  [[script::bindings::operator(@)]]
-    static sp<Vec3> matmul(sp<Mat3> lvalue, const V3& rvalue);
+    static sp<Vec3> matmul(sp<Mat3> lvalue, V3 rvalue);
 //  [[script::bindings::operator(@)]]
     static sp<Vec2> matmul(sp<Mat3> lvalue, sp<Vec2> rvalue);
 //  [[script::bindings::operator(@)]]
-    static sp<Vec2> matmul(sp<Mat3> lvalue, const V2& rvalue);
+    static sp<Vec2> matmul(sp<Mat3> lvalue, V2 rvalue);
 
 //  [[script::bindings::auto]]
     static sp<Mat3> identity();

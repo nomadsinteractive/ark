@@ -4,8 +4,6 @@
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/forwarding.h"
-
 namespace ark {
 
 class ARK_API ApplicationController {
@@ -44,7 +42,6 @@ public:
 
 //  [[script::bindings::auto]]
     virtual void exit() = 0;
-
 };
 
 }

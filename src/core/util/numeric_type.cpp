@@ -41,59 +41,59 @@ sp<NumericWrapper> NumericType::create(sp<Integer> value)
     return sp<NumericWrapper>::make(std::move(casted));
 }
 
-sp<Numeric> NumericType::add(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
+sp<Numeric> NumericType::add(sp<Numeric> lhs, sp<Numeric> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Add<float>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Add<float>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Numeric> NumericType::add(const sp<Numeric>& lvalue, float rvalue)
+sp<Numeric> NumericType::add(sp<Numeric> lhs, float rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, float, Operators::Add<float>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, float, Operators::Add<float>>>(std::move(lhs), rhs);
 }
 
-sp<Numeric> NumericType::add(float lvalue, const sp<Numeric>& rvalue)
+sp<Numeric> NumericType::add(float lhs, sp<Numeric> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<float, sp<Numeric>, Operators::Add<float>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<float, sp<Numeric>, Operators::Add<float>>>(lhs, std::move(rhs));
 }
 
-sp<Numeric> NumericType::sub(sp<Numeric> lvalue, sp<Numeric> rvalue)
+sp<Numeric> NumericType::sub(sp<Numeric> lhs, sp<Numeric> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Sub<float>>>(std::move(lvalue), std::move(rvalue));
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Sub<float>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Numeric> NumericType::sub(sp<Numeric> lvalue, float rvalue)
+sp<Numeric> NumericType::sub(sp<Numeric> lhs, float rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, float, Operators::Sub<float>>>(std::move(lvalue), rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, float, Operators::Sub<float>>>(std::move(lhs), rhs);
 }
 
-sp<Numeric> NumericType::sub(float lvalue, sp<Numeric> rvalue)
+sp<Numeric> NumericType::sub(float lhs, sp<Numeric> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<float, sp<Numeric>, Operators::Sub<float>>>(lvalue, std::move(rvalue));
+    return sp<Numeric>::make<VariableOP2<float, sp<Numeric>, Operators::Sub<float>>>(lhs, std::move(rhs));
 }
 
-sp<Numeric> NumericType::mul(sp<Numeric> lvalue, sp<Numeric> rvalue)
+sp<Numeric> NumericType::mul(sp<Numeric> lhs, sp<Numeric> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Mul<float>>>(std::move(lvalue), std::move(rvalue));
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Mul<float>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Numeric> NumericType::mul(sp<Numeric> lvalue, float rvalue)
+sp<Numeric> NumericType::mul(sp<Numeric> lhs, float rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, float, Operators::Mul<float>>>(std::move(lvalue), rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, float, Operators::Mul<float>>>(std::move(lhs), rhs);
 }
 
-sp<Vec2> NumericType::mul(sp<Numeric> lvalue, sp<Vec2> rvalue)
+sp<Vec2> NumericType::mul(sp<Numeric> lhs, sp<Vec2> rhs)
 {
-    return sp<Vec2>::make<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Mul<V2, float>>>(std::move(rvalue), std::move(lvalue));
+    return sp<Vec2>::make<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Mul<V2, float>>>(std::move(rhs), std::move(lhs));
 }
 
-sp<Vec3> NumericType::mul(sp<Numeric> lvalue, sp<Vec3> rvalue)
+sp<Vec3> NumericType::mul(sp<Numeric> lhs, sp<Vec3> rhs)
 {
-    return sp<Vec3>::make<VariableOP2<sp<Vec3>, sp<Numeric>, Operators::Mul<V3, float>>>(std::move(rvalue), std::move(lvalue));
+    return sp<Vec3>::make<VariableOP2<sp<Vec3>, sp<Numeric>, Operators::Mul<V3, float>>>(std::move(rhs), std::move(lhs));
 }
 
-sp<Vec4> NumericType::mul(sp<Numeric> lvalue, sp<Vec4> rvalue)
+sp<Vec4> NumericType::mul(sp<Numeric> lhs, sp<Vec4> rhs)
 {
-    return sp<Vec4>::make<VariableOP2<sp<Vec4>, sp<Numeric>, Operators::Mul<V4, float>>>(std::move(rvalue), std::move(lvalue));
+    return sp<Vec4>::make<VariableOP2<sp<Vec4>, sp<Numeric>, Operators::Mul<V4, float>>>(std::move(rhs), std::move(lhs));
 }
 
 sp<Numeric> NumericType::truediv(sp<Numeric> lhs, sp<Numeric> rhs)
@@ -186,25 +186,6 @@ float NumericType::val(const sp<Numeric>& self)
     return self->val();
 }
 
-sp<Numeric> NumericType::delegate(const sp<Numeric>& self)
-{
-    const sp<NumericWrapper>& nw = self.asInstance<NumericWrapper>();
-    DCHECK_WARN(nw, "Non-NumericWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
-    return nw ? nw->wrapped() : nullptr;
-}
-
-void NumericType::setDelegate(const sp<Numeric>& self, const sp<Numeric>& delegate)
-{
-    const sp<NumericWrapper> nw = self.ensureInstance<NumericWrapper>("Must be an NumericWrapper instance to set its delegate attribute");
-    nw->set(delegate);
-}
-
-sp<Observer> NumericType::observer(const sp<Numeric>& self)
-{
-    const sp<WithObserver> wo = self.asInstance<WithObserver>();
-    return wo ? wo->observer() : nullptr;
-}
-
 void NumericType::set(const sp<Numeric::Impl>& self, const float value)
 {
     self->set(value);
@@ -241,26 +222,26 @@ sp<Numeric> NumericType::synchronize(sp<Numeric> self, sp<Boolean> canceled)
     return Ark::instance().renderController()->synchronize(std::move(self), std::move(canceled));
 }
 
-sp<Numeric> NumericType::atLeast(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer)
+sp<Numeric> NumericType::atLeast(sp<Numeric> self, sp<Numeric> a1, sp<Runnable> callback)
 {
-    return sp<Numeric>::make<AtLeast<float>>(std::move(self), std::move(a1), std::move(observer));
+    return sp<Numeric>::make<AtLeast<float>>(std::move(self), std::move(a1), std::move(callback));
 }
 
-sp<Numeric> NumericType::atMost(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer)
+sp<Numeric> NumericType::atMost(sp<Numeric> self, sp<Numeric> a1, sp<Runnable> callback)
 {
-    return sp<Numeric>::make<AtMost<float>>(std::move(self), std::move(a1), std::move(observer));
+    return sp<Numeric>::make<AtMost<float>>(std::move(self), std::move(a1), std::move(callback));
 }
 
-sp<Numeric> NumericType::clamp(sp<Numeric> self, sp<Numeric> min, sp<Numeric> max, sp<Observer> observer)
+sp<Numeric> NumericType::clamp(sp<Numeric> self, sp<Numeric> min, sp<Numeric> max, sp<Runnable> callback)
 {
     ASSERT(self && min && max);
-    return sp<Numeric>::make<Clamp<float>>(std::move(self), std::move(min), std::move(max), std::move(observer));
+    return sp<Numeric>::make<Clamp<float>>(std::move(self), std::move(min), std::move(max), std::move(callback));
 }
 
-sp<Numeric> NumericType::fence(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer)
+sp<Numeric> NumericType::fence(sp<Numeric> self, sp<Numeric> a1, sp<Runnable> callback)
 {
     DASSERT(self && a1);
-    return sp<Numeric>::make<Fence<float>>(std::move(self), std::move(a1), std::move(observer));
+    return sp<Numeric>::make<Fence<float>>(std::move(self), std::move(a1), std::move(callback));
 }
 
 sp<Numeric> NumericType::ifElse(sp<Numeric> self, sp<Boolean> condition, sp<Numeric> negative)

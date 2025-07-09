@@ -3,7 +3,6 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/named_hash.h"
-#include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
@@ -80,13 +79,6 @@ public:
 
 //  [[script::bindings::property]]
     static int32_t val(const sp<Integer>& self);
-//  [[script::bindings::property]]
-    static sp<Integer> delegate(const sp<Integer>& self);
-//  [[script::bindings::property]]
-    static void setDelegate(const sp<Integer>& self, const sp<Integer>& delegate);
-
-//  [[script::bindings::property]]
-    static sp<Observer> observer(const sp<Integer>& self);
 
 //  [[script::bindings::auto]]
     static sp<Integer> repeat(Vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE, sp<Observer> observer = nullptr);

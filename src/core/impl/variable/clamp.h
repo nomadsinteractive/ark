@@ -7,35 +7,40 @@
 
 namespace ark {
 
-template<typename T> class Clamp final : public Variable<T>::ByUpdate, public WithObserver, Implements<Clamp<T>, Variable<T>, WithObserver> {
+template<typename T> class Clamp final : public Variable<T>, public WithCallback, Implements<Clamp<T>, Variable<T>, WithCallback> {
 public:
-    Clamp(sp<Variable<T>> delegate, sp<Variable<T>> min, sp<Variable<T>> max, sp<Observer> observer)
-        : Variable<T>::ByUpdate(delegate->val()), WithObserver(std::move(observer)), _delegate(std::move(delegate)), _min(std::move(min)), _max(std::move(max)) {
-        doClamp(this->_value);
+    Clamp(sp<Variable<T>> delegate, sp<Variable<T>> min, sp<Variable<T>> max, sp<Runnable> callback)
+        : WithCallback(std::move(callback)), _delegate(std::move(delegate)), _min(std::move(min)), _max(std::move(max)) {
+        doClamp();
     }
 
-    virtual bool doUpdate(uint64_t timestamp, T& value) override {
+    T val() override {
+        return _value;
+    }
+
+    bool update(uint64_t timestamp) override {
         if(!UpdatableUtil::update(timestamp, _delegate, _min, _max))
             return false;
 
-        doClamp(value);
+        doClamp();
         return true;
     }
 
 private:
-    void doClamp(T& value) {
-        value = _delegate->val();
+    void doClamp() {
         T t;
-        if((t = _min->val()) > value) {
+        _value = _delegate->val();
+        if((t = _min->val()) > _value) {
             notify();
-            value = t;
-        } else if((t = _max->val()) < value) {
+            _value = t;
+        } else if((t = _max->val()) < _value) {
             notify();
-            value = t;
+            _value = t;
         }
     }
 
 private:
+    T _value;
     sp<Variable<T>> _delegate;
     sp<Variable<T>> _min;
     sp<Variable<T>> _max;

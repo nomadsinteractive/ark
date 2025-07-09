@@ -35,7 +35,7 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
     if(sp<Activity> activity = activityBuilder.build({}))
         applicationFacade->setActivity(std::move(activity));
 
-    applicationContext->_application_facade = applicationFacade;
+    applicationContext->_application_facade = std::move(applicationFacade);
 
     bool defaultEventListenerSet = false;
     for(const document& i : appManifest->children("script"))
@@ -88,32 +88,25 @@ void ApplicationDelegateImpl::ScriptTag::run() const
     if(_source)
         _interpreter->execute(_source);
     if(_function_name)
-    {
-        const Interpreter::Arguments args;
-        _interpreter->call(_interpreter->attr(nullptr, _function_name), args);
-    }
+        _interpreter->call(_interpreter->attr(nullptr, _function_name), {});
 }
 
 sp<EventListener> ApplicationDelegateImpl::ScriptTag::makeEventListener() const
 {
     DCHECK(_function_name, "Application EventListener should be function, not script");
-    return sp<EventListenerByScript>::make(_interpreter, _function_name);
+    return sp<EventListener>::make<EventListenerByScript>(_interpreter, _function_name);
 }
 
 template<> ApplicationDelegateImpl::ScriptRunOn StringConvert::eval<ApplicationDelegateImpl::ScriptRunOn>(const String& str)
 {
-    if(str == "create")
-        return ApplicationDelegateImpl::SCRIPT_RUN_ON_CREATE;
-    if(str == "pause")
-        return ApplicationDelegateImpl::SCRIPT_RUN_ON_PAUSE;
-    if(str == "resume")
-        return ApplicationDelegateImpl::SCRIPT_RUN_ON_RESUME;
-    if(str == "event")
-        return ApplicationDelegateImpl::SCRIPT_RUN_ON_EVENT;
-    if(str == "unhandled_event")
-        return ApplicationDelegateImpl::SCRIPT_RUN_ON_UNHANDLED_EVENT;
-    DFATAL("Unkown value %s", str.c_str());
-    return ApplicationDelegateImpl::SCRIPT_RUN_ON_CREATE;
+    constexpr enums::LookupTable<ApplicationDelegateImpl::ScriptRunOn, 5> table = {{
+        {"create", ApplicationDelegateImpl::SCRIPT_RUN_ON_CREATE},
+        {"pause", ApplicationDelegateImpl::SCRIPT_RUN_ON_PAUSE},
+        {"resume", ApplicationDelegateImpl::SCRIPT_RUN_ON_RESUME},
+        {"event", ApplicationDelegateImpl::SCRIPT_RUN_ON_EVENT},
+        {"unhandled_event", ApplicationDelegateImpl::SCRIPT_RUN_ON_UNHANDLED_EVENT}
+    }};
+    return enums::lookup(table, str);
 }
 
 }

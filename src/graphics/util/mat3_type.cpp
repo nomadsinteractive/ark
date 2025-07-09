@@ -36,7 +36,7 @@ sp<Vec3> Mat3Type::matmul(sp<Mat3> lvalue, sp<Vec3> rvalue)
     return sp<Vec3>::make<VariableOP2<sp<Mat3>, sp<Vec3>, Operators::Mul<M3, V3>>>(std::move(lvalue), std::move(rvalue));
 }
 
-sp<Vec3> Mat3Type::matmul(sp<Mat3> lvalue, const V3& rvalue)
+sp<Vec3> Mat3Type::matmul(sp<Mat3> lvalue, const V3 rvalue)
 {
     return sp<Vec3>::make<VariableOP2<sp<Mat3>, V3, Operators::Mul<M3, V3>>>(std::move(lvalue), rvalue);
 }
@@ -46,7 +46,7 @@ sp<Vec2> Mat3Type::matmul(sp<Mat3> lvalue, sp<Vec2> rvalue)
     return sp<Vec2>::make<VariableOP2<sp<Mat3>, sp<Vec2>, Operators::Mul<M3, V2>>>(std::move(lvalue), std::move(rvalue));
 }
 
-sp<Vec2> Mat3Type::matmul(sp<Mat3> lvalue, const V2& rvalue)
+sp<Vec2> Mat3Type::matmul(sp<Mat3> lvalue, const V2 rvalue)
 {
     return sp<Vec2>::make<VariableOP2<sp<Mat3>, V2, Operators::Mul<M3, V2>>>(std::move(lvalue), rvalue);
 }
