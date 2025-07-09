@@ -92,7 +92,9 @@ public:
     static Optional<float> getItem(const sp<Vec2>& self, ptrdiff_t index);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> freeze(sp<Vec2> self);
+    static V2 update(const sp<Vec2>& self);
+//  [[script::bindings::classmethod]]
+    static sp<Vec2> freeze(const sp<Vec2>& self);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec2> wrap(sp<Vec2> self);

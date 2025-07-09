@@ -4,7 +4,6 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
-#include "core/util/updatable_util.h"
 
 #include "graphics/base/mat.h"
 #include "graphics/impl/mat/mat3_impl.h"
@@ -19,11 +18,10 @@ sp<Mat3> Mat3Type::create(sp<Vec3> t, sp<Vec3> b, sp<Vec3> n)
 
 M3 Mat3Type::val(const sp<Mat3>& self)
 {
-    self->update(Timestamp::now());
     return self->val();
 }
 
-sp<Mat3> Mat3Type::create(const V3& t, const V3& b, const V3& n)
+sp<Mat3> Mat3Type::create(const V3 t, const V3 b, const V3 n)
 {
     return sp<Mat3>::make<Mat3Impl>(t, b, n);
 }
@@ -58,14 +56,20 @@ sp<Mat3> Mat3Type::identity()
     return sp<Mat3>::make<Mat3Impl>();
 }
 
+M3 Mat3Type::update(const sp<Mat3>& self)
+{
+    self->update(Timestamp::now());
+    return self->val();
+}
+
 sp<Mat3> Mat3Type::freeze(const sp<Mat3>& self)
 {
-    return sp<Mat3>::make<Mat3::Const>(val(self));
+    return sp<Mat3>::make<Mat3::Const>(update(self));
 }
 
 sp<Mat3> Mat3Type::ensureImpl(const sp<Mat3>& self)
 {
-    return self.ensureInstance<Mat3Impl>("This Vec3 object is not a Mat3Impl instance");
+    return self.ensureInstance<Mat3Impl>("This Mat3 object is not a Mat3Impl instance");
 }
 
 }

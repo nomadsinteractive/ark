@@ -101,6 +101,8 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Integer> wrap(const sp<Integer>& self);
 //  [[script::bindings::classmethod]]
+    static int32_t update(const sp<Integer>& self);
+//  [[script::bindings::classmethod]]
     static sp<Integer> freeze(const sp<Integer>& self);
 
 //  [[script::bindings::classmethod]]

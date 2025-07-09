@@ -138,12 +138,12 @@ sp<Numeric> NumericType::pow(const sp<Numeric>& x, const sp<Numeric>& y, const s
 
 int32_t NumericType::toInt32(const sp<Numeric>& self)
 {
-    return static_cast<int32_t>(val(self));
+    return static_cast<int32_t>(update(self));
 }
 
 float NumericType::toFloat(const sp<Numeric>& self)
 {
-    return val(self);
+    return update(self);
 }
 
 sp<Boolean> NumericType::gt(sp<Numeric> self, sp<Numeric> other)
@@ -183,7 +183,6 @@ sp<Boolean> NumericType::dirty(sp<Numeric> self)
 
 float NumericType::val(const sp<Numeric>& self)
 {
-    self->update(Timestamp::now());
     return self->val();
 }
 
@@ -221,9 +220,15 @@ void NumericType::set(const sp<NumericWrapper>& self, sp<Numeric> value)
     self->set(std::move(value));
 }
 
+float NumericType::update(const sp<Numeric>& self)
+{
+    self->update(Timestamp::now());
+    return self->val();
+}
+
 sp<Numeric> NumericType::freeze(const sp<Numeric>& self)
 {
-    return sp<Numeric>::make<NumericWrapper>(val(self));
+    return sp<Numeric>::make<NumericWrapper>(update(self));
 }
 
 sp<Numeric> NumericType::wrap(sp<Numeric> self)
@@ -270,7 +275,7 @@ sp<Numeric> NumericType::dye(sp<Numeric> self, sp<Boolean> condition, String mes
 
 String NumericType::str(const sp<Numeric>& self)
 {
-    return Strings::sprintf("%.2f", val(self));
+    return Strings::sprintf("%.2f", update(self));
 }
 
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)

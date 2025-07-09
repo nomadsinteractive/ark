@@ -23,7 +23,7 @@ public:
         return UpdatableUtil::update(timestamp, _t, _b, _n, _w);
     }
 
-    static M4 toMatrix(const V4& t, const V4& b, const V4& n, const V4& w) {
+    static M4 toMatrix(const V4 t, const V4 b, const V4 n, const V4 w) {
         const float values[16] = {t.x(), b.x(), n.x(), w.x(), t.y(), b.y(), n.y(), w.y(), t.z(), b.z(), n.z(), w.z(), t.w(), b.w(), n.w(), w.w()};
         return M4(values);
     }
@@ -47,7 +47,7 @@ Mat4Impl::Mat4Impl(sp<Mat4> other) noexcept
 {
 }
 
-Mat4Impl::Mat4Impl(const V4& t, const V4& b, const V4& n, const V4& w) noexcept
+Mat4Impl::Mat4Impl(const V4 t, const V4 b, const V4 n, const V4 w) noexcept
     : _impl(sp<VariableWrapper<M4>>::make(TBNMat4::toMatrix(t, b, n, w)))
 {
 }

@@ -13,7 +13,7 @@ namespace ark {
 class ARK_API Mat2Type final {
 public:
 //  [[script::bindings::constructor]]
-    static sp<Mat2> create(const V2& t, const V2& b);
+    static sp<Mat2> create(V2 t, V2 b);
 //  [[script::bindings::constructor]]
     static sp<Mat2> create(const sp<Vec2>& t = nullptr, const sp<Vec2>& b = nullptr);
 
@@ -33,6 +33,8 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Mat2> ifElse(const sp<Mat2>& self, const sp<Boolean>& condition, const sp<Mat2>& negative);
 
+//  [[script::bindings::classmethod]]
+    static M2 update(const sp<Mat2>& self);
 //  [[script::bindings::classmethod]]
     static sp<Mat2> freeze(const sp<Mat2>& self);
 };

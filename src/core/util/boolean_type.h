@@ -30,6 +30,11 @@ public:
     static sp<Boolean> wrapped(const sp<Boolean>& self);
 
 //  [[script::bindings::classmethod]]
+    static bool update(const sp<Boolean>& self);
+//  [[script::bindings::classmethod]]
+    static sp<Boolean> freeze(const sp<Boolean>& self);
+
+//  [[script::bindings::classmethod]]
     static sp<Boolean> wrap(sp<Boolean> self);
 
 //  [[script::bindings::classmethod]]

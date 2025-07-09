@@ -292,6 +292,9 @@ class _Var:
     def freeze(self):
         pass
 
+    def update(self):
+        pass
+
     def wrap(self):
         pass
 

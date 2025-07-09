@@ -35,6 +35,10 @@ public:
     };
 
     static T val(const sp<VarType>& self) {
+        return self->val();
+    }
+
+    static T update(const sp<VarType>& self) {
         self->update(Timestamp::now());
         return self->val();
     }
@@ -218,7 +222,7 @@ public:
     }
 
     static sp<VarType> freeze(const sp<VarType>& self) {
-        return self ? sp<VarType>::template make<typename VarType::Const>(val(self)) : nullptr;
+        return self ? sp<VarType>::template make<typename VarType::Const>(update(self)) : nullptr;
     }
 
     static sp<VarType> wrap(sp<VarType> self) {

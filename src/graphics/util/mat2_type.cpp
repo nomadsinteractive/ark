@@ -16,14 +16,14 @@ namespace  {
 
 class RotateOP {
 public:
-    M2 operator()(const M2& v1, float v2) const {
+    M2 operator()(const M2& v1, const float v2) const {
         return MatrixUtil::rotate(v1, v2);
     }
 };
 
 }
 
-sp<Mat2> Mat2Type::create(const V2& t, const V2& b)
+sp<Mat2> Mat2Type::create(const V2 t, const V2 b)
 {
     return sp<Mat2>::make<Mat2Impl>(t, b);
 }
@@ -36,7 +36,6 @@ sp<Mat2> Mat2Type::create(const sp<Vec2>& t, const sp<Vec2>& b)
 
 M2 Mat2Type::val(const sp<Mat2>& self)
 {
-    self->update(Timestamp::now());
     return self->val();
 }
 
@@ -65,9 +64,15 @@ sp<Mat2> Mat2Type::ifElse(const sp<Mat2>& self, const sp<Boolean>& condition, co
     return sp<Mat2>::make<VariableTernary<M2>>(condition, self, negative);
 }
 
+M2 Mat2Type::update(const sp<Mat2>& self)
+{
+    self->update(Timestamp::now());
+    return self->val();
+}
+
 sp<Mat2> Mat2Type::freeze(const sp<Mat2>& self)
 {
-    return sp<Mat2>::make<Mat2::Const>(val(self));
+    return sp<Mat2>::make<Mat2::Const>(update(self));
 }
 
 }

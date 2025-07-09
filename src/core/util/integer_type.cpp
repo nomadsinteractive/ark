@@ -145,7 +145,7 @@ int32_t IntegerType::toInt32(const sp<Integer>& self)
 
 float IntegerType::toFloat(const sp<Integer>& self)
 {
-    return static_cast<float>(val(self));
+    return static_cast<float>(update(self));
 }
 
 sp<Boolean> IntegerType::gt(const sp<Integer>& self, const sp<Integer>& other)
@@ -185,7 +185,6 @@ sp<Boolean> IntegerType::dirty(sp<Integer> self)
 
 int32_t IntegerType::val(const sp<Integer>& self)
 {
-    self->update(Timestamp::now());
     return self->val();
 }
 
@@ -231,9 +230,15 @@ sp<Integer> IntegerType::wrap(const sp<Integer>& self)
     return sp<Integer>::make<IntegerWrapper>(self);
 }
 
+int32_t IntegerType::update(const sp<Integer>& self)
+{
+    self->update(Timestamp::now());
+    return self->val();
+}
+
 sp<Integer> IntegerType::freeze(const sp<Integer>& self)
 {
-    return sp<Integer>::make<Integer::Const>(val(self));
+    return sp<Integer>::make<Integer::Const>(update(self));
 }
 
 sp<Integer> IntegerType::repeat(Vector<int32_t> array, IntegerType::Repeat repeat, sp<Observer> observer)
@@ -276,7 +281,7 @@ sp<Integer> IntegerType::dye(sp<Integer> self, sp<Boolean> condition, String mes
 IntegerType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
     : _value(value && value.at(0) == '#' ? sp<Builder<Integer>>::make<Prebuilt>(sp<Integer>::make<Integer::Const>(value.substr(1).hash())) : Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, value))
 {
-    CHECK(_value, "Numeric expression compile failed: %s. Use \"#%s\" if you need to build a NamedHash integer", value.c_str(), value.c_str());
+    CHECK(_value, "Integer expression compile failed: %s. Use \"#%s\" if you need to build a NamedHash integer", value.c_str(), value.c_str());
 }
 
 sp<Integer> IntegerType::DICTIONARY::build(const Scope& args)

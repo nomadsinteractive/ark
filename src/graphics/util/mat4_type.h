@@ -19,7 +19,7 @@ public:
     static sp<Mat4> create(sp<Mat4> other);
 //  [[script::bindings::constructor]]
     static sp<Mat4> create(sp<Mat3> other);
-    static sp<Mat4> create(const V4& t, const V4& b, const V4& n, const V4& w);
+    static sp<Mat4> create(V4 t, V4 b, V4 n, V4 w);
     static sp<Mat4> create(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w);
 
 //  [[script::bindings::property]]
@@ -50,6 +50,8 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Mat4> inverse(sp<Mat4> self);
 
+//  [[script::bindings::classmethod]]
+    static M4 update(const sp<Mat4>& self);
 //  [[script::bindings::classmethod]]
     static sp<Mat4> freeze(const sp<Mat4>& self);
 

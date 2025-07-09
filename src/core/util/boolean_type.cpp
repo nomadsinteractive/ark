@@ -140,12 +140,11 @@ sp<Boolean> BooleanType::expect(sp<Boolean> self, sp<Boolean> expectation, sp<Fu
 
 bool BooleanType::toBool(const sp<Boolean>& self)
 {
-    return val(self);
+    return update(self);
 }
 
 bool BooleanType::val(const sp<Boolean>& self)
 {
-    self->update(Timestamp::now());
     return self->val();
 }
 
@@ -154,6 +153,17 @@ sp<Boolean> BooleanType::wrapped(const sp<Boolean>& self)
     const sp<BooleanWrapper>& ib = self.asInstance<BooleanWrapper>();
     DCHECK_WARN(ib, "Non-BooleanWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
     return ib ? ib->wrapped() : nullptr;
+}
+
+bool BooleanType::update(const sp<Boolean>& self)
+{
+    self->update(Timestamp::now());
+    return self->val();
+}
+
+sp<Boolean> BooleanType::freeze(const sp<Boolean>& self)
+{
+    return sp<Boolean>::make<Boolean::Const>(update(self));
 }
 
 sp<Boolean> BooleanType::wrap(sp<Boolean> self)

@@ -64,7 +64,6 @@ sp<Mat4> Mat4Type::create(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w)
 
 M4 Mat4Type::val(const sp<Mat4>& self)
 {
-    self->update(Timestamp::now());
     return self->val();
 }
 
@@ -83,7 +82,7 @@ sp<Mat4> Mat4Type::create(sp<Mat4> other)
     return sp<Mat4>::make<Mat4Impl>(std::move(other));
 }
 
-sp<Mat4> Mat4Type::create(const V4& t, const V4& b, const V4& n, const V4& w)
+sp<Mat4> Mat4Type::create(const V4 t, const V4 b, const V4 n, const V4 w)
 {
     return sp<Mat4>::make<Mat4Impl>(t, b, n, w);
 }
@@ -143,9 +142,15 @@ sp<Mat4> Mat4Type::inverse(sp<Mat4> self)
     return sp<Mat4>::make<VariableCached<M4>>(sp<Mat4>::make<VariableOP1<M4>>(MatrixOperators::Inverse(), std::move(self)));
 }
 
+M4 Mat4Type::update(const sp<Mat4>& self)
+{
+    self->update(Timestamp::now());
+    return self->val();
+}
+
 sp<Mat4> Mat4Type::freeze(const sp<Mat4>& self)
 {
-    return sp<Mat4>::make<Mat4::Const>(val(self));
+    return sp<Mat4>::make<Mat4::Const>(update(self));
 }
 
 sp<Mat4> Mat4Type::dye(sp<Mat4> self, sp<Boolean> condition, String message)

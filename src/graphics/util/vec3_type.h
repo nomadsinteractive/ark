@@ -86,6 +86,8 @@ public:
     static sp<Size> toSize(const sp<Vec3>& self);
 
 //  [[script::bindings::classmethod]]
+    static V3 update(const sp<Vec3>& self);
+//  [[script::bindings::classmethod]]
     static sp<Vec3> freeze(const sp<Vec3>& self);
 
 //  [[script::bindings::classmethod]]

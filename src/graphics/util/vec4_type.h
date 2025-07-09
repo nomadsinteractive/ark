@@ -95,7 +95,9 @@ public:
     static sp<Vec3> xyz(const sp<Vec4>& self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> freeze(sp<Vec4> self);
+    static V4 update(const sp<Vec4>& self);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> freeze(const sp<Vec4>& self);
 
 //  [[script::bindings::classmethod]]
     static sp<Size> toSize(const sp<Vec4>& self);
