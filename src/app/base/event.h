@@ -173,7 +173,7 @@ public:
     Event(const Event& other, const V2& xy);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Event);
 
-    bool ptin(const Rect& rectf) const;
+    bool ptin(const Rect& rect) const;
 
 //  [[script::bindings::property]]
     Event::Action action() const;

@@ -144,7 +144,7 @@ private:
     friend class Ark;
     friend class Application;
     friend class SurfaceUpdater;
-    friend class ApplicationDelegateImpl;
+    friend class ApplicationDelegate;
 };
 
 }

@@ -22,10 +22,10 @@
 #include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
+#include "app/base/application_delegate.h"
 #include "app/base/application_facade.h"
 #include "app/base/application_manifest.h"
 #include "app/base/event.h"
-#include "app/impl/application/application_delegate_impl.h"
 #include "app/inf/application_controller.h"
 
 #include "renderer/inf/renderer_factory.h"
@@ -266,8 +266,8 @@ int32_t toWindowPosition(int32_t pos)
 
 }
 
-SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, const ApplicationManifest& manifest)
-    : Application(std::move(applicationDelegate), applicationContext, manifest), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
+SDLApplication::SDLApplication(sp<ApplicationContext> applicationContext, const ApplicationManifest& manifest, sp<ApplicationDelegate> applicationDelegate)
+    : Application(applicationContext, manifest, std::move(applicationDelegate)), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
       _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _vsync(manifest.renderer()._vsync)
 {
     initialize();
@@ -334,8 +334,8 @@ void SDLApplication::onSurfaceChanged()
 sp<Application> SDLApplication::BUILDER::build(const Scope& args)
 {
     const Ark& ark = Ark::instance();
-    const sp<ApplicationManifest>& manifest = ark.manifest();
-    return sp<Application>::make<SDLApplication>(sp<ApplicationDelegate>::make<ApplicationDelegateImpl>(), ark.applicationContext(), manifest);
+    const ApplicationManifest& manifest = ark.manifest();
+    return sp<Application>::make<SDLApplication>(ark.applicationContext(), manifest);
 }
 
 void SDLApplication::initialize()

@@ -88,8 +88,8 @@ Viewport getViewport(const ApplicationManifest& applicationManifest, const enums
 
 }
 
-Application::Application(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, const ApplicationManifest& applicationManifest)
-    : _application_delegate(std::move(applicationDelegate)), _application_context(std::move(applicationContext)), _viewport(getViewport(applicationManifest, _application_context->renderEngine()->coordinateSystem())), _surface_size(getSurfaceSize(applicationManifest)),
+Application::Application(sp<ApplicationContext> applicationContext, const ApplicationManifest& applicationManifest, sp<ApplicationDelegate> applicationDelegate)
+    : _application_context(std::move(applicationContext)), _application_delegate(applicationDelegate ? std::move(applicationDelegate) : sp<ApplicationDelegate>::make()), _viewport(getViewport(applicationManifest, _application_context->renderEngine()->coordinateSystem())), _surface_size(getSurfaceSize(applicationManifest)),
       _surface_updater_pre_created(sp<OnSurfaceUpdatePreCreated>::make(_application_context)), _surface_updater(_surface_updater_pre_created.get())
 {
 }

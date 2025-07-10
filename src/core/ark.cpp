@@ -22,8 +22,6 @@ limitations under the License.
  *
  */
 
-#include <list>
-
 #include "core/ark.h"
 
 #include "core/base/plugin_manager.h"
@@ -42,7 +40,6 @@ limitations under the License.
 
 #include "app/base/application_bundle.h"
 #include "app/base/application_context.h"
-#include "app/impl/application/application_delegate_impl.h"
 #include "app/base/application_manifest.h"
 #include "plugin/sdl2/impl/application/sdl_application.h"
 
@@ -56,7 +53,7 @@ namespace ark {
 namespace {
 
 Ark* _instance = nullptr;
-std::list<Ark*> _instance_stack;
+List<Ark*> _instance_stack;
 
 M4 changeProjectionHandSide(const M4& projection, bool flipx, bool flipy, bool flipz)
 {
@@ -72,7 +69,7 @@ M4 changeProjectionHandSide(const M4& projection, bool flipx, bool flipy, bool f
 
 struct CameraDelegateCHS final : Camera::Delegate {
 
-    CameraDelegateCHS(enums::CoordinateSystem rcs, sp<Delegate> delegate, bool flipx, bool flipy)
+    CameraDelegateCHS(const enums::CoordinateSystem rcs, sp<Delegate> delegate, const bool flipx, const bool flipy)
         : _rcs(rcs), _delegate(std::move(delegate)), _flipx(flipx), _flipy(flipy)
     {
         ASSERT(_rcs == enums::COORDINATE_SYSTEM_LHS || _rcs == enums::COORDINATE_SYSTEM_RHS);

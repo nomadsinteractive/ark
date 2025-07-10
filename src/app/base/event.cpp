@@ -13,9 +13,9 @@ Event::Event(const Event& other, const V2& xy)
     _info._button._xy = xy;
 }
 
-bool Event::ptin(const Rect& rectf) const
+bool Event::ptin(const Rect& rect) const
 {
-    return rectf.ptin(x(), y());
+    return rect.ptin(x(), y());
 }
 
 Event::Action Event::action() const

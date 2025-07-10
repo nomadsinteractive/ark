@@ -12,16 +12,16 @@ namespace ark {
 
 class ARK_API Application {
 public:
-    Application(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, const ApplicationManifest& applicationManifest);
+    Application(sp<ApplicationContext> applicationContext, const ApplicationManifest& applicationManifest, sp<ApplicationDelegate> applicationDelegate = nullptr);
     virtual ~Application() = default;
 
     virtual int run() = 0;
     virtual const sp<ApplicationController>& controller() = 0;
 
-    virtual void onCreate();
-    virtual void onPause();
-    virtual void onResume();
-    virtual void onDestroy();
+    void onCreate();
+    void onPause();
+    void onResume();
+    void onDestroy();
 
     void onSurfaceCreated();
     void onSurfaceChanged(uint32_t width, uint32_t height);
@@ -34,8 +34,8 @@ public:
     const sp<Size>& surfaceSize() const;
 
 protected:
-    sp<ApplicationDelegate> _application_delegate;
     sp<ApplicationContext> _application_context;
+    sp<ApplicationDelegate> _application_delegate;
     sp<Surface> _surface;
     Viewport _viewport;
     sp<Size> _surface_size;

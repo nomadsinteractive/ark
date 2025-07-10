@@ -18,10 +18,10 @@
 #include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
+#include "app/base/application_delegate.h"
 #include "app/base/application_facade.h"
 #include "app/base/application_manifest.h"
 #include "app/base/event.h"
-#include "app/impl/application/application_delegate_impl.h"
 #include "app/inf/application_controller.h"
 
 #include "renderer/inf/renderer_factory.h"
@@ -270,8 +270,8 @@ int32_t toWindowPosition(int32_t pos)
 
 }
 
-ApplicationSDL3::ApplicationSDL3(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, const ApplicationManifest& manifest)
-    : Application(std::move(applicationDelegate), applicationContext, manifest), _main_window(nullptr), _cond(SDL_CreateCondition()), _lock(SDL_CreateMutex()),
+ApplicationSDL3::ApplicationSDL3(sp<ApplicationContext> applicationContext, const ApplicationManifest& manifest, sp<ApplicationDelegate> applicationDelegate)
+    : Application(applicationContext, manifest, std::move(applicationDelegate)), _main_window(nullptr), _cond(SDL_CreateCondition()), _lock(SDL_CreateMutex()),
       _controller(sp<ApplicationController>::make<SDLApplicationController>(std::move(applicationContext))), _vsync(manifest.renderer()._vsync)
 {
     initialize();
@@ -338,8 +338,8 @@ void ApplicationSDL3::onSurfaceChanged()
 sp<Application> ApplicationSDL3::BUILDER::build(const Scope& args)
 {
     const Ark& ark = Ark::instance();
-    const sp<ApplicationManifest>& manifest = ark.manifest();
-    return sp<Application>::make<ApplicationSDL3>(sp<ApplicationDelegate>::make<ApplicationDelegateImpl>(), ark.applicationContext(), manifest);
+    const ApplicationManifest& manifest = ark.manifest();
+    return sp<Application>::make<ApplicationSDL3>(ark.applicationContext(), manifest);
 }
 
 void ApplicationSDL3::initialize()
@@ -455,7 +455,7 @@ void ApplicationSDL3::pollEvents(uint64_t timestamp)
         case SDL_EVENT_KEY_DOWN:
         case SDL_EVENT_KEY_UP:
             {
-                const Event::KeyboardInfo keyboardInfo{sdlScanCodeToEventCode(event.key.scancode), static_cast<wchar_t>(event.key.key)};
+                const Event::KeyboardInfo keyboardInfo = {sdlScanCodeToEventCode(event.key.scancode), static_cast<wchar_t>(event.key.key)};
                 const Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_EVENT_KEY_DOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, keyboardInfo);
                 onEvent(e);
                 break;
