@@ -2931,31 +2931,6 @@ class State:
         pass
 
 
-class StateMachine:
-    def __init__(self):
-        pass
-
-    def add_state(self, state: State):
-        pass
-
-
-class Emitter:
-
-    @property
-    def active(self):
-        return False
-
-    @active.setter
-    def active(self, active):
-        pass
-
-    def activate(self):
-        pass
-
-    def deactivate(self):
-        pass
-
-
 class LayoutLength:
 
     LENGTH_TYPE_AUTO = 0

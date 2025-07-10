@@ -15,7 +15,7 @@ V3::V3(const float x, const float y, const float z)
 {
 }
 
-V3::V3(const V2& other, const float z)
+V3::V3(const V2 other, const float z)
     : V2(other._x, other._y), _z(z)
 {
 }
@@ -125,6 +125,11 @@ V3 V3::floorDiv(const V3& other) const
 V3 V3::cross(const V3& other) const
 {
     return {_y * other._z - other._y * _z, _z * other._x - other._z * _x, _x * other._y - other._x * _y};
+}
+
+V2 V3::toNonHomogeneous() const
+{
+    return (_z < 0 ? -V2(_x, _y) : V2(_x, _y)) / std::max(MIN_NORMALIZE_LENGTH, std::abs(_z));
 }
 
 }

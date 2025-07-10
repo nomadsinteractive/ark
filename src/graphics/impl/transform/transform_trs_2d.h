@@ -8,7 +8,7 @@ namespace ark {
 
 class TransformTRS2D final : public Transform {
 public:
-    TransformTRS2D(const TransformImpl& transform);;
+    TransformTRS2D(const TransformImpl& transform);
 
     bool update(uint64_t timestamp) override;
     Snapshot snapshot() override;

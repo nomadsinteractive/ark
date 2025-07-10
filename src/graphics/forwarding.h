@@ -9,7 +9,6 @@ namespace ark {
 class Alphabet;
 class Bitmap;
 class Boundaries;
-class Bounds;
 class Camera;
 class GlyphMaker;
 class Color;
@@ -33,7 +32,6 @@ class LayerContext;
 class Varyings;
 class RendererMaker;
 class Transform;
-class Quaternion;
 class Renderable;
 class RenderBatch;
 class RenderCommand;

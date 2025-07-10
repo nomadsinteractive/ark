@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/concurrent/lf_stack.h"
 #include "core/inf/array.h"
@@ -17,7 +15,7 @@ private:
         uint8_t* allocate(size_t size);
         void reset();
 
-        std::vector<uint8_t> _memory;
+        Vector<uint8_t> _memory;
         uint8_t* _allocated_ptr;
     };
 

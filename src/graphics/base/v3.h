@@ -10,7 +10,7 @@ class ARK_API V3 : public V2 {
 public:
     explicit V3(float v = 0);
     V3(float x, float y, float z);
-    V3(const V2& other, float z);
+    V3(V2 other, float z);
     V3(const std::initializer_list<float>& values);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V3);
 
@@ -35,10 +35,10 @@ public:
     V3 operator -() const;
 
     V4 extend(float w) const;
-
     V3 floorDiv(const V3& other) const;
-
     V3 cross(const V3& other) const;
+
+    V2 toNonHomogeneous() const;
 
 protected:
     float _z;

@@ -2,7 +2,6 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
@@ -20,24 +19,12 @@ public:
     bool update(uint64_t timestamp) override;
 
 //  [[script::bindings::auto]]
-    void discard();
+    void discard() const;
 
 //  [[script::bindings::auto]]
-    void set(sp<Boolean> discarded);
+    void set(sp<Boolean> discarded) const;
 //  [[script::bindings::auto]]
-    void set(bool discarded);
-
-//  [[plugin::builder::by-value]]
-    class DICTIONARY final : public Builder<Discarded> {
-    public:
-        DICTIONARY(BeanFactory& factory, const String& value);
-
-        sp<Discarded> build(const Scope& args) override;
-
-    private:
-        bool _discarded;
-        sp<Builder<Boolean>> _delegate;
-    };
+    void set(bool discarded) const;
 
 private:
     sp<BooleanWrapper> _discarded;

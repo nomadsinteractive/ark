@@ -13,7 +13,7 @@ CLASS_PATTERN = re.compile(r'([\w<():=,>\s]+)class\s+(?:ARK_API\s+)?(\w+)(?:\s+f
 INDENT = '\n    '
 
 
-CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Uploader', 'Renderable', 'Renderer', 'Notifier', 'ModelLoader',
+CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Uploader', 'Renderable', 'Renderer', 'ModelLoader',
                    'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3', 'Mat4', 'Debris', 'Wirable', 'CollisionCallback', 'Wirable::Niche')
 
 

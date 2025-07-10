@@ -15,7 +15,6 @@ class ComputeContext;
 class DrawDecoratorFactory;
 class DrawingBuffer;
 class DrawingContext;
-class Emitter;
 class RenderTarget;
 class GraphicsBufferAllocator;
 class GraphicsContext;

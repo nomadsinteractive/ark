@@ -11,7 +11,7 @@ Discarded::Discarded(bool discarded)
 }
 
 Discarded::Discarded(sp<Boolean> discarded)
-    : _discarded(sp<BooleanWrapper>::make(std::move(discarded)))
+    : _discarded(discarded ? sp<BooleanWrapper>::make(std::move(discarded)) : sp<BooleanWrapper>::make(false))
 {
 }
 
@@ -20,36 +20,24 @@ bool Discarded::val()
     return _discarded->val();
 }
 
-bool Discarded::update(uint64_t timestamp)
+bool Discarded::update(const uint64_t timestamp)
 {
     return _discarded->update(timestamp);
 }
 
-void Discarded::discard()
+void Discarded::discard() const
 {
     _discarded->set(true);
 }
 
-void Discarded::set(bool discarded)
+void Discarded::set(const bool discarded) const
 {
     _discarded->set(discarded);
 }
 
-void Discarded::set(sp<Boolean> discarded)
+void Discarded::set(sp<Boolean> discarded) const
 {
     _discarded->set(std::move(discarded));
-}
-
-Discarded::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _discarded(value == "true")
-{
-    if(value && (value.at(0) == '@' || value.at(0) == '$'))
-        _delegate = factory.ensureBuilder<Boolean>(value);
-}
-
-sp<Discarded> Discarded::DICTIONARY::build(const Scope& args)
-{
-    return _delegate ? sp<Discarded>::make(_delegate->build(args)) : sp<Discarded>::make(_discarded);
 }
 
 }

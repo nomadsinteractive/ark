@@ -28,8 +28,8 @@ Transform::Snapshot TransformTRS2D::snapshot()
 V4 TransformTRS2D::transform(const Snapshot& snapshot, const V4& xyzw)
 {
     const M3& matrix = snapshot.data<M3>();
-    const V3 transformed = MatrixUtil::mul(matrix, V3(xyzw.x(), xyzw.y(), 0));
-    return {transformed * xyzw.w(), xyzw.w()};
+    const V2 transformed = MatrixUtil::mul(matrix, V3(xyzw.x(), xyzw.y(), 1.0f)).toNonHomogeneous();
+    return {transformed * xyzw.w(), xyzw.z(), xyzw.w()};
 }
 
 M4 TransformTRS2D::toMatrix(const Snapshot& snapshot)

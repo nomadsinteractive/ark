@@ -90,12 +90,12 @@ private:
         if constexpr(std::is_same_v<T, String>)
         {
             const char* arg1 = _value->val().c_str();
-            _formatted = fmt::vformat(_format.c_str(), fmt::make_format_args("arg1", arg1));
+            _formatted = fmt::vformat(_format.c_str(), fmt::make_format_args(arg1));
         }
         else
         {
             const T arg1 = _value->val();
-            _formatted = fmt::vformat(_format.c_str(), fmt::make_format_args("arg1", arg1));
+            _formatted = fmt::vformat(_format.c_str(), fmt::make_format_args(arg1));
         }
     }
 

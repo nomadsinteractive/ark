@@ -58,7 +58,6 @@ public:
 
 private:
     sp<Vec4Impl> _wrapped;
-
 };
 
 }
