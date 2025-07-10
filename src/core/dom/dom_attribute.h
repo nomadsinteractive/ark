@@ -1,25 +1,23 @@
-#ifndef ARK_CORE_DOM_ATTRIBUTE_H_
-#define ARK_CORE_DOM_ATTRIBUTE_H_
+#pragma once
 
 #include "core/base/api.h"
-#include "core/forwarding.h"
 #include "core/base/string.h"
 
 namespace ark {
 
 class ARK_API DOMAttribute {
 public:
-    DOMAttribute();
-    DOMAttribute(const String& name);
+    DOMAttribute() = default;
+    DOMAttribute(String name);
 //  [[script::bindings::auto]]
-    DOMAttribute(const String& name, const String& value);
+    DOMAttribute(String name, String value);
 
 //  [[script::bindings::property]]
     const String& name() const;
 //  [[script::bindings::property]]
     const String& value() const;
 //  [[script::bindings::property]]
-    void setValue(const String& value);
+    void setValue(String value);
 
 private:
     String _name;
@@ -27,5 +25,3 @@ private:
 };
 
 }
-
-#endif

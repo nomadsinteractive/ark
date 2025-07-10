@@ -2,17 +2,13 @@
 
 namespace ark {
 
-DOMAttribute::DOMAttribute()
+DOMAttribute::DOMAttribute(String name)
+    : _name(std::move(name))
 {
 }
 
-DOMAttribute::DOMAttribute(const String& name)
-    : _name(name)
-{
-}
-
-DOMAttribute::DOMAttribute(const String& name, const String& value)
-    : _name(name), _value(value)
+DOMAttribute::DOMAttribute(String name, String value)
+    : _name(std::move(name)), _value(std::move(value))
 {
 }
 
@@ -26,9 +22,9 @@ const String& DOMAttribute::value() const
     return _value;
 }
 
-void DOMAttribute::setValue(const String& value)
+void DOMAttribute::setValue(String value)
 {
-    _value = value;
+    _value = std::move(value);
 }
 
 }

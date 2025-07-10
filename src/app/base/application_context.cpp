@@ -25,6 +25,7 @@
 #include "app/base/application_manifest.h"
 #include "app/base/event.h"
 #include "app/impl/event_listener/event_listener_list.h"
+#include "app/inf/application_event_listener.h"
 
 #include "platform/platform.h"
 
@@ -228,6 +229,16 @@ const sp<ApplicationFacade>& ApplicationContext::applicationFacade() const
     return _application_facade;
 }
 
+const sp<ApplicationEventListener>& ApplicationContext::applicationEventListener() const
+{
+    return _application_event_listener;
+}
+
+void ApplicationContext::setApplicationEventListener(sp<ApplicationEventListener> applicationEventListener)
+{
+    _application_event_listener = std::move(applicationEventListener);
+}
+
 const sp<RenderEngine>& ApplicationContext::renderEngine() const
 {
     return _render_engine;
@@ -295,7 +306,7 @@ bool ApplicationContext::onEvent(const Event& event)
         _cursor_position->set(event.xy());
         _cursor_frag_coord->set(event.xyFragCoord());
     }
-    return _event_listeners.onEvent(event) || (_default_event_listener && _default_event_listener->onEvent(event));
+    return _event_listeners.onEvent(event) || (_application_event_listener && _application_event_listener->onUnhandledEvent(event));
 }
 
 void ApplicationContext::addPreComposeRunnable(sp<Runnable> runnable, sp<Boolean> cancelled)
@@ -311,11 +322,6 @@ void ApplicationContext::addEventListener(sp<EventListener> eventListener, sp<Bo
 void ApplicationContext::pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
     _event_listeners.pushEventListener(std::move(eventListener), std::move(discarded));
-}
-
-void ApplicationContext::setDefaultEventListener(sp<EventListener> eventListener)
-{
-    _default_event_listener = std::move(eventListener);
 }
 
 sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)

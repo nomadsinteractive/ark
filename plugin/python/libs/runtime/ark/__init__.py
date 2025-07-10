@@ -389,6 +389,9 @@ class Behavior:
     def create_searching_node_provider(self, on_visit_adjacent_nodes: str = "on_visit_adjacent_nodes") -> "SearchingNodeProvider":
         pass
 
+    def create_application_event_listener(self, on_pause: str = "on_pause", on_resume: str = "on_resume", on_unhandled_event: str = "on_unhandled_event") -> "ApplicationEventListener":
+        pass
+
 
 class Tags:
     def __init__(self, tag: Any = None):
@@ -707,6 +710,14 @@ class ApplicationFacade:
     @activity.setter
     def activity(self, activity: "Activity"):
         self._activity = activity
+
+    @property
+    def application_event_listener(self) -> Optional["ApplicationEventListener"]:
+        pass
+
+    @application_event_listener.setter
+    def application_event_listener(self, application_event_listener: Optional["ApplicationEventListener"]):
+        pass
 
     @property
     def argv(self) -> list[str]:
@@ -1036,17 +1047,13 @@ class String:
 
 class _Scalar(_Var):
 
-    @property
-    def observer(self) -> Optional[Observer]:
-        return None
-
-    def at_least(self, least) -> Self:
+    def at_least(self, a1, callback: Optional[Runnable] = None) -> Self:
         pass
 
-    def at_most(self, most) -> Self:
+    def at_most(self, a1, callback: Optional[Runnable] = None) -> Self:
         pass
 
-    def fence(self, fence) -> Self:
+    def fence(self, a1, callback: Optional[Runnable] = None) -> Self:
         pass
 
     def dirty(self) -> Boolean:
@@ -3133,6 +3140,21 @@ class CollisionCallback:
         pass
 
     def on_end_contact(self, rigidbody: Rigidbody):
+        pass
+
+
+class ApplicationEventListener:
+
+    def on_create(self):
+        pass
+
+    def on_pause(self):
+        pass
+
+    def on_resume(self):
+        pass
+
+    def on_unhandled_event(self, event: Event) -> bool:
         pass
 
 

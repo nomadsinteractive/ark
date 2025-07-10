@@ -4,7 +4,6 @@
 #include "core/base/scope.h"
 #include "core/base/resource_loader.h"
 #include "core/inf/interpreter.h"
-#include "core/util/string_convert.h"
 #include "core/util/log.h"
 
 #include "app/base/application.h"
@@ -12,7 +11,6 @@
 #include "app/base/application_facade.h"
 #include "app/base/application_manifest.h"
 #include "app/base/surface.h"
-#include "app/impl/event_listener/event_listener_by_script.h"
 #include "app/base/activity.h"
 
 namespace ark {
@@ -37,76 +35,18 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
 
     applicationContext->_application_facade = std::move(applicationFacade);
 
-    bool defaultEventListenerSet = false;
+    const sp<Interpreter>& interpreter = _application_context->interpreter();
     for(const document& i : appManifest->children("script"))
     {
-        ScriptTag script(_application_context->interpreter(), i);
-        if(script._on == SCRIPT_RUN_ON_CREATE)
-            script.run();
-        else if(script._on == SCRIPT_RUN_ON_EVENT)
-            applicationContext->addEventListener(script.makeEventListener());
-        else if(script._on == SCRIPT_RUN_ON_UNHANDLED_EVENT)
+        if(const String src = Documents::getAttribute(i, constants::SRC))
         {
-            DCHECK_WARN(!defaultEventListenerSet, "Default EventListener has been set already");
-            applicationContext->setDefaultEventListener(script.makeEventListener());
-            defaultEventListenerSet = true;
+            const sp<Asset> sourceAsset = Ark::instance().getAsset(src);
+            CHECK(sourceAsset, "Cannot open script \"%s\"", src.c_str());
+            interpreter->execute(sourceAsset);
         }
-        else
-            _interpreter.push_back(std::move(script));
+        if(const String func = Documents::getAttribute(i, "function"))
+            interpreter->call(interpreter->attr(nullptr, func), {});
     }
-}
-
-void ApplicationDelegateImpl::onPause()
-{
-    for(const auto& i: _interpreter)
-        if(i._on == SCRIPT_RUN_ON_PAUSE)
-            i.run();
-}
-
-void ApplicationDelegateImpl::onResume()
-{
-    for(const auto& i: _interpreter)
-        if(i._on == SCRIPT_RUN_ON_RESUME)
-            i.run();
-}
-
-ApplicationDelegateImpl::ScriptTag::ScriptTag(sp<Interpreter> interpreter, const document& manifest)
-    : _on(Documents::getAttribute(manifest, "on", SCRIPT_RUN_ON_CREATE)),
-      _function_name(Documents::getAttribute(manifest, "function")),
-      _interpreter(std::move(interpreter))
-{
-    if(const String src = Documents::getAttribute(manifest, constants::SRC))
-    {
-        _source = Ark::instance().getAsset(src);
-        CHECK(_source, "Cannot open script \"%s\"", src.c_str());
-    }
-}
-
-void ApplicationDelegateImpl::ScriptTag::run() const
-{
-    DASSERT(_interpreter);
-    if(_source)
-        _interpreter->execute(_source);
-    if(_function_name)
-        _interpreter->call(_interpreter->attr(nullptr, _function_name), {});
-}
-
-sp<EventListener> ApplicationDelegateImpl::ScriptTag::makeEventListener() const
-{
-    DCHECK(_function_name, "Application EventListener should be function, not script");
-    return sp<EventListener>::make<EventListenerByScript>(_interpreter, _function_name);
-}
-
-template<> ApplicationDelegateImpl::ScriptRunOn StringConvert::eval<ApplicationDelegateImpl::ScriptRunOn>(const String& str)
-{
-    constexpr enums::LookupTable<ApplicationDelegateImpl::ScriptRunOn, 5> table = {{
-        {"create", ApplicationDelegateImpl::SCRIPT_RUN_ON_CREATE},
-        {"pause", ApplicationDelegateImpl::SCRIPT_RUN_ON_PAUSE},
-        {"resume", ApplicationDelegateImpl::SCRIPT_RUN_ON_RESUME},
-        {"event", ApplicationDelegateImpl::SCRIPT_RUN_ON_EVENT},
-        {"unhandled_event", ApplicationDelegateImpl::SCRIPT_RUN_ON_UNHANDLED_EVENT}
-    }};
-    return enums::lookup(table, str);
 }
 
 }

@@ -8,6 +8,7 @@ class ApplicationContext;
 class ApplicationController;
 class ApplicationDelegate;
 class ApplicationFacade;
+class ApplicationEventListener;
 class ApplicationProfiler;
 class ApplicationBundle;
 class Arena;

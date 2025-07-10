@@ -185,7 +185,17 @@ void ApplicationFacade::setActivity(sp<Activity> activity)
     _context->addEventListener(_activity, _activity_discarded);
 }
 
-sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, const Scope& args)
+const sp<ApplicationEventListener>& ApplicationFacade::applicationEventListener() const
+{
+    return _context->applicationEventListener();
+}
+
+void ApplicationFacade::setApplicationEventListener(sp<ApplicationEventListener> applicationEventListener) const
+{
+    _context->setApplicationEventListener(std::move(applicationEventListener));
+}
+
+sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, const Scope& args) const
 {
     return _context->createResourceLoader(name, args);
 }
@@ -205,19 +215,14 @@ void ApplicationFacade::addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelle
     _context->addPreComposeRunnable(std::move(task), std::move(cancelled));
 }
 
-void ApplicationFacade::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+void ApplicationFacade::addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
-    _context->addEventListener(std::move(eventListener), std::move(disposed));
+    _context->addEventListener(std::move(eventListener), std::move(discarded));
 }
 
-void ApplicationFacade::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+void ApplicationFacade::pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
-    _context->pushEventListener(std::move(eventListener), std::move(disposed));
-}
-
-void ApplicationFacade::setDefaultEventListener(sp<EventListener> eventListener)
-{
-    _context->setDefaultEventListener(std::move(eventListener));
+    _context->pushEventListener(std::move(eventListener), std::move(discarded));
 }
 
 void ApplicationFacade::exit()

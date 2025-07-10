@@ -48,8 +48,13 @@ public:
 //  [[script::bindings::property]]
     void setActivity(sp<Activity> activity);
 
+//  [[script::bindings::property]]
+    const sp<ApplicationEventListener>& applicationEventListener() const;
+//  [[script::bindings::property]]
+    void setApplicationEventListener(sp<ApplicationEventListener> applicationEventListener) const;
+
 //  [[script::bindings::auto]]
-    sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args);
+    sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args) const;
 //  [[script::bindings::auto]]
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);
 
@@ -59,11 +64,9 @@ public:
 //  [[script::bindings::auto]]
     void addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelled);
 //  [[script::bindings::auto]]
-    void addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+    void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
-    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
-//  [[script::bindings::auto]]
-    void setDefaultEventListener(sp<EventListener> eventListener);
+    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 
 //  [[script::bindings::auto]]
     void exit();

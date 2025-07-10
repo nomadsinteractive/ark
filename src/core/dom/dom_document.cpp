@@ -5,16 +5,16 @@
 
 namespace ark {
 
-DOMDocument::DOMDocument(const String& name, const String& value, ElementType type)
+DOMDocument::DOMDocument(const String& name, const String& value, const ElementType type)
     : DOMElement(name, value, type)
 {
 }
 
 document DOMDocument::getChild(const String& name) const
 {
-    auto iter = _children_by_name.find(name);
-    if(iter != _children_by_name.end()) {
-        const std::vector<document>& list = iter->second;
+    if(const auto iter = _children_by_name.find(name); iter != _children_by_name.end())
+    {
+        const Vector<document>& list = iter->second;
         if(!list.empty())
             return list.front();
     }
@@ -30,27 +30,24 @@ document DOMDocument::ensureChild(const String& name) const
 
 void DOMDocument::addChild(const sp<DOMDocument>& doc)
 {
-    auto iter = _children_by_name.find(doc->name());
-    if(iter != _children_by_name.end())
+    if(const auto iter = _children_by_name.find(doc->name()); iter != _children_by_name.end())
     {
-        std::vector<document>& list = iter->second;
+        Vector<document>& list = iter->second;
         list.push_back(doc);
     }
     else
-    {
         _children_by_name[doc->name()].push_back(doc);
-    }
     _children.push_back(doc);
 }
 
-const std::vector<document>& DOMDocument::children() const
+const Vector<document>& DOMDocument::children() const
 {
     return _children;
 }
 
-const std::vector<document>& DOMDocument::children(const String& name)
+const Vector<document>& DOMDocument::children(const String& name)
 {
-    static std::vector<document> EMPTY;
+    static Vector<document> EMPTY;
     const auto iter = _children_by_name.find(name);
     if(iter == _children_by_name.end())
         return EMPTY;

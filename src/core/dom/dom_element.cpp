@@ -10,13 +10,13 @@ DOMElement::DOMElement()
 {
 }
 
-DOMElement::DOMElement(const String& name, DOMElement::ElementType type)
-    : DOMAttribute(name), _type(type)
+DOMElement::DOMElement(String name, const DOMElement::ElementType type)
+    : DOMAttribute(std::move(name)), _type(type)
 {
 }
 
-DOMElement::DOMElement(const String& name, const String& value, DOMElement::ElementType type)
-    : DOMAttribute(name, value), _type(type)
+DOMElement::DOMElement(String name, String value, const DOMElement::ElementType type)
+    : DOMAttribute(std::move(name), std::move(value)), _type(type)
 {
 }
 
@@ -25,7 +25,7 @@ DOMElement::ElementType DOMElement::type() const
     return _type;
 }
 
-const std::vector<sp<DOMAttribute>>& DOMElement::attributes() const
+const Vector<sp<DOMAttribute>>& DOMElement::attributes() const
 {
     return _attributes.values();
 }
@@ -36,20 +36,20 @@ sp<DOMAttribute> DOMElement::getAttribute(const String& name) const
     return iter != _attributes.end() ? iter->second : nullptr;
 }
 
-void DOMElement::setAttribute(const String& name, const String& value)
+void DOMElement::setAttribute(const String& name, String value)
 {
-    const sp<DOMAttribute>& attr = getAttribute(name);
-    if(attr)
+    if(const sp<DOMAttribute>& attr = getAttribute(name))
     {
-        attr->setValue(value);
+        attr->setValue(std::move(value));
         return;
     }
-    addAttribute(attribute::make(name, value));
+    addAttribute(attribute::make(name, std::move(value)));
 }
 
-void DOMElement::addAttribute(const sp<DOMAttribute>& attr)
+void DOMElement::addAttribute(sp<DOMAttribute> attr)
 {
-    _attributes.push_back(attr->name(), attr);
+    const String& name = attr->name();
+    _attributes.push_back(name, std::move(attr));
 }
 
 }

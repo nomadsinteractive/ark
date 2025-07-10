@@ -7,6 +7,7 @@
 #include "app/base/application.h"
 #include "app/base/application_context.h"
 #include "app/base/surface.h"
+#include "app/inf/application_event_listener.h"
 
 namespace ark {
 
@@ -19,10 +20,14 @@ void ApplicationDelegate::onCreate(Application& application, const sp<Surface>& 
 
 void ApplicationDelegate::onPause()
 {
+    if(_application_context->applicationEventListener())
+        _application_context->applicationEventListener()->onPause();
 }
 
 void ApplicationDelegate::onResume()
 {
+    if(_application_context->applicationEventListener())
+        _application_context->applicationEventListener()->onResume();
 }
 
 void ApplicationDelegate::onDestroy()

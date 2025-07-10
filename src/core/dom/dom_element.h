@@ -19,21 +19,21 @@ public:
     };
 public:
     DOMElement();
-    DOMElement(const String& name, DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);
+    DOMElement(String name, DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);
 //  [[script::bindings::auto]]
-    DOMElement(const String& name, const String& value, DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);
+    DOMElement(String name, String value, DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);
 
 //  [[script::bindings::property]]
     DOMElement::ElementType type() const;
 //  [[script::bindings::property]]
-    const std::vector<sp<DOMAttribute>>& attributes() const;
+    const Vector<sp<DOMAttribute>>& attributes() const;
 
 //  [[script::bindings::auto]]
     sp<DOMAttribute> getAttribute(const String& name) const;
 //  [[script::bindings::auto]]
-    void setAttribute(const String& name, const String& value);
+    void setAttribute(const String& name, String value);
 //  [[script::bindings::auto]]
-    void addAttribute(const sp<DOMAttribute>& attr);
+    void addAttribute(sp<DOMAttribute> attr);
 
 private:
     DOMElement::ElementType _type;

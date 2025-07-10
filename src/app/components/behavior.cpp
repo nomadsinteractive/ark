@@ -8,6 +8,7 @@
 #include "app/base/event.h"
 #include "app/base/searching_node.h"
 #include "app/components/rigidbody.h"
+#include "app/inf/application_event_listener.h"
 #include "app/inf/collision_callback.h"
 #include "app/inf/searching_node_provider.h"
 
@@ -108,6 +109,35 @@ private:
     sp<Behavior::Method> _method;
 };
 
+class ApplicationEventListenerImpl final : public ApplicationEventListener {
+public:
+    ApplicationEventListenerImpl(sp<Behavior::Method> onPause, sp<Behavior::Method> onResume, sp<Behavior::Method> onUnhandledEvent)
+        : _on_pause(std::move(onPause)), _on_resume(std::move(onResume)), _on_unhandled_event(std::move(onUnhandledEvent))
+    {
+    }
+
+    void onPause() override
+    {
+        _on_pause->call({});
+    }
+
+    void onResume() override
+    {
+        _on_resume->call({});
+    }
+
+    bool onUnhandledEvent(const Event& event) override
+    {
+        Box arg1(sp<Event>::make(event));
+        return static_cast<bool>(_on_unhandled_event->call({std::move(arg1)}));
+    }
+
+private:
+    sp<Behavior::Method> _on_pause;
+    sp<Behavior::Method> _on_resume;
+    sp<Behavior::Method> _on_unhandled_event;
+};
+
 }
 
 Behavior::Behavior(Box delegate)
@@ -156,6 +186,11 @@ sp<EventListener> Behavior::createEventListener(const StringView onEvent)
 sp<SearchingNodeProvider> Behavior::createSearchingNodeProvider(const StringView onVisitAdjacentNodes)
 {
     return sp<SearchingNodeProvider>::make<SearchingNodeProviderImpl>(getMethod(onVisitAdjacentNodes));
+}
+
+sp<ApplicationEventListener> Behavior::createApplicationEventListener(const StringView onPause, const StringView onResume, const StringView onUnhandledEvent)
+{
+    return sp<ApplicationEventListener>::make<ApplicationEventListenerImpl>(getMethod(onPause), getMethod(onResume), getMethod(onUnhandledEvent));
 }
 
 sp<Runnable> Behavior::doCreateRunnable(Box function)

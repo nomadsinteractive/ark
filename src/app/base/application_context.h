@@ -29,6 +29,9 @@ public:
 
     const sp<ApplicationBundle>& applicationBundle() const;
     const sp<ApplicationFacade>& applicationFacade() const;
+    const sp<ApplicationEventListener>& applicationEventListener() const;
+    void setApplicationEventListener(sp<ApplicationEventListener> applicationEventListener);
+
     const sp<RenderEngine>& renderEngine() const;
     const sp<RenderController>& renderController() const;
     const sp<ResourceLoader>& resourceLoader() const;
@@ -51,7 +54,6 @@ public:
 
     void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
     void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
-    void setDefaultEventListener(sp<EventListener> eventListener);
 
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);
     const sp<MessageLoop>& messageLoopApp() const;
@@ -115,6 +117,8 @@ private:
 
     sp<ApplicationBundle> _application_bundle;
     sp<ApplicationFacade> _application_facade;
+    sp<ApplicationEventListener> _application_event_listener;
+
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
     sp<Clock> _sys_clock;
@@ -127,8 +131,6 @@ private:
     sp<MessageLoop> _message_loop_renderer;
     sp<MessageLoop> _message_loop_core;
     sp<MessageLoop> _message_loop_app;
-
-    sp<EventListener> _default_event_listener;
 
     sp<ResourceLoader> _resource_loader;
     sp<StringTable> _string_table;

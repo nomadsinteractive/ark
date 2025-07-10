@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/base/api.h"
 #include "core/dom/dom_element.h"
 #include "core/types/implements.h"
@@ -22,12 +20,12 @@ public:
     void addChild(const sp<DOMDocument>& doc);
 
 //  [[script::bindings::property]]
-    const std::vector<document>& children() const;
-    const std::vector<document>& children(const String& name);
+    const Vector<document>& children() const;
+    const Vector<document>& children(const String& name);
 
 private:
-    std::map<String, std::vector<document>> _children_by_name;
-    std::vector<document> _children;
+    Map<String, Vector<document>> _children_by_name;
+    Vector<document> _children;
 };
 
 }
