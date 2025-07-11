@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
 #include "core/inf/wirable.h"
 #include "core/impl/builder/safe_builder.h"

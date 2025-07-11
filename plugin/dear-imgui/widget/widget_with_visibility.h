@@ -7,7 +7,7 @@
 
 namespace ark::plugin::dear_imgui {
 
-class WidgetWithVisibility : public Wrapper<Widget>, public Widget {
+class WidgetWithVisibility final : public Wrapper<Widget>, public Widget {
 public:
     WidgetWithVisibility(sp<Widget> delegate, sp<Boolean> visible);
 

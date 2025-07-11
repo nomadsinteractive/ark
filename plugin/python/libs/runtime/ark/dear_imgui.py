@@ -1,19 +1,17 @@
+from collections.abc import Sequence
 from typing import Optional, Union
 
 from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, Vec2, Vec4, Vec3
 
 
 class Widget:
-    def __init__(self, delegate: Optional['Widget'] = None):
+    def __init__(self, delegate: Optional["Widget", Sequence["Widget"]] = None):
         pass
 
-    def reset(self, wrapped: Optional['Widget'] = None):
+    def reset(self, wrapped: Optional["Widget"] = None):
         pass
 
-    def before(self, after: Optional['Widget']) -> 'Widget':
-        pass
-
-    def make_visible(self, visibility: Boolean) -> 'Widget':
+    def visible_if(self, visibility: Boolean):
         pass
 
     def to_renderer(self) -> Renderer:
@@ -28,6 +26,18 @@ class WidgetBuilder:
         pass
 
     def end(self):
+        pass
+
+    def get_cursor_screen_pos(self) -> Vec2:
+        pass
+
+    def get_content_region_avail(self) -> Vec2:
+        pass
+
+    def get_item_rect_min(self) -> Vec2:
+        pass
+
+    def get_item_rect_max(self) -> Vec2:
         pass
 
     def text(self, text: str):
@@ -82,7 +92,10 @@ class WidgetBuilder:
     def separator(self):
         pass
 
-    def same_line(self):
+    def same_line(self, offset_from_start_x: float = 0, spacing: float = -1) -> Widget:
+        pass
+
+    def new_line(self) -> Widget:
         pass
 
     def small_button(self, label: str) -> Observer:

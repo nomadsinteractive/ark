@@ -4,7 +4,6 @@
 
 namespace ark::plugin::dear_imgui {
 
-//[[script::bindings::class]]
 class ARK_PLUGIN_DEAR_IMGUI_API Widget {
 public:
     virtual ~Widget() = default;

@@ -10,10 +10,10 @@
 #include "graphics/impl/vec/vec2_impl.h"
 #include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/impl/vec/vec4_impl.h"
-#include "graphics/util/transform_type.h"
 #include "graphics/util/vec3_type.h"
 
 #include "dear-imgui/base/renderer_context.h"
+#include "dear-imgui/base/widget_type.h"
 #include "dear-imgui/renderer/renderer_imgui.h"
 
 namespace ark::plugin::dear_imgui {
@@ -172,6 +172,32 @@ private:
     sp<RendererContext> _renderer_context;
 };
 
+class GetImVec2 final : public Widget, public Vec2 {
+public:
+    GetImVec2(std::function<ImVec2()> func)
+        : _func(std::move(func)) {
+    }
+
+    void render() override
+    {
+        const ImVec2 vec2 = _func();
+        _value = {vec2.x, vec2.y};
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return true;
+    }
+
+    V2 val() override
+    {
+        return _value;
+    }
+
+private:
+    std::function<ImVec2()> _func;
+    V2 _value;
+};
 
 class FunctionCall final : public Widget {
 public:
@@ -275,8 +301,8 @@ public:
     }
 
     void render() override {
-        bool isOpen = _is_open->val();
-        if(isOpen) {
+        if(const bool isOpen = _is_open->val())
+        {
             bool isOpenArg = isOpen;
             _func(&isOpenArg);
             if(isOpen != isOpenArg)
@@ -318,9 +344,37 @@ void WidgetBuilder::end()
     pop();
 }
 
-void WidgetBuilder::bulletText(const String& content)
+sp<Vec2> WidgetBuilder::getCursorScreenPos()
 {
-    addWidget(sp<Widget>::make<WidgetText>(ImGui::BulletText, content));
+    const sp<GetImVec2> widget = sp<GetImVec2>::make(ImGui::GetCursorScreenPos);
+    addWidget(widget);
+    return widget;
+}
+
+sp<Vec2> WidgetBuilder::getContentRegionAvail()
+{
+    const sp<GetImVec2> widget = sp<GetImVec2>::make(ImGui::GetContentRegionAvail);
+    addWidget(widget);
+    return widget;
+}
+
+sp<Vec2> WidgetBuilder::getItemRectMin()
+{
+    const sp<GetImVec2> widget = sp<GetImVec2>::make(ImGui::GetItemRectMin);
+    addWidget(widget);
+    return widget;
+}
+
+sp<Vec2> WidgetBuilder::getItemRectMax()
+{
+    const sp<GetImVec2> widget = sp<GetImVec2>::make(ImGui::GetItemRectMax);
+    addWidget(widget);
+    return widget;
+}
+
+void WidgetBuilder::bulletText(String content)
+{
+    addWidget(sp<Widget>::make<WidgetText>(ImGui::BulletText, std::move(content)));
 }
 
 sp<Observer> WidgetBuilder::button(const String& label, const V2& size)
@@ -504,9 +558,18 @@ void WidgetBuilder::image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, con
     addWidget(sp<Widget>::make<Image>(std::move(texture), std::move(size), uv0, uv1, std::move(color), std::move(borderColor), _renderer_context));
 }
 
-void WidgetBuilder::sameLine(float localPosX, float spacingW)
+sp<Widget> WidgetBuilder::sameLine(float offsetFromStartX, float spacing)
 {
-    addFunctionCall([localPosX, spacingW] { ImGui::SameLine(localPosX, spacingW); });
+    sp<Widget> widget = WidgetType::create(sp<Widget>::make<FunctionCall>([offsetFromStartX, spacing] { ImGui::SameLine(offsetFromStartX, spacing); }));
+    addWidget(widget);
+    return widget;
+}
+
+sp<Widget> WidgetBuilder::newLine()
+{
+    sp<Widget> widget = WidgetType::create(sp<Widget>::make<FunctionCall>(ImGui::NewLine));
+    addWidget(widget);
+    return widget;
 }
 
 void WidgetBuilder::separator()

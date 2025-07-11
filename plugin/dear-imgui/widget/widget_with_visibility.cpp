@@ -2,9 +2,7 @@
 
 #include "core/inf/variable.h"
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 WidgetWithVisibility::WidgetWithVisibility(sp<Widget> delegate, sp<Boolean> visible)
     : Wrapper(std::move(delegate)), _visible(std::move(visible))
@@ -13,10 +11,9 @@ WidgetWithVisibility::WidgetWithVisibility(sp<Widget> delegate, sp<Boolean> visi
 
 void WidgetWithVisibility::render()
 {
+    _visible->update(Timestamp::now());
     if(_visible->val())
         _wrapped->render();
 }
 
-}
-}
 }

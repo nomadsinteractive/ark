@@ -28,7 +28,7 @@ private:
     sp<Widget> _widget;
 };
 
-class WidgetWrapper final : public Widget, public Wrapper<Widget>, public Implements<WidgetWrapper, Wrapper<Widget>, Widget> {
+class WidgetWrapper final : public Widget, public Wrapper<Widget>, Implements<WidgetWrapper, Wrapper<Widget>, Widget> {
 public:
     WidgetWrapper(sp<Widget> delegate)
         : Wrapper(std::move(delegate)) {
@@ -40,37 +40,37 @@ public:
     }
 };
 
-class WidgetBefore final : public Widget, public Wrapper<Widget>, public Implements<WidgetBefore, Wrapper<Widget>, Widget> {
+class WidgetList final : public Widget {
 public:
-    WidgetBefore(sp<Widget> before, sp<Widget> after)
-        : Wrapper(std::move(after)), _before(std::move(before)) {
+    WidgetList(Vector<sp<Widget>> widgets)
+        : _widgets(std::move(widgets)) {
     }
 
-    void render() override {
-        _before->render();
-        if(_wrapped)
-            _wrapped->render();
+    void render() override
+    {
+        for(const sp<Widget>& i : _widgets)
+            i->render();
     }
 
 private:
-    sp<Widget> _before;
+    Vector<sp<Widget>> _widgets;
 };
 
 }
 
-sp<Widget> WidgetType::create(sp<Widget> wrapped)
+sp<Widget> WidgetType::create(sp<Widget> delegate)
 {
-    return sp<Widget>::make<WidgetWrapper>(std::move(wrapped));
+    return sp<Widget>::make<WidgetWrapper>(std::move(delegate));
 }
 
-sp<Widget> WidgetType::makeVisible(sp<Widget> self, sp<Boolean> visibility)
+sp<Widget> WidgetType::create(Vector<sp<Widget>> delegate)
 {
-    return sp<Widget>::make<WidgetWithVisibility>(std::move(self), std::move(visibility));
+    return sp<Widget>::make<WidgetWrapper>(sp<Widget>::make<WidgetList>(std::move(delegate)));
 }
 
-sp<Widget> WidgetType::before(sp<Widget> self, sp<Widget> after)
+void WidgetType::visibleIf(const sp<Widget>& self, sp<Boolean> visibility)
 {
-    return sp<Widget>::make<WidgetBefore>(std::move(self), std::move(after));
+    reset(self, sp<Widget>::make<WidgetWithVisibility>(self.ensureInstance<Wrapper<Widget>>()->wrapped(), std::move(visibility)));
 }
 
 void WidgetType::reset(const sp<Widget>& self, sp<Widget> wrapped)
