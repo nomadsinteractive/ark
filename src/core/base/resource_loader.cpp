@@ -27,10 +27,10 @@ void ResourceLoader::import(const document& manifest, BeanFactory& parent)
     {
         const String name = Documents::getAttribute(i, constants::NAME, Documents::getId(i));
         const String& src = Documents::ensureAttribute(i, constants::SRC);
-        if(const Identifier id(Identifier::parse(src)); id.isRef())
+        if(const Identifier id = Identifier::parse(src); id.isRef())
         {
             sp<BeanFactory> package = parent.getPackage(id.ref());
-            DCHECK(package, "Package \"%s\" does not exist", src.c_str());
+            CHECK(package, "Package \"%s\" does not exist", src.c_str());
             _bean_factory.addPackage(name, *package);
         }
         else

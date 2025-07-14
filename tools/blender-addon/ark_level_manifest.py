@@ -276,8 +276,6 @@ def unregister():
     for i in classes:
         bpy.utils.unregister_class(i)
 
-    bpy.utils.unregister_class(ArkLayerProperty)
-
 
 if __name__ == "__main__":
     register()

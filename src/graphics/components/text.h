@@ -15,7 +15,7 @@ namespace ark {
 class ARK_API Text final : public Wirable {
 public:
 //  [[script::bindings::auto]]
-    Text(sp<RenderLayer> renderLayer, sp<StringVar> text = nullptr, sp<Vec3> position = nullptr, sp<LayoutParam> layoutParam = nullptr, sp<GlyphMaker> glyphMaker = nullptr, sp<Mat4> transform = nullptr, float letterSpacing = 0.0f, LayoutLength lineHeight = {}, float lineIndent = 0.0f);
+    Text(sp<RenderLayer> renderLayer, sp<StringVar> text = nullptr, sp<Vec3> position = nullptr, sp<LayoutParam> layoutParam = nullptr, sp<Vec2> scale = nullptr, sp<GlyphMaker> glyphMaker = nullptr, float letterSpacing = 0.0f, LayoutLength lineHeight = {}, float lineIndent = 0.0f);
 
     void onWire(const WiringContext& context, const Box& self) override;
 
@@ -28,9 +28,9 @@ public:
     void setPosition(sp<Vec3> position);
 
 //  [[script::bindings::property]]
-    const sp<Mat4>& transform() const;
+    sp<Vec2> scale() const;
 //  [[script::bindings::property]]
-    void setTransform(sp<Mat4> transform);
+    void setScale(sp<Vec2> scale);
 
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
@@ -63,8 +63,8 @@ public:
         SafeBuilder<Font> _font;
         SafeBuilder<Vec3> _position;
         SafeBuilder<LayoutParam> _layout_param;
+        SafeBuilder<Vec2> _scale;
         SafeBuilder<GlyphMaker> _glyph_maker;
-        SafeBuilder<Mat4> _transform;
         SafeBuilder<Numeric> _letter_spacing;
         SafeIBuilder<LayoutLength> _line_height;
         float _line_indent;
