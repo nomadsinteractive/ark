@@ -1,5 +1,7 @@
 #include "renderer/base/render_target.h"
 
+#include <ranges>
+
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/util/string_convert.h"
@@ -39,7 +41,7 @@ RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
 {
     Configure configure = {_color_attachment_op, _depth_stencil_op, _clear_mask};
-    for(const auto& [i, j] : _attachments)
+    for(const auto& i : std::views::keys(_attachments))
     {
         sp<Texture> tex = i->build(args);
         if(const Texture::Usage usage = tex->usage(); usage == Texture::USAGE_AUTO || usage.has(Texture::USAGE_COLOR_ATTACHMENT))

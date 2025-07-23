@@ -96,6 +96,7 @@ Vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoader& m
         else
         {
             const int32_t type = c;
+            DTRACE(c == '#', "");
             sp<Model> model = modelLoader.loadModel(i->font() ? i->font()->combine(type) : type);
             const V2 offset = getCharacterOffset(model);
             const Boundaries& m = model->occupy();

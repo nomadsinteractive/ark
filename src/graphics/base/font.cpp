@@ -18,7 +18,7 @@ constexpr uint32_t FONT_STYLE_BIT_SHIFT = FONT_SIZE_UNIT_BIT_SHIFT + FONT_SIZE_U
 constexpr uint32_t FONT_STYLE_BITS = 3;
 constexpr uint32_t FONT_STYLE_MASK = (1 << (FONT_STYLE_BITS + 1)) - 1;
 
-constexpr uint32_t UNICODE_MASK = (1 << (FONT_SIZE_VALUE_BIT_SHIFT + 1)) - 1;
+constexpr uint32_t UNICODE_MASK = (1 << FONT_SIZE_VALUE_BIT_SHIFT) - 1;
 
 Font::Font(const String& size, const Style style)
     : _size(size), _style(style)
@@ -126,7 +126,7 @@ Font::TextSize::TextSize(const String& size)
         _value = Strings::eval<uint32_t>(size);
 }
 
-Font::TextSize::TextSize(uint32_t value, SizeUnit unit)
+Font::TextSize::TextSize(const uint32_t value, const SizeUnit unit)
     : _value(value), _unit(unit)
 {
 }

@@ -11,7 +11,7 @@ namespace ark {
 class ARK_API GlyphMakerType {
 public:
 //  [[script::bindings::constructor]]
-    static sp<GlyphMaker> create(sp<Font> font);
+    static sp<GlyphMaker> create(sp<Font> font = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<GlyphMaker> withColor(sp<GlyphMaker> self, sp<Vec4> c);

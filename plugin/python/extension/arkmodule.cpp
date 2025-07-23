@@ -233,7 +233,8 @@ PyMODINIT_FUNC PyInit_ark(void)
         {"TYPE_M4", "tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]"},
         {"TYPE_MAT4", "ark.Mat4"},
         {"TYPE_NAMED_HASH", "Union[int, str]"},
-        {"TYPE_RUNNABLE", "Union['Runnable', Callable[[], None]]"}
+        {"TYPE_RUNNABLE", "Union['Runnable', Callable[[], None]]"},
+        {"TYPE_STRING", "Union[str, 'String']"}
     };
     for(auto [k, v] : type_hints)
         PyModule_AddStringConstant(module, k, v);

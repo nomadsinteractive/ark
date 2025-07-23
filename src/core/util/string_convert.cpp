@@ -131,6 +131,7 @@ template<> ARK_API bool StringConvert::eval<bool>(const String& str)
         return true;
     if(str == "false")
         return false;
+    DFATAL("Boolean value should be either true or false. Now it's \"%s\"", str.c_str());
     return !str.empty();
 }
 

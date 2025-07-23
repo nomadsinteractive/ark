@@ -226,7 +226,7 @@ void NarrowPhraseCuteC2::loadShapes(const document& manifest, float ppu)
     }
 }
 
-sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::findBodyDef(TypeId shapeId) const
+sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::findBodyDef(const HashId shapeId) const
 {
     const auto iter = _body_defs.find(shapeId);
     return iter != _body_defs.end() ? iter->second : nullptr;

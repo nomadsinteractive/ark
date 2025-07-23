@@ -67,12 +67,11 @@ private:
 
     void loadShapes(const document& manifest, float ppu);
 
-    sp<BodyDefCuteC2> findBodyDef(TypeId shapeId) const;
+    sp<BodyDefCuteC2> findBodyDef(HashId shapeId) const;
     sp<BodyDefCuteC2> ensureBodyDef(const BroadPhrase::Candidate& candidate) const;
 
 private:
-    std::unordered_map<TypeId, sp<BodyDefCuteC2>> _body_defs;
-
+    HashMap<HashId, sp<BodyDefCuteC2>> _body_defs;
 };
 
 }

@@ -116,7 +116,7 @@ private:
         int32_t _position_iterations;
 
         b2World _world;
-        std::unordered_map<TypeId, BodyCreateInfo> _body_manifests;
+        HashMap<HashId, BodyCreateInfo> _body_manifests;
 
         ContactListenerImpl _contact_listener;
         DestructionListenerImpl _destruction_listener;

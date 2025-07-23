@@ -60,7 +60,6 @@ private:
 
 sp<GlyphMaker> GlyphMakerType::create(sp<Font> font)
 {
-    ASSERT(font);
     return sp<GlyphMaker>::make<GlyphMakerFont>(std::move(font));
 }
 

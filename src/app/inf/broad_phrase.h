@@ -20,14 +20,14 @@ public:
 
     struct Candidate {
         Candidate() = default;
-        Candidate(CandidateIdType id, const V2& position, const V4& quaternion, TypeId shapeId, sp<CollisionFilter> collisionFilter, Box bodyDef)
+        Candidate(CandidateIdType id, const V2& position, const V4& quaternion, const HashId shapeId, sp<CollisionFilter> collisionFilter, Box bodyDef)
             : _id(id), _position(position), _quaternion(quaternion), _shape_id(shapeId), _collision_filter(std::move(collisionFilter)), _body_def(std::move(bodyDef)) {
         }
 
         CandidateIdType _id;
         V2 _position;
         V4 _quaternion;
-        TypeId _shape_id;
+        HashId _shape_id;
         sp<CollisionFilter> _collision_filter;
         Box _body_def;
     };
