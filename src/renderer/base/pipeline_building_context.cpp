@@ -440,7 +440,7 @@ void PipelineBuildingContext::loadDefinitions(BeanFactory& factory, const Scope&
     for(const document& i : manifest->children("define"))
     {
         String name = Documents::getAttribute(i, constants::NAME);
-        CHECK_WARN(_definitions.find(name) == _definitions.end(), "Definition \"%s\" redefined", name.c_str());
+        CHECK_WARN(!_definitions.contains(name), "Definition \"%s\" redefined", name.c_str());
         _definitions.insert(std::make_pair(name, factory.ensureBuilder<StringVar>(i, constants::VALUE)->build(args)));
     }
 }

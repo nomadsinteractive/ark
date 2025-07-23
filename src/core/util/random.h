@@ -33,9 +33,9 @@ public:
     sp<Numeric> uniform(sp<Numeric> a, sp<Numeric> b);
 
 //  [[script::bindings::auto]]
-    sp<Numeric> normal(float a, float b);
+    sp<Numeric> normal(float mean, float sigma);
 //  [[script::bindings::auto]]
-    sp<Numeric> normal(sp<Numeric> a, sp<Numeric> b);
+    sp<Numeric> normal(sp<Numeric> mean, sp<Numeric> sigma);
 
 private:
     uint32_t _seed;

@@ -1817,10 +1817,17 @@ class Level:
     def cameras(self) -> dict[str, "Camera"]:
         pass
 
+    @property
+    def lights(self) -> dict[str, "Vec3"]:
+        pass
+
     def get_layer(self, name: str) -> LevelLayer:
         pass
 
     def get_camera(self, name: str) -> Optional[Camera]:
+        pass
+
+    def get_light(self, name: str) -> Optional[Vec3]:
         pass
 
 
@@ -2231,7 +2238,7 @@ class Random:
     def uniform(self, a: TYPE_NUMERIC, b: TYPE_NUMERIC) -> Numeric:
         return Numeric(0)
 
-    def normal(self, a: TYPE_NUMERIC, b: TYPE_NUMERIC) -> Numeric:
+    def normal(self, mean: TYPE_NUMERIC, sigma: TYPE_NUMERIC) -> Numeric:
         return Numeric(0)
 
 
@@ -2575,7 +2582,7 @@ class EventDispatcher(EventListener):
 
 
 class Glyph:
-    def __init__(self, _type: Union[Integer, int], position: Optional[Vec3] = None, transform: Optional[Transform] = None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, discarded: Optional[Discarded] = None):
+    def __init__(self, type: TYPE_INTEGER, font: Optional[Font] = None, position: Optional[Vec3] = None, transform: Optional[Mat4] = None, varyings: Optional["Varyings"] = None, visible: Optional[TYPE_BOOLEAN] = None, discarded: Optional[TYPE_BOOLEAN] = None):
         pass
 
     @property
@@ -2587,18 +2594,21 @@ class Glyph:
         return None
 
     @property
-    def transform(self) -> Optional[Transform]:
+    def transform(self) -> Optional[Mat4]:
         return None
 
 
 class GlyphMaker:
-    def __init__(self, font: Font, color: Optional[TYPE_VEC4] = None):
+    def __init__(self, font: Font):
         pass
 
-    def set_color(self, color: TYPE_VEC4) -> Self:
+    def with_color(self, color: TYPE_VEC4) -> Self:
         pass
 
-    def set_spans(self, spans: dict[str, "GlyphMaker"]) -> Self:
+    def with_spans(self, spans: dict[str, "GlyphMaker"]) -> Self:
+        pass
+
+    def with_transform(self, transform: Mat4) -> Self:
         pass
 
 

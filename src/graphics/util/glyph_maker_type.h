@@ -11,12 +11,14 @@ namespace ark {
 class ARK_API GlyphMakerType {
 public:
 //  [[script::bindings::constructor]]
-    static sp<GlyphMaker> create(sp<Font> font, sp<Vec4> color = nullptr);
+    static sp<GlyphMaker> create(sp<Font> font);
 
 //  [[script::bindings::classmethod]]
-    static sp<GlyphMaker> setColor(sp<GlyphMaker> self, sp<Vec4> c);
+    static sp<GlyphMaker> withColor(sp<GlyphMaker> self, sp<Vec4> c);
 //  [[script::bindings::classmethod]]
-    static sp<GlyphMaker> setSpans(sp<GlyphMaker> self, Map<String, sp<GlyphMaker>> spans);
+    static sp<GlyphMaker> withSpans(sp<GlyphMaker> self, Map<String, sp<GlyphMaker>> spans);
+//  [[script::bindings::classmethod]]
+    static sp<GlyphMaker> withTransform(sp<GlyphMaker> self, sp<Mat4> transform);
 
 };
 

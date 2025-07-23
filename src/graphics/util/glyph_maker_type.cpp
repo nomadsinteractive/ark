@@ -3,6 +3,7 @@
 #include "graphics/base/glyph.h"
 #include "graphics/impl/glyph_maker/glyph_maker_font.h"
 #include "graphics/impl/glyph_maker/glyph_maker_span.h"
+#include "graphics/util/mat4_type.h"
 
 #include "renderer/components/varyings.h"
 
@@ -10,34 +11,9 @@ namespace ark {
 
 namespace {
 
-class GlyphMakerImpl final : public GlyphMaker {
+class GlyphMakerWithColor final : public GlyphMaker {
 public:
-    GlyphMakerImpl(sp<Font> font, sp<Vec4> textColor)
-        : _font(std::move(font))
-    {
-        if(textColor)
-        {
-            _varyings = sp<Varyings>::make();
-            _varyings->setProperty("Color", std::move(textColor));
-        }
-    }
-
-    Vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override
-    {
-        Vector<sp<Glyph>> glyphs;
-        for(const wchar_t i : text)
-            glyphs.push_back(sp<Glyph>::make(sp<Integer>::make<Integer::Const>(i), _font, nullptr, nullptr, _varyings));
-        return glyphs;
-    }
-
-private:
-    sp<Font> _font;
-    sp<Varyings> _varyings;
-};
-
-class GlyphMakerTextColor final : public GlyphMaker {
-public:
-    GlyphMakerTextColor(sp<GlyphMaker> delegate, sp<Vec4> color)
+    GlyphMakerWithColor(sp<GlyphMaker> delegate, sp<Vec4> color)
         : _delegate(delegate ? std::move(delegate) : sp<GlyphMaker>::make<GlyphMakerFont>(nullptr)), _varyings(sp<Varyings>::make()), _color(std::move(color))
     {
         _varyings->setProperty("Color", _color);
@@ -60,25 +36,47 @@ private:
     sp<Vec4> _color;
 };
 
+class GlyphMakerWithTransform final : public GlyphMaker {
+public:
+    GlyphMakerWithTransform(sp<GlyphMaker> delegate, sp<Mat4> transform)
+        : _delegate(std::move(delegate)), _transform(std::move(transform))
+    {
+    }
+
+    Vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override
+    {
+        Vector<sp<Glyph>> glyphs = _delegate->makeGlyphs(text);
+        for(const sp<Glyph>& i : glyphs)
+            i->setTransform(i->transform() ? Mat4Type::matmul(_transform, i->transform()) : _transform);
+        return glyphs;
+    }
+
+private:
+    sp<GlyphMaker> _delegate;
+    sp<Mat4> _transform;
+};
+
 }
 
-sp<GlyphMaker> GlyphMakerType::create(sp<Font> font, sp<Vec4> color)
+sp<GlyphMaker> GlyphMakerType::create(sp<Font> font)
 {
     ASSERT(font);
-    if(color)
-        return sp<GlyphMaker>::make<GlyphMakerImpl>(std::move(font), std::move(color));
-
     return sp<GlyphMaker>::make<GlyphMakerFont>(std::move(font));
 }
 
-sp<GlyphMaker> GlyphMakerType::setColor(sp<GlyphMaker> self, sp<Vec4> c)
+sp<GlyphMaker> GlyphMakerType::withColor(sp<GlyphMaker> self, sp<Vec4> c)
 {
-    return sp<GlyphMaker>::make<GlyphMakerTextColor>(std::move(self), std::move(c));
+    return sp<GlyphMaker>::make<GlyphMakerWithColor>(std::move(self), std::move(c));
 }
 
-sp<GlyphMaker> GlyphMakerType::setSpans(sp<GlyphMaker> self, Map<String, sp<GlyphMaker>> spans)
+sp<GlyphMaker> GlyphMakerType::withSpans(sp<GlyphMaker> self, Map<String, sp<GlyphMaker>> spans)
 {
     return sp<GlyphMaker>::make<GlyphMakerSpan>(std::move(self), std::move(spans));
+}
+
+sp<GlyphMaker> GlyphMakerType::withTransform(sp<GlyphMaker> self, sp<Mat4> transform)
+{
+    return sp<GlyphMaker>::make<GlyphMakerWithTransform>(std::move(self), std::move(transform));
 }
 
 }

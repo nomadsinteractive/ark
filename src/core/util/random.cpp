@@ -144,17 +144,17 @@ sp<Numeric> Random::uniform(sp<Numeric> a, sp<Numeric> b)
     return g;
 }
 
-sp<Numeric> Random::normal(const float a, const float b)
+sp<Numeric> Random::normal(const float mean, const float sigma)
 {
-    sp<Numeric> g = sp<Numeric>::make<Distribution<std::normal_distribution<float>, float>>(std::normal_distribution<float>(a, b), _generator);
+    sp<Numeric> g = sp<Numeric>::make<Distribution<std::normal_distribution<float>, float>>(std::normal_distribution<float>(mean, sigma), _generator);
     if(_nonvolatile)
         return toNonvolatile<float>(std::move(g));
     return g;
 }
 
-sp<Numeric> Random::normal(sp<Numeric> a, sp<Numeric> b)
+sp<Numeric> Random::normal(sp<Numeric> mean, sp<Numeric> sigma)
 {
-    sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::normal_distribution<float>>>(std::move(a), std::move(b), _generator);
+    sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::normal_distribution<float>>>(std::move(mean), std::move(sigma), _generator);
     if(_nonvolatile)
         return toNonvolatile<float>(std::move(g));
     return g;

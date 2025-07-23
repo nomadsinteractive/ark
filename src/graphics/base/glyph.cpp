@@ -3,6 +3,7 @@
 #include "graphics/base/font.h"
 #include "graphics/components/render_object.h"
 #include "graphics/components/size.h"
+#include "graphics/util/transform_type.h"
 #include "graphics/util/vec3_type.h"
 
 namespace ark {
@@ -33,7 +34,7 @@ private:
 
 }
 
-Glyph::Glyph(sp<Integer> type, sp<Font> font, sp<Vec3> position, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
+Glyph::Glyph(sp<Integer> type, sp<Font> font, sp<Vec3> position, sp<Mat4> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
     : _type(std::move(type)), _font(std::move(font)), _position(std::move(position)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible)), _discarded(std::move(discarded))
 {
 }
@@ -53,9 +54,14 @@ const sp<Vec3>& Glyph::position() const
     return _position;
 }
 
-const sp<Transform>& Glyph::transform() const
+const sp<Mat4>& Glyph::transform() const
 {
     return _transform;
+}
+
+void Glyph::setTransform(sp<Mat4> transform)
+{
+    _transform = std::move(transform);
 }
 
 const sp<Varyings>& Glyph::varyings() const
@@ -80,7 +86,7 @@ const sp<Boolean>& Glyph::visible() const
 
 sp<RenderObject> Glyph::toRenderObject() const
 {
-    return sp<RenderObject>::make(_font ? sp<Integer>::make<GlyphRenderObjectType>(_type, _font) : _type, _position, sp<Size>::make(_content_size.x(), _content_size.y()), _transform, _varyings, _visible, _discarded);
+    return sp<RenderObject>::make(_font ? sp<Integer>::make<GlyphRenderObjectType>(_type, _font) : _type, _position, sp<Size>::make(_content_size.x(), _content_size.y()), _transform ? TransformType::create(_transform) : sp<Transform>(), _varyings, _visible, _discarded);
 }
 
 wchar_t Glyph::character() const

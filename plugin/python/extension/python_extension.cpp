@@ -54,13 +54,13 @@ PythonExtension::PythonExtension()
 
 bool PythonExtension::isPyArkTypeObject(void* pyTypeObject) const
 {
-    return _type_by_py_object.find(pyTypeObject) != _type_by_py_object.end();
+    return _type_by_py_object.contains(pyTypeObject);
 }
 
 PyArkType* PythonExtension::getPyArkType(PyObject* pyObject)
 {
     void* pyTypeObject = PyType_Check(pyObject) ? static_cast<void*>(pyObject) : static_cast<void*>(Py_TYPE(pyObject));
-    auto iter = _type_by_py_object.find(pyTypeObject);
+    const auto iter = _type_by_py_object.find(pyTypeObject);
     return iter != _type_by_py_object.end() ? iter->second : nullptr;
 }
 

@@ -114,7 +114,7 @@ uint32_t Atlas::height() const
 
 bool Atlas::has(const NamedHash& resid) const
 {
-    return _items.find(resid.hash()) != _items.end();
+    return _items.contains(resid.hash());
 }
 
 const V2& Atlas::getOriginalSize(const NamedHash& resid) const

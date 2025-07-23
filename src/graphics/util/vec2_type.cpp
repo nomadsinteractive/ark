@@ -55,7 +55,7 @@ sp<Vec2> Vec2Type::create(sp<Numeric> x, sp<Numeric> y)
 {
     ASSERT(x);
     if(!y)
-        sp<Vec2>::make<Vec2Impl>(std::move(x));
+        return sp<Vec2>::make<Vec2Impl>(std::move(x));
     return sp<Vec2>::make<Vec2Impl>(std::move(x), std::move(y));
 }
 
