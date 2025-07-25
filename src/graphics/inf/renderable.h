@@ -32,8 +32,8 @@ public:
         State _state = {RENDERABLE_STATE_DISCARDED};
         int32_t _type = 0;
         sp<Model> _model = nullptr;
-        V3 _position{0};
-        V3 _size{1.0f};
+        V3 _position = {0};
+        V3 _size = {1.0f};
         sp<Transform> _transform = nullptr;
         Transform::Snapshot _transform_snapshot;
         Varyings::Snapshot _varyings_snapshot;

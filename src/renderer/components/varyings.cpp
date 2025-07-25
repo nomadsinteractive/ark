@@ -1,5 +1,7 @@
 #include "renderer/components/varyings.h"
 
+#include <ranges>
+
 #include "core/base/allocator.h"
 #include "core/base/bean_factory.h"
 #include "core/base/named_hash.h"
@@ -43,9 +45,9 @@ String findNearestAttribute(const PipelineLayout& shaderLayout, const String& na
 {
     String nearest;
     constexpr size_t nd = std::numeric_limits<size_t>::max();
-    for(const auto& [i, j] : shaderLayout.streamLayouts())
+    for(const auto& i : std::views::values(shaderLayout.streamLayouts()))
     {
-        const auto [value, distance] = Math::levensteinNearest(name, j.attributes().keys());
+        const auto [value, distance] = Math::levensteinNearest(name, i.attributes().keys());
         if(distance < nd)
             nearest = std::move(value);
     }
@@ -209,10 +211,10 @@ Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineLayout, Allo
     for(const auto& [i, j] : _slot_strides)
         new(&buffers.at(idx++)) Divided(i, allocator.sbrkSpan(j));
 
-    for(const auto& [i, j] : _slots)
+    for(const auto& i : std::views::values(_slots))
     {
-        DASSERT(j._divisor < buffers.length());
-        buffers.at(j._divisor).addSnapshot(allocator, j);
+        DASSERT(i._divisor < buffers.length());
+        buffers.at(i._divisor).addSnapshot(allocator, i);
     }
 
     Snapshot snapshot(buffers);

@@ -11,7 +11,7 @@ VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, c
 {
 }
 
-VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, sp<VertexWriter::Writer> writer)
+VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, const bool doTransform, sp<VertexWriter::Writer> writer)
     : _attribute_offsets(attributes), _writer(std::move(writer)), _do_transform(doTransform), _visible(true), _transform_snapshot(nullptr)
 {
 }
@@ -79,7 +79,7 @@ void VertexWriter::writeVaryings()
     _writer->write(_varying_contents.buf(), static_cast<uint32_t>(_varying_contents.length()), 0);
 }
 
-VertexWriter::WriterMemory::WriterMemory(uint8_t* ptr, uint32_t size, uint32_t stride)
+VertexWriter::WriterMemory::WriterMemory(uint8_t* ptr, const uint32_t size, const uint32_t stride)
     : _ptr(nullptr), _begin(ptr), _end(_begin + size), _stride(stride)
 {
 }

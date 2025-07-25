@@ -70,10 +70,10 @@ void Level::doLoad(const String& src)
     for(const document& i : manifest->children("library"))
     {
         const String& name = Documents::ensureAttribute(i, constants::NAME);
-        const String& dimensions = Documents::ensureAttribute(i, "dimensions");
+        const String& size = Documents::ensureAttribute(i, constants::SIZE);
         const int32_t id = Documents::ensureAttribute<int32_t>(i, constants::ID);
-        CHECK_WARN(_stub->_libraries.find(id) == _stub->_libraries.end(), "Overwriting instance library mapping(%d)", id);
-        _stub->_libraries.emplace(id, sp<LevelLibrary>::make(id, name, sp<Vec3>::make<Vec3::Const>(Strings::eval<V3>(dimensions))));
+        CHECK_WARN(!_stub->_libraries.contains(id), "Overwriting instance library mapping(%d)", id);
+        _stub->_libraries.emplace(id, sp<LevelLibrary>::make(id, name, sp<Vec3>::make<Vec3::Const>(Strings::eval<V3>(size))));
     }
 
     for(const document& i : manifest->children(constants::LAYER))

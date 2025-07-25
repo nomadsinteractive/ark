@@ -42,30 +42,6 @@ public:
 
 //  [[script::bindings::classmethod]]
     static sp<Mat4> toMatrix(sp<Vec4> self);
-
-//  [[plugin::builder]]
-    class BUILDER final : public Builder<Rotation> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        sp<Rotation> build(const Scope& args) override;
-
-    private:
-        SafeBuilder<Numeric> _theta;
-        SafeBuilder<Vec3> _axis;
-    };
-
-//  [[plugin::builder::by-value]]
-    class DICTIONARY final : public Builder<Rotation> {
-    public:
-        DICTIONARY(BeanFactory& factory, const String& str);
-
-        sp<Rotation> build(const Scope& args) override;
-
-    private:
-        SafeBuilder<Numeric> _theta;
-    };
-
 };
 
 }

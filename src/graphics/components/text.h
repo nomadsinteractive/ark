@@ -48,7 +48,7 @@ public:
 //  [[script::bindings::auto]]
     void show(sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
-    void hide();
+    void discard();
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Text> {

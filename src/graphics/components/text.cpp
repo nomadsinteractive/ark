@@ -41,8 +41,6 @@ namespace ark {
 
 namespace {
 
-typedef Vector<sp<Glyph>> GlyphContents;
-
 struct Character {
     sp<Glyph> _glyph;
     sp<Model> _model;
@@ -76,7 +74,7 @@ V2 getCharacterOffset(const Model& model)
     return {bitmapPos.x(), bitmapOccupySize.y() - bitmapPos.y() - bitmapContentSize.y()};
 }
 
-Vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoader& modelLoader)
+Vector<Character> toLayoutCharacters(const Vector<sp<Glyph>>& glyphs, ModelLoader& modelLoader)
 {
     HashMap<wchar_t, std::tuple<sp<Model>, V2, bool, bool>> mmap;
     float integral = 0;
@@ -96,7 +94,6 @@ Vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoader& m
         else
         {
             const int32_t type = c;
-            DTRACE(c == '#', "");
             sp<Model> model = modelLoader.loadModel(i->font() ? i->font()->combine(type) : type);
             const V2 offset = getCharacterOffset(model);
             const Boundaries& m = model->occupy();
@@ -141,6 +138,7 @@ struct LayoutInfo {
     void setLayoutNode(sp<Layout::Node> layoutNode)
     {
         _layout_size = Vec2Type::toSize(sp<Vec2>::make<LayoutNodeSize>(layoutNode));
+        _size = _layout_param ? _layout_size : sp<Size>::make(_auto_width, _auto_height);
         _layout_node = std::move(layoutNode);
 
         if(!_layout_param || _layout_param->width().isAuto())
@@ -164,6 +162,7 @@ struct LayoutInfo {
 
     sp<Layout::Node> _layout_node;
     sp<Size> _layout_size;
+    sp<Size> _size;
 
     sp<Numeric::Impl> _auto_width;
     sp<Numeric::Impl> _auto_height;
@@ -623,7 +622,7 @@ void Text::setScale(sp<Vec2> scale)
 
 const sp<Size>& Text::size() const
 {
-    return _content->_layout_info->_layout_size;
+    return _content->_layout_info->_size;
 }
 
 const sp<Boundaries>& Text::boundaries() const
@@ -648,14 +647,14 @@ void Text::setText(std::wstring text)
 
 void Text::show(sp<Boolean> discarded)
 {
-    hide();
+    discard();
 
     _content->update(Timestamp::now());
     _render_batch = sp<RenderBatch>::make<RenderBatchContent>(_content, discarded ? std::move(discarded) : sp<Boolean>::make<BooleanByWeakRef<Content>>(_content, 0));
     _content->_render_layer->addRenderBatch(_render_batch);
 }
 
-void Text::hide()
+void Text::discard()
 {
     if(_render_batch)
         _render_batch->setDiscarded(Global<Constants>()->BOOLEAN_TRUE);

@@ -2611,6 +2611,9 @@ class GlyphMaker:
     def with_transform(self, transform: Mat4) -> Self:
         pass
 
+    def with_varyings(self, varyings: "Varyings") -> Self:
+        pass
+
 
 class Text:
     def __init__(self, render_layer: RenderLayer, text: String | str | None = None, position: Optional[TYPE_VEC3] = None, layout_param: Optional["LayoutParam"] = None, scale: Optional[TYPE_VEC2] = None, glyph_maker: Any = None,
@@ -2650,17 +2653,17 @@ class Text:
         pass
 
     @property
-    def transform(self) -> Optional[Mat4]:
+    def scale(self) -> Optional[Vec2]:
         return None
 
-    @transform.setter
-    def transform(self, transform: Optional[Mat4]):
+    @scale.setter
+    def scale(self, scale: Optional[Vec2]):
         pass
 
     def show(self, discarded: Optional[TYPE_BOOLEAN] = None):
         pass
 
-    def set_rich_text(self, text: str, **kwargs):
+    def discard(self):
         pass
 
 

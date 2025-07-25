@@ -19,6 +19,8 @@ public:
     static sp<GlyphMaker> withSpans(sp<GlyphMaker> self, Map<String, sp<GlyphMaker>> spans);
 //  [[script::bindings::classmethod]]
     static sp<GlyphMaker> withTransform(sp<GlyphMaker> self, sp<Mat4> transform);
+//  [[script::bindings::classmethod]]
+    static sp<GlyphMaker> withVaryings(sp<GlyphMaker> self, sp<Varyings> varyings);
 
 };
 

@@ -56,6 +56,27 @@ private:
     sp<Mat4> _transform;
 };
 
+class GlyphMakerWithVaryings final : public GlyphMaker {
+public:
+    GlyphMakerWithVaryings(sp<GlyphMaker> delegate, sp<Varyings> varyings)
+        : _delegate(std::move(delegate)), _varyings(std::move(varyings))
+    {
+    }
+
+    Vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override
+    {
+        Vector<sp<Glyph>> glyphs = _delegate->makeGlyphs(text);
+        for(const sp<Glyph>& i : glyphs)
+            // TODO: merge varyings?
+            i->setVaryings(_varyings);
+        return glyphs;
+    }
+
+private:
+    sp<GlyphMaker> _delegate;
+    sp<Varyings> _varyings;
+};
+
 }
 
 sp<GlyphMaker> GlyphMakerType::create(sp<Font> font)
@@ -76,6 +97,11 @@ sp<GlyphMaker> GlyphMakerType::withSpans(sp<GlyphMaker> self, Map<String, sp<Gly
 sp<GlyphMaker> GlyphMakerType::withTransform(sp<GlyphMaker> self, sp<Mat4> transform)
 {
     return sp<GlyphMaker>::make<GlyphMakerWithTransform>(std::move(self), std::move(transform));
+}
+
+sp<GlyphMaker> GlyphMakerType::withVaryings(sp<GlyphMaker> self, sp<Varyings> varyings)
+{
+    return sp<GlyphMaker>::make<GlyphMakerWithVaryings>(std::move(self), std::move(varyings));
 }
 
 }

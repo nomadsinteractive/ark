@@ -33,7 +33,7 @@ public:
     void upload(Writable& uploader) override {
         uint32_t offset = 0;
         const size_t stride = _pipeline_input->getStreamLayout(0).stride();
-        PipelineLayout::VertexDescriptor attributes(_pipeline_input);
+        const PipelineLayout::VertexDescriptor attributes(_pipeline_input);
         for(const ModelBundle::ModelLayout& i : _model_bundle->modelLayouts().values())
         {
             const Model& model = i._model;

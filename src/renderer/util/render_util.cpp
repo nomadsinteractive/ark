@@ -1,5 +1,6 @@
 #include "renderer/util/render_util.h"
 
+#include <ranges>
 #include <glslang/Public/ShaderLang.h>
 #include <glslang/SPIRV/GlslangToSpv.h>
 
@@ -493,11 +494,9 @@ Vector<ShaderPreprocessor::Declaration> RenderUtil::setupLayoutLocation(const Pi
         divisors[attribute.divisor()].push_back(&i);
     }
 
-    for(const auto& i : divisors)
-    {
-        for(const ShaderPreprocessor::Declaration* j : i.second)
+    for(const auto& i : std::views::values(divisors))
+        for(const ShaderPreprocessor::Declaration* j : i)
             locations.push_back(*j);
-    }
 
     return locations;
 }

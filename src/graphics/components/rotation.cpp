@@ -109,24 +109,4 @@ sp<Mat4> Rotation::toMatrix(sp<Vec4> self)
     return sp<Mat4>::make<Mat4Quaternion>(std::move(self));
 }
 
-Rotation::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _theta(factory.getBuilder<Numeric>(manifest, "theta")), _axis(factory.getBuilder<Vec3>(manifest, "axis"))
-{
-}
-
-sp<Rotation> Rotation::BUILDER::build(const Scope& args)
-{
-    return sp<Rotation>::make(sp<Vec4>::make<RotationAxisTheta>(_axis.build(args), _theta.build(args)));
-}
-
-Rotation::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
-    : _theta(factory.getBuilder<Numeric>(str))
-{
-}
-
-sp<Rotation> Rotation::DICTIONARY::build(const Scope& args)
-{
-    return sp<Rotation>::make(sp<Vec4>::make<RotationAxisTheta>(sp<Vec3>::make<Vec3::Const>(V3(constants::AXIS_Z)), _theta.build(args)));
-}
-
 }

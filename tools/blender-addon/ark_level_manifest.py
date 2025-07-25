@@ -129,10 +129,10 @@ class ArkInstanceCollection:
         if obj:
             bb = obj.bound_box
             d = Vector(tuple(max(bb[i][j] for i in range(8)) - min(bb[i][j] for i in range(8)) for j in range(3)))
-            dimensions = ', '.join(str(abs(i)) for i in to_y_up_scale(obj.matrix_world @ d))
+            size = ', '.join(str(abs(i)) for i in to_y_up_scale(obj.matrix_world @ d))
         else:
-            dimensions = '0, 0, 0'
-        return '%s<library id="%d" name="%s" dimensions="(%s)"/>' % (_INDENT_BLOCK * indent, self._id, self._name, dimensions)
+            size = '0, 0, 0'
+        return '%s<library id="%d" name="%s" size="(%s)"/>' % (_INDENT_BLOCK * indent, self._id, self._name, size)
 
 
 class ArkLayer:
