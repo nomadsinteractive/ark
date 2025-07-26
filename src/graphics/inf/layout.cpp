@@ -73,6 +73,11 @@ void Layout::Node::setSize(const V2& size)
     _size.reset(size);
 }
 
+bool Layout::Node::isAutoWidth() const
+{
+    return !_layout_param || _layout_param->width().isAuto();
+}
+
 const sp<Numeric>& Layout::Node::autoWidth() const
 {
     return _auto_width;
@@ -81,6 +86,11 @@ const sp<Numeric>& Layout::Node::autoWidth() const
 void Layout::Node::setAutoWidth(sp<Numeric> autoWidth)
 {
     _auto_width = std::move(autoWidth);
+}
+
+bool Layout::Node::isAutoHeight() const
+{
+    return !_layout_param || _layout_param->height().isAuto();
 }
 
 const sp<Numeric>& Layout::Node::autoHeight() const

@@ -182,15 +182,15 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
     YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));
     YGNodeStyleSetFlexGrow(node, layoutParam.flexGrow());
 
-    if(const Optional<float> flexBasis = updateVar<float, const SafeVar<Numeric>>(timestamp, layoutParam.flexBasis()))
+    if(const Optional<float> flexBasis = updateVar<float, const SafeVar<Numeric>>(timestamp, layoutParam.flexBasis().value()))
     {
-        if(layoutParam.flexBasisType() == LayoutLength::LENGTH_TYPE_AUTO)
+        if(layoutParam.flexBasis().type() == LayoutLength::LENGTH_TYPE_AUTO)
             YGNodeStyleSetFlexBasisAuto(node);
-        else if(layoutParam.flexBasisType() == LayoutLength::LENGTH_TYPE_PIXEL)
+        else if(layoutParam.flexBasis().type() == LayoutLength::LENGTH_TYPE_PIXEL)
             YGNodeStyleSetFlexBasis(node, flexBasis.value());
         else
         {
-            ASSERT(layoutParam.flexBasisType() == LayoutLength::LENGTH_TYPE_PERCENTAGE);
+            ASSERT(layoutParam.flexBasis().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE);
             YGNodeStyleSetFlexBasisPercent(node, flexBasis.value());
         }
     }

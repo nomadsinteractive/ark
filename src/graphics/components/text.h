@@ -37,8 +37,6 @@ public:
 
 //  [[script::bindings::property]]
     const sp<Boundaries>& boundaries() const;
-//  [[script::bindings::property]]
-    void setBoundaries(sp<Boundaries> boundaries);
 
 //  [[script::bindings::property]]
     const std::wstring& text() const;

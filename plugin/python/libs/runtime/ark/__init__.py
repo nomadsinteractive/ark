@@ -2990,7 +2990,8 @@ class LayoutParam:
     FLEX_WRAP_WRAP = 1
     FLEX_WRAP_WRAP_REVERSE = 2
 
-    def __init__(self, width: LayoutLength, height: LayoutLength):
+    def __init__(self, width: LayoutLength = None, height: LayoutLength = None, layout = None, flex_direction: int = FLEX_DIRECTION_ROW, flex_wrap: int = FLEX_WRAP_NOWRAP, justify_content: int = JUSTIFY_CONTENT_FLEX_START, align_items: int = ALIGN_STRETCH,
+                 align_self: int = ALIGN_AUTO, align_content: int = ALIGN_STRETCH, flex_grow: float = 0, flex_basis: LayoutLength = None, margins: Optional[TYPE_VEC4] = None, paddings: Optional[TYPE_VEC4] = None, offset: Optional[TYPE_VEC3] = None):
         pass
 
 

@@ -99,25 +99,14 @@ void LayoutParam::setStopPropagation(sp<Boolean> stopPropagation)
     _stop_propagation = std::move(stopPropagation);
 }
 
-LayoutLength::LengthType LayoutParam::flexBasisType() const
+const LayoutLength& LayoutParam::flexBasis() const
 {
-    return _flex_basis._type;
+    return _flex_basis;
 }
 
-void LayoutParam::setFlexBasisType(LayoutLength::LengthType basisType)
+void LayoutParam::setFlexBasis(LayoutLength flexBasis)
 {
-    _flex_basis._type = basisType;
-    _timestamp.markDirty();
-}
-
-const SafeVar<Numeric>& LayoutParam::flexBasis() const
-{
-    return _flex_basis._value;
-}
-
-void LayoutParam::setFlexBasis(sp<Numeric> flexBasis)
-{
-    _flex_basis._value = std::move(flexBasis);
+    _flex_basis = std::move(flexBasis);
 }
 
 float LayoutParam::flexGrow() const

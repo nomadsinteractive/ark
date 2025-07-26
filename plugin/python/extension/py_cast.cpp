@@ -8,8 +8,10 @@
 #include "core/inf/variable.h"
 #include "core/types/box.h"
 #include "core/util/log.h"
+#include "core/util/string_type.h"
 
 #include "graphics/base/color.h"
+#include "graphics/base/layout_length.h"
 #include "graphics/base/mat.h"
 #include "graphics/util/vec2_type.h"
 #include "graphics/util/vec3_type.h"
@@ -17,8 +19,6 @@
 
 #include "app/base/event.h"
 #include "app/base/raycast_manifold.h"
-#include "core/util/string_type.h"
-#include "graphics/base/layout_length.h"
 
 #include "python/api.h"
 #include "python/extension/python_extension.h"
@@ -702,6 +702,11 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<BytesView>(co
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<NamedHash>(const NamedHash& obj)
 {
     return toPyObject<sp<NamedHash>>(sp<NamedHash>::make(obj));
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<LayoutLength>(const LayoutLength& obj)
+{
+    return toPyObject<sp<LayoutLength>>(sp<LayoutLength>::make(obj));
 }
 
 }

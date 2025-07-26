@@ -34,8 +34,11 @@ public:
         const WithTimestamp<V2>& size() const;
         void setSize(const V2& size);
 
+        bool isAutoWidth() const;
         const sp<Numeric>& autoWidth() const;
         void setAutoWidth(sp<Numeric> autoWidth);
+
+        bool isAutoHeight() const;
         const sp<Numeric>& autoHeight() const;
         void setAutoHeight(sp<Numeric> autoHeight);
 

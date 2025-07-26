@@ -54,7 +54,7 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    LayoutParam(LayoutLength width, LayoutLength height, sp<Layout> layout = nullptr, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
+    LayoutParam(LayoutLength width = {}, LayoutLength height = {}, sp<Layout> layout = nullptr, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
                 LayoutParam::JustifyContent justifyContent = LayoutParam::JUSTIFY_CONTENT_FLEX_START, LayoutParam::Align alignItems = LayoutParam::ALIGN_STRETCH,
                 LayoutParam::Align alignSelf = LayoutParam::ALIGN_AUTO, LayoutParam::Align alignContent = LayoutParam::ALIGN_STRETCH,
                 float flexGrow = 0, LayoutLength flexBasis = {}, sp<Vec4> margins = nullptr, sp<Vec4> paddings = nullptr, sp<Vec3> offset = nullptr);
@@ -85,13 +85,9 @@ public:
     void setStopPropagation(sp<Boolean> stopPropagation);
 
 //  [[script::bindings::property]]
-    LayoutLength::LengthType flexBasisType() const;
+    const LayoutLength& flexBasis() const;
 //  [[script::bindings::property]]
-    void setFlexBasisType(LayoutLength::LengthType basisType);
-//  [[script::bindings::property]]
-    const SafeVar<Numeric>& flexBasis() const;
-//  [[script::bindings::property]]
-    void setFlexBasis(sp<Numeric> flexBasis);
+    void setFlexBasis(LayoutLength flexBasis);
 
 //  [[script::bindings::property]]
     float flexGrow() const;
@@ -99,10 +95,14 @@ public:
     void setFlexGrow(float weight);
     bool hasFlexGrow() const;
 
+//  [[script::bindings::property]]
     const LayoutLength& width() const;
+//  [[script::bindings::property]]
     void setWidth(LayoutLength width);
 
+//  [[script::bindings::property]]
     const LayoutLength& height() const;
+//  [[script::bindings::property]]
     void setHeight(LayoutLength height);
 
 //  [[script::bindings::property]]
