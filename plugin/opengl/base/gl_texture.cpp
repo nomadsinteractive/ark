@@ -1,7 +1,6 @@
 #include "opengl/base/gl_texture.h"
 
 #include "core/inf/array.h"
-#include "core/inf/variable.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
@@ -9,14 +8,13 @@
 
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/texture_bundle.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
 #include "opengl/util/gl_util.h"
 
 namespace ark::plugin::opengl {
 
-GLTexture::GLTexture(sp<Recycler> recycler, sp<Size> size, uint32_t target, Texture::Type type, sp<Texture::Parameters> parameters)
+GLTexture::GLTexture(sp<Recycler> recycler, sp<Size> size, const uint32_t target, const Texture::Type type, sp<Texture::Parameters> parameters)
     : Texture::Delegate(type), _recycler(std::move(recycler)), _size(std::move(size)), _target(target), _parameters(std::move(parameters)), _id(0), _fbo(0)
 {
 }
@@ -36,7 +34,7 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
 
         glGenTextures(1, &_id);
         LOGD("Generating GLTexture[%d]", _id);
-        glBindTexture(static_cast<GLenum>(_target), _id);
+        GL_CHECK_ERROR(glBindTexture(static_cast<GLenum>(_target), _id));
         glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(glParameters[_parameters->_min_filter]));
         glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(glParameters[_parameters->_mag_filter]));
         glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_S, static_cast<GLint>(glParameters[_parameters->_wrap_s]));
@@ -44,7 +42,7 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
         glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_R, static_cast<GLint>(glParameters[_parameters->_wrap_r]));
     }
     else
-        glBindTexture(static_cast<GLenum>(_target), _id);
+        GL_CHECK_ERROR(glBindTexture(static_cast<GLenum>(_target), _id));
 
     if(uploader)
     {
@@ -55,7 +53,7 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
     }
 
     if(_parameters->_features & Texture::FEATURE_MIPMAPS)
-        glGenerateMipmap(static_cast<GLenum>(_target));
+        GL_CHECK_ERROR(glGenerateMipmap(static_cast<GLenum>(_target)));
 }
 
 ResourceRecycleFunc GLTexture::recycle()
@@ -70,15 +68,15 @@ void GLTexture::clear(GraphicsContext& /*graphicsContext*/)
         if(!_fbo)
         {
             glGenFramebuffers(1, &_fbo);
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
-            glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _id, 0);
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            GL_CHECK_ERROR(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo));
+            GL_CHECK_ERROR(glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _id, 0));
+            GL_CHECK_ERROR(glDrawBuffer(GL_COLOR_ATTACHMENT0));
         }
         else
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
+            GL_CHECK_ERROR(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo));
         constexpr GLuint clearColor[4] = {0, 0, 0, 0};
-        glClearBufferuiv(GL_COLOR, 0, clearColor);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        GL_CHECK_ERROR(glClearBufferuiv(GL_COLOR, 0, clearColor));
+        GL_CHECK_ERROR(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
     }
 }
 

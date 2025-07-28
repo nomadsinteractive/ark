@@ -41,7 +41,8 @@ public:
 
     void run() override
     {
-        _buffer.delegate()->downloadBuffer(GraphicsContext::mocked(), _offset, _memory->size(), _memory->buf());
+        if(_buffer.id())
+            _buffer.delegate()->downloadBuffer(GraphicsContext::mocked(), _offset, _memory->size(), _memory->buf());
     }
 
 private:

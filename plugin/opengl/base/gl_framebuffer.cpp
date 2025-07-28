@@ -105,32 +105,32 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         attachments.push_back(_configure._depth_stencil_attachment->id(), glAttachments[usage]);
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _id);
-    glDrawBuffers(static_cast<uint32_t>(drawBuffers.size()), drawBuffers.data());
+    GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, _id));
+    GL_CHECK_ERROR(glDrawBuffers(static_cast<uint32_t>(drawBuffers.size()), drawBuffers.data()));
     if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
         for(const auto& [k, v] : attachments)
         {
-            glFramebufferTexture2D(GL_FRAMEBUFFER, v, GL_TEXTURE_2D, static_cast<GLuint>(k), 0);
+            GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, v, GL_TEXTURE_2D, static_cast<GLuint>(k), 0));
             LOGD("glFramebufferTexture2D, attachment: %d, id: %d", v, k);
         }
 
     if(depthTexture)
     {
         const sp<GLRenderbuffer> renderbuffer = ensureRenderBuffer(graphicsContext, *static_cast<sp<GLTexture>>(depthTexture->delegate()), _recycler);
-        glBindRenderbuffer(GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
-        glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, depthTexture->width(), depthTexture->height());
+        GL_CHECK_ERROR(glBindRenderbuffer(GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id())));
+        GL_CHECK_ERROR(glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, depthTexture->width(), depthTexture->height()));
         for(const GLenum i : depthInputs)
         {
             if(_configure._depth_stencil_op != RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE && _configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_LOAD))
-                glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
+                GL_CHECK_ERROR(glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id())));
             if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
-                glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
+                GL_CHECK_ERROR(glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id())));
         }
     }
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         GLDebug::glCheckError("FrameBuffer");
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
 ResourceRecycleFunc GLFramebuffer::recycle()

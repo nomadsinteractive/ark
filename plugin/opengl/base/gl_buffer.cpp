@@ -19,9 +19,9 @@ public:
 
     uint32_t write(const void* buffer, const uint32_t size, const uint32_t offset) override
     {
-        DASSERT(buffer);
-        DCHECK(offset + size <= _size, "GLBuffer data overflow");
-        glBufferSubData(_type, static_cast<GLsizeiptr>(offset), static_cast<GLsizeiptr>(size), buffer);
+        ASSERT(buffer);
+        CHECK(offset + size <= _size, "GLBuffer data overflow");
+        GL_CHECK_ERROR(glBufferSubData(_type, static_cast<GLsizeiptr>(offset), static_cast<GLsizeiptr>(size), buffer));
         return size;
     }
 
@@ -69,7 +69,7 @@ void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader
 
     _size = uploader.size();
     if(static_cast<size_t>(bufsize) < _size)
-        glBufferData(_target, static_cast<GLsizeiptr>(_size), nullptr, _usage);
+        GL_CHECK_ERROR(glBufferData(_target, static_cast<GLsizeiptr>(_size), nullptr, _usage));
     WritableGLBuffer writer(_target, _size);
     uploader.upload(writer);
 }
@@ -94,7 +94,7 @@ void GLBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader
 void GLBuffer::downloadBuffer(GraphicsContext& /*graphicsContext*/, const size_t offset, const size_t size, void* ptr)
 {
     const GLBufferBinder glBinder(_target, _id);
-    glGetBufferSubData(_target, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), ptr);
+    GL_CHECK_ERROR(glGetBufferSubData(_target, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), ptr));
 }
 
 ResourceRecycleFunc GLBuffer::recycle()

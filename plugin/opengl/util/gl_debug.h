@@ -17,8 +17,6 @@ namespace ark::plugin::opengl {
 class GLDebug {
 public:
     static int32_t glGetBufferSize(GLenum target);
-    static GLuint glTestIndexBuffer();
-    static GLuint glTestArrayBuffer();
 
     template<typename T, typename P> static void glDumpBuffer(P& buffer, GLenum type) {
         int32_t nBufferSize = glGetBufferSize(type);

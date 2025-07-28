@@ -24,12 +24,6 @@
 
 #include "platform/platform.h"
 
-#ifdef ARK_FLAG_DEBUG
-#define GL_CHECK_ERROR(x) do { x; const GLenum err = glGetError(); CHECK(err == GL_NO_ERROR, "OpenGL error: 0x%x", err); } while(false)
-#else
-#define GL_CHECK_ERROR(x) x
-#endif
-
 namespace ark::plugin::opengl {
 
 namespace {
@@ -792,21 +786,22 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     _stub->_rebind_needed = true;
     _stub->_id = id;
 
-    Map<enums::ShaderStageBit, sp<Stage>> compiledStages;
+    sp<Stage> compiledStages[enums::SHADER_STAGE_BIT_COUNT];
     for(const auto& [k, v] : _stages)
     {
         sp<Stage>& shader = compiledStages[k];
         shader = makeShader(graphicsContext, _version, GLUtil::toShaderType(k), v);
-        glAttachShader(id, shader->id());
+        GL_CHECK_ERROR(glAttachShader(id, shader->id()));
     }
 
-    glLinkProgram(id);
+    GL_CHECK_ERROR(glLinkProgram(id));
 
     for(const auto& i : compiledStages)
-        glDetachShader(id, i.second->id());
+        if(i)
+            GL_CHECK_ERROR(glDetachShader(id, i->id()));
 
     GLint linkstatus = 0;
-    glGetProgramiv(id, GL_LINK_STATUS, &linkstatus);
+    GL_CHECK_ERROR(glGetProgramiv(id, GL_LINK_STATUS, &linkstatus));
     CHECK(linkstatus, "Program link failed: %s", getInformationLog(id).c_str());
 }
 
