@@ -81,7 +81,7 @@ public:
     static int32_t val(const sp<Integer>& self);
 
 //  [[script::bindings::auto]]
-    static sp<Integer> repeat(Vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE, sp<Observer> observer = nullptr);
+    static sp<Integer> repeat(Vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE, sp<Runnable> observer = nullptr);
 
 //  [[script::bindings::classmethod]]
     static void set(const sp<Integer>& self, int32_t value);
@@ -98,14 +98,14 @@ public:
     static sp<Integer> freeze(const sp<Integer>& self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Integer> atLeast(sp<Integer> self, sp<Integer> a1, sp<Observer> observer = nullptr);
+    static sp<Integer> atLeast(sp<Integer> self, sp<Integer> a1, sp<Runnable> observer = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Integer> atMost(sp<Integer> self, sp<Integer> a1, sp<Observer> observer = nullptr);
+    static sp<Integer> atMost(sp<Integer> self, sp<Integer> a1, sp<Runnable> observer = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Integer> clamp(sp<Integer> self, sp<Integer> min, sp<Integer> max, sp<Observer> observer = nullptr);
+    static sp<Integer> clamp(sp<Integer> self, sp<Integer> min, sp<Integer> max, sp<Runnable> observer = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Integer> fence(sp<Integer> self, sp<Integer> a1, sp<Observer> observer = nullptr);
+    static sp<Integer> fence(sp<Integer> self, sp<Integer> a1, sp<Runnable> observer = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Integer> ifElse(const sp<Integer>& self, const sp<Boolean>& condition, const sp<Integer>& negative);

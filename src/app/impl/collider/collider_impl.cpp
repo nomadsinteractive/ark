@@ -320,7 +320,7 @@ void ColliderImpl::Stub::resolveCandidates(const Rigidbody& self, const BroadPhr
 {
     Set<BroadPhrase::CandidateIdType> contacts = std::move(c);
     Set<BroadPhrase::CandidateIdType> contactsOut;
-    RefManager& refManager = Global<RefManager>();
+    const RefManager& refManager = Global<RefManager>();
     for(const BroadPhrase::Candidate& i : candidates)
     {
         CollisionManifold manifold;
@@ -332,7 +332,7 @@ void ColliderImpl::Stub::resolveCandidates(const Rigidbody& self, const BroadPhr
                 {
                     const Rigidbody other = ref.instance<RigidbodyImpl>().makeShadow();
                     self.onBeginContact(other, manifold);
-                    if(_dirty_rigid_body_refs.find(&ref) == _dirty_rigid_body_refs.end() )
+                    if(!_dirty_rigid_body_refs.contains(&ref))
                         other.onBeginContact(self, {manifold.contactPoint(), -manifold.normal()});
                 }
             }
@@ -348,7 +348,7 @@ void ColliderImpl::Stub::resolveCandidates(const Rigidbody& self, const BroadPhr
             {
                 const Rigidbody other = ref.instance<RigidbodyImpl>().makeShadow();
                 self.onEndContact(other);
-                if(_dirty_rigid_body_refs.find(&ref) == _dirty_rigid_body_refs.end())
+                if(!_dirty_rigid_body_refs.contains(&ref))
                     other.onEndContact(self);
             }
     }

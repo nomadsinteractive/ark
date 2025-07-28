@@ -23,6 +23,7 @@
 #include "bullet/base/collision_object_ref.h"
 #include "bullet/base/collision_shape_ref.h"
 #include "bullet/base/rigidbody_bullet.h"
+#include "core/types/ref.h"
 
 namespace ark::plugin::bullet {
 
@@ -375,7 +376,7 @@ void ColliderBullet::markForDestroy(sp<CollisionObjectRef> collisionBody) const
 void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
 {
     const ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
-    const uint64_t tick = Ark::instance().applicationContext()->timestamp();
+    const uint64_t tick = Timestamp::now();
     for(const GhostObject& i : self->_stub->_ghost_objects)
     {
         i._position.update(tick);
@@ -441,7 +442,7 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
             for(const sp<CollisionObjectRef>& i : contactInfo._last_tick)
                 if(i->collisionObject())
                 {
-                    if(contactInfo._current_tick.find(i) == contactInfo._current_tick.end())
+                    if(!contactInfo._current_tick.contains(i))
                         obj.collisionCallback()->onEndContact(getRigidBodyFromCollisionObject(i->collisionObject()).makeShadow());
                 }
 
@@ -457,7 +458,7 @@ void ColliderBullet::addTickContactInfo(const sp<CollisionObjectRef>& rigidBody,
 {
     ContactInfo& contactInfo = _contact_infos[rigidBody];
     contactInfo._current_tick.insert(contact);
-    if(contactInfo._last_tick.find(contact) == contactInfo._last_tick.end())
+    if(!contactInfo._last_tick.contains(contact))
         if(const RigidbodyBullet& obj = getRigidBodyFromCollisionObject(contact->collisionObject()); obj.validate())
             callback->onBeginContact(obj.makeShadow(), CollisionManifold(cp, normal));
 }

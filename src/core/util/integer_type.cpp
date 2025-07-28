@@ -222,28 +222,28 @@ sp<Integer> IntegerType::freeze(const sp<Integer>& self)
     return sp<Integer>::make<Integer::Const>(update(self));
 }
 
-sp<Integer> IntegerType::repeat(Vector<int32_t> array, IntegerType::Repeat repeat, sp<Observer> observer)
+sp<Integer> IntegerType::repeat(Vector<int32_t> array, IntegerType::Repeat repeat, sp<Runnable> observer)
 {
     return sp<Integer>::make<IntegerByArray>(sp<IntArray>::make<IntArray::Vector>(std::move(array)), repeat, std::move(observer));
 }
 
-sp<Integer> IntegerType::atLeast(sp<Integer> self, sp<Integer> a1, sp<Observer> observer)
+sp<Integer> IntegerType::atLeast(sp<Integer> self, sp<Integer> a1, sp<Runnable> observer)
 {
     return sp<Integer>::make<AtLeast<int32_t>>(std::move(self), std::move(a1), std::move(observer));
 }
 
-sp<Integer> IntegerType::atMost(sp<Integer> self, sp<Integer> a1, sp<Observer> observer)
+sp<Integer> IntegerType::atMost(sp<Integer> self, sp<Integer> a1, sp<Runnable> observer)
 {
     return sp<Integer>::make<AtMost<int32_t>>(std::move(self), std::move(a1), std::move(observer));
 }
 
-sp<Integer> IntegerType::clamp(sp<Integer> self, sp<Integer> min, sp<Integer> max, sp<Observer> observer)
+sp<Integer> IntegerType::clamp(sp<Integer> self, sp<Integer> min, sp<Integer> max, sp<Runnable> observer)
 {
     ASSERT(self && min && max);
     return sp<Integer>::make<Clamp<int32_t>>(std::move(self), std::move(min), std::move(max), std::move(observer));
 }
 
-sp<Integer> IntegerType::fence(sp<Integer> self, sp<Integer> a1, sp<Observer> observer)
+sp<Integer> IntegerType::fence(sp<Integer> self, sp<Integer> a1, sp<Runnable> observer)
 {
     ASSERT(self && a1);
     return sp<Integer>::make<Fence<int32_t>>(std::move(self), std::move(a1), std::move(observer));
