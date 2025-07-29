@@ -80,8 +80,8 @@ private:
         Set<sp<CollisionObjectRef>> _current_tick;
     };
 
-    static void myInternalPreTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
-    static void myInternalTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
+    static void myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, btScalar timeStep);
+    static void myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btScalar timeStep);
 
     void addTickContactInfo(const sp<CollisionObjectRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<CollisionObjectRef>& contact, const V3& cp, const V3& normal);
 

@@ -120,7 +120,7 @@ void Entity::discard()
 sp<Discarded> Entity::discarded()
 {
     if(!_discarded)
-        _discarded = sp<Discarded>::make(_components.get<Discarded>());
+        _discarded = sp<Discarded>::make(_components.get<Discarded>().cast<Boolean>());
     return _discarded;
 }
 

@@ -174,7 +174,7 @@ struct GhostObject : BtRigibodyObject {
 
 }
 
-struct ColliderBullet::Stub final : Runnable {
+struct ColliderBullet::Stub final : Updatable {
     Stub(const V3& gravity, sp<ModelLoader> modelLoader)
         : _model_loader(std::move(modelLoader)), _collision_configuration(new btDefaultCollisionConfiguration()), _collision_dispatcher(new btCollisionDispatcher(_collision_configuration)),
           _broadphase(new btDbvtBroadphase()), _solver(new btSequentialImpulseConstraintSolver()), _dynamics_world(new btDiscreteDynamicsWorld(_collision_dispatcher, _broadphase, _solver, _collision_configuration)),
@@ -188,9 +188,11 @@ struct ColliderBullet::Stub final : Runnable {
         discard();
     }
 
-    void run() override
+    bool update(const uint64_t timestamp) override
     {
+        _timestamp = timestamp;
         _dynamics_world->stepSimulation(_app_clock_interval->val());
+        return true;
     }
 
     void discard() const
@@ -223,6 +225,7 @@ struct ColliderBullet::Stub final : Runnable {
     Vector<sp<CollisionObjectRef>> _mark_for_destroys;
 
     sp<Numeric> _app_clock_interval;
+    uint64_t _timestamp;
 };
 
 ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
@@ -376,11 +379,11 @@ void ColliderBullet::markForDestroy(sp<CollisionObjectRef> collisionBody) const
 void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
 {
     const ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
-    const uint64_t tick = Timestamp::now();
+    const uint64_t timestamp = self->_stub->_timestamp;
     for(const GhostObject& i : self->_stub->_ghost_objects)
     {
-        i._position.update(tick);
-        i._quaternion.update(tick);
+        i._position.update(timestamp);
+        i._quaternion.update(timestamp);
         const V3 pos = i._position.val();
         const V4 quaternion = i._quaternion.val();
         btTransform transform;
@@ -476,7 +479,7 @@ sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)
     const sp<ColliderBullet> collider = sp<ColliderBullet>::make(_gravity, _model_loader.build(args));
     for(const auto& [k, v] : _importers)
         k->build(args)->import(collider, v);
-    _resource_loader_context->renderController()->addPreComposeRunnable(collider->_stub, BooleanType::__or__(_resource_loader_context->discarded(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 0)));
+    _resource_loader_context->renderController()->addPreComposeUpdatable(collider->_stub, BooleanType::__or__(_resource_loader_context->discarded(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 0)));
     return collider;
 }
 
