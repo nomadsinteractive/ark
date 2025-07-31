@@ -46,12 +46,6 @@ bool exists(const String& location)
 
 using namespace platform::darwin;
 
-void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* content)
-{
-    printf("[%s] %s\n", tag, content);
-    fflush(nullptr);
-}
-
 sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
 {
     sp<AssetBundle> bundle = exists(path) ? sp<AssetBundle>::make<AssetBundleDarwin>(path) : nullptr;
@@ -133,12 +127,12 @@ void Platform::vkInitialize()
 {
 }
 
-String Platform::glShaderVersionDeclaration(uint32_t versionCode)
+String Platform::glShaderVersionDeclaration(const uint32_t versionCode)
 {
     return Strings::sprintf("#version %d\n", versionCode);
 }
 
-uint32_t Platform::glPreprocessShader(const String& shader, const char* srcs[], uint32_t length)
+uint32_t Platform::glPreprocessShader(const String& shader, const char* srcs[], const uint32_t length)
 {
     DCHECK(length > 0, "length = %d", length);
     srcs[0] = shader.c_str();
