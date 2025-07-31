@@ -60,8 +60,8 @@ public:
     const sp<MessageLoop>& messageLoopCore() const;
     const sp<MessageLoop>& messageLoopRenderer() const;
 
-    void runAtCoreThread(sp<Runnable> task);
-    void runAtCoreThread(std::function<void()> task);
+    void runAtCoreThread(sp<Runnable> task) const;
+    void runAtCoreThread(std::function<void()> task) const;
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
     Optional<String> getString(const String& resid, bool alert);

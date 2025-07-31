@@ -13,8 +13,6 @@ namespace ark {
 
 class ARK_API Platform : public PlatformIndependent {
 public:
-    static void log(Log::LogLevel logLevel, const char* tag, const char* content);
-
 //  [[script::bindings::auto]]
     static String getUserStoragePath(const String& path);
 //  [[script::bindings::auto]]

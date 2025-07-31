@@ -14,7 +14,7 @@
 
 namespace ark {
 
-Surface::Surface(sp<RenderView> renderView, const ApplicationContext& applicationContext)
+Surface::Surface(sp<RenderView> renderView, const sp<ApplicationContext>& applicationContext)
     : _render_view(std::move(renderView)), _surface_controller(sp<SurfaceController>::make()), _updater(sp<SurfaceUpdater>::make(_surface_controller, applicationContext))
 {
 }

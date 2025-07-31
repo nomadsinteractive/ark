@@ -35,7 +35,7 @@ void Log::e(const char* tag, const char* content)
     log(LOG_LEVEL_ERROR, tag, content);
 }
 
-void Log::log(LogLevel logLevel, const char* tag, const char* content)
+void Log::log(const LogLevel logLevel, const char* tag, const char* content)
 {
     static volatile SpdLogInitializer _spd_initialized;
     switch(logLevel) {

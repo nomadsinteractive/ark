@@ -346,12 +346,12 @@ const sp<MessageLoop>& ApplicationContext::messageLoopRenderer() const
     return _message_loop_renderer;
 }
 
-void ApplicationContext::runAtCoreThread(sp<Runnable> task)
+void ApplicationContext::runAtCoreThread(sp<Runnable> task) const
 {
     _message_loop_core->post(std::move(task), 0);
 }
 
-void ApplicationContext::runAtCoreThread(std::function<void()> task)
+void ApplicationContext::runAtCoreThread(std::function<void()> task) const
 {
     _message_loop_core->post(sp<RunnableByFunction>::make(std::move(task)), 0);
 }

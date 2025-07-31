@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_SURFACE_H_
-#define ARK_APP_BASE_SURFACE_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -14,7 +13,7 @@ namespace ark {
 
 class ARK_API Surface {
 public:
-    Surface(sp<RenderView> renderView, const ApplicationContext& applicationContext);
+    Surface(sp<RenderView> renderView, const sp<ApplicationContext>& applicationContext);
 
     const sp<RenderView>& renderView() const;
     const sp<SurfaceController>& controller() const;
@@ -33,5 +32,3 @@ private:
 };
 
 }
-
-#endif

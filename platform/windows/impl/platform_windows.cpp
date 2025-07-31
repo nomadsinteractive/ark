@@ -15,12 +15,6 @@
 
 namespace ark {
 
-void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* content)
-{
-    printf("[%s] %s\n", tag, content);
-    fflush(nullptr);
-}
-
 sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
 {
     if(isDirectory(path))
