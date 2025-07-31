@@ -195,6 +195,16 @@ void ApplicationFacade::setApplicationEventListener(sp<ApplicationEventListener>
     _context->setApplicationEventListener(std::move(applicationEventListener));
 }
 
+void ApplicationFacade::pushClock(sp<Numeric> timeScale) const
+{
+    _context->pushAppClock(std::move(timeScale));
+}
+
+sp<Clock> ApplicationFacade::popClock() const
+{
+    return _context->popAppClock();
+}
+
 sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, const Scope& args) const
 {
     return _context->createResourceLoader(name, args);

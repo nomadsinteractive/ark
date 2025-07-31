@@ -672,11 +672,11 @@ class ApplicationFacade:
         return Vec2(0, 0)
 
     @property
-    def surface_size(self) -> 'Size':
+    def surface_size(self) -> "Size":
         return Size(0, 0)
 
     @property
-    def application_controller(self) -> 'ApplicationController':
+    def application_controller(self) -> "ApplicationController":
         return ApplicationController()
 
     @property
@@ -684,7 +684,7 @@ class ApplicationFacade:
         return ApplicationBundle()
 
     @property
-    def surface_controller(self) -> 'SurfaceController':
+    def surface_controller(self) -> "SurfaceController":
         return SurfaceController()
 
     @property
@@ -692,15 +692,15 @@ class ApplicationFacade:
         return RenderController()
 
     @property
-    def camera(self) -> 'Camera':
+    def camera(self) -> "Camera":
         return Camera()
 
     @property
-    def manifest(self) -> 'ApplicationManifest':
+    def manifest(self) -> "ApplicationManifest":
         return ApplicationManifest()
 
     @property
-    def resource_loader(self) -> 'ResourceLoader':
+    def resource_loader(self) -> "ResourceLoader":
         return ResourceLoader()
 
     @property
@@ -722,6 +722,12 @@ class ApplicationFacade:
     @property
     def argv(self) -> list[str]:
         return []
+
+    def push_clock(self, time_scale: Optional[TYPE_NUMERIC] = None):
+        pass
+
+    def pop_clock(self) -> "Clock":
+        pass
 
     def to_frag_coord(self, xy: "Vec2", resolution: Optional['Size'] = None) -> "Vec2":
         pass

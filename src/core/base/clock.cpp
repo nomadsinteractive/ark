@@ -135,7 +135,7 @@ uint64_t Clock::val()
     return _ticker->val();
 }
 
-bool Clock::update(uint64_t timestamp)
+bool Clock::update(const uint64_t timestamp)
 {
     return _ticker->update(timestamp);
 }

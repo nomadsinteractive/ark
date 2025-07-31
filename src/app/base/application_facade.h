@@ -54,6 +54,11 @@ public:
     void setApplicationEventListener(sp<ApplicationEventListener> applicationEventListener) const;
 
 //  [[script::bindings::auto]]
+    void pushClock(sp<Numeric> timeScale = nullptr) const;
+//  [[script::bindings::auto]]
+    sp<Clock> popClock() const;
+
+//  [[script::bindings::auto]]
     sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args) const;
 //  [[script::bindings::auto]]
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);

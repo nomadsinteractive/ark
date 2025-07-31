@@ -1,5 +1,7 @@
 #include "graphics/base/layer_context.h"
 
+#include <ranges>
+
 #include "core/base/constants.h"
 #include "core/types/global.h"
 #include "core/util/updatable_util.h"
@@ -76,7 +78,7 @@ void LayerContext::pushBack(sp<Renderable> renderable)
 
 void LayerContext::clear()
 {
-    for(auto& [i, j] : _renderables)
+    for(auto& j : std::views::values(_renderables))
         j = Renderable::RENDERABLE_STATE_DISCARDED;
     _created_push_front.clear();
     _created_push_back.clear();
@@ -135,7 +137,7 @@ LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, const Rende
 
 LayerContext::ElementState& LayerContext::addElementState(void* key)
 {
-    DASSERT(_element_states.find(key) == _element_states.end());
+    DASSERT(!_element_states.contains(key));
     return _element_states.insert(std::make_pair(key, ElementState{})).first->second;
 }
 

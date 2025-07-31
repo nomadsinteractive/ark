@@ -16,7 +16,7 @@ public:
 
 private:
     sp<SurfaceController> _surface_controller;
-    sp<ApplicationContext> _application_controller;
+    sp<ApplicationContext> _application_context;
 };
 
 }

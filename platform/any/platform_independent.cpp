@@ -14,13 +14,15 @@ namespace ark {
 
 namespace {
 
-class PlatformSteadyClock : public Variable<uint64_t> {
+class PlatformSteadyClock final : public Variable<uint64_t> {
 public:
-    virtual uint64_t val() override {
+    uint64_t val() override
+    {
         return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    bool update(uint64_t /*timestamp*/) override
+    {
         return true;
     }
 };
@@ -36,7 +38,7 @@ bool PlatformIndependent::isAbsolutePath(const String& path)
 {
     if(path.empty())
         return false;
-    char s = path.at(0);
+    const char s = path.at(0);
     if(s == _DIR_SEPARATOR)
         return true;
     return path.length() >= 2 && std::isalpha(s) && path.at(1) == ':';
@@ -72,7 +74,7 @@ String PlatformIndependent::pathJoin(const String& p1, const String& p2)
 
 sp<Variable<uint64_t>> PlatformIndependent::getSteadyClock()
 {
-    return sp<PlatformSteadyClock>::make();
+    return sp<Variable<uint64_t>>::make<PlatformSteadyClock>();
 }
 
 }

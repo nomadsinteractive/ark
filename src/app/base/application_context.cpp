@@ -64,15 +64,13 @@ public:
     }
 };
 
-}
-
-class ApplicationContext::Ticker final : public Variable<uint64_t> {
+class Ticker final : public Variable<uint64_t> {
 public:
     Ticker()
         : _steady_clock(Platform::getSteadyClock()), _val(_steady_clock->val()) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(uint64_t /*timestamp*/) override
     {
         _val = _steady_clock->val();
         return true;
@@ -88,10 +86,12 @@ private:
     std::atomic<uint64_t> _val;
 };
 
+}
+
 class ApplicationContext::ExecutorWorkerStrategy final : public ExecutorWorkerThread::Strategy {
 public:
-    ExecutorWorkerStrategy(const sp<AppClock>& appClock, sp<MessageLoop> messageLoop)
-        : _app_clock(appClock), _message_loop(std::move(messageLoop)) {
+    ExecutorWorkerStrategy(sp<MessageLoop> messageLoop)
+        : _message_loop(std::move(messageLoop)) {
     }
 
     void onStart() override
@@ -119,32 +119,34 @@ public:
         throw e;
     }
 
-    sp<AppClock> _app_clock;
     sp<MessageLoop> _message_loop;
     U_FList<sp<MessageLoop>> _app_message_loops;
 };
 
-ApplicationContext::AppClock::AppClock()
-    : _steady(Platform::getSteadyClock()), _tick(sp<Variable<uint64_t>::Impl>::make(0)), _interval(sp<Numeric::Impl>::make(0)), _clock(sp<Clock>::make(_tick)), _next_timestamp(_steady->val()), _timestamp(_next_timestamp)
+ApplicationContext::AppClock::AppClock(sp<Numeric> timeScale)
+    : _steady(Platform::getSteadyClock()), _time_scale(std::move(timeScale), 1.0f), _tick(sp<Variable<uint64_t>::Impl>::make(0)), _interval(sp<Numeric::Impl>::make(0)), _clock(sp<Clock>::make(_tick)), _timestamp(_steady->val())
 {
 }
 
 uint64_t ApplicationContext::AppClock::onTick()
 {
-    _next_timestamp = _steady->val();
-    const uint64_t interval = std::min<uint64_t>(_next_timestamp - _timestamp, 1000000 / 24);
+    const uint64_t nextTimestamp = _steady->val();
+    _time_scale.update(nextTimestamp);
+
+    const float timeScale = _time_scale.val();
+    const uint64_t interval = std::min<uint64_t>(nextTimestamp - _timestamp, 1000000 / 60) * timeScale;
     _interval->set(interval / 1000000.0f);
     _tick->set(_tick->val() + interval);
 
     const uint64_t timestamp = _timestamp;
-    _timestamp = _next_timestamp;
+    _timestamp = nextTimestamp;
     return timestamp;
 }
 
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
-    : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _cursor_frag_coord(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
-      _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_ticker)), _app_clock(sp<AppClock>::make()),
-      _worker_strategy(sp<ExecutorWorkerStrategy>::make(_app_clock, sp<MessageLoop>::make(_ticker))), _executor_main(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")),
+    : _ticker(sp<Variable<uint64_t>>::make<Ticker>()), _cursor_position(sp<Vec2Impl>::make()), _cursor_frag_coord(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
+      _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_ticker)),
+      _worker_strategy(sp<ExecutorWorkerStrategy>::make(sp<MessageLoop>::make(_ticker))), _executor_main(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")),
       _executor_thread_pool(sp<Executor>::make<ExecutorThreadPool>(_executor_main)), _string_table(Global<StringTable>()), _background_color(0, 0, 0), _paused(false)
 {
     const Ark& ark = Ark::instance();
@@ -162,7 +164,8 @@ void ApplicationContext::initialize(const document& manifest)
 
     _message_loop_renderer = sp<MessageLoop>::make(_ticker);
     _message_loop_core = ark.manifest()->application()._message_loop == ApplicationManifest::MESSAGE_LOOP_TYPE_RENDER ? _message_loop_renderer : _worker_strategy->_message_loop;
-    _message_loop_app = makeMessageLoop(_app_clock->_clock);
+
+    pushAppClock();
 
     if(const document& interpreter = ark.manifest()->interpreter())
         _interpreter = _resource_loader->beanFactory().build<Interpreter>(interpreter, {});
@@ -281,22 +284,45 @@ const sp<Clock>& ApplicationContext::sysClock() const
 
 const sp<Clock>& ApplicationContext::appClock() const
 {
-    return _app_clock->_clock;
+    return _app_clocks.back()._clock;
+}
+
+void ApplicationContext::pushAppClock(sp<Numeric> timeScale)
+{
+    _app_clocks.push_back(AppClock(std::move(timeScale)));
+    _app_message_loops.push_back(makeMessageLoop(_app_clocks.back()._clock));
+}
+
+sp<Clock> ApplicationContext::popAppClock()
+{
+    ASSERT(!_app_clocks.empty());
+    sp<Clock> clock = std::move(_app_clocks.back()._clock);
+    _app_clocks.pop_back();
+    _app_message_loops.pop_back();
+    return clock;
 }
 
 const sp<Numeric::Impl>& ApplicationContext::appClockInterval() const
 {
-    return _app_clock->_interval;
+    return _app_clocks.back()._interval;
+}
+
+uint64_t ApplicationContext::timestamp() const
+{
+    return _app_clocks.back()._timestamp;
+}
+
+uint64_t ApplicationContext::onRenderTick()
+{
+    uint64_t timestamp = 0;
+    for(AppClock& i : _app_clocks)
+        timestamp = i.onTick();
+    return timestamp;
 }
 
 const sp<Vec2Impl>& ApplicationContext::cursorPosition() const
 {
     return _cursor_position;
-}
-
-uint64_t ApplicationContext::timestamp() const
-{
-    return _app_clock->_timestamp;
 }
 
 bool ApplicationContext::onEvent(const Event& event)
@@ -333,7 +359,7 @@ sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)
 
 const sp<MessageLoop>& ApplicationContext::messageLoopApp() const
 {
-    return _message_loop_app;
+    return _app_message_loops.back();
 }
 
 const sp<MessageLoop>& ApplicationContext::messageLoopCore() const

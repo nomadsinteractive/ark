@@ -44,9 +44,15 @@ public:
 
     const sp<Clock>& sysClock() const;
     const sp<Clock>& appClock() const;
+
+    void pushAppClock(sp<Numeric> timeScale = nullptr);
+    sp<Clock> popAppClock();
+
     const sp<Numeric::Impl>& appClockInterval() const;
-    const sp<Vec2Impl>& cursorPosition() const;
     uint64_t timestamp() const;
+    uint64_t onRenderTick();
+
+    const sp<Vec2Impl>& cursorPosition() const;
 
     bool onEvent(const Event& event);
 
@@ -91,27 +97,26 @@ private:
     document createResourceLoaderManifest(const document& manifest) const;
 
     struct AppClock {
-        AppClock();
+        AppClock(sp<Numeric> timeScale);
 
         sp<Variable<uint64_t>> _steady;
+        SafeVar<Numeric> _time_scale;
 
         sp<Variable<uint64_t>::Impl> _tick;
         sp<Numeric::Impl> _interval;
 
         sp<Clock> _clock;
 
-        uint64_t _next_timestamp;
         uint64_t _timestamp;
 
         uint64_t onTick();
     };
 
-    class Ticker;
     class ExecutorWorkerStrategy;
 
 private:
     Vector<String> _argv;
-    sp<Ticker> _ticker;
+    sp<Variable<uint64_t>> _ticker;
     sp<Vec2Impl> _cursor_position;
     sp<Vec2Impl> _cursor_frag_coord;
 
@@ -122,7 +127,8 @@ private:
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
     sp<Clock> _sys_clock;
-    sp<AppClock> _app_clock;
+    Vector<AppClock> _app_clocks;
+
     sp<ExecutorWorkerStrategy> _worker_strategy;
 
     sp<Executor> _executor_main;
@@ -130,7 +136,8 @@ private:
 
     sp<MessageLoop> _message_loop_renderer;
     sp<MessageLoop> _message_loop_core;
-    sp<MessageLoop> _message_loop_app;
+
+    Vector<sp<MessageLoop>> _app_message_loops;
 
     sp<ResourceLoader> _resource_loader;
     sp<StringTable> _string_table;
@@ -143,7 +150,6 @@ private:
 
     friend class Ark;
     friend class Application;
-    friend class SurfaceUpdater;
     friend class ApplicationDelegate;
 };
 
