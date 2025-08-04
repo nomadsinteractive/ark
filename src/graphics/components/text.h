@@ -39,9 +39,9 @@ public:
     const sp<Boundaries>& boundaries() const;
 
 //  [[script::bindings::property]]
-    const std::wstring& text() const;
+    std::wstring text() const;
 //  [[script::bindings::property]]
-    void setText(std::wstring text);
+    void setText(std::wstring text) const;
 
 //  [[script::bindings::auto]]
     void show(sp<Boolean> discarded = nullptr);

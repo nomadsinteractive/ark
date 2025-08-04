@@ -3,6 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/named_hash.h"
 #include "core/components/discarded.h"
+#include "core/components/tags.h"
 #include "core/components/with_id.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
@@ -20,7 +21,6 @@
 #include "renderer/components/varyings.h"
 
 #include "app/view/view.h"
-#include "core/components/tags.h"
 
 namespace ark {
 

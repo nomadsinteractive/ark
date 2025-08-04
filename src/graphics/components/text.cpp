@@ -457,21 +457,21 @@ struct Text::Content {
         const bool contentDirty = _text->update(timestamp);
         const bool layoutDirty = _timestamp.update(timestamp);
         if(contentDirty)
-            setText(Strings::fromUTF8(_text->val()));
+            createContent(Strings::fromUTF8(_text->val()));
         else if(layoutDirty)
             updateLayoutContent();
         return contentDirty || layoutDirty || UpdatableUtil::update(timestamp, _updatable_layout);
     }
 
-    void setText(std::wstring text)
+    void setText(const std::wstring& text)
     {
-        _text_unicode = std::move(text);
-        createContent();
+        _text = StringType::create(Strings::toUTF8(text));
+        createContent(text);
     }
 
-    void createContent()
+    void createContent(const std::wstring& text)
     {
-        _glyphs = _glyph_maker->makeGlyphs(_text_unicode);
+        _glyphs = _glyph_maker->makeGlyphs(text);
         _layout_chars = toLayoutCharacters(_glyphs, _render_layer->modelLoader());
         createLayerContent();
     }
@@ -539,7 +539,6 @@ struct Text::Content {
     sp<GlyphMaker> _glyph_maker;
     sp<Layout> _layout;
 
-    std::wstring _text_unicode;
     Vector<sp<Glyph>> _glyphs;
     Vector<Character> _layout_chars;
     Vector<sp<RenderObject>> _render_objects;
@@ -619,12 +618,12 @@ const sp<Boundaries>& Text::boundaries() const
     return _content->_layout_info->_boundaries;
 }
 
-const std::wstring& Text::text() const
+std::wstring Text::text() const
 {
-    return _content->_text_unicode;
+    return Strings::fromUTF8(_content->_text->val());
 }
 
-void Text::setText(std::wstring text)
+void Text::setText(std::wstring text) const
 {
     _content->setText(std::move(text));
 }
