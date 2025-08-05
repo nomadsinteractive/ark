@@ -6,7 +6,6 @@
 #include "core/inf/variable.h"
 #include "core/impl/executor/executor_this_thread.h"
 #include "core/impl/runnable/runnable_by_function.h"
-#include "core/types/safe_var.h"
 
 namespace ark {
 
@@ -93,7 +92,7 @@ void MessageLoop::pollOnce()
 void MessageLoop::requestNextTask(sp<Task> task)
 {
     for(auto iter = _tasks.begin(); iter != _tasks.end(); ++iter)
-        if(const sp<Task>& i = (*iter); i->_next_fire_tick > task->_next_fire_tick)
+        if(const sp<Task>& i = *iter; i->_next_fire_tick > task->_next_fire_tick)
         {
             _tasks.insert(iter, std::move(task));
             return;

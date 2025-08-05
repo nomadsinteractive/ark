@@ -31,7 +31,7 @@ public:
 
     [[nodiscard]]
 //  [[script::bindings::auto]]
-    virtual sp<Model> loadModel(int32_t type) = 0;
+    virtual sp<Model> loadModel(int32_t resid) = 0;
     [[nodiscard]]
     virtual sp<DrawingContextComposer> makeRenderCommandComposer(const Shader& shader) = 0;
 

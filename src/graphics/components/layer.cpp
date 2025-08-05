@@ -67,24 +67,15 @@ const sp<LayerContext>& Layer::context() const
     return _layer_context;
 }
 
-void Layer::pushFront(sp<Renderable> renderable, sp<Boolean> discarded)
+void Layer::add(const sp<RenderObject>& renderObject, sp<Boolean> discarded, sp<Updatable> updatable, const enums::InsertPosition insertPosition)
 {
-    _layer_context->pushFront(RenderableType::create(std::move(renderable), nullptr, std::move(discarded)));
-}
-
-void Layer::pushBack(sp<Renderable> renderable, sp<Boolean> discarded)
-{
-    _layer_context->pushBack(RenderableType::create(std::move(renderable), nullptr, std::move(discarded)));
-}
-
-void Layer::pushFront(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded)
-{
-    _layer_context->pushFront(RenderableType::create(renderObject, nullptr, discarded ? discarded : renderObject->discarded()));
-}
-
-void Layer::pushBack(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded)
-{
-    _layer_context->pushBack(RenderableType::create(renderObject, nullptr, discarded ? discarded : renderObject->discarded()));
+    if(insertPosition == enums::INSERT_POSITION_BACK)
+        _layer_context->pushBack(RenderableType::create(renderObject, discarded ? std::move(discarded) : sp<Boolean>(renderObject->discarded()), std::move(updatable)));
+    else
+    {
+        ASSERT(insertPosition == enums::INSERT_POSITION_FRONT);
+        _layer_context->pushFront(RenderableType::create(renderObject, discarded ? std::move(discarded) : sp<Boolean>(renderObject->discarded()), std::move(updatable)));
+    }
 }
 
 void Layer::clear()
@@ -93,17 +84,13 @@ void Layer::clear()
 }
 
 Layer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)),
+    : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)),
       _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)) {
 }
 
 sp<Layer> Layer::BUILDER::build(const Scope& args)
 {
-    sp<Vec3> position = _position.build(args);
-    sp<ModelLoader> modelLoader = _model_loader.build(args);
-    const sp<RenderLayer> renderLayer = _render_layer.build(args);
-    //TODO: Every Layer should have been associated with a RenderLayer
-    return sp<Layer>::make(renderLayer ? renderLayer->addLayerContext(std::move(modelLoader), std::move(position)) : sp<LayerContext>::make(nullptr, ModelLoaderCached::ensureCached(std::move(modelLoader)), std::move(position), _visible.build(args)));
+    return sp<Layer>::make(_render_layer->build(args)->addLayerContext(_model_loader.build(args), _position.build(args), _visible.build(args)));
 }
 
 }

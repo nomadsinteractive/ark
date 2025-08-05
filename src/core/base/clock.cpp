@@ -1,7 +1,5 @@
 #include "core/base/clock.h"
 
-#include <cmath>
-
 #include "core/ark.h"
 #include "core/base/wrapper.h"
 #include "core/inf/variable.h"
@@ -16,29 +14,27 @@ namespace ark {
 
 namespace {
 
-class ClockDuration : public Numeric {
+class ClockDuration final : public Numeric {
 public:
     ClockDuration(const sp<Variable<uint64_t>>& ticker)
-        : _ticker(ticker), _initial_ticket(0) {
+        : _ticker(ticker), _initial_tick(_ticker->val()) {
     }
 
-    virtual float val() override {
-        if(!_initial_ticket) {
-            _initial_ticket = _ticker->val();
-            return 0;
-        }
-        uint64_t v = _ticker->val();
-        DASSERT(v >= _initial_ticket);
-        return (v - _initial_ticket) / 1000000.0f;
+    float val() override
+    {
+        const uint64_t v = _ticker->val();
+        DASSERT(v >= _initial_tick);
+        return (v - _initial_tick) / 1000000.0f;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override
+    {
         return _ticker->update(timestamp);
     }
 
 private:
     sp<Variable<uint64_t>> _ticker;
-    uint64_t _initial_ticket;
+    uint64_t _initial_tick;
 };
 
 }
@@ -49,23 +45,29 @@ public:
         : Wrapper(std::move(delegate)), _bypass(0), _paused(0) {
     }
 
-    uint64_t val() override {
+    uint64_t val() override
+    {
         return _paused ? _paused : _wrapped->val() - _bypass;
     }
 
-    bool update(const uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override
+    {
         return _paused ? false : _wrapped->update(timestamp);
     }
 
-    void pause() {
-        if(!_paused) {
+    void pause()
+    {
+        if(!_paused)
+        {
             _wrapped->update(0);
             _paused = _wrapped->val();
         }
     }
 
-    void resume() {
-        if(_paused != 0) {
+    void resume()
+    {
+        if(_paused != 0)
+        {
             _wrapped->update(0);
             _bypass += (_wrapped->val() - _bypass - _paused);
             _paused = 0;
@@ -157,12 +159,7 @@ void Clock::setTicker(const sp<Variable<uint64_t>>& ticker)
 
 sp<Numeric> Clock::duration() const
 {
-    return sp<ClockDuration>::make(_ticker);
-}
-
-sp<Numeric> Clock::durationUntil(const sp<Numeric>& until) const
-{
-    return Math::min(duration(), until);
+    return sp<Numeric>::make<ClockDuration>(_ticker);
 }
 
 sp<Boolean> Clock::timeout(float seconds) const
@@ -182,12 +179,12 @@ void Clock::resume() const
 
 template<> ARK_API Clock::Interval StringConvert::eval<Clock::Interval>(const String& val)
 {
-    size_t len = val.length();
+    const size_t len = val.length();
     if(val.endsWith("ms"))
         return static_cast<uint64_t>(Strings::eval<float>(val.substr(0, len - 2)) * 1000.0f);
-    else if(val.endsWith("us"))
+    if(val.endsWith("us"))
         return static_cast<uint64_t>(Strings::eval<float>(val.substr(0, len - 2)));
-    else if(val.endsWith("s"))
+    if(val.endsWith("s"))
         return static_cast<uint64_t>(Strings::eval<float>(val.substr(0, len - 1)) * 1000000.0f);
     return static_cast<uint64_t>(Strings::eval<float>(val) * 1000000.0f);
 }

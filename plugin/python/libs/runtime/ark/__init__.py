@@ -11,6 +11,8 @@ Use it for:
 """
 from typing import Callable, Type, TypeVar, Union, Optional, Tuple, Any, Self, Sequence
 
+from scipy.odr import Model
+
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', "Numeric", 'NarrowPhrase',
                            'Layer', "Vec2", "Vec3", "Vec4", "Renderer", 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
                            'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings', 'View')
@@ -156,6 +158,12 @@ class Readable:
     pass
 
 
+class Updatable:
+
+    def update(self, timestamp: int):
+        pass
+
+
 class Runnable:
 
     def __call__(self):
@@ -167,7 +175,9 @@ class Writable:
 
 
 class ModelLoader:
-    pass
+
+    def load_model(self, resid: int) -> Optional[Model]:
+        pass
 
 
 class Asset:
@@ -1838,7 +1848,7 @@ class Level:
 
 
 class RenderObject:
-    def __init__(self, type: TYPE_NAMED_HASH, position: Optional[TYPE_VEC3] = None, size: Optional[TYPE_VEC3] = None, transform=None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, discarded: TYPE_BOOLEAN = None):
+    def __init__(self, resid: TYPE_NAMED_HASH, position: Optional[TYPE_VEC3] = None, size: Optional[TYPE_VEC3] = None, transform: Optional["Transform"] = None, varyings: Optional["Varyings"] = None, visible: Optional[TYPE_BOOLEAN] = None, discarded: Optional[TYPE_BOOLEAN] = None):
         self._position = position
         self._size = size
         self._transform = transform
@@ -1958,10 +1968,26 @@ class Layer:
         pass
 
     @property
-    def context(self) -> LayerContext:
-        return LayerContext()
+    def model_loader(self) -> ModelLoader:
+        pass
 
-    def push_back(self, render_object: RenderObject, discarded: Boolean = None):
+    @property
+    def shader(self) -> Shader:
+        pass
+
+    @property
+    def position(self) -> Optional[Vec3]:
+        pass
+
+    @position.setter
+    def position(self, position: TYPE_VEC3):
+        pass
+
+    @property
+    def discarded(self) -> Boolean:
+        pass
+
+    def add(self, render_object: RenderObject, discarded: Boolean = None, updatable: Optional[Updatable] = None, insert_position: int = Enum.INSERT_POSITION_BACK):
         pass
 
     def clear(self):

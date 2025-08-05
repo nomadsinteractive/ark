@@ -4,7 +4,6 @@
 #include "core/base/string.h"
 #include "core/base/bean_factory.h"
 #include "core/base/bit_set_types.h"
-#include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"

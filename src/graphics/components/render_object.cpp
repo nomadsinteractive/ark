@@ -24,13 +24,13 @@
 
 namespace ark {
 
-RenderObject::RenderObject(const NamedHash& type, sp<Vec3> position, sp<Vec3> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
-    : RenderObject(sp<IntegerWrapper>::make(type.hash()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
+RenderObject::RenderObject(const NamedHash& resid, sp<Vec3> position, sp<Vec3> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
+    : RenderObject(sp<IntegerWrapper>::make(resid.hash()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
 {
 }
 
-RenderObject::RenderObject(sp<Integer> type, sp<Vec3> position, sp<Vec3> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
-    : _type(sp<IntegerWrapper>::make(std::move(type))), _position(std::move(position)), _size(std::move(size)), _transform(transform ? std::move(transform) : sp<Transform>::make<TransformImpl>(TransformType::TYPE_LINEAR_3D)),
+RenderObject::RenderObject(sp<Integer> resid, sp<Vec3> position, sp<Vec3> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
+    : _type(sp<IntegerWrapper>::make(std::move(resid))), _position(std::move(position)), _size(std::move(size)), _transform(transform ? std::move(transform) : sp<Transform>::make<TransformImpl>(TransformType::TYPE_LINEAR_3D)),
       _varyings(std::move(varyings)), _visible(std::move(visible), true), _discarded(std::move(discarded), false)
 {
 }
@@ -207,11 +207,7 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
 
     if(const auto layer = context.getComponent<Layer>())
     {
-        if(const enums::InsertPosition lpo = context.getEnum<enums::InsertPosition>(enums::InsertPosition::INSERT_POSITION_BACK);
-            lpo == enums::INSERT_POSITION_BACK)
-            layer->pushBack(self.as<RenderObject>());
-        else
-            layer->pushFront(self.as<RenderObject>());
+        layer->add(self.as<RenderObject>(), nullptr, nullptr, context.getEnum<enums::InsertPosition>(enums::InsertPosition::INSERT_POSITION_BACK));
 
         if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layer->shader() && layer->shader()->layout()->getAttribute("Id"))
             varyings()->setProperty(constants::ID, sp<Integer>::make<Integer::Const>(withId->id()));

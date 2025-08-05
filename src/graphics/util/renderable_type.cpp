@@ -5,7 +5,7 @@
 
 namespace ark {
 
-sp<Renderable> RenderableType::create(sp<Renderable> renderable, sp<Updatable> updatable, sp<Boolean> discarded)
+sp<Renderable> RenderableType::create(sp<Renderable> renderable, sp<Boolean> discarded, sp<Updatable> updatable)
 {
     ASSERT(renderable);
     if(updatable)

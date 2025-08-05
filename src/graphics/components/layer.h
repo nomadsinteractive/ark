@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/base/enum.h"
 #include "core/inf/builder.h"
 #include "core/inf/debris.h"
 #include "core/inf/wirable.h"
@@ -15,7 +16,6 @@ namespace ark {
 
 class ARK_API Layer final {
 public:
-// [[script::bindings::auto]]
     Layer();
     Layer(sp<LayerContext> layerContext);
 
@@ -41,12 +41,8 @@ public:
 //  [[script::bindings::property]]
     sp<ModelLoader> modelLoader() const;
 
-    void pushFront(sp<Renderable> renderable, sp<Boolean> discarded = nullptr);
-    void pushBack(sp<Renderable> renderable, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
-    void pushFront(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded = nullptr);
-//  [[script::bindings::auto]]
-    void pushBack(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded = nullptr);
+    void add(const sp<RenderObject>& renderObject, sp<Boolean> discarded = nullptr, sp<Updatable> updatable = nullptr, enums::InsertPosition insertPosition = enums::INSERT_POSITION_BACK);
 //  [[script::bindings::auto]]
     void clear();
 
@@ -60,7 +56,7 @@ public:
         sp<Layer> build(const Scope& args) override;
 
     private:
-        SafeBuilder<RenderLayer> _render_layer;
+        sp<Builder<RenderLayer>> _render_layer;
         SafeBuilder<ModelLoader> _model_loader;
         SafeBuilder<Boolean> _visible;
         SafeBuilder<Vec3> _position;

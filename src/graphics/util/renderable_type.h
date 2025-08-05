@@ -11,7 +11,7 @@ namespace ark {
 class ARK_API RenderableType {
 public:
 //  [[script::bindings::constructor]]
-    static sp<Renderable> create(sp<Renderable> renderable, sp<Updatable> updatable = nullptr, sp<Boolean> discarded = nullptr);
+    static sp<Renderable> create(sp<Renderable> renderable, sp<Boolean> discarded = nullptr, sp<Updatable> updatable = nullptr);
 };
 
 }

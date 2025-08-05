@@ -52,9 +52,6 @@ public:
 //  [[script::bindings::auto]]
     sp<Numeric> duration() const;
 //  [[script::bindings::auto]]
-    sp<Numeric> durationUntil(const sp<Numeric>& until) const;
-
-//  [[script::bindings::auto]]
     sp<Boolean> timeout(float seconds) const;
 
 //  [[script::bindings::auto]]
