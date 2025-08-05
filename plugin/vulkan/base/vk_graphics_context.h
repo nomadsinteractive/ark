@@ -17,7 +17,7 @@ namespace ark::plugin::vulkan {
 
 class VKGraphicsContext {
 public:
-    VKGraphicsContext(GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer);
+    VKGraphicsContext(const GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer);
     ~VKGraphicsContext();
 
     void begin(uint32_t imageId, const Color& backgroundColor);
@@ -33,6 +33,8 @@ public:
         const RenderEngineContext::Resolution& resolution() const;
         uint32_t colorAttachmentCount() const;
         VkCommandBuffer vkCommandBuffer() const;
+
+        virtual Vector<VkPipelineColorBlendAttachmentState> makeColorBlendAttachmentStates(const VkPipelineColorBlendAttachmentState& mainState, uint32_t colorAttachmentCount) = 0;
 
         virtual VkRenderPass acquire() = 0;
         virtual VkRenderPass begin(VkCommandBuffer commandBuffer) = 0;

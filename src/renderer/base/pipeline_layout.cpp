@@ -1,5 +1,7 @@
 #include "renderer/base/pipeline_layout.h"
 
+#include <ranges>
+
 #include "core/base/allocator.h"
 #include "core/base/string.h"
 #include "core/util/uploader_type.h"
@@ -89,7 +91,7 @@ void PipelineLayout::initialize(const PipelineBuildingContext& buildingContext)
     if(const ShaderPreprocessor* fragment = buildingContext.tryGetRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT))
         _color_attachment_count = fragment->_main_block->outArgumentCount() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
 
-    for(const auto& [k, v] : buildingContext._ubos)
+    for(const auto& v : std::views::values(buildingContext._ubos))
     {
         v->initialize();
         _ubos.push_back(v);
@@ -166,8 +168,8 @@ const PipelineLayout::StreamLayout& PipelineLayout::getStreamLayout(const uint32
 
 Optional<const Attribute&> PipelineLayout::getAttribute(const String& name) const
 {
-    for(const auto& i : _stream_layouts)
-        if(const Optional<const Attribute&> opt = i.second.getAttribute(name))
+    for(const auto& v : std::views::values(_stream_layouts))
+        if(const Optional<const Attribute&> opt = v.getAttribute(name))
             return opt;
     return {};
 }
@@ -217,7 +219,7 @@ Optional<const Attribute&> PipelineLayout::StreamLayout::getAttribute(const Stri
     return _attributes.has(name) ? Optional<const Attribute&>(_attributes.at(name)) : Optional<const Attribute&>();
 }
 
-int32_t PipelineLayout::StreamLayout::getAttributeOffset(Attribute::Usage layoutType) const
+int32_t PipelineLayout::StreamLayout::getAttributeOffset(const Attribute::Usage layoutType) const
 {
     const Optional<const Attribute&> attr = getAttribute(layoutType);
     return attr ? static_cast<int32_t>(attr->offset()) : -1;

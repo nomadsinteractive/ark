@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
@@ -31,9 +29,9 @@ public:
     const sp<VKDevice>& device() const;
 
     const sp<VKCommandPool>& commandPool() const;
-    const std::vector<VkFramebuffer>& frameBuffers() const;
+    const Vector<VkFramebuffer>& frameBuffers() const;
 
-    std::vector<VkCommandBuffer> makeCommandBuffers() const;
+    Vector<VkCommandBuffer> makeCommandBuffers() const;
 
     uint32_t acquire(VKGraphicsContext& vkContext);
     uint32_t aquiredImageId() const;
@@ -63,7 +61,7 @@ private:
     VkRect2D _scissor;
     VkViewport _viewport;
 
-    std::vector<VkFramebuffer> _frame_buffers;
+    Vector<VkFramebuffer> _frame_buffers;
 
     struct
     {

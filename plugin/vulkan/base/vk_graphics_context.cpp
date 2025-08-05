@@ -15,23 +15,31 @@ namespace ark::plugin::vulkan {
 
 namespace {
 
-VkClearColorValue toVkClearColorValue(const V4& rgba)
+VkClearColorValue toVkClearColorValue(const V4 rgba)
 {
     return {{rgba.x(), rgba.y(), rgba.z(), rgba.w()}};
 }
 
 class MainRenderPassPhrase final : public VKGraphicsContext::RenderPassPhrase {
 public:
-    MainRenderPassPhrase(const RenderEngineContext::Resolution& resolution, const sp<VKRenderer>& renderer, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, const Color& backgroundColor)
+    MainRenderPassPhrase(const RenderEngineContext::Resolution& resolution, const sp<VKRenderer>& renderer, const VkCommandBuffer commandBuffer, const VkFramebuffer framebuffer, const Color& backgroundColor)
         : RenderPassPhrase(resolution, 1, commandBuffer), _renderer(renderer), _framebuffer(framebuffer), _clear_color_value(toVkClearColorValue(backgroundColor.rgba())) {
     }
 
-    VkRenderPass acquire() override {
+    Vector<VkPipelineColorBlendAttachmentState> makeColorBlendAttachmentStates(const VkPipelineColorBlendAttachmentState& mainState, const uint32_t colorAttachmentCount) override
+    {
+        ASSERT(colorAttachmentCount == 1);
+        return {mainState};
+    }
+
+    VkRenderPass acquire() override
+    {
         const VKSwapChain& renderTarget = _renderer->renderTarget();
         return renderTarget.vkRenderPassBeginInfo().renderPass;
     }
 
-    VkRenderPass begin(const VkCommandBuffer commandBuffer) override {
+    VkRenderPass begin(const VkCommandBuffer commandBuffer) override
+    {
         VkClearValue vkClearValues[2];
         vkClearValues[0].color = _clear_color_value;
         vkClearValues[1].depthStencil = {1.0f, 0};
@@ -57,7 +65,7 @@ private:
 
 }
 
-VKGraphicsContext::VKGraphicsContext(GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer)
+VKGraphicsContext::VKGraphicsContext(const GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer)
     : _renderer(renderer), _render_target(_renderer->renderTarget()), _command_buffers(sp<VKCommandBuffers>::make(graphicsContext.recycler(), _render_target)),
       _submit_queue(_renderer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT), _semaphore_render_complete(_submit_queue.createSignalSemaphore())
 {
@@ -77,7 +85,7 @@ VKGraphicsContext::~VKGraphicsContext()
 void VKGraphicsContext::begin(const uint32_t imageId, const Color& backgroundColor)
 {
     const VKSwapChain& renderTarget = _renderer->renderTarget();
-    const std::vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
+    const Vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
 
     VkCommandBuffer commandBuffer = commandBuffers.at(imageId);
     _state_stack.push(State(sp<RenderPassPhrase>::make<MainRenderPassPhrase>(RenderEngineContext::Resolution{_render_target->width(), _render_target->height()}, _renderer, commandBuffer, renderTarget.frameBuffers().at(imageId), backgroundColor), commandBuffer, false));

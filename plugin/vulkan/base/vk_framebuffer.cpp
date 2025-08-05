@@ -96,6 +96,7 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
     if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
         for(uint32_t i = 0; i < _configure._color_attachments.size(); ++i)
             _clear_values.push_back(clearColor);
+
     if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
         _clear_values.push_back(clearDepthStencil);
 
@@ -107,6 +108,19 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
 void VKFramebuffer::Stub::initialize()
 {
     _command_buffer = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
+}
+
+Vector<VkPipelineColorBlendAttachmentState> VKFramebuffer::Stub::makeColorBlendAttachmentStates(const VkPipelineColorBlendAttachmentState& mainState, uint32_t colorAttachmentCount)
+{
+    Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
+    const uint32_t stateCount = std::max<uint32_t>(colorAttachmentCount, _configure._color_attachments.size());
+    for(uint32_t i = 0; i < stateCount; ++i)
+    {
+        VkPipelineColorBlendAttachmentState cbaState = mainState;
+        cbaState.blendEnable = i == 0 || (i < _configure._color_attachments.size() && !(_configure._color_attachments.at(i)->parameters()->_format & Texture::FORMAT_INTEGER));
+        blendAttachmentStates.push_back(cbaState);
+    }
+    return blendAttachmentStates;
 }
 
 VkRenderPass VKFramebuffer::Stub::acquire()

@@ -127,7 +127,7 @@ void VKSwapChain::waitIdle() const
     vkQueueWaitIdle(_queue);
 }
 
-void VKSwapChain::onSurfaceChanged(uint32_t width, uint32_t height)
+void VKSwapChain::onSurfaceChanged(const uint32_t width, const uint32_t height)
 {
     _width = width;
     _height = height;

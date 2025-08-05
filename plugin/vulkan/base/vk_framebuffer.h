@@ -29,11 +29,15 @@ public:
     VkCommandBuffer endRenderPass(GraphicsContext& graphicsContext) const;
 
 private:
+
     class Stub final : public VKGraphicsContext::RenderPassPhrase {
     public:
         Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::Configure configure);
 
         void initialize();
+
+        Vector<VkPipelineColorBlendAttachmentState> makeColorBlendAttachmentStates(const VkPipelineColorBlendAttachmentState& mainState,
+            uint32_t colorAttachmentCount) override;
 
         VkRenderPass acquire() override;
         VkRenderPass begin(VkCommandBuffer commandBuffer) override;
@@ -50,7 +54,7 @@ private:
         VkRect2D _scissor;
         VkViewport _viewport;
 
-        std::vector<VkClearValue> _clear_values;
+        Vector<VkClearValue> _clear_values;
 
         friend class VKFramebuffer;
     };

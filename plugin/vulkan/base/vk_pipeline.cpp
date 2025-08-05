@@ -498,11 +498,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
     const sp<VKDevice>& device = _renderer->device();
     const PipelineDescriptor& pipelineDescriptor = _pipeline_bindings.pipelineDescriptor();
 
-    VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
-            vks::initializers::pipelineInputAssemblyStateCreateInfo(
-                VKUtil::toPrimitiveTopology(_draw_mode),
-                0,
-                VK_FALSE);
+    VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vks::initializers::pipelineInputAssemblyStateCreateInfo(VKUtil::toPrimitiveTopology(_draw_mode), 0, VK_FALSE);
 
     const PipelineDescriptor::PipelineTraitTable& traits = pipelineDescriptor.configuration()._traits;
     const VkPipelineRasterizationStateCreateInfo rasterizationState = makeRasterizationState(traits);
@@ -524,20 +520,9 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
     VKGraphicsContext::State& state = vkGraphicsContext->currentState();
     VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.acquireRenderPass(), 0);
 
-    Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
-    const uint32_t colorAttachmentCount = std::max<uint32_t>(pipelineDescriptor.layout()->colorAttachmentCount(), state.renderPassPhrase()->colorAttachmentCount());
-    for(uint32_t i = 0; i < colorAttachmentCount; ++i)
-    {
-        //TODO: MRT only albedo needs blending for now, what about the others?
-        VkPipelineColorBlendAttachmentState cbaState = colorBlendAttachmentState;
-        cbaState.blendEnable = cbaState.blendEnable && i == 0;
-        blendAttachmentStates.push_back(cbaState);
-    }
+    Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = state.renderPassPhrase()->makeColorBlendAttachmentStates(colorBlendAttachmentState, pipelineDescriptor.layout()->colorAttachmentCount());
     CHECK_WARN(!blendAttachmentStates.empty(), "Graphics pipeline has no color attachment");
-    VkPipelineColorBlendStateCreateInfo colorBlendState =
-            vks::initializers::pipelineColorBlendStateCreateInfo(
-                static_cast<uint32_t>(blendAttachmentStates.size()),
-                blendAttachmentStates.data());
+    VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(static_cast<uint32_t>(blendAttachmentStates.size()), blendAttachmentStates.data());
 
     VkRect2D vkScissors;
     VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
