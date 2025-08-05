@@ -2575,25 +2575,18 @@ class Function:
 
 
 class EventListener:
-    def __init__(self, delegate: Optional["EventListener"]):
-        pass
 
     def on_event(self, event: Event):
         pass
 
-    def reset(self, listener: Any = None):
+    def wrap(self, delegate: "EventListener") -> Self:
         pass
 
-    def add_event_listener(self, listener: Any, disposed: Optional[Boolean] = None):
-        pass
-
-    def push_event_listener(self, listener: Any, disposed: Optional[Boolean] = None):
+    def reset(self, event_listener: Any = None):
         pass
 
 
 class EventDispatcher(EventListener):
-    def __init__(self):
-        super().__init__(None)
 
     @property
     def locked(self) -> bool:

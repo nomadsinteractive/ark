@@ -24,72 +24,57 @@ class InputField:
     INTPUT_TYPE_MAPPING = {Numeric: 'input_float', Vec2: 'input_float2', Vec3: 'input_float3', Vec4: 'input_float4', Color: 'color_edit4',
                                     Integer: 'input_int', Boolean: 'checkbox', String: 'input_text'}
 
-    def __init__(self, name: str, value: Any, input_type: Optional[str] = None, *args, **kwargs):
-        self._name = name
+    def __init__(self, name: str, value: Any, input_type: str = '', *args, **kwargs):
+        self.name = name
         self._input_type = input_type or self.INTPUT_TYPE_MAPPING[type(value)]
         self._value = value
         self._args = args
         self._kwargs = kwargs
 
-    @property
-    def name(self) -> str:
-        return self._name
-
     def build(self, builder: dear_imgui.WidgetBuilder):
         input_func = getattr(builder, self._input_type)
-        input_func(self._name, self._value, *self._args, **self._kwargs)
+        input_func(self.name, self._value, *self._args, **self._kwargs)
 
 
 class ConsoleCommand:
     def __init__(self, name: str, delegate: Any):
-        self._name = name
+        self.name = name
+        self.delegate = delegate
         self._packages = tuple(name.split('.'))
-        self._delegate = delegate
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def delegate(self) -> Any:
-        return self._delegate
 
     def get_executor(self, name_and_methods: list[str]):
         executor = None
         if self._packages == tuple(name_and_methods[:len(self._packages)]):
             remains = name_and_methods[len(self._packages):]
-            executor = self._delegate
+            executor = self.delegate
             while remains and executor:
                 executor = getattr(executor, remains.pop(0), None)
         return executor
 
     def get_public_properties(self) -> list[tuple[str, Any]]:
-        if isinstance(self._delegate, dict):
-            return list(self._delegate.items())
-        elif isinstance(self._delegate, list):
-            return [(i.name, i.delegate) for i in self._delegate]
+        if isinstance(self.delegate, dict):
+            return list(sorted(self.delegate.items(), key=lambda x: x[0]))
+        elif isinstance(self.delegate, list):
+            return [(i.name, i.delegate) for i in self.delegate]
 
         pms = []
-        for i, j in inspect.getmembers(self._delegate, lambda x: type(x) is not type):
+        for i, j in inspect.getmembers(self.delegate, lambda x: type(x) is not type):
             if not i.startswith('_'):
                 pms.append((i, j))
         return pms
 
-    @staticmethod
-    def _get_public_methods(prefix: str, delegate) -> list[tuple[str, Callable]]:
-        return [(f'{prefix}{i}', j) for i, j in inspect.getmembers(delegate, lambda x: callable(x)) if not i.startswith('_')]
-
 
 class Window:
-    def __init__(self, imgui: Renderer | None = None, is_open: Optional[TYPE_BOOLEAN] = None):
+    def __init__(self, imgui: Renderer | None = None, is_open: Optional[TYPE_BOOLEAN] = None, title: str = ''):
         self._imgui = imgui or _mark_studio.imgui
         self._is_open = None if is_open is None else Boolean(is_open)
+        self._title = title
         self._renderer = Renderer()
         self._imgui.add_renderer(self._renderer)
 
     @property
     def title(self) -> str:
-        return ''
+        return self._title
 
     @property
     def is_open(self) -> Optional[Boolean]:
@@ -114,17 +99,13 @@ class Window:
 
 class MainWindow(Window):
     def __init__(self, mark_studio: "MarkStudio", is_open: Optional[TYPE_BOOLEAN] = None, quick_bar_items: Optional[list[QuickBarItem]] = None):
-        super().__init__(mark_studio.imgui, is_open)
+        super().__init__(mark_studio.imgui, is_open, 'My Ark Studio')
         self._mark_studio = mark_studio
         self._quick_bar_items = quick_bar_items or []
         self._imgui_demo_is_open = Boolean(False)
         self._imgui_about_is_open = Boolean(False)
         self._pydevd_started = Boolean(False)
         self._quick_bar_widget = dear_imgui.Widget()
-
-    @property
-    def title(self) -> str:
-        return 'My Ark Studio'
 
     def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
         builder.text('Windows')
@@ -176,11 +157,7 @@ class MainWindow(Window):
 
 class ConsoleWindow(Window):
     def __init__(self, imgui: Renderer | None, is_open: Optional[bool]):
-        super().__init__(imgui, is_open)
-
-    @property
-    def title(self) -> str:
-        return 'Console'
+        super().__init__(imgui, is_open, 'Console')
 
     def on_show(self, builder: dear_imgui.WidgetBuilder, console_cmds: list[ConsoleCommand]):
         text_cmd = String('')
@@ -256,13 +233,9 @@ class ConsoleWindow(Window):
 
 
 class PropertiesWindow(Window):
-    def __init__(self, imgui: Renderer | None = None, is_open: Optional[TYPE_BOOLEAN] = None, input_fields: Sequence[InputField] = None):
-        super().__init__(imgui, is_open)
+    def __init__(self, imgui: Renderer | None = None, is_open: Optional[TYPE_BOOLEAN] = None, input_fields: Sequence[InputField] = None, title: str = 'Properties'):
+        super().__init__(imgui, is_open, title)
         self._input_fields = input_fields or []
-
-    @property
-    def title(self) -> str:
-        return 'Properties'
 
     def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
         for i in self._input_fields:
@@ -275,7 +248,7 @@ class PropertiesWindow(Window):
 
 class NoiseGeneratorWindow(Window):
     def __init__(self, imgui: Renderer | None = None):
-        super().__init__(imgui, True)
+        super().__init__(imgui, True, 'Noise Generator')
         try:
             from ark import noise
         except ImportError:
@@ -292,10 +265,6 @@ class NoiseGeneratorWindow(Window):
         self._fractal_gain = Numeric(0.2)
         self._fractal_lacunarity = Numeric(1.0)
         self._texture = self._do_generate()
-
-    @property
-    def title(self) -> str:
-        return 'Noise Generator'
 
     def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
         builder.combo('Type', self._type, self._type_options)
@@ -344,7 +313,6 @@ class MarkStudio:
         self._renderer_properties = None
         self._main_window = MainWindow(self, None, quick_bar_items)
         self._console_window = ConsoleWindow(self._imgui, True)
-        self._properties_window = PropertiesWindow(self._imgui, True)
         self._resolution = resolution
 
     @property
@@ -358,19 +326,9 @@ class MarkStudio:
     def make_widget_builder(self) -> dear_imgui.WidgetBuilder:
         return dear_imgui.WidgetBuilder(self._imgui)
 
-    def show_properties(self, properties: Any = None, **kwargs):
-        if kwargs:
-            input_fields = [InputField(k, v) for k, v in kwargs.items()]
-            properties = [properties] + input_fields if properties else input_fields
-        self.show(properties=properties)
-
-    def show(self, console_cmds: Optional[list[ConsoleCommand]] = None, properties: Any = None):
+    def show(self, console_cmds: Optional[list[ConsoleCommand]] = None):
         self._main_window.show()
 
-        if properties:
-            self._properties_window.show(properties)
-        else:
-            self._properties_window.hide()
         if console_cmds:
             self._console_window.show(console_cmds)
         else:

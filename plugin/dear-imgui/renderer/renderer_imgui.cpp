@@ -6,6 +6,7 @@
 
 #include "core/ark.h"
 #include "core/types/global.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/asset.h"
 #include "core/inf/readable.h"
 
@@ -19,17 +20,15 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/render_engine.h"
+#include "renderer/inf/renderer_factory.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_facade.h"
 #include "app/base/event.h"
-#include "app/inf/application_controller.h"
-#include "core/impl/variable/variable_wrapper.h"
 
 #include "dear-imgui/base/draw_command_pool.h"
 #include "dear-imgui/base/imgui_context.h"
 #include "dear-imgui/base/renderer_context.h"
-#include "renderer/inf/renderer_factory.h"
 
 namespace ark::plugin::dear_imgui {
 
@@ -112,10 +111,10 @@ ImGuiKey toImGuiKey(const Event::Code code) {
 
 }
 
-RendererImgui::RendererImgui(const sp<Shader>& shader, const sp<Texture>& texture)
-    : _shader(shader), _render_engine(Ark::instance().renderController()->renderEngine()), _texture(texture), _renderer_context(sp<RendererContext>::make(shader)), _text_input_enabled(sp<BooleanWrapper>::make(false))
+RendererImgui::RendererImgui(sp<Shader> shader, sp<Texture> texture)
+    : _shader(std::move(shader)), _render_engine(Ark::instance().renderController()->renderEngine()), _texture(std::move(texture)), _renderer_context(sp<RendererContext>::make(_shader)), _text_input_enabled(sp<BooleanWrapper>::make(false))
 {
-    _renderer_context->addDefaultTexture(texture);
+    _renderer_context->addDefaultTexture(_texture);
     Ark::instance().applicationContext()->applicationFacade()->setTextInputEnabled(_text_input_enabled);
 }
 
@@ -330,7 +329,7 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     const Viewport& viewport = renderController.renderEngine()->viewport();
     _camera->ortho(0, viewport.width(), viewport.height(), 0, viewport.clipNear(), viewport.clipFar());
     shader->setCamera(_camera);
-    return sp<RendererImgui>::make(std::move(shader), texture);
+    return sp<Renderer>::make<RendererImgui>(std::move(shader), std::move(texture));
 }
 
 RendererImgui::DrawCommand::DrawCommand(RenderController& renderController)

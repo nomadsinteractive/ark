@@ -16,7 +16,7 @@ PyMethodDef ARK_DEAR_IMGUI_METHODS[] = {
     {nullptr, nullptr, 0, nullptr}
 };
 
-class DearImguiPybindingsPlugin : public Plugin {
+class DearImguiPybindingsPlugin final : public Plugin {
 public:
     DearImguiPybindingsPlugin()
         : Plugin("dear-imgui-pybindings", Plugin::PLUGIN_TYPE_CORE) {
