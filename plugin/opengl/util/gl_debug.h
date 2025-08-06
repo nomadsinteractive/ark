@@ -3,6 +3,7 @@
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/strings.h"
+#include "core/util/log.h"
 
 #include "graphics/forwarding.h"
 

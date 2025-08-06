@@ -7,6 +7,7 @@
 #include "core/inf/array.h"
 #include "core/inf/asset.h"
 #include "core/types/optional.h"
+#include "core/util/log.h"
 #include "core/util/strings.h"
 
 #include "platform/platform.h"

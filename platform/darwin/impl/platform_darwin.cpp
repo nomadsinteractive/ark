@@ -118,9 +118,6 @@ void Platform::sysCall(int32_t /*id*/, const String& /*value*/)
 
 void Platform::glInitialize()
 {
-#ifdef ARK_BUILD_PLUGIN_OPENGL
-    glbinding::Binding::initialize(nullptr);
-#endif
 }
 
 void Platform::vkInitialize()

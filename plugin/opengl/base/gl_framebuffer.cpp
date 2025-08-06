@@ -1,6 +1,7 @@
 #include "opengl/base/gl_framebuffer.h"
 
 #include "core/collection/table.h"
+#include "core/util/log.h"
 
 #include "renderer/base/recycler.h"
 #include "renderer/base/texture.h"

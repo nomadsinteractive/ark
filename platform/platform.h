@@ -3,7 +3,6 @@
 #include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/util/log.h"
 
 #include "graphics/forwarding.h"
 

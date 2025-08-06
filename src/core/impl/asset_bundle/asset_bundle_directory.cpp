@@ -4,6 +4,7 @@
 
 #include "core/impl/asset/asset_file.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/strings.h"
 
 #include "platform/platform.h"
 

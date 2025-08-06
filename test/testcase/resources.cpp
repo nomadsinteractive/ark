@@ -4,11 +4,10 @@
 #include "core/impl/asset_bundle/asset_bundle_zip_file.h"
 #include "core/inf/asset.h"
 #include "core/inf/readable.h"
+#include "core/util/strings.h"
 
-#include "platform/platform.h"
 
-namespace ark {
-namespace unittest {
+namespace ark::unittest {
 
 class ResourcesTestCase : public TestCase {
 public:
@@ -27,7 +26,6 @@ public:
     }
 };
 
-}
 }
 
 
