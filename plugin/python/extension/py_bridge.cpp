@@ -175,6 +175,16 @@ PyObject* PyBridge::incRefNone()
     Py_RETURN_NONE;
 }
 
+PyObject* PyBridge::pyTrue()
+{
+    return Py_True;
+}
+
+PyObject* PyBridge::pyFalse()
+{
+    return Py_False;
+}
+
 void PyBridge::incRef(PyObject* obj)
 {
     Py_INCREF(obj);

@@ -54,6 +54,9 @@ public:
 
     static PyObject* incRefNone();
 
+    static PyObject* pyTrue();
+    static PyObject* pyFalse();
+
     static void incRef(PyObject* obj);
     static void decRef(PyObject* obj);
 

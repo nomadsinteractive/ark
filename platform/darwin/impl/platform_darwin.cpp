@@ -32,11 +32,11 @@ namespace {
 
 bool exists(const String& location)
 {
-    CFBundleRef bundle = CFBundleGetMainBundle();
-    CFStringRef cfDirectory = CFStringCreateWithCString(nullptr, location.c_str(), kCFStringEncodingUTF8);
-    CFURLRef url = CFBundleCopyResourceURL(bundle, nullptr, nullptr, cfDirectory);
+    const CFBundleRef bundle = CFBundleGetMainBundle();
+    const CFStringRef cfDirectory = CFStringCreateWithCString(nullptr, location.c_str(), kCFStringEncodingUTF8);
+    const CFURLRef url = CFBundleCopyResourceURL(bundle, nullptr, nullptr, cfDirectory);
     CFRelease(cfDirectory);
-    bool r = static_cast<bool>(url);
+    const bool r = static_cast<bool>(url);
     if(url)
         CFRelease(url);
     return r;
@@ -51,13 +51,13 @@ sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPa
     sp<AssetBundle> bundle = exists(path) ? sp<AssetBundle>::make<AssetBundleDarwin>(path) : nullptr;
     if(isDirectory(path))
     {
-        const sp<AssetBundle> pathBundle = sp<AssetBundleDirectory>::make(path);
-        bundle = bundle ? sp<AssetBundleWithFallback>::make(bundle, pathBundle).cast<AssetBundle>() : pathBundle;
+        const sp<AssetBundle> pathBundle = sp<AssetBundle>::make<AssetBundleDirectory>(path);
+        bundle = bundle ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(bundle), std::move(pathBundle)) : std::move(pathBundle);
     }
     if(isDirectory(appPath))
     {
-        const sp<AssetBundle> appPathBundle = sp<AssetBundleDirectory>::make(path);
-        bundle = bundle ? sp<AssetBundle>::make<AssetBundleWithFallback>(bundle, appPathBundle) : appPathBundle;
+        const sp<AssetBundle> appPathBundle = sp<AssetBundle>::make<AssetBundleDirectory>(path);
+        bundle = bundle ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(bundle), std::move(appPathBundle)) : std::move(appPathBundle);
     }
     return bundle;
 }
@@ -87,7 +87,7 @@ String Platform::getExecutablePath()
 
 String Platform::getRealPath(const String& path)
 {
-    if(Platform::isFile(path) || Platform::isDirectory(path))
+    if(isFile(path) || isDirectory(path))
     {
         char buf[PATH_MAX] = {0};
         char* rp = realpath(path.c_str(), buf);

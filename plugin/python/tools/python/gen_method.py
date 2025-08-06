@@ -128,7 +128,7 @@ class GenMethod(object):
                 dvalue = None
                 if realtypename == 'PyObject*':
                     if j.accept_type == 'bool':
-                        dvalue = 'Py_True' if j.default_value == 'true' else 'Py_False'
+                        dvalue = 'PyBridge::pyTrue()' if j.default_value == 'true' else 'PyBridge::pyFalse()'
                     else:
                         dvalue = 'nullptr'
                 elif j.default_value is not None:
