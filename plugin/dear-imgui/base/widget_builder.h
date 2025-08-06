@@ -43,7 +43,7 @@ public:
 //  [[script::bindings::auto]]
     void bulletText(String content);
 //  [[script::bindings::auto]]
-    sp<Observer> button(const String& label, const V2& size = V2());
+    sp<Observer> button(const String& label, V2 size = V2());
 //  [[script::bindings::auto]]
     sp<Observer> smallButton(const String& label);
 
@@ -68,6 +68,8 @@ public:
     sp<Widget> newLine();
 //  [[script::bindings::auto]]
     void separator();
+//  [[script::bindings::auto]]
+    void separatorText(String label);
 //  [[script::bindings::auto]]
     void spacing();
 //  [[script::bindings::auto]]
@@ -128,9 +130,9 @@ public:
     void endMenu();
 
 //  [[script::bindings::auto]]
-    sp<Boolean> menuItem(String label, String shortcut = {}, bool pSelected = false, sp<Boolean> enabled = nullptr);
+    sp<Observer> menuItem(String label, String shortcut = {}, bool pSelected = false, sp<Boolean> enabled = nullptr);
 //  [[script::bindings::auto]]
-    sp<Boolean> menuItem(String label, String shortcut, sp<Boolean> pSelected, sp<Boolean> enabled);
+    sp<Observer> menuItem(String label, String shortcut, sp<Boolean> pSelected, sp<Boolean> enabled);
 
 //  [[script::bindings::auto]]
     void pushID(const String& id);
@@ -170,6 +172,7 @@ private:
         Argument(T arg)
             : _arg(arg) {
         }
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Argument);
 
         T operator()() const {
             return _arg;
@@ -184,6 +187,7 @@ private:
         Argument(String arg)
             : _arg(std::move(arg)) {
         }
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Argument);
 
         ArgType operator()() const {
             return _arg.c_str();
@@ -230,8 +234,7 @@ private:
 
 private:
     void addWidgetGroupAndPush(sp<WidgetGroup> widgetGroup);
-
-    void addFunctionCall(std::function<void(void)> func);
+    void addFunctionCall(std::function<void()> func);
 
     template<typename T> void addInvocation(std::function<void(typename Argument<T>::ArgType)> func, T arg) {
         addWidget(sp<Invocation<T>>::make(std::move(func), std::move(arg)));

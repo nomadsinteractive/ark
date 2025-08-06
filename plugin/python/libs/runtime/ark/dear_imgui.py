@@ -92,6 +92,9 @@ class WidgetBuilder:
     def separator(self):
         pass
 
+    def separator_text(self, label: str):
+        pass
+
     def same_line(self, offset_from_start_x: float = 0, spacing: float = -1) -> Widget:
         pass
 
@@ -137,7 +140,7 @@ class WidgetBuilder:
     def end_menu(self):
         pass
 
-    def menu_item(self, label: str, shortcut: str = '', p_selected: Optional[TYPE_BOOLEAN] = None, enabled: TYPE_BOOLEAN = True) -> Boolean:
+    def menu_item(self, label: str, shortcut: str = '', p_selected: Optional[TYPE_BOOLEAN] = None, enabled: TYPE_BOOLEAN = True) -> Observer:
         pass
 
     def push_id(self, hashid: Union[str, int]):
@@ -150,4 +153,10 @@ class WidgetBuilder:
         pass
 
     def make_widget(self) -> Widget:
+        pass
+
+    def make_demo_widget(self, is_open: TYPE_BOOLEAN = True) -> Widget:
+        pass
+
+    def make_about_widget(self, is_open: TYPE_BOOLEAN = True) -> Widget:
         pass

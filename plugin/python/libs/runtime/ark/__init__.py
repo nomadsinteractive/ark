@@ -949,7 +949,7 @@ class Renderer:
     def add_renderer(self, renderer: "Renderer", *traits):
         pass
 
-    def reset(self, v: "Renderer") -> Optional["Renderer"]:
+    def reset(self, v: Optional["Renderer"]) -> Optional["Renderer"]:
         pass
 
     def wrap(self) -> Self:

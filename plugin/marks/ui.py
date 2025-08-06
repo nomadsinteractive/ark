@@ -2,7 +2,7 @@ import inspect
 from collections.abc import Sequence
 from typing import Callable, Any, Optional
 
-from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Color, Integer, ApplicationFacade, Texture, Bitmap, Math, TYPE_BOOLEAN
+from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Color, Integer, ApplicationFacade, Texture, Bitmap, Math, TYPE_BOOLEAN, Discarded
 from ark import dear_imgui
 
 
@@ -22,7 +22,7 @@ class QuickBarItem:
 
 class InputField:
     INTPUT_TYPE_MAPPING = {Numeric: 'input_float', Vec2: 'input_float2', Vec3: 'input_float3', Vec4: 'input_float4', Color: 'color_edit4',
-                                    Integer: 'input_int', Boolean: 'checkbox', String: 'input_text'}
+                           Integer: 'input_int', Boolean: 'checkbox', String: 'input_text'}
 
     def __init__(self, name: str, value: Any, input_type: str = '', *args, **kwargs):
         self.name = name
@@ -66,56 +66,64 @@ class ConsoleCommand:
 
 class Window:
     def __init__(self, imgui: Renderer | None = None, is_open: Optional[TYPE_BOOLEAN] = None, title: str = ''):
+        self.is_open = None if is_open is None else Boolean(is_open)
+        self.title = title
         self._imgui = imgui or _mark_studio.imgui
-        self._is_open = None if is_open is None else Boolean(is_open)
-        self._title = title
+        self._discarded = Discarded()
         self._renderer = Renderer()
-        self._imgui.add_renderer(self._renderer)
-
-    @property
-    def title(self) -> str:
-        return self._title
-
-    @property
-    def is_open(self) -> Optional[Boolean]:
-        return self._is_open
-
-    def show(self, args: Any = None):
-        if self._is_open is not None:
-            self._is_open.set(True)
+        self._imgui.add_renderer(self._renderer, self._discarded)
 
         builder = dear_imgui.WidgetBuilder(self._imgui)
-        builder.begin(self.title, self._is_open)
-        self.on_show(builder, args)
+        builder.begin(self.title, self.is_open)
+        self.on_create(builder)
         builder.end()
-        self._renderer.reset(builder.make_widget().to_renderer())
+        self._widget = builder.make_widget()
+
+    def ready(self):
+        self._renderer.reset(self._widget.to_renderer())
+
+    def show(self):
+        if self.is_open is not None:
+            self.is_open.set(True)
+        self.ready()
 
     def hide(self):
-        self._is_open.set(False)
+        if self.is_open is not None:
+            self.is_open.set(False)
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
+        self._renderer.reset(None)
+
+    def discard(self):
+        self._discarded.discard()
+
+    def on_create(self, builder: dear_imgui.WidgetBuilder):
         pass
 
 
 class MainWindow(Window):
     def __init__(self, mark_studio: "MarkStudio", is_open: Optional[TYPE_BOOLEAN] = None, quick_bar_items: Optional[list[QuickBarItem]] = None):
-        super().__init__(mark_studio.imgui, is_open, 'My Ark Studio')
         self._mark_studio = mark_studio
         self._quick_bar_items = quick_bar_items or []
         self._imgui_demo_is_open = Boolean(False)
         self._imgui_about_is_open = Boolean(False)
-        self._pydevd_started = Boolean(False)
         self._quick_bar_widget = dear_imgui.Widget()
+        self._noise_generator_window = NoiseGeneratorWindow(mark_studio.imgui, False)
+        self._noise_generator_window.ready()
+        super().__init__(mark_studio.imgui, is_open, 'My Ark Studio')
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
+    def on_create(self, builder: dear_imgui.WidgetBuilder):
 
         if builder.begin_main_menu_bar():
 
+            if builder.begin_menu('File'):
+                builder.menu_item('Close').add_callback(close_mark_studio)
+                builder.end_menu()
+
             if builder.begin_menu('Windows'):
-                builder.menu_item('Noises')
-                builder.separator()
-                builder.menu_item('Imgui Demo')
-                builder.menu_item('Imgui About')
+                builder.menu_item('Noise Generator', p_selected=self._noise_generator_window.is_open)
+                builder.separator_text('Imgui')
+                builder.menu_item('Imgui Demo', p_selected=self._imgui_demo_is_open)
+                builder.menu_item('Imgui About', p_selected=self._imgui_about_is_open)
                 builder.end_menu()
 
             if builder.begin_menu('Help'):
@@ -124,20 +132,8 @@ class MainWindow(Window):
 
             builder.end_main_menu_bar()
 
-        builder.text('Windows')
-        builder.small_button('Noise Generator').add_callback(self._show_noise_generator)
-        builder.separator()
-        builder.small_button('Imgui Demo').add_callback(self._show_imgui_demo)
-        builder.same_line()
-        builder.small_button('Imgui About').add_callback(self._show_imgui_about)
-        self._build_quick_bar()
-
-        builder.text('Quick Bar')
         builder.add_widget(self._quick_bar_widget)
         self._build_quick_bar()
-
-        builder.separator()
-        builder.small_button('Close').add_callback(self._mark_studio.close)
 
         builder.add_widget(builder.make_demo_widget(self._imgui_demo_is_open))
         builder.add_widget(builder.make_about_widget(self._imgui_about_is_open))
@@ -156,12 +152,6 @@ class MainWindow(Window):
     def _show_noise_generator():
         NoiseGeneratorWindow().show()
 
-    def _show_imgui_demo(self):
-        self._imgui_demo_is_open.set(True)
-
-    def _show_imgui_about(self):
-        self._imgui_about_is_open.set(True)
-
     def _make_quickbar_onclick(self, quick_bar_item: QuickBarItem):
 
         def onclick():
@@ -172,24 +162,25 @@ class MainWindow(Window):
 
 
 class ConsoleWindow(Window):
-    def __init__(self, imgui: Renderer | None, is_open: Optional[bool]):
+    def __init__(self, imgui: Renderer | None, is_open: Optional[bool], console_cmds: list[ConsoleCommand]):
+        self._console_cmds = console_cmds
         super().__init__(imgui, is_open, 'Console')
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, console_cmds: list[ConsoleCommand]):
+    def on_create(self, builder: dear_imgui.WidgetBuilder):
         text_cmd = String('')
 
         def execute_cmd():
             cmd_splitted = text_cmd.val.split(' ')
             if cmd_splitted:
                 name_and_methods = cmd_splitted[0].split('.')
-                for i in console_cmds:
+                for i in self._console_cmds:
                     if executor := i.get_executor(name_and_methods):
                         executor(*cmd_splitted[1:])
             text_cmd.set('')
 
         builder.input_text('Command', text_cmd, 64, 1 << 5).add_callback(execute_cmd)
         builder.separator()
-        builder.add_widget(self._make_cmd_tab_widget(console_cmds))
+        builder.add_widget(self._make_cmd_tab_widget(self._console_cmds))
 
     def _make_cmd_tab_widget(self, console_cmds: list[ConsoleCommand]) -> dear_imgui.Widget:
         tab_title_builder = dear_imgui.WidgetBuilder(self._imgui)
@@ -231,7 +222,7 @@ class ConsoleWindow(Window):
         def _callback():
             result = cmd() if callable(cmd) else cmd
             if result is None:
-                close_main_window()
+                close_mark_studio()
             elif isinstance(result, Window):
                 result.show()
             elif isinstance(result, dear_imgui.Widget):
@@ -250,21 +241,16 @@ class ConsoleWindow(Window):
 
 class PropertiesWindow(Window):
     def __init__(self, imgui: Renderer | None = None, is_open: Optional[TYPE_BOOLEAN] = None, input_fields: Sequence[InputField] = None, title: str = 'Properties'):
-        super().__init__(imgui, is_open, title)
         self._input_fields = input_fields or []
+        super().__init__(imgui, is_open, title)
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
+    def on_create(self, builder: dear_imgui.WidgetBuilder):
         for i in self._input_fields:
             i.build(builder)
 
-        if isinstance(args, Sequence):
-            for i in args:
-                i.build(builder)
-
 
 class NoiseGeneratorWindow(Window):
-    def __init__(self, imgui: Renderer | None = None):
-        super().__init__(imgui, True, 'Noise Generator')
+    def __init__(self, imgui: Renderer | None = None, is_open: Optional[TYPE_BOOLEAN] = None):
         try:
             from ark import noise
         except ImportError:
@@ -281,8 +267,9 @@ class NoiseGeneratorWindow(Window):
         self._fractal_gain = Numeric(0.2)
         self._fractal_lacunarity = Numeric(1.0)
         self._texture = self._do_generate()
+        super().__init__(imgui, is_open, 'Noise Generator')
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
+    def on_create(self, builder: dear_imgui.WidgetBuilder):
         builder.combo('Type', self._type, self._type_options)
         builder.slider_int('Components', self._components, 1, 4)
         builder.input_float2('Position', self._position)
@@ -321,14 +308,14 @@ class NoiseGeneratorWindow(Window):
 
 
 class MarkStudio:
-    def __init__(self, application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None):
+    def __init__(self, application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
         self._application_facade = application_facade
         self._imgui = imgui
         self._discarded = Boolean(False)
         self._renderer_quickbar = None
         self._renderer_properties = None
         self._main_window = MainWindow(self, None, quick_bar_items)
-        self._console_window = ConsoleWindow(self._imgui, True)
+        self._console_window = ConsoleWindow(self._imgui, True, console_cmds)
         self._resolution = resolution
 
     @property
@@ -342,13 +329,9 @@ class MarkStudio:
     def make_widget_builder(self) -> dear_imgui.WidgetBuilder:
         return dear_imgui.WidgetBuilder(self._imgui)
 
-    def show(self, console_cmds: Optional[list[ConsoleCommand]] = None):
+    def show(self):
         self._main_window.show()
-
-        if console_cmds:
-            self._console_window.show(console_cmds)
-        else:
-            self._console_window.hide()
+        self._console_window.show()
 
         self._discarded.set(True)
         self._discarded = Boolean(False)
@@ -371,15 +354,15 @@ def get_mark_studio() -> Optional[MarkStudio]:
     return _mark_studio
 
 
-def close_main_window():
+def close_mark_studio():
     global _mark_studio
     if _mark_studio and not _mark_studio.discarded:
         _mark_studio.close()
     _mark_studio = None
 
 
-def show_main_window(application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
+def show_mark_studio(application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
     global _mark_studio
     if not _mark_studio or _mark_studio.discarded:
-        _mark_studio = MarkStudio(application_facade, imgui, resolution, quick_bar_items)
-        _mark_studio.show(console_cmds)
+        _mark_studio = MarkStudio(application_facade, imgui, resolution, quick_bar_items, console_cmds)
+        _mark_studio.show()

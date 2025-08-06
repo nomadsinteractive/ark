@@ -1,5 +1,7 @@
 #include "graphics/impl/renderer/render_group.h"
 
+#include <ranges>
+
 #include "core/base/bean_factory.h"
 #include "core/components/discarded.h"
 
@@ -62,7 +64,7 @@ void RenderGroup::render(RenderRequest& renderRequest, const V3& position, const
         }
     }
     else
-        for(auto& [k, v] : _phrases)
+        for(auto& v : std::views::values(_phrases))
             for(const sp<Renderer>& i : v.update(renderRequest.timestamp()))
                 i->render(renderRequest, position, nullptr);
 }

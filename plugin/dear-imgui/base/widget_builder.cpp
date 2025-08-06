@@ -1,6 +1,7 @@
 #include "dear-imgui/base/widget_builder.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include "core/base/string_buffer.h"
 #include "core/impl/variable/variable_wrapper.h"
@@ -105,8 +106,8 @@ private:
 
 class MenuItem final : public Widget {
 public:
-    MenuItem(String label, String shortcut, sp<Boolean> selected, sp<Boolean> enabled, const sp<Boolean::Impl>& returnValue, const bool toggleable)
-        : _label(std::move(label)), _shortcut(std::move(shortcut)), _selected(std::move(selected)), _enabled(std::move(enabled), true), _return_value(returnValue), _toggleable(toggleable) {
+    MenuItem(String label, String shortcut, sp<Boolean> selected, sp<Boolean> enabled, sp<Runnable> observer, const bool toggleable)
+        : _label(std::move(label)), _shortcut(std::move(shortcut)), _selected(std::move(selected)), _enabled(std::move(enabled), true), _observer(std::move(observer)), _toggleable(toggleable) {
         ASSERT(_selected);
     }
 
@@ -121,7 +122,9 @@ public:
         }
         else
             r = ImGui::MenuItem(_label.c_str(), _shortcut.c_str(), _selected->val(), _enabled.val());
-        _return_value->set(r);
+
+        if(r)
+            _observer->run();
     }
 
 private:
@@ -129,7 +132,7 @@ private:
     String _shortcut;
     sp<Boolean> _selected;
     SafeVar<Boolean> _enabled;
-    sp<Boolean::Impl> _return_value;
+    sp<Runnable> _observer;
     bool _toggleable;
 };
 
@@ -450,7 +453,7 @@ void WidgetBuilder::bulletText(String content)
     addWidget(sp<Widget>::make<WidgetText>(ImGui::BulletText, std::move(content)));
 }
 
-sp<Observer> WidgetBuilder::button(const String& label, const V2& size)
+sp<Observer> WidgetBuilder::button(const String& label, const V2 size)
 {
     sp<Observer> observer = sp<Observer>::make();
     addCallback<String>([size](const char* s) { return ImGui::Button(s, ImVec2(size.x(), size.y())); }, label, observer);
@@ -634,18 +637,18 @@ void WidgetBuilder::endMenu()
     pop();
 }
 
-sp<Boolean> WidgetBuilder::menuItem(String label, String shortcut, bool pSelected, sp<Boolean> enabled)
+sp<Observer> WidgetBuilder::menuItem(String label, String shortcut, bool pSelected, sp<Boolean> enabled)
 {
-    sp<Boolean::Impl> returnValue = sp<Boolean::Impl>::make(true);
-    addWidget(sp<Widget>::make<MenuItem>(std::move(label), std::move(shortcut), sp<Boolean>::make<Boolean::Const>(pSelected), std::move(enabled), returnValue, false));
-    return returnValue;
+    sp<Observer> observer = sp<Observer>::make();
+    addWidget(sp<Widget>::make<MenuItem>(std::move(label), std::move(shortcut), sp<Boolean>::make<Boolean::Const>(pSelected), std::move(enabled), observer, false));
+    return observer;
 }
 
-sp<Boolean> WidgetBuilder::menuItem(String label, String shortcut, sp<Boolean> pSelected, sp<Boolean> enabled)
+sp<Observer> WidgetBuilder::menuItem(String label, String shortcut, sp<Boolean> pSelected, sp<Boolean> enabled)
 {
-    sp<Boolean::Impl> returnValue = sp<Boolean::Impl>::make(true);
-    addWidget(sp<Widget>::make<MenuItem>(std::move(label), std::move(shortcut), std::move(pSelected), std::move(enabled), returnValue, true));
-    return returnValue;
+    sp<Observer> observer = sp<Observer>::make();
+    addWidget(sp<Widget>::make<MenuItem>(std::move(label), std::move(shortcut), std::move(pSelected), std::move(enabled), observer, true));
+    return observer;
 }
 
 void WidgetBuilder::pushID(const String& id)
@@ -653,7 +656,7 @@ void WidgetBuilder::pushID(const String& id)
     addFunctionCall([id] { ImGui::PushID(id.c_str()); } );
 }
 
-void WidgetBuilder::pushID(int64_t id)
+void WidgetBuilder::pushID(const int64_t id)
 {
     int32_t idHash = static_cast<int32_t>(id) ^ static_cast<int32_t>(id >> 32);
     addFunctionCall([idHash] { ImGui::PushID(idHash); } );
@@ -688,12 +691,17 @@ void WidgetBuilder::separator()
     addFunctionCall(ImGui::Separator);
 }
 
+void WidgetBuilder::separatorText(String label)
+{
+    addInvocation<String>(ImGui::SeparatorText, std::move(label));
+}
+
 void WidgetBuilder::spacing()
 {
     addFunctionCall(ImGui::Spacing);
 }
 
-sp<Boolean> WidgetBuilder::beginTabBar(String strId, int32_t flags)
+sp<Boolean> WidgetBuilder::beginTabBar(String strId, const int32_t flags)
 {
     sp<BooleanWrapper> isOpen = sp<BooleanWrapper>::make(false);
     addWidgetGroupAndPush(sp<WidgetGroup>::make<TabBar>(std::move(strId), flags, isOpen));
