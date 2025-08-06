@@ -119,6 +119,20 @@ public:
     void colorPicker4(const String& label, const sp<Vec4>& value);
 
 //  [[script::bindings::auto]]
+    sp<Boolean> beginMainMenuBar();
+//  [[script::bindings::auto]]
+    void endMainMenuBar();
+//  [[script::bindings::auto]]
+    sp<Boolean> beginMenu(String label, sp<Boolean> enabled = nullptr);
+//  [[script::bindings::auto]]
+    void endMenu();
+
+//  [[script::bindings::auto]]
+    sp<Boolean> menuItem(String label, String shortcut = {}, bool pSelected = false, sp<Boolean> enabled = nullptr);
+//  [[script::bindings::auto]]
+    sp<Boolean> menuItem(String label, String shortcut, sp<Boolean> pSelected, sp<Boolean> enabled);
+
+//  [[script::bindings::auto]]
     void pushID(const String& id);
 //  [[script::bindings::auto]]
     void pushID(int64_t id);

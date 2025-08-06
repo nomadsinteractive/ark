@@ -132,6 +132,11 @@ int32_t PyBridge::PyDict_SetItem(PyObject* mp, PyObject* key, PyObject* item)
     return ::PyDict_SetItem(mp, key, item);
 }
 
+int32_t PyBridge::PyObject_IsInstance(PyObject* object, PyObject* typeorclass)
+{
+    return ::PyObject_IsInstance(object, typeorclass);
+}
+
 int32_t PyBridge::PyArg_ParseTuple(PyObject* args, const char* format, ...)
 {
     va_list val;

@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Optional, Union
 
-from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, Vec2, Vec4, Vec3
+from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, Vec2, Vec4, Vec3, TYPE_BOOLEAN
 
 
 class Widget:
@@ -123,6 +123,21 @@ class WidgetBuilder:
         pass
 
     def end_tab_item(self):
+        pass
+
+    def begin_main_menu_bar(self) -> Boolean:
+        pass
+
+    def end_main_menu_bar(self):
+        pass
+
+    def begin_menu(self, label: str, enabled: TYPE_BOOLEAN = True) -> Boolean:
+        pass
+
+    def end_menu(self):
+        pass
+
+    def menu_item(self, label: str, shortcut: str = '', p_selected: Optional[TYPE_BOOLEAN] = None, enabled: TYPE_BOOLEAN = True) -> Boolean:
         pass
 
     def push_id(self, hashid: Union[str, int]):

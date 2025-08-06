@@ -38,14 +38,14 @@ public:
     }
 
     template<typename T> bool isInstance(PyObject* object) const {
-        return PyObject_IsInstance(object, getPyArkType<T>()->getPyObject()) != 0;
+        return PyBridge::PyObject_IsInstance(object, getPyArkType<T>()->getPyObject()) != 0;
     }
 
     template<typename T> PyObject* pyNewObject(const sp<T>& object) {
         const Class* objClass = object.getClass();
         const TypeId typeId = objClass->id();
         const Box box(object);
-        return _type_by_id.find(typeId) != _type_by_id.end() ? toPyObject(objClass->cast(box, typeId)) : getPyArkType<T>()->create(box);
+        return _type_by_id.contains(typeId) ? toPyObject(objClass->cast(box, typeId)) : getPyArkType<T>()->create(box);
     }
 
     template<typename T, typename P> T* pyModuleAddType(PyObject* module, const char* moduleName, const char* typeName, PyTypeObject* base, long flags) {

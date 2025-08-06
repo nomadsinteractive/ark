@@ -3,7 +3,6 @@
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
-#include "python/extension/python_extension.h"
 #include "generated/py_dear-imgui_bindings.h"
 
 using namespace ark;

@@ -44,8 +44,7 @@ public:
     }
 
     void render() override {
-        bool isOpen = _is_open->val();
-        if(isOpen) {
+        if(const bool isOpen = _is_open->val()) {
             bool isOpenArg = isOpen;
             if(ImGui::Begin(_name.c_str(), &isOpenArg))
                 WidgetGroup::render();
@@ -58,6 +57,80 @@ public:
 private:
     String _name;
     sp<BooleanWrapper> _is_open;
+};
+
+class MainMenuBar final : public WidgetGroup {
+public:
+    MainMenuBar(const sp<Boolean::Impl>& returnValue)
+        : _return_value(returnValue) {
+    }
+
+    void render() override
+    {
+        const bool r = ImGui::BeginMainMenuBar();
+        if(r)
+        {
+            WidgetGroup::render();
+            ImGui::EndMainMenuBar();
+        }
+        _return_value->set(r);
+    }
+
+private:
+    sp<Boolean::Impl> _return_value;
+};
+
+class Menu final : public WidgetGroup {
+public:
+    Menu(String label, sp<Boolean> enabled, const sp<Boolean::Impl>& returnValue)
+        : _label(std::move(label)), _enabled(std::move(enabled), true), _return_value(returnValue) {
+    }
+
+    void render() override
+    {
+        const bool r = ImGui::BeginMenu(_label.c_str(), _enabled.val());
+        if(r)
+        {
+            WidgetGroup::render();
+            ImGui::EndMenu();
+        }
+        _return_value->set(r);
+    }
+
+private:
+    String _label;
+    SafeVar<Boolean> _enabled;
+    sp<Boolean::Impl> _return_value;
+};
+
+class MenuItem final : public Widget {
+public:
+    MenuItem(String label, String shortcut, sp<Boolean> selected, sp<Boolean> enabled, const sp<Boolean::Impl>& returnValue, const bool toggleable)
+        : _label(std::move(label)), _shortcut(std::move(shortcut)), _selected(std::move(selected)), _enabled(std::move(enabled), true), _return_value(returnValue), _toggleable(toggleable) {
+        ASSERT(_selected);
+    }
+
+    void render() override
+    {
+        bool r;
+        if(_toggleable)
+        {
+            bool selected = _selected->val();
+            r = ImGui::MenuItem(_label.c_str(), _shortcut.c_str(), &selected, _enabled.val());
+            BooleanType::set(_selected, selected);
+        }
+        else
+            r = ImGui::MenuItem(_label.c_str(), _shortcut.c_str(), _selected->val(), _enabled.val());
+        _return_value->set(r);
+    }
+
+private:
+    String _label;
+    String _shortcut;
+    sp<Boolean> _selected;
+    SafeVar<Boolean> _enabled;
+    sp<Boolean::Impl> _return_value;
+    bool _toggleable;
 };
 
 class TabBar final : public WidgetGroup {
@@ -535,6 +608,44 @@ void WidgetBuilder::colorPicker4(const String& label, const sp<Color>& value)
 void WidgetBuilder::colorPicker4(const String& label, const sp<Vec4>& value)
 {
     addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value));
+}
+
+sp<Boolean> WidgetBuilder::beginMainMenuBar()
+{
+    sp<Boolean::Impl> returnValue = sp<Boolean::Impl>::make(true);
+    addWidgetGroupAndPush(sp<WidgetGroup>::make<MainMenuBar>(returnValue));
+    return returnValue;
+}
+
+void WidgetBuilder::endMainMenuBar()
+{
+    pop();
+}
+
+sp<Boolean> WidgetBuilder::beginMenu(String label, sp<Boolean> enabled)
+{
+    sp<Boolean::Impl> returnValue = sp<Boolean::Impl>::make(true);
+    addWidgetGroupAndPush(sp<WidgetGroup>::make<Menu>(std::move(label), std::move(enabled), returnValue));
+    return returnValue;
+}
+
+void WidgetBuilder::endMenu()
+{
+    pop();
+}
+
+sp<Boolean> WidgetBuilder::menuItem(String label, String shortcut, bool pSelected, sp<Boolean> enabled)
+{
+    sp<Boolean::Impl> returnValue = sp<Boolean::Impl>::make(true);
+    addWidget(sp<Widget>::make<MenuItem>(std::move(label), std::move(shortcut), sp<Boolean>::make<Boolean::Const>(pSelected), std::move(enabled), returnValue, false));
+    return returnValue;
+}
+
+sp<Boolean> WidgetBuilder::menuItem(String label, String shortcut, sp<Boolean> pSelected, sp<Boolean> enabled)
+{
+    sp<Boolean::Impl> returnValue = sp<Boolean::Impl>::make(true);
+    addWidget(sp<Widget>::make<MenuItem>(std::move(label), std::move(shortcut), std::move(pSelected), std::move(enabled), returnValue, true));
+    return returnValue;
 }
 
 void WidgetBuilder::pushID(const String& id)

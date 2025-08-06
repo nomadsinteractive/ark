@@ -42,7 +42,8 @@ public:
 
     static PyObject* PyDict_Keys(PyObject* mp);
     static PyObject* PyDict_GetItem(PyObject* mp, PyObject* key);
-    static int PyDict_SetItem(PyObject* mp, PyObject* key, PyObject* item);
+    static int32_t PyDict_SetItem(PyObject* mp, PyObject* key, PyObject* item);
+    static int32_t PyObject_IsInstance(PyObject* object, PyObject* typeorclass);
 
     static int32_t PyArg_ParseTuple(PyObject* args, const char* format, ...);
     static int32_t PyArg_ParseTupleAndKeywords(PyObject*args, PyObject* kwargs, const char* format, char** argnames, ...);

@@ -108,6 +108,22 @@ class MainWindow(Window):
         self._quick_bar_widget = dear_imgui.Widget()
 
     def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
+
+        if builder.begin_main_menu_bar():
+
+            if builder.begin_menu('Windows'):
+                builder.menu_item('Noises')
+                builder.separator()
+                builder.menu_item('Imgui Demo')
+                builder.menu_item('Imgui About')
+                builder.end_menu()
+
+            if builder.begin_menu('Help'):
+                builder.menu_item('About')
+                builder.end_menu()
+
+            builder.end_main_menu_bar()
+
         builder.text('Windows')
         builder.small_button('Noise Generator').add_callback(self._show_noise_generator)
         builder.separator()
