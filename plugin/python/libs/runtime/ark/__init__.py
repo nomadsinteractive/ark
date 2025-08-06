@@ -1855,7 +1855,7 @@ class RenderObject:
         self._discarded = discarded
 
     @property
-    def type(self):
+    def type(self) -> Integer:
         return 0
 
     @type.setter

@@ -54,4 +54,14 @@ const String& NamedHash::reverse(const HashId hash)
     return Global<HashNames>()->findName(hash);
 }
 
+bool NamedHash::update(uint64_t /*timestamp*/)
+{
+    return false;
+}
+
+int32_t NamedHash::val()
+{
+    return _hash;
+}
+
 }

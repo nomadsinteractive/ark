@@ -56,11 +56,11 @@ template<typename T> Optional<T> toCppInteger(PyObject* object)
 std::wstring pyUnicodeToWString(PyObject* unicode)
 {
     PyUnicode_READY(unicode);
-    uint32_t k = PyUnicode_KIND(unicode);
+    const uint32_t k = PyUnicode_KIND(unicode);
     void* data = PyUnicode_DATA(unicode);
     if(k == sizeof(wchar_t))
         return static_cast<wchar_t*>(data);
-    std::vector<wchar_t> buf;
+    Vector<wchar_t> buf;
     if(k == 1)
         for(char* i = static_cast<char*>(data); *i; ++i)
             buf.push_back(static_cast<wchar_t>(*i));
@@ -94,7 +94,7 @@ std::wstring toWString(PyObject* object)
 
 String unicodeToUTF8String(PyObject* object, const char* encoding, const char* error)
 {
-    DCHECK(PyUnicode_Check(object), "Expecting an unicode object");
+    CHECK(PyUnicode_Check(object), "Expecting an unicode object");
     return PyUnicode_AsUTF8(object);
 }
 

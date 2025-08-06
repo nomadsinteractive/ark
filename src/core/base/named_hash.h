@@ -2,10 +2,12 @@
 
 #include "core/base/api.h"
 #include "core/base/string.h"
+#include "core/inf/variable.h"
 
 namespace ark {
 
-class ARK_API NamedHash final {
+//[[script::bindings::extends(Integer)]]
+class ARK_API NamedHash final : public Integer {
 public:
 //  [[script::bindings::auto]]
     NamedHash(String value);
@@ -19,6 +21,9 @@ public:
     HashId hash() const;
 //  [[script::bindings::property]]
     const String& name() const;
+
+    bool update(uint64_t timestamp) override;
+    int32_t val() override;
 
 //  [[script::bindings::auto]]
     static const String& reverse(HashId hash);
