@@ -2,10 +2,9 @@
 
 #include "noise/api.h"
 
-#include "FastNoise/FastNoise.h"
-
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/owned_ptr.h"
 
 #include "graphics/forwarding.h"
 
@@ -23,6 +22,7 @@ public:
 public:
 //  [[script::bindings::auto]]
     Generator(Generator::NoiseType type = Generator::NOISE_TYPE_SIMPLEX, int32_t seed = 0, float frequency = 1.0f);
+    ~Generator();
 
 //  [[script::bindings::property]]
     int32_t seed() const;
@@ -57,15 +57,15 @@ public:
     sp<FloatArray> noiseMap2d(const RectI& bounds, sp<Future> future = nullptr) const;
 
 private:
-    void ensureFractalGenerator();
+    void ensureFractalGenerator() const;
+
+    struct Stub;
 
 private:
     int32_t _seed;
     float _frequency;
 
-    FastNoise::SmartNode<FastNoise::Generator> _generator;
-    FastNoise::SmartNode<FastNoise::Generator> _source_generator;
-    FastNoise::SmartNode<FastNoise::Fractal<>> _fractal_generator;
+    op<Stub> _stub;
 };
 
 }

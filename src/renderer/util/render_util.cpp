@@ -464,7 +464,8 @@ Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, enums::ShaderS
         if(!program.link(EShMsgDefault))
             FATAL("Link error: %s\n\n%s", source.data(), shader.getInfoLog());
 
-        if(const glslang::TIntermediate* intermedia = program.getIntermediate(esStage)) {
+        if(const glslang::TIntermediate* intermedia = program.getIntermediate(esStage))
+        {
             Vector<uint32_t> spirv;
             spv::SpvBuildLogger logger;
             glslang::SpvOptions spvOptions;

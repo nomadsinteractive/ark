@@ -45,7 +45,7 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShader(const VkDevice device, const 
 
 VkPipelineShaderStageCreateInfo VKUtil::createShader(const VkDevice device, const String& source, enums::ShaderStageBit stage)
 {
-    const std::vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage, enums::RENDERING_BACKEND_BIT_VULKAN);
+    const Vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage, enums::RENDERING_BACKEND_BIT_VULKAN);
     VkShaderModuleCreateInfo moduleCreateInfo = {VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
     moduleCreateInfo.codeSize = spirv.size() * sizeof(uint32_t);
     moduleCreateInfo.pCode = spirv.data();

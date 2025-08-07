@@ -1,5 +1,7 @@
 #include "noise/base/generator.h"
 
+#include "FastNoise/FastNoise.h"
+
 #include "core/ark.h"
 #include "core/base/future.h"
 #include "core/inf/array.h"
@@ -38,17 +40,27 @@ private:
 
 }
 
+struct Generator::Stub {
+    FastNoise::SmartNode<FastNoise::Generator> _generator;
+    FastNoise::SmartNode<FastNoise::Generator> _source_generator;
+    FastNoise::SmartNode<FastNoise::Fractal<>> _fractal_generator;
+};
+
 Generator::Generator(const NoiseType type, const int32_t seed, const float frequency)
-    : _seed(seed), _frequency(frequency)
+    : _seed(seed), _frequency(frequency), _stub(new Stub())
 {
     if(type == NOISE_TYPE_CELLULAR)
-        _source_generator = FastNoise::New<FastNoise::CellularDistance>();
+        _stub->_source_generator = FastNoise::New<FastNoise::CellularDistance>();
     else if(type == NOISE_TYPE_SIMPLEX)
-        _source_generator = FastNoise::New<FastNoise::Simplex>();
+        _stub->_source_generator = FastNoise::New<FastNoise::Simplex>();
     else if(type == NOISE_TYPE_PERLIN)
-        _source_generator = FastNoise::New<FastNoise::Perlin>();
-    CHECK(_source_generator, "Unknow noise type: %d", type);
-    _generator = _source_generator;
+        _stub->_source_generator = FastNoise::New<FastNoise::Perlin>();
+    CHECK(_stub->_source_generator, "Unknow noise type: %d", type);
+    _stub->_generator = _stub->_source_generator;
+}
+
+Generator::~Generator()
+{
 }
 
 int32_t Generator::seed() const
@@ -73,13 +85,13 @@ void Generator::setFrequency(const float frequency)
 
 bool Generator::useFractal() const
 {
-    return static_cast<bool>(_fractal_generator);
+    return static_cast<bool>(_stub->_fractal_generator);
 }
 
 void Generator::setUseFractal(const bool enabled)
 {
     if(!enabled && useFractal())
-        _fractal_generator = nullptr;
+        _stub->_fractal_generator = nullptr;
     else if(enabled && !useFractal())
         setFractalOctaves(4);
 }
@@ -87,35 +99,35 @@ void Generator::setUseFractal(const bool enabled)
 void Generator::setFractalOctaves(const int32_t octaves)
 {
     ensureFractalGenerator();
-    _fractal_generator->SetOctaveCount(octaves);
+    _stub->_fractal_generator->SetOctaveCount(octaves);
 }
 
 void Generator::setFractalGain(const float gain)
 {
     ensureFractalGenerator();
-    _fractal_generator->SetGain(gain);
+    _stub->_fractal_generator->SetGain(gain);
 }
 
 void Generator::setFractalLacunarity(const float lacunarity)
 {
     ensureFractalGenerator();
-    _fractal_generator->SetLacunarity(lacunarity);
+    _stub->_fractal_generator->SetLacunarity(lacunarity);
 }
 
 void Generator::setFractalWeightedStrength(const float weightedStrength)
 {
     ensureFractalGenerator();
-    _fractal_generator->SetWeightedStrength(weightedStrength);
+    _stub->_fractal_generator->SetWeightedStrength(weightedStrength);
 }
 
 float Generator::noise2d(const float x, const float y) const
 {
-    return _generator->GenSingle2D(x, y, _seed);
+    return _stub->_generator->GenSingle2D(x, y, _seed);
 }
 
 float Generator::noise3d(const float x, const float y, const float z) const
 {
-    return _generator->GenSingle3D(x, y, z, _seed);
+    return _stub->_generator->GenSingle3D(x, y, z, _seed);
 }
 
 sp<FloatArray> Generator::noiseMap2d(const RectI& bounds, sp<Future> future) const
@@ -123,20 +135,20 @@ sp<FloatArray> Generator::noiseMap2d(const RectI& bounds, sp<Future> future) con
     ASSERT(bounds.width() > 0 && bounds.height() > 0);
     sp<FloatArray> floatArray = FloatArrayType::create(bounds.width() * bounds.height());
     if(future)
-        Ark::instance().applicationContext()->executorThreadPool()->execute(sp<Runnable>::make<RunnableGenUniformGrid2D>(_generator, std::move(future), floatArray, bounds, _seed, _frequency));
+        Ark::instance().applicationContext()->executorThreadPool()->execute(sp<Runnable>::make<RunnableGenUniformGrid2D>(_stub->_generator, std::move(future), floatArray, bounds, _seed, _frequency));
     else
-        _generator->GenUniformGrid2D(floatArray->buf(), bounds.left(), bounds.top(), bounds.width(), bounds.height(), _frequency, _seed);
+        _stub->_generator->GenUniformGrid2D(floatArray->buf(), bounds.left(), bounds.top(), bounds.width(), bounds.height(), _frequency, _seed);
     return floatArray;
 }
 
-void Generator::ensureFractalGenerator()
+void Generator::ensureFractalGenerator() const
 {
-    if(_fractal_generator)
+    if(_stub->_fractal_generator)
         return;
 
-    _fractal_generator = FastNoise::New<FastNoise::FractalFBm>();
-    _fractal_generator->SetSource(_source_generator);
-    _generator = _fractal_generator;
+    _stub->_fractal_generator = FastNoise::New<FastNoise::FractalFBm>();
+    _stub->_fractal_generator->SetSource(_stub->_source_generator);
+    _stub->_generator = _stub->_fractal_generator;
 }
 
 }

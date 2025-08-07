@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_NOISE_API_H_
-#define ARK_PLUGIN_NOISE_API_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -11,6 +10,4 @@
     #endif
 #else
 #   define ARK_PLUGIN_NOISE_API
-#endif
-
 #endif
