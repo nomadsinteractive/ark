@@ -26,9 +26,6 @@ public:
     static String getRealPath(const String& path);
     static Vector<enums::RendererVersion> getRendererVersionPreferences();
 
-    static void glInitialize();
-    static void vkInitialize();
-
     static String glShaderVersionDeclaration(uint32_t versionCode);
     static uint32_t glPreprocessShader(const String& shader, const char* srcs[], uint32_t length);
 

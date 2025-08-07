@@ -4,10 +4,9 @@
 #include <shlwapi.h>
 #include <shlobj.h>
 
-#include <glbinding/Binding.h>
-
 #include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
 #include "core/impl/asset_bundle/asset_bundle_directory.h"
+#include "core/util/strings.h"
 
 #include "graphics/impl/alphabet/alphabet_true_type.h"
 
@@ -91,14 +90,6 @@ sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
         return sp<AlphabetTrueType>::make("Arial.ttf");
 
     return sp<AlphabetTrueType>::make("l_10646.ttf");
-}
-
-void Platform::glInitialize()
-{
-}
-
-void Platform::vkInitialize()
-{
 }
 
 String Platform::glShaderVersionDeclaration(uint32_t versionCode)

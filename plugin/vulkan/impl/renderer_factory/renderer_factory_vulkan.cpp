@@ -65,8 +65,6 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderEngine& renderEngine)
 
     setVersion(enums::RENDERER_VERSION_VULKAN_12, renderEngine.context());
 
-    Platform::vkInitialize();
-
     _renderer->_instance = sp<VKInstance>::make();
     _renderer->_instance->initialize(renderEngine);
 

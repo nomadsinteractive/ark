@@ -24,7 +24,7 @@ struct HashNames {
 NamedHash::NamedHash(String value)
     : _hash(value.hash()), _name(std::move(value))
 {
-#ifdef ARK_FLAG_DEBUG
+#ifndef ARK_FLAG_PUBLISHING_BUILD
     Global<HashNames>()->_hash_names[_hash] = _name;
 #endif
 }
@@ -49,11 +49,6 @@ HashId NamedHash::hash() const
     return _hash;
 }
 
-const String& NamedHash::reverse(const HashId hash)
-{
-    return Global<HashNames>()->findName(hash);
-}
-
 bool NamedHash::update(uint64_t /*timestamp*/)
 {
     return false;
@@ -62,6 +57,11 @@ bool NamedHash::update(uint64_t /*timestamp*/)
 int32_t NamedHash::val()
 {
     return _hash;
+}
+
+const String& NamedHash::reverse(const HashId hash)
+{
+    return Global<HashNames>()->findName(hash);
 }
 
 }
