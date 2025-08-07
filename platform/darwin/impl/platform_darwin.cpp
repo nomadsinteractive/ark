@@ -116,14 +116,6 @@ void Platform::sysCall(int32_t /*id*/, const String& /*value*/)
 {
 }
 
-void Platform::glInitialize()
-{
-}
-
-void Platform::vkInitialize()
-{
-}
-
 String Platform::glShaderVersionDeclaration(const uint32_t versionCode)
 {
     return Strings::sprintf("#version %d\n", versionCode);
