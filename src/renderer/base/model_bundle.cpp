@@ -6,7 +6,6 @@
 #include "core/base/named_hash.h"
 #include "core/inf/executor.h"
 #include "core/inf/runnable.h"
-#include "core/impl/executor/executor_thread_pool.h"
 
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/mesh.h"
@@ -161,14 +160,14 @@ sp<Model> ModelBundle::getModel(const NamedHash& type) const
     return iter != _stub->_model_layouts.end() ? iter->second._model : nullptr;
 }
 
-sp<Model> ModelBundle::loadModel(int32_t type)
+sp<Model> ModelBundle::loadModel(const int32_t type)
 {
     return ensureModelLayout(type)._model;
 }
 
-void ModelBundle::importModel(const NamedHash& type, const String& manifest, sp<Future> future)
+void ModelBundle::importModel(const NamedHash& type, String manifest, sp<Future> future)
 {
-    importModel(type.hash(), Manifest(manifest), std::move(future));
+    importModel(type.hash(), Manifest(std::move(manifest)), std::move(future));
 }
 
 void ModelBundle::importModel(const NamedHash& type, const Manifest& manifest, sp<Future> future)
@@ -178,18 +177,16 @@ void ModelBundle::importModel(const NamedHash& type, const Manifest& manifest, s
     applicationContext.executorThreadPool()->execute(std::move(task));
 }
 
-void ModelBundle::importMaterials(const NamedHash& type, const String& manifest)
+void ModelBundle::importMaterials(String manifest)
 {
-    importMaterials(type, Manifest(manifest));
+    importMaterials(Manifest(std::move(manifest)));
 }
 
-void ModelBundle::importMaterials(const NamedHash& type, const Manifest& manifest)
+void ModelBundle::importMaterials(const Manifest& manifest)
 {
     sp<Model> model = _stub->importModel(manifest, nullptr);
     for(const sp<Material>& i : model->materials())
         _stub->_material_bundle->addMaterial(i->name(), i);
-    if(type)
-        _stub->addModel(type.hash(), std::move(model));
 }
 
 const Table<int32_t, ModelBundle::ModelLayout>& ModelBundle::modelLayouts() const

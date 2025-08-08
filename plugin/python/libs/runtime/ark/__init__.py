@@ -1710,7 +1710,7 @@ class ModelBundle:
     def get_model(self, t: TYPE_NAMED_HASH) -> Model:
         pass
 
-    def import_materials(self, t: TYPE_NAMED_HASH, manifest: str | Manifest):
+    def import_materials(self, manifest: str | Manifest):
         pass
 
     def import_model(self, t: TYPE_NAMED_HASH, manifest: str | Manifest, future: Optional[Future] = None):

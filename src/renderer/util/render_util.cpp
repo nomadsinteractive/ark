@@ -469,10 +469,12 @@ Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, enums::ShaderS
             Vector<uint32_t> spirv;
             spv::SpvBuildLogger logger;
             glslang::SpvOptions spvOptions;
+#ifdef ARK_FLAG_DEBUG
             spvOptions.disableOptimizer = false;
             spvOptions.optimizeSize = false;
             spvOptions.disassemble = false;
             spvOptions.validate = true;
+#endif
             glslang::GlslangToSpv(*intermedia, spirv, &logger, &spvOptions);
             return spirv;
         }
