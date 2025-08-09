@@ -40,9 +40,9 @@ struct ModelBundle::Stub {
         return sp<Model>::make((importer ? importer : _importer)->import(manifest, _material_bundle));
     }
 
-    ModelLayout& addModel(int32_t type, sp<Model> model)
+    ModelLayout& addModel(const int32_t type, sp<Model> model)
     {
-        CHECK(_model_layouts.find(type) == _model_layouts.end(), "Model[%d] exists already", type);
+        CHECK(_model_layouts.find(type) == _model_layouts.end(), "Model[%d](%s) exists already", type, NamedHash::reverse(type).c_str());
         ModelLayout& modelLayout = _model_layouts[type];
         modelLayout._node_layouts = model->toFlatLayouts<NodeLayout>();
         modelLayout._vertex_offset = _vertex_length;
