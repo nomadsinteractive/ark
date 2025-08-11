@@ -28,8 +28,8 @@ const sp<Resource>& RenderTarget::resource() const
 }
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _renderer(factory.getBuilder<Renderer>(manifest, constants::RENDERER)), _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)),
-      _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)), _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_LOAD, ATTACHMENT_OP_BIT_STORE})),
+    : _renderer(factory.ensureBuilder<Renderer>(manifest, constants::RENDERER)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
+      _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_LOAD, ATTACHMENT_OP_BIT_STORE})),
       _depth_stencil_op(Documents::getAttribute<AttachmentOp>(manifest, "depth-stencil-op", {ATTACHMENT_OP_BIT_LOAD, ATTACHMENT_OP_BIT_STORE}))
 {
     for(const document& i : manifest->children(constants::TEXTURE))
@@ -53,15 +53,7 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
             configure._depth_stencil_attachment = std::move(tex);
         }
     }
-
-    sp<Renderer> renderer = _renderer.build(args);
-    const sp<RenderLayer> renderLayer = _render_layer.build(args);
-    ASSERT(renderer || renderLayer);
-    CHECK(!(renderer && renderLayer), "Unimplemented");
-    if(renderLayer)
-        if(const auto& traits = renderLayer->_stub->_shader->pipelineDesciptor()->configuration()._traits; traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
-            configure._depth_test_write_enabled = traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)._depth_test._write_enabled;
-    return Ark::instance().renderController()->makeRenderTarget(renderer ? std::move(renderer) : renderLayer.cast<Renderer>(), std::move(configure));
+    return Ark::instance().renderController()->makeRenderTarget(_renderer->build(args), std::move(configure));
 }
 
 RenderTarget::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest)

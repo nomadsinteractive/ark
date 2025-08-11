@@ -45,7 +45,7 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader
         VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         stagingBuffer.uploadBuffer(graphicsContext, uploader);
 
-        std::vector<VkBufferCopy> copyRegions;
+        Vector<VkBufferCopy> copyRegions;
         copyRegions.reserve(records.size());
         for(const auto& [k, v] : records)
             copyRegions.push_back({k, k, v});
@@ -123,13 +123,13 @@ void VKBuffer::allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRe
 
 void VKBuffer::ensureSize(GraphicsContext& graphicsContext, const size_t size)
 {
-    if(!_memory || _memory.size() < size)
+    if(const size_t allocatingSize = std::max<size_t>(size, 16); !_memory || _memory.size() < allocatingSize)
     {
         _size = size;
         if (_descriptor.buffer)
             vkDestroyBuffer(_renderer->vkLogicalDevice(), _descriptor.buffer, nullptr);
 
-        const VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(isDeviceLocal() ? _usage_flags | VK_BUFFER_USAGE_TRANSFER_DST_BIT : _usage_flags, _size);
+        const VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(isDeviceLocal() ? _usage_flags | VK_BUFFER_USAGE_TRANSFER_DST_BIT : _usage_flags, allocatingSize);
         VKUtil::checkResult(vkCreateBuffer(_renderer->vkLogicalDevice(), &bufferCreateInfo, nullptr, &_descriptor.buffer));
 
         _observer.notify();
@@ -149,7 +149,7 @@ void VKBuffer::bind()
 {
     vkBindBufferMemory(_renderer->vkLogicalDevice(), _descriptor.buffer, _memory.vkMemory(), _memory.offset());
     _descriptor.offset = 0;
-    _descriptor.range = _size;
+    _descriptor.range = _size ? _size : VK_WHOLE_SIZE;
 }
 
 VkResult VKBuffer::flush() const

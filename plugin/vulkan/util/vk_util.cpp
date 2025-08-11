@@ -77,7 +77,7 @@ VkImageLayout VKUtil::toImageLayout(const Texture::Usage usage)
     if(usage.has(Texture::USAGE_ATTACHMENT))
         return toAttachmentImageLayout(usage);
 
-    if(usage.has(Texture::USAGE_SAMPLER) || usage.has(Texture::USAGE_STORAGE))
+    if(usage.has(Texture::USAGE_SAMPLER))
         return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     return VK_IMAGE_LAYOUT_GENERAL;

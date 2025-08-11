@@ -43,6 +43,7 @@ public:
 
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
+    const sp<Shader>& shader() const;
 
 //  [[script::bindings::auto]]
     sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr) const;

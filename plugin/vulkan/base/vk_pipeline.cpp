@@ -431,7 +431,8 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
         if(shouldStageNeedBinding(i->_stages))
         {
             sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-            ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(Vector<uint8_t>(i->size(), 0)));
+            UploaderArray<uint8_t> uploader(Vector<uint8_t>(i->size(), 0));
+            ubo->uploadBuffer(graphicsContext, uploader);
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                               _descriptor_sets.at(1),
                                               VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,

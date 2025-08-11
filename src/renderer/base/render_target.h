@@ -56,8 +56,7 @@ public:
         sp<RenderTarget> build(const Scope& args) override;
 
     private:
-        SafeBuilder<Renderer> _renderer;
-        SafeBuilder<RenderLayer> _render_layer;
+        builder<Renderer> _renderer;
         Vector<std::pair<sp<Builder<Texture>>, document>> _attachments;
         ClearBitSet _clear_mask;
         AttachmentOp _color_attachment_op;
