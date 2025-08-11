@@ -63,7 +63,7 @@ struct ModelBundle::Stub {
         return modelLayout;
     }
 
-    const ModelLayout& ensureModelLayout(int32_t type) const
+    const ModelLayout& ensureModelLayout(const int32_t type) const
     {
         const auto iter = _model_layouts.find(type);
         CHECK(iter != _model_layouts.end(), "Model not found, type: %d(%s)", type, NamedHash::reverse(type).c_str());
@@ -184,7 +184,7 @@ void ModelBundle::importMaterials(String manifest)
 
 void ModelBundle::importMaterials(const Manifest& manifest)
 {
-    sp<Model> model = _stub->importModel(manifest, nullptr);
+    const sp<Model> model = _stub->importModel(manifest, nullptr);
     for(const sp<Material>& i : model->materials())
         _stub->_material_bundle->addMaterial(i->name(), i);
 }

@@ -98,6 +98,7 @@ sp<Camera::Delegate> RendererFactoryVulkan::createCamera(const enums::Coordinate
 
 sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
+    const sp<RenderLayer> renderLayer = renderer.asInstance<RenderLayer>();
     sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, Ark::instance().renderController()->recycler(), std::move(configure));
     sp<Renderer> fbr = sp<Renderer>::make<VKFramebufferRenderer>(std::move(renderer), fbo);
     return sp<RenderTarget>::make(std::move(fbr), std::move(fbo));
