@@ -2701,18 +2701,6 @@ class StringBundle:
         return []
 
 
-class Color(Vec4):
-    def __init__(self, r: float, g: float, b: float, a: float = 1.0):
-        super().__init__(r, g, b, a)
-
-    @property
-    def value(self) -> int:
-        return 0
-
-    def to_vec3(self) -> Vec3:
-        pass
-
-
 class Varyings:
     def __init__(self, **kwargs):
         pass

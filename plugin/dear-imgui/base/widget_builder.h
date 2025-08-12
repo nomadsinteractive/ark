@@ -108,17 +108,30 @@ public:
     void sliderFloat4(const String& label, const sp<Vec4>& value, float vMin, float vMax, const String& format = "%.3f", float power = 1.0f);
 
 //  [[script::bindings::auto]]
-    void colorEdit3(const String& label, const sp<Vec3>& value);
+    void colorEdit3(const String& label, const sp<Vec3>& value, int32_t flags = 0);
 //  [[script::bindings::auto]]
-    void colorEdit4(const String& label, const sp<Color>& value);
+    void colorEdit4(const String& label, const sp<Color>& value, int32_t flags = 0);
 //  [[script::bindings::auto]]
-    void colorEdit4(const String& label, const sp<Vec4>& value);
+    void colorEdit4(const String& label, const sp<Vec4>& value, int32_t flags = 0);
 //  [[script::bindings::auto]]
-    void colorPicker3(const String& label, const sp<Vec3>& value);
+    void colorPicker3(const String& label, const sp<Vec3>& value, int32_t flags = 0);
 //  [[script::bindings::auto]]
-    void colorPicker4(const String& label, const sp<Color>& value);
+    void colorPicker4(const String& label, const sp<Color>& value, int32_t flags = 0);
 //  [[script::bindings::auto]]
-    void colorPicker4(const String& label, const sp<Vec4>& value);
+    void colorPicker4(const String& label, const sp<Vec4>& value, int32_t flags = 0);
+
+//  [[script::bindings::auto]]
+    sp<Boolean> beginTable(String strId, int32_t columns, int32_t flags = 0);
+//  [[script::bindings::auto]]
+    void endTable();
+//  [[script::bindings::auto]]
+    void tableSetupColumn(String label);
+//  [[script::bindings::auto]]
+    void tableHeadersRow();
+//  [[script::bindings::auto]]
+    void tableNextRow();
+//  [[script::bindings::auto]]
+    void tableSetColumnIndex(int32_t columnN);
 
 //  [[script::bindings::auto]]
     sp<Boolean> beginMainMenuBar();

@@ -52,6 +52,18 @@ class WidgetBuilder:
     def button(self, title: str) -> Observer:
         pass
 
+    def color_edit3(self, label: str, value: Vec3, flags: int = 0):
+        pass
+
+    def color_edit4(self, label: str, value: Vec4, flags: int = 0):
+        pass
+
+    def color_picker3(self, label: str, value: Vec3, flags: int = 0):
+        pass
+
+    def color_picker4(self, label: str, value: Vec4, flags: int = 0):
+        pass
+
     def slider_int(self, label: str, value: Integer, v_min: int, v_max: int, prompt_format: str = '%d'):
         pass
 
@@ -141,6 +153,24 @@ class WidgetBuilder:
         pass
 
     def menu_item(self, label: str, shortcut: str = '', p_selected: Optional[TYPE_BOOLEAN] = None, enabled: TYPE_BOOLEAN = True) -> Observer:
+        pass
+
+    def begin_table(self, str_id: str, columns: int, flags: int = 0) -> Boolean:
+        pass
+
+    def end_table(self):
+        pass
+
+    def table_setup_column(self, label: str):
+        pass
+
+    def table_headers_row(self):
+        pass
+
+    def table_next_row(self):
+        pass
+
+    def table_set_column_index(self, column_n: int):
         pass
 
     def push_id(self, hashid: Union[str, int]):

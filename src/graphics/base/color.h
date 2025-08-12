@@ -9,43 +9,28 @@
 
 namespace ark {
 
-//[[script::bindings::extends(Vec4)]]
-class ARK_API Color final : public Vec4 {
+class [[deprecated]] Color final : public Vec4 {
 public:
     Color();
     Color(uint32_t value);
-//  [[script::bindings::auto]]
     Color(float r, float g, float b, float a = 1.0);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Color);
 
-//  [[script::bindings::property]]
     sp<Numeric> r() const;
-//  [[script::bindings::property]]
     void setR(float r);
-//  [[script::bindings::property]]
     sp<Numeric> g() const;
-//  [[script::bindings::property]]
     void setG(float g);
-//  [[script::bindings::property]]
     sp<Numeric> b() const;
-//  [[script::bindings::property]]
     void setB(float b);
-//  [[script::bindings::property]]
     sp<Numeric> a() const;
-//  [[script::bindings::property]]
     void setA(float a);
 
-//  [[script::bindings::property]]
     V4 rgba() const;
 
-//  [[script::bindings::auto]]
     sp<Vec3> toVec3() const;
 
-//  [[script::bindings::operator(index)]]
-//  [[script::bindings::property]]
     uint32_t value() const;
 
-//  [[script::bindings::auto]]
     void reset(uint32_t value);
 
     bool operator == (const Color& other) const;
