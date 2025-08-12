@@ -44,7 +44,7 @@ void Surface::onSurfaceChanged(uint32_t width, uint32_t height)
     _render_view->onSurfaceChanged(width, height);
 }
 
-void Surface::onRenderFrame(const Color& backgroundColor)
+void Surface::onRenderFrame(const V4 backgroundColor)
 {
     _surface_controller->onRenderFrame(backgroundColor, _render_view);
 }

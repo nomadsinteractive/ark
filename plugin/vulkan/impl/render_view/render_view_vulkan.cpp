@@ -40,7 +40,7 @@ void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
     _graphics_context->onSurfaceReady();
 }
 
-void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand)
+void RenderViewVulkan::onRenderFrame(const V4 backgroundColor, RenderCommand& renderCommand)
 {
     _graphics_context->onDrawFrame();
 

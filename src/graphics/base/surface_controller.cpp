@@ -5,7 +5,7 @@
 #include "core/base/clock.h"
 
 #include "graphics/base/render_request.h"
-#include "graphics/base/v3.h"
+#include "graphics/base/v4.h"
 
 namespace ark {
 
@@ -32,7 +32,7 @@ void SurfaceController::requestUpdate(uint64_t timestamp)
     DCHECK_WARN(size < 3, "Frame skipped. RenderCommand size: %d. Rendering thread busy?", size);
 }
 
-void SurfaceController::onRenderFrame(const Color& backgroundColor, RenderView& renderView)
+void SurfaceController::onRenderFrame(const V4 backgroundColor, RenderView& renderView) const
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 

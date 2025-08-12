@@ -28,7 +28,7 @@ void ApplicationDelegate::onCreate(Application& application, const sp<Surface>& 
     DASSERT(appResourceLoader);
 
     sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface);
-    applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color(0, 0, 0)));
+    applicationFacade->setBackgroundColor(Documents::getAttribute<V4>(appManifest, "background-color", V4(0, 0, 0, 1.0f)));
 
     const SafeBuilder<Activity> activityBuilder(appResourceLoader->beanFactory().getBuilder<Activity>(appManifest, "activity"));
     if(sp<Activity> activity = activityBuilder.build({}))

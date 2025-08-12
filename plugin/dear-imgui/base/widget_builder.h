@@ -110,13 +110,9 @@ public:
 //  [[script::bindings::auto]]
     void colorEdit3(const String& label, const sp<Vec3>& value, int32_t flags = 0);
 //  [[script::bindings::auto]]
-    void colorEdit4(const String& label, const sp<Color>& value, int32_t flags = 0);
-//  [[script::bindings::auto]]
     void colorEdit4(const String& label, const sp<Vec4>& value, int32_t flags = 0);
 //  [[script::bindings::auto]]
     void colorPicker3(const String& label, const sp<Vec3>& value, int32_t flags = 0);
-//  [[script::bindings::auto]]
-    void colorPicker4(const String& label, const sp<Color>& value, int32_t flags = 0);
 //  [[script::bindings::auto]]
     void colorPicker4(const String& label, const sp<Vec4>& value, int32_t flags = 0);
 

@@ -14,13 +14,13 @@
 
 namespace ark::plugin::vulkan {
 
-class RenderViewVulkan : public RenderView {
+class RenderViewVulkan final : public RenderView {
 public:
     RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController);
 
-    virtual void onSurfaceCreated() override;
-    virtual void onSurfaceChanged(uint32_t width, uint32_t height) override;
-    virtual void onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand) override;
+    void onSurfaceCreated() override;
+    void onSurfaceChanged(uint32_t width, uint32_t height) override;
+    void onRenderFrame(V4 backgroundColor, RenderCommand& renderCommand) override;
 
 private:
     void makeCommandBuffers(GraphicsContext& graphicsContext, const Color& backgroundColor);

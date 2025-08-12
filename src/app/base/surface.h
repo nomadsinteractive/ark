@@ -21,7 +21,7 @@ public:
 
     void onSurfaceCreated();
     void onSurfaceChanged(uint32_t width, uint32_t height);
-    void onRenderFrame(const Color& backgroundColor);
+    void onRenderFrame(V4 backgroundColor);
 
 private:
     sp<RenderView> _render_view;

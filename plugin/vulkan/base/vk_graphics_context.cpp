@@ -22,8 +22,8 @@ VkClearColorValue toVkClearColorValue(const V4 rgba)
 
 class MainRenderPassPhrase final : public VKGraphicsContext::RenderPassPhrase {
 public:
-    MainRenderPassPhrase(const RenderEngineContext::Resolution& resolution, const sp<VKRenderer>& renderer, const VkCommandBuffer commandBuffer, const VkFramebuffer framebuffer, const Color& backgroundColor)
-        : RenderPassPhrase(resolution, 1, commandBuffer), _renderer(renderer), _framebuffer(framebuffer), _clear_color_value(toVkClearColorValue(backgroundColor.rgba())) {
+    MainRenderPassPhrase(const RenderEngineContext::Resolution& resolution, const sp<VKRenderer>& renderer, const VkCommandBuffer commandBuffer, const VkFramebuffer framebuffer, const V4 backgroundColor)
+        : RenderPassPhrase(resolution, 1, commandBuffer), _renderer(renderer), _framebuffer(framebuffer), _clear_color_value(toVkClearColorValue(backgroundColor)) {
     }
 
     Vector<VkPipelineColorBlendAttachmentState> makeColorBlendAttachmentStates(const VkPipelineColorBlendAttachmentState& mainState, const uint32_t colorAttachmentCount) override
@@ -82,7 +82,7 @@ VKGraphicsContext::~VKGraphicsContext()
     vkDestroySemaphore(_renderer->vkLogicalDevice(), _semaphore_present_complete, nullptr);
 }
 
-void VKGraphicsContext::begin(const uint32_t imageId, const Color& backgroundColor)
+void VKGraphicsContext::begin(const uint32_t imageId, const V4 backgroundColor)
 {
     const VKSwapChain& renderTarget = _renderer->renderTarget();
     const Vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();

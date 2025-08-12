@@ -75,8 +75,8 @@ public:
 
     sp<Runnable> defer(const sp<Runnable>& task) const;
 
-    const Color& backgroundColor() const;
-    void setBackgroundColor(const Color& backgroundColor);
+    V4 backgroundColor() const;
+    void setBackgroundColor(V4 backgroundColor);
 
     void pause();
     void resume();
@@ -145,7 +145,7 @@ private:
     sp<Interpreter> _interpreter;
 
     EventListenerList _event_listeners;
-    Color _background_color;
+    V4 _background_color;
     bool _paused;
 
     friend class Ark;

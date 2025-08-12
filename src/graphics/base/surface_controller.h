@@ -19,7 +19,7 @@ public:
     void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr, RendererType::Priority priority = RendererType::PRIORITY_DEFAULT);
 
     void requestUpdate(uint64_t timestamp);
-    void onRenderFrame(const Color& backgroundColor, RenderView& renderView);
+    void onRenderFrame(V4 backgroundColor, RenderView& renderView) const;
 
 private:
     sp<Allocator::Pool> _allocator_pool;

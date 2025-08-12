@@ -147,7 +147,7 @@ ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, 
     : _ticker(sp<Variable<uint64_t>>::make<Ticker>()), _cursor_position(sp<Vec2Impl>::make()), _cursor_frag_coord(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
       _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_ticker)),
       _worker_strategy(sp<ExecutorWorkerStrategy>::make(sp<MessageLoop>::make(_ticker))), _executor_main(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")),
-      _executor_thread_pool(sp<Executor>::make<ExecutorThreadPool>(_executor_main)), _string_table(Global<StringTable>()), _background_color(0, 0, 0), _paused(false)
+      _executor_thread_pool(sp<Executor>::make<ExecutorThreadPool>(_executor_main)), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
 {
     const Ark& ark = Ark::instance();
 
@@ -406,12 +406,12 @@ sp<Runnable> ApplicationContext::defer(const sp<Runnable>& task) const
     return sp<Runnable>::make<DeferedRunnable>(_message_loop_core, task);
 }
 
-const Color& ApplicationContext::backgroundColor() const
+V4 ApplicationContext::backgroundColor() const
 {
     return _background_color;
 }
 
-void ApplicationContext::setBackgroundColor(const Color& backgroundColor)
+void ApplicationContext::setBackgroundColor(const V4 backgroundColor)
 {
     _background_color = backgroundColor;
 }

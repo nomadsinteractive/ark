@@ -281,12 +281,12 @@ sp<Runnable> ApplicationFacade::defer(const sp<Runnable>& task) const
     return _context->defer(task);
 }
 
-const Color& ApplicationFacade::backgroundColor() const
+V4 ApplicationFacade::backgroundColor() const
 {
     return _context->backgroundColor();
 }
 
-void ApplicationFacade::setBackgroundColor(const Color& backgroundColor)
+void ApplicationFacade::setBackgroundColor(const V4 backgroundColor)
 {
     _context->setBackgroundColor(backgroundColor);
 }

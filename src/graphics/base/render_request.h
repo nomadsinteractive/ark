@@ -19,7 +19,7 @@ public:
     uint64_t timestamp() const;
     Allocator& allocator() const;
 
-    void onRenderFrame(const Color& backgroundColor, RenderView& renderView) const;
+    void onRenderFrame(V4 backgroundColor, RenderView& renderView) const;
 
     void addRenderCommand(sp<RenderCommand> renderCommand) const;
 

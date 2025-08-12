@@ -559,21 +559,6 @@ template<> ARK_PLUGIN_PYTHON_API Optional<RectI> PyCast::toCppObject_impl<RectI>
     return toRectType<int32_t>(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API Optional<Color> PyCast::toCppObject_impl<Color>(PyObject* object)
-{
-    if(PyLong_Check(object))
-        return Color(static_cast<uint32_t>(PyLong_AsLongLong(object)));
-    if(PyTuple_Check(object))
-    {
-        float r, g, b, a = 1.0f;
-        if(PyArg_ParseTuple(object, "fff|f", &r, &g, &b, &a))
-            return Color(r, g, b, a);
-        PyErr_Clear();
-    }
-    FATAL("Color object should be either int or length-4 float tuple. (eg. 0xffffffff or (1.0, 1.0, 1.0, 1.0))");
-    return Color();
-}
-
 template<> ARK_PLUGIN_PYTHON_API Optional<PyInstance> PyCast::toCppObject_impl<PyInstance>(PyObject* object)
 {
     return PyInstance::own(object);
@@ -677,11 +662,6 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Rect>(const R
     PyTuple_SetItem(v4, 2, PyFloat_FromDouble(value.right()));
     PyTuple_SetItem(v4, 3, PyFloat_FromDouble(value.bottom()));
     return v4;
-}
-
-template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Color>(const Color& color)
-{
-    return toPyObject_SharedPtr<Color>(sp<Color>::make(color));
 }
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<RayCastManifold>(const RayCastManifold& manifold)

@@ -209,7 +209,7 @@ public:
         _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
     }
 
-    void onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand) override
+    void onRenderFrame(V4 backgroundColor, RenderCommand& renderCommand) override
     {
         const ContextSDL3_GPU& context = ensureContext(_graphics_context);
         GraphicsContextSDL3_GPU& graphicsContext = ensureGraphicsContext(_graphics_context);
@@ -226,12 +226,11 @@ public:
         if(SDL_WaitAndAcquireGPUSwapchainTexture(cmdbuf, context._main_window, &swapchainTexture, nullptr, nullptr))
         {
             DASSERT(swapchainTexture);
-            const V4 clearColor = backgroundColor.rgba();
             const Vector<SDL_GPUColorTargetInfo> colorTargets = {{
                 swapchainTexture,
                 0,
                 0,
-                { clearColor.x(), clearColor.y(), clearColor.z(), clearColor.w() },
+                { backgroundColor.x(), backgroundColor.y(), backgroundColor.z(), backgroundColor.w() },
                 SDL_GPU_LOADOP_CLEAR,
                 SDL_GPU_STOREOP_STORE
             }};

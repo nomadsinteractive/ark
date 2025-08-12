@@ -20,7 +20,7 @@ public:
     VKGraphicsContext(const GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer);
     ~VKGraphicsContext();
 
-    void begin(uint32_t imageId, const Color& backgroundColor);
+    void begin(uint32_t imageId, V4 backgroundColor);
     void end();
 
     VKSubmitQueue& submitQueue();

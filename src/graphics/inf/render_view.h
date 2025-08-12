@@ -1,9 +1,6 @@
 #pragma once
 
-#include "core/forwarding.h"
-#include "core/types/shared_ptr.h"
-
-#include "graphics/forwarding.h"
+#include "graphics/base/v4.h"
 
 namespace ark {
 
@@ -13,8 +10,7 @@ public:
 
     virtual void onSurfaceCreated() = 0;
     virtual void onSurfaceChanged(uint32_t width, uint32_t height) = 0;
-    virtual void onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand) = 0;
-
+    virtual void onRenderFrame(V4 backgroundColor, RenderCommand& renderCommand) = 0;
 };
 
 }

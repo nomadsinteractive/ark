@@ -94,9 +94,9 @@ public:
     sp<Runnable> defer(const sp<Runnable>& task) const;
 
 //  [[script::bindings::property]]
-    const Color& backgroundColor() const;
+    V4 backgroundColor() const;
 //  [[script::bindings::property]]
-    void setBackgroundColor(const Color& backgroundColor);
+    void setBackgroundColor(V4 backgroundColor);
 
 //  [[script::bindings::property]]
     const SafeVar<Boolean>& textInputEnabled() const;
