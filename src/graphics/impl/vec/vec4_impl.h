@@ -51,8 +51,6 @@ public:
 
     private:
         sp<Builder<Numeric>> _x, _y, _z, _w;
-        bool _is_color;
-        Color _color;
     };
 
 private:

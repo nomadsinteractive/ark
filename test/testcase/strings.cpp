@@ -13,8 +13,7 @@
 
 #include "test/base/test_case.h"
 
-namespace ark {
-namespace unittest {
+namespace ark::unittest {
 
 class StringsTestCase : public TestCase {
 public:
@@ -29,9 +28,6 @@ public:
 
         Rect rectf = Strings::eval<Rect>("0, 0, 20.0, 30.0");
         TESTCASE_VALIDATE(rectf.left() == 0 && rectf.top() == 0 && rectf.width() == 20.0f && rectf.height() == 30.0f);
-
-        Color white = Strings::eval<Color>("#ffffff");
-        TESTCASE_VALIDATE(white == Color(1.0f, 1.0f, 1.0f));
 
         const String formatted = Strings::sprintf("hello %s %d", "world", 123);
         TESTCASE_VALIDATE(formatted == "hello world 123");
@@ -52,7 +48,6 @@ public:
     }
 };
 
-}
 }
 
 

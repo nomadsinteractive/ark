@@ -47,7 +47,6 @@ public:
         void setUniform3f(GLfloat x, GLfloat y, GLfloat z) const;
         void setUniform4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a) const;
         void setUniform4fv(GLsizei count, const GLfloat* value) const;
-        void setUniformColor4f(const Color& color) const;
         void setUniformMatrix4fv(GLsizei count, GLboolean transpose, const GLfloat* value) const;
 
     private:

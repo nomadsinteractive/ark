@@ -83,18 +83,12 @@ sp<Vec4> Vec4Impl::BUILDER::build(const Scope& args)
 }
 
 Vec4Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
-    : _is_color(expr.startsWith("#"))
 {
-    if(_is_color)
-        _color = Strings::eval<Color>(expr);
-    else
-        factory.expand(expr, _x, _y, _z, _w);
+    factory.expand(expr, _x, _y, _z, _w);
 }
 
 sp<Vec4> Vec4Impl::DICTIONARY::build(const Scope& args)
 {
-    if(_is_color)
-        return sp<Vec4>::make<Color>(_color);
     return Vec4Type::create(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }
 

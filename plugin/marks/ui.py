@@ -2,7 +2,7 @@ import inspect
 from collections.abc import Sequence
 from typing import Callable, Any, Optional
 
-from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Color, Integer, ApplicationFacade, Texture, Bitmap, Math, TYPE_BOOLEAN, Discarded
+from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, Math, TYPE_BOOLEAN, Discarded
 from ark import dear_imgui
 
 
@@ -21,7 +21,7 @@ class QuickBarItem:
 
 
 class InputField:
-    INTPUT_TYPE_MAPPING = {Numeric: 'input_float', Vec2: 'input_float2', Vec3: 'input_float3', Vec4: 'input_float4', Color: 'color_edit4',
+    INTPUT_TYPE_MAPPING = {Numeric: 'input_float', Vec2: 'input_float2', Vec3: 'input_float3', Vec4: 'input_float4',
                            Integer: 'input_int', Boolean: 'checkbox', String: 'input_text'}
 
     def __init__(self, name: str, value: Any, input_type: str = '', *args, **kwargs):
