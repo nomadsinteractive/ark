@@ -955,11 +955,21 @@ class Renderer:
     def wrap(self) -> Self:
         pass
 
+    def to_render_layer(self) -> Optional["RenderLayer"]:
+        pass
+
 
 class RenderPass(Renderer):
     def __init__(self, shader, vertex_buffer: Buffer, index_buffer: Buffer, draw_count: "Integer", render_mode: TYPE_ENUM, draw_procedure: TYPE_ENUM,
                  divided_uploaders: tuple[tuple[int, "Uploader"]] = tuple(), indirect_buffer: Optional[Buffer] = None):
         super().__init__()
+
+
+class RenderTarget(Renderer):
+
+    @property
+    def renderer(self) -> Renderer:
+        pass
 
 
 class ResourceLoader:

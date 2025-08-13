@@ -12,19 +12,24 @@
 
 namespace ark {
 
-RenderTarget::RenderTarget(sp<Renderer> renderer, sp<Resource> resource)
-    : _renderer(std::move(renderer)), _resource(std::move(resource))
+RenderTarget::RenderTarget(sp<Renderer> renderer, sp<Resource> fbo, sp<Renderer> fboRenderer)
+    : _renderer(std::move(renderer)), _fbo(std::move(fbo)), _fbo_renderer(std::move(fboRenderer))
 {
 }
 
 void RenderTarget::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
-    _renderer->render(renderRequest, position, drawDecorator);
+    _fbo_renderer->render(renderRequest, position, drawDecorator);
 }
 
-const sp<Resource>& RenderTarget::resource() const
+const sp<Renderer>& RenderTarget::renderer() const
 {
-    return _resource;
+    return _renderer;
+}
+
+const sp<Resource>& RenderTarget::fbo() const
+{
+    return _fbo;
 }
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -49,7 +54,7 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
         else
         {
             CHECK(configure._depth_stencil_attachment == nullptr, "Only one depth-stencil attachment allowed");
-            CHECK(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Unknow Texture usage: %d", usage);
+            CHECK(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Texture has no depth stencil usage: %d", usage);
             configure._depth_stencil_attachment = std::move(tex);
         }
     }

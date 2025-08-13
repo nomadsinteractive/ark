@@ -103,8 +103,8 @@ sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer
             configure._depth_test_write_enabled = traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)._depth_test._write_enabled;
 
     sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, Ark::instance().renderController()->recycler(), std::move(configure));
-    sp<Renderer> fbr = sp<Renderer>::make<VKFramebufferRenderer>(std::move(renderer), fbo);
-    return sp<RenderTarget>::make(std::move(fbr), std::move(fbo));
+    sp<Renderer> fboRenderer = sp<Renderer>::make<VKFramebufferRenderer>(renderer, fbo);
+    return sp<RenderTarget>::make(std::move(renderer), std::move(fbo), std::move(fboRenderer));
 }
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)

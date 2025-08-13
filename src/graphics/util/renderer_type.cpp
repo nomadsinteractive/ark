@@ -36,6 +36,11 @@ sp<Renderer> RendererType::wrap(sp<Renderer> self)
     return sp<Renderer>::make<RendererWrapper>(std::move(self));
 }
 
+sp<RenderLayer> RendererType::toRenderLayer(const sp<Renderer>& self)
+{
+    return self.asInstance<RenderLayer>();
+}
+
 sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)
 {
     const sp<Wrapper<Renderer>> rd = self.ensureInstance<Wrapper<Renderer>>("Renderer is not an instance of Wrapper<Renderer>");

@@ -305,7 +305,8 @@ sp<Camera::Delegate> RendererFactorySDL3_GPU::createCamera(const enums::Coordina
 
 sp<RenderTarget> RendererFactorySDL3_GPU::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
-    return sp<RenderTarget>::make(sp<Renderer>::make<OffscreenRendererSDL3_GPU>(std::move(renderer), std::move(configure)), nullptr);
+    sp<Renderer> fboRenderer = sp<Renderer>::make<OffscreenRendererSDL3_GPU>(renderer, std::move(configure));
+    return sp<RenderTarget>::make(std::move(renderer), nullptr, std::move(fboRenderer));
 }
 
 sp<PipelineFactory> RendererFactorySDL3_GPU::createPipelineFactory()

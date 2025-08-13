@@ -34,6 +34,9 @@ public:
     static sp<Renderer> wrap(sp<Renderer> self);
 
 //  [[script::bindings::classmethod]]
+    static sp<RenderLayer> toRenderLayer(const sp<Renderer>& self);
+
+//  [[script::bindings::classmethod]]
     static sp<Renderer> reset(const sp<Renderer>& self, sp<Renderer> wrapped);
 
 };

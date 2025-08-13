@@ -100,7 +100,8 @@ sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer
     int32_t height = configure._color_attachments.at(0)->height();
     uint32_t drawBufferCount = static_cast<uint32_t>(configure._color_attachments.size());
     sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(Ark::instance().renderController()->recycler(), std::move(configure));
-    return sp<RenderTarget>::make(sp<GLFramebufferRenderer>::make(fbo, width, height, std::move(renderer), drawBufferCount, toClearMaskBits(configure)), std::move(fbo));
+    sp<Renderer> fboRenderer = sp<Renderer>::make<GLFramebufferRenderer>(fbo, width, height, renderer, drawBufferCount, toClearMaskBits(configure));
+    return sp<RenderTarget>::make(std::move(renderer), std::move(fbo), std::move(fboRenderer));
 }
 
 sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()

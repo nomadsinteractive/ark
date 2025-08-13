@@ -2,7 +2,6 @@
 
 #include "core/base/api.h"
 #include "core/base/bit_set.h"
-#include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -13,6 +12,7 @@
 
 namespace ark {
 
+//[[script::bindings::extends(Renderer)]]
 class ARK_API RenderTarget final : public Renderer {
 public:
     enum ClearBits {
@@ -42,11 +42,13 @@ public:
         bool _depth_test_write_enabled = true;
     };
 
-    RenderTarget(sp<Renderer> renderer, sp<Resource> resource);
+    RenderTarget(sp<Renderer> renderer, sp<Resource> fbo, sp<Renderer> fboRenderer);
 
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 
-    const sp<Resource>& resource() const;
+//  [[script::bindings::property]]
+    const sp<Renderer>& renderer() const;
+    const sp<Resource>& fbo() const;
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<RenderTarget> {
@@ -76,7 +78,8 @@ public:
 
 private:
     sp<Renderer> _renderer;
-    sp<Resource> _resource;
+    sp<Resource> _fbo;
+    sp<Renderer> _fbo_renderer;
 };
 
 }

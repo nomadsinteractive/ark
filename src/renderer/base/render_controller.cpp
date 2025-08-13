@@ -337,8 +337,8 @@ sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveI
 sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
     sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(configure));
-    if(renderTarget->resource())
-        upload(renderTarget->resource(), enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, enums::UPLOAD_PRIORITY_LOW);
+    if(renderTarget->fbo())
+        upload(renderTarget->fbo(), enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, enums::UPLOAD_PRIORITY_LOW);
     return renderTarget;
 }
 
