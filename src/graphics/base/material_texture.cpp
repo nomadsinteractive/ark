@@ -1,5 +1,6 @@
 #include "graphics/base/material_texture.h"
 
+#include "core/base/enum.h"
 #include "core/base/string.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/string_convert.h"
@@ -35,16 +36,14 @@ const sp<VariableWrapper<sp<Bitmap>>>& MaterialTexture::bitmapWrapper() const
 
 template<> ARK_API MaterialTexture::Type StringConvert::eval<MaterialTexture::Type>(const String& str)
 {
-    if(str == "base_color")
-        return MaterialTexture::TYPE_BASE_COLOR;
-    if(str == "normal")
-        return MaterialTexture::TYPE_NORMAL;
-    if(str == "roughness")
-        return MaterialTexture::TYPE_ROUGHNESS;
-    if(str == "metallic")
-        return MaterialTexture::TYPE_METALLIC;
-    DCHECK(str == "specular", "Unknow texture-type: %s, possible values are [base_color, normal, roughness, metallic, specular]");
-    return MaterialTexture::TYPE_SPECULAR;
+    constexpr enums::LookupTable<MaterialTexture::Type, 5> table = {{
+        {"base_color", MaterialTexture::TYPE_BASE_COLOR},
+        {"normal", MaterialTexture::TYPE_NORMAL},
+        {"roughness", MaterialTexture::TYPE_ROUGHNESS},
+        {"metallic", MaterialTexture::TYPE_METALLIC},
+        {"specular", MaterialTexture::TYPE_SPECULAR}
+    }};
+    return enums::lookup(table, str);
 }
 
 }

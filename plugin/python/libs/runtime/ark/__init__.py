@@ -1500,9 +1500,14 @@ class MaterialTexture:
 
 
 class Material:
+
     @property
     def id(self) -> int:
         return 0
+
+    @id.setter
+    def id(self, v: int):
+        pass
 
     @property
     def name(self) -> str:

@@ -341,10 +341,10 @@ public:
         T v = _value->val();
         if(_func(_label.c_str(), &v))
         {
-            if(sp<VariableWrapper<T>> wrapper = _value.template asInstance<VariableWrapper<T>>())
+            if(const sp<VariableWrapper<T>> wrapper = _value.template asInstance<VariableWrapper<T>>())
                 return wrapper->set(v);
 
-            sp<U> impl = _value.template ensureInstance<U>("Mutablable variable required.");
+            const sp<U> impl = _value.template ensureInstance<U>("Mutablable variable required.");
             impl->set(v);
         }
     }

@@ -210,6 +210,7 @@ class ConsoleWindow(Window):
 
     def _create_sub_panel(self, sub_tab_panel: dear_imgui.Widget, widget: dear_imgui.Widget):
         builder = dear_imgui.WidgetBuilder(self._imgui)
+        builder.new_line()
         builder.separator()
         builder.add_widget(widget)
         sub_tab_panel.reset(builder.make_widget())
@@ -292,7 +293,7 @@ class MarkStudio:
 
         self._renderer = Renderer()
         self._imgui.add_renderer(self._renderer, self._discarded)
-        self._windows = [ConsoleWindow(self._imgui, console_cmds, True), NoiseGeneratorWindow(False)]
+        self._windows: list[Window] = [ConsoleWindow(self._imgui, console_cmds, True), NoiseGeneratorWindow(False)]
         self.on_create()
 
         self._main_window = MainWindow(self, None, quick_bar_items)
@@ -300,11 +301,6 @@ class MarkStudio:
     @property
     def windows(self) -> tuple[Window, ...]:
         return tuple(self._windows)
-
-    @windows.setter
-    def windows(self, windows: Sequence[Window]):
-        self._windows = list(windows)
-        self.on_create()
 
     def on_create(self):
         builder = dear_imgui.WidgetBuilder(self._imgui)
@@ -363,6 +359,16 @@ class MarkStudio:
         self._imgui = None
         self._discarded.set(True)
         return True
+
+    def register_window(self, window: Window):
+        window_type = type(window)
+        for i, j in enumerate(self._windows):
+            if window_type is type(j):
+                self._windows[i] = window
+                break
+        else:
+            self._windows.append(window)
+        self.on_create()
 
 
 _mark_studio: Optional[MarkStudio] = None
