@@ -89,7 +89,7 @@ template<> RenderTarget::AttachmentOp StringConvert::eval<RenderTarget::Attachme
         {"load", RenderTarget::ATTACHMENT_OP_BIT_LOAD},
         {"clear", RenderTarget::ATTACHMENT_OP_BIT_CLEAR},
         {"dont_care", RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE},
-        {"store", RenderTarget::ATTACHMENT_OP_BIT_STORE},
+        {"store", RenderTarget::ATTACHMENT_OP_BIT_STORE}
     }};
     if(str)
         return RenderTarget::AttachmentOp::toBitSet(str, opBits);

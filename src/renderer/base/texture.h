@@ -35,6 +35,7 @@ public:
         FORMAT_BIT_MASK = FORMAT_24_BIT | FORMAT_32_BIT
     };
 
+//  [[script::bindings::enumeration]]
     enum UsageBits {
         USAGE_AUTO = 0,
         USAGE_DEPTH_ATTACHMENT = 1,
@@ -71,7 +72,7 @@ public:
     };
 
     struct Parameters {
-        Parameters(Type type, const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
+        Parameters(Type type, const document& parameters = nullptr, Format format = FORMAT_AUTO, Usage usages = USAGE_AUTO, Feature features = FEATURE_DEFAULT);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Parameters);
 
         void loadParameters(const document& parameters, BeanFactory& factory, const Scope& args);
@@ -129,7 +130,7 @@ public:
     };
 
 //  [[script::bindings::auto]]
-    Texture(sp<Bitmap> bitmap, Texture::Format textureFormat = Texture::FORMAT_AUTO, enums::UploadStrategy uploadStrategy = enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
+    Texture(sp<Bitmap> bitmap, Texture::Format format = Texture::FORMAT_AUTO, Texture::Usage usages = Texture::USAGE_AUTO, enums::UploadStrategy uploadStrategy = enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 
     Texture(sp<Delegate> delegate, sp<Size> size, sp<Uploader> uploader, sp<Parameters> parameters);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Texture);

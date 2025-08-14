@@ -4,7 +4,6 @@
 #include "core/components/discarded.h"
 #include "core/util/log.h"
 
-#include "renderer/base/buffer.h"
 #include "renderer/base/texture_bundle.h"
 #include "renderer/base/render_controller.h"
 

@@ -96,12 +96,12 @@ class Enum:
     BUILD_TYPE_RELEASE_WITH_DEBUG_INFO = 3
     BUILD_TYPE_PUBLISHED = 100
 
-    RENDER_MODE_NONE = -1
-    RENDER_MODE_LINES = 0
-    RENDER_MODE_POINTS = 1
-    RENDER_MODE_TRIANGLES = 2
-    RENDER_MODE_TRIANGLE_STRIP = 3
-    RENDER_MODE_COUNT = 4
+    DRAW_MODE_NONE = -1
+    DRAW_MODE_LINES = 0
+    DRAW_MODE_POINTS = 1
+    DRAW_MODE_TRIANGLES = 2
+    DRAW_MODE_TRIANGLE_STRIP = 3
+    DRAW_MODE_COUNT = 4
 
     DRAW_PROCEDURE_AUTO = 0
     DRAW_PROCEDURE_DRAW_ARRAYS = 1
@@ -621,7 +621,16 @@ class Texture:
     FORMAT_16_BIT = 256
     FORMAT_32_BIT = FORMAT_8_BIT | FORMAT_16_BIT
 
-    def __init__(self, bitmap: "Bitmap", texture_format: int = FORMAT_AUTO, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, future: Optional[Future] = None):
+    USAGE_AUTO = 0
+    USAGE_DEPTH_ATTACHMENT = 1
+    USAGE_STENCIL_ATTACHMENT = 2
+    USAGE_DEPTH_STENCIL_ATTACHMENT = 3
+    USAGE_COLOR_ATTACHMENT = 4
+    USAGE_ATTACHMENT = USAGE_DEPTH_STENCIL_ATTACHMENT | USAGE_COLOR_ATTACHMENT
+    USAGE_SAMPLER = 8
+    USAGE_STORAGE = 16
+
+    def __init__(self, bitmap: "Bitmap", format: int = FORMAT_AUTO, usages: int = USAGE_AUTO, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, future: Optional[Future] = None):
         pass
 
     @property
@@ -960,8 +969,8 @@ class Renderer:
 
 
 class RenderPass(Renderer):
-    def __init__(self, shader, vertex_buffer: Buffer, index_buffer: Buffer, draw_count: "Integer", render_mode: TYPE_ENUM, draw_procedure: TYPE_ENUM,
-                 divided_uploaders: tuple[tuple[int, "Uploader"]] = tuple(), indirect_buffer: Optional[Buffer] = None):
+    def __init__(self, shader, vertex_buffer: Buffer, index_buffer: Buffer, offset: TYPE_INTEGER, draw_count: TYPE_INTEGER, draw_procedure: TYPE_ENUM, draw_mode: TYPE_ENUM = Enum.RENDER_MODE_TRIANGLES,
+                 instance_buffers: tuple[tuple[int, "Uploader"]] = tuple(), indirect_buffer: Optional[Buffer] = None):
         super().__init__()
 
 
@@ -1643,7 +1652,7 @@ class Vertices:
     def length(self) -> int:
         return 0
 
-    def make_uploader(self, shader: Shader, bounds: TYPE_VEC3) -> Uploader:
+    def make_uploader(self, shader: Shader, size: TYPE_VEC3) -> Uploader:
         pass
 
 

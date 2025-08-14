@@ -18,7 +18,6 @@ public:
     Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels, bool allocate);
 //  [[script::bindings::auto]]
     Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels, sp<ByteArray> bytes);
-    ~Bitmap();
 
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Bitmap);
 
@@ -47,7 +46,7 @@ public:
     Bitmap resize(uint32_t width, uint32_t height) const;
     Bitmap crop(uint32_t x, uint32_t y, uint32_t width, uint32_t height) const;
 
-    void draw(int32_t x, int32_t y, void* buf, uint32_t width, uint32_t height, uint32_t stride);
+    void draw(int32_t x, int32_t y, void* buf, uint32_t width, uint32_t height, uint32_t stride) const;
 
 //  [[script::bindings::auto]]
     void dump(const String& filename) const;
@@ -127,11 +126,11 @@ public:
     };
 
 //  [[plugin::resource-loader]]
-    class BUILDER : public Builder<Bitmap> {
+    class BUILDER final : public Builder<Bitmap> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Bitmap> build(const Scope& args) override;
+        sp<Bitmap> build(const Scope& args) override;
 
     private:
         sp<Builder<String>> _src;
@@ -139,11 +138,11 @@ public:
     };
 
 //  [[plugin::resource-loader::by-value]]
-    class VALUE_BUILDER : public Builder<Bitmap> {
+    class VALUE_BUILDER final : public Builder<Bitmap> {
     public:
         VALUE_BUILDER(BeanFactory& factory, const String& src, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Bitmap> build(const Scope& args) override;
+        sp<Bitmap> build(const Scope& args) override;
 
     private:
         String _src;

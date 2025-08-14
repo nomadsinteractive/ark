@@ -282,10 +282,10 @@ sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameter
     return texture;
 }
 
-sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, Texture::Format format, const enums::UploadStrategy us, sp<Future> future)
+sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, sp<Texture::Parameters> parameters, const enums::UploadStrategy us, sp<Future> future)
 {
     sp<Size> size = sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height()));
-    return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, nullptr, format), sp<Texture::UploaderBitmap>::make(std::move(bitmap)), us, std::move(future));
+    return createTexture(std::move(size), parameters ? std::move(parameters) : sp<Texture::Parameters>::make(Texture::TYPE_2D, nullptr, Texture::FORMAT_AUTO), sp<Texture::Uploader>::make<Texture::UploaderBitmap>(std::move(bitmap)), us, std::move(future));
 }
 
 Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uploader, const enums::UploadStrategy us, sp<Future> future)

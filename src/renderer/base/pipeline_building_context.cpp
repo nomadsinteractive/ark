@@ -1,5 +1,6 @@
 #include "renderer/base/pipeline_building_context.h"
 
+#include <ranges>
 #include <regex>
 
 #include "core/inf/uploader.h"
@@ -18,9 +19,9 @@ namespace {
 
 class AlignedUploader final : public Uploader {
 public:
-    AlignedUploader(sp<Uploader> delegate, size_t alignedSize)
-        : Uploader(alignedSize), _delegate(std::move(delegate)), _aligned_size(alignedSize) {
-        CHECK(_delegate->size() <= _aligned_size, "Alignment is lesser than delegate's size(%d)", _delegate->size());
+    AlignedUploader(sp<Uploader> delegate, const size_t alignedSize)
+        : Uploader(alignedSize), _delegate(std::move(delegate)) {
+        CHECK(_delegate->size() <= alignedSize, "Alignment is lesser than delegate's size(%d)", _delegate->size());
     }
 
     void upload(Writable& buf) override {
@@ -33,7 +34,6 @@ public:
 
 private:
     sp<Uploader> _delegate;
-    size_t _aligned_size;
 };
 
 Attribute makePredefinedAttribute(const String& name, const String& type)
@@ -88,14 +88,14 @@ void PipelineBuildingContext::initializeAttributes()
     // for(const auto& i : firstStage._declaration_ins.vars().values())
     //     addInputAttribute(i.name(), i.type(), 0);
 
-    for(const auto& [i, j] : _rendering_stages)
-        for(const ShaderPreprocessor::Parameter& k : j->args())
-            if(k._annotation & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_IN)
-                j->inDeclare(k._type, Strings::capitalizeFirst(k._name));
+    for(const auto& v : std::views::values(_rendering_stages))
+        for(const ShaderPreprocessor::Parameter& i : v->args())
+            if(i._annotation & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_IN)
+                v->inDeclare(i._type, Strings::capitalizeFirst(i._name));
 
     Set<String> passThroughVars;
     const ShaderPreprocessor* prestage = nullptr;
-    for(const auto& [k, v] : _rendering_stages)
+    for(const auto& v : std::views::values(_rendering_stages))
     {
         if(prestage)
             v->linkPreStage(*prestage, passThroughVars);
@@ -145,7 +145,7 @@ void PipelineBuildingContext::initializeAttributes()
     for(const String& i : generated)
     {
         firstStage.inDeclare(attributes.at(i), i);
-        if(passThroughVars.find(i) != passThroughVars.end())
+        if(passThroughVars.contains(i))
             firstStage.passThroughDeclare(attributes.at(i), i);
     }
 
@@ -334,7 +334,8 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const Uniform::Type uType = Uniform::toType(type);
         const uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
         CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
-        addUniform(sp<Uniform>::make(std::move(name), uType, componentSize, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Uploader>::make<AlignedUploader>(std::move(uploader), 16) : std::move(uploader)));
+        CHECK_WARN(uType != Uniform::TYPE_F3, "We strongly against declaring vec3 uniform type for \"%s\"", name.c_str());
+        addUniform(sp<Uniform>::make(std::move(name), uType, componentSize, size / componentSize, std::move(uploader)));
     }
 }
 

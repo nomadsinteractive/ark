@@ -36,14 +36,34 @@ uint32_t Enum::__index__(const Box& self)
     return self.toInteger();
 }
 
-int32_t Enum::__and__(const Box& lvalue, const Box& rvalue)
+int32_t Enum::__and__(const int32_t lhs, const Box& rhs)
 {
-    return lvalue.toInteger() & rvalue.toInteger();
+    return lhs & rhs.toInteger();
 }
 
-int32_t Enum::__or__(const Box& lvalue, const Box& rvalue)
+int32_t Enum::__and__(const Box& lhs, int32_t rhs)
 {
-    return lvalue.toInteger() | rvalue.toInteger();
+    return lhs.toInteger() & rhs;
+}
+
+int32_t Enum::__and__(const Box& lhs, const Box& rhs)
+{
+    return lhs.toInteger() & rhs.toInteger();
+}
+
+int32_t Enum::__or__(const Box& lhs, const Box& rhs)
+{
+    return lhs.toInteger() | rhs.toInteger();
+}
+
+int32_t Enum::__or__(const int32_t lhs, const Box& rhs)
+{
+    return lhs | rhs.toInteger();
+}
+
+int32_t Enum::__or__(const Box& lhs, const int32_t rhs)
+{
+    return lhs.toInteger() | rhs;
 }
 
 }

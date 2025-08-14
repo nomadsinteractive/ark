@@ -45,6 +45,8 @@ public:
 
 //  [[script::bindings::classmethod]]
     static BytesView toBytes(const sp<IntArray>& self);
+//  [[script::bindings::classmethod]]
+    static sp<ByteArray> toByteArray(sp<IntArray> self);
 
 //  [[script::bindings::operator(str)]]
     static String str(const sp<IntArray>& self);

@@ -78,8 +78,8 @@ struct Texture::Stub {
     Timestamp _timestamp;
 };
 
-Texture::Texture(sp<Bitmap> bitmap, const Format textureFormat, const enums::UploadStrategy uploadStrategy, sp<Future> future)
-    : Texture(*Ark::instance().renderController()->createTexture2d(std::move(bitmap), textureFormat, uploadStrategy, std::move(future)))
+Texture::Texture(sp<Bitmap> bitmap, const Format format, const Usage usages, const enums::UploadStrategy uploadStrategy, sp<Future> future)
+    : Texture(*Ark::instance().renderController()->createTexture2d(std::move(bitmap), sp<Parameters>::make(TYPE_2D, nullptr, format, usages), uploadStrategy, std::move(future)))
 {
 }
 
@@ -257,11 +257,11 @@ template<> ARK_API Texture::Filter StringConvert::eval<Texture::Filter>(const St
     return enums::lookup(table, str);
 }
 
-Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
-    : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_AUTO) : Texture::USAGE_AUTO),
-      _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
-      _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
-      _min_filter((features & Texture::FEATURE_MIPMAPS) ? FILTER_LINEAR_MIPMAP : FILTER_LINEAR), _mag_filter(FILTER_LINEAR),
+Texture::Parameters::Parameters(const Type type, const document& parameters, const Format format, const Usage usages, const Feature features)
+    : _type(type), _usage(parameters ? Documents::getAttribute<Usage>(parameters, "usage", usages) : usages),
+      _format(parameters ? Documents::getAttribute<Format>(parameters, "format", format) : format),
+      _features(parameters ? Documents::getAttribute<Feature>(parameters, "feature", features) : features),
+      _min_filter((features & FEATURE_MIPMAPS) ? FILTER_LINEAR_MIPMAP : FILTER_LINEAR), _mag_filter(FILTER_LINEAR),
       _wrap_s(FILTER_REPEAT), _wrap_t(FILTER_REPEAT), _wrap_r(FILTER_REPEAT)
 {
 }
@@ -295,19 +295,21 @@ Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
 sp<Texture> Texture::BUILDER::build(const Scope& args)
 {
     const Type type = Documents::getAttribute<Type>(_manifest, constants::TYPE, TYPE_2D);
-    const sp<Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
+    sp<Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
     parameters->loadParameters(_manifest, _factory, args);
 
     if(const sp<String> src = _src.build(args))
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
     if(sp<Bitmap> bitmap = _bitmap.build(args))
-        return _resource_loader_context->renderController()->createTexture2d(std::move(bitmap), parameters->_format, enums::UploadStrategy(_upload_strategy));
+        return _resource_loader_context->renderController()->createTexture2d(std::move(bitmap), std::move(parameters), enums::UploadStrategy(_upload_strategy));
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, constants::SIZE)->build(args);
     CHECK(size->widthAsFloat() != 0 && size->heightAsFloat() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
     sp<Uploader> uploader = _uploader.build(args);
-    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : sp<Uploader>::make<UploaderClear>(size, parameters->_format), enums::UploadStrategy(_upload_strategy));
+    if(!uploader)
+        uploader = sp<Uploader>::make<UploaderClear>(size, parameters->_format);
+    return _resource_loader_context->renderController()->createTexture(size, std::move(parameters), std::move(uploader), enums::UploadStrategy(_upload_strategy));
 }
 
 Texture::UploaderBitmap::UploaderBitmap(sp<Bitmap> bitmap)

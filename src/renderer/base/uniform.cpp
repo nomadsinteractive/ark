@@ -60,17 +60,17 @@ String toDeclaredType(const Uniform::Type type)
 
 }
 
-Uniform::Uniform(String name, String declaredType, Uniform::Type type, uint32_t componentSize, uint32_t length, sp<Uploader> uploader)
+Uniform::Uniform(String name, String declaredType, const Type type, const uint32_t componentSize, const uint32_t length, sp<Uploader> uploader)
     : _name(std::move(name)), _declared_type(std::move(declaredType)), _type(type), _component_size(componentSize), _length(length), _uploader(std::move(uploader))
 {
 }
 
-Uniform::Uniform(String name, Type type, uint32_t componentSize, uint32_t length, sp<Uploader> uploader)
+Uniform::Uniform(String name, const Type type, const uint32_t componentSize, const uint32_t length, sp<Uploader> uploader)
     : _name(std::move(name)), _declared_type(toDeclaredType(type)), _type(type), _component_size(componentSize), _length(length), _uploader(std::move(uploader))
 {
 }
 
-Uniform::Uniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> uploader)
+Uniform::Uniform(String name, const Type type, const uint32_t length, sp<Uploader> uploader)
     : Uniform(std::move(name), toDeclaredType(type), type, getComponentSize(type), length, std::move(uploader))
 {
 }
@@ -141,34 +141,34 @@ Uniform::Type Uniform::toType(const String& declaredType)
     return TYPE_STRUCT;
 }
 
-uint32_t Uniform::getComponentSize(Uniform::Type type)
+uint32_t Uniform::getComponentSize(const Type type)
 {
     switch (type) {
-        case Uniform::TYPE_I1:
-        case Uniform::TYPE_F1:
-        case Uniform::TYPE_I1V:
-        case Uniform::TYPE_F1V:
+        case TYPE_I1:
+        case TYPE_F1:
+        case TYPE_I1V:
+        case TYPE_F1V:
             return 4;
-        case Uniform::TYPE_I2:
-        case Uniform::TYPE_F2:
-        case Uniform::TYPE_I2V:
-        case Uniform::TYPE_F2V:
+        case TYPE_I2:
+        case TYPE_F2:
+        case TYPE_I2V:
+        case TYPE_F2V:
             return 8;
-        case Uniform::TYPE_I3:
-        case Uniform::TYPE_F3:
-        case Uniform::TYPE_I3V:
-        case Uniform::TYPE_F3V:
+        case TYPE_I3:
+        case TYPE_F3:
+        case TYPE_I3V:
+        case TYPE_F3V:
             return 12;
-        case Uniform::TYPE_I4:
-        case Uniform::TYPE_F4:
-        case Uniform::TYPE_I4V:
-        case Uniform::TYPE_F4V:
+        case TYPE_I4:
+        case TYPE_F4:
+        case TYPE_I4V:
+        case TYPE_F4V:
             return 16;
-        case Uniform::TYPE_MAT3:
-        case Uniform::TYPE_MAT3V:
+        case TYPE_MAT3:
+        case TYPE_MAT3V:
             return 36;
-        case Uniform::TYPE_MAT4:
-        case Uniform::TYPE_MAT4V:
+        case TYPE_MAT4:
+        case TYPE_MAT4V:
             return 64;
         default:
             break;

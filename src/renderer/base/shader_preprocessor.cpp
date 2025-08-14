@@ -645,12 +645,15 @@ void ShaderPreprocessor::Source::replace(const String& str, const String& replac
 
 void ShaderPreprocessor::Source::replace(const std::regex& regexp, const std::function<sp<String>(const std::smatch&)>& replacer)
 {
+    Vector<sp<String>> inserting;
     for(auto iter = _lines.begin(); iter != _lines.end(); ++iter)
     {
+        if((*iter)->strip().startsWith("//"))
+            continue;
+
         bool matched = false;
-        const sp<String>& fragment = *iter;
-        Vector<sp<String>> inserting;
-        fragment->search(regexp, [&matched, &inserting, replacer](const std::smatch& match) {
+        inserting.clear();
+        (*iter)->search(regexp, [&matched, &inserting, replacer](const std::smatch& match) {
             if(sp<String> replacement = replacer(match))
                 inserting.push_back(std::move(replacement));
             matched = true;

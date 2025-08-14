@@ -26,7 +26,7 @@ enum DrawMode {
     DRAW_MODE_POINTS,
     DRAW_MODE_TRIANGLES,
     DRAW_MODE_TRIANGLE_STRIP,
-    DRAW_MODE_COUNT,
+    DRAW_MODE_COUNT
 };
 
 //[[script::bindings::enumeration(Enum)]]
@@ -140,9 +140,17 @@ public:
 //  [[script::bindings::operator(index)]]
     static uint32_t __index__(const Box& self);
 //  [[script::bindings::operator(&)]]
-    static int32_t __and__(const Box& lvalue, const Box& rvalue);
+    static int32_t __and__(int32_t lhs, const Box& rhs);
+//  [[script::bindings::operator(&)]]
+    static int32_t __and__(const Box& lhs, int32_t rhs);
+//  [[script::bindings::operator(&)]]
+    static int32_t __and__(const Box& lhs, const Box& rhs);
 //  [[script::bindings::operator(|)]]
-    static int32_t __or__(const Box& lvalue, const Box& rvalue);
+    static int32_t __or__(int32_t lhs, const Box& rhs);
+//  [[script::bindings::operator(|)]]
+    static int32_t __or__(const Box& lhs, int32_t rhs);
+//  [[script::bindings::operator(|)]]
+    static int32_t __or__(const Box& lhs, const Box& rhs);
 };
 
 }
