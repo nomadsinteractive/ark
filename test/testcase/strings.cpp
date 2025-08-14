@@ -1,13 +1,7 @@
-#include <string>
-#include <map>
-#include <vector>
-
 #include "core/inf/array.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/base/color.h"
-#include "graphics/components/layout_param.h"
 
 #include "app/view/view.h"
 

@@ -2,8 +2,6 @@
 
 #include <array>
 
-#include "graphics/base/color.h"
-
 #include "renderer/base/render_engine.h"
 
 #include "vulkan/base/vk_device.h"

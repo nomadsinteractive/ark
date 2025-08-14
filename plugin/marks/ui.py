@@ -8,16 +8,8 @@ from ark import dear_imgui
 
 class QuickBarItem:
     def __init__(self, text: str, on_click: Callable[[], None]):
-        self._text = text
-        self._on_click = on_click
-
-    @property
-    def text(self) -> str:
-        return self._text
-
-    @property
-    def on_click(self) -> Callable[[], None]:
-        return self._on_click
+        self.text = text
+        self.on_click = on_click
 
 
 class InputField:

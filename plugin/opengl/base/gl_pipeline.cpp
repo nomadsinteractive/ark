@@ -4,9 +4,6 @@
 #include "core/util/log.h"
 #include "core/util/strings.h"
 
-#include "graphics/base/color.h"
-#include "opengl/impl/es30/gl_resource/gl_vertex_array.h"
-
 #include "renderer/base/compute_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/pipeline_descriptor.h"
@@ -19,6 +16,7 @@
 #include "renderer/inf/resource.h"
 #include "renderer/util/render_util.h"
 
+#include "opengl/impl/es30/gl_resource/gl_vertex_array.h"
 #include "opengl/util/gl_debug.h"
 #include "opengl/util/gl_util.h"
 

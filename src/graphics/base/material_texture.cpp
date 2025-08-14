@@ -5,8 +5,6 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/string_convert.h"
 
-#include "graphics/base/color.h"
-
 namespace ark {
 
 MaterialTexture::MaterialTexture(sp<Vec4> color, sp<Bitmap> bitmap)

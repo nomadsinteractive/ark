@@ -4,14 +4,13 @@
 #include "core/util/log.h"
 
 #include "graphics/inf/render_command.h"
-#include "graphics/base/color.h"
 
 #include "renderer/base/graphics_context.h"
-#include "opengl/util/gl_debug.h"
+#include "renderer/base/render_controller.h"
 
 #include "platform/gl/gl.h"
-#include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine.h"
+
+#include "opengl/util/gl_debug.h"
 
 namespace ark::plugin::opengl {
 

@@ -5,7 +5,6 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/updatable_util.h"
 
-#include "graphics/base/color.h"
 #include "graphics/util/vec4_type.h"
 
 namespace ark {

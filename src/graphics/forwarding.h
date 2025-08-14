@@ -11,7 +11,6 @@ class Bitmap;
 class Boundaries;
 class Camera;
 class GlyphMaker;
-class Color;
 class DrawDecorator;
 class RotationAxisTheta;
 class RotationEuler;

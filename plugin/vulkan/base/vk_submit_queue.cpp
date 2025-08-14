@@ -1,7 +1,5 @@
 #include "vulkan/base/vk_submit_queue.h"
 
-#include "graphics/base/color.h"
-
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
 
@@ -11,7 +9,7 @@
 
 namespace ark::plugin::vulkan {
 
-VKSubmitQueue::VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags)
+VKSubmitQueue::VKSubmitQueue(const sp<VKRenderer>& renderer, const VkPipelineStageFlags stageFlags)
     : _renderer(renderer), _stage_flags{stageFlags}
 {
 }

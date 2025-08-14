@@ -10,7 +10,6 @@
 #include "core/util/log.h"
 #include "core/util/string_type.h"
 
-#include "graphics/base/color.h"
 #include "graphics/base/layout_length.h"
 #include "graphics/base/mat.h"
 #include "graphics/util/vec2_type.h"

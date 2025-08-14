@@ -1,6 +1,5 @@
 #include "vulkan/base/vk_graphics_context.h"
 
-#include "graphics/base/color.h"
 #include "graphics/inf/renderer.h"
 
 #include "renderer/base/graphics_context.h"
