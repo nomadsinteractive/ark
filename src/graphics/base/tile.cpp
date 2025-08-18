@@ -4,8 +4,8 @@
 
 namespace ark {
 
-Tile::Tile(int32_t id, String type, int32_t shapeId, sp<RenderObject> renderObject)
-    : _id(id), _shape_id(shapeId), _type(std::move(type)), _render_object(std::move(renderObject))
+Tile::Tile(int32_t id, const NamedHash& type, sp<Shape> shape, sp<RenderObject> renderObject)
+    : _id(id), _type(std::move(type)), _shape(std::move(shape)), _render_object(std::move(renderObject))
 {
 }
 
@@ -14,24 +14,24 @@ int32_t Tile::id() const
     return _id;
 }
 
-const String& Tile::type() const
+NamedHash Tile::type() const
 {
     return _type;
 }
 
-void Tile::setType(String type)
+void Tile::setType(const NamedHash& type)
 {
     _type = std::move(type);
 }
 
-int32_t Tile::shapeId() const
+const sp<Shape>& Tile::shape() const
 {
-    return _shape_id;
+    return _shape;
 }
 
-void Tile::setShapeId(int32_t type)
+void Tile::setShape(sp<Shape> shape)
 {
-    _shape_id = type;
+    _shape = std::move(shape);
 }
 
 const sp<RenderObject>& Tile::renderObject() const

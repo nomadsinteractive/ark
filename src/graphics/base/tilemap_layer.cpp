@@ -265,7 +265,7 @@ void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<Tile>& tile, con
     CHECK(row < _row_count && col < _col_count, "Invaild tile position:(%d, %d), tilemap size(%d, %d)", row, col, _row_count, _col_count);
     const uint32_t index = row * _col_count + col;
     const sp<RenderObject>& ro = renderObject ? renderObject : (tile ? tile->renderObject() : nullptr);
-    sp<Tile> tileDup = renderObject ? (tile ? sp<Tile>::make(tile->id(), tile->type(), tile->shapeId(), renderObject) : sp<Tile>::make(0, "", -1, renderObject)) : tile;
+    sp<Tile> tileDup = renderObject ? (tile ? sp<Tile>::make(tile->id(), tile->type(), tile->shape(), renderObject) : sp<Tile>::make(0, NamedHash(0), nullptr, renderObject)) : tile;
     const float tileWidth = _stub->_tileset->tileWidth(), tileHeight = _stub->_tileset->tileWidth();
     const float dx = static_cast<float>(col) * tileWidth + tileWidth / 2;
     const float dy = static_cast<float>(row) * tileHeight + tileHeight / 2;

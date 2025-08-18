@@ -5,6 +5,7 @@
 #include "core/util/strings.h"
 
 #include "graphics/components/render_object.h"
+#include "graphics/components/shape.h"
 #include "graphics/base/tile.h"
 #include "graphics/base/tileset.h"
 
@@ -23,7 +24,7 @@ void TilesetImporterTsx::import(Tileset& tileset, const sp<Readable>& src)
         const String source = Documents::ensureAttribute(image, "source");
         auto [path, name] = source.rcut('/');
         auto [stem, ext] = name.rcut('.');
-        tileset.addTile(sp<Tile>::make(id, std::move(type), shapeId, sp<RenderObject>::make(Strings::eval<int32_t>(stem.value()), nullptr, tileset.tileSize())));
+        tileset.addTile(sp<Tile>::make(id, std::move(type), sp<Shape>::make(shapeId), sp<RenderObject>::make(Strings::eval<int32_t>(stem.value()), nullptr, tileset.tileSize())));
     }
 }
 

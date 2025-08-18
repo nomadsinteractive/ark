@@ -20,7 +20,7 @@
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
 #include "app/inf/broad_phrase.h"
-#include "app/components/shape.h"
+#include "graphics/components/shape.h"
 #include "app/util/collider_type.h"
 #include "core/types/ref.h"
 #include "graphics/util/transform_type.h"

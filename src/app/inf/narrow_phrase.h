@@ -27,8 +27,15 @@ public:
         int32_t _data[8];
     };
 
+    struct ShapeDef {
+        Box _implementation;
+        V3 _size;
+    };
+
 public:
     virtual ~NarrowPhrase() = default;
+
+    virtual ShapeDef createShapeDef(HashId shapeId, Optional<V3> size) = 0;
 
     virtual RigidbodyDef makeBodyDef(HashId shapeId, sp<Vec3> size) = 0;
 

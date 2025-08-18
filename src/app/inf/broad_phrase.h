@@ -19,17 +19,11 @@ public:
     typedef uintptr_t CandidateIdType;
 
     struct Candidate {
-        Candidate() = default;
-        Candidate(CandidateIdType id, const V2& position, const V4& quaternion, const HashId shapeId, sp<CollisionFilter> collisionFilter, Box bodyDef)
-            : _id(id), _position(position), _quaternion(quaternion), _shape_id(shapeId), _collision_filter(std::move(collisionFilter)), _body_def(std::move(bodyDef)) {
-        }
-
         CandidateIdType _id;
         V2 _position;
         V4 _quaternion;
-        HashId _shape_id;
+        sp<Shape> _shape;
         sp<CollisionFilter> _collision_filter;
-        Box _body_def;
     };
 
     struct Result {

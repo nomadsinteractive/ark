@@ -2,7 +2,7 @@
 
 #include "core/types/ref.h"
 
-#include "app/components/shape.h"
+#include "graphics/components/shape.h"
 #include "app/inf/collider.h"
 
 namespace ark {

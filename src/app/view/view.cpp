@@ -16,7 +16,7 @@
 #include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
-#include "app/components/shape.h"
+#include "graphics/components/shape.h"
 #include "app/view/view_hierarchy.h"
 
 namespace ark {

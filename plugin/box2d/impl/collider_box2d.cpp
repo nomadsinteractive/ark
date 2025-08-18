@@ -13,7 +13,7 @@
 #include "app/base/collision_manifold.h"
 #include "app/base/raycast_manifold.h"
 #include "app/inf/collision_callback.h"
-#include "app/components/shape.h"
+#include "graphics/components/shape.h"
 
 #include "box2d/impl/rigidbody_box2d.h"
 #include "box2d/impl/joint.h"

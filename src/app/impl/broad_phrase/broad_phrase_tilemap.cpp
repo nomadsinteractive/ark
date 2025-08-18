@@ -18,7 +18,7 @@
 #include "app/base/collision_filter.h"
 #include "app/inf/collider.h"
 #include "app/inf/narrow_phrase.h"
-#include "app/components/shape.h"
+#include "graphics/components/shape.h"
 #include "app/util/rigid_body_def.h"
 
 namespace ark {
@@ -26,8 +26,6 @@ namespace ark {
 BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrowPhrase)
     : _tilemap(std::move(tilemap))
 {
-    const Tileset& tileset = _tilemap->tileset();
-    _body_def_tile = narrowPhrase.makeBodyDef(Shape::TYPE_AABB,  sp<Vec3>::make<Vec3::Const>(tileset.tileSize()->val())).impl();
 }
 
 void BroadPhraseTilemap::create(CandidateIdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
@@ -64,17 +62,17 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
                         const sp<Tile>& tile = i.getTile(j, k);
                         if(tile)
                         {
-                            int32_t shapeId = tile->shapeId();
+                            int32_t shapeId = tile->shape()->type().hash();
                             if(shapeId != Shape::TYPE_NONE)
                             {
                                 int32_t candidateId = toCandidateId(layerId, k, j);
-                                if(candidateIdSet.find(candidateId) != candidateIdSet.end())
+                                if(candidateIdSet.contains(candidateId))
                                 {
                                     LOGW("Duplicated candidate found, this may be caused by duplidated layer name \"%s\"", i.name().c_str());
                                     continue;
                                 }
                                 candidateIdSet.insert(candidateId);
-                                candidates.push_back(makeCandidate(candidateId, tile->id(), V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2), i.collisionFilter()));
+                                candidates.push_back(makeCandidate(candidateId, tile->shape(), V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2), i.collisionFilter()));
                             }
                         }
                     }
@@ -86,8 +84,8 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
 BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
 {
     std::vector<Candidate> candidates;
-    float tileWidth = static_cast<float>(_tilemap->tileset()->tileWidth());
-    float tileHeight = static_cast<float>(_tilemap->tileset()->tileHeight());
+    float tileWidth = _tilemap->tileset()->tileWidth();
+    float tileHeight = _tilemap->tileset()->tileHeight();
     const Rect aabb = Rect(from, to);
     for(const TilemapLayer& i : _tilemap->layers())
         if(i.collisionFilter() && (!collisionFilter || i.collisionFilter()->collisionTest(*collisionFilter)))
@@ -144,21 +142,20 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
     if(row >= 0 && static_cast<uint32_t>(row) < tilemapLayer.rowCount() && col >= 0 && static_cast<uint32_t>(col) < tilemapLayer.colCount())
     {
         const int32_t candidateId = toCandidateId(layerId, row, col);
-        if(candidateIdSet.find(candidateId) == candidateIdSet.end())
+        if(!candidateIdSet.contains(candidateId))
         {
             const sp<Tile>& tile = tilemapLayer.getTile(static_cast<uint32_t>(col), static_cast<uint32_t>(row));
             candidateIdSet.insert(candidateId);
             if(tile)
-                if(const int32_t shapeId = tile->shapeId(); shapeId != Shape::TYPE_NONE)
-                    candidates.push_back(makeCandidate(candidateId, tile->id(), tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
+                if(const int32_t shapeId = tile->shape()->type().hash(); shapeId != Shape::TYPE_NONE)
+                    candidates.push_back(makeCandidate(candidateId, tile->shape(), tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
         }
     }
 }
 
-BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(CandidateIdType candidateId, TypeId shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const
+BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(CandidateIdType candidateId, const sp<Shape>& shape, const V2& position, sp<CollisionFilter> collisionFilter) const
 {
-    Box bodyDef = shapeId == Shape::TYPE_AABB ? _body_def_tile : Box();
-    return {candidateId, position, constants::QUATERNION_ONE, shapeId, std::move(collisionFilter), std::move(bodyDef)};
+    return {candidateId, position, constants::QUATERNION_ONE, shape, std::move(collisionFilter)};
 }
 
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

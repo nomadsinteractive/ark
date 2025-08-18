@@ -28,7 +28,7 @@ public:
     private:
         struct Boundary {
             int32_t key;
-            std::set<CandidateIdType> items;
+            Set<CandidateIdType> items;
         };
 
         struct Range {
@@ -44,7 +44,7 @@ public:
         void update(CandidateIdType id, float low, float high);
         void remove(CandidateIdType id);
 
-        std::unordered_set<CandidateIdType> search(float low, float high) const;
+        HashSet<CandidateIdType> search(float low, float high) const;
 
     private:
         Boundary* boundaryCreate(std::map<int32_t, Boundary>& boundaries, CandidateIdType id, int32_t key);
@@ -69,7 +69,7 @@ public:
         void create(CandidateIdType id, const V3& position, const V3& size);
         void update(CandidateIdType id, const V3& position, const V3& size);
 
-        std::unordered_set<CandidateIdType> search(const V3& position, const V3& size) const;
+        HashSet<CandidateIdType> search(const V3& position, const V3& size) const;
 
     private:
         int32_t _dimension;
@@ -77,11 +77,11 @@ public:
     };
 
 //  [[plugin::builder("broad-phrase-trie")]]
-    class BUILDER : public Builder<BroadPhrase> {
+    class BUILDER final : public Builder<BroadPhrase> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<BroadPhrase> build(const Scope& args) override;
+        sp<BroadPhrase> build(const Scope& args) override;
 
     private:
         int32_t _dimension;

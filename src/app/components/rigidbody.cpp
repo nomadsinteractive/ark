@@ -15,7 +15,7 @@
 #include "graphics/components/translation.h"
 
 #include "app/base/application_context.h"
-#include "app/components/shape.h"
+#include "graphics/components/shape.h"
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
 #include "app/util/collider_type.h"

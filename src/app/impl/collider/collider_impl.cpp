@@ -20,7 +20,7 @@
 #include "app/components/rigidbody.h"
 #include "app/inf/broad_phrase.h"
 #include "app/inf/narrow_phrase.h"
-#include "app/components/shape.h"
+#include "graphics/components/shape.h"
 #include "app/inf/rigidbody_controller.h"
 #include "app/util/rigid_body_def.h"
 
@@ -108,7 +108,7 @@ public:
 
     BroadPhrase::Candidate toBroadPhraseCandidate() const
     {
-        return {_rigidbody_stub->_ref->id(), _rigidbody_stub->_position.val(), _rigidbody_stub->_rotation.val(), _rigidbody_stub->_shape->type().hash(), _rigidbody_stub->_collision_filter, bodyDef().impl()};
+        return {_rigidbody_stub->_ref->id(), _rigidbody_stub->_position.val(), _rigidbody_stub->_rotation.val(), _rigidbody_stub->_shape, _rigidbody_stub->_collision_filter};
     }
 
     Rigidbody makeShadow() const
@@ -146,12 +146,14 @@ public:
 ColliderImpl::ColliderImpl(Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase, RenderController& renderController)
     : _stub(sp<Stub>::make(std::move(broadPhrases), std::move(narrowPhrase)))
 {
-    renderController.addPreComposeUpdatable(_stub, sp<BooleanByWeakRef<Stub>>::make(_stub, 1));
+    renderController.addPreComposeUpdatable(_stub, sp<Boolean>::make<BooleanByWeakRef<Stub>>(_stub, 1));
 }
 
-Rigidbody::Impl ColliderImpl::createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
+Rigidbody::Impl ColliderImpl::createBody(const Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
 {
     CHECK(type == Rigidbody::BODY_TYPE_KINEMATIC || type == Rigidbody::BODY_TYPE_DYNAMIC || type == Rigidbody::BODY_TYPE_STATIC || type == Rigidbody::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
+    if(!shape->implementation())
+        shape = createShape(shape->type(), shape->size() ? shape->size().toVar() : sp<Vec3>(), shape->origin() ? shape->origin().toVar() : sp<Vec3>());
     const sp<RigidbodyImpl> rigidbodyImpl = _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
     sp<Rigidbody::Stub> stub = rigidbodyImpl->_rigidbody_stub;
     return Rigidbody::Impl{std::move(stub), nullptr, rigidbodyImpl};
@@ -159,7 +161,8 @@ Rigidbody::Impl ColliderImpl::createBody(Rigidbody::BodyType type, sp<Shape> sha
 
 sp<Shape> ColliderImpl::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)
 {
-    return sp<Shape>::make(type, std::move(size), std::move(origin));
+    auto [_implementation, _size] = _stub->narrowPhrase()->createShapeDef(type.hash(), size ? Optional<V3>(size->val()) : Optional<V3>());
+    return sp<Shape>::make(type, size ? std::move(size) : sp<Vec3>::make<Vec3::Const>(_size), std::move(origin), std::move(_implementation));
 }
 
 Vector<RayCastManifold> ColliderImpl::rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter)
@@ -265,8 +268,8 @@ sp<ColliderImpl::RigidbodyImpl> ColliderImpl::Stub::createRigidBody(Rigidbody::B
     _rigid_bodies[rigidBody->_rigidbody_stub->_ref->id()] = rigidBody->_rigidbody_stub->_ref;
 
     const V3 posVal = rigidBody->_rigidbody_stub->_position.val();
-    float s = rigidBodyDef.occupyRadius() * 2;
-    for(const auto& [i, j] : _broad_phrases)
+    const float s = rigidBodyDef.occupyRadius() * 2;
+    for(const auto& i : _broad_phrases | std::views::keys)
         i->create(rigidBody->_rigidbody_stub->_ref->id(), posVal, V3(s));
 
     return rigidBody;

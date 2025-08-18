@@ -15,6 +15,7 @@ class NarrowPhraseCuteC2 final : public NarrowPhrase {
 public:
     NarrowPhraseCuteC2(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
+    ShapeDef createShapeDef(HashId shapeId, Optional<V3> size) override;
     RigidbodyDef makeBodyDef(HashId shapeId, sp<Vec3> size) override;
 
     Ray toRay(const V2& from, const V2& to) override;
@@ -64,9 +65,10 @@ private:
 
     sp<BodyDefCuteC2> findBodyDef(HashId shapeId) const;
     sp<BodyDefCuteC2> ensureBodyDef(const BroadPhrase::Candidate& candidate) const;
+    sp<BodyDefCuteC2> createShapeImplementation(HashId shapeId, const sp<Vec3>& size) const;
 
 private:
-    HashMap<HashId, sp<BodyDefCuteC2>> _body_shapes;
+    HashMap<HashId, sp<BodyDefCuteC2>> _predefined_shapes;
 };
 
 }

@@ -32,6 +32,9 @@ public:
 //  [[script::bindings::property]]
     const OptionalVar<Vec3>& origin() const;
 
+    const Box& implementation() const;
+    void setImplementation(Box implementation);
+
     template<typename T> sp<T> asImplementation() const {
         if(!_implementation)
             return nullptr;

@@ -1,4 +1,4 @@
-#include "app/components/shape.h"
+#include "graphics/components/shape.h"
 
 #include "core/impl/variable/variable_dirty_mark.h"
 
@@ -27,6 +27,16 @@ const OptionalVar<Vec3>& Shape::size() const
 const OptionalVar<Vec3>& Shape::origin() const
 {
     return _origin;
+}
+
+const Box& Shape::implementation() const
+{
+    return _implementation;
+}
+
+void Shape::setImplementation(Box implementation)
+{
+    _implementation = std::move(implementation);
 }
 
 }

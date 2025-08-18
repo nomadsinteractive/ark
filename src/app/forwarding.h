@@ -40,7 +40,6 @@ class Rigidbody;
 class RigidbodyController;
 class RigidbodyDef;
 class SearchingNodeProvider;
-class Shape;
 class Surface;
 class SurfaceUpdater;
 class View;

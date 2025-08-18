@@ -18,7 +18,7 @@
 #include "app/base/collision_filter.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
-#include "app/components//shape.h"
+#include "graphics/components/shape.h"
 
 #include "bullet/base/collision_object_ref.h"
 #include "bullet/base/collision_shape_ref.h"

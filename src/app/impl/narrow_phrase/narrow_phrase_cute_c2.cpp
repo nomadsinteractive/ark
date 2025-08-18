@@ -9,7 +9,7 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/inf/collider.h"
-#include "app/components/shape.h"
+#include "graphics/components/shape.h"
 #include "app/base/raycast_manifold.h"
 #include "app/util/rigid_body_def.h"
 
@@ -111,6 +111,57 @@ NarrowPhraseCuteC2::NarrowPhraseCuteC2(const document& manifest, const sp<Resour
         const document content = resourceLoaderContext->documents()->get(src);
         loadShapes(content->ensureChild("bodies"), ppu);
     }
+}
+
+NarrowPhraseCuteC2::ShapeDef NarrowPhraseCuteC2::createShapeDef(const HashId shapeId, const Optional<V3> size)
+{
+    V3 sizeVal;
+    sp<BodyDefCuteC2> bodyDef = findBodyDef(shapeId);
+    if(bodyDef)
+    {
+        if(!size)
+            sizeVal = V3(bodyDef->size(), 0);
+        else
+        {
+            sizeVal = size.value();
+            if(bodyDef->size() != V2(sizeVal.x(), sizeVal.y()))
+            {
+                bodyDef = sp<BodyDefCuteC2>::make(*bodyDef);
+                bodyDef->resize(sizeVal);
+            }
+        }
+    }
+    else
+    {
+        CHECK(size, "Size required for predefined shapes");
+        sizeVal = size.value();
+
+        const Rect bounds(sizeVal.x() / -2.0f, sizeVal.y() / -2.0f, sizeVal.x() / 2.0f, sizeVal.y() / 2.0f);
+        switch(shapeId)
+        {
+            case Shape::TYPE_BALL:
+                bodyDef = makeBodyBall(V2(0, 0), sizeVal.x());
+                break;
+            case Shape::TYPE_AABB:
+                bodyDef = makeBodyAABB(bounds);
+                break;
+            case Shape::TYPE_CAPSULE:
+            {
+                float radius = bounds.width() / 2;
+                float x = (bounds.left() + bounds.right()) / 2;
+                CHECK(radius < bounds.height() / 2, "Capsule too narrow, width = %.2f, height = %.2f, radius = %.2f", bounds.width(), bounds.height(), radius);
+                bodyDef = makeBodyCapsule(V2(x, bounds.top() + radius), V2(x, bounds.bottom() - radius), radius);
+                break;
+            }
+            case Shape::TYPE_BOX:
+                bodyDef = makeBodyBox(bounds);
+                break;
+            default:
+                FATAL("Shape %d not found", shapeId);
+                break;
+        }
+    }
+    return {Box(std::move(bodyDef)), sizeVal};
 }
 
 sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyAABB(const Rect& aabb)
@@ -222,23 +273,19 @@ void NarrowPhraseCuteC2::loadShapes(const document& manifest, float ppu)
     for(const document& i : manifest->children("body"))
     {
         const int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "name");
-        _body_shapes[shapeId] = sp<BodyDefCuteC2>::make(i, ppu);
+        _predefined_shapes[shapeId] = sp<BodyDefCuteC2>::make(i, ppu);
     }
 }
 
 sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::findBodyDef(const HashId shapeId) const
 {
-    const auto iter = _body_shapes.find(shapeId);
-    return iter != _body_shapes.end() ? iter->second : nullptr;
+    const auto iter = _predefined_shapes.find(shapeId);
+    return iter != _predefined_shapes.end() ? iter->second : nullptr;
 }
 
 sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::ensureBodyDef(const BroadPhrase::Candidate& candidate) const
 {
-    if(candidate._body_def)
-        return candidate._body_def.toPtr<BodyDefCuteC2>();
-    sp<BodyDefCuteC2> bodyDef = findBodyDef(candidate._shape_id);
-    CHECK(bodyDef, "Shape %d not found", candidate._shape_id);
-    return bodyDef;
+    return candidate._shape->asImplementation<BodyDefCuteC2>();
 }
 
 NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const V2& size, const V2& pivot, Vector<ShapeCuteC2> shapes)
