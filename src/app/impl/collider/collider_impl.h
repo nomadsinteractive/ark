@@ -48,9 +48,8 @@ public:
         sp<RigidbodyImpl> createRigidBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
 
         Vector<sp<Ref>> toRigidBodyRefs(const HashSet<BroadPhrase::CandidateIdType>& candidateSet, uint32_t filter) const;
-        Vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const HashSet<BroadPhrase::CandidateIdType>& candidateSet) const;
 
-        void resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const Vector<BroadPhrase::Candidate>& candidates, Set<BroadPhrase::CandidateIdType>& c);
+        void resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const Vector<BroadPhrase::Candidate>& candidates, Set<BroadPhrase::CandidateIdType>& c) const;
 
         const sp<NarrowPhrase>& narrowPhrase() const;
 
@@ -62,6 +61,8 @@ public:
     private:
         BroadPhrase::Result broadPhraseSearch(const V3& position, const V3& aabb, const sp<CollisionFilter>& collisionFilter) const;
         BroadPhrase::Result broadPhraseRayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) const;
+
+        static Vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const HashSet<BroadPhrase::CandidateIdType>& candidateSet);
 
     private:
         Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> _broad_phrases;

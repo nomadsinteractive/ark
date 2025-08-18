@@ -62,7 +62,7 @@ bool LayoutLength::update(const uint64_t timestamp) const
     return _value.update(timestamp);
 }
 
-const SafeVar<Numeric>& LayoutLength::value() const
+const OptionalVar<Numeric>& LayoutLength::value() const
 {
     return _value;
 }

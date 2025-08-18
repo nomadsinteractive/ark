@@ -89,8 +89,8 @@ struct View::Stub final : Updatable {
     sp<ViewHierarchy> _hierarchy;
     sp<Layout::Node> _layout_node;
 
-    SafeVar<Vec3> _position;
-    SafeVar<Boolean> _discarded;
+    OptionalVar<Vec3> _position;
+    OptionalVar<Boolean> _discarded;
 
     WeakPtr<Stub> _parent_stub;
     bool _top_view;
@@ -241,7 +241,7 @@ const String& View::name() const
     return _stub->_name;
 }
 
-const SafeVar<Boolean>& View::discarded() const
+const OptionalVar<Boolean>& View::discarded() const
 {
     return _stub->_discarded;
 }

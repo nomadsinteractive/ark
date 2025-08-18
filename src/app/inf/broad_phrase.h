@@ -34,7 +34,7 @@ public:
 
     struct Result {
         Result() = default;
-        Result(std::unordered_set<CandidateIdType> dynamicCandidates, std::vector<Candidate> staticCandidates)
+        Result(HashSet<CandidateIdType> dynamicCandidates, Vector<Candidate> staticCandidates)
             : _dynamic_candidates(std::move(dynamicCandidates)), _static_candidates(std::move(staticCandidates)) {
         }
 
@@ -43,7 +43,7 @@ public:
             std::copy(other._static_candidates.begin(), other._static_candidates.end(), std::back_inserter(_static_candidates));
         }
 
-        std::unordered_set<CandidateIdType> _dynamic_candidates;
+        HashSet<CandidateIdType> _dynamic_candidates;
         Vector<Candidate> _static_candidates;
     };
 

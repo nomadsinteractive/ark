@@ -69,7 +69,7 @@ void RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, Ve
     for(auto iter = layerContexts.begin(); iter != layerContexts.end(); )
     {
         const sp<LayerContext>& layerContext = *iter;
-        if(const SafeVar<Boolean>& discarded = layerContext->discarded(); (!discarded && layerContext.unique()) || discarded.val())
+        if(const OptionalVar<Boolean>& discarded = layerContext->discarded(); (!discarded && layerContext.unique()) || discarded.val())
         {
             addDiscardedLayerContext(layerContext);
             iter = layerContexts.erase(iter);

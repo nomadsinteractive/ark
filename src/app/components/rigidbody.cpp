@@ -117,17 +117,17 @@ const sp<Shape>& Rigidbody::shape() const
     return _impl._stub->_shape;
 }
 
-const SafeVar<Vec3>& Rigidbody::position() const
+const OptionalVar<Vec3>& Rigidbody::position() const
 {
     return _impl._stub->_position;
 }
 
-const SafeVar<Vec4>& Rigidbody::rotation() const
+const OptionalVar<Vec4>& Rigidbody::rotation() const
 {
     return _impl._stub->_rotation;
 }
 
-const SafeVar<Boolean>& Rigidbody::discarded() const
+const OptionalVar<Boolean>& Rigidbody::discarded() const
 {
     return _impl._stub->_ref->discarded();
 }

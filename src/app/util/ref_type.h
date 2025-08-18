@@ -21,7 +21,7 @@ public:
     static bool toBool(const sp<Ref>& self);
 
 //  [[script::bindings::property]]
-    static const SafeVar<Boolean>& discarded(const sp<Ref>& self);
+    static const OptionalVar<Boolean>& discarded(const sp<Ref>& self);
 //  [[script::bindings::property]]
     static void setDiscarded(const sp<Ref>& self, sp<Boolean> discarded);
 

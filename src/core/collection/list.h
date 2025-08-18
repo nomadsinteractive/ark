@@ -6,7 +6,7 @@
 #include "core/forwarding.h"
 #include "core/inf/variable.h"
 #include "core/collection/iterable.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 #include "core/components/visibility.h"
 
 namespace ark {
@@ -43,7 +43,7 @@ public:
         }
 
     private:
-        SafeVar<Boolean> _condition;
+        OptionalVar<Boolean> _condition;
     };
 
     template<typename T, typename U, typename V> class IsBoth {

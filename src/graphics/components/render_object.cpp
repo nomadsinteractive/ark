@@ -40,7 +40,7 @@ sp<Integer> RenderObject::type() const
     return _type;
 }
 
-const SafeVar<Vec3>& RenderObject::size()
+const OptionalVar<Vec3>& RenderObject::size()
 {
     return _size;
 }

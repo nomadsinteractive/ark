@@ -22,7 +22,7 @@ bool RefType::toBool(const sp<Ref>& self)
     return !self->isDiscarded();
 }
 
-const SafeVar<Boolean>& RefType::discarded(const sp<Ref>& self)
+const OptionalVar<Boolean>& RefType::discarded(const sp<Ref>& self)
 {
     return self->discarded();
 }

@@ -100,7 +100,7 @@ public:
 
 private:
     String _label;
-    SafeVar<Boolean> _enabled;
+    OptionalVar<Boolean> _enabled;
     sp<Boolean::Impl> _return_value;
 };
 
@@ -131,7 +131,7 @@ private:
     String _label;
     String _shortcut;
     sp<Boolean> _selected;
-    SafeVar<Boolean> _enabled;
+    OptionalVar<Boolean> _enabled;
     sp<Runnable> _observer;
     bool _toggleable;
 };
@@ -266,8 +266,8 @@ private:
     sp<Texture> _texture;
     sp<Vec2> _size;
     ImVec2 _uv0, _uv1;
-    SafeVar<Vec4> _color;
-    SafeVar<Vec4> _border_color;
+    OptionalVar<Vec4> _color;
+    OptionalVar<Vec4> _border_color;
 
     sp<RendererContext> _renderer_context;
 };

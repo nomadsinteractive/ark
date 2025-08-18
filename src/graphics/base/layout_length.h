@@ -4,7 +4,7 @@
 #include "core/base/string.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 namespace ark {
 
@@ -30,7 +30,7 @@ public:
     bool update(uint64_t timestamp) const;
 
 //  [[script::bindings::property]]
-    const SafeVar<Numeric>& value() const;
+    const OptionalVar<Numeric>& value() const;
 //  [[script::bindings::property]]
     LayoutLength::LengthType type() const;
 
@@ -64,7 +64,7 @@ public:
     };
 
 private:
-    SafeVar<Numeric> _value;
+    OptionalVar<Numeric> _value;
     LengthType _type;
 
     friend class LayoutParam;

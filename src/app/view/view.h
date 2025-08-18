@@ -6,7 +6,7 @@
 #include "core/inf/builder.h"
 #include "core/inf/updatable.h"
 #include "core/inf/wirable.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/components/text.h"
@@ -35,7 +35,7 @@ public:
     const String& name() const;
 
 //  [[script::bindings::property]]
-    const SafeVar<Boolean>& discarded() const;
+    const OptionalVar<Boolean>& discarded() const;
 //  [[script::bindings::property]]
     void setDiscarded(sp<Boolean> discarded);
 

@@ -2,7 +2,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/runnable.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -29,8 +29,8 @@ public:
 
 private:
     sp<Runnable> _observer;
-    SafeVar<Boolean> _done;
-    SafeVar<Boolean> _canceled;
+    OptionalVar<Boolean> _done;
+    OptionalVar<Boolean> _canceled;
     uint32_t _count_down;
 };
 

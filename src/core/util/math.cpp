@@ -13,7 +13,7 @@
 #include "core/impl/variable/lerp.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 #include "core/util/operators.h"
 #include "core/util/log.h"
 
@@ -60,8 +60,8 @@ public:
     }
 
 private:
-    SafeVar<Numeric> _a;
-    SafeVar<Numeric> _b;
+    OptionalVar<Numeric> _a;
+    OptionalVar<Numeric> _b;
 };
 
 class Randfv final : public Numeric {
@@ -95,8 +95,8 @@ private:
     }
 
 private:
-    SafeVar<Numeric> _a;
-    SafeVar<Numeric> _b;
+    OptionalVar<Numeric> _a;
+    OptionalVar<Numeric> _b;
 
     Timestamp _timestamp;
     float _value;

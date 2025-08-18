@@ -4,7 +4,6 @@
 
 #include "core/base/bean_factory.h"
 #include "core/util/math.h"
-#include "core/util/log.h"
 
 namespace ark {
 

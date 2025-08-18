@@ -176,7 +176,7 @@ LayoutParam::Align LayoutParam::alignContent() const
     return _align_content;
 }
 
-const SafeVar<Vec4>& LayoutParam::margins() const
+const OptionalVar<Vec4>& LayoutParam::margins() const
 {
     return _margins;
 }
@@ -186,7 +186,7 @@ void LayoutParam::setMargins(sp<Vec4> margins)
     _margins = std::move(margins);
 }
 
-const SafeVar<Vec4>& LayoutParam::paddings() const
+const OptionalVar<Vec4>& LayoutParam::paddings() const
 {
     return _paddings;
 }
@@ -196,7 +196,7 @@ void LayoutParam::setPaddings(sp<Vec4> paddings)
     _paddings.reset(std::move(paddings));
 }
 
-const SafeVar<Vec3>& LayoutParam::offset() const
+const OptionalVar<Vec3>& LayoutParam::offset() const
 {
     return _offset;
 }

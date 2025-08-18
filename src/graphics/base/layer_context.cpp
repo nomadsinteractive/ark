@@ -30,7 +30,7 @@ const sp<Shader>& LayerContext::shader() const
     return _shader;
 }
 
-const SafeVar<Vec3>& LayerContext::position() const
+const OptionalVar<Vec3>& LayerContext::position() const
 {
     return _position;
 }
@@ -41,17 +41,17 @@ void LayerContext::setPosition(sp<Vec3> position)
     _timestamp.markDirty();
 }
 
-SafeVar<Boolean>& LayerContext::visible()
+OptionalVar<Boolean>& LayerContext::visible()
 {
     return _visible;
 }
 
-const SafeVar<Boolean>& LayerContext::visible() const
+const OptionalVar<Boolean>& LayerContext::visible() const
 {
     return _visible;
 }
 
-const SafeVar<Boolean>& LayerContext::discarded() const
+const OptionalVar<Boolean>& LayerContext::discarded() const
 {
     return _discarded;
 }

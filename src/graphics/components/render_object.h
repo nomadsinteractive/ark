@@ -6,7 +6,7 @@
 #include "core/inf/wirable.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/components/size.h"
@@ -35,7 +35,7 @@ public:
     void setPosition(sp<Vec3> position);
 
 //  [[script::bindings::property]]
-    const SafeVar<Vec3>& size();
+    const OptionalVar<Vec3>& size();
 //  [[script::bindings::property]]
     void setSize(sp<Vec3> size);
 
@@ -110,13 +110,13 @@ public:
 private:
     sp<IntegerWrapper> _type;
 
-    SafeVar<Vec3> _position;
-    SafeVar<Vec3> _size;
+    OptionalVar<Vec3> _position;
+    OptionalVar<Vec3> _size;
     sp<Transform> _transform;
     sp<Varyings> _varyings;
 
-    SafeVar<Boolean> _visible;
-    SafeVar<Boolean> _discarded;
+    OptionalVar<Boolean> _visible;
+    OptionalVar<Boolean> _discarded;
 
     sp<Tags> _tags;
 

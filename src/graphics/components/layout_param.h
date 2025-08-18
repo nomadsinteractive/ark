@@ -5,7 +5,7 @@
 #include "core/inf/builder.h"
 #include "core/inf/updatable.h"
 #include "core/impl/builder/safe_builder.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/layout_length.h"
@@ -119,17 +119,17 @@ public:
     LayoutParam::Align alignContent() const;
 
 //  [[script::bindings::property]]
-    const SafeVar<Vec4>& margins() const;
+    const OptionalVar<Vec4>& margins() const;
 //  [[script::bindings::property]]
     void setMargins(sp<Vec4> margins);
 
 //  [[script::bindings::property]]
-    const SafeVar<Vec4>& paddings() const;
+    const OptionalVar<Vec4>& paddings() const;
 //  [[script::bindings::property]]
     void setPaddings(sp<Vec4> paddings);
 
 //  [[script::bindings::property]]
-    const SafeVar<Vec3>& offset() const;
+    const OptionalVar<Vec3>& offset() const;
 //  [[script::bindings::property]]
     void setOffset(sp<Vec3> offset);
 
@@ -178,10 +178,10 @@ private:
 
     LayoutLength _flex_basis;
     float _flex_grow;
-    SafeVar<Vec4> _margins;
-    SafeVar<Vec4> _paddings;
+    OptionalVar<Vec4> _margins;
+    OptionalVar<Vec4> _paddings;
 
-    SafeVar<Vec3> _offset;
+    OptionalVar<Vec3> _offset;
 
     Timestamp _timestamp;
 };

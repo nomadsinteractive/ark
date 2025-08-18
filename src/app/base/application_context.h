@@ -99,7 +99,7 @@ private:
         AppClock(sp<Numeric> timeScale);
 
         sp<Variable<uint64_t>> _steady;
-        SafeVar<Numeric> _time_scale;
+        OptionalVar<Numeric> _time_scale;
 
         sp<Variable<uint64_t>::Impl> _tick;
         sp<Numeric::Impl> _interval;

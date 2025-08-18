@@ -5,7 +5,7 @@
 #include "core/forwarding.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/mat.h"
@@ -27,13 +27,13 @@ public:
     V4 transform(const Snapshot& snapshot, const V4& xyzw) override;
     M4 toMatrix(const Snapshot& snapshot) override;
 
-    const SafeVar<Vec4>& rotation() const;
+    const OptionalVar<Vec4>& rotation() const;
     void setRotation(sp<Vec4> rotation);
 
-    const SafeVar<Vec3>& scale() const;
+    const OptionalVar<Vec3>& scale() const;
     void setScale(sp<Vec3> scale);
 
-    const SafeVar<Vec3>& translation() const;
+    const OptionalVar<Vec3>& translation() const;
     void setTranslation(sp<Vec3> translation);
 
     void reset(sp<Mat4> transform);
@@ -46,9 +46,9 @@ private:
     void doUpdateDelegate();
 
     struct Stub {
-        SafeVar<Vec3> _translation;
-        SafeVar<Vec4> _rotation;
-        SafeVar<Vec3> _scale;
+        OptionalVar<Vec3> _translation;
+        OptionalVar<Vec4> _rotation;
+        OptionalVar<Vec3> _scale;
 
         Timestamp _timestamp;
 

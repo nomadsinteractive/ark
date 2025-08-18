@@ -28,9 +28,9 @@ struct Camera::Stub {
         : _position(nullptr, V3(0, 0, 1)), _up(nullptr, V3(0, 1, 0)) {
     }
 
-    SafeVar<Vec3> _position;
-    SafeVar<Vec3> _target;
-    SafeVar<Vec3> _up;
+    OptionalVar<Vec3> _position;
+    OptionalVar<Vec3> _target;
+    OptionalVar<Vec3> _up;
 };
 
 namespace {

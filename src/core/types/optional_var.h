@@ -6,25 +6,25 @@
 
 namespace ark {
 
-template<typename T> class SafeVar {
+template<typename T> class OptionalVar {
 public:
     typedef decltype(std::declval<T>().val()) ValType;
-    typedef typename Variable<ValType>::Const WrapperType;
+    typedef Variable<ValType>::Const WrapperType;
     typedef T _PtrType;
 
-    SafeVar() noexcept
+    OptionalVar() noexcept
         : _stub(sp<Stub>::make(nullptr, ValType())) {
     }
-    SafeVar(nullptr_t) noexcept
-        : SafeVar() {
+    OptionalVar(nullptr_t) noexcept
+        : OptionalVar() {
     }
-    SafeVar(sp<T> delegate) noexcept
-        : SafeVar(std::move(delegate), ValType()) {
+    OptionalVar(sp<T> delegate) noexcept
+        : OptionalVar(std::move(delegate), ValType()) {
     }
-    SafeVar(sp<T> delegate, ValType defaultVal) noexcept
+    OptionalVar(sp<T> delegate, ValType defaultVal) noexcept
         : _stub(sp<Stub>::make(std::move(delegate), std::move(defaultVal))) {
     }
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SafeVar);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(OptionalVar);
 
     explicit operator bool() const {
         return static_cast<bool>(this->_stub->_delegate);

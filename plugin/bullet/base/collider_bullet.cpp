@@ -168,8 +168,8 @@ struct GhostObject : BtRigibodyObject {
         : BtRigibodyObject(std::move(btRigidbodyRef)), _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE) {
     }
 
-    SafeVar<Vec3> _position;
-    SafeVar<Vec4> _quaternion;
+    OptionalVar<Vec3> _position;
+    OptionalVar<Vec4> _quaternion;
 };
 
 }

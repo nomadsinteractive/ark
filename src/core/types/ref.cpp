@@ -31,7 +31,7 @@ bool Ref::isDiscarded() const
     return _discarded.val();
 }
 
-const SafeVar<Boolean>& Ref::discarded() const
+const OptionalVar<Boolean>& Ref::discarded() const
 {
     return _discarded;
 }

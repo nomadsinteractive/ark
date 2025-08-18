@@ -117,7 +117,7 @@ M4 TransformImpl::val()
     return _wrapped->val();
 }
 
-const SafeVar<Vec4>& TransformImpl::rotation() const
+const OptionalVar<Vec4>& TransformImpl::rotation() const
 {
     return _stub->_rotation;
 }
@@ -128,7 +128,7 @@ void TransformImpl::setRotation(sp<Vec4> rotation)
     doUpdateDelegate();
 }
 
-const SafeVar<Vec3>& TransformImpl::scale() const
+const OptionalVar<Vec3>& TransformImpl::scale() const
 {
     return _stub->_scale;
 }
@@ -139,7 +139,7 @@ void TransformImpl::setScale(sp<Vec3> scale)
     doUpdateDelegate();
 }
 
-const SafeVar<Vec3>& TransformImpl::translation() const
+const OptionalVar<Vec3>& TransformImpl::translation() const
 {
     return _stub->_translation;
 }

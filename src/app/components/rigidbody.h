@@ -5,7 +5,7 @@
 #include "core/impl/builder/safe_builder.h"
 #include "core/inf/wirable.h"
 #include "core/types/box.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -37,8 +37,8 @@ public:
         sp<Ref> _ref;
         BodyType _type;
         sp<Shape> _shape;
-        SafeVar<Vec3> _position;
-        SafeVar<Vec4> _rotation;
+        OptionalVar<Vec3> _position;
+        OptionalVar<Vec4> _rotation;
         sp<CollisionFilter> _collision_filter;
         sp<CollisionCallback> _collision_callback;
         sp<Tags> _tags;
@@ -65,14 +65,14 @@ public:
 //  [[script::bindings::property]]
     const sp<Shape>& shape() const;
 //  [[script::bindings::property]]
-    const SafeVar<Vec3>& position() const;
+    const OptionalVar<Vec3>& position() const;
 //  [[script::bindings::property]]
-    const SafeVar<Vec4>& rotation() const;
+    const OptionalVar<Vec4>& rotation() const;
 
 //  [[script::bindings::auto]]
     void discard();
 //  [[script::bindings::property]]
-    const SafeVar<Boolean>& discarded() const;
+    const OptionalVar<Boolean>& discarded() const;
 
 //  [[script::bindings::property]]
     const sp<CollisionCallback>& collisionCallback() const;

@@ -2,7 +2,7 @@
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/rect.h"
@@ -23,7 +23,7 @@ public:
     const String& name() const;
 
 // [[script::bindings::property]]
-    const SafeVar<Vec3>& position() const;
+    const OptionalVar<Vec3>& position() const;
 // [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
 
@@ -49,7 +49,7 @@ public:
     uint32_t rowCount() const;
 
 // [[script::bindings::property]]
-    const SafeVar<Boolean>& visible() const;
+    const OptionalVar<Boolean>& visible() const;
 // [[script::bindings::property]]
     void setVisible(sp<Boolean> visible);
 
@@ -89,7 +89,7 @@ private:
     uint32_t _row_count;
     sp<Size> _size;
 
-    SafeVar<Boolean> _visible;
+    OptionalVar<Boolean> _visible;
     sp<CollisionFilter> _collision_filter;
     sp<LayerContext> _layer_context;
 

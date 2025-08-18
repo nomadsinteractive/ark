@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include <cute_c2.h>
 
 #include "graphics/forwarding.h"

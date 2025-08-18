@@ -5,7 +5,7 @@
 #include "core/base/string.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 namespace ark {
 
@@ -26,7 +26,7 @@ public:
     }
 
 private:
-    SafeVar<Boolean> _condition;
+    OptionalVar<Boolean> _condition;
     String _message;
 };
 

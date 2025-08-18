@@ -26,13 +26,13 @@ public:
 
     const sp<Shader>& shader() const;
 
-    const SafeVar<Vec3>& position() const;
+    const OptionalVar<Vec3>& position() const;
     void setPosition(sp<Vec3> position);
 
-    SafeVar<Boolean>& visible();
-    const SafeVar<Boolean>& visible() const;
+    OptionalVar<Boolean>& visible();
+    const OptionalVar<Boolean>& visible() const;
 
-    const SafeVar<Boolean>& discarded() const;
+    const OptionalVar<Boolean>& discarded() const;
 
     const sp<ModelLoader>& modelLoader() const;
     void setModelLoader(sp<ModelLoader> modelLoader);
@@ -58,9 +58,9 @@ private:
     sp<Shader> _shader;
     sp<ModelLoader> _model_loader;
 
-    SafeVar<Vec3> _position;
-    SafeVar<Boolean> _visible;
-    SafeVar<Boolean> _discarded;
+    OptionalVar<Vec3> _position;
+    OptionalVar<Boolean> _visible;
+    OptionalVar<Boolean> _discarded;
 
     sp<Varyings> _varyings;
 

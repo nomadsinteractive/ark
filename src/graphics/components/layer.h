@@ -6,7 +6,7 @@
 #include "core/inf/wirable.h"
 #include "core/types/shared_ptr.h"
 #include "core/impl/builder/safe_builder.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
 
@@ -26,17 +26,17 @@ public:
     const sp<Shader>& shader() const;
 
 //  [[script::bindings::property]]
-    const SafeVar<Vec3>& position() const;
+    const OptionalVar<Vec3>& position() const;
 //  [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
 
 //  [[script::bindings::property]]
-    const SafeVar<Boolean>& visible() const;
+    const OptionalVar<Boolean>& visible() const;
 //  [[script::bindings::property]]
     void setVisible(sp<Boolean> visible);
 
 //  [[script::bindings::property]]
-    const SafeVar<Boolean>& discarded() const;
+    const OptionalVar<Boolean>& discarded() const;
 
 //  [[script::bindings::property]]
     sp<ModelLoader> modelLoader() const;

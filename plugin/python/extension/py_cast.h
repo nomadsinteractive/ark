@@ -12,7 +12,7 @@
 #include "core/types/box.h"
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/rect.h"

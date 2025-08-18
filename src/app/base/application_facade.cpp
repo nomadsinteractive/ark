@@ -291,7 +291,7 @@ void ApplicationFacade::setBackgroundColor(const V4 backgroundColor)
     _context->setBackgroundColor(backgroundColor);
 }
 
-const SafeVar<Boolean>& ApplicationFacade::textInputEnabled() const
+const OptionalVar<Boolean>& ApplicationFacade::textInputEnabled() const
 {
     return _text_input_enabled;
 }

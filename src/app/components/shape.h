@@ -2,7 +2,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/named_hash.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
@@ -28,9 +28,9 @@ public:
 //  [[script::bindings::property]]
     const NamedHash& type() const;
 //  [[script::bindings::property]]
-    const SafeVar<Vec3>& size() const;
+    const OptionalVar<Vec3>& size() const;
 //  [[script::bindings::property]]
-    const SafeVar<Vec3>& origin() const;
+    const OptionalVar<Vec3>& origin() const;
 
     template<typename T> sp<T> asImplementation() const {
         if(!_implementation)
@@ -43,8 +43,8 @@ public:
 
 private:
     NamedHash _type;
-    SafeVar<Vec3> _size;
-    SafeVar<Vec3> _origin;
+    OptionalVar<Vec3> _size;
+    OptionalVar<Vec3> _origin;
 
     Box _implementation;
 };

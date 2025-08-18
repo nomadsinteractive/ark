@@ -22,7 +22,7 @@ const CollisionFilter& getCollisionFilter(const CollisionFilter& oneFilter, cons
     return specifiedFilter ? *specifiedFilter : oneFilter;
 }
 
-std::vector<ShapeCuteC2> toCuteC2Shapes(const ShapeCuteC2& shape)
+Vector<ShapeCuteC2> toCuteC2Shapes(const ShapeCuteC2& shape)
 {
     return {shape};
 }
@@ -55,7 +55,7 @@ ShapeCuteC2 makeAABBShapeImpl(const Rect& bounds)
     return shape;
 }
 
-ShapeCuteC2 makePolygonShapeImpl(const std::vector<V2>& vertices)
+ShapeCuteC2 makePolygonShapeImpl(const Vector<V2>& vertices)
 {
     CHECK(vertices.size() < C2_MAX_POLYGON_VERTS, "Max polygon vertices exceeded, vertices.size: %d, max size: %d", vertices.size(), C2_MAX_POLYGON_VERTS);
 
@@ -134,7 +134,7 @@ sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyCapsule(const 
     return sp<BodyDefCuteC2>::make(size, V2(0.5f), toCuteC2Shapes(makeCapsuleShapeImpl(p1, p2, radius)));
 }
 
-RigidbodyDef NarrowPhraseCuteC2::makeBodyDef(TypeId shapeId, const SafeVar<Vec3>& size)
+RigidbodyDef NarrowPhraseCuteC2::makeBodyDef(const HashId shapeId, sp<Vec3> size)
 {
     V3 sizeVal;
     sp<BodyDefCuteC2> bodyDef = findBodyDef(shapeId);
@@ -144,7 +144,7 @@ RigidbodyDef NarrowPhraseCuteC2::makeBodyDef(TypeId shapeId, const SafeVar<Vec3>
             sizeVal = V3(bodyDef->size(), 0);
         else
         {
-            sizeVal = size.val();
+            sizeVal = size->val();
             if(bodyDef->size() != V2(sizeVal.x(), sizeVal.y()))
             {
                 bodyDef = sp<BodyDefCuteC2>::make(*bodyDef);
@@ -155,7 +155,7 @@ RigidbodyDef NarrowPhraseCuteC2::makeBodyDef(TypeId shapeId, const SafeVar<Vec3>
     else
     {
         CHECK(size, "Size required for predefined shapes");
-        sizeVal = size.val();
+        sizeVal = size->val();
 
         const Rect bounds(sizeVal.x() / -2.0f, sizeVal.y() / -2.0f, sizeVal.x() / 2.0f, sizeVal.y() / 2.0f);
         switch(shapeId)
@@ -222,14 +222,14 @@ void NarrowPhraseCuteC2::loadShapes(const document& manifest, float ppu)
     for(const document& i : manifest->children("body"))
     {
         const int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "name");
-        _body_defs[shapeId] = sp<BodyDefCuteC2>::make(i, ppu);
+        _body_shapes[shapeId] = sp<BodyDefCuteC2>::make(i, ppu);
     }
 }
 
 sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::findBodyDef(const HashId shapeId) const
 {
-    const auto iter = _body_defs.find(shapeId);
-    return iter != _body_defs.end() ? iter->second : nullptr;
+    const auto iter = _body_shapes.find(shapeId);
+    return iter != _body_shapes.end() ? iter->second : nullptr;
 }
 
 sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::ensureBodyDef(const BroadPhrase::Candidate& candidate) const
@@ -241,7 +241,7 @@ sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::ensureBodyDef(const Br
     return bodyDef;
 }
 
-NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const V2& size, const V2& pivot, std::vector<ShapeCuteC2> shapes)
+NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const V2& size, const V2& pivot, Vector<ShapeCuteC2> shapes)
     : _size(size), _pivot(pivot), _shapes(std::move(shapes))
 {
 }
@@ -288,7 +288,7 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest, float
             const document& polygons = j->ensureChild("polygons");
             for(const document& k : polygons->children("polygon"))
             {
-                const std::vector<String> values = k->value().split(',');
+                const Vector<String> values = k->value().split(',');
                 CHECK(values.size() % 2 == 0, "Illegal vertex points: %s", k->value().c_str());
                 ShapeCuteC2 shape;
                 shape._collision_filter.setCategoryBits(Documents::getValue<uint32_t>(j, "filter_categoryBits", 1));
@@ -319,7 +319,7 @@ const V2& NarrowPhraseCuteC2::BodyDefCuteC2::pivot() const
     return _pivot;
 }
 
-const std::vector<ShapeCuteC2>& NarrowPhraseCuteC2::BodyDefCuteC2::shapes() const
+const Vector<ShapeCuteC2>& NarrowPhraseCuteC2::BodyDefCuteC2::shapes() const
 {
     return _shapes;
 }

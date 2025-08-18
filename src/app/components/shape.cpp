@@ -19,12 +19,12 @@ const NamedHash& Shape::type() const
     return _type;
 }
 
-const SafeVar<Vec3>& Shape::size() const
+const OptionalVar<Vec3>& Shape::size() const
 {
     return _size;
 }
 
-const SafeVar<Vec3>& Shape::origin() const
+const OptionalVar<Vec3>& Shape::origin() const
 {
     return _origin;
 }

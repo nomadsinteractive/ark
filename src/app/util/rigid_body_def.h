@@ -5,8 +5,6 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
 
-#include "app/forwarding.h"
-
 namespace ark {
 
 class ARK_API [[deprecated]] RigidbodyDef {
@@ -21,9 +19,6 @@ public:
     float occupyRadius() const;
 
     const Box& impl() const;
-
-private:
-    float calcOccupyRadius(const V3& size, const V3& pivot) const;
 
 private:
     V3 _size;

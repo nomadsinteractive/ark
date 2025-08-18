@@ -158,7 +158,7 @@ struct LayoutInfo {
         return _layout_node->_layout_param;
     }
 
-    SafeVar<Vec2> _scale;
+    OptionalVar<Vec2> _scale;
 
     float _letter_spacing;
     float _line_indent;
@@ -534,7 +534,7 @@ struct Text::Content {
 
     sp<RenderLayer> _render_layer;
     sp<StringVar> _text;
-    SafeVar<Vec3> _position;
+    OptionalVar<Vec3> _position;
     sp<LayoutInfo> _layout_info;
     sp<GlyphMaker> _glyph_maker;
     sp<Layout> _layout;

@@ -182,7 +182,7 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
     YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));
     YGNodeStyleSetFlexGrow(node, layoutParam.flexGrow());
 
-    if(const Optional<float> flexBasis = updateVar<float, const SafeVar<Numeric>>(timestamp, layoutParam.flexBasis().value()))
+    if(const Optional<float> flexBasis = updateVar<float, const OptionalVar<Numeric>>(timestamp, layoutParam.flexBasis().value()))
     {
         if(layoutParam.flexBasis().type() == LayoutLength::LENGTH_TYPE_AUTO)
             YGNodeStyleSetFlexBasisAuto(node);

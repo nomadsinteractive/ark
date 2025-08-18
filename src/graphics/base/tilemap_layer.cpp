@@ -24,7 +24,7 @@ struct TilemapLayer::Stub {
     size_t _col_count;
     size_t _row_count;
     sp<Tileset> _tileset;
-    SafeVar<Vec3> _position;
+    OptionalVar<Vec3> _position;
     float _zorder;
 };
 
@@ -99,7 +99,7 @@ const String& TilemapLayer::name() const
     return _name;
 }
 
-const SafeVar<Vec3>& TilemapLayer::position() const
+const OptionalVar<Vec3>& TilemapLayer::position() const
 {
     return _stub->_position;
 }
@@ -137,7 +137,7 @@ uint32_t TilemapLayer::rowCount() const
     return _row_count;
 }
 
-const SafeVar<Boolean>& TilemapLayer::visible() const
+const OptionalVar<Boolean>& TilemapLayer::visible() const
 {
     return _visible;
 }

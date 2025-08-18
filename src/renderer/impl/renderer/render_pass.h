@@ -2,7 +2,7 @@
 
 #include "core/inf/builder.h"
 #include "core/base/enum.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/inf/renderer.h"
@@ -43,7 +43,7 @@ public:
 private:
     sp<Shader> _shader;
     Buffer _index_buffer;
-    SafeVar<Integer> _offset;
+    OptionalVar<Integer> _offset;
     sp<Integer> _draw_count;
     enums::DrawProcedure _draw_procedure;
     Buffer _indirect_buffer;

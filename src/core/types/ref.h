@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/types/safe_var.h"
+#include "core/types/optional_var.h"
 
 namespace ark {
 
@@ -21,7 +21,7 @@ public:
     RefId id() const;
 
     bool isDiscarded() const;
-    const SafeVar<Boolean>& discarded() const;
+    const OptionalVar<Boolean>& discarded() const;
     void setDiscarded(sp<Boolean> discarded);
 
     void discard();
@@ -29,7 +29,7 @@ public:
 private:
     RefId _id;
     void* _instance;
-    SafeVar<Boolean> _discarded;
+    OptionalVar<Boolean> _discarded;
 
     friend class RefManager;
 };

@@ -23,8 +23,8 @@ private:
         sp<RenderController> _render_controller;
         sp<ModelLoader> _model_loader;
         sp<Shader> _shader;
-        SafeVar<Boolean> _visible;
-        SafeVar<Boolean> _discarded;
+        OptionalVar<Boolean> _visible;
+        OptionalVar<Boolean> _discarded;
         sp<Varyings> _varyings;
         sp<Vec4> _scissor;
 

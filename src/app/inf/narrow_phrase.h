@@ -30,7 +30,7 @@ public:
 public:
     virtual ~NarrowPhrase() = default;
 
-    virtual RigidbodyDef makeBodyDef(TypeId shapeId, const SafeVar<Vec3>& size) = 0;
+    virtual RigidbodyDef makeBodyDef(HashId shapeId, sp<Vec3> size) = 0;
 
     virtual Ray toRay(const V2& from, const V2& to) = 0;
 

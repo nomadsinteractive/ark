@@ -32,7 +32,7 @@ const sp<Shader>& Layer::shader() const
     return _layer_context->shader();
 }
 
-const SafeVar<Vec3>& Layer::position() const
+const OptionalVar<Vec3>& Layer::position() const
 {
     return _layer_context->position();
 }
@@ -42,7 +42,7 @@ void Layer::setPosition(sp<Vec3> position)
     _layer_context->setPosition(std::move(position));
 }
 
-const SafeVar<Boolean>& Layer::visible() const
+const OptionalVar<Boolean>& Layer::visible() const
 {
     return _layer_context->visible();
 }
@@ -52,7 +52,7 @@ void Layer::setVisible(sp<Boolean> visible)
     _layer_context->visible().reset(std::move(visible));
 }
 
-const SafeVar<Boolean>& Layer::discarded() const
+const OptionalVar<Boolean>& Layer::discarded() const
 {
     return _layer_context->discarded();
 }
