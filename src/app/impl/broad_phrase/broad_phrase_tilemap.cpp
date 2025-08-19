@@ -19,7 +19,6 @@
 #include "app/inf/collider.h"
 #include "app/inf/narrow_phrase.h"
 #include "graphics/components/shape.h"
-#include "app/util/rigid_body_def.h"
 
 namespace ark {
 

@@ -36,8 +36,7 @@ public:
     virtual ~NarrowPhrase() = default;
 
     virtual ShapeDef createShapeDef(HashId shapeId, Optional<V3> size) = 0;
-
-    virtual RigidbodyDef makeBodyDef(HashId shapeId, sp<Vec3> size) = 0;
+    virtual void updateShapeDef(const ShapeDef& shapeDef) = 0;
 
     virtual Ray toRay(const V2& from, const V2& to) = 0;
 

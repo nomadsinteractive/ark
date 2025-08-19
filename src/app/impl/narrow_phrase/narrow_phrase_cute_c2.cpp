@@ -6,12 +6,12 @@
 #include "graphics/base/rect.h"
 #include "graphics/components/size.h"
 
+#include "graphics/components/shape.h"
+
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/inf/collider.h"
-#include "graphics/components/shape.h"
 #include "app/base/raycast_manifold.h"
-#include "app/util/rigid_body_def.h"
 
 namespace ark {
 
@@ -164,6 +164,11 @@ NarrowPhraseCuteC2::ShapeDef NarrowPhraseCuteC2::createShapeDef(const HashId sha
     return {Box(std::move(bodyDef)), sizeVal};
 }
 
+void NarrowPhraseCuteC2::updateShapeDef(const ShapeDef& shapeDef)
+{
+    shapeDef._implementation.as<BodyDefCuteC2>()->resize({shapeDef._size.x(), shapeDef._size.y()});
+}
+
 sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyAABB(const Rect& aabb)
 {
     return sp<BodyDefCuteC2>::make(V2(aabb.width(), aabb.height()), V2(0.5f), toCuteC2Shapes(makeAABBShapeImpl(aabb)));
@@ -183,57 +188,6 @@ sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyCapsule(const 
 {
     const V2 size = Math::abs(p1 - p2) + V2(radius * 2);
     return sp<BodyDefCuteC2>::make(size, V2(0.5f), toCuteC2Shapes(makeCapsuleShapeImpl(p1, p2, radius)));
-}
-
-RigidbodyDef NarrowPhraseCuteC2::makeBodyDef(const HashId shapeId, sp<Vec3> size)
-{
-    V3 sizeVal;
-    sp<BodyDefCuteC2> bodyDef = findBodyDef(shapeId);
-    if(bodyDef)
-    {
-        if(!size)
-            sizeVal = V3(bodyDef->size(), 0);
-        else
-        {
-            sizeVal = size->val();
-            if(bodyDef->size() != V2(sizeVal.x(), sizeVal.y()))
-            {
-                bodyDef = sp<BodyDefCuteC2>::make(*bodyDef);
-                bodyDef->resize(sizeVal);
-            }
-        }
-    }
-    else
-    {
-        CHECK(size, "Size required for predefined shapes");
-        sizeVal = size->val();
-
-        const Rect bounds(sizeVal.x() / -2.0f, sizeVal.y() / -2.0f, sizeVal.x() / 2.0f, sizeVal.y() / 2.0f);
-        switch(shapeId)
-        {
-            case Shape::TYPE_BALL:
-                bodyDef = makeBodyBall(V2(0, 0), sizeVal.x());
-            break;
-            case Shape::TYPE_AABB:
-                bodyDef = makeBodyAABB(bounds);
-            break;
-            case Shape::TYPE_CAPSULE:
-            {
-                float radius = bounds.width() / 2;
-                float x = (bounds.left() + bounds.right()) / 2;
-                CHECK(radius < bounds.height() / 2, "Capsule too narrow, width = %.2f, height = %.2f, radius = %.2f", bounds.width(), bounds.height(), radius);
-                bodyDef = makeBodyCapsule(V2(x, bounds.top() + radius), V2(x, bounds.bottom() - radius), radius);
-                break;
-            }
-            case Shape::TYPE_BOX:
-                bodyDef = makeBodyBox(bounds);
-            break;
-            default:
-                FATAL("Shape %d not found", shapeId);
-                break;
-        }
-    }
-    return RigidbodyDef(sizeVal, V3(bodyDef->pivot(), 0), Box(bodyDef));
 }
 
 NarrowPhrase::Ray NarrowPhraseCuteC2::toRay(const V2& from, const V2& to)

@@ -9,6 +9,7 @@
 #include "core/types/ref.h"
 #include "core/util/log.h"
 
+#include "graphics/components/shape.h"
 #include "graphics/components/size.h"
 #include "graphics/base/v2.h"
 
@@ -20,9 +21,7 @@
 #include "app/components/rigidbody.h"
 #include "app/inf/broad_phrase.h"
 #include "app/inf/narrow_phrase.h"
-#include "graphics/components/shape.h"
 #include "app/inf/rigidbody_controller.h"
-#include "app/util/rigid_body_def.h"
 
 namespace ark {
 
@@ -33,12 +32,22 @@ bool collisionFilterTest(const sp<CollisionFilter>& cf1, const sp<CollisionFilte
     return cf1 && cf2 ? cf1->collisionTest(*cf2) : true;
 }
 
+float calcOccupyRadius(const Shape& shape)
+{
+    const V3 size = shape.size().val();
+    const V3 pivot = shape.origin().val();
+    const V3 pm(std::max(std::abs(pivot.x()), std::abs(1.0f - pivot.x())), std::max(std::abs(pivot.y()), std::abs(1.0f - pivot.y())), std::max(std::abs(pivot.z()), std::abs(1.0f - pivot.z())));
+    const V3 sm = pm * size;
+    return Math::sqrt(Math::hypot2(sm));
+}
+
 }
 
 class ColliderImpl::RigidbodyImpl final : public RigidbodyController {
 public:
     RigidbodyImpl(const Stub& stub, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
-        : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter))), _collider_stub(stub), _position_updated(true), _size_updated(false)
+        : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter))), _collider_stub(stub), _position_updated(true),
+          _size_updated(false), _occupy_radius(0)
     {
     }
 
@@ -53,10 +62,10 @@ public:
         {
             if(_size_updated)
             {
-                updateBodyDef(_collider_stub.narrowPhrase(), _rigidbody_stub->_shape->size().toVar());
+                updateBodyDef(_collider_stub.narrowPhrase(), _rigidbody_stub->_shape->size().val());
                 _size_updated = false;
             }
-            const float r = bodyDef().occupyRadius();
+            const float r = updateOccupyRadius();
             _collider_stub.updateBroadPhraseCandidate(_rigidbody_stub->_ref->id(), pos, V3(r * 2));
             _position_updated = false;
             return true;
@@ -95,15 +104,9 @@ public:
         stub.requestRigidBodyRemoval(_rigidbody_stub->_ref->id());
     }
 
-    const RigidbodyDef& bodyDef() const
+    void updateBodyDef(NarrowPhrase& narrowPhrase, const V3& size) const
     {
-        return _body_def;
-    }
-
-    const RigidbodyDef& updateBodyDef(NarrowPhrase& narrowPhrase, sp<Vec3> size)
-    {
-        _body_def = narrowPhrase.makeBodyDef(_rigidbody_stub->_shape->type().hash(), std::move(size));
-        return _body_def;
+        narrowPhrase.updateShapeDef({_rigidbody_stub->_shape->implementation(), size});
     }
 
     BroadPhrase::Candidate toBroadPhraseCandidate() const
@@ -132,15 +135,21 @@ public:
         FATAL("Unimplemented");
     }
 
+    float updateOccupyRadius()
+    {
+        _occupy_radius = calcOccupyRadius(_rigidbody_stub->_shape);
+        return _occupy_radius;
+    }
+
     sp<Rigidbody::Stub> _rigidbody_stub;
     const Stub& _collider_stub;
     Set<BroadPhrase::CandidateIdType> _dynamic_contacts;
     Set<BroadPhrase::CandidateIdType> _static_contacts;
 
-    RigidbodyDef _body_def;
-
     bool _position_updated;
     bool _size_updated;
+
+    float _occupy_radius;
 };
 
 ColliderImpl::ColliderImpl(Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase, RenderController& renderController)
@@ -241,7 +250,8 @@ bool ColliderImpl::Stub::update(const uint64_t timestamp)
     for(const Ref* i : _dirty_rigid_body_refs)
     {
         auto& bodyImpl = i->instance<RigidbodyImpl>();
-        bodyImpl.collisionTest(*this, bodyImpl._rigidbody_stub->_position.val(), V3(bodyImpl.bodyDef().occupyRadius() * 2), _phrase_remove);
+        const float r = bodyImpl._occupy_radius;
+        bodyImpl.collisionTest(*this, bodyImpl._rigidbody_stub->_position.val(), V3(r * 2), _phrase_remove);
     }
 
     for(const BroadPhrase::CandidateIdType i : _phrase_remove)
@@ -262,13 +272,11 @@ void ColliderImpl::Stub::requestRigidBodyRemoval(const int32_t rigidBodyId)
 
 sp<ColliderImpl::RigidbodyImpl> ColliderImpl::Stub::createRigidBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotate, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
 {
-    const V3 size = shape->size().val();
     sp<RigidbodyImpl> rigidBody = sp<RigidbodyImpl>::make(*this, type, std::move(shape), std::move(position), std::move(rotate), std::move(collisionFilter), std::move(discarded));
-    const RigidbodyDef& rigidBodyDef = rigidBody->updateBodyDef(_narrow_phrase, sp<Vec3>::make<Vec3::Const>(size));
     _rigid_bodies[rigidBody->_rigidbody_stub->_ref->id()] = rigidBody->_rigidbody_stub->_ref;
 
     const V3 posVal = rigidBody->_rigidbody_stub->_position.val();
-    const float s = rigidBodyDef.occupyRadius() * 2;
+    const float s = rigidBody->updateOccupyRadius() * 2;
     for(const auto& i : _broad_phrases | std::views::keys)
         i->create(rigidBody->_rigidbody_stub->_ref->id(), posVal, V3(s));
 
