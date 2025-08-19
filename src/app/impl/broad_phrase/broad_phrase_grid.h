@@ -19,8 +19,8 @@ public:
 
     sp<Coordinator> requestCoordinator() override;
 
-    Result search(const V3& position, const V3& size) override;
-    Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
+    Result search(BroadPhraseCallback& callback, V3 position, V3 size) override;
+    Result rayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
 
     class Stub;
 

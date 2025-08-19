@@ -1,6 +1,7 @@
 #include "app/impl/broad_phrase/broad_phrase_grid.h"
 
 #include "app/inf/broad_phrase.h"
+#include "app/inf/broad_phrase_callback.h"
 #include "core/base/bean_factory.h"
 #include "core/util/math.h"
 
@@ -51,7 +52,7 @@ public:
         }
     }
 
-    HashSet<CandidateIdType> search(const V3& position, const V3& size) const
+    HashSet<CandidateIdType> search(BroadPhraseCallback& callback, const V3& position, const V3& size) const
     {
         HashSet<CandidateIdType> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
         for(int32_t i = 1; i < _dimension && !candidates.empty(); i++)
@@ -59,8 +60,11 @@ public:
             const HashSet<CandidateIdType> s1 = std::move(candidates);
             const HashSet<CandidateIdType> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
             for(int32_t i : s1)
-                if(s2.find(i) != s2.end())
+                if(s2.contains(i))
+                {
+                    callback.onRigidbodyCandidate(i);
                     candidates.insert(i);
+                }
         }
         return candidates;
     }
@@ -80,14 +84,14 @@ sp<BroadPhrase::Coordinator> BroadPhraseGrid::requestCoordinator()
     return _stub.cast<Coordinator>();
 }
 
-BroadPhrase::Result BroadPhraseGrid::search(const V3& position, const V3& size)
+BroadPhrase::Result BroadPhraseGrid::search(BroadPhraseCallback& callback, const V3 position, const V3 size)
 {
-    return Result(_stub->search(position, size), {});
+    return Result(_stub->search(callback, position, size), {});
 }
 
-BroadPhrase::Result BroadPhraseGrid::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& /*collisionFilter*/)
+BroadPhrase::Result BroadPhraseGrid::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
-    return search(V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
+    return search(callback, V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
 }
 
 void BroadPhraseGrid::Axis::create(CandidateIdType id, float position, float low, float high)

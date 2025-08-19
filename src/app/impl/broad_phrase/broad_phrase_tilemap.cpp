@@ -16,6 +16,7 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/base/collision_filter.h"
+#include "app/inf/broad_phrase_callback.h"
 #include "app/inf/collider.h"
 #include "app/inf/narrow_phrase.h"
 
@@ -34,7 +35,7 @@ BroadPhrase::Candidate makeCandidate(const BroadPhrase::CandidateIdType candidat
     return {candidateId, V3(position, 0), constants::QUATERNION_ONE, shape, std::move(collisionFilter)};
 }
 
-void addCandidate(const TilemapLayer& tilemapLayer, Set<int32_t>& candidateIdSet, Vector<BroadPhrase::Candidate>& candidates, int32_t row, int32_t col, int32_t layerId, const V2& tl, const V2& tileSize)
+void addCandidate(BroadPhraseCallback& callback, const TilemapLayer& tilemapLayer, Set<int32_t>& candidateIdSet, Vector<BroadPhrase::Candidate>& candidates, int32_t row, int32_t col, int32_t layerId, const V2& tl, const V2& tileSize)
 {
     if(row >= 0 && static_cast<uint32_t>(row) < tilemapLayer.rowCount() && col >= 0 && static_cast<uint32_t>(col) < tilemapLayer.colCount())
     {
@@ -45,7 +46,10 @@ void addCandidate(const TilemapLayer& tilemapLayer, Set<int32_t>& candidateIdSet
             candidateIdSet.insert(candidateId);
             if(tile)
                 if(const int32_t shapeId = tile->shape()->type().hash(); shapeId != Shape::TYPE_NONE)
+                {
+                    callback.onStaticCandidate(candidateId, V3(tl + V2(col * tileSize.x(), row * tileSize.y()), 0), constants::QUATERNION_ONE, tile->shape(), tilemapLayer.collisionFilter());
                     candidates.push_back(makeCandidate(candidateId, tile->shape(), tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
+                }
         }
     }
 }
@@ -62,7 +66,7 @@ sp<BroadPhrase::Coordinator> BroadPhraseTilemap::requestCoordinator()
     return nullptr;
 }
 
-BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& size)
+BroadPhrase::Result BroadPhraseTilemap::search(BroadPhraseCallback& callback, const V3 position, const V3 size)
 {
     Vector<Candidate> candidates;
     Set<int32_t> candidateIdSet;
@@ -95,6 +99,7 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
                                 }
                                 candidateIdSet.insert(candidateId);
                                 candidates.push_back(makeCandidate(candidateId, tile->shape(), V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2), i.collisionFilter()));
+                                callback.onStaticCandidate(candidateId, V3(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2, 0), constants::QUATERNION_ONE, tile->shape(), i.collisionFilter());
                             }
                         }
                     }
@@ -103,7 +108,7 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
     return BroadPhrase::Result({}, std::move(candidates));
 }
 
-BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
+BroadPhrase::Result BroadPhraseTilemap::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& collisionFilter)
 {
     Vector<Candidate> candidates;
     float tileWidth = _tilemap->tileset()->tileWidth();
@@ -140,13 +145,13 @@ BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to, co
                     const V2 pos = start + delta * static_cast<float>(j);
                     const int32_t row = static_cast<int32_t>((pos.y() - tilemapLayerAabb.top()) / tileHeight);
                     const int32_t col = static_cast<int32_t>((pos.x() - tilemapLayerAabb.left()) / tileWidth);
-                    addCandidate(i, candidateIdSet, candidates, row, col, layerId, tl, tileSize);
+                    addCandidate(callback, i, candidateIdSet, candidates, row, col, layerId, tl, tileSize);
                     if(j != 0)
                     {
                         if(xwise)
-                            addCandidate(i, candidateIdSet, candidates, row, col + pre, layerId, tl, tileSize);
+                            addCandidate(callback, i, candidateIdSet, candidates, row, col + pre, layerId, tl, tileSize);
                         else
-                            addCandidate(i, candidateIdSet, candidates, row + pre, col, layerId, tl, tileSize);
+                            addCandidate(callback, i, candidateIdSet, candidates, row + pre, col, layerId, tl, tileSize);
                     }
                 }
             }

@@ -20,6 +20,7 @@
 #include "app/base/raycast_manifold.h"
 #include "app/components/rigidbody.h"
 #include "app/inf/broad_phrase.h"
+#include "app/inf/broad_phrase_callback.h"
 #include "app/inf/narrow_phrase.h"
 #include "app/inf/rigidbody_controller.h"
 
@@ -40,6 +41,19 @@ float calcOccupyRadius(const Shape& shape)
     const V3 sm = pm * size;
     return Math::sqrt(Math::hypot2(sm));
 }
+
+class BroadPhraseCallbackImpl final : public BroadPhraseCallback {
+public:
+
+    void onRigidbodyCandidate(CandidateIdType rigidbodyId) override
+    {
+    }
+
+    void onStaticCandidate(CandidateIdType candidateId, V3 position, V4 quaternion, sp<Shape> shape, sp<CollisionFilter> collisionFilter) override
+    {
+    }
+
+};
 
 }
 
@@ -80,10 +94,11 @@ public:
 
         BroadPhrase::Result result;
         HashSet<BroadPhrase::CandidateIdType> dynamicCandidates;
+        BroadPhraseCallbackImpl broadPhraseCallback;
 
         {
             DPROFILER_TRACE("BroadPhrase");
-            result = collider.broadPhraseSearch(position, size, _rigidbody_stub->_collision_filter);
+            result = collider.broadPhraseSearch(broadPhraseCallback, position, size, _rigidbody_stub->_collision_filter);
             dynamicCandidates = std::move(result._dynamic_candidates);
             dynamicCandidates.erase(_rigidbody_stub->_ref->id());
             for(const BroadPhrase::CandidateIdType i : removingIds)
@@ -179,33 +194,33 @@ ColliderImpl::Stub::Stub(Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>>
 {
 }
 
-BroadPhrase::Result ColliderImpl::Stub::broadPhraseSearch(const V3& position, const V3& aabb, const sp<CollisionFilter>& collisionFilter) const
+BroadPhrase::Result ColliderImpl::Stub::broadPhraseSearch(BroadPhraseCallback& callback, const V3 position, const V3 aabb, const sp<CollisionFilter>& collisionFilter) const
 {
     if(_broad_phrases.size() == 1)
     {
         const auto& [i, j] = _broad_phrases.at(0);
-        return collisionFilterTest(j, collisionFilter) ? i->search(position, aabb) : BroadPhrase::Result();
+        return collisionFilterTest(j, collisionFilter) ? i->search(callback, position, aabb) : BroadPhrase::Result();
     }
 
     BroadPhrase::Result result;
     for(const auto& [i, j] : _broad_phrases)
         if(collisionFilterTest(j, collisionFilter))
-            result.merge(i->search(position, aabb));
+            result.merge(i->search(callback, position, aabb));
 
     return result;
 }
 
-BroadPhrase::Result ColliderImpl::Stub::broadPhraseRayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) const
+BroadPhrase::Result ColliderImpl::Stub::broadPhraseRayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& collisionFilter) const
 {
     if(_broad_phrases.size() == 1)
     {
         const auto& [i, j] = _broad_phrases.at(0);
-        return i->rayCast(from, to, collisionFilter);
+        return i->rayCast(callback, from, to, collisionFilter);
     }
 
     BroadPhrase::Result result;
     for(const auto& i : _broad_phrases | std::views::keys)
-        result.merge(i->rayCast(from, to, collisionFilter));
+        result.merge(i->rayCast(callback, from, to, collisionFilter));
 
     return result;
 }
@@ -305,9 +320,10 @@ Vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(const
 
 Vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V2& to, const sp<CollisionFilter>& collisionFilter) const
 {
-    Vector<RayCastManifold> manifolds;
-    const BroadPhrase::Result result = broadPhraseRayCast(V3(from.x(), from.y(), 0), V3(to.x(), to.y(), 0), collisionFilter);
+    BroadPhraseCallbackImpl broadPhraseCallback;
+    const BroadPhrase::Result result = broadPhraseRayCast(broadPhraseCallback, V3(from.x(), from.y(), 0), V3(to.x(), to.y(), 0), collisionFilter);
 
+    Vector<RayCastManifold> manifolds;
     const NarrowPhrase::Ray ray = _narrow_phrase->toRay(from, to);
     for(const auto& i : toRigidBodyRefs(result._dynamic_candidates, Rigidbody::BODY_TYPE_RIGID))
     {

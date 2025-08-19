@@ -55,8 +55,8 @@ public:
 
     virtual sp<Coordinator> requestCoordinator() = 0;
 
-    virtual Result search(const V3& position, const V3& size) = 0;
-    virtual Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
+    virtual Result search(BroadPhraseCallback& callback, V3 position, V3 size) = 0;
+    virtual Result rayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
 };
 
 }

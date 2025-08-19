@@ -1,8 +1,10 @@
 #include "app/impl/broad_phrase/broad_phrase_all.h"
 
-#include "app/inf/broad_phrase.h"
 #include "core/base/bean_factory.h"
 #include "core/util/math.h"
+
+#include "app/inf/broad_phrase.h"
+#include "app/inf/broad_phrase_callback.h"
 
 namespace ark {
 
@@ -32,16 +34,19 @@ BroadPhraseAll::BroadPhraseAll()
 {
 }
 
-BroadPhrase::Result BroadPhraseAll::search(const V3& /*position*/, const V3& /*size*/)
+BroadPhrase::Result BroadPhraseAll::search(BroadPhraseCallback& callback, const V3 /*position*/, const V3 /*size*/)
 {
+    for(const auto i : _stub->_candidates)
+        callback.onRigidbodyCandidate(i);
+
     Result result;
     result._dynamic_candidates = _stub->_candidates;
     return result;
 }
 
-BroadPhrase::Result BroadPhraseAll::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& /*collisionFilter*/)
+BroadPhrase::Result BroadPhraseAll::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
-    return search(from, to);
+    return search(callback, from, to);
 }
 
 sp<BroadPhrase::Coordinator> BroadPhraseAll::requestCoordinator()

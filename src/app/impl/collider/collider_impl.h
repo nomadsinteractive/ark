@@ -59,8 +59,8 @@ public:
         bool update(uint64_t timestamp) override;
 
     private:
-        BroadPhrase::Result broadPhraseSearch(const V3& position, const V3& aabb, const sp<CollisionFilter>& collisionFilter) const;
-        BroadPhrase::Result broadPhraseRayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) const;
+        BroadPhrase::Result broadPhraseSearch(BroadPhraseCallback& callback, V3 position, V3 size, const sp<CollisionFilter>& collisionFilter) const;
+        BroadPhrase::Result broadPhraseRayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) const;
 
         static Vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const HashSet<BroadPhrase::CandidateIdType>& candidateSet);
 
