@@ -7,7 +7,7 @@
 #include "core/util/math.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/components/render_object.h"
+#include "graphics/components/shape.h"
 #include "graphics/base/tilemap.h"
 #include "graphics/base/tilemap_layer.h"
 #include "graphics/base/tileset.h"
@@ -18,31 +18,54 @@
 #include "app/base/collision_filter.h"
 #include "app/inf/collider.h"
 #include "app/inf/narrow_phrase.h"
-#include "graphics/components/shape.h"
 
 namespace ark {
 
-BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrowPhrase)
+namespace {
+
+BroadPhrase::CandidateIdType toCandidateId(const int32_t layerId, const int32_t row, const int32_t col)
+{
+    return layerId << 16 | ((row << 8) & 0xff00) | (col & 0xff);
+}
+
+
+BroadPhrase::Candidate makeCandidate(const BroadPhrase::CandidateIdType candidateId, const sp<Shape>& shape, const V2& position, sp<CollisionFilter> collisionFilter)
+{
+    return {candidateId, V3(position, 0), constants::QUATERNION_ONE, shape, std::move(collisionFilter)};
+}
+
+void addCandidate(const TilemapLayer& tilemapLayer, Set<int32_t>& candidateIdSet, Vector<BroadPhrase::Candidate>& candidates, int32_t row, int32_t col, int32_t layerId, const V2& tl, const V2& tileSize)
+{
+    if(row >= 0 && static_cast<uint32_t>(row) < tilemapLayer.rowCount() && col >= 0 && static_cast<uint32_t>(col) < tilemapLayer.colCount())
+    {
+        const int32_t candidateId = toCandidateId(layerId, row, col);
+        if(!candidateIdSet.contains(candidateId))
+        {
+            const sp<Tile>& tile = tilemapLayer.getTile(static_cast<uint32_t>(col), static_cast<uint32_t>(row));
+            candidateIdSet.insert(candidateId);
+            if(tile)
+                if(const int32_t shapeId = tile->shape()->type().hash(); shapeId != Shape::TYPE_NONE)
+                    candidates.push_back(makeCandidate(candidateId, tile->shape(), tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
+        }
+    }
+}
+    
+}
+
+BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap)
     : _tilemap(std::move(tilemap))
 {
 }
 
-void BroadPhraseTilemap::create(CandidateIdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
+sp<BroadPhrase::Coordinator> BroadPhraseTilemap::requestCoordinator()
 {
-}
-
-void BroadPhraseTilemap::update(CandidateIdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
-{
-}
-
-void BroadPhraseTilemap::remove(CandidateIdType /*id*/)
-{
+    return nullptr;
 }
 
 BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& size)
 {
-    std::vector<Candidate> candidates;
-    std::set<int32_t> candidateIdSet;
+    Vector<Candidate> candidates;
+    Set<int32_t> candidateIdSet;
     const V2 sizeHalf = size / V2(2.0, 2.0);
     const Rect aabb(V2(position) - sizeHalf, V2(position) + sizeHalf);
     const V2 tileSize(static_cast<float>(_tilemap->tileset()->tileWidth()), static_cast<float>(_tilemap->tileset()->tileHeight()));
@@ -82,7 +105,7 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
 
 BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
 {
-    std::vector<Candidate> candidates;
+    Vector<Candidate> candidates;
     float tileWidth = _tilemap->tileset()->tileWidth();
     float tileHeight = _tilemap->tileset()->tileHeight();
     const Rect aabb = Rect(from, to);
@@ -111,7 +134,7 @@ BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to, co
                 const V2 tileSize(tileWidth, tileHeight);
                 const V2 tl = V2(tilemapLayerAabb.left(), tilemapLayerAabb.top()) + tileSize / 2.0f;
                 const int32_t pre = st > 0 ? -1 : 1;
-                std::set<int32_t> candidateIdSet;
+                Set<int32_t> candidateIdSet;
                 for(uint32_t j = 0; j <= step; ++j)
                 {
                     const V2 pos = start + delta * static_cast<float>(j);
@@ -128,43 +151,17 @@ BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to, co
                 }
             }
         }
-    return BroadPhrase::Result({}, std::move(candidates));
-}
-
-BroadPhrase::CandidateIdType BroadPhraseTilemap::toCandidateId(int32_t layerId, int32_t row, int32_t col) const
-{
-    return layerId << 16 | ((row << 8) & 0xff00) | (col & 0xff);
-}
-
-void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set<int32_t>& candidateIdSet, std::vector<Candidate>& candidates, int32_t row, int32_t col, int32_t layerId, const V2& tl, const V2& tileSize)
-{
-    if(row >= 0 && static_cast<uint32_t>(row) < tilemapLayer.rowCount() && col >= 0 && static_cast<uint32_t>(col) < tilemapLayer.colCount())
-    {
-        const int32_t candidateId = toCandidateId(layerId, row, col);
-        if(!candidateIdSet.contains(candidateId))
-        {
-            const sp<Tile>& tile = tilemapLayer.getTile(static_cast<uint32_t>(col), static_cast<uint32_t>(row));
-            candidateIdSet.insert(candidateId);
-            if(tile)
-                if(const int32_t shapeId = tile->shape()->type().hash(); shapeId != Shape::TYPE_NONE)
-                    candidates.push_back(makeCandidate(candidateId, tile->shape(), tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
-        }
-    }
-}
-
-BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(CandidateIdType candidateId, const sp<Shape>& shape, const V2& position, sp<CollisionFilter> collisionFilter) const
-{
-    return {candidateId, position, constants::QUATERNION_ONE, shape, std::move(collisionFilter)};
+    return Result({}, std::move(candidates));
 }
 
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _tilemap(factory.ensureBuilder<Tilemap>(manifest, "tilemap")), _narrow_phrase(factory.ensureBuilder<NarrowPhrase>(manifest, "narrow-phrase"))
+    : _tilemap(factory.ensureBuilder<Tilemap>(manifest, "tilemap"))
 {
 }
 
 sp<BroadPhrase> BroadPhraseTilemap::BUILDER::build(const Scope& args)
 {
-    return sp<BroadPhraseTilemap>::make(_tilemap->build(args), _narrow_phrase->build(args));
+    return sp<BroadPhraseTilemap>::make(_tilemap->build(args));
 }
 
 }

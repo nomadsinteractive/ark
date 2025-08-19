@@ -16,7 +16,7 @@ public:
     NarrowPhraseCuteC2(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     ShapeDef createShapeDef(HashId shapeId, Optional<V3> size) override;
-    void updateShapeDef(const ShapeDef& shapeDef) override;
+    void updateShapeDef(const Box& implementation, V3 size) override;
 
     Ray toRay(const V2& from, const V2& to) override;
 

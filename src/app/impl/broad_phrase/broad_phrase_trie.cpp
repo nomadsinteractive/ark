@@ -1,36 +1,82 @@
 #include "app/impl/broad_phrase/broad_phrase_trie.h"
 
-#include <algorithm>
-
+#include "app/inf/broad_phrase.h"
 #include "core/base/bean_factory.h"
 #include "core/util/math.h"
 #include "core/util/log.h"
 
 namespace ark {
 
+class BroadPhraseTrie::Stub final : public BroadPhrase::Coordinator {
+public:
+    Stub(const int32_t dimension)
+        : _dimension(dimension), _axes(new Axis[dimension])
+    {
+        CHECK(_dimension < 4, "Dimension should be either 2(V2) or 3(V3)");
+    }
+    ~Stub() override
+    {
+        delete[] _axes;
+    };
+
+    void remove(CandidateIdType id) override
+    {
+        for(int32_t i = 0; i < _dimension; i++)
+            _axes[i].remove(id);
+    }
+
+    void create(CandidateIdType id, const V3& position, const V3& size) override
+    {
+        for(int32_t i = 0; i < _dimension; i++)
+        {
+            const float p = position[i];
+            const float s = size[i];
+            _axes[i].create(id, p - s / 2.0f, p + s / 2.0f);
+        }
+    }
+
+    void update(CandidateIdType id, const V3& position, const V3& size) override
+    {
+        for(int32_t i = 0; i < _dimension; i++)
+        {
+            const float p = position[i];
+            const float s = size[i];
+            _axes[i].update(id, p - s / 2.0f, p + s / 2.0f);
+        }
+    }
+
+    HashSet<CandidateIdType> search(const V3& position, const V3& size) const
+    {
+        HashSet<CandidateIdType> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
+        for(int32_t i = 1; i < _dimension && !candidates.empty(); i++)
+        {
+            const HashSet<CandidateIdType> s1 = std::move(candidates);
+            const HashSet<CandidateIdType> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
+            for(const CandidateIdType j : s1)
+                if(s2.contains(j))
+                    candidates.insert(j);
+        }
+        return candidates;
+    }
+
+private:
+    int32_t _dimension;
+    Axis* _axes;
+};
+
 BroadPhraseTrie::BroadPhraseTrie(int32_t dimension)
     : _stub(sp<Stub>::make(dimension))
 {
 }
 
-void BroadPhraseTrie::create(CandidateIdType id, const V3& position, const V3& aabb)
+sp<BroadPhrase::Coordinator> BroadPhraseTrie::requestCoordinator()
 {
-    _stub->create(id, position, aabb);
-}
-
-void BroadPhraseTrie::update(CandidateIdType id, const V3& position, const V3& aabb)
-{
-    _stub->update(id, position, aabb);
-}
-
-void BroadPhraseTrie::remove(CandidateIdType id)
-{
-    _stub->remove(id);
+    return _stub.cast<Coordinator>();
 }
 
 BroadPhrase::Result BroadPhraseTrie::search(const V3& position, const V3& size)
 {
-    return BroadPhrase::Result(_stub->search(position, size), {});
+    return Result(_stub->search(position, size), {});
 }
 
 BroadPhrase::Result BroadPhraseTrie::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& /*collisionFilter*/)
@@ -38,65 +84,14 @@ BroadPhrase::Result BroadPhraseTrie::rayCast(const V3& from, const V3& to, const
     return search(V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
 }
 
-BroadPhraseTrie::Stub::Stub(int32_t dimension)
-    : _dimension(dimension), _axes(new Axis[dimension])
-{
-    DCHECK(_dimension < 4, "Dimension should be either 2(V2) or 3(V3)");
-}
-
-BroadPhraseTrie::Stub::~Stub()
-{
-    delete[] _axes;
-}
-
-void BroadPhraseTrie::Stub::remove(CandidateIdType id)
-{
-    for(int32_t i = 0; i < _dimension; i++)
-        _axes[i].remove(id);
-}
-
-void BroadPhraseTrie::Stub::create(CandidateIdType id, const V3& position, const V3& size)
-{
-    for(int32_t i = 0; i < _dimension; i++)
-    {
-        float p = position[i];
-        float s = size[i];
-        _axes[i].create(id, p - s / 2.0f, p + s / 2.0f);
-    }
-}
-
-void BroadPhraseTrie::Stub::update(CandidateIdType id, const V3& position, const V3& size)
-{
-    for(int32_t i = 0; i < _dimension; i++)
-    {
-        float p = position[i];
-        float s = size[i];
-        _axes[i].update(id, p - s / 2.0f, p + s / 2.0f);
-    }
-}
-
-HashSet<BroadPhrase::CandidateIdType> BroadPhraseTrie::Stub::search(const V3& position, const V3& size) const
-{
-    HashSet<CandidateIdType> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
-    for(int32_t i = 1; i < _dimension && !candidates.empty(); i++)
-    {
-        const HashSet<CandidateIdType> s1 = std::move(candidates);
-        const HashSet<CandidateIdType> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
-        for(const CandidateIdType j : s1)
-            if(s2.contains(j))
-                candidates.insert(j);
-    }
-    return candidates;
-}
-
-BroadPhraseTrie::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+BroadPhraseTrie::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& manifest)
     : _dimension(Documents::getAttribute<int32_t>(manifest, "dimension", 2))
 {
 }
 
 sp<BroadPhrase> BroadPhraseTrie::BUILDER::build(const Scope& args)
 {
-    return sp<BroadPhraseTrie>::make(_dimension);
+    return sp<BroadPhrase>::make<BroadPhraseTrie>(_dimension);
 }
 
 BroadPhraseTrie::Axis::Range::Range()

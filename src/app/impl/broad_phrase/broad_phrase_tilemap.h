@@ -11,34 +11,26 @@
 
 namespace ark {
 
-class BroadPhraseTilemap : public BroadPhrase {
+class BroadPhraseTilemap final : public BroadPhrase {
 public:
-    BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrowPhrase);
+    BroadPhraseTilemap(sp<Tilemap> tilemap);
 
-    void create(CandidateIdType id, const V3& position, const V3& aabb) override;
-    void update(CandidateIdType id, const V3& position, const V3& aabb) override;
-    void remove(CandidateIdType id) override;
+    sp<Coordinator> requestCoordinator() override;
 
     Result search(const V3& position, const V3& size) override;
     Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
 //  [[plugin::builder("broad-phrase-tilemap")]]
-    class BUILDER : public Builder<BroadPhrase> {
+    class BUILDER final : public Builder<BroadPhrase> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<BroadPhrase> build(const Scope& args) override;
+        sp<BroadPhrase> build(const Scope& args) override;
 
     private:
         sp<Builder<Tilemap>> _tilemap;
         sp<Builder<NarrowPhrase>> _narrow_phrase;
     };
-
-private:
-    CandidateIdType toCandidateId(int32_t layerId, int32_t row, int32_t col) const;
-
-    void addCandidate(const TilemapLayer& tilemapLayer, std::set<int32_t>& candidateIdSet, std::vector<BroadPhrase::Candidate>& candidates, int32_t row, int32_t col, int32_t layerId, const V2& tl, const V2& tileSize);
-    Candidate makeCandidate(CandidateIdType candidateId, const sp<Shape>& shape, const V2& position, sp<CollisionFilter> collisionFilter) const;
 
 private:
     sp<Tilemap> _tilemap;

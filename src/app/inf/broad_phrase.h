@@ -20,7 +20,7 @@ public:
 
     struct Candidate {
         CandidateIdType _id;
-        V2 _position;
+        V3 _position;
         V4 _quaternion;
         sp<Shape> _shape;
         sp<CollisionFilter> _collision_filter;
@@ -41,16 +41,22 @@ public:
         Vector<Candidate> _static_candidates;
     };
 
+    class Coordinator {
+    public:
+        virtual ~Coordinator() = default;
+
+        virtual void create(CandidateIdType id, const V3& position, const V3& aabb) = 0;
+        virtual void update(CandidateIdType id, const V3& position, const V3& aabb) = 0;
+        virtual void remove(CandidateIdType id) = 0;
+    };
+
 public:
     virtual ~BroadPhrase() = default;
 
-    virtual void create(CandidateIdType id, const V3& position, const V3& aabb) = 0;
-    virtual void update(CandidateIdType id, const V3& position, const V3& aabb) = 0;
-    virtual void remove(CandidateIdType id) = 0;
+    virtual sp<Coordinator> requestCoordinator() = 0;
 
-    virtual Result search(const V3& position, const V3& aabb) = 0;
+    virtual Result search(const V3& position, const V3& size) = 0;
     virtual Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
-
 };
 
 }

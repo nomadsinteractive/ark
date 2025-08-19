@@ -8,27 +8,28 @@
 
 namespace ark {
 
-class BroadPhraseAll : public BroadPhrase {
+class BroadPhraseAll final : public BroadPhrase {
 public:
+    BroadPhraseAll();
 
-    void create(CandidateIdType id, const V3& position, const V3& aabb) override;
-    void update(CandidateIdType id, const V3& position, const V3& aabb) override;
-    void remove(CandidateIdType id) override;
+    sp<Coordinator> requestCoordinator() override;
 
     Result search(const V3& position, const V3& size) override;
     Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
 //  [[plugin::builder("broad-phrase-all")]]
-    class BUILDER : public Builder<BroadPhrase> {
+    class BUILDER final : public Builder<BroadPhrase> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest);
+        BUILDER() = default;
 
-        virtual sp<BroadPhrase> build(const Scope& args) override;
-
+        sp<BroadPhrase> build(const Scope& args) override;
     };
 
 private:
-    std::unordered_set<CandidateIdType> _candidates;
+    class Stub;
+
+private:
+    sp<Stub> _stub;
 };
 
 }

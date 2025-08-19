@@ -164,9 +164,9 @@ NarrowPhraseCuteC2::ShapeDef NarrowPhraseCuteC2::createShapeDef(const HashId sha
     return {Box(std::move(bodyDef)), sizeVal};
 }
 
-void NarrowPhraseCuteC2::updateShapeDef(const ShapeDef& shapeDef)
+void NarrowPhraseCuteC2::updateShapeDef(const Box& implementation, const V3 size)
 {
-    shapeDef._implementation.as<BodyDefCuteC2>()->resize({shapeDef._size.x(), shapeDef._size.y()});
+    implementation.as<BodyDefCuteC2>()->resize(V2(size.x(), size.y()));
 }
 
 sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyAABB(const Rect& aabb)

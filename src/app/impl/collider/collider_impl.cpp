@@ -62,11 +62,11 @@ public:
         {
             if(_size_updated)
             {
-                updateBodyDef(_collider_stub.narrowPhrase(), _rigidbody_stub->_shape->size().val());
+                _collider_stub.narrowPhrase()->updateShapeDef(_rigidbody_stub->_shape->implementation(), _rigidbody_stub->_shape->size().val());
+                updateOccupyRadius();
                 _size_updated = false;
             }
-            const float r = updateOccupyRadius();
-            _collider_stub.updateBroadPhraseCandidate(_rigidbody_stub->_ref->id(), pos, V3(r * 2));
+            _collider_stub.updateBroadPhraseCandidate(_rigidbody_stub->_ref->id(), pos, V3(_occupy_radius * 2));
             _position_updated = false;
             return true;
         }
@@ -102,11 +102,6 @@ public:
     void doDiscard(Stub& stub) const
     {
         stub.requestRigidBodyRemoval(_rigidbody_stub->_ref->id());
-    }
-
-    void updateBodyDef(NarrowPhrase& narrowPhrase, const V3& size) const
-    {
-        narrowPhrase.updateShapeDef({_rigidbody_stub->_shape->implementation(), size});
     }
 
     BroadPhrase::Candidate toBroadPhraseCandidate() const
@@ -218,13 +213,15 @@ BroadPhrase::Result ColliderImpl::Stub::broadPhraseRayCast(const V3& from, const
 void ColliderImpl::Stub::updateBroadPhraseCandidate(BroadPhrase::CandidateIdType id, const V3& position, const V3& aabb) const
 {
     for(const auto& i : _broad_phrases | std::views::keys)
-        i->update(id, position, aabb);
+        if(const auto coordinator = i->requestCoordinator())
+            coordinator->update(id, position, aabb);
 }
 
 void ColliderImpl::Stub::removeBroadPhraseCandidate(BroadPhrase::CandidateIdType id)
 {
     for(const auto& i : _broad_phrases | std::views::keys)
-        i->remove(id);
+        if(const auto coordinator = i->requestCoordinator())
+            coordinator->remove(id);
 }
 
 bool ColliderImpl::Stub::update(const uint64_t timestamp)
@@ -278,7 +275,8 @@ sp<ColliderImpl::RigidbodyImpl> ColliderImpl::Stub::createRigidBody(Rigidbody::B
     const V3 posVal = rigidBody->_rigidbody_stub->_position.val();
     const float s = rigidBody->updateOccupyRadius() * 2;
     for(const auto& i : _broad_phrases | std::views::keys)
-        i->create(rigidBody->_rigidbody_stub->_ref->id(), posVal, V3(s));
+        if(const auto coordinator = i->requestCoordinator())
+            coordinator->create(rigidBody->_rigidbody_stub->_ref->id(), posVal, V3(s));
 
     return rigidBody;
 }

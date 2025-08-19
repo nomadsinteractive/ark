@@ -66,7 +66,7 @@ private:
 
 class CollidersTestCase : public TestCase {
 public:
-    virtual int launch() override {
+    int launch() override {
         const sp<ResourceLoader> resourceLoader = getResourceLoader();
         const sp<ApplicationContext>& applicationContext = Ark::instance().applicationContext();
         const sp<Clock>& clock = applicationContext->sysClock();
@@ -78,8 +78,9 @@ public:
         const sp<BroadPhrase> bp1 = resourceLoader->load<BroadPhrase>("tracker-01", args);
         const sp<BroadPhrase> bp2 = resourceLoader->load<BroadPhrase>("tracker-02", args);
 
-        bp2->create(1, V3(0), V3(600));
-        bp2->create(1, V3(4, 4, 0), V3(600));
+        const auto coordinator = bp2->requestCoordinator();
+        coordinator->create(1, V3(0), V3(600));
+        coordinator->create(1, V3(4, 4, 0), V3(600));
         const auto r = bp2->search(V3(220, 0, 0), V3(16, 32, 0));
 
         const sp<RenderObject> c001 = resourceLoader->load<RenderObject>("c001", args);
