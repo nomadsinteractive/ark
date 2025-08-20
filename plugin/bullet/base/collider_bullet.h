@@ -61,7 +61,7 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
     };
 
-//  [[plugin::resource-loader("btWorld")]]
+//  [[plugin::resource-loader("PyBullet")]]
     class BUILDER_IMPL2 final : public Builder<Collider> {
     public:
         BUILDER_IMPL2(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
