@@ -45,11 +45,11 @@ float calcOccupyRadius(const Shape& shape)
 class BroadPhraseCallbackImpl final : public BroadPhraseCallback {
 public:
 
-    void onRigidbodyCandidate(CandidateIdType rigidbodyId) override
+    void onRigidbodyCandidate(uint64_t rigidbodyId) override
     {
     }
 
-    void onStaticCandidate(CandidateIdType candidateId, V3 position, V4 quaternion, sp<Shape> shape, sp<CollisionFilter> collisionFilter) override
+    void onStaticCandidate(uint64_t candidateId, V3 position, V4 quaternion, sp<Shape> shape, sp<CollisionFilter> collisionFilter) override
     {
     }
 
