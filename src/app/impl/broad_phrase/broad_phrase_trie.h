@@ -16,8 +16,8 @@ public:
 
     sp<Coordinator> requestCoordinator() override;
 
-    Result search(BroadPhraseCallback& callback, V3 position, V3 size) override;
-    Result rayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
+    void search(BroadPhraseCallback& callback, V3 position, V3 size) override;
+    void rayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
 
 public:
     class Stub;
@@ -26,7 +26,7 @@ public:
     private:
         struct Boundary {
             int32_t key;
-            Set<CandidateIdType> items;
+            Set<RefId> items;
         };
 
         struct Range {
@@ -38,16 +38,16 @@ public:
         };
 
     public:
-        void create(CandidateIdType id, float low, float high);
-        void update(CandidateIdType id, float low, float high);
-        void remove(CandidateIdType id);
+        void create(RefId id, float low, float high);
+        void update(RefId id, float low, float high);
+        void remove(RefId id);
 
-        HashSet<CandidateIdType> search(float low, float high) const;
+        HashSet<RefId> search(float low, float high) const;
 
     private:
-        Boundary* boundaryCreate(Map<int32_t, Boundary>& boundaries, CandidateIdType id, int32_t key);
-        Boundary* boundaryUpdate(Map<int32_t, Boundary>& boundaries, Boundary* boundary, int32_t key, CandidateIdType id);
-        void boundaryRemove(Map<int32_t, Boundary>& boundaries, Boundary* boundary, CandidateIdType id);
+        Boundary* boundaryCreate(Map<int32_t, Boundary>& boundaries, RefId id, int32_t key);
+        Boundary* boundaryUpdate(Map<int32_t, Boundary>& boundaries, Boundary* boundary, int32_t key, RefId id);
+        void boundaryRemove(Map<int32_t, Boundary>& boundaries, Boundary* boundary, RefId id);
 
         Range& ensureRange(int32_t id);
 

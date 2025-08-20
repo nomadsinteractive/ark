@@ -24,18 +24,18 @@ namespace ark {
 
 namespace {
 
-BroadPhrase::CandidateIdType toCandidateId(const int32_t layerId, const int32_t row, const int32_t col)
+RefId toCandidateId(const int32_t layerId, const int32_t row, const int32_t col)
 {
     return layerId << 16 | ((row << 8) & 0xff00) | (col & 0xff);
 }
 
 
-BroadPhrase::Candidate makeCandidate(const BroadPhrase::CandidateIdType candidateId, const sp<Shape>& shape, const V2& position, sp<CollisionFilter> collisionFilter)
+BroadPhrase::Candidate makeCandidate(const RefId candidateId, const sp<Shape>& shape, const V2& position, sp<CollisionFilter> collisionFilter)
 {
     return {candidateId, V3(position, 0), constants::QUATERNION_ONE, shape, std::move(collisionFilter)};
 }
 
-void addCandidate(BroadPhraseCallback& callback, const TilemapLayer& tilemapLayer, Set<int32_t>& candidateIdSet, Vector<BroadPhrase::Candidate>& candidates, int32_t row, int32_t col, int32_t layerId, const V2& tl, const V2& tileSize)
+void addCandidate(BroadPhraseCallback& callback, const TilemapLayer& tilemapLayer, Set<int32_t>& candidateIdSet, const int32_t row, const int32_t col, const int32_t layerId, const V2& tl, const V2& tileSize)
 {
     if(row >= 0 && static_cast<uint32_t>(row) < tilemapLayer.rowCount() && col >= 0 && static_cast<uint32_t>(col) < tilemapLayer.colCount())
     {
@@ -46,10 +46,7 @@ void addCandidate(BroadPhraseCallback& callback, const TilemapLayer& tilemapLaye
             candidateIdSet.insert(candidateId);
             if(tile)
                 if(const int32_t shapeId = tile->shape()->type().hash(); shapeId != Shape::TYPE_NONE)
-                {
                     callback.onStaticCandidate(candidateId, V3(tl + V2(col * tileSize.x(), row * tileSize.y()), 0), constants::QUATERNION_ONE, tile->shape(), tilemapLayer.collisionFilter());
-                    candidates.push_back(makeCandidate(candidateId, tile->shape(), tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
-                }
         }
     }
 }
@@ -66,9 +63,8 @@ sp<BroadPhrase::Coordinator> BroadPhraseTilemap::requestCoordinator()
     return nullptr;
 }
 
-BroadPhrase::Result BroadPhraseTilemap::search(BroadPhraseCallback& callback, const V3 position, const V3 size)
+void BroadPhraseTilemap::search(BroadPhraseCallback& callback, const V3 position, const V3 size)
 {
-    Vector<Candidate> candidates;
     Set<int32_t> candidateIdSet;
     const V2 sizeHalf = size / V2(2.0, 2.0);
     const Rect aabb(V2(position) - sizeHalf, V2(position) + sizeHalf);
@@ -98,19 +94,16 @@ BroadPhrase::Result BroadPhraseTilemap::search(BroadPhraseCallback& callback, co
                                     continue;
                                 }
                                 candidateIdSet.insert(candidateId);
-                                candidates.push_back(makeCandidate(candidateId, tile->shape(), V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2), i.collisionFilter()));
                                 callback.onStaticCandidate(candidateId, V3(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2, 0), constants::QUATERNION_ONE, tile->shape(), i.collisionFilter());
                             }
                         }
                     }
                 }
         }
-    return BroadPhrase::Result({}, std::move(candidates));
 }
 
-BroadPhrase::Result BroadPhraseTilemap::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& collisionFilter)
+void BroadPhraseTilemap::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& collisionFilter)
 {
-    Vector<Candidate> candidates;
     float tileWidth = _tilemap->tileset()->tileWidth();
     float tileHeight = _tilemap->tileset()->tileHeight();
     const Rect aabb = Rect(from, to);
@@ -145,18 +138,17 @@ BroadPhrase::Result BroadPhraseTilemap::rayCast(BroadPhraseCallback& callback, c
                     const V2 pos = start + delta * static_cast<float>(j);
                     const int32_t row = static_cast<int32_t>((pos.y() - tilemapLayerAabb.top()) / tileHeight);
                     const int32_t col = static_cast<int32_t>((pos.x() - tilemapLayerAabb.left()) / tileWidth);
-                    addCandidate(callback, i, candidateIdSet, candidates, row, col, layerId, tl, tileSize);
+                    addCandidate(callback, i, candidateIdSet, row, col, layerId, tl, tileSize);
                     if(j != 0)
                     {
                         if(xwise)
-                            addCandidate(callback, i, candidateIdSet, candidates, row, col + pre, layerId, tl, tileSize);
+                            addCandidate(callback, i, candidateIdSet, row, col + pre, layerId, tl, tileSize);
                         else
-                            addCandidate(callback, i, candidateIdSet, candidates, row + pre, col, layerId, tl, tileSize);
+                            addCandidate(callback, i, candidateIdSet, row + pre, col, layerId, tl, tileSize);
                     }
                 }
             }
         }
-    return Result({}, std::move(candidates));
 }
 
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

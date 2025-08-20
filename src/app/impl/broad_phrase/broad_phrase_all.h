@@ -14,8 +14,8 @@ public:
 
     sp<Coordinator> requestCoordinator() override;
 
-    Result search(BroadPhraseCallback& callback, V3 position, V3 size) override;
-    Result rayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
+    void search(BroadPhraseCallback& callback, V3 position, V3 size) override;
+    void rayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
 
 //  [[plugin::builder("broad-phrase-all")]]
     class BUILDER final : public Builder<BroadPhrase> {

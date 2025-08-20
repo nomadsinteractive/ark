@@ -10,23 +10,23 @@ namespace ark {
 
 class BroadPhraseAll::Stub final : public BroadPhrase::Coordinator {
 public:
-    void create(const CandidateIdType id, const V3& position, const V3& aabb) override
+    void create(const RefId id, const V3& position, const V3& aabb) override
     {
         _candidates.insert(id);
     }
 
-    void update(CandidateIdType id, const V3& position, const V3& aabb) override
+    void update(RefId id, const V3& position, const V3& aabb) override
     {
     }
 
-    void remove(const CandidateIdType id) override
+    void remove(const RefId id) override
     {
         const auto iter = _candidates.find(id);
         CHECK(iter != _candidates.end(), "RigidBody(%uz) not registered", id);
         _candidates.erase(iter);
     }
 
-    HashSet<CandidateIdType> _candidates;
+    HashSet<RefId> _candidates;
 };
 
 BroadPhraseAll::BroadPhraseAll()
@@ -34,19 +34,15 @@ BroadPhraseAll::BroadPhraseAll()
 {
 }
 
-BroadPhrase::Result BroadPhraseAll::search(BroadPhraseCallback& callback, const V3 /*position*/, const V3 /*size*/)
+void BroadPhraseAll::search(BroadPhraseCallback& callback, const V3 /*position*/, const V3 /*size*/)
 {
     for(const auto i : _stub->_candidates)
         callback.onRigidbodyCandidate(i);
-
-    Result result;
-    result._dynamic_candidates = _stub->_candidates;
-    return result;
 }
 
-BroadPhrase::Result BroadPhraseAll::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
+void BroadPhraseAll::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
-    return search(callback, from, to);
+    search(callback, from, to);
 }
 
 sp<BroadPhrase::Coordinator> BroadPhraseAll::requestCoordinator()

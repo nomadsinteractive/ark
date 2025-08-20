@@ -41,38 +41,33 @@ public:
     struct Stub final : Updatable {
         Stub(Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase);
 
-        Vector<RayCastManifold> rayCast(const V2& from, const V2& to, const sp<CollisionFilter>& collisionFilter) const;
+        Vector<RayCastManifold> rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) const;
 
         void requestRigidBodyRemoval(int32_t rigidBodyId);
 
         sp<RigidbodyImpl> createRigidBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
 
-        Vector<sp<Ref>> toRigidBodyRefs(const HashSet<BroadPhrase::CandidateIdType>& candidateSet, uint32_t filter) const;
-
-        void resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const Vector<BroadPhrase::Candidate>& candidates, Set<BroadPhrase::CandidateIdType>& c) const;
+        sp<Ref> toRigidbodyRef(RefId refid) const;
 
         const sp<NarrowPhrase>& narrowPhrase() const;
 
-        void updateBroadPhraseCandidate(BroadPhrase::CandidateIdType id, const V3& position, const V3& aabb) const;
-        void removeBroadPhraseCandidate(BroadPhrase::CandidateIdType id);
+        void updateBroadPhraseCandidate(RefId id, const V3& position, const V3& size) const;
+        void removeBroadPhraseCandidate(RefId id);
 
         bool update(uint64_t timestamp) override;
 
     private:
-        BroadPhrase::Result broadPhraseSearch(BroadPhraseCallback& callback, V3 position, V3 size, const sp<CollisionFilter>& collisionFilter) const;
-        BroadPhrase::Result broadPhraseRayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) const;
-
-        static Vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const HashSet<BroadPhrase::CandidateIdType>& candidateSet);
+        void broadPhraseSearch(BroadPhraseCallback& callback, V3 position, V3 size, const sp<CollisionFilter>& collisionFilter) const;
 
     private:
         Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> _broad_phrases;
         sp<NarrowPhrase> _narrow_phrase;
 
-        HashMap<BroadPhrase::CandidateIdType, sp<Ref>> _rigid_bodies;
+        HashMap<RefId, sp<Ref>> _rigid_bodies;
         Set<const Ref*> _dirty_rigid_body_refs;
 
-        Set<BroadPhrase::CandidateIdType> _phrase_dispose;
-        Set<BroadPhrase::CandidateIdType> _phrase_remove;
+        Set<RefId> _phrase_discard;
+        Set<RefId> _phrase_remove;
 
         friend class RigidbodyImpl;
     };

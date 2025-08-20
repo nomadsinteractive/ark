@@ -16,38 +16,21 @@ namespace ark {
 
 class ARK_API BroadPhrase {
 public:
-    typedef uintptr_t CandidateIdType;
-
     struct Candidate {
-        CandidateIdType _id;
+        RefId _id;
         V3 _position;
         V4 _quaternion;
         sp<Shape> _shape;
         sp<CollisionFilter> _collision_filter;
     };
 
-    struct Result {
-        Result() = default;
-        Result(HashSet<CandidateIdType> dynamicCandidates, Vector<Candidate> staticCandidates)
-            : _dynamic_candidates(std::move(dynamicCandidates)), _static_candidates(std::move(staticCandidates)) {
-        }
-
-        void merge(const Result& other) {
-            std::copy(other._dynamic_candidates.begin(), other._dynamic_candidates.end(), std::inserter(_dynamic_candidates, _dynamic_candidates.begin()));
-            std::copy(other._static_candidates.begin(), other._static_candidates.end(), std::back_inserter(_static_candidates));
-        }
-
-        HashSet<CandidateIdType> _dynamic_candidates;
-        Vector<Candidate> _static_candidates;
-    };
-
     class Coordinator {
     public:
         virtual ~Coordinator() = default;
 
-        virtual void create(CandidateIdType id, const V3& position, const V3& aabb) = 0;
-        virtual void update(CandidateIdType id, const V3& position, const V3& aabb) = 0;
-        virtual void remove(CandidateIdType id) = 0;
+        virtual void create(RefId id, const V3& position, const V3& size) = 0;
+        virtual void update(RefId id, const V3& position, const V3& size) = 0;
+        virtual void remove(RefId id) = 0;
     };
 
 public:
@@ -55,8 +38,8 @@ public:
 
     virtual sp<Coordinator> requestCoordinator() = 0;
 
-    virtual Result search(BroadPhraseCallback& callback, V3 position, V3 size) = 0;
-    virtual Result rayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
+    virtual void search(BroadPhraseCallback& callback, V3 position, V3 size) = 0;
+    virtual void rayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
 };
 
 }

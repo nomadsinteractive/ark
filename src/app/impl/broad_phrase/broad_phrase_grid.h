@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
@@ -19,18 +17,18 @@ public:
 
     sp<Coordinator> requestCoordinator() override;
 
-    Result search(BroadPhraseCallback& callback, V3 position, V3 size) override;
-    Result rayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
+    void search(BroadPhraseCallback& callback, V3 position, V3 size) override;
+    void rayCast(BroadPhraseCallback& callback, V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
 
     class Stub;
 
     class Axis {
     public:
-        void create(CandidateIdType id, float position, float low, float high);
-        void update(CandidateIdType id, float position, float low, float high);
-        void remove(CandidateIdType id);
+        void create(RefId id, float position, float low, float high);
+        void update(RefId id, float position, float low, float high);
+        void remove(RefId id);
 
-        HashSet<CandidateIdType> search(float low, float high) const;
+        HashSet<RefId> search(float low, float high) const;
 
     private:
         struct Range {
@@ -45,12 +43,12 @@ public:
             int32_t _end;
         };
 
-        void updateRange(CandidateIdType id, const Range& cur, const Range& prev);
-        void remove(CandidateIdType id, int32_t rangeId);
+        void updateRange(RefId id, const Range& cur, const Range& prev);
+        void remove(RefId id, int32_t rangeId);
 
     private:
-        HashMap<CandidateIdType, Range> _trackee_ranges;
-        std::unordered_multimap<int32_t, CandidateIdType> _trackee_range_ids;
+        HashMap<RefId, Range> _trackee_ranges;
+        std::unordered_multimap<int32_t, RefId> _trackee_range_ids;
         int32_t _stride;
 
         friend class Stub;

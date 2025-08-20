@@ -26,13 +26,13 @@ public:
         delete[] _axes;
     }
 
-    void remove(CandidateIdType id) override
+    void remove(RefId id) override
     {
         for(int32_t i = 0; i < _dimension; i++)
             _axes[i].remove(id);
     }
 
-    void create(CandidateIdType id, const V3& position, const V3& size) override
+    void create(RefId id, const V3& position, const V3& size) override
     {
         for(int32_t i = 0; i < _dimension; i++)
         {
@@ -42,7 +42,7 @@ public:
         }
     }
     
-    void update(CandidateIdType id, const V3& position, const V3& size) override
+    void update(RefId id, const V3& position, const V3& size) override
     {
         for(int32_t i = 0; i < _dimension; i++)
         {
@@ -52,13 +52,13 @@ public:
         }
     }
 
-    HashSet<CandidateIdType> search(BroadPhraseCallback& callback, const V3& position, const V3& size) const
+    void search(BroadPhraseCallback& callback, const V3& position, const V3& size) const
     {
-        HashSet<CandidateIdType> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
+        HashSet<RefId> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
         for(int32_t i = 1; i < _dimension && !candidates.empty(); i++)
         {
-            const HashSet<CandidateIdType> s1 = std::move(candidates);
-            const HashSet<CandidateIdType> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
+            const HashSet<RefId> s1 = std::move(candidates);
+            const HashSet<RefId> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
             for(int32_t i : s1)
                 if(s2.contains(i))
                 {
@@ -66,7 +66,6 @@ public:
                     candidates.insert(i);
                 }
         }
-        return candidates;
     }
 
 private:
@@ -84,17 +83,17 @@ sp<BroadPhrase::Coordinator> BroadPhraseGrid::requestCoordinator()
     return _stub.cast<Coordinator>();
 }
 
-BroadPhrase::Result BroadPhraseGrid::search(BroadPhraseCallback& callback, const V3 position, const V3 size)
+void BroadPhraseGrid::search(BroadPhraseCallback& callback, const V3 position, const V3 size)
 {
-    return Result(_stub->search(callback, position, size), {});
+    _stub->search(callback, position, size);
 }
 
-BroadPhrase::Result BroadPhraseGrid::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
+void BroadPhraseGrid::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
-    return search(callback, V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
+    search(callback, V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
 }
 
-void BroadPhraseGrid::Axis::create(CandidateIdType id, float position, float low, float high)
+void BroadPhraseGrid::Axis::create(RefId id, float position, float low, float high)
 {
     const int32_t mp = Math::modFloor(static_cast<int32_t>(position), _stride);
     int32_t remainder;
@@ -104,7 +103,7 @@ void BroadPhraseGrid::Axis::create(CandidateIdType id, float position, float low
     updateRange(id, cur, Range());
 }
 
-void BroadPhraseGrid::Axis::update(CandidateIdType id, float position, float low, float high)
+void BroadPhraseGrid::Axis::update(RefId id, float position, float low, float high)
 {
     const int32_t mp = Math::modFloor(static_cast<int32_t>(position), _stride);
     if(const auto iter = _trackee_ranges.find(id); iter != _trackee_ranges.end() && iter->second._position != mp)
@@ -118,7 +117,7 @@ void BroadPhraseGrid::Axis::update(CandidateIdType id, float position, float low
     }
 }
 
-void BroadPhraseGrid::Axis::updateRange(CandidateIdType id, const Range& cur, const Range& prev)
+void BroadPhraseGrid::Axis::updateRange(RefId id, const Range& cur, const Range& prev)
 {
     for(int32_t i = prev._begin; i < prev._end; i++)
         if(!cur.within(i))
@@ -131,36 +130,35 @@ void BroadPhraseGrid::Axis::updateRange(CandidateIdType id, const Range& cur, co
     _trackee_ranges[id] = cur;
 }
 
-HashSet<BroadPhrase::CandidateIdType> BroadPhraseGrid::Axis::search(float low, float high) const
+HashSet<RefId> BroadPhraseGrid::Axis::search(float low, float high) const
 {
-    HashSet<CandidateIdType> candidates;
+    HashSet<RefId> candidates;
     int32_t remainder;
     const int32_t begin = Math::divmod(static_cast<int32_t>(low), _stride, remainder);
     const int32_t end = Math::divmod(static_cast<int32_t>(high), _stride, remainder) + 1;
     for(int32_t i = begin; i < end; i++)
     {
-        const auto range = _trackee_range_ids.equal_range(i);
-        for(auto iter = range.first; iter != range.second; ++iter)
+        const auto [k, v] = _trackee_range_ids.equal_range(i);
+        for(auto iter = k; iter != v; ++iter)
             candidates.insert(iter->second);
     }
     return candidates;
 }
 
-void BroadPhraseGrid::Axis::remove(CandidateIdType id)
+void BroadPhraseGrid::Axis::remove(const RefId id)
 {
-    const auto it1 = _trackee_ranges.find(id);
-    if(it1 != _trackee_ranges.end())
+    if(const auto iter = _trackee_ranges.find(id); iter != _trackee_ranges.end())
     {
-        const Range& p = it1->second;
+        const Range& p = iter->second;
 
         for(int32_t i = p._begin; i < p._end; i++)
             remove(id, i);
 
-        _trackee_ranges.erase(it1);
+        _trackee_ranges.erase(iter);
     }
 }
 
-void BroadPhraseGrid::Axis::remove(CandidateIdType id, int32_t rangeId)
+void BroadPhraseGrid::Axis::remove(const RefId id, const int32_t rangeId)
 {
     const auto range = _trackee_range_ids.equal_range(rangeId);
     for(auto iter = range.first; iter != range.second; ++iter)

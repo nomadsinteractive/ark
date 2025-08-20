@@ -20,13 +20,13 @@ public:
         delete[] _axes;
     };
 
-    void remove(CandidateIdType id) override
+    void remove(RefId id) override
     {
         for(int32_t i = 0; i < _dimension; i++)
             _axes[i].remove(id);
     }
 
-    void create(CandidateIdType id, const V3& position, const V3& size) override
+    void create(RefId id, const V3& position, const V3& size) override
     {
         for(int32_t i = 0; i < _dimension; i++)
         {
@@ -36,7 +36,7 @@ public:
         }
     }
 
-    void update(CandidateIdType id, const V3& position, const V3& size) override
+    void update(RefId id, const V3& position, const V3& size) override
     {
         for(int32_t i = 0; i < _dimension; i++)
         {
@@ -46,21 +46,20 @@ public:
         }
     }
 
-    HashSet<CandidateIdType> search(BroadPhraseCallback& callback, const V3& position, const V3& size) const
+    void search(BroadPhraseCallback& callback, const V3& position, const V3& size) const
     {
-        HashSet<CandidateIdType> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
+        HashSet<RefId> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
         for(int32_t i = 1; i < _dimension && !candidates.empty(); i++)
         {
-            const HashSet<CandidateIdType> s1 = std::move(candidates);
-            const HashSet<CandidateIdType> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
-            for(const CandidateIdType j : s1)
+            const HashSet<RefId> s1 = std::move(candidates);
+            const HashSet<RefId> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
+            for(const RefId j : s1)
                 if(s2.contains(j))
                 {
                     callback.onRigidbodyCandidate(j);
                     candidates.insert(j);
                 }
         }
-        return candidates;
     }
 
 private:
@@ -78,14 +77,14 @@ sp<BroadPhrase::Coordinator> BroadPhraseTrie::requestCoordinator()
     return _stub.cast<Coordinator>();
 }
 
-BroadPhrase::Result BroadPhraseTrie::search(BroadPhraseCallback& callback, const V3 position, const V3 size)
+void BroadPhraseTrie::search(BroadPhraseCallback& callback, const V3 position, const V3 size)
 {
-    return Result(_stub->search(callback, position, size), {});
+    _stub->search(callback, position, size);
 }
 
-BroadPhrase::Result BroadPhraseTrie::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
+void BroadPhraseTrie::rayCast(BroadPhraseCallback& callback, const V3 from, const V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
-    return search(callback, V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
+    search(callback, V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
 }
 
 BroadPhraseTrie::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& manifest)
@@ -106,12 +105,12 @@ BroadPhraseTrie::Axis::Range::Range(Boundary* lower, Boundary* upper)
     : _lower(lower), _upper(upper) {
 }
 
-void BroadPhraseTrie::Axis::create(CandidateIdType id, float low, float high)
+void BroadPhraseTrie::Axis::create(RefId id, float low, float high)
 {
     _ranges[id] = Range(boundaryCreate(_lower_bounds, id, static_cast<int32_t>(std::floor(low))), boundaryCreate(_upper_bounds, id, static_cast<int32_t>(std::ceil(high))));
 }
 
-void BroadPhraseTrie::Axis::update(CandidateIdType id, float low, float high)
+void BroadPhraseTrie::Axis::update(RefId id, float low, float high)
 {
     Range& range = ensureRange(id);
     int32_t keyLower = static_cast<int32_t>(std::floor(low));
@@ -120,7 +119,7 @@ void BroadPhraseTrie::Axis::update(CandidateIdType id, float low, float high)
     range._upper = boundaryUpdate(_upper_bounds, range._upper, keyUpper, id);
 }
 
-void BroadPhraseTrie::Axis::remove(CandidateIdType id)
+void BroadPhraseTrie::Axis::remove(RefId id)
 {
     Range& range = ensureRange(id);
     boundaryRemove(_lower_bounds, range._lower, id);
@@ -128,10 +127,10 @@ void BroadPhraseTrie::Axis::remove(CandidateIdType id)
     _ranges.erase(_ranges.find(id));
 }
 
-HashSet<BroadPhrase::CandidateIdType> BroadPhraseTrie::Axis::search(float low, float high) const
+HashSet<RefId> BroadPhraseTrie::Axis::search(float low, float high) const
 {
-    std::set<CandidateIdType> c1;
-    HashSet<CandidateIdType> c3;
+    std::set<RefId> c1;
+    HashSet<RefId> c3;
     const auto keyLower = static_cast<int32_t>(std::floor(low));
     const auto keyUpper = static_cast<int32_t>(std::ceil(high));
 
@@ -139,14 +138,14 @@ HashSet<BroadPhrase::CandidateIdType> BroadPhraseTrie::Axis::search(float low, f
         c1.insert(iter->second.items.begin(), iter->second.items.end());
 
     for(auto iter = _upper_bounds.lower_bound(keyLower); iter != _upper_bounds.end(); ++iter)
-        for(const CandidateIdType i : iter->second.items)
+        for(const RefId i : iter->second.items)
             if(c1.contains(i))
                 c3.insert(c3.begin(), i);
 
     return c3;
 }
 
-BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryCreate(Map<int32_t, Boundary>& boundaries, CandidateIdType id, int32_t key)
+BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryCreate(Map<int32_t, Boundary>& boundaries, RefId id, int32_t key)
 {
     Boundary& boundary = boundaries[key];
     if(boundary.items.empty())
@@ -155,7 +154,7 @@ BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryCreate(Map<int32
     return &boundary;
 }
 
-BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryUpdate(Map<int32_t, Boundary>& boundaries, Boundary* boundary, int32_t key, CandidateIdType id)
+BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryUpdate(Map<int32_t, Boundary>& boundaries, Boundary* boundary, int32_t key, RefId id)
 {
     if(key != boundary->key)
     {
@@ -165,7 +164,7 @@ BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryUpdate(Map<int32
     return boundary;
 }
 
-void BroadPhraseTrie::Axis::boundaryRemove(Map<int32_t, Boundary>& boundaries, Boundary* boundary, CandidateIdType id)
+void BroadPhraseTrie::Axis::boundaryRemove(Map<int32_t, Boundary>& boundaries, Boundary* boundary, RefId id)
 {
     boundary->items.erase(boundary->items.find(id));
     if(boundary->items.empty())
