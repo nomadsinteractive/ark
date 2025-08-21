@@ -2,7 +2,6 @@
 
 #include <list>
 #include <queue>
-#include <unordered_set>
 
 #include "core/concurrent/internal.h"
 
@@ -64,16 +63,6 @@ public:
     }
 };
 
-template<typename T> class _UnorderedSetSynchronizer {
-public:
-    static void append(std::unordered_set<T>& unorderedSet, _Node<T>* head) {
-        while(head) {
-            unorderedSet.insert(head->data());
-            head = head->next();
-        }
-    }
-};
-
 }
 
 template<typename T> class OCSQueue : public internal::concurrent::_OneConsumerSynchronized<T, std::queue<T>, internal::concurrent::_QueueSynchronizer<T>> {
@@ -85,17 +74,6 @@ public:
         data = queue.front();
         queue.pop();
         return true;
-    }
-};
-
-template<typename T> class OCSUnorderedSet : public internal::concurrent::_OneConsumerSynchronized<T, std::unordered_set<T>, internal::concurrent::_UnorderedSetSynchronizer<T>> {
-public:
-    bool containsOrInsert(const T& data) {
-        const auto iter = this->_collection->find(data);
-        if(iter != this->_collection->end())
-            return true;
-        this->add(data);
-        return false;
     }
 };
 

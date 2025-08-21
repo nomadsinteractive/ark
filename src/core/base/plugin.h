@@ -3,7 +3,6 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/base/library.h"
 
 #include "renderer/forwarding.h"
 
