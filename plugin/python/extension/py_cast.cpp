@@ -345,11 +345,41 @@ template<> ARK_PLUGIN_PYTHON_API Optional<uint32_t> PyCast::toCppObject_impl<uin
 {
     if(PythonExtension& pi = PythonExtension::instance(); pi.isPyArkTypeObject(object))
     {
-        PyArkType* pyArkType = pi.getPyArkType(object);
-        DCHECK(pyArkType, "Cannot convert PyObject to PyArkType");
-        return pyArkType->typeId();
+        const PyArkType* pyArkType = pi.getPyArkType(object);
+        CHECK(pyArkType, "Cannot convert PyObject to PyArkType");
+        return {static_cast<uint32_t>(pyArkType->typeId())};
     }
     return toCppInteger<uint32_t>(object);
+}
+
+template<> ARK_PLUGIN_PYTHON_API Optional<TypeId> PyCast::toCppObject_impl<TypeId>(PyObject* object)
+{
+    if(PythonExtension& pi = PythonExtension::instance(); pi.isPyArkTypeObject(object))
+    {
+        const PyArkType* pyArkType = pi.getPyArkType(object);
+        CHECK(pyArkType, "Cannot convert PyObject to PyArkType");
+        return {pyArkType->typeId()};
+    }
+    if(PyType_Check(object))
+    {
+        const auto pyTypeObject = reinterpret_cast<PyTypeObject*>(object);
+        PyObject* pyQualName = PyType_GetQualName(pyTypeObject);
+        PyObject* pyModuleName = PyObject_GetAttrString(object, "__module__");
+        const Optional<String> qualname = toCppObject<String>(pyQualName);
+        const Optional<String> modulename = toCppObject<String>(pyModuleName);
+        Py_DECREF(pyQualName);
+        Py_DECREF(pyModuleName);
+        ASSERT(qualname && modulename);
+        return {TypeId(string_hash(Strings::sprintf("%s.%s", modulename.value().c_str(), qualname.value().c_str()).c_str()))};
+    }
+
+    if(const Optional<String> opt = toStringExact(object))
+        return {TypeId(string_hash(opt.value().c_str()))};
+
+    if(const Optional<HashId> opt = toCppObject<HashId>(object))
+        return {TypeId(opt.value())};
+
+    return {};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<int32_t> PyCast::toCppObject_impl<int32_t>(PyObject* object)
@@ -560,13 +590,18 @@ template<> ARK_PLUGIN_PYTHON_API Optional<RectI> PyCast::toCppObject_impl<RectI>
 
 template<> ARK_PLUGIN_PYTHON_API Optional<PyInstance> PyCast::toCppObject_impl<PyInstance>(PyObject* object)
 {
-    return PyInstance::own(object);
+    return {PyInstance::own(object)};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<Buffer> PyCast::toCppObject_impl<Buffer>(PyObject* object)
 {
     const sp<Buffer> ptr = toSharedPtrOrNull<Buffer>(object);
     return ptr ? Optional<Buffer>(std::move(*ptr)) : Optional<Buffer>();
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<TypeId>(const TypeId& value)
+{
+    return PyLong_FromUnsignedLong(value._hash);
 }
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Box>(const Box& value)

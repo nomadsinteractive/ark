@@ -16,16 +16,16 @@ public:
     Box tag() const;
 
 //  [[script::bindings::map(get)]]
-    Box getTag(uint64_t typeId) const;
+    Box getTag(TypeId typeId) const;
 //  [[script::bindings::map(set)]]
-    void setTag(uint64_t typeId, Box tag);
+    void setTag(TypeId typeId, Box tag);
 //  [[script::bindings::map(del)]]
-    void removeTag(uint64_t typeId);
+    void removeTag(TypeId typeId);
 
     void traverse(const Visitor& visitor) override;
 
 private:
-    Map<uint64_t, Box> _tags;
+    Map<TypeId, Box> _tags;
 };
 
 }

@@ -1,5 +1,7 @@
 #include "entity.h"
 
+#include <ranges>
+
 #include "core/components/discarded.h"
 #include "core/inf/wirable.h"
 
@@ -126,15 +128,7 @@ sp<Discarded> Entity::discarded()
 
 void Entity::addComponent(Box component)
 {
-    Wirable::WiringContext context(_components);
-
-    if(const sp<Wirable> wirable = component.as<Wirable>())
-        if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
-            _components.add(typeId, component);
-    if(const sp<Wirable> wirable = component.as<Wirable>())
-        wirable->onWire(context, component);
-
-    _components.add(component.typeId(), std::move(component));
+    setComponent(component.typeId(), std::move(component));
 }
 
 bool Entity::hasComponent(const TypeId typeId) const
@@ -145,6 +139,19 @@ bool Entity::hasComponent(const TypeId typeId) const
 Optional<Box> Entity::getComponent(const TypeId typeId) const
 {
     return _components.get(typeId);
+}
+
+void Entity::setComponent(const TypeId typeId, Box component)
+{
+    Wirable::WiringContext context(_components);
+
+    if(const sp<Wirable> wirable = component.as<Wirable>())
+        if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
+            _components.add(typeId, component);
+    if(const sp<Wirable> wirable = component.as<Wirable>())
+        wirable->onWire(context, component);
+
+    _components.add(typeId, std::move(component));
 }
 
 Vector<Box> Entity::getComponentList(const TypeId typeId) const

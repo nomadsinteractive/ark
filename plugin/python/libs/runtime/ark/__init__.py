@@ -9,13 +9,7 @@ Use it for:
 3. Unit test(maybe)
 
 """
-from typing import Callable, Type, TypeVar, Union, Optional, Tuple, Any, Self, Sequence
-
-from scipy.odr import Model
-
-_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', "Numeric", 'NarrowPhrase',
-                           'Layer', "Vec2", "Vec3", "Vec4", "Renderer", 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
-                           'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings', 'View')
+from typing import Callable, TypeVar, Union, Optional, Tuple, Any, Self, Sequence
 
 
 TYPE_INTEGER = Union[int, "Integer"]
@@ -36,6 +30,8 @@ TYPE_MAT4 = Union["Mat4", TYPE_M4]
 TYPE_NAMED_HASH = Union[int, str, "NamedHash"]
 TYPE_RUNNABLE = Union["Runnable", Callable[[], None]]
 TYPE_STRING = Union[str, "String"]
+TYPE_TYPE_ID = Union[int, str, type]
+
 
 T = TypeVar('T')
 
@@ -411,13 +407,13 @@ class Tags:
     def tag(self) -> Any:
         return None
 
-    def __getitem__(self, item: Any) -> Any:
+    def __getitem__(self, key: TYPE_TYPE_ID) -> Any:
         pass
 
-    def __setitem__(self, key: Any, value: Any):
+    def __setitem__(self, key: TYPE_TYPE_ID, value: Any):
         pass
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: TYPE_TYPE_ID):
         pass
 
 
@@ -983,7 +979,7 @@ class RenderTarget(Renderer):
 
 class ResourceLoader:
 
-    def load(self, cls: Type[_BUILDABLE_TYPES], type_id: str, **kwargs) -> _BUILDABLE_TYPES:
+    def load(self, cls: type[T], type_id: str, **kwargs) -> T:
         return cls()
 
     @property
