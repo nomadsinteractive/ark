@@ -23,7 +23,7 @@ public:
         return has(Type<T>::id());
     }
 
-    bool has(TypeId typeId) const {
+    bool has(const TypeId typeId) const {
         return _traits.find(typeId) != _traits.end();
     }
 

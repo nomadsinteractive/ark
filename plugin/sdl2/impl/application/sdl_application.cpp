@@ -264,6 +264,28 @@ int32_t toWindowPosition(int32_t pos)
     return pos;
 }
 
+Event::KeyModifier toKeyModifier(const Uint16 keymod)
+{
+    Event::KeyModifier keyModifier;
+    if(keymod & KMOD_LSHIFT)
+        keyModifier.set(Event::KEY_MODIFIER_LSHIFT);
+    if(keymod & KMOD_RSHIFT)
+        keyModifier.set(Event::KEY_MODIFIER_RSHIFT);
+    if(keymod & KMOD_LCTRL)
+        keyModifier.set(Event::KEY_MODIFIER_LCTRL);
+    if(keymod & KMOD_RCTRL)
+        keyModifier.set(Event::KEY_MODIFIER_RCTRL);
+    if(keymod & KMOD_LALT)
+        keyModifier.set(Event::KEY_MODIFIER_LALT);
+    if(keymod & KMOD_RALT)
+        keyModifier.set(Event::KEY_MODIFIER_RALT);
+    if(keymod & KMOD_LGUI)
+        keyModifier.set(Event::KEY_MODIFIER_LGUI);
+    if(keymod & KMOD_RGUI)
+        keyModifier.set(Event::KEY_MODIFIER_RGUI);
+    return keyModifier;
+}
+    
 }
 
 SDLApplication::SDLApplication(sp<ApplicationContext> applicationContext, const ApplicationManifest& manifest, sp<ApplicationDelegate> applicationDelegate)
@@ -449,7 +471,7 @@ void SDLApplication::pollEvents(uint64_t timestamp)
         case SDL_KEYDOWN:
         case SDL_KEYUP:
             {
-                const Event::KeyboardInfo keyboardInfo{sdlScanCodeToEventCode(event.key.keysym.scancode), static_cast<wchar_t>(event.key.keysym.sym)};
+                const Event::KeyboardInfo keyboardInfo{sdlScanCodeToEventCode(event.key.keysym.scancode), toKeyModifier(event.key.keysym.mod), static_cast<wchar_t>(event.key.keysym.sym)};
                 const Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, keyboardInfo);
                 onEvent(e);
                 break;

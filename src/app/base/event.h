@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/base/bit_set.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/v2.h"
@@ -118,6 +119,23 @@ public:
     };
 
 //  [[script::bindings::enumeration]]
+    enum KeyModifierBits {
+        KEY_MODIFIER_LSHIFT = 1,
+        KEY_MODIFIER_RSHIFT = 1 << 1,
+        KEY_MODIFIER_SHIFT = KEY_MODIFIER_LSHIFT | KEY_MODIFIER_RSHIFT,
+        KEY_MODIFIER_LCTRL = 1 << 2,
+        KEY_MODIFIER_RCTRL = 1 << 3,
+        KEY_MODIFIER_CTRL = KEY_MODIFIER_LCTRL | KEY_MODIFIER_RCTRL,
+        KEY_MODIFIER_LALT = 1 << 4,
+        KEY_MODIFIER_RALT = 1 << 5,
+        KEY_MODIFIER_ALT = KEY_MODIFIER_LALT | KEY_MODIFIER_RALT,
+        KEY_MODIFIER_LGUI = 1 << 6,
+        KEY_MODIFIER_RGUI = 1 << 7,
+        KEY_MODIFIER_GUI = KEY_MODIFIER_LGUI | KEY_MODIFIER_RGUI
+    };
+    typedef BitSet<KeyModifierBits> KeyModifier;
+
+//  [[script::bindings::enumeration]]
     enum Button {
         BUTTON_NONE,
         BUTTON_MOUSE_LEFT,
@@ -135,6 +153,7 @@ public:
 
     struct KeyboardInfo {
         Code _code;
+        KeyModifier _modifier;
         wchar_t _character;
     };
 
@@ -191,6 +210,8 @@ public:
 
 //  [[script::bindings::property]]
     Event::Code code() const;
+//  [[script::bindings::property]]
+    uint32_t keyModifier() const;
 //  [[script::bindings::property]]
     Event::Button button() const;
 

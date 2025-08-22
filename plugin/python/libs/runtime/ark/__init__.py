@@ -2138,6 +2138,19 @@ class Event:
     CODE_KEYBOARD_BACK = 49
     CODE_KEYBOARD_MENU = 50
 
+    KEY_MODIFIER_LSHIFT = 1
+    KEY_MODIFIER_RSHIFT = 1 << 1
+    KEY_MODIFIER_SHIFT = KEY_MODIFIER_LSHIFT | KEY_MODIFIER_RSHIFT
+    KEY_MODIFIER_LCTRL = 1 << 2
+    KEY_MODIFIER_RCTRL = 1 << 3
+    KEY_MODIFIER_CTRL = KEY_MODIFIER_LCTRL | KEY_MODIFIER_RCTRL
+    KEY_MODIFIER_LALT = 1 << 4
+    KEY_MODIFIER_RALT = 1 << 5
+    KEY_MODIFIER_ALT = KEY_MODIFIER_LALT | KEY_MODIFIER_RALT
+    KEY_MODIFIER_LGUI = 1 << 6
+    KEY_MODIFIER_RGUI = 1 << 7
+    KEY_MODIFIER_GUI = KEY_MODIFIER_LGUI | KEY_MODIFIER_RGUI
+
     BUTTON_NONE = 0
     BUTTON_MOUSE_LEFT = 1
     BUTTON_MOUSE_MIDDLE = 2
@@ -2154,6 +2167,10 @@ class Event:
     @property
     def code(self) -> int:
         return self.CODE_NONE
+
+    @property
+    def key_modifier(self) -> int:
+        return 0
 
     @property
     def button(self) -> int:
@@ -3143,7 +3160,10 @@ class Entity:
     def discard(self):
         pass
 
-    def __getitem__(self, ctype: type[T]) -> Optional[T]:
+    def __getitem__(self, key: type[T]) -> Optional[T]:
+        pass
+
+    def __setitem__(self, key: type[T], value: Any):
         pass
 
 

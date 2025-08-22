@@ -40,7 +40,7 @@ namespace {
 
 bool gQuit = false;
 
-Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
+Event::Code sdlScanCodeToEventCode(const SDL_Scancode sc)
 {
     if(Math::between<SDL_Scancode>(SDL_SCANCODE_A, SDL_SCANCODE_Z, sc))
         return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_A) + sc - SDL_SCANCODE_A);
@@ -117,6 +117,28 @@ Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
         break;
     }
     return Event::CODE_NONE;
+}
+
+Event::KeyModifier toKeyModifier(const SDL_Keymod keymod)
+{
+    Event::KeyModifier keyModifier;
+    if(keymod & SDL_KMOD_LSHIFT)
+        keyModifier.set(Event::KEY_MODIFIER_LSHIFT);
+    if(keymod & SDL_KMOD_RSHIFT)
+        keyModifier.set(Event::KEY_MODIFIER_RSHIFT);
+    if(keymod & SDL_KMOD_LCTRL)
+        keyModifier.set(Event::KEY_MODIFIER_LCTRL);
+    if(keymod & SDL_KMOD_RCTRL)
+        keyModifier.set(Event::KEY_MODIFIER_RCTRL);
+    if(keymod & SDL_KMOD_LALT)
+        keyModifier.set(Event::KEY_MODIFIER_LALT);
+    if(keymod & SDL_KMOD_RALT)
+        keyModifier.set(Event::KEY_MODIFIER_RALT);
+    if(keymod & SDL_KMOD_LGUI)
+        keyModifier.set(Event::KEY_MODIFIER_LGUI);
+    if(keymod & SDL_KMOD_RGUI)
+        keyModifier.set(Event::KEY_MODIFIER_RGUI);
+    return keyModifier;
 }
 
 void doSetMouseCapture(const bool enabled)
@@ -455,7 +477,7 @@ void ApplicationSDL3::pollEvents(uint64_t timestamp)
         case SDL_EVENT_KEY_DOWN:
         case SDL_EVENT_KEY_UP:
             {
-                const Event::KeyboardInfo keyboardInfo = {sdlScanCodeToEventCode(event.key.scancode), static_cast<wchar_t>(event.key.key)};
+                const Event::KeyboardInfo keyboardInfo = {sdlScanCodeToEventCode(event.key.scancode), toKeyModifier(event.key.mod), static_cast<wchar_t>(event.key.key)};
                 const Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_EVENT_KEY_DOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, keyboardInfo);
                 onEvent(e);
                 break;

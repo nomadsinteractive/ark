@@ -55,6 +55,11 @@ Event::Code Event::code() const
     return CODE_NONE;
 }
 
+uint32_t Event::keyModifier() const
+{
+    return _info._keyboard._modifier.bits();
+}
+
 Event::Button Event::button() const
 {
     if(_action == ACTION_DOWN || _action == ACTION_UP)

@@ -143,13 +143,13 @@ Optional<Box> Entity::getComponent(const TypeId typeId) const
 
 void Entity::setComponent(const TypeId typeId, Box component)
 {
-    Wirable::WiringContext context(_components);
-
     if(const sp<Wirable> wirable = component.as<Wirable>())
+    {
+        Wirable::WiringContext context(_components);
         if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
             _components.add(typeId, component);
-    if(const sp<Wirable> wirable = component.as<Wirable>())
         wirable->onWire(context, component);
+    }
 
     _components.add(typeId, std::move(component));
 }
