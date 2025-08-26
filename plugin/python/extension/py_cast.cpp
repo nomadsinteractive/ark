@@ -262,13 +262,13 @@ Traits PyCast::toTraits(PyObject* args, const size_t offset)
     Traits traits;
     if(const Py_ssize_t size = PyTuple_Size(args); size > 0)
         for(size_t i = offset; i < size; ++i)
-        {
-            PyObject* v = PyTuple_GetItem(args, i);
-            CHECK(PythonExtension::instance().isPyArkTypeObject(Py_TYPE(v)), "Trait \"%s\" must be an Ark Type", Py_TYPE(v)->tp_name);
-            Box component(*reinterpret_cast<PyArkType::Instance*>(v)->box);
-            const TypeId typeId = component.typeId();
-            traits.put(typeId, std::move(component));
-        }
+            if(PyObject* v = PyTuple_GetItem(args, i); PythonExtension::instance().isPyArkTypeObject(Py_TYPE(v)))
+            {
+                Box component(*reinterpret_cast<PyArkType::Instance*>(v)->box);
+                traits.put(component.typeId(), std::move(component));
+            }
+            else
+                traits.put(ensureCppObject<TypeId>(reinterpret_cast<PyObject*>(Py_TYPE(v))), PyInstance::own(v).toBox());
     return traits;
 }
 
