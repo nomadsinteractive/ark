@@ -2224,7 +2224,7 @@ class RotationEuler(Vec4):
 
 
 class Rotation(Vec4):
-    def __init__(self, quaternion: Vec4):
+    def __init__(self, quaternion: TYPE_VEC4):
         super().__init__(0)
 
     def reset(self, quaternion: Vec4):

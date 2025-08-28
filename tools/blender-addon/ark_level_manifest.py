@@ -80,7 +80,7 @@ class ArkScene:
     def __init__(self, layer_collection):
         self._collections = bpy.data.collections
         instance_collections = set(filter(None, (i.instance_collection for i in bpy.data.objects)))
-        self._libraries = [ArkInstanceCollection(i, j) for i, j in enumerate(instance_collections)]
+        self._libraries = [ArkInstanceCollection(i, j) for i, j in enumerate(sorted(instance_collections, key=lambda x: x.name))]
         collections_not_excluded = [i.collection for i in layer_collection.children if not i.exclude]
         self._layers = [ArkLayer(self, i) for i in collections_not_excluded if not i.library]
         self._filename = bpy.path.basename(bpy.data.filepath)
@@ -108,31 +108,19 @@ class ArkScene:
 
 class ArkInstanceCollection:
     def __init__(self, _id, collection):
-        self._id = _id
-        self._name = collection.name
-        self._collection = collection
-
-    @property
-    def id(self):
-        return self._id
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def collection(self):
-        return self._collection
+        self.id = _id
+        self.name = collection.name
+        self.collection = collection
 
     def to_xml(self, indent):
-        obj = self._collection.objects[0] if self._collection.objects else None
+        obj = self.collection.objects[0] if self.collection.objects else None
         if obj:
             bb = obj.bound_box
             d = Vector(tuple(max(bb[i][j] for i in range(8)) - min(bb[i][j] for i in range(8)) for j in range(3)))
             size = ', '.join(str(abs(i)) for i in to_y_up_scale(obj.matrix_world @ d))
         else:
             size = '0, 0, 0'
-        return '%s<library id="%d" name="%s" size="(%s)"/>' % (_INDENT_BLOCK * indent, self._id, self._name, size)
+        return '%s<library id="%d" name="%s" size="(%s)"/>' % (_INDENT_BLOCK * indent, self.id, self.name, size)
 
 
 class ArkLayer:
