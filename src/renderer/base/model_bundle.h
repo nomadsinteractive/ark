@@ -20,21 +20,13 @@ public:
         size_t _vertex_offset;
     };
 
-    struct NodeLayout {
-        NodeLayout() = default;
-        NodeLayout(const sp<Node>& node, const NodeLayout& parentLayout);
-
-        sp<Node> _node;
-        M4 _transform;
-    };
-
     struct ModelLayout {
         sp<Model> _model;
         size_t _vertex_offset;
         size_t _index_offset;
 
         Vector<MeshLayout> _mesh_layouts;
-        Vector<NodeLayout> _node_layouts;
+        Vector<Node::WithTransform> _node_layouts;
     };
     struct Stub;
 
@@ -88,7 +80,7 @@ public:
     };
 
 //  [[plugin::builder("model-bundle")]]
-    class MODEL_LOADER_BUILDER : public Builder<ModelLoader> {
+    class MODEL_LOADER_BUILDER final : public Builder<ModelLoader> {
     public:
         MODEL_LOADER_BUILDER(BeanFactory& factory, const document& manifest);
 

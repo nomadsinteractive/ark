@@ -30,8 +30,8 @@ namespace {
 
 class DynamicPosition final : public Vec3 {
 public:
-    DynamicPosition(const sp<btMotionState>& motionState, const V3 origin)
-        : _motion_state(motionState), _origin(origin) {
+    DynamicPosition(sp<btMotionState> motionState, const V3 origin)
+        : _motion_state(std::move(motionState)), _origin(origin) {
     }
 
     bool update(uint64_t timestamp) override
@@ -60,8 +60,8 @@ private:
 
 class DynamicRotation final : public Vec4 {
 public:
-    DynamicRotation(const sp<btMotionState>& motionState)
-        : _motion_state(motionState) {
+    DynamicRotation(sp<btMotionState> motionState)
+        : _motion_state(std::move(motionState)) {
     }
 
     bool update(uint64_t timestamp) override
@@ -85,17 +85,21 @@ sp<CollisionShapeRef> makeConvexHullCollisionShape(const Model& model, btScalar 
 {
     CHECK(!model.meshes().empty(), "ConvexHullRigidBodyImporter only works with Mesh based models");
 
-    const sp<btConvexHullShape> convexHullShape = sp<btConvexHullShape>::make();
-    for(const Mesh& i : model.meshes())
-        for(const V3& j : i.vertices())
-            convexHullShape->addPoint(btVector3(j.x(), j.y(), j.z()), false);
+    sp<btConvexHullShape> convexHullShape = sp<btConvexHullShape>::make();
+    for(const Vector<Node::WithTransform> flattened = model.toFlattened<Node::WithTransform>(); const Node::WithTransform& i : flattened)
+        for(const Mesh& j : i._node->meshes())
+            for(const V3 k : j.vertices())
+            {
+                const V3 pt = MatrixUtil::transform(i._transform, k);
+                convexHullShape->addPoint(btVector3(pt.x(), pt.y(), pt.z()), false);
+            }
 
     convexHullShape->recalcLocalAabb();
     convexHullShape->optimizeConvexHull();
-    return sp<CollisionShapeRef>::make(convexHullShape, mass);
+    return sp<CollisionShapeRef>::make(std::move(convexHullShape), mass);
 }
 
-sp<CollisionObjectRef> makeRigidBody(btDynamicsWorld* world, sp<CollisionShapeRef> shape, sp<btMotionState> motionState, Rigidbody::BodyType bodyType, const btScalar mass, const sp<CollisionFilter>& collisionFilter)
+sp<CollisionObjectRef> makeRigidBody(btDynamicsWorld* world, sp<CollisionShapeRef> shape, sp<btMotionState> motionState, const Rigidbody::BodyType bodyType, const btScalar mass, const sp<CollisionFilter>& collisionFilter)
 {
     DASSERT(bodyType == Rigidbody::BODY_TYPE_STATIC || bodyType == Rigidbody::BODY_TYPE_DYNAMIC || bodyType == Rigidbody::BODY_TYPE_KINEMATIC);
 
@@ -104,7 +108,7 @@ sp<CollisionObjectRef> makeRigidBody(btDynamicsWorld* world, sp<CollisionShapeRe
     if(mass != 0.f)
         btShape->calculateLocalInertia(mass, localInertia);
 
-    btRigidBody::btRigidBodyConstructionInfo cInfo(mass, motionState.get(), btShape, localInertia);
+    const btRigidBody::btRigidBodyConstructionInfo cInfo(mass, motionState.get(), btShape, localInertia);
 
     btRigidBody* rigidBody = new btRigidBody(cInfo);
     if(bodyType == Rigidbody::BODY_TYPE_KINEMATIC)

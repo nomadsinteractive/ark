@@ -56,14 +56,13 @@ public:
 //  [[script::bindings::auto]]
     const sp<Animation>& getAnimation(const String& name) const;
 
-    void writeToStream(VertexWriter& buf, const V3& size) const;
-
-    void writeRenderable(VertexWriter& buf, const Renderable::Snapshot& renderable) const;
+    void writeToStream(VertexWriter& writer, const V3& size) const;
+    void writeRenderable(VertexWriter& writer, const Renderable::Snapshot& renderable) const;
 
     void discard();
     bool isDiscarded() const;
 
-    template<typename T> Vector<T> toFlatLayouts() const {
+    template<typename T> Vector<T> toFlattened() const {
         Vector<T> nodeLayouts;
         loadFlatLayouts(_root_node, T(), nodeLayouts);
         return nodeLayouts;

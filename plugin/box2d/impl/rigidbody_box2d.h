@@ -29,11 +29,10 @@ public:
         ColliderBox2D _world;
         b2Body* _body;
         OptionalVar<Boolean> _discarded;
-        std::unordered_set<RefId> _contacts;
+        HashSet<RefId> _contacts;
     };
 
 public:
-//  [[script::bindings::auto]]
     RigidbodyBox2D(const ColliderBox2D& world, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const OptionalVar<Numeric>& rotate, sp<CollisionFilter> collisionFilter, const sp<Shape>& shape, float density, float friction);
     RigidbodyBox2D(const ColliderBox2D& world, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const OptionalVar<Numeric>& rotate, sp<CollisionFilter> collisionFilter, const BodyCreateInfo& createInfo);
     RigidbodyBox2D(const sp<Stub>& stub, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const OptionalVar<Numeric>& rotate, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded = nullptr);
@@ -50,12 +49,14 @@ public:
     V3 linearVelocity() const override;
     void setLinearVelocity(const V3& velocity) override;
     void applyCentralImpulse(const V3& impulse) override;
+    float friction() const override;
+    void setFriction(float friction) override;
+
+    bool active() const override;
+    void setActive(bool active) override;
 
     float gravityScale() const;
     void setGravityScale(float scale);
-
-    bool active();
-    void setActive(bool active);
 
     bool awake();
     void setAwake(bool awake);

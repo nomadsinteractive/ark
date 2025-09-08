@@ -1,15 +1,13 @@
 #include "box2d/impl/body_create_info.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 BodyCreateInfo::BodyCreateInfo()
     : density(0), friction(0), category(0), mask(0), group(0)
 {
 }
 
-BodyCreateInfo::BodyCreateInfo(const sp<Shape>& shape, float density, float friction, bool isSensor)
+BodyCreateInfo::BodyCreateInfo(const sp<Shape>& shape, const float density, const float friction, const bool isSensor)
     : shape(shape), density(density), friction(friction), is_sensor(isSensor), category(0), mask(0), group(0)
 {
 }
@@ -24,6 +22,4 @@ b2FixtureDef BodyCreateInfo::toFixtureDef(const b2Shape* shape) const
     return fixture;
 }
 
-}
-}
 }

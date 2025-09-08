@@ -48,6 +48,7 @@ public:
 
 //  [[script::bindings::auto]]
     sp<RenderObject> createRenderObject();
+    [[deprecated]]
 //  [[script::bindings::auto]]
     sp<Rigidbody> createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter = nullptr);
 

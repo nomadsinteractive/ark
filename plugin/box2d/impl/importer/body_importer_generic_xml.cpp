@@ -22,10 +22,10 @@ public:
     ShapePolygon(const document& polygons, const V2& size) {
         for(const document& i : polygons->children("polygon")) {
             const String& content = i->value();
-            std::vector<String> splitted = content.split(',');
+            Vector<String> splitted = content.split(',');
             DCHECK(splitted.size() % 2 == 0, "Illegal size: %d", splitted.size());
 
-            std::vector<V2> vec2s;
+            Vector<V2> vec2s;
             for(size_t j = 0; j < splitted.size(); j += 2) {
                 float x = Strings::eval<float>(splitted.at(j)) / size.x();
                 float y = Strings::eval<float>(splitted.at(j + 1)) / size.y();
@@ -36,10 +36,10 @@ public:
     }
 
     void apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo) override {
-        for(const std::vector<V2>& i : _polygons) {
+        for(const Vector<V2>& i : _polygons) {
             b2PolygonShape shape;
 
-            std::vector<b2Vec2> vec2s;
+            Vector<b2Vec2> vec2s;
             for(const V2& j : i)
                 vec2s.push_back(b2Vec2(j.x() * size.x(), j.y() * size.y()));
 
@@ -51,7 +51,7 @@ public:
     }
 
 private:
-    std::vector<std::vector<V2>> _polygons;
+    Vector<Vector<V2>> _polygons;
 
 };
 

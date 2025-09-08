@@ -98,6 +98,15 @@ public:
         return {Rigidbody::Impl{_rigidbody_stub, nullptr}, true};
     }
 
+    bool active() const override
+    {
+        return true;
+    }
+
+    void setActive(bool active) override
+    {
+    }
+
     V3 linearVelocity() const override
     {
         FATAL("Unimplemented");
@@ -112,6 +121,15 @@ public:
     void applyCentralImpulse(const V3& impulse) override
     {
         FATAL("Unimplemented");
+    }
+
+    float friction() const override
+    {
+        return 0;
+    }
+
+    void setFriction(float friction) override
+    {
     }
 
     float updateOccupyRadius()

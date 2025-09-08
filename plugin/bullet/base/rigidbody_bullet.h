@@ -24,13 +24,16 @@ public:
 
     void applyCentralForce(const V3& force);
 
+    bool active() const override;
+    void setActive(bool active) override;
+
     V3 linearVelocity() const override;
     void setLinearVelocity(const V3& velocity) override;
 
     void applyCentralImpulse(const V3& impulse) override;
 
-    float friction() const;
-    void setFriction(float friction);
+    float friction() const override;
+    void setFriction(float friction) override;
 
     V3 angularFactor() const;
     void setAngularFactor(const V3& factor);

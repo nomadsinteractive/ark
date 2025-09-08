@@ -230,6 +230,17 @@ void RigidbodyBox2D::applyCentralImpulse(const V3& impulse)
     _stub->body()->ApplyLinearImpulseToCenter(b2Vec2(impulse.x(), impulse.y()), true);
 }
 
+float RigidbodyBox2D::friction() const
+{
+    FATAL("Unimplemented");
+    return 0;
+}
+
+void RigidbodyBox2D::setFriction(float friction)
+{
+    FATAL("Unimplemented");
+}
+
 float RigidbodyBox2D::gravityScale() const
 {
     return _stub->body()->GetGravityScale();
@@ -240,7 +251,7 @@ void RigidbodyBox2D::setGravityScale(float scale)
     _stub->body()->SetGravityScale(scale);
 }
 
-bool RigidbodyBox2D::active()
+bool RigidbodyBox2D::active() const
 {
     return _stub->body()->IsEnabled();
 }

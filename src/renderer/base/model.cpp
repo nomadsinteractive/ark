@@ -190,9 +190,9 @@ const sp<Animation>& Model::getAnimation(const String& name) const
     return _animations.at(name);
 }
 
-void Model::writeToStream(VertexWriter& buf, const V3& size) const
+void Model::writeToStream(VertexWriter& writer, const V3& size) const
 {
-    _vertices->write(buf, size == V3(0) && _content ? _content->size()->val() : size);
+    _vertices->write(writer, size == V3(0) && _content ? _content->size()->val() : size);
 }
 
 void Model::writeRenderable(VertexWriter& writer, const Renderable::Snapshot& renderable) const

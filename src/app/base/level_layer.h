@@ -25,6 +25,7 @@ public:
 
 //  [[script::bindings::auto]]
     void createRenderObjects(const sp<Layer>& layer = nullptr) const;
+    [[deprecated]]
 //  [[script::bindings::auto]]
     void createRigidbodies(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter = nullptr) const;
 

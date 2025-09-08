@@ -2819,6 +2819,14 @@ class RigidbodyController:
     def linear_velocity(self, linear_velocity: TYPE_FLOAT3):
         pass
 
+    @property
+    def friction(self) -> float:
+        return 0
+
+    @friction.setter
+    def friction(self, friction: float):
+        pass
+
     def apply_central_impulse(self, impulse: TYPE_FLOAT3):
         pass
 
@@ -2962,7 +2970,7 @@ class NarrowPhrase:
 
 
 class Collider:
-    def create_body(self, body_type: int | Integer, shape: Optional[Shape], position: Optional[TYPE_VEC3] = None, rotation: Optional[TYPE_VEC4] = None, collision_filter: Optional[CollisionFilter] = None, discarded: Optional[Boolean] = None) -> Rigidbody:
+    def create_body(self, body_type: int | Integer, shape: Optional[Shape], position: TYPE_VEC3, rotation: Optional[TYPE_VEC4] = None, collision_filter: Optional[CollisionFilter] = None, discarded: Optional[Boolean] = None) -> Rigidbody:
         pass
 
     def create_shape(self, shape_id: TYPE_NAMED_HASH, size: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None) -> Shape:

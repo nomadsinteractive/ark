@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_BOX2D_IMPL_BODY_CREATE_INFO_H_
-#define ARK_PLUGIN_BOX2D_IMPL_BODY_CREATE_INFO_H_
+#pragma once
 
 #include <Box2D/Box2D.h>
 
@@ -8,9 +7,7 @@
 
 #include "box2d/forwarding.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 class BodyCreateInfo {
 public:
@@ -31,7 +28,3 @@ public:
 };
 
 }
-}
-}
-
-#endif

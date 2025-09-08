@@ -44,7 +44,7 @@ struct ModelBundle::Stub {
     {
         CHECK(_model_layouts.find(type) == _model_layouts.end(), "Model[%d](%s) exists already", type, NamedHash::reverse(type).c_str());
         ModelLayout& modelLayout = _model_layouts[type];
-        modelLayout._node_layouts = model->toFlatLayouts<NodeLayout>();
+        modelLayout._node_layouts = model->toFlattened<Node::WithTransform>();
         modelLayout._vertex_offset = _vertex_length;
         modelLayout._index_offset = _index_length;
         size_t meshIndexOffset = _index_length;
@@ -144,7 +144,7 @@ sp<DrawingContextComposer> ModelBundle::makeRenderCommandComposer(const Shader& 
     return sp<DrawingContextComposer>::make<RCCMultiDrawElementsIndirect>(sp<ModelBundle>::make(_stub));
 }
 
-const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(int32_t type) const
+const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(const int32_t type) const
 {
     return _stub->ensureModelLayout(type);
 }
@@ -225,11 +225,6 @@ ModelBundle::MODEL_LOADER_BUILDER::MODEL_LOADER_BUILDER(BeanFactory& factory, co
 sp<ModelLoader> ModelBundle::MODEL_LOADER_BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
-}
-
-ModelBundle::NodeLayout::NodeLayout(const sp<Node>& node, const NodeLayout& parentLayout)
-    : _node(node), _transform(parentLayout._node ? parentLayout._transform * _node->localMatrix() : _node->localMatrix())
-{
 }
 
 }

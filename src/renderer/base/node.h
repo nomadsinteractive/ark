@@ -51,6 +51,14 @@ public:
 
     void calculateLocalAABB();
 
+    struct ARK_API WithTransform {
+        WithTransform() = default;
+        WithTransform(const sp<Node>& node, const WithTransform& parentNode);
+
+        sp<Node> _node;
+        M4 _transform;
+    };
+
 private:
     WeakPtr<Node> _parent_node;
     String _name;

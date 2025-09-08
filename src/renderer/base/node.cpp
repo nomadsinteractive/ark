@@ -105,4 +105,9 @@ void Node::calculateLocalAABB()
     }
 }
 
+Node::WithTransform::WithTransform(const sp<Node>& node, const WithTransform& parentNode)
+    : _node(node), _transform(parentNode._node ? parentNode._transform * _node->localMatrix() : _node->localMatrix())
+{
+}
+
 }
