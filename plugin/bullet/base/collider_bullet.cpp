@@ -8,6 +8,7 @@
 #include "core/util/boolean_type.h"
 
 #include "graphics/base/v3.h"
+#include "graphics/components/shape.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/mesh.h"
@@ -18,12 +19,10 @@
 #include "app/base/collision_filter.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
-#include "graphics/components/shape.h"
 
 #include "bullet/base/collision_object_ref.h"
 #include "bullet/base/collision_shape_ref.h"
 #include "bullet/base/rigidbody_bullet.h"
-#include "core/types/ref.h"
 
 namespace ark::plugin::bullet {
 
@@ -31,7 +30,7 @@ namespace {
 
 class DynamicPosition final : public Vec3 {
 public:
-    DynamicPosition(const sp<btMotionState>& motionState, const V3& origin)
+    DynamicPosition(const sp<btMotionState>& motionState, const V3 origin)
         : _motion_state(motionState), _origin(origin) {
     }
 
@@ -175,7 +174,7 @@ struct GhostObject : BtRigibodyObject {
 }
 
 struct ColliderBullet::Stub final : Updatable {
-    Stub(const V3& gravity, sp<ModelLoader> modelLoader)
+    Stub(const V3 gravity, sp<ModelLoader> modelLoader)
         : _model_loader(std::move(modelLoader)), _collision_configuration(new btDefaultCollisionConfiguration()), _collision_dispatcher(new btCollisionDispatcher(_collision_configuration)),
           _broadphase(new btDbvtBroadphase()), _solver(new btSequentialImpulseConstraintSolver()), _dynamics_world(new btDiscreteDynamicsWorld(_collision_dispatcher, _broadphase, _solver, _collision_configuration)),
           _app_clock_interval(Ark::instance().applicationContext()->appClockInterval())
@@ -228,7 +227,7 @@ struct ColliderBullet::Stub final : Updatable {
     uint64_t _timestamp;
 };
 
-ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
+ColliderBullet::ColliderBullet(const V3 gravity, sp<ModelLoader> modelLoader)
     : _stub(sp<Stub>::make(gravity, std::move(modelLoader)))
 {
     _stub->_dynamics_world->setInternalTickCallback(myInternalPreTickCallback, this, true);

@@ -125,7 +125,7 @@ sp<RenderObject> LevelObject::createRenderObject()
     return _render_object;
 }
 
-sp<Rigidbody> LevelObject::createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter)
+sp<Rigidbody> LevelObject::createRigidbody(const sp<Collider>& collider, const Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter)
 {
     if(_instance_of != -1)
         _rigidbody = makeRigidBody(ensureLibrary(), collider, *this, bodyType, collisionFilter);

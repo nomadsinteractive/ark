@@ -50,7 +50,7 @@ def to_y_up_quaternion(quaternion):
     # q.rotate(Z_UP_TO_Y_UP_ROTATION)
     # return tuple(truncate(i) for i in q)
     w, x, y, z = quaternion
-    return x, z, y, w
+    return x, z, -y, w
 
 
 class XmlWriter:

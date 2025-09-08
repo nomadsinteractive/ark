@@ -30,7 +30,7 @@ const Vector<sp<LevelObject>>& LevelLayer::objects() const
     return _objects;
 }
 
-sp<LevelObject> LevelLayer::getObject(StringView name) const
+sp<LevelObject> LevelLayer::getObject(const StringView name) const
 {
     const auto iter = _objects_by_name.find(name);
     return iter != _objects_by_name.end() ? iter->second : nullptr;

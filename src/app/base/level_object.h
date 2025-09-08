@@ -49,7 +49,7 @@ public:
 //  [[script::bindings::auto]]
     sp<RenderObject> createRenderObject();
 //  [[script::bindings::auto]]
-    sp<Rigidbody> createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter);
+    sp<Rigidbody> createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter = nullptr);
 
 private:
     const sp<LevelLibrary>& ensureLibrary() const;
