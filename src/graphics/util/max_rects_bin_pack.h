@@ -52,6 +52,9 @@ public:
 		RectContactPointRule ///< -CP: Choosest the placement where the rectangle touches other rects as much as possible.
 	};
 
+	int32_t width() const;
+	int32_t height() const;
+
 	/// Inserts the given list of rectangles in an offline/batch mode, possibly rotated.
 	/// @param rects The list of rectangles to insert. This vector will be destroyed in the process.
 	/// @param dst [out] This list will contain the packed rectangles. The indices will not correspond to that of rects.

@@ -49,6 +49,16 @@ void MaxRectsBinPack::Init(int width, int height, bool allowFlip)
 	freeRectangles.push_back(n);
 }
 
+int32_t MaxRectsBinPack::width() const
+{
+	return binWidth;
+}
+
+int32_t MaxRectsBinPack::height() const
+{
+	return binHeight;
+}
+
 MaxRectsBinPack::Rect MaxRectsBinPack::Insert(int width, int height, FreeRectChoiceHeuristic method)
 {
 	Rect newNode;

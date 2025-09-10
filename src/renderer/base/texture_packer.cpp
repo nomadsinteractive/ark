@@ -1,80 +1,64 @@
 #include "renderer/base/texture_packer.h"
 
+#include "core/ark.h"
+
 #include "graphics/base/bitmap.h"
 #include "graphics/base/rect.h"
 
 #include "renderer/base/resource_loader_context.h"
 
-#include "app/base/application_context.h"
-#include "app/base/application_bundle.h"
-
 namespace ark {
 
-namespace {
+TexturePacker::TexturePacker(sp<Texture> texture)
+    : _texture(std::move(texture)), _channels(0), _bin_pack(texture ? texture->width() : 256, texture ? texture->height() : 256, false)
+{
+}
 
-class BitmapProvider : public Variable<bitmap> {
-public:
-    BitmapProvider(sp<BitmapLoaderBundle> bitmapBundle, String src)
-        : _bitmap_bundle(std::move(bitmapBundle)), _src(std::move(src)) {
+RectI TexturePacker::addBitmap(MaxRectsBinPack& binPack, sp<Bitmap> bitmap)
+{
+    sp<Variable<sp<Bitmap>>> bitmapProvider = sp<Variable<sp<Bitmap>>::Const>::make(bitmap);
+    return addBitmap(binPack, std::move(bitmap), std::move(bitmapProvider));
+}
 
+RectI TexturePacker::addBitmap(MaxRectsBinPack& binPack, sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider)
+{
+    const MaxRectsBinPack::Rect rect = _bin_pack.Insert(static_cast<int32_t>(bounds->width()), static_cast<int32_t>(bounds->height()), MaxRectsBinPack::RectBestShortSideFit);
+    if(rect.width == 0 || rect.height == 0)
+    {
+        resize(_bin_pack.width() * 2, _bin_pack.height() * 2);
+        return addBitmap(binPack, std::move(bounds), std::move(bitmapProvider));
     }
-
-    virtual bool update(uint64_t /*timestamp*/) override {
-        return false;
-    }
-
-    virtual bitmap val() override {
-        return _bitmap_bundle->get(_src);
-    }
-
-private:
-    sp<BitmapLoaderBundle> _bitmap_bundle;
-    String _src;
-};
-
+    const RectI uv(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+    addPackedBitmap(uv, std::move(bounds), std::move(bitmapProvider));
+    return uv;
 }
 
-TexturePacker::TexturePacker(const ApplicationContext& applicationContext, sp<Texture> texture)
-    : TexturePacker(applicationContext.applicationBundle()->bitmapBoundsBundle(), applicationContext.applicationBundle()->bitmapBundle(), applicationContext.renderController(), std::move(texture))
+const Vector<TexturePacker::PackedBitmap>& TexturePacker::packedBitmaps() const
 {
+    return _packed_bitmaps;
 }
 
-TexturePacker::TexturePacker(sp<BitmapLoaderBundle> bitmapBundleBounds, sp<BitmapLoaderBundle> bitmapBundle, sp<RenderController> renderController, sp<Texture> texture)
-    : _bitmap_bundle_bounds(std::move(bitmapBundleBounds)), _bitmap_bundle(std::move(bitmapBundle)), _render_controller(std::move(renderController)), _texture(std::move(texture)), _channels(0)
+void TexturePacker::addPackedBitmap(RectI uv, sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider)
 {
+    _channels = std::max(bounds->channels(), _channels);
+    _packed_bitmaps.emplace_back(std::move(bounds), std::move(bitmapProvider), uv);
 }
 
-RectI TexturePacker::addBitmap(MaxRectsBinPack& binPack, const String& src)
+void TexturePacker::resize(const int32_t width, const int32_t height)
 {
-    return addBitmap(binPack, _bitmap_bundle_bounds->get(src), sp<BitmapProvider>::make(_bitmap_bundle, src));
-}
-
-RectI TexturePacker::addBitmap(MaxRectsBinPack& binPack, bitmap fragment)
-{
-    return addBitmap(binPack, fragment, sp<Variable<bitmap>::Const>::make(std::move(fragment)));
+    Vector<PackedBitmap> packedBitmaps = std::move(_packed_bitmaps);
+    _bin_pack = MaxRectsBinPack(width, height, false);
+    for(auto& [bitmapBounds, bitmapProvider, uv] : packedBitmaps)
+        addBitmap(_bin_pack, std::move(bitmapBounds), std::move(bitmapProvider));
 }
 
 void TexturePacker::updateTexture()
 {
     if(_channels)
     {
-        sp<Texture::Uploader> uploader = sp<PackedTextureUploader>::make(_texture->width(), _texture->height(), _channels, std::move(_packed_bitmaps));
-        _texture->reset(*_render_controller->createTexture(_texture->size(), _texture->parameters(), std::move(uploader)));
+        sp<Texture::Uploader> uploader = sp<Texture::Uploader>::make<PackedTextureUploader>(_texture->width(), _texture->height(), _channels, std::move(_packed_bitmaps));
+        _texture->reset(*Ark::instance().renderController()->createTexture(_texture->size(), _texture->parameters(), std::move(uploader)));
     }
-}
-
-RectI TexturePacker::addBitmap(MaxRectsBinPack& binPack, const bitmap& bounds, sp<Variable<bitmap>> bitmapProvider)
-{
-    MaxRectsBinPack::Rect rect = binPack.Insert(static_cast<int32_t>(bounds->width()), static_cast<int32_t>(bounds->height()), MaxRectsBinPack::RectBestShortSideFit);
-    DCHECK(rect.width != 0 && rect.height != 0, "Cannot insert more bitmap into the atlas(%d, %d), more space required", static_cast<int32_t>(_texture->width()), static_cast<int32_t>(_texture->height()));
-    addPackedBitmap(rect.x, rect.y, bounds, std::move(bitmapProvider));
-    return RectI(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
-}
-
-void TexturePacker::addPackedBitmap(int32_t x, int32_t y, const bitmap& bounds, sp<Variable<bitmap>> bitmapProvider)
-{
-    _channels = std::max(bounds->channels(), _channels);
-    _packed_bitmaps.emplace_back(std::move(bitmapProvider), x, y);
 }
 
 TexturePacker::PackedTextureUploader::PackedTextureUploader(uint32_t width, uint32_t height, uint8_t channels, std::vector<PackedBitmap> bitmaps)
@@ -84,18 +68,13 @@ TexturePacker::PackedTextureUploader::PackedTextureUploader(uint32_t width, uint
 
 void TexturePacker::PackedTextureUploader::initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
-    const bitmap content = sp<Bitmap>::make(_width, _height, _width * _channels, _channels, true);
-    for(const PackedBitmap& i : _bitmaps)
+    const sp<Bitmap> content = sp<Bitmap>::make(_width, _height, _width * _channels, _channels, true);
+    for(const auto& [bitmapBounds, bitmapProvider, uv] : _bitmaps)
     {
-        const bitmap s = i._bitmap_provider->val();
-        content->draw(i._x, i._y, s->byteArray()->buf(), s->width(), s->height(), s->rowBytes());
+        const sp<Bitmap> s = bitmapProvider->val();
+        content->draw(uv.left(), uv.top(), s->byteArray()->buf(), s->width(), s->height(), s->rowBytes());
     }
     delegate.uploadBitmap(graphicsContext, content, {content->byteArray()});
-}
-
-TexturePacker::PackedBitmap::PackedBitmap(sp<Variable<bitmap>> bitmapProvider, int32_t x, int32_t y)
-    : _bitmap_provider(std::move(bitmapProvider)), _x(x), _y(y)
-{
 }
 
 }

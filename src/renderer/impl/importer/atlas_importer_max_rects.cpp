@@ -14,6 +14,30 @@
 
 namespace ark {
 
+namespace {
+
+class BitmapProvider final : public Variable<bitmap> {
+public:
+    BitmapProvider(sp<BitmapLoaderBundle> bitmapBundle, String src)
+        : _bitmap_bundle(std::move(bitmapBundle)), _src(std::move(src)) {
+
+    }
+
+    bool update(uint64_t /*timestamp*/) override {
+        return false;
+    }
+
+    bitmap val() override {
+        return _bitmap_bundle->get(_src);
+    }
+
+private:
+    sp<BitmapLoaderBundle> _bitmap_bundle;
+    String _src;
+};
+
+}
+
 AtlasImporterMaxRects::AtlasImporterMaxRects(document manifest, sp<ResourceLoaderContext> resourceLoaderContext)
     : _manifest(std::move(manifest)), _resource_loader_context(std::move(resourceLoaderContext))
 {
@@ -21,15 +45,15 @@ AtlasImporterMaxRects::AtlasImporterMaxRects(document manifest, sp<ResourceLoade
 
 void AtlasImporterMaxRects::import(Atlas& atlas, const sp<Readable>& /*readable*/)
 {
-    TexturePacker texturePacker(Ark::instance().applicationContext(), atlas.texture());
+    TexturePacker texturePacker(atlas.texture());
     MaxRectsBinPack binPack(atlas.texture()->width(), atlas.texture()->height(), false);
     for(const document& i : _manifest->children())
     {
         DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
 
         const String& src = Documents::ensureAttribute(i, constants::SRC);
-        int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
-        const RectI rect = texturePacker.addBitmap(binPack, src);
+        const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
+        const RectI rect = texturePacker.addBitmap(binPack, _resource_loader_context->bitmapBoundsBundle()->get(src), sp<BitmapProvider>::make(_resource_loader_context->bitmapBundle(), src));
         atlas.add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(static_cast<float>(rect.width()), static_cast<float>(rect.height())), V2(0.5f, 0.5f));
     }
     texturePacker.updateTexture();

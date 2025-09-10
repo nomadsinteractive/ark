@@ -2812,6 +2812,14 @@ class Shape:
 class RigidbodyController:
 
     @property
+    def active(self) -> bool:
+        return False
+
+    @active.setter
+    def active(self, active: bool):
+        pass
+
+    @property
     def linear_velocity(self) -> TYPE_FLOAT3:
         return 0, 0, 0
 

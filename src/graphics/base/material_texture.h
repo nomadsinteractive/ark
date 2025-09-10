@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/forwarding.h"
+#include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -20,7 +21,10 @@ public:
         TYPE_LENGTH
     };
 
-    MaterialTexture(sp<Vec4> color = nullptr, sp<Bitmap> bitmap = nullptr);
+    MaterialTexture(String name, sp<Vec4> color = nullptr, sp<Bitmap> bitmap = nullptr);
+
+//  [[script::bindings::property]]
+    const String& name() const;
 
 //  [[script::bindings::property]]
     const sp<Vec4>& color() const;
@@ -29,12 +33,15 @@ public:
 
 //  [[script::bindings::property]]
     sp<Bitmap> bitmap() const;
+//  [[script::bindings::property]]
+    void setBitmap(sp<Bitmap> bitmap);
 
-    const sp<VariableWrapper<sp<Bitmap>>>& bitmapWrapper() const;
+    const sp<Variable<sp<Bitmap>>>& bitmapProvider() const;
 
 private:
+    String _name;
     sp<Vec4> _color;
-    sp<VariableWrapper<sp<Bitmap>>> _bitmap_wrapper;
+    sp<Variable<sp<Bitmap>>> _bitmap_provider;
 };
 
 }

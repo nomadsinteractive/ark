@@ -15,6 +15,7 @@
 #include "core/util/math.h"
 #include "core/util/strings.h"
 
+#include "graphics/base/bitmap.h"
 #include "graphics/base/v4.h"
 
 #include "renderer/base/animation.h"
@@ -76,7 +77,7 @@ template<typename T> struct SBufferReadData {
 	size_t NumElements = 0;
 };
 
-template<typename T> T mix(const T& x, const T& y, float a)
+template<typename T> T mix(const T x, const T y, float a)
 {
 	return x * (1.0 - a) + y * a;
 }
@@ -277,11 +278,12 @@ sp<Node> makeNode(WeakPtr<Node> parentNode, const tinygltf::Node& node)
 	return sp<Node>::make(std::move(parentNode), node.name, translation, quaternion, scale);
 }
 
-Vector<sp<Material>> loadMaterials(const tinygltf::Model& gltfModel, const MaterialBundle& materialBundle)
+Vector<sp<Material>> loadMaterials(const tinygltf::Model& gltfModel, MaterialBundle& materialBundle)
 {
 	Vector<sp<Material>> materials(gltfModel.materials.size());
 
-	for(size_t i = 0; i < gltfModel.materials.size(); ++i) {
+	for(size_t i = 0; i < gltfModel.materials.size(); ++i)
+	{
 		const tinygltf::Material& gltfMaterial = gltfModel.materials.at(i);
 		String mName = gltfMaterial.name;
 		sp<Material>& material = materials[i];
@@ -289,11 +291,25 @@ Vector<sp<Material>> loadMaterials(const tinygltf::Model& gltfModel, const Mater
 		if(!material)
 		{
 			material = sp<Material>::make(i, std::move(mName));
-			if(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index == -1) {
+			if(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index == -1)
+			{
 				const Vector<double>& vertexColorData = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
 				V4 vertexColor(static_cast<float>(vertexColorData.at(0)), static_cast<float>(vertexColorData.at(1)),
 							   static_cast<float>(vertexColorData.at(2)), static_cast<float>(vertexColorData.at(3)));
 				material->baseColor()->setColor(sp<Vec4>::make<Vec4::Const>(vertexColor));
+			}
+			else
+			{
+				const tinygltf::Texture& texture = gltfModel.textures.at(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index);
+				const tinygltf::Image& image = gltfModel.images.at(texture.source);
+				const auto iter = materialBundle.images().find(image.name);
+				sp<Bitmap> bitmap = iter != materialBundle.images().end() ? iter->second : nullptr;
+				if(!bitmap)
+				{
+					bitmap = sp<Bitmap>::make(image.width, image.height, image.bits / 8 * image.component * image.width, image.component, sp<ByteArray>::make<ByteArray::Vector>(image.image));
+					materialBundle.images()[image.name] = bitmap;
+				}
+				material->setBaseColor(sp<MaterialTexture>::make(image.name, nullptr, std::move(bitmap)));
 			}
 			material->roughness()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor), 0, 0, 0)));
 			material->metallic()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor), 0, 0, 0)));
@@ -466,7 +482,7 @@ void initNodeTransforms(const Vector<sp<Node>>& nodes, Vector<NodeTransform>& no
 
 }
 
-GltfImporter::GltfImporter(const String& src, const MaterialBundle& materialBundle)
+GltfImporter::GltfImporter(const String& src, MaterialBundle& materialBundle)
 	: _model(new tinygltf::Model(loadGltfModel(src))), _materials(loadMaterials(_model, materialBundle)), _nodes(_model->nodes.size()), _primitives_in_mesh(_model->meshes.size())
 {
 }

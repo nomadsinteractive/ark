@@ -1,13 +1,10 @@
-#ifndef ARK_PLUGIN_ASSIMP_BASE_NODE_H_
-#define ARK_PLUGIN_ASSIMP_BASE_NODE_H_
+#pragma once
 
 #include <assimp/matrix4x4.h>
 
 #include "graphics/base/mat.h"
 
-namespace ark {
-namespace plugin {
-namespace assimp {
+namespace ark::plugin::assimp {
 
 struct AnimationNode {
     AnimationNode();
@@ -21,7 +18,3 @@ struct AnimationNode {
 };
 
 }
-}
-}
-
-#endif

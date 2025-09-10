@@ -39,29 +39,23 @@ public:
 private:
     const aiScene* loadScene(Assimp::Importer& importer, const String& src, bool checkMeshes = true) const;
     Model loadModel(const aiScene* scene, MaterialBundle& materialBundle, const Manifest& manifest) const;
-    Mesh loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, uint32_t meshId, element_index_t vertexBase, NodeTable& boneMapping, const std::vector<sp<Material> >& materials) const;
+    Mesh loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, uint32_t meshId, element_index_t vertexBase, NodeTable& boneMapping, const Vector<sp<Material> >& materials) const;
     NodeTable loadNodes(const aiNode* node, Model& model) const;
     void loadBones(const aiMesh* mesh, NodeTable& boneMapping, Array<Mesh::BoneInfo>& bones) const;
     void loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback) const;
     void loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback, String name, String alias) const;
 
     bitmap loadBitmap(const sp<BitmapLoaderBundle>& imageResource, const aiTexture* tex) const;
-    std::vector<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
+    Vector<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
 
-    sp<Node> loadNodeHierarchy(WeakPtr<Node> parentNode, const aiNode* node, const std::vector<sp<Mesh>>& meshes) const;
+    sp<Node> loadNodeHierarchy(WeakPtr<Node> parentNode, const aiNode* node, const Vector<sp<Mesh>>& meshes) const;
 
     void loadNodeHierarchy(const aiNode* node, NodeTable& nodes, std::unordered_map<uint32_t, uint32_t>& nodeIds) const;
     void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
-    std::vector<sp<Material>> loadMaterials(const aiScene* scene, MaterialBundle& materialBundle) const;
-    static void yUp2zUp(const Mesh& mesh, bool upSign);
-    static V3 yUp2zUp(const V3& p, bool upSign);
-
-    static aiMatrix4x4 callbackNodeAnimation(const AnimationNode& node, const aiMatrix4x4& transform);
-    static aiMatrix4x4 callbackBoneAnimation(const AnimationNode& node, const aiMatrix4x4& transform);
+    Vector<sp<Material>> loadMaterials(const aiScene* scene, MaterialBundle& materialBundle) const;
 
 private:
-    std::vector<sp<Texture>> _textures;
-
+    Vector<sp<Texture>> _textures;
 };
 
 }

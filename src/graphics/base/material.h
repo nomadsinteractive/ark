@@ -25,33 +25,30 @@ public:
 //  [[script::bindings::property]]
     const sp<MaterialTexture>& baseColor() const;
 //  [[script::bindings::property]]
+    void setBaseColor(sp<MaterialTexture> materialTexture);
+//  [[script::bindings::property]]
     const sp<MaterialTexture>& normal() const;
+//  [[script::bindings::property]]
+    void setNormal(sp<MaterialTexture> materialTexture);
 //  [[script::bindings::property]]
     const sp<MaterialTexture>& roughness() const;
 //  [[script::bindings::property]]
+    void setRoughness(sp<MaterialTexture> materialTexture);
+//  [[script::bindings::property]]
     const sp<MaterialTexture>& metallic() const;
+//  [[script::bindings::property]]
+    void setMetallic(sp<MaterialTexture> materialTexture);
 //  [[script::bindings::property]]
     const sp<MaterialTexture>& specular() const;
 //  [[script::bindings::property]]
+    void setSpecular(sp<MaterialTexture> materialTexture);
+//  [[script::bindings::property]]
     const sp<MaterialTexture>& emission() const;
+//  [[script::bindings::property]]
+    void setEmission(sp<MaterialTexture> materialTexture);
 
 //  [[script::bindings::auto]]
     const sp<MaterialTexture>& getTexture(MaterialTexture::Type type) const;
-
-//  [[plugin::builder]]
-    class BUILDER final : public Builder<Material> {
-    public:
-        BUILDER(BeanFactory& beanFactory, const document& manifest);
-
-        sp<Material> build(const Scope& args) override;
-
-    private:
-        SafeBuilder<Bitmap> _base_color;
-        SafeBuilder<Bitmap> _normal;
-        SafeBuilder<Bitmap> _roughness;
-        SafeBuilder<Bitmap> _metallic;
-        SafeBuilder<Bitmap> _specular;
-    };
 
 private:
     uint32_t _id;

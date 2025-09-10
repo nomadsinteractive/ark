@@ -56,7 +56,7 @@ void loadNodeHierarchy(float tick, const aiNode* node, const aiAnimation* animat
         loadNodeHierarchy(tick, node->mChildren[i], animation, globalTransformation, nodes, callback);
 }
 
-void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& transform, Table<String, AnimationNode>& nodes, const ModelImporterAssimp::NodeLoaderCallback& callback, std::vector<M4>& output)
+void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& transform, Table<String, AnimationNode>& nodes, const ModelImporterAssimp::NodeLoaderCallback& callback, Vector<M4>& output)
 {
     loadNodeHierarchy(tick, node, animation, aiMatrix4x4(), nodes, callback);
     for(AnimationNode& i : nodes.values())
@@ -73,7 +73,7 @@ sp<Animation> makeAnimation(String name, float tps, const aiAnimation* animation
     const uint32_t durationInTicks = static_cast<uint32_t>(duration * tps / tpsDefault);
 
     Table<String, uint32_t> nodeIds;
-    std::vector<AnimationFrame> animationFrames;
+    Vector<AnimationFrame> animationFrames;
 
     aiMatrix4x4 globalInversedTransform = rootNode->mTransformation * globalTransform;
     globalInversedTransform.Inverse();
@@ -91,6 +91,17 @@ sp<Animation> makeAnimation(String name, float tps, const aiAnimation* animation
         nodeIds.push_back(iter.first, index++);
 
     return sp<Animation>::make(std::move(name), durationInTicks, std::move(nodeIds), std::move(animationFrames));
+}
+
+
+aiMatrix4x4 callbackNodeAnimation(const AnimationNode& /*node*/, const aiMatrix4x4& transform)
+{
+    return transform;
+}
+
+aiMatrix4x4 callbackBoneAnimation(const AnimationNode& node, const aiMatrix4x4& transform)
+{
+    return transform * node._offset;
 }
 
 }
@@ -111,9 +122,9 @@ void ModelImporterAssimp::loadSceneTexture(const ResourceLoaderContext& resource
     _textures.push_back(resourceLoaderContext.renderController()->createTexture2d(std::move(bitmap)));
 }
 
-std::vector<sp<Material>> ModelImporterAssimp::loadMaterials(const aiScene* scene, MaterialBundle& materialBundle) const
+Vector<sp<Material>> ModelImporterAssimp::loadMaterials(const aiScene* scene, MaterialBundle& materialBundle) const
 {
-    std::vector<sp<Material>> materials(scene->mNumMaterials);
+    Vector<sp<Material>> materials(scene->mNumMaterials);
 
     for(uint32_t i = 0; i < scene->mNumMaterials; ++i)
     {
@@ -132,9 +143,9 @@ std::vector<sp<Material>> ModelImporterAssimp::loadMaterials(const aiScene* scen
     return materials;
 }
 
-std::vector<element_index_t> ModelImporterAssimp::loadIndices(const aiMesh* mesh, element_index_t vertexBase) const
+Vector<element_index_t> ModelImporterAssimp::loadIndices(const aiMesh* mesh, element_index_t vertexBase) const
 {
-    std::vector<element_index_t> s(mesh->mNumFaces * 3);
+    Vector<element_index_t> s(mesh->mNumFaces * 3);
     element_index_t* buf = s.data();
     for(uint32_t i = 0; i < mesh->mNumFaces; i ++)
     {
@@ -210,10 +221,10 @@ const aiScene* ModelImporterAssimp::loadScene(Assimp::Importer& importer, const 
     return scene;
 }
 
-Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, uint32_t meshId, element_index_t vertexBase, NodeTable& boneMapping, const std::vector<sp<Material>>& materials) const
+Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, uint32_t meshId, element_index_t vertexBase, NodeTable& boneMapping, const Vector<sp<Material>>& materials) const
 {
-    std::vector<element_index_t> indices = loadIndices(mesh, vertexBase);
-    std::vector<V3> vertices(mesh->mNumVertices);
+    Vector<element_index_t> indices = loadIndices(mesh, vertexBase);
+    Vector<V3> vertices(mesh->mNumVertices);
     sp<Array<Mesh::UV>> uvs = sp<Array<Mesh::UV>::Allocated>::make(mesh->mNumVertices);
     sp<Array<V3>> normals = mesh->HasNormals() ? sp<Array<V3>::Allocated>::make(mesh->mNumVertices) : sp<Array<V3>::Allocated>();
     sp<Array<Mesh::Tangent>> tangents = mesh->HasTangentsAndBitangents() ? sp<Array<Mesh::Tangent>::Allocated>::make(mesh->mNumVertices) : sp<Array<Mesh::Tangent>::Allocated>();
@@ -254,9 +265,9 @@ NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
 Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& materialBundle, const Manifest& manifest) const
 {
     NodeTable bones;
-    std::vector<sp<Mesh>> meshes;
+    Vector<sp<Mesh>> meshes;
     element_index_t vertexBase = 0;
-    std::vector<sp<Material>> materials = loadMaterials(scene, materialBundle);
+    Vector<sp<Material>> materials = loadMaterials(scene, materialBundle);
 
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
@@ -268,7 +279,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
 
     sp<Node> rootNode = loadNodeHierarchy({}, scene->mRootNode, meshes);
 
-    std::vector<document> animateManifests = manifest.descriptor() ? manifest.descriptor()->children("animate") : std::vector<document>();
+    Vector<document> animateManifests = manifest.descriptor() ? manifest.descriptor()->children("animate") : Vector<document>();
     const bool hasAnimation = scene->HasAnimations() || animateManifests.size() > 0;
 
     Model model(std::move(materials), std::move(meshes), std::move(rootNode));
@@ -320,22 +331,12 @@ void ModelImporterAssimp::loadBones(const aiMesh* mesh, NodeTable& boneMapping, 
     }
 }
 
-aiMatrix4x4 ModelImporterAssimp::callbackNodeAnimation(const AnimationNode& /*node*/, const aiMatrix4x4& transform)
-{
-    return transform;
-}
-
-aiMatrix4x4 ModelImporterAssimp::callbackBoneAnimation(const AnimationNode& node, const aiMatrix4x4& transform)
-{
-    return transform * node._offset;
-}
-
 sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER::build(const Scope& /*args*/)
 {
     return sp<ModelImporterAssimp>::make();
 }
 
-sp<Node> ModelImporterAssimp::loadNodeHierarchy(WeakPtr<Node> parentNode, const aiNode* node, const std::vector<sp<Mesh>>& meshes) const
+sp<Node> ModelImporterAssimp::loadNodeHierarchy(WeakPtr<Node> parentNode, const aiNode* node, const Vector<sp<Mesh>>& meshes) const
 {
     sp<Node> n = sp<Node>::make(std::move(parentNode), node->mName.C_Str(), M4(node->mTransformation).transpose());
     for(uint32_t i = 0; i < node->mNumMeshes; ++i)
