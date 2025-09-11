@@ -15,7 +15,7 @@ Size::Size()
 {
 }
 
-Size::Size(const V3& size)
+Size::Size(const V3 size)
     : Size(size.x(), size.y(), size.z())
 {
 }

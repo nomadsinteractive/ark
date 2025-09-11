@@ -10,7 +10,6 @@
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/mesh.h"
 #include "renderer/base/node.h"
-#include "renderer/base/texture_packer.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
 
 #include "app/base/application_context.h"

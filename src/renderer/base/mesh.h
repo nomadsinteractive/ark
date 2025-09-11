@@ -20,18 +20,12 @@ public:
         INFO_ARRAY_LENGTH = 4
     };
 
-    struct ARK_API UV {
-        UV() = default;
-        UV(uint16_t u, uint16_t v);
-
+    struct UV {
         uint16_t _u;
         uint16_t _v;
     };
 
-    struct ARK_API Tangent {
-        Tangent() = default;
-        Tangent(const V3& tangent, const V3& bitangent);
-
+    struct Tangent {
         V3 _tangent;
         V3 _bitangent;
     };

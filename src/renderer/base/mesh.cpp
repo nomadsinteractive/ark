@@ -10,16 +10,6 @@
 
 namespace ark {
 
-Mesh::UV::UV(uint16_t u, uint16_t v)
-    : _u(u), _v(v)
-{
-}
-
-Mesh::Tangent::Tangent(const V3& tangent, const V3& bitangent)
-    : _tangent(tangent), _bitangent(bitangent)
-{
-}
-
 Mesh::Mesh(uint32_t id, String name, Vector<element_index_t> indices, Vector<V3> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material)
     : _id(id), _name(std::move(name)), _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos)),
       _material(std::move(material))

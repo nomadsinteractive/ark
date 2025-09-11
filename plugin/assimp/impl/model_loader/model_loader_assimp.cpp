@@ -244,9 +244,9 @@ Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, Mat
         if(norm)
             *(++norm) = V3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         if(tangents)
-            *(++t) = Mesh::Tangent(V3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z), V3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z));
-        *(++u) = mesh->mTextureCoords[0] ? Mesh::UV(static_cast<uint16_t>((mesh->mTextureCoords[0][i].x * uvBounds.width() + uvBounds.left()) * 0xffff),
-                                                    static_cast<uint16_t>((mesh->mTextureCoords[0][i].y * uvBounds.height() + uvBounds.bottom()) * 0xffff)) : Mesh::UV(0, 0);
+            *(++t) = {V3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z), V3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z)};
+        *(++u) = mesh->mTextureCoords[0] ? Mesh::UV{static_cast<uint16_t>((mesh->mTextureCoords[0][i].x * uvBounds.width() + uvBounds.left()) * 0xffff),
+                                                    static_cast<uint16_t>((mesh->mTextureCoords[0][i].y * uvBounds.height() + uvBounds.bottom()) * 0xffff)} : Mesh::UV{0, 0};
     }
     if(mesh->HasBones())
         loadBones(mesh, boneMapping, bones);
@@ -286,7 +286,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
     if(hasAnimation)
     {
         aiMatrix4x4 globalAnimationTransform;
-        bool noBones = bones.nodes().size() == 0;
+        const bool noBones = bones.nodes().empty();
         Table<String, sp<Animation>> animates;
         NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
         NodeTable animationNodes = noBones ? loadNodes(scene->mRootNode, model) : std::move(bones);

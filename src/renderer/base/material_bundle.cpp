@@ -1,8 +1,9 @@
 #include "renderer/base/material_bundle.h"
 
 #include "core/ark.h"
-#include "core/impl/variable/variable_wrapper.h"
+#include "core/util/math.h"
 
+#include "graphics/base/bitmap.h"
 #include "graphics/base/material.h"
 #include "graphics/util/max_rects_bin_pack.h"
 
@@ -20,7 +21,7 @@ Table<String, sp<Material>> toMaterialMap(const Vector<sp<Material>>& materials)
     return materialMap;
 }
 
-Vector<sp<Bitmap>> getMaterialTextureImages(const Vector<sp<Material>>& materials, const MaterialTexture::Type type)
+Table<String, sp<Bitmap>> getMaterialTextureImages(const Vector<sp<Material>>& materials, const MaterialTexture::Type type)
 {
     Table<String, sp<Bitmap>> images;
     for(const sp<Material>& i : materials)
@@ -32,7 +33,19 @@ Vector<sp<Bitmap>> getMaterialTextureImages(const Vector<sp<Material>>& material
         if(sp<Bitmap> bitmap = texture->bitmap())
             images[texture->name()] = std::move(bitmap);
     }
-    return std::move(images.values());
+    return images;
+}
+
+sp<TexturePacker> makeTexturePackerForImages(const Vector<sp<Bitmap>>& images)
+{
+    uint32_t imageSize = 0;
+    for(const sp<Bitmap>& i : images)
+    {
+        imageSize = std::max(imageSize, i->width());
+        imageSize = std::max(imageSize, i->height());
+    }
+    imageSize = 1 << (Math::log2(imageSize) + 1);
+    return sp<TexturePacker>::make(imageSize, imageSize);
 }
 
 }
@@ -40,6 +53,7 @@ Vector<sp<Bitmap>> getMaterialTextureImages(const Vector<sp<Material>>& material
 MaterialBundle::MaterialBundle(const Vector<sp<Material>>& materials)
     : _materials(toMaterialMap(materials))
 {
+    update();
 }
 
 const Vector<sp<Material>>& MaterialBundle::materials() const
@@ -57,9 +71,12 @@ Map<String, sp<Bitmap>>& MaterialBundle::images()
     return _images;
 }
 
-const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& MaterialBundle::textures() const
+std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> MaterialBundle::textures() const
 {
-    return _textures;
+    std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures;
+    for(size_t i = 0; i < MaterialTexture::TYPE_LENGTH; ++i)
+        textures[i] = _texture_infos[i]._texture;
+    return textures;
 }
 
 sp<Material> MaterialBundle::getMaterial(const String& name) const
@@ -84,16 +101,28 @@ void MaterialBundle::addMaterial(String name, sp<Material> material)
 
 void MaterialBundle::update()
 {
-     Vector<Map<bitmap, RectI>> bitmapBounds(MaterialTexture::TYPE_LENGTH);
+    sp<TexturePacker> texturePackers[MaterialTexture::TYPE_LENGTH];
 
-     for(const auto& i : _materials)
-     {
-         const sp<Material>& material = i.second;
-     }
+    for(size_t i = 0; i < MaterialTexture::TYPE_LENGTH; ++i)
+        if(Table<String, sp<Bitmap>> images = getMaterialTextureImages(_materials.values(), static_cast<MaterialTexture::Type>(i)); !images.empty())
+        {
+            texturePackers[i] = makeTexturePackerForImages(images.values());
+            for(auto& [k, v] : images)
+                texturePackers[i]->addBitmap(std::move(v), std::move(k));
 
-     for(const sp<TexturePacker>& i : _texture_packers)
-         if(i)
-             i->updateTexture();
+            _texture_infos[i]._bounds.clear();
+            for(const TexturePacker::PackedBitmap& j : texturePackers[i]->packedBitmaps())
+                _texture_infos[i]._bounds[j._name] = j._uv;
+        }
+
+    for(size_t i = 0; i < MaterialTexture::TYPE_LENGTH; ++i)
+        if(texturePackers[i])
+        {
+            if(_texture_infos[i]._texture)
+                texturePackers[i]->updateTexture(_texture_infos[i]._texture);
+            else
+                _texture_infos[i]._texture = texturePackers[i]->createTexture();
+        }
 }
 
 Rect MaterialBundle::getMaterialUV(const String& name) const

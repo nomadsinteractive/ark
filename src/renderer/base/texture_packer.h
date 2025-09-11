@@ -15,40 +15,28 @@ namespace ark {
 
 class ARK_API TexturePacker {
 public:
-    TexturePacker(sp<Texture> texture);
+    TexturePacker(int32_t initialWidth, int32_t initialHeight);
 
     struct PackedBitmap {
+        String _name;
         sp<Bitmap> _bitmap_bounds;
         sp<Variable<sp<Bitmap>>> _bitmap_provider;
         RectI _uv;
     };
 
-    RectI addBitmap(MaxRectsBinPack& binPack, sp<Bitmap> bitmap);
-    RectI addBitmap(MaxRectsBinPack& binPack, sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider);
+    RectI addBitmap(sp<Bitmap> bitmap, String name = "");
+    RectI addBitmap(sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider, String name = "");
 
     const Vector<PackedBitmap>& packedBitmaps() const;
 
-    void updateTexture();
+    sp<Texture> createTexture(sp<Texture::Parameters> parameters = nullptr) const;
+    void updateTexture(Texture& texture);
 
 private:
-    class PackedTextureUploader final : public Texture::Uploader {
-    public:
-        PackedTextureUploader(uint32_t width, uint32_t height, uint8_t channels, Vector<PackedBitmap> bitmaps);
-
-        void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
-
-    private:
-        uint32_t _width;
-        uint32_t _height;
-        uint8_t _channels;
-        Vector<PackedBitmap> _bitmaps;
-    };
-
-    void addPackedBitmap(RectI uv, sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider);
+    void addPackedBitmap(RectI uv, sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider, String name);
     void resize(int32_t width, int32_t height);
 
 private:
-    sp<Texture> _texture;
     uint8_t _channels;
 
     MaxRectsBinPack _bin_pack;

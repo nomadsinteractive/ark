@@ -26,8 +26,8 @@ namespace {
 
 class VerticesUploader final : public Uploader {
 public:
-    VerticesUploader(sp<ModelBundle> multiModels, sp<PipelineLayout> pipelineInput)
-        : Uploader(multiModels->vertexLength() * pipelineInput->getStreamLayout(0).stride()), _model_bundle(std::move(multiModels)), _pipeline_input(std::move(pipelineInput)) {
+    VerticesUploader(sp<ModelBundle> modelBundle, sp<PipelineLayout> pipelineInput)
+        : Uploader(modelBundle->vertexLength() * pipelineInput->getStreamLayout(0).stride()), _model_bundle(std::move(modelBundle)), _pipeline_input(std::move(pipelineInput)) {
     }
 
     void upload(Writable& uploader) override {
@@ -38,7 +38,7 @@ public:
         {
             const Model& model = i._model;
             const uint32_t size = static_cast<uint32_t>(model.vertexCount() * stride);
-            std::vector<uint8_t> buf(size);
+            Vector<uint8_t> buf(size);
             VertexWriter stream(attributes, false, buf.data(), size, stride);
             model.writeToStream(stream, V3(1.0f));
             uploader.write(buf.data(), size, offset);
@@ -53,7 +53,6 @@ public:
 private:
     sp<ModelBundle> _model_bundle;
     sp<PipelineLayout> _pipeline_input;
-
 };
 
 class IndicesUploader final : public Uploader {
@@ -101,7 +100,7 @@ sp<PipelineBindings> RCCMultiDrawElementsIndirect::makePipelineBindings(const Sh
 {
     _indices = renderController.makeIndexBuffer({}, sp<IndicesUploader>::make(_model_bundle));
     _draw_indirect = renderController.makeBuffer({Buffer::USAGE_BIT_DRAW_INDIRECT, Buffer::USAGE_BIT_DYNAMIC}, nullptr);
-    return shader.makeBindings(renderController.makeVertexBuffer({}, sp<VerticesUploader>::make(_model_bundle, shader.layout())), renderMode, enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT);
+    return shader.makeBindings(renderController.makeVertexBuffer({}, sp<Uploader>::make<VerticesUploader>(_model_bundle, shader.layout())), renderMode, enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT);
 }
 
 DrawingContext RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)

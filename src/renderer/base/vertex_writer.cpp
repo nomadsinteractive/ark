@@ -6,13 +6,45 @@
 
 namespace ark {
 
+namespace {
+
+class WriterMemory final : public VertexWriter::Delegate {
+public:
+    WriterMemory(uint8_t* ptr, const uint32_t size, const uint32_t stride)
+        : _ptr(nullptr), _begin(ptr), _end(_begin + size), _stride(stride)
+    {
+    }
+
+    void nextVertex() override
+    {
+        _ptr = _ptr ? _ptr + _stride : _begin;
+        DCHECK(_ptr <= _end - _stride, "Writer buffer out of bounds");
+    }
+
+    void write(const void* ptr, const uint32_t size, const uint32_t offset) override
+    {
+        DCHECK(_ptr, "Writer is uninitialized, call nextVertex() first");
+        DCHECK(size + offset <= _stride, "Stride overflow: sizeof(value) = %d, offset = %d", size, offset);
+        memcpy(_ptr + offset, ptr, size);
+    }
+
+private:
+    uint8_t* _ptr;
+    uint8_t* _begin;
+    uint8_t* _end;
+
+    uint32_t _stride;
+};
+
+}
+
 VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, const bool doTransform, uint8_t* ptr, size_t size, size_t stride)
-    : VertexWriter(attributes, doTransform, sp<Writer>::make<WriterMemory>(ptr, size, stride))
+    : VertexWriter(attributes, doTransform, sp<Delegate>::make<WriterMemory>(ptr, size, stride))
 {
 }
 
-VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, const bool doTransform, sp<VertexWriter::Writer> writer)
-    : _attribute_offsets(attributes), _writer(std::move(writer)), _do_transform(doTransform), _visible(true), _transform_snapshot(nullptr)
+VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, const bool doTransform, sp<VertexWriter::Delegate> writer)
+    : _attribute_offsets(attributes), _delegate(std::move(writer)), _do_transform(doTransform), _visible(true), _transform_snapshot(nullptr)
 {
 }
 
@@ -24,7 +56,8 @@ bool VertexWriter::hasAttribute(const int32_t name) const
 void VertexWriter::writePosition(const V3 position)
 {
     DASSERT(!_do_transform || _transform_snapshot);
-    _writer->writeObject<V3>(_visible ? (_do_transform ? (_transform->transform(*_transform_snapshot, {position, 1.0f}).toNonHomogeneous() + _translate) : position) : V3());
+    const V3 obj = _visible ? (_do_transform ? (_transform->transform(*_transform_snapshot, {position, 1.0f}).toNonHomogeneous() + _translate) : position) : V3();
+    _delegate->write(&obj, sizeof(V3), 0);
 }
 
 void VertexWriter::writeTexCoordinate(const uint16_t u, const uint16_t v)
@@ -41,7 +74,7 @@ void VertexWriter::writeBoneInfo(const Mesh::BoneInfo& boneInfo)
 
 void VertexWriter::write(const void* buf, const uint32_t size, const uint32_t offset)
 {
-    _writer->write(buf, size, offset);
+    _delegate->write(buf, size, offset);
 }
 
 void VertexWriter::setRenderable(const Renderable::Snapshot& renderObject)
@@ -70,32 +103,13 @@ void VertexWriter::writeBitangent(const V3 bitangent)
 
 void VertexWriter::next()
 {
-    _writer->nextVertex();
+    _delegate->nextVertex();
     writeVaryings();
 }
 
 void VertexWriter::writeVaryings()
 {
-    _writer->write(_varying_contents.buf(), static_cast<uint32_t>(_varying_contents.length()), 0);
-}
-
-VertexWriter::WriterMemory::WriterMemory(uint8_t* ptr, const uint32_t size, const uint32_t stride)
-    : _ptr(nullptr), _begin(ptr), _end(_begin + size), _stride(stride)
-{
-}
-
-void VertexWriter::WriterMemory::nextVertex()
-{
-    _ptr = _ptr ? _ptr + _stride : _begin;
-    DCHECK(_ptr <= _end - _stride, "Writer buffer out of bounds");
-}
-
-uint32_t VertexWriter::WriterMemory::write(const void* ptr, uint32_t size, uint32_t offset)
-{
-    DCHECK(_ptr, "BufferWriter is uninitialized, call nextVertex() first");
-    DCHECK(size + offset <= _stride, "Stride overflow: sizeof(value) = %d, offset = %d", size, offset);
-    memcpy(_ptr + offset, ptr, size);
-    return size;
+    _delegate->write(_varying_contents.buf(), static_cast<uint32_t>(_varying_contents.length()), 0);
 }
 
 }

@@ -290,7 +290,8 @@ Vector<sp<Material>> loadMaterials(const tinygltf::Model& gltfModel, MaterialBun
 		material = materialBundle.getMaterial(mName);
 		if(!material)
 		{
-			material = sp<Material>::make(i, std::move(mName));
+			material = sp<Material>::make(i, mName);
+			materialBundle.addMaterial(std::move(mName), material);
 			if(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index == -1)
 			{
 				const Vector<double>& vertexColorData = gltfMaterial.pbrMetallicRoughness.baseColorFactor;

@@ -13,24 +13,21 @@ namespace ark {
 
 class ARK_API VertexWriter {
 public:
-    class Writer : public Writable {
+    class Delegate {
     public:
-        ~Writer() override = default;
+        ~Delegate() = default;
 
+        virtual void write(const void* buffer, uint32_t size, uint32_t offset) = 0;
         virtual void nextVertex() = 0;
     };
 
 public:
-    VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, sp<Writer> writer);
+    VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, sp<Delegate> writer);
     VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
 
-    template<typename T> void write(const T& value, const uint32_t offset = 0) {
-        _writer->write(&value, sizeof(T), offset);
-    }
-
-    template<typename T> void writeAttribute(const T& value, const int32_t name) {
-        if(_attribute_offsets._offsets[name] >= 0)
-            write<T>(value, _attribute_offsets._offsets[name]);
+    template<typename T> void writeAttribute(const T& value, const Attribute::Usage usage) {
+        if(_attribute_offsets._offsets[usage] >= 0)
+            _delegate->write(&value, sizeof(T), _attribute_offsets._offsets[usage]);
     }
 
     bool hasAttribute(int32_t name) const;
@@ -49,29 +46,12 @@ public:
     void next();
 
 private:
-    class WriterMemory : public Writer {
-    public:
-        WriterMemory(uint8_t* ptr, uint32_t size, uint32_t stride);
-
-        void nextVertex() override;
-
-        uint32_t write(const void* ptr, uint32_t size, uint32_t offset) override;
-
-    private:
-        uint8_t* _ptr;
-        uint8_t* _begin;
-        uint8_t* _end;
-
-        uint32_t _stride;
-    };
-
-private:
     void writeVaryings();
     void writeArray(ByteArray& array);
 
 private:
     PipelineLayout::VertexDescriptor _attribute_offsets;
-    sp<Writer> _writer;
+    sp<Delegate> _delegate;
 
     bool _do_transform;
     bool _visible;
@@ -80,7 +60,6 @@ private:
     V3 _translate;
 
     ByteArray::Borrowed _varying_contents;
-
 };
 
 }

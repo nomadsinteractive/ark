@@ -28,7 +28,7 @@ public:
     Map<String, sp<Bitmap>>& images();
 
 //  [[script::bindings::property]]
-    const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& textures() const;
+    std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures() const;
 
 //  [[script::bindings::auto]]
     sp<Material> getMaterial(const String& name) const;
@@ -41,15 +41,19 @@ public:
     Rect getMaterialUV(const String& name) const;
 
 private:
+    struct TextureInfo {
+        sp<Texture> _texture;
+        Map<String, RectI> _bounds;
+    };
+
     Table<String, sp<Material>> _materials;
     Map<String, sp<Bitmap>> _images;
-    std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> _textures;
+
+    TextureInfo _texture_infos[MaterialTexture::TYPE_LENGTH];
 
     Map<String, RectI> _material_bounds;
     int32_t _width;
     int32_t _height;
-
-    sp<TexturePacker> _texture_packers[MaterialTexture::TYPE_LENGTH];
 };
 
 }

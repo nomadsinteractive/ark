@@ -112,6 +112,10 @@ public:
         return _indices.size();
     }
 
+    bool empty() const {
+        return _indices.empty();
+    }
+
     const U& at(const T& key) const {
         const auto iter = find(key);
         DCHECK(iter != end(), "Key not found");

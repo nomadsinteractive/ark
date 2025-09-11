@@ -14,7 +14,7 @@ namespace ark {
 class ARK_API Size final : public Vec3 {
 public:
     Size();
-    Size(const V3& size);
+    Size(V3 size);
 //  [[script::bindings::auto]]
     Size(float width, float height, float depth = 0);
 //  [[script::bindings::auto]]
