@@ -2,8 +2,6 @@
 
 #include "core/forwarding.h"
 #include "core/base/string.h"
-#include "core/inf/builder.h"
-#include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -47,12 +45,18 @@ public:
 //  [[script::bindings::property]]
     void setEmission(sp<MaterialTexture> materialTexture);
 
+    const sp<Variable<Rect>>& uv() const;
+    void setUV(sp<Variable<Rect>> uv);
+
+    Rect toTextureUV() const;
+
 //  [[script::bindings::auto]]
     const sp<MaterialTexture>& getTexture(MaterialTexture::Type type) const;
 
 private:
     uint32_t _id;
     String _name;
+    sp<Variable<Rect>> _uv;
     sp<MaterialTexture> _textures[MaterialTexture::TYPE_LENGTH];
 };
 

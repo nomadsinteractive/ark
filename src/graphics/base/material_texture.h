@@ -21,10 +21,7 @@ public:
         TYPE_LENGTH
     };
 
-    MaterialTexture(String name, sp<Vec4> color = nullptr, sp<Bitmap> bitmap = nullptr);
-
-//  [[script::bindings::property]]
-    const String& name() const;
+    MaterialTexture(sp<Vec4> color = nullptr, sp<Bitmap> bitmap = nullptr);
 
 //  [[script::bindings::property]]
     const sp<Vec4>& color() const;
@@ -36,10 +33,7 @@ public:
 //  [[script::bindings::property]]
     void setBitmap(sp<Bitmap> bitmap);
 
-    const sp<Variable<sp<Bitmap>>>& bitmapProvider() const;
-
 private:
-    String _name;
     sp<Vec4> _color;
     sp<Variable<sp<Bitmap>>> _bitmap_provider;
 };

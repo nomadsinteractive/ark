@@ -1709,6 +1709,10 @@ class MaterialBundle:
     def materials(self) -> list[Material]:
         pass
 
+    @property
+    def textures(self) -> list[Texture]:
+        pass
+
     def add_material(self, name: str, material: Material):
         pass
 

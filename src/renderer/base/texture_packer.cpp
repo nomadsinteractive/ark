@@ -14,25 +14,27 @@ namespace {
 
 class PackedTextureUploader final : public Texture::Uploader {
 public:
-    PackedTextureUploader(const uint32_t width, const uint32_t height, const uint8_t channels, Vector<TexturePacker::PackedBitmap> bitmaps)
-        : _width(width), _height(height), _channels(channels), _bitmaps(std::move(bitmaps))
+    PackedTextureUploader(sp<Size> size, const uint8_t channels, Vector<TexturePacker::PackedBitmap> bitmaps)
+        : _size(std::move(size)), _channels(channels), _bitmaps(std::move(bitmaps))
     {
     }
 
     void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override
     {
-        const sp<Bitmap> content = sp<Bitmap>::make(_width, _height, _width * _channels, _channels, true);
+        const V3 s = _size->val();
+        const uint32_t width = static_cast<uint32_t>(s.x());
+        const uint32_t height = static_cast<uint32_t>(s.y());
+        const Bitmap content(width, height, width * _channels, _channels, true);
         for(const auto& [name, bitmapBounds, bitmapProvider, uv] : _bitmaps)
         {
-            const sp<Bitmap> s = bitmapProvider->val();
-            content->draw(uv.left(), uv.top(), s->byteArray()->buf(), s->width(), s->height(), s->rowBytes());
+            const sp<Bitmap> bitmap = bitmapProvider->val();
+            content.draw(uv.left(), uv.top(), bitmap->byteArray()->buf(), bitmap->width(), bitmap->height(), bitmap->rowBytes());
         }
-        delegate.uploadBitmap(graphicsContext, content, {content->byteArray()});
+        delegate.uploadBitmap(graphicsContext, content, {content.byteArray()});
     }
 
 private:
-    uint32_t _width;
-    uint32_t _height;
+    sp<Size> _size;
     uint8_t _channels;
     Vector<TexturePacker::PackedBitmap> _bitmaps;
 };
@@ -55,6 +57,16 @@ Texture::Format toTextureFormat(const uint8_t channels)
 TexturePacker::TexturePacker(const int32_t initialWidth, const int32_t initialHeight)
     : _channels(0), _bin_pack(initialWidth, initialHeight, false)
 {
+}
+
+int32_t TexturePacker::width() const
+{
+    return _bin_pack.width();
+}
+
+int32_t TexturePacker::height() const
+{
+    return _bin_pack.height();
 }
 
 RectI TexturePacker::addBitmap(sp<Bitmap> bitmap, String name)
@@ -95,22 +107,20 @@ void TexturePacker::resize(const int32_t width, const int32_t height)
         addBitmap(std::move(bitmapBounds), std::move(bitmapProvider), std::move(name));
 }
 
-sp<Texture> TexturePacker::createTexture(sp<Texture::Parameters> parameters) const
+sp<Texture> TexturePacker::createTexture(sp<Size> size, sp<Texture::Parameters> parameters) const
 {
-    if(_channels)
+    if(!_channels)
         return nullptr;
 
-    sp<Texture::Uploader> uploader = sp<Texture::Uploader>::make<PackedTextureUploader>(_bin_pack.width(), _bin_pack.height(), _channels, _packed_bitmaps);
-    return Ark::instance().renderController()->createTexture(sp<Size>::make(_bin_pack.width(), _bin_pack.height()), parameters ? std::move(parameters) : sp<Texture::Parameters>::make(Texture::TYPE_2D, nullptr, toTextureFormat(_channels)), std::move(uploader));
+    sp<Size> s = size ? std::move(size) : sp<Size>::make(_bin_pack.width(), _bin_pack.height());
+    sp<Texture::Uploader> uploader = sp<Texture::Uploader>::make<PackedTextureUploader>(s, _channels, _packed_bitmaps);
+    return Ark::instance().renderController()->createTexture(std::move(s), parameters ? std::move(parameters) : sp<Texture::Parameters>::make(Texture::TYPE_2D, nullptr, toTextureFormat(_channels)), std::move(uploader));
 }
 
-void TexturePacker::updateTexture(Texture& texture)
+void TexturePacker::updateTexture(Texture& texture, sp<Size> size) const
 {
     if(_channels)
-    {
-        sp<Texture::Uploader> uploader = sp<Texture::Uploader>::make<PackedTextureUploader>(_bin_pack.width(), _bin_pack.height(), _channels, _packed_bitmaps);
-        texture.reset(*createTexture(texture.parameters()));
-    }
+        texture.reset(*createTexture(std::move(size), texture.parameters()));
 }
 
 }

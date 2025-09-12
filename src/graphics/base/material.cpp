@@ -4,17 +4,19 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 
+#include "graphics/base/rect.h"
+
 namespace ark {
 
 Material::Material(const uint32_t id, String name, bitmap baseColor, bitmap normal, bitmap roughness, bitmap metallic, bitmap specular)
     : _id(id), _name(std::move(name))
 {
-    _textures[MaterialTexture::TYPE_BASE_COLOR] = sp<MaterialTexture>::make("", nullptr, std::move(baseColor));
-    _textures[MaterialTexture::TYPE_NORMAL] = sp<MaterialTexture>::make("", nullptr, std::move(normal));
-    _textures[MaterialTexture::TYPE_ROUGHNESS] = sp<MaterialTexture>::make("", nullptr, std::move(roughness));
-    _textures[MaterialTexture::TYPE_METALLIC] = sp<MaterialTexture>::make("", nullptr, std::move(metallic));
-    _textures[MaterialTexture::TYPE_SPECULAR] = sp<MaterialTexture>::make("", nullptr, std::move(specular));
-    _textures[MaterialTexture::TYPE_EMISSION] = sp<MaterialTexture>::make("");
+    _textures[MaterialTexture::TYPE_BASE_COLOR] = sp<MaterialTexture>::make(nullptr, std::move(baseColor));
+    _textures[MaterialTexture::TYPE_NORMAL] = sp<MaterialTexture>::make(nullptr, std::move(normal));
+    _textures[MaterialTexture::TYPE_ROUGHNESS] = sp<MaterialTexture>::make(nullptr, std::move(roughness));
+    _textures[MaterialTexture::TYPE_METALLIC] = sp<MaterialTexture>::make(nullptr, std::move(metallic));
+    _textures[MaterialTexture::TYPE_SPECULAR] = sp<MaterialTexture>::make(nullptr, std::move(specular));
+    _textures[MaterialTexture::TYPE_EMISSION] = sp<MaterialTexture>::make();
 }
 
 uint32_t Material::id() const
@@ -90,6 +92,23 @@ const sp<MaterialTexture>& Material::emission() const
 void Material::setEmission(sp<MaterialTexture> materialTexture)
 {
     _textures[MaterialTexture::TYPE_EMISSION] = std::move(materialTexture);
+}
+
+const sp<Variable<Rect>>& Material::uv() const
+{
+    return _uv;
+}
+
+void Material::setUV(sp<Variable<Rect>> uv)
+{
+    _uv = std::move(uv);
+}
+
+Rect Material::toTextureUV() const
+{
+    if(_uv)
+        return _uv->val();
+    return {0, 1.0f, 1.0f, 0};
 }
 
 const sp<MaterialTexture>& Material::getTexture(const MaterialTexture::Type type) const

@@ -24,13 +24,16 @@ public:
         RectI _uv;
     };
 
+    int32_t width() const;
+    int32_t height() const;
+
     RectI addBitmap(sp<Bitmap> bitmap, String name = "");
     RectI addBitmap(sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider, String name = "");
 
     const Vector<PackedBitmap>& packedBitmaps() const;
 
-    sp<Texture> createTexture(sp<Texture::Parameters> parameters = nullptr) const;
-    void updateTexture(Texture& texture);
+    sp<Texture> createTexture(sp<Size> size = nullptr, sp<Texture::Parameters> parameters = nullptr) const;
+    void updateTexture(Texture& texture, sp<Size> size = nullptr) const;
 
 private:
     void addPackedBitmap(RectI uv, sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider, String name);

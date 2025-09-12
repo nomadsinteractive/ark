@@ -7,14 +7,20 @@
 
 namespace ark {
 
-MaterialTexture::MaterialTexture(String name, sp<Vec4> color, sp<Bitmap> bitmap)
-    : _name(std::move(name)), _color(std::move(color)), _bitmap_provider(sp<Variable<sp<Bitmap>>>::make<Variable<sp<Bitmap>>::Const>(std::move(bitmap)))
+namespace {
+
+sp<Variable<sp<Bitmap>>> toBitmapProvider(sp<Bitmap> bitmap)
 {
+    if(bitmap)
+        return sp<Variable<sp<Bitmap>>>::make<Variable<sp<Bitmap>>::Const>(std::move(bitmap));
+    return nullptr;
 }
 
-const String& MaterialTexture::name() const
+}
+
+MaterialTexture::MaterialTexture(sp<Vec4> color, sp<Bitmap> bitmap)
+    : _color(std::move(color)), _bitmap_provider(toBitmapProvider(std::move(bitmap)))
 {
-    return _name;
 }
 
 const sp<Vec4>& MaterialTexture::color() const
@@ -29,17 +35,12 @@ void MaterialTexture::setColor(sp<Vec4> color)
 
 sp<Bitmap> MaterialTexture::bitmap() const
 {
-    return _bitmap_provider->val();
+    return _bitmap_provider ? _bitmap_provider->val() : sp<Bitmap>();
 }
 
 void MaterialTexture::setBitmap(sp<Bitmap> bitmap)
 {
-    _bitmap_provider = sp<Variable<sp<Bitmap>>>::make<Variable<sp<Bitmap>>::Const>(std::move(bitmap));
-}
-
-const sp<Variable<sp<Bitmap>>>& MaterialTexture::bitmapProvider() const
-{
-    return _bitmap_provider;
+    _bitmap_provider = toBitmapProvider(std::move(bitmap));
 }
 
 template<> ARK_API MaterialTexture::Type StringConvert::eval<MaterialTexture::Type>(const String& str)

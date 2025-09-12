@@ -73,6 +73,7 @@ void Mesh::write(VertexWriter& buf) const
     const Tangent* tangent = _tangents ? _tangents->buf() : nullptr;
     const BoneInfo* boneInfo = _bone_infos ? _bone_infos->buf() : nullptr;
     const size_t len = _vertices.size();
+    Optional<Rect> materialUV = (_material && _material->uv()) ? Optional<Rect>(_material->uv()->val()) : Optional<Rect>();
 
     for(size_t i = 0; i < len; ++i)
     {
@@ -81,7 +82,11 @@ void Mesh::write(VertexWriter& buf) const
         ++vertice;
         if(uv)
         {
-            buf.writeTexCoordinate(uv->_u, uv->_v);
+            if(materialUV)
+                buf.writeTexCoordinate((uv->_u / static_cast<float>(0xffff) * materialUV->width() + materialUV->left()) * 0xffff,
+                                       (uv->_v / static_cast<float>(0xffff) * materialUV->height() + materialUV->bottom()) * 0xffff);
+            else
+                buf.writeTexCoordinate(uv->_u, uv->_v);
             ++uv;
         }
         else

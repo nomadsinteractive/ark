@@ -310,7 +310,7 @@ Vector<sp<Material>> loadMaterials(const tinygltf::Model& gltfModel, MaterialBun
 					bitmap = sp<Bitmap>::make(image.width, image.height, image.bits / 8 * image.component * image.width, image.component, sp<ByteArray>::make<ByteArray::Vector>(image.image));
 					materialBundle.images()[image.name] = bitmap;
 				}
-				material->setBaseColor(sp<MaterialTexture>::make(image.name, nullptr, std::move(bitmap)));
+				material->setBaseColor(sp<MaterialTexture>::make(nullptr, std::move(bitmap)));
 			}
 			material->roughness()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor), 0, 0, 0)));
 			material->metallic()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor), 0, 0, 0)));

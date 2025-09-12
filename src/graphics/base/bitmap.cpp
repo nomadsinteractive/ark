@@ -21,6 +21,8 @@ namespace ark {
 Bitmap::Bitmap(const uint32_t width, const uint32_t height, const uint32_t rowBytes, const uint8_t channels, const bool allocate)
     : Bitmap(width, height, rowBytes, channels, allocate ? sp<ByteArray>::make<ByteArray::Allocated>(height * rowBytes) : sp<ByteArray>())
 {
+    if(allocate)
+        memset(_byte_array->buf(), 0, _byte_array->size());
 }
 
 Bitmap::Bitmap(const uint32_t width, const uint32_t height, const uint32_t rowBytes, const uint8_t channels, sp<ByteArray> bytes)
@@ -74,22 +76,22 @@ uint8_t* Bitmap::at(const uint32_t x, const uint32_t y) const
     return _byte_array ? _byte_array->buf() + y * _row_bytes + x * _channels : nullptr;
 }
 
-Bitmap Bitmap::resize(const uint32_t w, const uint32_t h) const
+Bitmap Bitmap::resize(const uint32_t width, const uint32_t height) const
 {
     const uint32_t d = depth();
     CHECK(d == 1 || d == 4, "Unsupported bitmap depth: %d", d);
-    Bitmap s(w, h, w * _channels * d, _channels, true);
+    Bitmap s(width, height, width * _channels * d, _channels, true);
     if(d == 1)
-        stbir_resize_uint8_linear(_byte_array->buf(), _width, _height, _row_bytes, s.at(0, 0), w, h, s.rowBytes(), static_cast<stbir_pixel_layout>(_channels));
+        stbir_resize_uint8_linear(_byte_array->buf(), _width, _height, _row_bytes, s.at(0, 0), width, height, s.rowBytes(), static_cast<stbir_pixel_layout>(_channels));
     else if (d == 4)
-        stbir_resize_float_linear(reinterpret_cast<const float*>(_byte_array->buf()), _width, _height, _row_bytes, reinterpret_cast<float*>(s.at(0, 0)), w, h, s.rowBytes(), static_cast<stbir_pixel_layout>(_channels));
+        stbir_resize_float_linear(reinterpret_cast<const float*>(_byte_array->buf()), _width, _height, _row_bytes, reinterpret_cast<float*>(s.at(0, 0)), width, height, s.rowBytes(), static_cast<stbir_pixel_layout>(_channels));
     return s;
 }
 
-Bitmap Bitmap::crop(uint32_t x, uint32_t y, uint32_t w, uint32_t h) const
+Bitmap Bitmap::crop(const uint32_t x, const uint32_t y, const uint32_t w, const uint32_t h) const
 {
-    DCHECK(x + w <= width() && y + h <= height(), "Cropped image out of bounds. cropped bitmap(%d, %d, %d, %d), image size(%d, %d)", x, y, w, h, width(), height());
-    uint32_t d = depth();
+    CHECK(x + w <= width() && y + h <= height(), "Cropped image out of bounds. cropped bitmap(%d, %d, %d, %d), image size(%d, %d)", x, y, w, h, width(), height());
+    const uint32_t d = depth();
     Bitmap s(w, h, w * _channels * d, _channels, true);
     for(uint32_t i = 0; i < h; ++i)
         memcpy(s.at(0, i), at(x, i), s.rowBytes());
@@ -128,8 +130,8 @@ void Bitmap::draw(const int32_t x, const int32_t y, void* buf, const uint32_t wi
 
 void Bitmap::dump(const String& filename) const
 {
-    int32_t pixel_size = _channels;
-    int32_t depth = 8;
+    const int32_t pixel_size = _channels;
+    const int32_t depth = 8;
 
     FILE* fp = fopen(filename.c_str(), "wb");
     if(!fp)

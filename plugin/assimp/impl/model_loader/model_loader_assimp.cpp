@@ -237,7 +237,6 @@ Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, Mat
 
     DASSERT(mesh->mMaterialIndex < scene->mNumMaterials);
     const sp<Material>& material = materials[mesh->mMaterialIndex];
-    const Rect uvBounds = materialBundle.getMaterialUV(material->name());
     for(uint32_t i = 0; i < mesh->mNumVertices; i ++)
     {
         *(++vert) = V3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
@@ -245,8 +244,8 @@ Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, Mat
             *(++norm) = V3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         if(tangents)
             *(++t) = {V3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z), V3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z)};
-        *(++u) = mesh->mTextureCoords[0] ? Mesh::UV{static_cast<uint16_t>((mesh->mTextureCoords[0][i].x * uvBounds.width() + uvBounds.left()) * 0xffff),
-                                                    static_cast<uint16_t>((mesh->mTextureCoords[0][i].y * uvBounds.height() + uvBounds.bottom()) * 0xffff)} : Mesh::UV{0, 0};
+        *(++u) = mesh->mTextureCoords[0] ? Mesh::UV{static_cast<uint16_t>(mesh->mTextureCoords[0][i].x * 0xffff), static_cast<uint16_t>(mesh->mTextureCoords[0][i].y * 0xffff)}
+                                           : Mesh::UV{0, 0};
     }
     if(mesh->HasBones())
         loadBones(mesh, boneMapping, bones);
