@@ -7,7 +7,7 @@
 
 namespace ark {
 
-template<typename T, typename U> class Table : public NonThreadSafe<THREAD_NAME_ID_CORE> {
+template<typename T, typename U> class Table : public NonThreadSafe {
 public:
     static constexpr size_t npos = std::numeric_limits<size_t>::max();
 
@@ -87,7 +87,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN(Table);
 
     void push_back(T key, U value) {
-        safetyCheck();
+        threadCheck();
         size_t index = _values.size();
         _indices.insert(std::make_pair(key, index));
         _keys.push_back(std::move(key));
@@ -99,22 +99,22 @@ public:
     }
 
     const Vector<T>& keys() const {
-        safetyCheck();
+        threadCheck();
         return _keys;
     }
 
     const Vector<U>& values() const {
-        safetyCheck();
+        threadCheck();
         return _values;
     }
 
     Vector<U>& values() {
-        safetyCheck();
+        threadCheck();
         return _values;
     }
 
     size_t size() const {
-        safetyCheck();
+        threadCheck();
         return _indices.size();
     }
 
@@ -123,14 +123,14 @@ public:
     }
 
     const U& at(const T& key) const {
-        safetyCheck();
+        threadCheck();
         const auto iter = find(key);
         DCHECK(iter != end(), "Key not found");
         return iter->second;
     }
 
     U& operator[](const T& key) {
-        safetyCheck();
+        threadCheck();
         const auto iter = _indices.find(key);
         if(iter != _indices.end())
             return _values[iter->second];
@@ -141,7 +141,7 @@ public:
     }
 
     iterator begin() {
-        safetyCheck();
+        threadCheck();
         return iterator(_keys, _values, _keys.empty() ? npos : 0);
     }
 
@@ -150,13 +150,13 @@ public:
     }
 
     iterator find(const T& key) {
-        safetyCheck();
+        threadCheck();
         const auto iter = _indices.find(key);
         return iter != _indices.end() ? iterator(_keys, _values, iter->second) : end();
     }
 
     const_iterator begin() const {
-        safetyCheck();
+        threadCheck();
         return const_iterator(_keys, _values, _keys.empty() ? npos : 0);
     }
 
@@ -165,20 +165,20 @@ public:
     }
 
     const_iterator find(const T& key) const {
-        safetyCheck();
+        threadCheck();
         const auto iter = _indices.find(key);
         return iter != _indices.end() ? const_iterator(_keys, _values, iter->second) : end();
     }
 
     void clear() {
-        safetyCheck();
+        threadCheck();
         _indices.clear();
         _keys.clear();
         _values.clear();
     }
 
     template<typename V> Vector<V> flat() const {
-        safetyCheck();
+        threadCheck();
         Vector<V> flatted;
         for(const auto& [k, v] : *this)
             flatted.emplace_back(k, v);

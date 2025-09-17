@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <mutex>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -50,6 +51,8 @@ private:
 
     std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> _textures;
     sp<Stub> _stub;
+
+    mutable std::mutex _mutex;
 };
 
 }

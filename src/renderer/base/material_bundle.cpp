@@ -107,12 +107,14 @@ const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& MaterialBundle::tex
 
 sp<Material> MaterialBundle::getMaterial(const String& name) const
 {
+    const auto synchronized = _materials.threadSynchronize(_mutex);
     const auto iter = _materials.find(name);
     return iter != _materials.end() ? iter->second : nullptr;
 }
 
 void MaterialBundle::addMaterial(String name, sp<Material> material)
 {
+    const auto synchronized = _materials.threadSynchronize(_mutex);
     if(const auto iter = _materials.find(name); iter == _materials.end())
     {
         material->setId(_materials.size());

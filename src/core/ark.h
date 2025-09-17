@@ -24,14 +24,12 @@ public:
     static Ark& instance();
 
     template<typename T> sp<T> query() const {
-        const std::lock_guard lg(_mutex);
-        const auto synchronized = _interfaces.table().synchronize();
+        const auto synchronized = _interfaces.table().threadSynchronize(_mutex);
         return _interfaces.get<T>();
     }
 
     template<typename T> sp<T> ensure() {
-        const std::lock_guard lg(_mutex);
-        const auto synchronized = _interfaces.table().synchronize();
+        const auto synchronized = _interfaces.table().threadSynchronize(_mutex);
         return _interfaces.ensure<T>();
     }
 
@@ -90,7 +88,7 @@ private:
     sp<ApplicationManifest> _manifest;
     Traits _interfaces;
 
-    std::mutex _mutex;
+    mutable std::mutex _mutex;
     friend class ClassManager;
 };
 

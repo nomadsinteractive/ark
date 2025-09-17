@@ -6,29 +6,28 @@
 
 namespace ark {
 
-template<THREAD_NAME_ID TID = THREAD_NAME_ID_UNSPECIFIED> class NonThreadSafe {
+class NonThreadSafe {
 public:
-#if ARK_FLAG_DEBUG
     class Synchronized {
     public:
         ~Synchronized() {
             _owner._synchronized_thread_id = {};
         }
+        DISALLOW_COPY_AND_ASSIGN(Synchronized);
 
     private:
-        Synchronized(const NonThreadSafe& owner)
-            : _owner(owner) {
+        Synchronized(const NonThreadSafe& owner, std::mutex& mutex)
+            : _owner(owner), _lock_guard(mutex) {
             DASSERT(_owner._synchronized_thread_id == std::thread::id());
             _owner._synchronized_thread_id = std::this_thread::get_id();
         }
 
     private:
         const NonThreadSafe& _owner;
+        std::lock_guard<std::mutex> _lock_guard;
+
         friend class NonThreadSafe;
     };
-#else
-    typedef int32_t Synchronized;
-#endif
 
     NonThreadSafe()
 #if ARK_FLAG_DEBUG
@@ -38,19 +37,15 @@ public:
     }
 
 [[nodiscard]]
-    Synchronized synchronize() const {
-#if ARK_FLAG_DEBUG
-        return {*this};
-#else
-        return 0;
-#endif
+    Synchronized threadSynchronize(std::mutex& mutex) const {
+        return {*this, mutex};
     }
 
-    void safetyCheck() const {
+    void threadCheck() const {
 #if ARK_FLAG_DEBUG
-        if constexpr(TID != THREAD_NAME_ID_UNSPECIFIED)
-            if(__thread_check__(TID))
-                return;
+        // Most of the instances should be safely accessed on core thread.
+        if(__thread_check__(THREAD_NAME_ID_CORE))
+            return;
         const std::thread::id threadId = std::this_thread::get_id();
         DCHECK(threadId == _owner_thread_id || threadId == _synchronized_thread_id, "Thread safety policy violation");
 #endif
