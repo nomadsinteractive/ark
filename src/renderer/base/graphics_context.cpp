@@ -16,7 +16,7 @@ GraphicsContext::GraphicsContext(sp<RenderEngineContext> renderContext, sp<Rende
 
 GraphicsContext& GraphicsContext::mocked()
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     return Global<GraphicsContext>();
 }
 

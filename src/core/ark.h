@@ -25,11 +25,13 @@ public:
 
     template<typename T> sp<T> query() const {
         const std::lock_guard lg(_mutex);
+        const auto synchronized = _interfaces.table().synchronize();
         return _interfaces.get<T>();
     }
 
     template<typename T> sp<T> ensure() {
         const std::lock_guard lg(_mutex);
+        const auto synchronized = _interfaces.table().synchronize();
         return _interfaces.ensure<T>();
     }
 

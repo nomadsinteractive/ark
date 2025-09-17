@@ -3,10 +3,11 @@
 #include <memory>
 
 #include "core/base/api.h"
+#include "core/concurrent/non_thread_safe.h"
 
 namespace ark {
 
-template<typename T, typename U, bool Ordered> class Table {
+template<typename T, typename U> class Table : public NonThreadSafe<THREAD_NAME_ID_CORE> {
 public:
     static constexpr size_t npos = std::numeric_limits<size_t>::max();
 
@@ -22,7 +23,7 @@ public:
 
         Iterator(VType<T> keys, VType<U> values, const size_t iterator)
             : _keys(keys), _values(values), _iterator(iterator), _data(iterator != npos ? new PairType(_keys.at(_iterator), _values.at(_iterator)) : nullptr) {
-            DCHECK(keys.size() == values.size(), "Zipped iterator must be equal length: %zu vs %zu", keys.size(), values.size());
+            CHECK(keys.size() == values.size(), "Zipped iterator must be equal length: %zu vs %zu", keys.size(), values.size());
         }
         Iterator(Iterator&& other)
             : _keys(other._keys), _values(other._values), _iterator(other._iterator), _data(std::move(other._data)) {
@@ -79,13 +80,14 @@ public:
 
     typedef Iterator<false> iterator;
     typedef Iterator<true>  const_iterator;
-    typedef std::conditional_t<Ordered, Map<T, size_t>, HashMap<T, size_t>> IndexType;
+    typedef Map<T, size_t>  IndexType;
 
 public:
     Table() = default;
     DEFAULT_COPY_AND_ASSIGN(Table);
 
     void push_back(T key, U value) {
+        safetyCheck();
         size_t index = _values.size();
         _indices.insert(std::make_pair(key, index));
         _keys.push_back(std::move(key));
@@ -97,18 +99,22 @@ public:
     }
 
     const Vector<T>& keys() const {
+        safetyCheck();
         return _keys;
     }
 
     const Vector<U>& values() const {
+        safetyCheck();
         return _values;
     }
 
     Vector<U>& values() {
+        safetyCheck();
         return _values;
     }
 
     size_t size() const {
+        safetyCheck();
         return _indices.size();
     }
 
@@ -117,12 +123,14 @@ public:
     }
 
     const U& at(const T& key) const {
+        safetyCheck();
         const auto iter = find(key);
         DCHECK(iter != end(), "Key not found");
         return iter->second;
     }
 
     U& operator[](const T& key) {
+        safetyCheck();
         const auto iter = _indices.find(key);
         if(iter != _indices.end())
             return _values[iter->second];
@@ -133,6 +141,7 @@ public:
     }
 
     iterator begin() {
+        safetyCheck();
         return iterator(_keys, _values, _keys.empty() ? npos : 0);
     }
 
@@ -141,11 +150,13 @@ public:
     }
 
     iterator find(const T& key) {
+        safetyCheck();
         const auto iter = _indices.find(key);
         return iter != _indices.end() ? iterator(_keys, _values, iter->second) : end();
     }
 
     const_iterator begin() const {
+        safetyCheck();
         return const_iterator(_keys, _values, _keys.empty() ? npos : 0);
     }
 
@@ -154,17 +165,20 @@ public:
     }
 
     const_iterator find(const T& key) const {
+        safetyCheck();
         const auto iter = _indices.find(key);
         return iter != _indices.end() ? const_iterator(_keys, _values, iter->second) : end();
     }
 
     void clear() {
+        safetyCheck();
         _indices.clear();
         _keys.clear();
         _values.clear();
     }
 
     template<typename V> Vector<V> flat() const {
+        safetyCheck();
         Vector<V> flatted;
         for(const auto& [k, v] : *this)
             flatted.emplace_back(k, v);

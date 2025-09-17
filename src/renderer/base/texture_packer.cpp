@@ -81,7 +81,7 @@ RectI TexturePacker::addBitmap(sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapPro
     if(rect.width == 0 || rect.height == 0)
     {
         resize(_bin_pack.width() * 2, _bin_pack.height() * 2);
-        return addBitmap(std::move(bounds), std::move(bitmapProvider));
+        return addBitmap(std::move(bounds), std::move(bitmapProvider), std::move(name));
     }
     const RectI uv(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     addPackedBitmap(uv, std::move(bounds), std::move(bitmapProvider), std::move(name));

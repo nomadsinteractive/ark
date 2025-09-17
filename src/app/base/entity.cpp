@@ -42,14 +42,14 @@ Entity::Entity(Traits components)
     : _ref(Global<RefManager>()->makeRef(this)), _components(std::move(components))
 {
     Wirable::WiringContext context(_components);
-    for(const auto& [k, v] : _components.traits())
+    for(const auto& [k, v] : _components.table())
         if(!v.isEnum())
             if(const sp<Wirable> wirable = v.as<Wirable>())
                 if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
                     _components.add(typeId, v);
 
     preWire();
-    for(const auto& [k, v] : _components.traits())
+    for(const auto& [k, v] : _components.table())
         if(!v.isEnum())
             if(const sp<Wirable> wirable = v.as<Wirable>())
                 wirable->onWire(context, v);
@@ -96,7 +96,7 @@ Entity::~Entity()
 
 void Entity::traverse(const Visitor& visitor)
 {
-    for(const auto& [k, v] : _components.traits())
+    for(const auto& [k, v] : _components.table())
         if(const sp<Debris>& holder = v.as<Debris>())
             holder->traverse(visitor);
 }
@@ -116,7 +116,7 @@ void Entity::discard()
     _ref->discard();
     if(_discarded)
         _discarded->discard();
-    _components.traits().clear();
+    _components.table().clear();
 }
 
 sp<Discarded> Entity::discarded()

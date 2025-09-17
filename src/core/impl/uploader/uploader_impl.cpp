@@ -35,7 +35,7 @@ bool UploaderImpl::update(const uint64_t timestamp)
 
 void UploaderImpl::upload(Writable& writable)
 {
-    THREAD_CHECK(THREAD_ID_CORE);
+    THREAD_CHECK(THREAD_NAME_ID_CORE);
     for(UploaderStub& i : _uploaders)
         if(i._dirty_updated || i._dirty_marked)
         {

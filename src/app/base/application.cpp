@@ -106,7 +106,7 @@ const sp<Size>& Application::surfaceSize() const
 
 void Application::onCreateTask()
 {
-    __thread_init__<THREAD_ID_CORE>();
+    __thread_init__(THREAD_NAME_ID_CORE);
     _application_delegate->onCreate(*this, _surface);
     setSurfaceUpdater(true);
 }
@@ -134,7 +134,7 @@ void Application::setSurfaceUpdater(bool alive)
 void Application::onCreate()
 {
     LOGD("");
-    __thread_init__<THREAD_ID_MAIN>();
+    __thread_init__(THREAD_NAME_ID_MAIN);
     const Global<StringTable> stringTable;
     stringTable->addStringBundle("asset", sp<AssetStringBundle>::make());
     sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
@@ -180,7 +180,7 @@ void Application::onDestroy()
 void Application::onSurfaceCreated()
 {
     LOGD("");
-    __thread_init__<THREAD_ID_RENDERER>();
+    __thread_init__(THREAD_NAME_ID_RENDERER);
 
     _application_context->renderEngine()->onSurfaceCreated();
     _surface->onSurfaceCreated();
@@ -190,7 +190,7 @@ void Application::onSurfaceCreated()
 void Application::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     LOGD("width = %d, height = %d", width, height);
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
 
     _surface_size->setWidth(static_cast<float>(width));
     _surface_size->setHeight(static_cast<float>(height));

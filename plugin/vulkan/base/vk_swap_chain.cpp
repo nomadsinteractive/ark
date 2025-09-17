@@ -97,7 +97,7 @@ std::vector<VkCommandBuffer> VKSwapChain::makeCommandBuffers() const
 
 uint32_t VKSwapChain::acquire(VKGraphicsContext& vkContext)
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     VkResult result = _swap_chain.acquireNextImage(vkContext.semaphorePresentComplete(), &_aquired_image_id);
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
@@ -115,7 +115,7 @@ uint32_t VKSwapChain::aquiredImageId() const
 
 void VKSwapChain::swap(VKGraphicsContext& vkGraphicsContext)
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     vkGraphicsContext.submit(_queue);
     VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, vkGraphicsContext.semaphoreRenderComplete()->vkSemaphore()));
 }

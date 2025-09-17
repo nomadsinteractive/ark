@@ -23,7 +23,7 @@ sp<VKSemaphore> VKSubmitQueue::createSignalSemaphore()
 
 void VKSubmitQueue::begin(VkSemaphore waitSemaphore)
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     _submit_infos.clear();
     _submit_queue.clear();
     _wait_semaphores.push_back(waitSemaphore);
@@ -31,14 +31,14 @@ void VKSubmitQueue::begin(VkSemaphore waitSemaphore)
 
 void VKSubmitQueue::submitCommandBuffer(VkCommandBuffer commandBuffer)
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     _submit_queue.push_back(commandBuffer);
     addSubmitInfo(1, &_submit_queue.back());
 }
 
 void VKSubmitQueue::submit(VkQueue queue)
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     if(!_submit_infos.empty())
     {
         std::vector<VkSemaphore> signalSemaphores;
@@ -65,7 +65,7 @@ void VKSubmitQueue::submit(VkQueue queue)
 
 void VKSubmitQueue::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers)
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     VkSubmitInfo submitInfo = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
     submitInfo.pWaitDstStageMask = _stage_flags;
     submitInfo.commandBufferCount = commandBufferCount;
@@ -79,7 +79,7 @@ void VKSubmitQueue::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBu
 
 void VKSubmitQueue::addWaitSemaphore(VkSemaphore semaphore, VkPipelineStageFlags waitStageFlag)
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     DCHECK(_wait_semaphores.size() <= array_size(_stage_flags), "Too many stages");
     _wait_semaphores.push_back(semaphore);
     _stage_flags[_wait_semaphores.size()] = waitStageFlag;

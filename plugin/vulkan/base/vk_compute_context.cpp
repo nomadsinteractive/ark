@@ -21,7 +21,7 @@ VKComputeContext::VKComputeContext(GraphicsContext& graphicsContext, sp<VKRender
 
 void VKComputeContext::begin()
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     DASSERT(_semaphore_render_complete);
     _command_buffer = _command_pool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
     _submit_queue.begin(_semaphore_render_complete->vkSemaphore());
@@ -29,7 +29,7 @@ void VKComputeContext::begin()
 
 void VKComputeContext::end()
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     VKUtil::checkResult(vkEndCommandBuffer(_command_buffer));
     _submit_queue.submitCommandBuffer(_command_buffer);
     _submit_queue.submit(_command_pool->vkQueue());
@@ -49,7 +49,7 @@ VkCommandBuffer VKComputeContext::buildCommandBuffer(GraphicsContext& graphicsCo
 
 VkCommandBuffer VKComputeContext::vkCommandBuffer() const
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     return _command_buffer;
 }
 

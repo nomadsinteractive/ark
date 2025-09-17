@@ -24,7 +24,7 @@ public:
     }
 
     bool has(const TypeId typeId) const {
-        return _traits.find(typeId) != _traits.end();
+        return _table.find(typeId) != _table.end();
     }
 
     template<typename T> Box& put(sp<T> trait) {
@@ -35,24 +35,24 @@ public:
     }
 
     Box& put(const TypeId typeId, Box trait) {
-        Box& slot = _traits[typeId];
+        Box& slot = _table[typeId];
         slot = std::move(trait);
         return slot;
     }
 
     void add(const TypeId typeId, Box trait) {
-        if(_traits.find(typeId) != _traits.end()) {
-            Box& listBox = _traits[toVectorTypeId(typeId)];
+        if(_table.find(typeId) != _table.end()) {
+            Box& listBox = _table[toVectorTypeId(typeId)];
             sp<Vector<Box>> list = listBox.toPtr<Vector<Box>>();
             if(!list) {
                 list = sp<Vector<Box>>::make();
-                list->push_back(_traits[typeId]);
+                list->push_back(_table[typeId]);
                 listBox = Box(list);
             }
             list->push_back(std::move(trait));
         }
         else
-            _traits[typeId] = std::move(trait);
+            _table[typeId] = std::move(trait);
     }
 
     template<typename T> sp<T> get() const {
@@ -61,26 +61,26 @@ public:
     }
 
     Optional<Box> get(const TypeId typeId) const {
-        const auto iter = _traits.find(typeId);
-        return iter != _traits.end() ? Optional<Box>(iter->second) : Optional<Box>();
+        const auto iter = _table.find(typeId);
+        return iter != _table.end() ? Optional<Box>(iter->second) : Optional<Box>();
     }
 
     template<typename T> T getEnum(T defaultValue) const {
         static_assert(std::is_enum_v<T>);
-        const auto iter = _traits.find(Type<T>::id());
-        return iter != _traits.end() ? iter->second.template toEnum<T>() : defaultValue;
+        const auto iter = _table.find(Type<T>::id());
+        return iter != _table.end() ? iter->second.template toEnum<T>() : defaultValue;
     }
 
     template<typename T, typename... Args> sp<T> ensure(Args&&... args) {
         return instance_sfinae<T, Args...>(0, std::forward<Args>(args)...);
     }
 
-    const TableType& traits() const {
-        return _traits;
+    const TableType& table() const {
+        return _table;
     }
 
-    TableType& traits() {
-        return _traits;
+    TableType& table() {
+        return _table;
     }
 
 private:
@@ -104,7 +104,7 @@ private:
     }
 
 private:
-    TableType _traits;
+    TableType _table;
 };
 
 }

@@ -10,12 +10,12 @@ DOMElement::DOMElement()
 {
 }
 
-DOMElement::DOMElement(String name, const DOMElement::ElementType type)
+DOMElement::DOMElement(String name, const ElementType type)
     : DOMAttribute(std::move(name)), _type(type)
 {
 }
 
-DOMElement::DOMElement(String name, String value, const DOMElement::ElementType type)
+DOMElement::DOMElement(String name, String value, const ElementType type)
     : DOMAttribute(std::move(name), std::move(value)), _type(type)
 {
 }

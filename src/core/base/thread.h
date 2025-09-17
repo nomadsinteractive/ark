@@ -46,10 +46,10 @@ public:
 
     void start();
 
-    template<typename T> bool wait(const T& duration) const {
+    template<typename T> bool wait(T duration) const {
         return _stub->_mutex.wait<T>(duration);
     }
-    template<typename T, typename U> bool wait(const T& duration, U pred) const {
+    template<typename T, typename U> bool wait(T duration, U pred) const {
         return _stub->_mutex.wait<T, U>(duration, std::move(pred));
     }
 

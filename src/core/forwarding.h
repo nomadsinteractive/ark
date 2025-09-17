@@ -29,7 +29,7 @@ template<typename T> class LFQueue;
 template<typename T> class Range;
 template<typename T> class OptionalVar;
 template<typename T> class SharedPtr;
-template<typename T, typename U, bool Ordered = true> class Table;
+template<typename T, typename U> class Table;
 template<typename T> class Type;
 template<typename T> class Variable;
 template<typename T> class VariableWrapper;

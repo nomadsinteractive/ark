@@ -39,7 +39,7 @@ const sp<Scope>& BeanFactory::references() const
 
 BeanFactory::Factory::operator bool() const
 {
-    return !_workers.traits().empty();
+    return !_workers.table().empty();
 }
 
 BeanFactory::Stub::Stub(sp<Dictionary<document>> documentRefs)

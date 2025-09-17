@@ -66,7 +66,7 @@ sp<RenderEngineContext> RendererFactoryOpenGL::createRenderEngineContext(const A
 
 void RendererFactoryOpenGL::onSurfaceCreated(RenderEngine& renderEngine)
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     glbinding::Binding::initialize(nullptr);
 
     if(renderEngine.version() == enums::RENDERER_VERSION_AUTO)

@@ -8,6 +8,8 @@
 
 namespace ark {
 
+static std::thread::id _thread_ids[THREAD_NAME_ID_COUNT];
+
 void __fatal__(const char* func, const char* condition, const char* message)
 {
     const String str = Strings::sprintf("%s%s", condition ? Strings::sprintf("\"%s\" failed! ", condition).c_str() : "", message);
@@ -33,29 +35,24 @@ void __trace__(const char* func, const char* /*condition*/, const char* message)
     Log::d(func, "<<<__TRACING__<<<");
 }
 
-void __thread_check__(const char* func, const THREAD_ID threadId)
+bool __thread_check__(const THREAD_NAME_ID threadNameId)
 {
-    THREAD_ID against = THREAD_ID_UNSPECIFIED;
-    switch(threadId)
-    {
-        case THREAD_ID_UNSPECIFIED:
-            against = _internal::ThreadFlag<THREAD_ID_UNSPECIFIED>::id();
-        break;
-        case THREAD_ID_MAIN:
-            against = _internal::ThreadFlag<THREAD_ID_MAIN>::id();
-        break;
-        case THREAD_ID_CORE:
-            against = _internal::ThreadFlag<THREAD_ID_CORE>::id();
-        break;
-        case THREAD_ID_RENDERER:
-            against = _internal::ThreadFlag<THREAD_ID_RENDERER>::id();
-        break;
-    }
-    if(against != threadId)
-        __message__(__fatal__, func, "", "ThreadId check failed: %d, should be %d", against, threadId);
+    ASSERT(threadNameId != THREAD_NAME_ID_UNSPECIFIED);
+    return _thread_ids[threadNameId] == std::this_thread::get_id();
 }
 
-void __message__(fnTraceCallback callback, const char* func, const char* condition, const char* format, ...)
+void __thread_check__(const char* func, const THREAD_NAME_ID threadId)
+{
+    if(_thread_ids[threadId] != std::this_thread::get_id())
+        __message__(__fatal__, func, "", "ThreadId check failed: %d, should be %d", threadId);
+}
+
+void __thread_init__(const THREAD_NAME_ID nameId)
+{
+    _thread_ids[nameId] = std::this_thread::get_id();
+}
+
+void __message__(const fnTraceCallback callback, const char* func, const char* condition, const char* format, ...)
 {
     va_list args;
     va_start(args, format);

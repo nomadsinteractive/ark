@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <stdint.h>
+#include <thread>
 
 #include "core/forwarding.h"
 
@@ -89,11 +90,12 @@
 
 namespace ark {
 
-enum THREAD_ID {
-    THREAD_ID_UNSPECIFIED = 0,
-    THREAD_ID_MAIN = 1,
-    THREAD_ID_CORE = 2,
-    THREAD_ID_RENDERER = 3
+enum THREAD_NAME_ID {
+    THREAD_NAME_ID_UNSPECIFIED = 0,
+    THREAD_NAME_ID_MAIN = 1,
+    THREAD_NAME_ID_CORE = 2,
+    THREAD_NAME_ID_RENDERER = 3,
+    THREAD_NAME_ID_COUNT = 4
 };
 
 typedef void(*fnTraceCallback)(const char* func, const char* condition, const char* message);
@@ -106,22 +108,10 @@ void ARK_API __message__(fnTraceCallback callback, const char* func, const char*
 void ARK_API __fatal__(const char* func, const char* condition, const char* message);
 void ARK_API __warning__(const char* func, const char* condition, const char* message);
 void ARK_API __trace__(const char* func, const char* condition, const char* message);
-void ARK_API __thread_check__(const char* func, THREAD_ID threadId);
+bool ARK_API __thread_check__(THREAD_NAME_ID threadNameId);
+void ARK_API __thread_check__(const char* func, THREAD_NAME_ID threadId);
 
-namespace _internal {
-
-template<THREAD_ID ID> struct ThreadFlag {
-    static THREAD_ID& id() {
-        thread_local THREAD_ID _thread_id = THREAD_ID_UNSPECIFIED;
-        return _thread_id;
-    }
-};
-
-}
-
-template<THREAD_ID ID> void __thread_init__() {
-    _internal::ThreadFlag<ID>::id() = ID;
-}
+void __thread_init__(THREAD_NAME_ID nameId);
 
 template<typename T, size_t N> constexpr size_t array_size(const T (&)[N]) {
     return N - 1;

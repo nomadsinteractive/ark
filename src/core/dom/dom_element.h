@@ -2,7 +2,6 @@
 
 #include "core/base/api.h"
 #include "core/dom/dom_attribute.h"
-#include "core/collection/iterable.h"
 #include "core/collection/table.h"
 #include "core/types/implements.h"
 
@@ -36,8 +35,7 @@ public:
     void addAttribute(sp<DOMAttribute> attr);
 
 private:
-    DOMElement::ElementType _type;
-
+    ElementType _type;
     Table<String, attribute> _attributes;
 };
 

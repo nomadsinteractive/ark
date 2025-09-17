@@ -61,7 +61,7 @@ sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(const A
 
 void RendererFactoryVulkan::onSurfaceCreated(RenderEngine& renderEngine)
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
 
     setVersion(enums::RENDERER_VERSION_VULKAN_12, renderEngine.context());
 

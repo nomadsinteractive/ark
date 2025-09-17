@@ -18,7 +18,7 @@ SurfaceUpdater::SurfaceUpdater(sp<SurfaceController> surfaceController, const sp
 void SurfaceUpdater::run()
 {
     DPROFILER_TRACE("SurfaceUpdate");
-    DTHREAD_CHECK(THREAD_ID_CORE);
+    DTHREAD_CHECK(THREAD_NAME_ID_CORE);
     const uint64_t timestamp = _application_context->onRenderTick();
     _application_context->renderController()->onPreCompose(timestamp);
     _surface_controller->requestUpdate(timestamp);

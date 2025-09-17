@@ -34,7 +34,7 @@ void SurfaceController::requestUpdate(uint64_t timestamp)
 
 void SurfaceController::onRenderFrame(const V4 backgroundColor, RenderView& renderView) const
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
 
     RenderRequest renderRequest;
     do {
