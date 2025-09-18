@@ -15,7 +15,7 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
 
 sp<ModelLoader::Importer> ModelImporterGltf::BUILDER::build(const Scope& args)
 {
-    return sp<ModelImporterGltf>::make();
+    return sp<Importer>::make<ModelImporterGltf>();
 }
 
 }

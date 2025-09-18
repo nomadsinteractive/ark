@@ -19,8 +19,15 @@ namespace ark {
 
 class ARK_API MaterialBundle {
 public:
+
+    struct Initializer {
+        Table<String, sp<Material>> _materials;
+        Map<String, sp<Bitmap>> _images;
+    };
+
 //  [[script::bindings::auto]]
     MaterialBundle(const Vector<sp<Material>>& materials = {});
+    MaterialBundle(Initializer initializer);
 
 //  [[script::bindings::property]]
     const Vector<sp<Material>>& materials() const;

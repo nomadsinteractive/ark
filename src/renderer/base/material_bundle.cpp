@@ -85,6 +85,11 @@ MaterialBundle::MaterialBundle(const Vector<sp<Material>>& materials)
     update();
 }
 
+MaterialBundle::MaterialBundle(Initializer initializer)
+    : _materials(std::move(initializer._materials)), _images(std::move(initializer._images)), _stub(sp<Stub>::make())
+{
+}
+
 const Vector<sp<Material>>& MaterialBundle::materials() const
 {
     return _materials.values();
