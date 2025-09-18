@@ -22,6 +22,7 @@ class Layer;
 class MaterialBundle;
 class Mesh;
 class Model;
+class ModelImporter;
 class ModelLoader;
 class ModelBundle;
 class Node;

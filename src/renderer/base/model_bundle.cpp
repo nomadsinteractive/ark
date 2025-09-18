@@ -7,19 +7,21 @@
 #include "core/inf/executor.h"
 #include "core/inf/runnable.h"
 
+#include "graphics/base/material.h"
+
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/mesh.h"
 #include "renderer/base/node.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
+#include "renderer/inf/model_importer.h"
 
 #include "app/base/application_context.h"
-#include "graphics/base/material.h"
 
 namespace ark {
 
 struct ModelBundle::Stub {
-    Stub(sp<Importer> importer, sp<MaterialBundle> materialBundle)
-        : _importer(std::move(importer)), _material_bundle(materialBundle ? std::move(materialBundle) : sp<MaterialBundle>::make()), _vertex_length(0), _index_length(0)
+    Stub(sp<ModelImporter> importer)
+        : _importer(std::move(importer)), _material_bundle(sp<MaterialBundle>::make()), _vertex_length(0), _index_length(0)
     {
     }
 
@@ -30,13 +32,18 @@ struct ModelBundle::Stub {
             const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
             const String importer = Documents::getAttribute(i, "importer");
             const Manifest manifest(Documents::getAttribute(i, constants::SRC, ""), i);
-            addModel(type, importModel(manifest, importer ? factory.build<Importer>(importer, args) : nullptr));
+            addModel(type, importModel(manifest, importer ? factory.build<ModelImporter>(importer, args) : nullptr));
         }
     }
 
-    sp<Model> importModel(const Manifest& manifest, const sp<Importer>& importer) const
+    sp<Model> importModel(const Manifest& manifest, const sp<ModelImporter>& importer)
     {
-        return sp<Model>::make((importer ? importer : _importer)->import(manifest, _material_bundle));
+        return sp<Model>::make((importer ? importer : _importer)->import(manifest, _material_initializer));
+    }
+
+    void updateMaterials()
+    {
+        _material_bundle = sp<MaterialBundle>::make(_material_initializer._materials, _material_initializer._images);
     }
 
     ModelLayout& addModel(const int32_t type, sp<Model> model)
@@ -69,12 +76,14 @@ struct ModelBundle::Stub {
         return iter->second;
     }
 
-    sp<Importer> _importer;
+    sp<ModelImporter> _importer;
     sp<MaterialBundle> _material_bundle;
 
     Table<int32_t, ModelLayout> _model_layouts;
     size_t _vertex_length;
     size_t _index_length;
+
+    MaterialBundle::Initializer _material_initializer;
 };
 
 namespace {
@@ -102,7 +111,7 @@ private:
 
 class ImportModuleRunnable final : public Runnable {
 public:
-    ImportModuleRunnable(const int32_t type, Manifest manifest, const sp<ModelBundle::Stub>& stub, sp<ModelLoader::Importer> importer, sp<Executor> executor, sp<Future> future)
+    ImportModuleRunnable(const int32_t type, Manifest manifest, const sp<ModelBundle::Stub>& stub, sp<ModelImporter> importer, sp<Executor> executor, sp<Future> future)
         : _type(type), _manifest(std::move(manifest)), _stub(stub), _importer(std::move(importer)), _executor(std::move(executor)), _future(std::move(future))
     {
     }
@@ -116,15 +125,15 @@ private:
     int32_t _type;
     Manifest _manifest;
     sp<ModelBundle::Stub> _stub;
-    sp<ModelLoader::Importer> _importer;
+    sp<ModelImporter> _importer;
     sp<Executor> _executor;
     sp<Future> _future;
 };
 
 }
 
-ModelBundle::ModelBundle(sp<Importer> importer, sp<MaterialBundle> materialBundle)
-    : ModelLoader(enums::DRAW_MODE_TRIANGLES, nullptr), _stub(sp<Stub>::make(std::move(importer), std::move(materialBundle)))
+ModelBundle::ModelBundle(sp<ModelImporter> importer)
+    : ModelLoader(enums::DRAW_MODE_TRIANGLES, nullptr), _stub(sp<Stub>::make(std::move(importer)))
 {
 }
 
@@ -146,11 +155,6 @@ sp<DrawingContextComposer> ModelBundle::makeRenderCommandComposer(const Shader& 
 const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(const int32_t type) const
 {
     return _stub->ensureModelLayout(type);
-}
-
-const sp<MaterialBundle>& ModelBundle::materialBundle() const
-{
-    return _stub->_material_bundle;
 }
 
 sp<Model> ModelBundle::getModel(const NamedHash& type) const
@@ -176,16 +180,19 @@ void ModelBundle::importModel(const NamedHash& type, const Manifest& manifest, s
     applicationContext.executorThreadPool()->execute(std::move(task));
 }
 
-void ModelBundle::importMaterials(String manifest)
+void ModelBundle::importMaterials(String manifest) const
 {
     importMaterials(Manifest(std::move(manifest)));
 }
 
-void ModelBundle::importMaterials(const Manifest& manifest)
+void ModelBundle::importMaterials(const Manifest& manifest) const
 {
-    const sp<Model> model = _stub->importModel(manifest, nullptr);
-    for(const sp<Material>& i : model->materials())
-        _stub->_material_bundle->addMaterial(i->name(), i);
+    _stub->importModel(manifest, nullptr);
+}
+
+void ModelBundle::updateMaterials() const
+{
+    _stub->updateMaterials();
 }
 
 const Table<int32_t, ModelBundle::ModelLayout>& ModelBundle::modelLayouts() const
@@ -203,15 +210,34 @@ size_t ModelBundle::indexLength() const
     return _stub->_index_length;
 }
 
+const Vector<sp<Material>>& ModelBundle::materials() const
+{
+    return _stub->_material_bundle->materials();
+}
+
+const Map<String, sp<Bitmap>>& ModelBundle::images() const
+{
+    return _stub->_material_bundle->images();
+}
+
+const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& ModelBundle::textures() const
+{
+    return _stub->_material_bundle->textures();
+}
+
+sp<Material> ModelBundle::getMaterial(const String& name) const
+{
+    return _stub->_material_bundle->getMaterial(name);
+}
+
 ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _bean_factory(factory), _manifest(manifest), _material_bundle(factory.getBuilder<MaterialBundle>(manifest, "material-bundle")),
-      _importer(factory.ensureBuilder<ModelLoader::Importer>(manifest, "importer"))
+    : _bean_factory(factory), _manifest(manifest), _importer(factory.ensureBuilder<ModelImporter>(manifest, "importer"))
 {
 }
 
 sp<ModelBundle> ModelBundle::BUILDER::build(const Scope& args)
 {
-    sp<ModelBundle> modelBundle = sp<ModelBundle>::make(_importer->build(args), _material_bundle.build(args));
+    sp<ModelBundle> modelBundle = sp<ModelBundle>::make(_importer->build(args));
     modelBundle->import(_bean_factory, _manifest, args);
     return modelBundle;
 }

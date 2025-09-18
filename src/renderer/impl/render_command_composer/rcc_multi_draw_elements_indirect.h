@@ -18,9 +18,9 @@ namespace ark {
 
 class ARK_API RCCMultiDrawElementsIndirect final : public DrawingContextComposer {
 public:
-    RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels);
+    RCCMultiDrawElementsIndirect(sp<ModelBundle> modelBundle);
 
-    sp<PipelineBindings> makePipelineBindings(const Shader& shader, RenderController& renderController, enums::DrawMode renderMode) override;
+    sp<PipelineBindings> makePipelineBindings(const Shader& shader, RenderController& renderController, enums::DrawMode drawMode) override;
     DrawingContext compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot) override;
 
 private:

@@ -2,10 +2,11 @@
 
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_descriptor.h"
+#include "renderer/base/texture.h"
 
 namespace ark {
 
-ModelLoader::ModelLoader(enums::DrawMode renderMode, sp<Texture> texture, ModelTrait trait)
+ModelLoader::ModelLoader(const enums::DrawMode renderMode, sp<Texture> texture, const ModelTrait trait)
     : _render_mode(renderMode), _texture(std::move(texture)), _trait(trait) {
 }
 

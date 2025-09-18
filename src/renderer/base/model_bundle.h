@@ -6,6 +6,8 @@
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/base/material_texture.h"
+
 #include "renderer/base/model.h"
 #include "renderer/inf/model_loader.h"
 
@@ -31,7 +33,7 @@ public:
     struct Stub;
 
 public:
-    ModelBundle(sp<Importer> importer, sp<MaterialBundle> materialBundle = nullptr);
+    ModelBundle(sp<ModelImporter> importer);
     ModelBundle(const sp<Stub>& stub);
 
     void import(BeanFactory& factory, const document& manifest, const Scope& args);
@@ -41,9 +43,6 @@ public:
 
     const ModelLayout& ensureModelLayout(int32_t type) const;
 
-//  [[script::bindings::property]]
-    const sp<MaterialBundle>& materialBundle() const;
-
 //  [[script::bindings::auto]]
     sp<Model> getModel(const NamedHash& type) const;
 
@@ -52,15 +51,27 @@ public:
 //  [[script::bindings::auto]]
     void importModel(const NamedHash& type, const Manifest& manifest, sp<Future> future = nullptr);
 
-//  [[script::bindings::auto]]
-    void importMaterials(String manifest);
-//  [[script::bindings::auto]]
-    void importMaterials(const Manifest& manifest);
-
 //  [[script::bindings::property]]
     size_t vertexLength() const;
 //  [[script::bindings::property]]
     size_t indexLength() const;
+
+//  [[script::bindings::auto]]
+    void importMaterials(String manifest) const;
+//  [[script::bindings::auto]]
+    void importMaterials(const Manifest& manifest) const;
+//  [[script::bindings::auto]]
+    void updateMaterials() const;
+
+//  [[script::bindings::property]]
+    const Vector<sp<Material>>& materials() const;
+//  [[script::bindings::property]]
+    const Map<String, sp<Bitmap>>& images() const;
+//  [[script::bindings::property]]
+    const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& textures() const;
+
+//  [[script::bindings::auto]]
+    sp<Material> getMaterial(const String& name) const;
 
     const Table<int32_t, ModelLayout>& modelLayouts() const;
 
@@ -74,9 +85,7 @@ public:
     private:
         BeanFactory _bean_factory;
         document _manifest;
-
-        SafeBuilder<MaterialBundle> _material_bundle;
-        sp<Builder<Importer>> _importer;
+        sp<Builder<ModelImporter>> _importer;
     };
 
 //  [[plugin::builder("model-bundle")]]

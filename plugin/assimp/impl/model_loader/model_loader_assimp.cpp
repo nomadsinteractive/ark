@@ -122,21 +122,20 @@ void ModelImporterAssimp::loadSceneTexture(const ResourceLoaderContext& resource
     _textures.push_back(resourceLoaderContext.renderController()->createTexture2d(std::move(bitmap)));
 }
 
-Vector<sp<Material>> ModelImporterAssimp::loadMaterials(const aiScene* scene, MaterialBundle& materialBundle) const
+Vector<sp<Material>> ModelImporterAssimp::loadMaterials(const aiScene* scene, MaterialBundle::Initializer& materialInitializer) const
 {
     Vector<sp<Material>> materials(scene->mNumMaterials);
 
     for(uint32_t i = 0; i < scene->mNumMaterials; ++i)
     {
         const aiMaterial* am = scene->mMaterials[i];
-        String mName = am->GetName().C_Str();
-        sp<Material>& material = materials[i];
-        if(!(material = materialBundle.getMaterial(mName)))
+        auto [material, newlyCreated] = materialInitializer.ensureMaterial(am->GetName().C_Str());
+        if(!newlyCreated)
         {
             aiColor4D ac;
-            material = sp<Material>::make(i, std::move(mName));
             if(aiGetMaterialColor(am, AI_MATKEY_COLOR_DIFFUSE, &ac) == aiReturn_SUCCESS)
                 material->baseColor()->setColor(sp<Vec4>::make<Vec4::Const>(V4(ac.r, ac.g, ac.b, ac.a)));
+            materials[i] = std::move(material);
         }
     }
 
@@ -201,10 +200,10 @@ void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& 
     }
 }
 
-Model ModelImporterAssimp::import(const Manifest& manifest, MaterialBundle& materialBundle)
+Model ModelImporterAssimp::import(const Manifest& manifest, MaterialBundle::Initializer& materialInitializer)
 {
     Assimp::Importer importer;
-    return loadModel(loadScene(importer, manifest.src()), materialBundle, manifest);
+    return loadModel(loadScene(importer, manifest.src()), materialInitializer, manifest);
 }
 
 const aiScene* ModelImporterAssimp::loadScene(Assimp::Importer& importer, const String& src, bool checkMeshes) const
@@ -221,7 +220,7 @@ const aiScene* ModelImporterAssimp::loadScene(Assimp::Importer& importer, const 
     return scene;
 }
 
-Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, uint32_t meshId, element_index_t vertexBase, NodeTable& boneMapping, const Vector<sp<Material>>& materials) const
+Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle::Initializer& materialInitializer, uint32_t meshId, element_index_t vertexBase, NodeTable& boneMapping, const Vector<sp<Material>>& materials) const
 {
     Vector<element_index_t> indices = loadIndices(mesh, vertexBase);
     Vector<V3> vertices(mesh->mNumVertices);
@@ -261,17 +260,17 @@ NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
     return nodes;
 }
 
-Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& materialBundle, const Manifest& manifest) const
+Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle::Initializer& materialInitializer, const Manifest& manifest) const
 {
     NodeTable bones;
     Vector<sp<Mesh>> meshes;
     element_index_t vertexBase = 0;
-    Vector<sp<Material>> materials = loadMaterials(scene, materialBundle);
+    Vector<sp<Material>> materials = loadMaterials(scene, materialInitializer);
 
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
         const aiMesh* mesh = scene->mMeshes[i];
-        sp<Mesh> m = sp<Mesh>::make(loadMesh(scene, mesh, materialBundle, i, vertexBase, bones, materials));
+        sp<Mesh> m = sp<Mesh>::make(loadMesh(scene, mesh, materialInitializer, i, vertexBase, bones, materials));
         meshes.push_back(std::move(m));
         vertexBase += static_cast<element_index_t>(meshes.back()->vertexCount());
     }
@@ -330,9 +329,9 @@ void ModelImporterAssimp::loadBones(const aiMesh* mesh, NodeTable& boneMapping, 
     }
 }
 
-sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER::build(const Scope& /*args*/)
+sp<ModelImporter> ModelImporterAssimp::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<ModelImporterAssimp>::make();
+    return sp<ModelImporter>::make<ModelImporterAssimp>();
 }
 
 sp<Node> ModelImporterAssimp::loadNodeHierarchy(WeakPtr<Node> parentNode, const aiNode* node, const Vector<sp<Mesh>>& meshes) const

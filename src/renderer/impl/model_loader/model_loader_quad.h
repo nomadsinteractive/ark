@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/inf/model_loader.h"

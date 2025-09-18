@@ -1701,27 +1701,7 @@ class Model:
         pass
 
 
-class MaterialBundle:
-    def __init__(self, materials: list[Material] = None):
-        pass
-
-    @property
-    def materials(self) -> list[Material]:
-        pass
-
-    @property
-    def textures(self) -> list[Texture]:
-        pass
-
-    def update(self):
-        pass
-
-
 class ModelBundle:
-
-    @property
-    def material_bundle(self) -> MaterialBundle:
-        pass
 
     @property
     def index_length(self) -> int:
@@ -1731,10 +1711,25 @@ class ModelBundle:
     def vertex_length(self) -> int:
         return 0
 
+    @property
+    def materials(self) -> list[Material]:
+        pass
+
+    @property
+    def images(self) -> dict[str, Bitmap]:
+        pass
+
+    @property
+    def textures(self) -> list[Texture]:
+        pass
+
     def get_model(self, t: TYPE_NAMED_HASH) -> Model:
         pass
 
     def import_materials(self, manifest: str | Manifest):
+        pass
+
+    def update_materials(self):
         pass
 
     def import_model(self, t: TYPE_NAMED_HASH, manifest: str | Manifest, future: Optional[Future] = None):

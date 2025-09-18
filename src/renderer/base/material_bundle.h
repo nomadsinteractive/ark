@@ -9,6 +9,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/material.h"
 #include "graphics/base/material_texture.h"
 #include "graphics/base/rect.h"
 
@@ -23,43 +24,42 @@ public:
     struct Initializer {
         Table<String, sp<Material>> _materials;
         Map<String, sp<Bitmap>> _images;
+        std::mutex _mutex;
+
+        std::pair<sp<Material>, bool> ensureMaterial(String materialName) {
+            const auto synchronized = _materials.threadSynchronize(_mutex);
+            if(const auto iter = _materials.find(materialName); iter != _materials.end())
+                return {iter->second, false};
+
+            sp<Material> material = sp<Material>::make(_materials.size(), materialName);
+            _materials.push_back(std::move(materialName), material);
+            return {material, true};
+        }
     };
 
-//  [[script::bindings::auto]]
     MaterialBundle(const Vector<sp<Material>>& materials = {});
-    MaterialBundle(Initializer initializer);
+    MaterialBundle(Table<String, sp<Material>> materials, Map<String, sp<Bitmap>> images);
 
-//  [[script::bindings::property]]
     const Vector<sp<Material>>& materials() const;
-//  [[script::bindings::property]]
     const Map<String, sp<Bitmap>>& images() const;
-    Map<String, sp<Bitmap>>& images();
 
-//  [[script::bindings::property]]
     const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& textures() const;
 
-//  [[script::bindings::auto]]
     sp<Material> getMaterial(const String& name) const;
-
-    void addMaterial(String name, sp<Material> material);
-
-//  [[script::bindings::auto]]
-    void update();
-
     Rect getMaterialUV(const String& name) const;
 
 private:
     struct Stub;
     class VariableMaterialUV;
 
+    void initialize();
+
 private:
-    Table<String, sp<Material>> _materials;
+    ImmutableTable<String, sp<Material>> _materials;
     Map<String, sp<Bitmap>> _images;
 
     std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> _textures;
     sp<Stub> _stub;
-
-    mutable std::mutex _mutex;
 };
 
 }

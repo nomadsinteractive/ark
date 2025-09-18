@@ -5,24 +5,23 @@
 #include "core/inf/builder.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/buffer.h"
-#include "renderer/base/model_bundle.h"
-#include "renderer/inf/model_loader.h"
+#include "renderer/base/material_bundle.h"
+#include "renderer/inf/model_importer.h"
 
 
 namespace ark::plugin::gltf {
 
-class ModelImporterGltf final : public ModelLoader::Importer {
+class ModelImporterGltf final : public ModelImporter {
 public:
 
-    Model import(const Manifest& manifest, MaterialBundle& materialBundle) override;
+    Model import(const Manifest& manifest, MaterialBundle::Initializer& materialInitializer) override;
 
 //  [[plugin::builder::by-value("gltf")]]
-    class BUILDER final : public Builder<ModelLoader::Importer> {
+    class BUILDER final : public Builder<ModelImporter> {
     public:
         BUILDER() = default;
 
-        sp<ModelLoader::Importer> build(const Scope& args) override;
+        sp<ModelImporter> build(const Scope& args) override;
     };
 
 private:

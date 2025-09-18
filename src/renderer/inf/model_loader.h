@@ -1,11 +1,11 @@
 #pragma once
 
+#include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/enum.h"
-#include "core/forwarding.h"
+#include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/atlas.h"
 
 namespace ark {
 
@@ -34,14 +34,6 @@ public:
     virtual sp<Model> loadModel(int32_t resid) = 0;
     [[nodiscard]]
     virtual sp<DrawingContextComposer> makeRenderCommandComposer(const Shader& shader) = 0;
-
-    class ARK_API Importer {
-    public:
-        virtual ~Importer() = default;
-
-        [[nodiscard]]
-        virtual Model import(const Manifest& manifest, MaterialBundle& materialBundle) = 0;
-    };
 
 private:
     enums::DrawMode _render_mode;

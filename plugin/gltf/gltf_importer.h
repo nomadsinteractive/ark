@@ -6,6 +6,7 @@
 #include "graphics/base/material.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/material_bundle.h"
 
 namespace tinygltf {
 
@@ -18,13 +19,14 @@ namespace ark::plugin::gltf {
 
 class GltfImporter {
 public:
-	GltfImporter(const String& src, MaterialBundle& materialBundle);
+	GltfImporter(const String& src, MaterialBundle::Initializer& materialInitializer);
 	~GltfImporter();
 
-	sp<Node> loadNode(WeakPtr<Node> parentNode, int32_t nodeId);
-	void loadPrimitives();
-
 	Model loadModel();
+
+private:
+	void loadPrimitives();
+	sp<Node> loadNode(WeakPtr<Node> parentNode, int32_t nodeId);
 
 private:
 	op<tinygltf::Model> _model;

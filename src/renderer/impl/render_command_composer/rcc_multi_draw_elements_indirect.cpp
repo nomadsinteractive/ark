@@ -91,16 +91,16 @@ V3 toScale(const V3& displaySize, const Boundaries& metrics)
 
 }
 
-RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels)
-    : _model_bundle(std::move(multiModels))
+RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(sp<ModelBundle> modelBundle)
+    : _model_bundle(std::move(modelBundle))
 {
 }
 
-sp<PipelineBindings> RCCMultiDrawElementsIndirect::makePipelineBindings(const Shader& shader, RenderController& renderController, enums::DrawMode renderMode)
+sp<PipelineBindings> RCCMultiDrawElementsIndirect::makePipelineBindings(const Shader& shader, RenderController& renderController, const enums::DrawMode drawMode)
 {
-    _indices = renderController.makeIndexBuffer({}, sp<IndicesUploader>::make(_model_bundle));
+    _indices = renderController.makeIndexBuffer({}, sp<Uploader>::make<IndicesUploader>(_model_bundle));
     _draw_indirect = renderController.makeBuffer({Buffer::USAGE_BIT_DRAW_INDIRECT, Buffer::USAGE_BIT_DYNAMIC}, nullptr);
-    return shader.makeBindings(renderController.makeVertexBuffer({}, sp<Uploader>::make<VerticesUploader>(_model_bundle, shader.layout())), renderMode, enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT);
+    return shader.makeBindings(renderController.makeVertexBuffer({}, sp<Uploader>::make<VerticesUploader>(_model_bundle, shader.layout())), drawMode, enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT);
 }
 
 DrawingContext RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)

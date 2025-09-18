@@ -19,7 +19,6 @@ struct MaterialBundle::Stub {
     int32_t _texture_height = 0;
 };
 
-
 class MaterialBundle::VariableMaterialUV final : public Variable<Rect> {
 public:
     VariableMaterialUV(const sp<Stub>& stub, const RectI uv)
@@ -82,12 +81,13 @@ sp<TexturePacker> makeTexturePackerForImages(const Vector<std::pair<sp<Material>
 MaterialBundle::MaterialBundle(const Vector<sp<Material>>& materials)
     : _materials(toMaterialMap(materials)), _stub(sp<Stub>::make())
 {
-    update();
+    initialize();
 }
 
-MaterialBundle::MaterialBundle(Initializer initializer)
-    : _materials(std::move(initializer._materials)), _images(std::move(initializer._images)), _stub(sp<Stub>::make())
+MaterialBundle::MaterialBundle(Table<String, sp<Material>> materials, Map<String, sp<Bitmap>> images)
+    : _materials(std::move(materials)), _images(std::move(images)), _stub(sp<Stub>::make())
 {
+    initialize();
 }
 
 const Vector<sp<Material>>& MaterialBundle::materials() const
@@ -100,11 +100,6 @@ const Map<String, sp<Bitmap>>& MaterialBundle::images() const
     return _images;
 }
 
-Map<String, sp<Bitmap>>& MaterialBundle::images()
-{
-    return _images;
-}
-
 const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& MaterialBundle::textures() const
 {
     return _textures;
@@ -112,27 +107,11 @@ const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& MaterialBundle::tex
 
 sp<Material> MaterialBundle::getMaterial(const String& name) const
 {
-    const auto synchronized = _materials.threadSynchronize(_mutex);
     const auto iter = _materials.find(name);
     return iter != _materials.end() ? iter->second : nullptr;
 }
 
-void MaterialBundle::addMaterial(String name, sp<Material> material)
-{
-    const auto synchronized = _materials.threadSynchronize(_mutex);
-    if(const auto iter = _materials.find(name); iter == _materials.end())
-    {
-        material->setId(_materials.size());
-        _materials.push_back(std::move(name), std::move(material));
-    }
-    else
-    {
-        material->setId(iter->second->id());
-        iter->second = std::move(material);
-    }
-}
-
-void MaterialBundle::update()
+void MaterialBundle::initialize()
 {
     sp<TexturePacker> texturePackers[MaterialTexture::TYPE_LENGTH];
     for(size_t i = 0; i < MaterialTexture::TYPE_LENGTH; ++i)
