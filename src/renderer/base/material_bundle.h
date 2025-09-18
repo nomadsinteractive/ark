@@ -33,7 +33,7 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Material> getMaterial(const String& name) const;
-//  [[script::bindings::auto]]
+
     void addMaterial(String name, sp<Material> material);
 
 //  [[script::bindings::auto]]

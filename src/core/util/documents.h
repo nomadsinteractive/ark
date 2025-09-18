@@ -18,9 +18,6 @@ public:
     static void saveToFile(const document& doc, const String& file_path);
     static document loadFromReadable(const sp<Readable>& readable);
 
-    static document fromProperties(const String& str);
-    static document fromProperties(const std::map<String, String>& properties);
-
     static void print(const document& doc, StringBuffer& sb, const String& indent = "\t", uint16_t indent_count = 0);
     static String toString(const document& doc, const String& indent = "\t", uint16_t indent_count = 0);
 

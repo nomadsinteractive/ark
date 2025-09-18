@@ -5,8 +5,8 @@
 
 namespace ark {
 
-DOMDocument::DOMDocument(const String& name, const String& value, const ElementType type)
-    : DOMElement(name, value, type)
+DOMDocument::DOMDocument(const String& name, const String& value, Table<String, attribute> attributes)
+    : DOMElement(name, value, std::move(attributes))
 {
 }
 

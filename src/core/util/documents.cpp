@@ -14,30 +14,23 @@ namespace ark {
 
 namespace {
 
-void _tinyattribute2attribute(DOMDocument& element, const XMLElement* tinyelement)
+sp<DOMDocument> toDOMDocument(const XMLElement* tinyelement)
 {
-    const char* text = tinyelement->GetText();
-    if(text)
-        element.setValue(text);
+    Table<String, attribute> attributes;
+    for(const XMLAttribute* tinyattr = tinyelement->FirstAttribute(); tinyattr; tinyattr = tinyattr->Next())
+        attributes.push_back(tinyattr->Name(), attribute::make(tinyattr->Name(), tinyattr->Value()));
 
-    for(const XMLAttribute* tinyattr = tinyelement->FirstAttribute();
-             tinyattr;
-             tinyattr = tinyattr->Next())
-    {
-        attribute attr = attribute::make(tinyattr->Name(), tinyattr->Value());
-        element.addAttribute(attr);
-    }
+    document element = document::make(tinyelement->Name(), "", std::move(attributes));
+    if(const char* text = tinyelement->GetText())
+        element->setValue(text);
+    return element;
 }
 
 document _tinyelement2document(const XMLElement* tinyelement)
 {
-    const document element = document::make(tinyelement->Name());
+    document element = toDOMDocument(tinyelement);
 
-    _tinyattribute2attribute(element, tinyelement);
-
-    for(const XMLElement* tinynode = tinyelement->FirstChildElement();
-             tinynode;
-             tinynode = tinynode->NextSiblingElement())
+    for(const XMLElement* tinynode = tinyelement->FirstChildElement(); tinynode; tinynode = tinynode->NextSiblingElement())
     {
         document node = _tinyelement2document(tinynode);
         element->addChild(node);
@@ -47,32 +40,22 @@ document _tinyelement2document(const XMLElement* tinyelement)
 
 document _tinyelement2documentfull(const XMLElement* tinyelement)
 {
-    const document element = document::make(tinyelement->Name());
+    document element = toDOMDocument(tinyelement);
 
-    _tinyattribute2attribute(element, tinyelement);
-
-    for(const XMLNode* tinynode = tinyelement->FirstChild();
-             tinynode;
-             tinynode = tinynode->NextSibling())
+    for(const XMLNode* tinynode = tinyelement->FirstChild(); tinynode; tinynode = tinynode->NextSibling())
     {
-        const XMLElement* tinyelement = tinynode->ToElement();
-        if(tinyelement)
+        if(const XMLElement* tinyelement = tinynode->ToElement())
         {
             element->addChild(_tinyelement2documentfull(tinyelement));
             continue;
         }
-        const XMLText* tinytext = tinynode->ToText();
-        if(tinytext)
+        if(const XMLText* tinytext = tinynode->ToText())
         {
-            element->addChild(sp<DOMDocument>::make("#text", tinytext->Value(), DOMDocument::ELEMENT_TYPE_TEXT));
+            element->addChild(sp<DOMDocument>::make("#text", tinytext->Value()));
             continue;
         }
-        const XMLComment* tinycomment = tinynode->ToComment();
-        if(tinycomment)
-        {
-            element->addChild(sp<DOMDocument>::make("#comment", tinycomment->Value(), DOMDocument::ELEMENT_TYPE_COMMENT));
-            continue;
-        }
+        if(const XMLComment* tinycomment = tinynode->ToComment())
+            element->addChild(sp<DOMDocument>::make("#comment", tinycomment->Value()));
     }
     return element;
 }
@@ -112,20 +95,6 @@ void Documents::saveToFile(const document& doc, const String& file_path)
 document Documents::loadFromReadable(const sp<Readable>& readable)
 {
     return parse(Strings::loadFromReadable(readable));
-}
-
-document Documents::fromProperties(const String& str)
-{
-    std::map<String, String> properties = Strings::parseProperties(str);
-    return fromProperties(properties);
-}
-
-document Documents::fromProperties(const std::map<String, String>& properties)
-{
-    document doc = document::make("root");
-    for(auto entry : properties)
-        doc->addAttribute(attribute::make(entry.first, entry.second));
-    return doc;
 }
 
 void Documents::print(const document& doc, StringBuffer& sb, const String& indent, uint16_t indent_count)

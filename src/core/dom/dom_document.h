@@ -9,8 +9,7 @@ namespace ark {
 //[[script::bindings::extends(DOMElement)]]
 class ARK_API DOMDocument : public DOMElement, public Implements<DOMDocument, DOMElement, DOMAttribute> {
 public:
-//  [[script::bindings::auto]]
-    DOMDocument(const String& name, const String& value = "", DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);
+    DOMDocument(const String& name, const String& value = "", Table<String, attribute> attributes = {});
 
 //  [[script::bindings::auto]]
     document getChild(const String& name) const;
