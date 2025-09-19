@@ -41,7 +41,7 @@ DrawingContext RCCDrawElementsInstanced::compose(const RenderRequest& renderRequ
     }
 
     const PipelineLayout::VertexDescriptor& attributeOffsets = buf.pipelineBindings()->pipelineDescriptor()->vertexDescriptor();
-    const size_t attributeStride = attributeOffsets._stride;
+    const size_t attributeStride = attributeOffsets._strides[1];
     const bool hasModelMatrix = attributeOffsets._offsets[Attribute::USAGE_MODEL_MATRIX] != -1;
 
     VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, snapshot._elements.size(), 0, 1);

@@ -95,9 +95,10 @@ sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(enums::CoordinateSystem
 
 sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
-    CHECK(!configure._color_attachments.empty(), "Framebuffer object should have at least one color attachment");
-    int32_t width = configure._color_attachments.at(0)->width();
-    int32_t height = configure._color_attachments.at(0)->height();
+    CHECK(!configure._color_attachments.empty() || configure._depth_stencil_attachment, "Framebuffer object should have at least one attachment");
+    const sp<Texture>& attachment = configure._color_attachments.empty() ? configure._depth_stencil_attachment : configure._color_attachments.at(0);
+    int32_t width = attachment->width();
+    int32_t height = attachment->height();
     uint32_t drawBufferCount = static_cast<uint32_t>(configure._color_attachments.size());
     sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(Ark::instance().renderController()->recycler(), std::move(configure));
     sp<Renderer> fboRenderer = sp<Renderer>::make<GLFramebufferRenderer>(fbo, width, height, renderer, drawBufferCount, toClearMaskBits(configure));

@@ -24,7 +24,7 @@ public:
         void initialize(const PipelineLayout& pipelineLayout);
 
         int32_t _offsets[Attribute::USAGE_COUNT];
-        uint32_t _stride;
+        uint32_t _strides[2];
     };
 
     class ARK_API StreamLayout {

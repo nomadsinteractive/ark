@@ -13,18 +13,36 @@ namespace ark {
 
 namespace {
 
-uint32_t getAttributeEndOffset(const PipelineLayout::VertexDescriptor& attrOffsets, const Attribute::Usage usage)
+uint32_t getAttributeSize(const Attribute::Usage usage)
 {
     switch(usage)
     {
-        case Attribute::USAGE_MODEL_MATRIX:
-            return attrOffsets._offsets[usage] + sizeof(M4);
         case Attribute::USAGE_NODE_ID:
         case Attribute::USAGE_MATERIAL_ID:
-            return attrOffsets._offsets[usage] + sizeof(int32_t);
+        case Attribute::USAGE_TEX_COORD:
+            return sizeof(int32_t);
+        case Attribute::USAGE_POSITION:
+            return sizeof(V3);
+        case Attribute::USAGE_COLOR:
+        case Attribute::USAGE_NORMAL:
+        case Attribute::USAGE_TANGENT:
+        case Attribute::USAGE_BITANGENT:
+        case Attribute::USAGE_BONE_IDS:
+            return sizeof(V4);
+        case Attribute::USAGE_BONE_WEIGHTS:
+        case Attribute::USAGE_MODEL_MATRIX:
+            return sizeof(M4);
         default:
-            return std::max(0, attrOffsets._offsets[usage]);
+            return 0;
     }
+}
+
+uint32_t getAttributeEndOffset(const PipelineLayout::VertexDescriptor& attrOffsets, const Attribute::Usage usage)
+{
+    if(attrOffsets._offsets[usage] < 0)
+        return 0;
+
+    return attrOffsets._offsets[usage] + getAttributeSize(usage);
 }
 
 const PipelineLayout::StreamLayout& findStreamLayout(const Vector<std::pair<uint32_t, PipelineLayout::StreamLayout>>& streamLayouts, const uint32_t divisor)
@@ -48,7 +66,7 @@ PipelineLayout::StreamLayout& ensureStreamLayout(Vector<std::pair<uint32_t, Pipe
 }
 
 PipelineLayout::VertexDescriptor::VertexDescriptor()
-    : _stride(0)
+    : _strides{}
 {
     std::fill_n(_offsets, Attribute::USAGE_COUNT, -1);
 }
@@ -77,8 +95,11 @@ void PipelineLayout::VertexDescriptor::initialize(const PipelineLayout& pipeline
         _offsets[Attribute::USAGE_MATERIAL_ID] = stream1.getAttributeOffset("MaterialId");
     }
 
-    for(int32_t i = Attribute::USAGE_MODEL_MATRIX; i < Attribute::USAGE_COUNT; ++i)
-        _stride = std::max(getAttributeEndOffset(*this, static_cast<Attribute::Usage>(i)), _stride);
+    for(int32_t i = Attribute::USAGE_POSITION; i <= Attribute::USAGE_BONE_WEIGHTS; ++i)
+        _strides[0] = std::max(getAttributeEndOffset(*this, static_cast<Attribute::Usage>(i)), _strides[0]);
+
+    for(int32_t i = Attribute::USAGE_MODEL_MATRIX; i <= Attribute::USAGE_MATERIAL_ID; ++i)
+        _strides[1] = std::max(getAttributeEndOffset(*this, static_cast<Attribute::Usage>(i)), _strides[1]);
 }
 
 PipelineLayout::PipelineLayout()

@@ -156,10 +156,10 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     }
 
     size_t instanceId = 0;
-    const PipelineLayout::VertexDescriptor& attributeOffsets = buf.pipelineBindings()->pipelineDescriptor()->vertexDescriptor();
-    const size_t attributeStride = attributeOffsets._stride;
-    const bool hasModelMatrix = attributeOffsets._offsets[Attribute::USAGE_MODEL_MATRIX] != -1;
-    const bool hasMaterialId = attributeOffsets._offsets[Attribute::USAGE_MATERIAL_ID] != -1;
+    const PipelineLayout::VertexDescriptor& vertexDescriptor = buf.pipelineBindings()->pipelineDescriptor()->vertexDescriptor();
+    const size_t attributeStride = vertexDescriptor._strides[1];
+    const bool hasModelMatrix = vertexDescriptor._offsets[Attribute::USAGE_MODEL_MATRIX] != -1;
+    const bool hasMaterialId = vertexDescriptor._offsets[Attribute::USAGE_MATERIAL_ID] != -1;
     for(const IndirectCmds& i : _indirect_cmds.values())
         for(const auto& [nodeInstance, mesh] : i._mesh_instances)
         {

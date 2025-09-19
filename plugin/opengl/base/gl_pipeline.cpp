@@ -677,7 +677,8 @@ private:
 class Stage {
 public:
     Stage(sp<Recycler> recycler, const uint32_t version, const GLenum type, const String& source)
-        : _recycler(std::move(recycler)), _id(compileShader(version, type, source)) {
+        : _recycler(std::move(recycler)), _id(compileShader(version, type, source))
+    {
     }
     ~Stage()
     {
@@ -723,15 +724,16 @@ String getInformationLog(const GLuint id)
 
 sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source)
 {
-    typedef HashMap<GLenum, Map<String, WeakPtr<Stage>>> ShaderPool;
+    typedef Map<GLenum, Map<HashId, WeakPtr<Stage>>> ShaderPool;
 
-    const sp<ShaderPool>& shaders = graphicsContext.traits().ensure<ShaderPool>();
-    if(const auto iter = (*shaders)[type].find(source); iter != (*shaders)[type].end())
-        if(const sp<Stage> shader = iter->second.lock())
+    const sp<ShaderPool>& shaderPool = graphicsContext.traits().ensure<ShaderPool>();
+    const HashId sourceHash = string_hash(source.c_str());
+    if(const auto iter = (*shaderPool)[type].find(sourceHash); iter != (*shaderPool)[type].end())
+        if(sp<Stage> shader = iter->second.lock())
             return shader;
 
-    const sp<Stage> shader = sp<Stage>::make(graphicsContext.renderController()->recycler(), version, type, source);
-    (*shaders)[type][source] = shader;
+    sp<Stage> shader = sp<Stage>::make(graphicsContext.renderController()->recycler(), version, type, source);
+    (*shaderPool)[type][sourceHash] = shader;
     return shader;
 }
 

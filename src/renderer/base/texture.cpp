@@ -299,7 +299,7 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
     parameters->loadParameters(_manifest, _factory, args);
 
     if(const sp<String> src = _src.build(args))
-       return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
+        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
     if(sp<Bitmap> bitmap = _bitmap.build(args))
         return _resource_loader_context->renderController()->createTexture2d(std::move(bitmap), std::move(parameters), enums::UploadStrategy(_upload_strategy));
