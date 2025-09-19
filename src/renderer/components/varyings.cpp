@@ -239,7 +239,7 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 }
 
 Varyings::BUILDER::UploaderBuilder::UploaderBuilder(BeanFactory& factory, const document& manifest)
-    : _name(Documents::ensureAttribute(manifest, constants::NAME)), _uploader(factory.ensureBuilderByTypeValue<Uploader>(Documents::ensureAttribute(manifest, constants::TYPE),
+    : _name(Documents::ensureAttribute(manifest, constants::NAME)), _uploader(factory.ensureBuilderByTypeValue<sp<Uploader>>(Documents::ensureAttribute(manifest, constants::TYPE),
                                                                                                                                Documents::ensureAttribute(manifest, constants::VALUE)))
 {
 }

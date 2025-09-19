@@ -106,7 +106,7 @@ VKSubmitQueue& VKGraphicsContext::submitQueue()
     return _submit_queue;
 }
 
-VKGraphicsContext::RenderPassPhrase::RenderPassPhrase(const RenderEngineContext::Resolution& resolution, const uint32_t colorAttachmentCount, const VkCommandBuffer commandBuffer)
+VKGraphicsContext::RenderPassPhrase::RenderPassPhrase(const RenderEngineContext::Resolution resolution, const uint32_t colorAttachmentCount, const VkCommandBuffer commandBuffer)
     : _resolution(resolution), _color_attachment_count(colorAttachmentCount), _command_buffer(commandBuffer)
 {
 }

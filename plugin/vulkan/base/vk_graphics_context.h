@@ -27,7 +27,7 @@ public:
 
     class RenderPassPhrase {
     public:
-        RenderPassPhrase(const RenderEngineContext::Resolution& resolution, uint32_t colorAttachmentCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+        RenderPassPhrase(RenderEngineContext::Resolution resolution, uint32_t colorAttachmentCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
         virtual ~RenderPassPhrase() = default;
 
         const RenderEngineContext::Resolution& resolution() const;

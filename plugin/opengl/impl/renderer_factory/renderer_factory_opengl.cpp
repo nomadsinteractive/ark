@@ -14,6 +14,7 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/texture.h"
+#include "renderer/util/render_util.h"
 
 #include "opengl/base/gl_buffer.h"
 #include "opengl/base/gl_cubemap.h"
@@ -95,13 +96,11 @@ sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(enums::CoordinateSystem
 
 sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
-    CHECK(!configure._color_attachments.empty() || configure._depth_stencil_attachment, "Framebuffer object should have at least one attachment");
-    const sp<Texture>& attachment = configure._color_attachments.empty() ? configure._depth_stencil_attachment : configure._color_attachments.at(0);
-    int32_t width = attachment->width();
-    int32_t height = attachment->height();
-    uint32_t drawBufferCount = static_cast<uint32_t>(configure._color_attachments.size());
+    const auto [width, height] = RenderUtil::getRenderTargetResolution(configure);
+    const int32_t clearBitMask = toClearMaskBits(configure);
+    const uint32_t drawBufferCount = static_cast<uint32_t>(configure._color_attachments.size());
     sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(Ark::instance().renderController()->recycler(), std::move(configure));
-    sp<Renderer> fboRenderer = sp<Renderer>::make<GLFramebufferRenderer>(fbo, width, height, renderer, drawBufferCount, toClearMaskBits(configure));
+    sp<Renderer> fboRenderer = sp<Renderer>::make<GLFramebufferRenderer>(fbo, width, height, renderer, drawBufferCount, clearBitMask);
     return sp<RenderTarget>::make(std::move(renderer), std::move(fbo), std::move(fboRenderer));
 }
 

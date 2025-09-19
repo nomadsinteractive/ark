@@ -6,6 +6,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/base/pipeline_layout.h"
+#include "renderer/base/render_target.h"
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/texture.h"
 
@@ -27,6 +28,7 @@ public:
     static uint32_t getChannelSize(Texture::Format format);
     static uint32_t getPixelSize(Texture::Format format);
     static uint32_t getComponentSize(Texture::Format format);
+    static std::pair<int32_t, int32_t> getRenderTargetResolution(const RenderTarget::Configure& configure);
 
     static Vector<uint32_t> compileSPIR(StringView source, enums::ShaderStageBit stage, enums::RenderingBackendBit renderTarget, uint32_t targetLanguageVersion = 0);
 

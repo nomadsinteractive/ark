@@ -6,6 +6,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/texture.h"
+#include "renderer/util/render_util.h"
 
 #include "vulkan/base/vk_command_pool.h"
 #include "vulkan/base/vk_device.h"
@@ -20,11 +21,10 @@ namespace ark::plugin::vulkan {
 
 namespace {
 
-RenderEngineContext::Resolution getFramebufferResolution(const Vector<sp<Texture>>& colorAttachments)
+RenderEngineContext::Resolution getFramebufferResolution(const RenderTarget::Configure& configure)
 {
-    DASSERT(colorAttachments.size() > 0);
-    const sp<Texture>& texture = colorAttachments.at(0);
-    return {static_cast<uint32_t>(texture->width()), static_cast<uint32_t>(texture->height())};
+    const auto [width, height] = RenderUtil::getRenderTargetResolution(configure);
+    return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 }
 
 }
@@ -84,7 +84,7 @@ VkRect2D VKFramebuffer::Stub::getFramebufferScissor() const
 }
 
 VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::Configure configure)
-    : RenderPassPhrase(getFramebufferResolution(configure._color_attachments), configure._color_attachments.size()), _renderer(renderer), _recycler(recycler), _configure(std::move(configure)),
+    : RenderPassPhrase(getFramebufferResolution(configure), configure._color_attachments.size()), _renderer(renderer), _recycler(recycler), _configure(std::move(configure)),
       _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(vks::initializers::rect2D(_resolution.width, _resolution.height, 0, 0)),
       _viewport(vks::initializers::viewport(static_cast<float>(_resolution.width), static_cast<float>(_resolution.height), 0, 1.0f))
 {

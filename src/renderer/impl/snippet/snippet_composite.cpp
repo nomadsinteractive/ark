@@ -48,7 +48,7 @@ sp<Snippet> SnippetComposite::DICTIONARY::build(const Scope& args)
     if(l.size() == 1)
     {
         const Identifier id = Identifier::parse(l.at(0));
-        const sp<Builder<Snippet>> builder = id.isVal() ? _factory.ensureBuilderByTypeValue<Snippet>(id.val(), id.val()) : _factory.ensureBuilder<Snippet>(l.at(0));
+        const sp<Builder<Snippet>> builder = id.isVal() ? _factory.ensureBuilderByTypeValue<sp<Snippet>>(id.val(), id.val()) : _factory.ensureBuilder<Snippet>(l.at(0));
         DCHECK(builder, "Cannot build \"%s\"", id.toString().c_str());
         return builder->build(args);
     }
@@ -88,7 +88,7 @@ sp<Snippet> SnippetComposite::BUILDER::_build(const document& manifest, const Sc
     const String type = Documents::getAttribute(manifest, constants::TYPE);
     const String& value = Documents::ensureAttribute(manifest, constants::VALUE);
     if(type)
-        return _factory.ensureBuilderByTypeValue<Snippet>(type, value)->build(args);
+        return _factory.ensureBuilderByTypeValue<sp<Snippet>>(type, value)->build(args);
     return _factory.ensure<Snippet>(manifest, args);
 }
 

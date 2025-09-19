@@ -356,8 +356,8 @@ public:
         return builder;
     }
 
-    template<typename T> sp<Builder<T>> ensureBuilderByTypeValue(const String& type, const String& value) {
-        sp<Builder<T>> builder = findBuilderByTypeValue<sp<T>>(type, value);
+    template<typename T> sp<IBuilder<T>> ensureBuilderByTypeValue(const String& type, const String& value) {
+        sp<IBuilder<T>> builder = findBuilderByTypeValue<T>(type, value);
         CHECK(builder, "Cannot not build Type(%s) with value \"%s\"", type.c_str(), value.c_str());
         return builder;
     }
