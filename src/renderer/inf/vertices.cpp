@@ -23,7 +23,7 @@ public:
         const PipelineLayout::VertexDescriptor attributes(_shader_layout);
         const uint32_t size = static_cast<uint32_t>(_vertices->length() * stride);
         Vector<uint8_t> buf(size);
-        VertexWriter vertexWriter(attributes, false, buf.data(), size, stride);
+        VertexWriter vertexWriter(attributes, false, size, stride, buf.data());
         _vertices->write(vertexWriter, _bounds);
         writable.write(buf.data(), size, 0);
     }

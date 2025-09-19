@@ -282,7 +282,7 @@ void ShaderPreprocessor::linkPreStage(const ShaderPreprocessor& preStage, Set<St
     linkParameters(_main_block->_args, preStage, passThroughVars);
 }
 
-sp<Uniform> ShaderPreprocessor::makeUniformInput(String name, Uniform::Type type) const
+sp<Uniform> ShaderPreprocessor::makeUniform(String name, Uniform::Type type) const
 {
     if(!_declaration_uniforms.has(name))
         return nullptr;
@@ -688,7 +688,7 @@ void ShaderPreprocessor::Source::insertBefore(const String& statement, const Str
     }
 }
 
-ShaderPreprocessor::Declaration::Declaration(const String& name, const String& type, uint32_t length, sp<String> source)
+ShaderPreprocessor::Declaration::Declaration(const String& name, const String& type, const uint32_t length, sp<String> source)
     : _name(name), _type(type), _length(length), _usage(RenderUtil::toAttributeLayoutType(_name, _type)), _source(std::move(source))
 {
 }

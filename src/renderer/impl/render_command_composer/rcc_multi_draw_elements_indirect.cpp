@@ -39,7 +39,7 @@ public:
             const Model& model = i._model;
             const uint32_t size = static_cast<uint32_t>(model.vertexCount() * stride);
             Vector<uint8_t> buf(size);
-            VertexWriter stream(attributes, false, buf.data(), size, stride);
+            VertexWriter stream(attributes, false, size, stride, buf.data());
             model.writeToStream(stream, V3(1.0f));
             uploader.write(buf.data(), size, offset);
             offset += size;
@@ -181,8 +181,11 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                     }
                     if(hasMaterialId && mesh->material())
                         writer.writeAttribute(mesh->material()->id(), Attribute::USAGE_MATERIAL_ID);
-                    if(ByteArray::Borrowed divided = snapshot._varyings_snapshot.getDivided(1)._content; divided.length() > attributeStride)
+                    if(ByteArray::Borrowed divided = snapshot._varyings_snapshot.getDivided(1)._content; divided.length() > attributeStride && writer.stride() > attributeStride)
+                    {
+                        CHECK(writer.stride() == divided.length(), "RenderObject has more custom attributes to fit in shader's vertex descriptors");
                         writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);
+                    }
                 }
             ++ instanceId;
         }

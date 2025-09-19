@@ -266,13 +266,13 @@ Varyings::Snapshot::operator bool() const
     return _buffers.buf() != nullptr;
 }
 
-Varyings::Divided Varyings::Snapshot::getDivided(uint32_t divisor) const
+Varyings::Divided Varyings::Snapshot::getDivided(const uint32_t divisor) const
 {
     for(size_t i = 0; i < _buffers.length(); ++i)
         if(_buffers.at(i)._divisor == divisor)
             return _buffers.at(i);
 
-    return Varyings::Divided();
+    return {};
 }
 
 void Varyings::Snapshot::snapshotSubProperties(const Map<String, sp<Varyings>>& subProperties, const PipelineLayout& pipelineInput, Allocator& allocator)

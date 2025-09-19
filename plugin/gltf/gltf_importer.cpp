@@ -300,6 +300,7 @@ Vector<sp<Material>> loadMaterials(const tinygltf::Model& gltfModel, MaterialBun
 			{
 				const tinygltf::Texture& texture = gltfModel.textures.at(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index);
 				const tinygltf::Image& image = gltfModel.images.at(texture.source);
+				const std::lock_guard<std::mutex> lg(materialInitializer._mutex);
 				const auto iter = materialInitializer._images.find(image.name);
 				sp<Bitmap> bitmap = iter != materialInitializer._images.end() ? iter->second : nullptr;
 				if(!bitmap)

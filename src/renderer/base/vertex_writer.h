@@ -13,23 +13,15 @@ namespace ark {
 
 class ARK_API VertexWriter {
 public:
-    class Delegate {
-    public:
-        ~Delegate() = default;
-
-        virtual void write(const void* buffer, uint32_t size, uint32_t offset) = 0;
-        virtual void nextVertex() = 0;
-    };
-
-public:
-    VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, sp<Delegate> writer);
-    VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
+    VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, uint32_t size, uint32_t stride, sp<Writable> writer);
+    VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, uint32_t size, uint32_t stride, uint8_t* ptr);
 
     template<typename T> void writeAttribute(const T& value, const Attribute::Usage usage) {
         if(_attribute_offsets._offsets[usage] >= 0)
-            _delegate->write(&value, sizeof(T), _attribute_offsets._offsets[usage]);
+            write(&value, sizeof(T), _attribute_offsets._offsets[usage]);
     }
 
+    uint32_t stride() const;
     bool hasAttribute(int32_t name) const;
 
     void writePosition(V3 position);
@@ -50,8 +42,11 @@ private:
     void writeArray(ByteArray& array);
 
 private:
+    class WriterImpl;
+
     PipelineLayout::VertexDescriptor _attribute_offsets;
-    sp<Delegate> _delegate;
+    sp<WriterImpl> _delegate;
+    uint32_t _stride;
 
     bool _do_transform;
     bool _visible;

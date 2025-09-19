@@ -1,51 +1,57 @@
 #include "renderer/base/vertex_writer.h"
 
+#include "core/impl/writable/writable_memory.h"
+
 #include "graphics/base/v4.h"
 
 #include "renderer/base/model.h"
 
 namespace ark {
 
-namespace {
-
-class WriterMemory final : public VertexWriter::Delegate {
+class VertexWriter::WriterImpl final {
 public:
-    WriterMemory(uint8_t* ptr, const uint32_t size, const uint32_t stride)
-        : _ptr(nullptr), _begin(ptr), _end(_begin + size), _stride(stride)
+    WriterImpl(sp<Writable> delegate, const uint32_t size, const uint32_t stride)
+        : _delegate(std::move(delegate)), _offset(0), _size(size), _stride(stride), _initialized(false)
     {
     }
 
-    void nextVertex() override
+    void nextVertex()
     {
-        _ptr = _ptr ? _ptr + _stride : _begin;
-        DCHECK(_ptr <= _end - _stride, "Writer buffer out of bounds");
+        if(_initialized)
+            _offset += _stride;
+        else
+            _initialized = true;
+        DCHECK(_offset <= _size - _stride, "Writer buffer out of bounds");
     }
 
-    void write(const void* ptr, const uint32_t size, const uint32_t offset) override
+    void write(const void* ptr, const uint32_t size, const uint32_t offset) const
     {
-        DCHECK(_ptr, "Writer is uninitialized, call nextVertex() first");
+        DCHECK(_initialized, "Writer is uninitialized, call nextVertex() first");
         DCHECK(size + offset <= _stride, "Stride overflow: sizeof(value) = %d, offset = %d", size, offset);
-        memcpy(_ptr + offset, ptr, size);
+        _delegate->write(ptr, size, _offset + offset);
     }
 
 private:
-    uint8_t* _ptr;
-    uint8_t* _begin;
-    uint8_t* _end;
-
+    sp<Writable> _delegate;
+    uint32_t _offset;
+    uint32_t _size;
     uint32_t _stride;
+    bool _initialized;
 };
 
-}
-
-VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, const bool doTransform, uint8_t* ptr, size_t size, size_t stride)
-    : VertexWriter(attributes, doTransform, sp<Delegate>::make<WriterMemory>(ptr, size, stride))
+VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, const bool doTransform, const uint32_t size, const uint32_t stride, uint8_t* ptr)
+    : VertexWriter(attributes, doTransform, size, stride, sp<Writable>::make<WritableMemory>(ptr))
 {
 }
 
-VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, const bool doTransform, sp<VertexWriter::Delegate> writer)
-    : _attribute_offsets(attributes), _delegate(std::move(writer)), _do_transform(doTransform), _visible(true), _transform_snapshot(nullptr)
+VertexWriter::VertexWriter(const PipelineLayout::VertexDescriptor& attributes, const bool doTransform, const uint32_t size, const uint32_t stride, sp<Writable> writer)
+    : _attribute_offsets(attributes), _delegate(sp<WriterImpl>::make(std::move(writer), size, stride)), _stride(stride), _do_transform(doTransform), _visible(true), _transform_snapshot(nullptr)
 {
+}
+
+uint32_t VertexWriter::stride() const
+{
+    return _stride;
 }
 
 bool VertexWriter::hasAttribute(const int32_t name) const

@@ -18,22 +18,21 @@ DrawingBuffer::DrawingBuffer(sp<PipelineBindings> pipelineBindings, const uint32
 {
 }
 
-VertexWriter DrawingBuffer::makeVertexWriter(const RenderRequest& renderRequest, size_t length, size_t offset)
+VertexWriter DrawingBuffer::makeVertexWriter(const RenderRequest& renderRequest, const size_t length, const size_t offset)
 {
     const size_t size = length * _vertices._stride;
     ByteArray::Borrowed content = renderRequest.allocator().sbrkSpan(size);
     _vertices.addStrip(offset * _vertices._stride, content);
-    return VertexWriter(_pipeline_descriptor->vertexDescriptor(), !_is_instanced, content.buf(), size, _vertices._stride);
+    return VertexWriter(_pipeline_descriptor->vertexDescriptor(), !_is_instanced, size, _vertices._stride, content.buf());
 }
 
-VertexWriter DrawingBuffer::makeDividedVertexWriter(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor)
+VertexWriter DrawingBuffer::makeDividedVertexWriter(const RenderRequest& renderRequest, const size_t length, const size_t offset, const uint32_t divisor)
 {
     Buffer::SnapshotFactory& builder = getDividedBufferBuilder(divisor);
-
     const size_t size = length * builder._stride;
     ByteArray::Borrowed content = renderRequest.allocator().sbrkSpan(size);
     builder.addStrip(offset * builder._stride, content);
-    return VertexWriter(_pipeline_descriptor->vertexDescriptor(), !_is_instanced, content.buf(), size, builder._stride);
+    return VertexWriter(_pipeline_descriptor->vertexDescriptor(), !_is_instanced, size, builder._stride, content.buf());
 }
 
 const sp<PipelineBindings>& DrawingBuffer::pipelineBindings() const

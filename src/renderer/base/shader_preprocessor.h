@@ -157,7 +157,7 @@ public:
 
     Stage preprocess() const;
 
-    sp<Uniform> makeUniformInput(String name, Uniform::Type type) const;
+    sp<Uniform> makeUniform(String name, Uniform::Type type) const;
 
     bool hasUBO(const PipelineLayout::UBO& ubo) const;
     void declareUBOStruct(const PipelineLayout& pipelineLayout, int32_t spaceSet = -1);

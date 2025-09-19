@@ -9,7 +9,7 @@
 
 namespace ark::plugin::python {
 
-class PyListDuckType : public Duck<std::vector<Box>>, public Duck<Vec2>, public Duck<Vec3>, public Duck<Vec4>, public Duck<Size>, Implements<PyListDuckType, Duck<Vector<Box>>, Duck<Vec2>, Duck<Vec3>, Duck<Vec4>, Duck<Size>> {
+class PyListDuckType : public Duck<Vector<Box>>, public Duck<Vec2>, public Duck<Vec3>, public Duck<Vec4>, public Duck<Size>, Implements<PyListDuckType, Duck<Vector<Box>>, Duck<Vec2>, Duck<Vec3>, Duck<Vec4>, Duck<Size>> {
 public:
     PyListDuckType(PyInstance instance);
 

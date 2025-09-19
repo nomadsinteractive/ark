@@ -58,6 +58,17 @@ String toDeclaredType(const Uniform::Type type)
     return "";
 }
 
+Optional<Uniform::Type> toUniformType(const String& declaredType, const String& vecPrefix, const Uniform::Type baseType)
+{
+    if(declaredType.startsWith(vecPrefix) && declaredType.length() == vecPrefix.length() + 1)
+    {
+        const int32_t vs = declaredType.at(vecPrefix.length()) - '1';
+        CHECK(vs >= 0 && vs < 4, "Unknow type %s", declaredType.c_str());
+        return static_cast<Uniform::Type>(baseType + vs);
+    }
+    return {};
+}
+
 }
 
 Uniform::Uniform(String name, String declaredType, const Type type, const uint32_t componentSize, const uint32_t length, sp<Uploader> uploader)
@@ -98,28 +109,17 @@ size_t Uniform::size() const
     return s;
 }
 
-static Optional<Uniform::Type> vecToUniformType(const String& declaredType, const String& vecPrefix, const Uniform::Type baseType)
-{
-    if(declaredType.startsWith(vecPrefix) && declaredType.length() == vecPrefix.length() + 1)
-    {
-        const int32_t vs = declaredType.at(vecPrefix.length()) - '1';
-        CHECK(vs >= 0 && vs < 4, "Unknow type %s", declaredType.c_str());
-        return static_cast<Uniform::Type>(baseType + vs);
-    }
-    return {};
-}
-
 Uniform::Type Uniform::toType(const String& declaredType)
 {
     if(declaredType == "float")
         return TYPE_F1;
     if(declaredType == "int" || declaredType == "uint")
         return TYPE_I1;
-    if(const Optional<Type> typeOpt = vecToUniformType(declaredType, "vec", TYPE_F1))
+    if(const Optional<Type> typeOpt = toUniformType(declaredType, "vec", TYPE_F1))
         return typeOpt.value();
-    if(const Optional<Type> typeOpt = vecToUniformType(declaredType, "ivec", TYPE_I1))
+    if(const Optional<Type> typeOpt = toUniformType(declaredType, "ivec", TYPE_I1))
         return typeOpt.value();
-    if(const Optional<Type> typeOpt = vecToUniformType(declaredType, "uvec", TYPE_I1))
+    if(const Optional<Type> typeOpt = toUniformType(declaredType, "uvec", TYPE_I1))
         return typeOpt.value();
     if(declaredType == "mat4")
         return TYPE_MAT4;
@@ -193,7 +193,7 @@ void Uniform::setUploader(sp<Uploader> uploader)
 
 String Uniform::declaration(const String& descriptor) const
 {
-    const String t = declaredType();
+    const String& t = declaredType();
     if(_length == 1)
         return Strings::sprintf("%s%s %s;", descriptor.c_str(), t.c_str(), _name.c_str());
     return Strings::sprintf("%s%s %s[%d];", descriptor.c_str(), t.c_str(), _name.c_str(), _length);
