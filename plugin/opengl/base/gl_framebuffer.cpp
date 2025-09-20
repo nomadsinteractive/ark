@@ -73,6 +73,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + (idx++));
     }
 
+    GLenum depthStencilAttachment = GL_NONE;
     if(_configure._depth_stencil_attachment)
     {
         const uint32_t usage = _configure._depth_stencil_attachment->parameters()->_usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
@@ -103,17 +104,11 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         }
         else
             LOGE("Unknow depth-stencil texture usage: %d", usage);
-        attachments.push_back(_configure._depth_stencil_attachment->id(), glAttachments[usage]);
+        depthStencilAttachment = glAttachments[usage];
     }
 
     GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, _id));
     GL_CHECK_ERROR(glDrawBuffers(static_cast<uint32_t>(drawBuffers.size()), drawBuffers.data()));
-    if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
-        for(const auto [k, v] : attachments)
-        {
-            GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, v, GL_TEXTURE_2D, static_cast<GLuint>(k), 0));
-            LOGD("glFramebufferTexture2D, attachment: %d, id: %d", v, k);
-        }
 
     if(depthTexture)
     {
@@ -127,7 +122,17 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
             if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
                 GL_CHECK_ERROR(glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id())));
         }
+
+        if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
+            GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, depthStencilAttachment, GL_TEXTURE_2D, static_cast<GLuint>(depthTexture->id()), 0));
     }
+
+    if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
+        for(const auto [k, v] : attachments)
+        {
+            GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, v, GL_TEXTURE_2D, static_cast<GLuint>(k), 0));
+            LOGD("glFramebufferTexture2D, attachment: %d, id: %d", v, k);
+        }
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         GLDebug::glCheckError("FrameBuffer");
