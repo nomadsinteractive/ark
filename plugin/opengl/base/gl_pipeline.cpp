@@ -117,12 +117,13 @@ struct GLPipeline::Stub {
 
         uint32_t binding = 0;
         const Vector<String>& samplerNames = pipelineBindings.pipelineLayout()->samplers().keys();
-        const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers = pipelineBindings.samplers();
+        const auto& samplers = pipelineBindings.samplers();
         DASSERT(samplerNames.size() == samplers.size());
         for(size_t i = 0; i < samplerNames.size(); ++i)
         {
             const String& name = samplerNames.at(i);
-            const sp<Texture>& texture = samplers.at(i).first;
+            const sp<Texture>& texture = samplers.at(i)._texture;
+            DASSERT(name == samplers.at(i)._name);
             CHECK_WARN(texture, "Pipeline has unbound sampler \"%s\"", name.c_str());
             if(texture)
                 activeTexture(texture, name, binding);

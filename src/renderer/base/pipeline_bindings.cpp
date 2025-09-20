@@ -73,7 +73,7 @@ struct PipelineBindings::Stub {
     sp<Traits> _attachments;
 
     Vector<std::pair<uint32_t, Buffer>> _instance_buffers;
-    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _samplers;
+    Vector<PipelineDescriptor::BindedTexture> _samplers;
     Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _images;
 };
 
@@ -122,7 +122,7 @@ const Vector<std::pair<uint32_t, Buffer>>& PipelineBindings::instanceBuffers() c
     return _stub->_instance_buffers;
 }
 
-const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineBindings::samplers() const
+const Vector<PipelineDescriptor::BindedTexture>& PipelineBindings::samplers() const
 {
     return _stub->_samplers;
 }
@@ -137,8 +137,8 @@ void PipelineBindings::bindSampler(sp<Texture> texture, const uint32_t name) con
     CHECK_WARN(_stub->_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _stub->_samplers.size());
     if(_stub->_samplers.size() > name)
     {
-        CHECK_WARN(!_stub->_samplers[name].first, "Overriding existing sampler binding: %d", name);
-        _stub->_samplers[name].first = std::move(texture);
+        CHECK_WARN(!_stub->_samplers[name]._texture, "Overriding existing sampler binding: %d", name);
+        _stub->_samplers[name]._texture = std::move(texture);
     }
 }
 

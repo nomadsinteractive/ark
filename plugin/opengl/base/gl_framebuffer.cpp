@@ -109,7 +109,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
     GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, _id));
     GL_CHECK_ERROR(glDrawBuffers(static_cast<uint32_t>(drawBuffers.size()), drawBuffers.data()));
     if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
-        for(const auto& [k, v] : attachments)
+        for(const auto [k, v] : attachments)
         {
             GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, v, GL_TEXTURE_2D, static_cast<GLuint>(k), 0));
             LOGD("glFramebufferTexture2D, attachment: %d, id: %d", v, k);

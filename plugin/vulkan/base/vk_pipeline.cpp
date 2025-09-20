@@ -457,7 +457,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
         }
     }
 
-    for(const auto& [i, bindingSet] : _pipeline_bindings.samplers())
+    for(const auto& [name, i, bindingSet] : _pipeline_bindings.samplers())
         if(shouldStageNeedBinding(bindingSet._stages))
         {
             CHECK_WARN(i, "Pipeline has unbound sampler");
@@ -465,12 +465,15 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
             {
                 const sp<VKTexture> texture = i->delegate();
                 _rebind_signals.push_back(texture->observer().addBooleanSignal());
-                if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
+                if(texture->vkDescriptor().imageView)
+                {
+                    CHECK(texture->vkDescriptor().sampler, "Binding sampler \"%s\" with a texture which declared without usage \"sampler\"", name.c_str());
                     writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                                   _descriptor_sets.at(2),
                                                   VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                                   bindingSet._binding._location,
                                                   &texture->vkDescriptor()));
+                }
             }
         }
 
@@ -639,7 +642,7 @@ bool VKPipeline::shouldStageNeedBinding(const enums::ShaderStageSet stages) cons
 bool VKPipeline::shouldRebind(const uint64_t tick) const
 {
     bool rebindNeeded = false;
-    for(const auto& [i, bindingSet] : _pipeline_bindings.samplers())
+    for(const auto& [name, i, bindingSet] : _pipeline_bindings.samplers())
         if(i->update(tick))
             rebindNeeded = true;
     for(const auto& [i, bindingSet] : _pipeline_bindings.images())

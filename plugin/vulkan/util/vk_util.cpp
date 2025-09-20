@@ -30,6 +30,26 @@ bool isDepthFormatSupported(VkPhysicalDevice physicalDevice, VkFormat format)
     return formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
 }
 
+
+VkFormat toVkChannelFormat(const VkFormat* channelFormat, const uint32_t depths, const Texture::Format format)
+{
+    if(depths == 1)
+    {
+        CHECK(!(format & Texture::FORMAT_FLOAT), "Component size one doesn't support float format");
+        return channelFormat[0];
+    }
+    if(depths == 2)
+    {
+        if(format & Texture::FORMAT_FLOAT)
+            return channelFormat[4];
+        return format & Texture::FORMAT_SIGNED ? channelFormat[3] : channelFormat[2];
+    }
+    DCHECK(depths == 4, "Unsupported color-depth: %d", depths * 8);
+    if(format & Texture::FORMAT_FLOAT)
+        return channelFormat[5];
+    return format & Texture::FORMAT_SIGNED ? channelFormat[7] : channelFormat[6];
+}
+
 }
 
 void VKUtil::checkResult(const VkResult result)
@@ -101,7 +121,7 @@ VkImageLayout VKUtil::toAttachmentImageLayout(const Texture::Usage usage)
     return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 }
 
-VkFormat VKUtil::toAttributeFormat(Attribute::Type type, uint32_t length)
+VkFormat VKUtil::toAttributeFormat(const Attribute::Type type, const uint32_t length)
 {
     if(length > 0 && length < 5)
     {
@@ -144,25 +164,6 @@ VkFormat VKUtil::toAttributeFormat(Attribute::Type type, uint32_t length)
     }
     DFATAL("Unsupport type %d, length %d", type, length);
     return VK_FORMAT_R32G32B32A32_SFLOAT;
-}
-
-static VkFormat toVkChannelFormat(const VkFormat* channelFormat, const uint32_t depths, const Texture::Format format)
-{
-    if(depths == 1)
-    {
-        CHECK(!(format & Texture::FORMAT_FLOAT), "Component size one doesn't support float format");
-        return channelFormat[0];
-    }
-    if(depths == 2)
-    {
-        if(format & Texture::FORMAT_FLOAT)
-            return channelFormat[4];
-        return format & Texture::FORMAT_SIGNED ? channelFormat[3] : channelFormat[2];
-    }
-    DCHECK(depths == 4, "Unsupported color-depth: %d", depths * 8);
-    if(format & Texture::FORMAT_FLOAT)
-        return channelFormat[5];
-    return format & Texture::FORMAT_SIGNED ? channelFormat[7] : channelFormat[6];
 }
 
 VkFormat VKUtil::toTextureFormat(const uint32_t depths, const uint8_t channels, const Texture::Format format)

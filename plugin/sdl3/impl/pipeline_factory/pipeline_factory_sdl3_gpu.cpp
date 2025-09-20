@@ -393,7 +393,7 @@ public:
         SDL_GPUTextureSamplerBinding textureSamplerBinding[8];
         Uint32 samplerCount = 0;
         ASSERT(pipelineBindings.samplers().size() < 8);
-        for(const auto& [k, v] : pipelineBindings.samplers())
+        for(const auto& [_, k, v] : pipelineBindings.samplers())
         {
             TextureSDL3_GPU& texture = k->delegate().cast<TextureSDL3_GPU>();
             if(!texture.texture())

@@ -206,17 +206,18 @@ Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPre
     return shaders;
 }
 
-Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> PipelineDescriptor::makeBindingSamplers() const
+Vector<PipelineDescriptor::BindedTexture> PipelineDescriptor::makeBindingSamplers() const
 {
     const PipelineLayout& pipelineLayout = _layout;
     CHECK_WARN(pipelineLayout._samplers.size() >= _predefined_samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", _predefined_samplers.size(), pipelineLayout._samplers.size());
 
-    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> samplers;
+    Vector<BindedTexture> samplers;
     for(size_t i = 0; i < pipelineLayout._samplers.size(); ++i)
     {
         const String& name = pipelineLayout._samplers.keys().at(i);
         const auto iter = _predefined_samplers.find(name);
-        samplers.emplace_back(iter != _predefined_samplers.end() ? iter->second : (i < _predefined_samplers.size() ? _predefined_samplers.values().at(i) : nullptr), pipelineLayout._samplers.values().at(i));
+        sp<Texture> texture = iter != _predefined_samplers.end() ? iter->second : (i < _predefined_samplers.size() ? _predefined_samplers.values().at(i) : nullptr);
+        samplers.emplace_back(name, std::move(texture), pipelineLayout._samplers.values().at(i));
     }
     return samplers;
 }

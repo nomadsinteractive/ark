@@ -41,7 +41,7 @@ void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, 
     }
 }
 
-VkImageUsageFlags toTextureUsage(Texture::Usage usage)
+VkImageUsageFlags toTextureUsage(const Texture::Usage usage)
 {
     VkImageUsageFlags vkFlags = usage == Texture::USAGE_AUTO ? VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT : 0;
     if(usage.has(Texture::USAGE_COLOR_ATTACHMENT))
@@ -86,7 +86,7 @@ void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
     else
     {
         const Texture::Format format = _parameters->_format;
-        const std::vector<sp<ByteArray>> imagedata(_num_faces);
+        const Vector<sp<ByteArray>> imagedata(_num_faces);
         if(format == Texture::FORMAT_AUTO)
             uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * 4, 4, false), imagedata);
         else
@@ -117,7 +117,40 @@ bool VKTexture::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
     return false;
 }
 
-void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& images)
+void VKTexture::doCreateSamplerDescriptor(const VkDevice logicalDevice)
+{
+    // Create a texture sampler
+    // In Vulkan textures are accessed by samplers
+    // This separates all the sampling information from the texture data. This means you could have multiple sampler objects for the same texture with different settings
+    // Note: Similar to the samplers available with OpenGL 3.3
+    VkSamplerCreateInfo sampler = vks::initializers::samplerCreateInfo();
+    sampler.magFilter = _parameters->_mag_filter == Texture::FILTER_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
+    sampler.minFilter = _parameters->_min_filter == Texture::FILTER_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
+    sampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    sampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler.mipLodBias = 0.0f;
+    sampler.compareOp = VK_COMPARE_OP_NEVER;
+    sampler.minLod = 0.0f;
+    // Set max level-of-detail to mip level count of the texture
+    sampler.maxLod = static_cast<float>(_mip_levels);
+    // Enable anisotropic filtering
+    // This feature is optional, so we must check if it's supported on the device
+    if (_renderer->device()->features().samplerAnisotropy) {
+        // Use max. level of anisotropy for this example
+        sampler.maxAnisotropy = _renderer->device()->properties().limits.maxSamplerAnisotropy;
+        sampler.anisotropyEnable = VK_TRUE;
+    } else {
+        // The device does not support anisotropic filtering
+        sampler.maxAnisotropy = 1.0;
+        sampler.anisotropyEnable = VK_FALSE;
+    }
+    sampler.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+    VKUtil::checkResult(vkCreateSampler(logicalDevice, &sampler, nullptr, &_descriptor.sampler));
+}
+
+void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& bitmap, const Vector<sp<ByteArray>>& images)
 {
     DASSERT(images.size() == _num_faces);
     const bytearray& imagedata = images.at(0);
@@ -136,7 +169,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         const VkFormat fbDepthFormat = VKUtil::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), _parameters->_format, _parameters->_usage);
         VkImageCreateInfo image = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
         image.format = fbDepthFormat;
-        image.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        image.usage = toTextureUsage(_parameters->_usage);
         image.imageType = VK_IMAGE_TYPE_2D;
         image.extent = {_width, _height , 1};
         image.mipLevels = 1;
@@ -157,6 +190,10 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         depthStencilView.subresourceRange.layerCount = _num_faces;
         depthStencilView.image = _image;
         VKUtil::checkResult(vkCreateImageView(logicalDevice, &depthStencilView, nullptr, &_descriptor.imageView));
+
+        if(_parameters->_usage.has(Texture::USAGE_SAMPLER))
+            doCreateSamplerDescriptor(logicalDevice);
+
         return;
     }
 
@@ -198,35 +235,8 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         doUploadBitmap(bitmap, imageDataSize, images);
     }
 
-    // Create a texture sampler
-    // In Vulkan textures are accessed by samplers
-    // This separates all the sampling information from the texture data. This means you could have multiple sampler objects for the same texture with different settings
-    // Note: Similar to the samplers available with OpenGL 3.3
-    VkSamplerCreateInfo sampler = vks::initializers::samplerCreateInfo();
-    sampler.magFilter = _parameters->_mag_filter == Texture::FILTER_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
-    sampler.minFilter = _parameters->_min_filter == Texture::FILTER_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
-    sampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    sampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler.mipLodBias = 0.0f;
-    sampler.compareOp = VK_COMPARE_OP_NEVER;
-    sampler.minLod = 0.0f;
-    // Set max level-of-detail to mip level count of the texture
-    sampler.maxLod = static_cast<float>(_mip_levels);
-    // Enable anisotropic filtering
-    // This feature is optional, so we must check if it's supported on the device
-    if (_renderer->device()->features().samplerAnisotropy) {
-        // Use max. level of anisotropy for this example
-        sampler.maxAnisotropy = _renderer->device()->properties().limits.maxSamplerAnisotropy;
-        sampler.anisotropyEnable = VK_TRUE;
-    } else {
-        // The device does not support anisotropic filtering
-        sampler.maxAnisotropy = 1.0;
-        sampler.anisotropyEnable = VK_FALSE;
-    }
-    sampler.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-    VKUtil::checkResult(vkCreateSampler(logicalDevice, &sampler, nullptr, &_descriptor.sampler));
+    if(_parameters->_usage == Texture::USAGE_AUTO || _parameters->_usage.has(Texture::USAGE_SAMPLER))
+        doCreateSamplerDescriptor(logicalDevice);
 
     // Create image view
     // Textures are not directly accessed by the shaders and
@@ -260,7 +270,7 @@ Observer& VKTexture::observer()
     return _observer;
 }
 
-void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata)
+void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const Vector<bytearray>& imagedata) const
 {
     VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
     VkMemoryRequirements memReqs = {};
@@ -304,7 +314,7 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
 
     // Setup buffer copy regions for each mip level
     uint32_t offset = 0;
-    std::vector<VkBufferImageCopy> bufferCopyRegions;
+    Vector<VkBufferImageCopy> bufferCopyRegions;
     for(size_t i = 0; i < imagedata.size(); ++i)
     {
         for(uint32_t j = 0; j < _mip_levels; j++)

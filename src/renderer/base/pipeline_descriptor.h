@@ -5,14 +5,12 @@
 #include "core/base/enum.h"
 #include "core/collection/table.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/optional.h"
 
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/shader_preprocessor.h"
-#include "renderer/inf/model_loader.h"
 
 namespace ark {
 
@@ -147,6 +145,12 @@ public:
         };
     };
 
+    struct BindedTexture {
+        String _name;
+        sp<Texture> _texture;
+        PipelineLayout::DescriptorSet _descriptor_set;
+    };
+
 public:
     PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, Configuration configuration);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineDescriptor);
@@ -164,7 +168,7 @@ public:
 
     const PipelineLayout::VertexDescriptor& vertexDescriptor() const;
 
-    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> makeBindingSamplers() const;
+    Vector<BindedTexture> makeBindingSamplers() const;
     Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> makeBindingImages() const;
 
     void preCompile(GraphicsContext& graphicsContext);

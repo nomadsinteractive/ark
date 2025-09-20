@@ -9,6 +9,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/inf/snippet.h"
 
@@ -32,7 +33,7 @@ public:
     const sp<Traits>& attachments() const;
 
     const Vector<std::pair<uint32_t, Buffer>>& instanceBuffers() const;
-    const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers() const;
+    const Vector<PipelineDescriptor::BindedTexture>& samplers() const;
     const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images() const;
 
     const sp<Pipeline>& ensurePipeline(GraphicsContext& graphicsContext);

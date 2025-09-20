@@ -25,15 +25,18 @@ public:
 
     void clear(GraphicsContext& graphicsContext) override;
     bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
-    void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& images) override;
+
+    void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const Vector<sp<ByteArray>>& images) override;
 
     const VkDescriptorImageInfo& vkDescriptor() const;
     Observer& observer();
 
 protected:
-    void doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata);
+    void doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const Vector<bytearray>& imagedata) const;
 
 private:
+    void doCreateSamplerDescriptor(VkDevice logicalDevice);
+
     ResourceRecycleFunc doRecycle();
 
 private:
