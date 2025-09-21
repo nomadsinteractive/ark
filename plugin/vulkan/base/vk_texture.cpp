@@ -191,6 +191,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         depthStencilView.image = _image;
         VKUtil::checkResult(vkCreateImageView(logicalDevice, &depthStencilView, nullptr, &_descriptor.imageView));
 
+        _descriptor.imageLayout = VKUtil::toImageLayout(_parameters->_usage);
         if(_parameters->_usage.has(Texture::USAGE_SAMPLER))
             doCreateSamplerDescriptor(logicalDevice);
 
