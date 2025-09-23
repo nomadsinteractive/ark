@@ -14,12 +14,10 @@
 
 namespace ark {
 
-sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
+sp<AssetBundle> Platform::getAssetBundle(const String& path)
 {
     if(isDirectory(path))
-        return sp<AssetBundle>::make<AssetBundleWithFallback>(sp<AssetBundle>::make<AssetBundleDirectory>(appPath), sp<AssetBundle>::make<AssetBundleDirectory>(path));
-    if(isDirectory(appPath))
-        return sp<AssetBundle>::make<AssetBundleDirectory>(appPath);
+        return sp<AssetBundle>::make<AssetBundleDirectory>(path);
     return nullptr;
 }
 
@@ -68,28 +66,6 @@ String Platform::getRealPath(const String& path)
 Vector<enums::RendererVersion> Platform::getRendererVersionPreferences()
 {
     return {enums::RENDERER_VERSION_OPENGL_46, enums::RENDERER_VERSION_VULKAN_12};
-}
-
-sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
-{
-/*
- * Lucida Sans Unicode
- * l_10646.ttf
-*/
-//    LOGFONT font = {0};
-//    HWND hwnd = GetDesktopWindow();
-//    HDC hdc = GetWindowDC(hwnd);
-//    font.lfCharSet = DEFAULT_CHARSET;
-//    EnumFontFamiliesEx(hdc, &font, _enumerate_font_callback, 0, 0);
-    const String fontsDirectory = getDefaultFontDirectory();
-    if(isFile(fontsDirectory + "\\ArialUni.ttf"))
-        return sp<AlphabetTrueType>::make("ArialUni.ttf");
-    if(isFile(fontsDirectory + "\\simfang.ttf"))
-        return sp<AlphabetTrueType>::make("simfang.ttf");
-    if(isFile(fontsDirectory + "\\Arial.ttf"))
-        return sp<AlphabetTrueType>::make("Arial.ttf");
-
-    return sp<AlphabetTrueType>::make("l_10646.ttf");
 }
 
 String Platform::glShaderVersionDeclaration(uint32_t versionCode)

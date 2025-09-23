@@ -75,16 +75,18 @@ private:
 class FrustumMatrixVariable final : public Mat4 {
 public:
     FrustumMatrixVariable(sp<Camera::Delegate> delegate, sp<Camera::Stub> cameraStub)
-        : _delegate(std::move(delegate)), _camera_stub(std::move(cameraStub)),
-          _matrix(_delegate->lookAt(_camera_stub->_position.val(), _camera_stub->_target.val(), _camera_stub->_up.val())) {
+        : _delegate(std::move(delegate)), _camera_stub(std::move(cameraStub)), _matrix(_delegate->lookAt(_camera_stub->_position.val(), _camera_stub->_target.val(), _camera_stub->_up.val()))
+    {
     }
 
-    M4 val() override {
+    M4 val() override
+    {
         return _matrix;
     }
 
     bool update(const uint64_t timestamp) override {
-        if(UpdatableUtil::update(timestamp, _camera_stub->_position, _camera_stub->_target, _camera_stub->_up)) {
+        if(UpdatableUtil::update(timestamp, _camera_stub->_position, _camera_stub->_target, _camera_stub->_up))
+        {
             _matrix = _delegate->lookAt(_camera_stub->_position.val(), _camera_stub->_target.val(), _camera_stub->_up.val());
             return true;
         }
@@ -299,17 +301,17 @@ M4 Camera::DelegateRH_ZO::lookAt(const V3& position, const V3& target, const V3&
     return {lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z()))};
 }
 
-M4 Camera::DelegateRH_ZO::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
+M4 Camera::DelegateRH_ZO::ortho(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
 {
     return {glm::orthoRH_ZO(left, right, bottom, top, clipNear, clipFar)};
 }
 
-M4 Camera::DelegateRH_ZO::perspective(float fov, float aspect, float clipNear, float clipFar)
+M4 Camera::DelegateRH_ZO::perspective(const float fov, const float aspect, const float clipNear, const float clipFar)
 {
     return {glm::perspectiveRH_ZO(fov, aspect, clipNear, clipFar)};
 }
 
-M4 Camera::DelegateLH_NO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
+M4 Camera::DelegateLH_NO::frustum(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
 {
     return {glm::frustumLH_NO(left, right, bottom, top, clipNear, clipFar)};
 }
@@ -319,17 +321,17 @@ M4 Camera::DelegateLH_NO::lookAt(const V3& position, const V3& target, const V3&
     return {glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z()))};
 }
 
-M4 Camera::DelegateLH_NO::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
+M4 Camera::DelegateLH_NO::ortho(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
 {
     return {glm::orthoLH_NO(left, right, bottom, top, clipNear, clipFar)};
 }
 
-M4 Camera::DelegateLH_NO::perspective(float fov, float aspect, float clipNear, float clipFar)
+M4 Camera::DelegateLH_NO::perspective(const float fov, const float aspect, const float clipNear, const float clipFar)
 {
     return {glm::perspectiveLH_NO(fov, aspect, clipNear, clipFar)};
 }
 
-M4 Camera::DelegateRH_NO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
+M4 Camera::DelegateRH_NO::frustum(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
 {
     return {glm::frustumRH_NO(left, right, bottom, top, clipNear, clipFar)};
 }
@@ -339,12 +341,12 @@ M4 Camera::DelegateRH_NO::lookAt(const V3& position, const V3& target, const V3&
     return {glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z()))};
 }
 
-M4 Camera::DelegateRH_NO::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
+M4 Camera::DelegateRH_NO::ortho(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
 {
     return {glm::orthoRH_NO(left, right, bottom, top, clipNear, clipFar)};
 }
 
-M4 Camera::DelegateRH_NO::perspective(float fov, float aspect, float clipNear, float clipFar)
+M4 Camera::DelegateRH_NO::perspective(const float fov, const float aspect, const float clipNear, const float clipFar)
 {
     return {glm::perspectiveRH_NO(fov, aspect, clipNear, clipFar)};
 }

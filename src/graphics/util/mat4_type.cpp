@@ -52,6 +52,12 @@ struct MatrixOperators {
         }
     };
 
+    struct Transpose {
+        M4 operator()(const M4& matrix) const {
+            return matrix.transpose();
+        }
+    };
+
 };
 
 }

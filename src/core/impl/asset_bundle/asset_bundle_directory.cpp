@@ -17,9 +17,9 @@ AssetBundleDirectory::AssetBundleDirectory(String directory)
 
 sp<Asset> AssetBundleDirectory::getAsset(const String& name)
 {
-    const String filepath = Platform::isAbsolutePath(name) ? name : Strings::sprintf("%s/%s", _directory.c_str(), name.c_str());
+    const String filepath = Platform::isAbsolutePath(name) ? name : Platform::pathJoin(_directory, name);
     if(Platform::isFile(filepath))
-        return sp<AssetFile>::make(filepath);
+        return sp<Asset>::make<AssetFile>(filepath);
     return nullptr;
 }
 

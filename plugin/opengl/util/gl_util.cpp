@@ -155,12 +155,12 @@ GLenum GLUtil::getEnum(const document& manifest, const String& name, GLenum defV
     return getEnum(Documents::getAttribute(manifest, name), defValue);
 }
 
-GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format format, const Bitmap& bitmap)
+GLenum GLUtil::getTextureInternalFormat(const Texture::Usage usage, const Texture::Format format, const Bitmap& bitmap)
 {
     return getTextureInternalFormat(usage, format, bitmap.channels(), bitmap.rowBytes() / bitmap.width() / bitmap.channels());
 }
 
-GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format format, uint32_t channelSize, uint32_t componentSize)
+GLenum GLUtil::getTextureInternalFormat(const Texture::Usage usage, const Texture::Format format, const uint32_t channelSize, const uint32_t componentSize)
 {
     struct GLComponentFormat {
         GLenum bit8;
@@ -197,7 +197,7 @@ GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format fo
     {
     case Texture::USAGE_AUTO: {
         const bool isSigned = format & Texture::FORMAT_SIGNED;
-        uint32_t cs = channelSize - 1;
+        const uint32_t cs = channelSize - 1;
 
         CHECK(componentSize == 1 || componentSize == 2 || componentSize == 4, "Illegal color component size %d", componentSize);
         if(format & Texture::FORMAT_AUTO)
@@ -231,6 +231,15 @@ GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format fo
         return nFormats[cs].bit16;
     }
     case Texture::USAGE_DEPTH_ATTACHMENT:
+        if(format & Texture::FORMAT_FLOAT)
+        {
+            CHECK(componentSize == 4, "Component size must be 4 for float depth format", componentSize);
+            return GL_DEPTH_COMPONENT32F;
+        }
+        if(componentSize == 4)
+            return GL_DEPTH_COMPONENT32;
+        if(componentSize == 2)
+            return GL_DEPTH_COMPONENT16;
         return GL_DEPTH_COMPONENT;
     case Texture::USAGE_STENCIL_ATTACHMENT:
     case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
@@ -240,31 +249,32 @@ GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format fo
     return GL_R8;
 }
 
-GLenum GLUtil::getTextureFormat(Texture::Usage usage, Texture::Format format, uint8_t channels)
+GLenum GLUtil::getTextureFormat(const Texture::Usage usage, const Texture::Format format, const uint8_t channels)
 {
     switch(usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
-    case Texture::USAGE_AUTO: {
-        const bool isInteger = format & Texture::FORMAT_INTEGER;
-        constexpr GLenum fChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
-        constexpr GLenum iChannels[] = {GL_RED_INTEGER, GL_RG_INTEGER, GL_RGB_INTEGER, GL_RGBA_INTEGER};
-        const GLenum* formatByChannels = isInteger ? iChannels : fChannels;
-        DCHECK(channels < 5, "Unknown bitmap format: (channels = %d)", static_cast<uint32_t>(channels));
-        return format == Texture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & Texture::FORMAT_RGBA)];
-    }
-    case Texture::USAGE_DEPTH_ATTACHMENT:
-        return GL_DEPTH_COMPONENT;
-    case Texture::USAGE_STENCIL_ATTACHMENT:
-    case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
-        return GL_DEPTH_STENCIL;
+        case Texture::USAGE_AUTO:
+        {
+            const bool isInteger = format & Texture::FORMAT_INTEGER;
+            constexpr GLenum fChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
+            constexpr GLenum iChannels[] = {GL_RED_INTEGER, GL_RG_INTEGER, GL_RGB_INTEGER, GL_RGBA_INTEGER};
+            const GLenum* formatByChannels = isInteger ? iChannels : fChannels;
+            DCHECK(channels < 5, "Unknown bitmap format: (channels = %d)", static_cast<uint32_t>(channels));
+            return format == Texture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & Texture::FORMAT_RGBA)];
+        }
+        case Texture::USAGE_DEPTH_ATTACHMENT:
+            return GL_DEPTH_COMPONENT;
+        case Texture::USAGE_STENCIL_ATTACHMENT:
+        case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
+            return GL_DEPTH_STENCIL;
     }
     return GL_RGBA;
 }
 
-GLenum GLUtil::getPixelType(int32_t format, const Bitmap& bitmap)
+GLenum GLUtil::getPixelType(const int32_t format, const Bitmap& bitmap)
 {
-    bool flagSigned = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED;
-    uint32_t componentSize = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
+    const bool flagSigned = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED;
+    const uint32_t componentSize = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
     if(componentSize == 1)
         return flagSigned ? GL_BYTE : GL_UNSIGNED_BYTE;
     if(componentSize == 2)

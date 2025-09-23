@@ -23,7 +23,7 @@ class UploaderClear final : public Texture::Uploader {
 public:
     UploaderClear(const Size& size, const Texture::Format format)
         : _bitmap(static_cast<uint32_t>(size.widthAsFloat()), static_cast<uint32_t>(size.heightAsFloat()), static_cast<uint32_t>(size.widthAsFloat()) * RenderUtil::getPixelSize(format),
-                  (format & Texture::FORMAT_RGBA) + 1, true) {
+                  (format & Texture::FORMAT_RGBA) + 1, false) {
     }
 
     void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {

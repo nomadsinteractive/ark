@@ -30,7 +30,6 @@ bool isDepthFormatSupported(VkPhysicalDevice physicalDevice, VkFormat format)
     return formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
 }
 
-
 VkFormat toVkChannelFormat(const VkFormat* channelFormat, const uint32_t depths, const Texture::Format format)
 {
     if(depths == 1)

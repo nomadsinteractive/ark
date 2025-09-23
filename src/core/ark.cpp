@@ -184,8 +184,8 @@ sp<RenderEngine> createRenderEngine(BeanFactory& beanFactory, const ApplicationM
 
 class Ark::ArkAssetBundle {
 public:
-    ArkAssetBundle(const sp<AssetBundle>& builtInAssetBundle, const Vector<ApplicationManifest::Asset>& assets)
-        : _builtin_asset_bundle(builtInAssetBundle)
+    ArkAssetBundle(sp<AssetBundle> defaultAssetBundle, const Vector<ApplicationManifest::Asset>& assets)
+        : _default_asset_bundle(std::move(defaultAssetBundle))
     {
         for(const ApplicationManifest::Asset& i : assets)
             if(sp<AssetBundle> assetBundle = createAssetBundle(i))
@@ -200,10 +200,11 @@ public:
             if(sp<Asset> asset = i.getAsset(url))
                 return asset;
         }
-        return _builtin_asset_bundle->getAsset(name);
+        return _default_asset_bundle->getAsset(name);
     }
 
-    sp<AssetBundle> getAssetBundle(const String& path) const {
+    sp<AssetBundle> getAssetBundle(const String& path) const
+    {
         const URL url(path);
         sp<AssetBundle> asset;
 
@@ -211,7 +212,7 @@ public:
             if(sp<AssetBundle> ia = i.getBundle(url))
                 asset = asset ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(asset), std::move(ia)) : std::move(ia);
 
-        if(sp<AssetBundle> fallback = _builtin_asset_bundle->getBundle(path))
+        if(sp<AssetBundle> fallback = _default_asset_bundle->getBundle(path))
             return asset ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(asset), std::move(fallback)) : std::move(fallback);
         CHECK(asset, "AssetBundle \"%s\" doesn't exists", path.c_str());
         return asset;
@@ -221,7 +222,7 @@ private:
     sp<AssetBundle> createAssetBundle(const ApplicationManifest::Asset& manifest) const
     {
         const String filepath = manifest._src.protocol() == "external" ? Platform::getExternalStoragePath(manifest._src.path()) : manifest._src.path();
-        sp<AssetBundle> assetBundle = _builtin_asset_bundle->getBundle(filepath);
+        sp<AssetBundle> assetBundle = Platform::getAssetBundle(filepath);
         CHECK_WARN(assetBundle, "Unable to load AssetBundle, src: %s", manifest._src.toString().c_str());
         return assetBundle;
     }
@@ -259,10 +260,13 @@ private:
 
     private:
         Optional<String> getRelativePath(const URL& url) const {
-            if(url.protocol() == _root.protocol() || _root.path().empty())
+            if(url.protocol() != _root.protocol())
+                return {};
+
+            if(_root.path().empty())
                 return {url.path()};
 
-            if(url.protocol().empty() && url.path().startsWith(_root.path()))
+            if(url.path().startsWith(_root.path()))
                 return {url.path().substr(_root.path().length())};
 
             return {};
@@ -274,7 +278,7 @@ private:
     };
 
     List<Mounted> _mounts;
-    sp<AssetBundle> _builtin_asset_bundle;
+    sp<AssetBundle> _default_asset_bundle;
 };
 
 Ark::Ark(int32_t argc, const char** argv)
@@ -318,9 +322,10 @@ void Ark::initialize(sp<ApplicationManifest> manifest)
 
     loadPlugins(_manifest);
 
-    sp<BeanFactory> factory = createBeanFactory(sp<Dictionary<document>>::make<DictionaryImpl<document>>());
-    _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->application()._dir), _manifest->assets());
+    _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir()), _manifest->assets());
     sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
+
+    const sp<BeanFactory> factory = createBeanFactory(sp<Dictionary<document>>::make<DictionaryImpl<document>>());
     sp<RenderEngine> renderEngine = createRenderEngine(factory, _manifest->renderer());
     _application_context = createApplicationContext(_manifest, std::move(applicationBundle), std::move(renderEngine));
 }

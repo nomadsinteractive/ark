@@ -37,10 +37,10 @@ void ApplicationManifest::load(const String& src)
         _application._dir = std::move(appDirOpt.value());
     _application._filename = std::move(appFileName);
 
-    const sp<AssetBundle> appAsset = Platform::getAssetBundle(".", _application._dir);
-    DASSERT(appAsset);
+    const sp<AssetBundle> appAsset = Platform::getAssetBundle(".");
+    ASSERT(appAsset);
     const sp<ark::Asset> asset = appAsset->getAsset(src);
-    DCHECK(asset, "Cannot load application manifest \"%s\"", src.c_str());
+    CHECK(asset, "Cannot load application manifest \"%s\"", src.c_str());
 
     _content = asset ? Documents::loadFromReadable(asset->open()) : document::make("");
     _asset_dir = Documents::getAttribute(_content, "asset-dir");

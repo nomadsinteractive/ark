@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/ark.h"
 
 #include "renderer/forwarding.h"

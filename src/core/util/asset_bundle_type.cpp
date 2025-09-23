@@ -18,8 +18,8 @@ namespace {
 
 class BuiltInAssetBundle final : public AssetBundle {
 public:
-    BuiltInAssetBundle(String assetDir, String appDir)
-        : _asset_dir(std::move(assetDir)), _app_dir(std::move(appDir)) {
+    BuiltInAssetBundle(String assetDir)
+        : _asset_dir(std::move(assetDir)) {
     }
 
     sp<Asset> getAsset(const String& filepath) override
@@ -36,7 +36,7 @@ public:
         String s = (path.empty() || path == "/") ? "." : path;
         const String assetDir = Platform::pathJoin(_asset_dir, s);
 
-        if(sp<AssetBundle> assetBundle = Platform::getAssetBundle(s, Platform::pathJoin(_app_dir, assetDir)))
+        if(sp<AssetBundle> assetBundle = Platform::getAssetBundle(assetDir))
             return assetBundle;
 
         if(const sp<Asset> asset = getAsset(path))
@@ -49,7 +49,8 @@ public:
             String dirname = dirnameOpt ? dirnameOpt.value() : "";
             filename = filename.empty() ? name : name + "/" + filename;
             const sp<Asset> asset = getAsset(dirname);
-            if(sp<Readable> readable = asset ? asset->open() : nullptr) {
+            if(sp<Readable> readable = asset ? asset->open() : nullptr)
+            {
                 sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirname);
                 String entryName = filename + "/";
                 return zip->hasEntry(entryName) ? sp<AssetBundleWithPrefix>::make(std::move(zip), std::move(entryName)) : nullptr;
@@ -66,7 +67,6 @@ public:
     }
 
     String _asset_dir;
-    String _app_dir;
 };
 
 class ByteArrayString final : public ByteArray {
@@ -126,9 +126,9 @@ String AssetBundleType::getRealPath(const sp<AssetBundle>& self, const String& f
     return asset ? asset->location() : filepath;
 }
 
-sp<AssetBundle> AssetBundleType::createBuiltInAssetBundle(const String& assetDir, const String& appDir)
+sp<AssetBundle> AssetBundleType::createBuiltInAssetBundle(String assetDir)
 {
-    return sp<AssetBundle>::make<BuiltInAssetBundle>(assetDir, appDir);
+    return sp<AssetBundle>::make<BuiltInAssetBundle>(std::move(assetDir));
 }
 
 sp<AssetBundle> AssetBundleType::createAssetBundle(const String& filepath)
