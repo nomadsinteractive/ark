@@ -180,6 +180,14 @@ sp<RenderEngine> createRenderEngine(BeanFactory& beanFactory, const ApplicationM
     return nullptr;
 }
 
+String getMountedPath(const String& root)
+{
+    if(root.empty() || root.endsWith("/"))
+        return root;
+
+    return root + "/";
+}
+
 }
 
 class Ark::ArkAssetBundle {
@@ -230,7 +238,7 @@ private:
     class Mounted {
     public:
         Mounted(const ApplicationManifest::Asset& manifest, sp<AssetBundle> assetBundle)
-            : _root(manifest._src.protocol(), manifest._root), _asset_bundle(std::move(assetBundle)) {
+            : _root(manifest._src.protocol(), getMountedPath(manifest._root)), _asset_bundle(std::move(assetBundle)) {
         }
 
         sp<Asset> getAsset(const URL& url) const
@@ -265,6 +273,9 @@ private:
 
             if(_root.path().empty())
                 return {url.path()};
+
+            if(url.path() == _root.path().substr(0, _root.path().length() - 1))
+                return {""};
 
             if(url.path().startsWith(_root.path()))
                 return {url.path().substr(_root.path().length())};

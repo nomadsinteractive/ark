@@ -21,7 +21,6 @@
 #include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
 #include "core/util/strings.h"
 
-#include "graphics/base/font.h"
 #include "graphics/impl/alphabet/alphabet_true_type.h"
 
 #include "impl/asset_bundle_darwin.h"
@@ -46,27 +45,15 @@ bool exists(const String& location)
 
 using namespace platform::darwin;
 
-sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
+sp<AssetBundle> Platform::getAssetBundle(const String& path)
 {
     sp<AssetBundle> bundle = exists(path) ? sp<AssetBundle>::make<AssetBundleDarwin>(path) : nullptr;
     if(isDirectory(path))
     {
-        const sp<AssetBundle> pathBundle = sp<AssetBundle>::make<AssetBundleDirectory>(path);
+        sp<AssetBundle> pathBundle = sp<AssetBundle>::make<AssetBundleDirectory>(path);
         bundle = bundle ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(bundle), std::move(pathBundle)) : std::move(pathBundle);
     }
-    if(isDirectory(appPath))
-    {
-        const sp<AssetBundle> appPathBundle = sp<AssetBundle>::make<AssetBundleDirectory>(path);
-        bundle = bundle ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(bundle), std::move(appPathBundle)) : std::move(appPathBundle);
-    }
     return bundle;
-}
-
-sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
-{
-    if(isFile("/Library/Fonts/Arial Unicode.ttf"))
-        return sp<Alphabet>::make<AlphabetTrueType>("Arial Unicode.ttf");
-    return sp<Alphabet>::make<AlphabetTrueType>("Arial.ttf");
 }
 
 String Platform::getDefaultFontDirectory()
