@@ -1,5 +1,7 @@
 #include "opengl/base/gl_pipeline.h"
 
+#include <ranges>
+
 #include "core/types/weak_ptr.h"
 #include "core/util/log.h"
 #include "core/util/strings.h"
@@ -711,7 +713,7 @@ bool isComputePipeline(const Map<enums::ShaderStageBit, String>& stages)
     return false;
 }
 
-String getInformationLog(const GLuint id)
+String getLinkingInformation(const GLuint id, const Map<enums::ShaderStageBit, String>& stages)
 {
     GLint length = 0;
     glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
@@ -720,7 +722,12 @@ String getInformationLog(const GLuint id)
     Vector<GLchar> infos(len + 1);
     glGetProgramInfoLog(id, length, &length, infos.data());
     infos.back() = 0;
-    return infos.data();
+
+    StringBuffer sb;
+    for(const auto& v : stages | std::views::values)
+        sb << v << std::endl;
+    sb << infos.data();
+    return sb.str();
 }
 
 sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source)
@@ -790,9 +797,9 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     sp<Stage> compiledStages[enums::SHADER_STAGE_BIT_COUNT];
     for(const auto& [k, v] : _stages)
     {
-        sp<Stage>& shader = compiledStages[k];
-        shader = makeShader(graphicsContext, _version, GLUtil::toShaderType(k), v);
-        GL_CHECK_ERROR(glAttachShader(id, shader->id()));
+        sp<Stage>& stage = compiledStages[k];
+        stage = makeShader(graphicsContext, _version, GLUtil::toShaderType(k), v);
+        GL_CHECK_ERROR(glAttachShader(id, stage->id()));
     }
 
     GL_CHECK_ERROR(glLinkProgram(id));
@@ -803,7 +810,7 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
 
     GLint linkstatus = 0;
     GL_CHECK_ERROR(glGetProgramiv(id, GL_LINK_STATUS, &linkstatus));
-    CHECK(linkstatus, "Program link failed: %s", getInformationLog(id).c_str());
+    CHECK(linkstatus, "Program link failed: %s", getLinkingInformation(id, _stages).c_str());
 }
 
 ResourceRecycleFunc GLPipeline::recycle()

@@ -31,7 +31,8 @@ sp<Ref> RefManager::makeRef(void* instance, sp<Boolean> discarded)
 
 sp<Ref> RefManager::toRef(const RefId refid) const
 {
-    CHECK(refid <= _ref_slots.size() && !_ref_slots.at(refid).expired(), "Invaild Ref(%d)", refid);
+    CHECK(refid <= _ref_slots.size(), "Invaild Ref(%d)", refid);
+    CHECK(!_ref_slots.at(refid).expired(), "Ref(%d) expired", refid);
     return _ref_slots.at(refid).ensure();
 }
 

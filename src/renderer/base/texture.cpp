@@ -26,11 +26,14 @@ public:
                   (format & Texture::FORMAT_RGBA) + 1, false) {
     }
 
-    void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
-        delegate.uploadBitmap(graphicsContext, _bitmap, {_bitmap.byteArray()});
+    void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override
+    {
+        sp<ByteArray> clearData = sp<ByteArray>::make<ByteArray::Vector>(Vector<uint8_t>(_bitmap.rowBytes() * _bitmap.height(), 0));
+        delegate.uploadBitmap(graphicsContext, _bitmap, {std::move(clearData)});
     }
 
-    void update(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
+    void update(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override
+    {
         delegate.clear(graphicsContext);
     }
 
