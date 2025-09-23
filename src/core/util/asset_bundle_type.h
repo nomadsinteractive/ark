@@ -26,7 +26,7 @@ public:
 //  [[script::bindings::classmethod]]
     static String getRealPath(const sp<AssetBundle>& self, const String& filepath);
 
-    static sp<AssetBundle> createBuiltInAssetBundle(String assetDir);
+    static sp<AssetBundle> createBuiltInAssetBundle();
     static sp<AssetBundle> createAssetBundle(const String& filepath);
 };
 

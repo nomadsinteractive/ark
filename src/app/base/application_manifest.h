@@ -88,9 +88,6 @@ public:
     const Application& application() const;
     const Window& window() const;
 
-    const String& appDir() const;
-    const String& assetDir() const;
-
     const Vector<Asset>& assets() const;
     const Vector<String>& plugins() const;
 
@@ -106,7 +103,6 @@ public:
 
 private:
     String _name;
-    String _asset_dir;
 
     Vector<Asset> _assets;
     Vector<String> _plugins;

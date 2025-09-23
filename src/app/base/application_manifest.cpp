@@ -43,7 +43,6 @@ void ApplicationManifest::load(const String& src)
     CHECK(asset, "Cannot load application manifest \"%s\"", src.c_str());
 
     _content = asset ? Documents::loadFromReadable(asset->open()) : document::make("");
-    _asset_dir = Documents::getAttribute(_content, "asset-dir");
     for(const document& i : _content->children("asset"))
         _assets.emplace_back(i);
 
@@ -91,11 +90,6 @@ const ApplicationManifest::Application& ApplicationManifest::application() const
 const ApplicationManifest::Window& ApplicationManifest::window() const
 {
     return _window;
-}
-
-const String& ApplicationManifest::assetDir() const
-{
-    return _asset_dir;
 }
 
 const Vector<ApplicationManifest::Asset>& ApplicationManifest::assets() const

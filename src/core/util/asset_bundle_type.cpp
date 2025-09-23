@@ -16,11 +16,8 @@ namespace ark {
 
 namespace {
 
-class BuiltInAssetBundle final : public AssetBundle {
+class AssetBundleDefault final : public AssetBundle {
 public:
-    BuiltInAssetBundle(String assetDir)
-        : _asset_dir(std::move(assetDir)) {
-    }
 
     sp<Asset> getAsset(const String& filepath) override
     {
@@ -33,8 +30,7 @@ public:
 
     sp<AssetBundle> getBundle(const String& path) override
     {
-        String s = (path.empty() || path == "/") ? "." : path;
-        const String assetDir = Platform::pathJoin(_asset_dir, s);
+        String assetDir = (path.empty() || path == "/") ? "." : path;
 
         if(sp<AssetBundle> assetBundle = Platform::getAssetBundle(assetDir))
             return assetBundle;
@@ -45,7 +41,7 @@ public:
 
         String filename;
         do {
-            const auto [dirnameOpt, name] = s.rcut('/');
+            const auto [dirnameOpt, name] = assetDir.rcut('/');
             String dirname = dirnameOpt ? dirnameOpt.value() : "";
             filename = filename.empty() ? name : name + "/" + filename;
             const sp<Asset> asset = getAsset(dirname);
@@ -53,10 +49,10 @@ public:
             {
                 sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirname);
                 String entryName = filename + "/";
-                return zip->hasEntry(entryName) ? sp<AssetBundleWithPrefix>::make(std::move(zip), std::move(entryName)) : nullptr;
+                return zip->hasEntry(entryName) ? sp<AssetBundle>::make<AssetBundleWithPrefix>(std::move(zip), std::move(entryName)) : nullptr;
             }
-            s = std::move(dirname);
-        } while(!s.empty());
+            assetDir = std::move(dirname);
+        } while(!assetDir.empty());
 
         return nullptr;
     }
@@ -65,8 +61,6 @@ public:
         DFATAL("Unimplemented");
         return {};
     }
-
-    String _asset_dir;
 };
 
 class ByteArrayString final : public ByteArray {
@@ -126,9 +120,9 @@ String AssetBundleType::getRealPath(const sp<AssetBundle>& self, const String& f
     return asset ? asset->location() : filepath;
 }
 
-sp<AssetBundle> AssetBundleType::createBuiltInAssetBundle(String assetDir)
+sp<AssetBundle> AssetBundleType::createBuiltInAssetBundle()
 {
-    return sp<AssetBundle>::make<BuiltInAssetBundle>(std::move(assetDir));
+    return sp<AssetBundle>::make<AssetBundleDefault>();
 }
 
 sp<AssetBundle> AssetBundleType::createAssetBundle(const String& filepath)
