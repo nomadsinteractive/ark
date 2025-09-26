@@ -54,9 +54,9 @@ public:
     Vector<Box> getComponentList(TypeId typeId) const;
 
 //  [[script::bindings::property]]
+    const Vector<Box>& components() const;
+//  [[script::bindings::property]]
     Box tag() const;
-
-    const Traits& components() const;
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Entity> {

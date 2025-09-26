@@ -122,9 +122,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
             if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
                 GL_CHECK_ERROR(glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id())));
         }
-
-        if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
-            GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, depthStencilAttachment, GL_TEXTURE_2D, static_cast<GLuint>(depthTexture->id()), 0));
+        GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, depthStencilAttachment, GL_TEXTURE_2D, static_cast<GLuint>(depthTexture->id()), 0));
     }
 
     if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))

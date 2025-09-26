@@ -173,9 +173,9 @@ Box Entity::tag() const
     return {};
 }
 
-const Traits& Entity::components() const
+const Vector<Box>& Entity::components() const
 {
-    return _components;
+    return _components.table().values();
 }
 
 struct Entity::BUILDER::ComponentBuilder {
