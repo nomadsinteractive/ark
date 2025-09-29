@@ -24,8 +24,8 @@
 
 namespace ark {
 
-Rigidbody::Stub::Stub(sp<Ref> ref, BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter)
-    : _ref(std::move(ref)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _rotation(std::move(rotation)), _collision_filter(std::move(collisionFilter))
+Rigidbody::Stub::Stub(sp<Ref> ref, const BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter)
+    : _ref(std::move(ref)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _rotation(std::move(rotation), constants::QUATERNION_ONE), _collision_filter(std::move(collisionFilter))
 {
 }
 

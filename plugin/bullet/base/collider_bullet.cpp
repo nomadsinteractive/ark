@@ -23,6 +23,7 @@
 #include "bullet/base/collision_object_ref.h"
 #include "bullet/base/collision_shape_ref.h"
 #include "bullet/base/rigidbody_bullet.h"
+#include "core/types/ref.h"
 
 namespace ark::plugin::bullet {
 
@@ -166,15 +167,6 @@ struct BtRigibodyObject {
     };
 };
 
-struct GhostObject : BtRigibodyObject {
-    GhostObject(sp<Vec3> position, sp<Vec4> quaternion, RigidbodyBullet btRigidbodyRef)
-        : BtRigibodyObject(std::move(btRigidbodyRef)), _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE) {
-    }
-
-    OptionalVar<Vec3> _position;
-    OptionalVar<Vec4> _quaternion;
-};
-
 }
 
 struct ColliderBullet::Stub final : Updatable {
@@ -224,7 +216,7 @@ struct ColliderBullet::Stub final : Updatable {
     op<btConstraintSolver> _solver;
     op<btDiscreteDynamicsWorld> _dynamics_world;
 
-    FList<GhostObject, GhostObject::ListFilter> _ghost_objects;
+    FList<BtRigibodyObject, BtRigibodyObject::ListFilter> _ghost_objects;
     Vector<sp<CollisionObjectRef>> _mark_for_destroys;
 
     sp<Numeric> _app_clock_interval;
@@ -281,8 +273,8 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
         sp<Vec3> originPosition = shape->origin() ? Vec3Type::add(position, shape->origin().val()) : position;
         sp<CollisionObjectRef> btGhostObjectRef = makeGhostObject(btDynamicWorld(), std::move(cs), type, collisionFilter);
         sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btGhostObjectRef), type, std::move(shape), std::move(position), rotation, std::move(collisionFilter), std::move(discarded));
-        _stub->_ghost_objects.emplace_back(GhostObject(std::move(originPosition), std::move(rotation), *impl));
         sp<Rigidbody::Stub> stub = impl->stub();
+        _stub->_ghost_objects.emplace_back(BtRigibodyObject(*impl));
         return {std::move(stub), nullptr, impl};
     }
 
@@ -383,12 +375,14 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
 {
     const ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
     const uint64_t timestamp = self->_stub->_timestamp;
-    for(const GhostObject& i : self->_stub->_ghost_objects)
+    for(const BtRigibodyObject& i : self->_stub->_ghost_objects)
     {
-        i._position.update(timestamp);
-        i._quaternion.update(timestamp);
-        const V3 pos = i._position.val();
-        const V4 quaternion = i._quaternion.val();
+        const Rigidbody::Stub& rigidbody = i._bt_rigidbody_ref.stub();
+        rigidbody._position.update(timestamp);
+        rigidbody._rotation.update(timestamp);
+        rigidbody._shape->origin().update(timestamp);
+        const V3 pos = rigidbody._position.val() + rigidbody._shape->origin().val();
+        const V4 quaternion = rigidbody._rotation.val();
         btTransform transform;
         transform.setIdentity();
         transform.setRotation(btQuaternion(quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w()));
