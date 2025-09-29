@@ -4,6 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/future.h"
 #include "core/base/named_hash.h"
+#include "core/collection/table.h"
 #include "core/inf/executor.h"
 #include "core/inf/runnable.h"
 
@@ -188,6 +189,7 @@ void ModelBundle::importMaterials(String manifest) const
 void ModelBundle::importMaterials(const Manifest& manifest) const
 {
     _stub->importModel(manifest, nullptr);
+    _stub->updateMaterials();
 }
 
 void ModelBundle::updateMaterials() const

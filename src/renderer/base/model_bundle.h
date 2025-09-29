@@ -2,7 +2,6 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/manifest.h"
-#include "core/collection/table.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 

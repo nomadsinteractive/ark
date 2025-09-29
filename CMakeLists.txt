@@ -160,7 +160,6 @@ ark_find_vcpkg_package(glslang LIBRARIES glslang::glslang glslang::glslang-defau
 
 ark_add_plugin_directory(python plugin/python)
 ark_add_plugin_directory(box2d plugin/box2d)
-#ark_add_plugin_directory(bgfx plugin/bgfx)
 ark_add_plugin_directory(bullet plugin/bullet)
 ark_add_plugin_directory(dear_imgui plugin/dear-imgui)
 ark_add_plugin_directory(gltf plugin/gltf)

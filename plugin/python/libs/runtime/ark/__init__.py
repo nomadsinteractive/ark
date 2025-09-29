@@ -744,7 +744,7 @@ class ApplicationFacade:
     def pop_clock(self) -> "Clock":
         pass
 
-    def to_frag_coord(self, xy: "Vec2", resolution: Optional['Size'] = None) -> "Vec2":
+    def to_frag_coord(self, xy: "Vec2", resolution: Optional["Size"] = None) -> "Vec2":
         pass
 
     def add_string_bundle(self, name: str, string_bundle: 'StringBundle'):
@@ -917,7 +917,7 @@ class ApplicationManifest:
         return ''
 
     @property
-    def renderer_resolution(self) -> 'Size':
+    def renderer_resolution(self) -> "Size":
         return Size(0, 0)
 
 
@@ -1276,7 +1276,7 @@ class Vec2(_Var):
     def hypot2(self) -> Numeric:
         pass
 
-    def to_size(self) -> 'Size':
+    def to_size(self) -> "Size":
         pass
 
     def lerp(self, other, t: TYPE_NUMERIC) -> Self:
@@ -1918,11 +1918,11 @@ class RenderObject:
         return 0
 
     @property
-    def size(self) -> 'Size':
+    def size(self) -> "Size":
         return self._size
 
     @size.setter
-    def size(self, v: 'Size'):
+    def size(self, v: "Size"):
         self._size = v
 
     @property
@@ -1934,7 +1934,7 @@ class RenderObject:
         self._transform = transform
 
     @property
-    def varyings(self) -> 'Varyings':
+    def varyings(self) -> "Varyings":
         return Varyings()
 
     @varyings.setter
