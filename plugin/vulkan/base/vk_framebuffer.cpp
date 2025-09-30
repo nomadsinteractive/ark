@@ -79,7 +79,7 @@ VkCommandBuffer VKFramebuffer::endRenderPass(GraphicsContext& graphicsContext) c
 VkRect2D VKFramebuffer::Stub::getFramebufferScissor() const
 {
     ASSERT(!_configure._color_attachments.empty());
-    const sp<Texture>& texture = _configure._color_attachments.at(0);
+    const sp<Texture>& texture = _configure._color_attachments.at(0)._texture;
     return vks::initializers::rect2D(texture->width(), texture->height(), 0, 0);
 }
 
@@ -88,15 +88,13 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
       _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(vks::initializers::rect2D(_resolution.width, _resolution.height, 0, 0)),
       _viewport(vks::initializers::viewport(static_cast<float>(_resolution.width), static_cast<float>(_resolution.height), 0, 1.0f))
 {
-    VkClearValue clearColor;
-    VkClearValue clearDepthStencil;
-    clearColor.color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-    clearDepthStencil.depthStencil = { 1.0f, 0 };
 
     if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
-        for(uint32_t i = 0; i < _configure._color_attachments.size(); ++i)
-            _clear_values.push_back(clearColor);
+        for(const auto& [t, cv] : _configure._color_attachments)
+            _clear_values.push_back(VkClearValue{cv.x(), cv.y(), cv.z(), cv.w()});
 
+    VkClearValue clearDepthStencil;
+    clearDepthStencil.depthStencil = { 1.0f, 0 };
     if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
         _clear_values.push_back(clearDepthStencil);
 
@@ -117,7 +115,7 @@ Vector<VkPipelineColorBlendAttachmentState> VKFramebuffer::Stub::makeColorBlendA
     for(uint32_t i = 0; i < stateCount; ++i)
     {
         VkPipelineColorBlendAttachmentState cbaState = mainState;
-        cbaState.blendEnable = i == 0 || (i < _configure._color_attachments.size() && !(_configure._color_attachments.at(i)->parameters()->_format & Texture::FORMAT_INTEGER));
+        cbaState.blendEnable = i == 0 || (i < _configure._color_attachments.size() && !(_configure._color_attachments.at(i)._texture->parameters()->_format & Texture::FORMAT_INTEGER));
         blendAttachmentStates.push_back(cbaState);
     }
     return blendAttachmentStates;
@@ -136,22 +134,22 @@ VkRenderPass VKFramebuffer::Stub::acquire()
     const VkAttachmentLoadOp colorAttachmentLoadOp = !_configure._color_attachment_op || _configure._color_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
                                                      : _configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
     const VkAttachmentStoreOp colorAttachmentStoreOp = _configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    for(const Texture& i : _configure._color_attachments)
+    for(const auto& [t, cv] : _configure._color_attachments)
     {
         VkAttachmentDescription colorAttachmentDescription = {};
-        colorAttachmentDescription.format = VKUtil::toTextureFormat(i.parameters()->_format);
+        colorAttachmentDescription.format = VKUtil::toTextureFormat(t->parameters()->_format);
         colorAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
         colorAttachmentDescription.loadOp = colorAttachmentLoadOp;
         colorAttachmentDescription.storeOp = colorAttachmentStoreOp;
         colorAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachmentDescription.initialLayout = VKUtil::toImageLayout(i.usage());
+        colorAttachmentDescription.initialLayout = VKUtil::toImageLayout(t->usage());
         colorAttachmentDescription.finalLayout = colorAttachmentDescription.initialLayout;
         attachmentDescriptions.push_back(colorAttachmentDescription);
 
         attachmentReferences.push_back({ static_cast<uint32_t>(attachmentReferences.size()), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 
-        const sp<VKTexture> vkTexture = i.delegate();
+        const sp<VKTexture> vkTexture = t->delegate();
         DCHECK(vkTexture->id(), "VKTexture uninitialized");
         attachments.push_back(vkTexture->vkDescriptor().imageView);
     }

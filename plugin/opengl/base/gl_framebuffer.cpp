@@ -63,13 +63,13 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
     uint32_t idx = 0;
     Vector<GLenum> drawBuffers;
 
-    for(const sp<Texture>& i : _configure._color_attachments)
+    for(const auto& [t, cv] : _configure._color_attachments)
     {
-        const Texture::Usage usage = i->parameters()->_usage;
+        const Texture::Usage usage = t->parameters()->_usage;
         ASSERT(usage == Texture::USAGE_AUTO || usage.has(Texture::USAGE_COLOR_ATTACHMENT));
-        ASSERT(i->id() != 0);
+        ASSERT(t->id() != 0);
         const GLenum attachment = GL_COLOR_ATTACHMENT0 + (bindings++);
-        attachments.push_back(i->id(), attachment);
+        attachments.push_back(t->id(), attachment);
         drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + (idx++));
     }
 

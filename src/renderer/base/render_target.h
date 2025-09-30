@@ -5,6 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v4.h"
 #include "graphics/inf/renderer.h"
 
 #include "renderer/forwarding.h"
@@ -33,11 +34,16 @@ public:
     };
     typedef BitSet<AttachmentOpBits> AttachmentOp;
 
+    struct Attachment {
+        sp<Texture> _texture;
+        V4 _clear_color;
+    };
+
     struct Configure {
         AttachmentOp _color_attachment_op;
         AttachmentOp _depth_stencil_op;
         ClearBitSet _clear_bits;
-        Vector<sp<Texture>> _color_attachments;
+        Vector<Attachment> _color_attachments;
         sp<Texture> _depth_stencil_attachment;
         bool _depth_test_write_enabled = true;
     };
@@ -58,8 +64,15 @@ public:
         sp<RenderTarget> build(const Scope& args) override;
 
     private:
-        builder<Renderer> _renderer;
-        Vector<std::pair<sp<Builder<Texture>>, document>> _attachments;
+        struct AttachmentBuilder {
+            AttachmentBuilder(BeanFactory& factory, const document& manifest);
+
+            sp<Builder<Texture>> _texture;
+            V4 _clear_value;
+        };
+
+        sp<Builder<Renderer>> _renderer;
+        Vector<AttachmentBuilder> _attachments;
         ClearBitSet _clear_mask;
         AttachmentOp _color_attachment_op;
         AttachmentOp _depth_stencil_op;

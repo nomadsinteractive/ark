@@ -406,7 +406,7 @@ uint32_t RenderUtil::getComponentSize(const Texture::Format format)
 std::pair<int32_t, int32_t> RenderUtil::getRenderTargetResolution(const RenderTarget::Configure& configure)
 {
     CHECK(!configure._color_attachments.empty() || configure._depth_stencil_attachment, "RenderTarget should have at least one attachment");
-    const sp<Texture>& attachment = configure._color_attachments.empty() ? configure._depth_stencil_attachment : configure._color_attachments.at(0);
+    const sp<Texture>& attachment = configure._color_attachments.empty() ? configure._depth_stencil_attachment : configure._color_attachments.at(0)._texture;
     return {attachment->width(), attachment->height()};
 }
 

@@ -5,6 +5,7 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/util/string_convert.h"
+#include "core/util/documents.h"
 
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
@@ -33,24 +34,21 @@ const sp<Resource>& RenderTarget::fbo() const
 }
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _renderer(factory.ensureBuilder<Renderer>(manifest, constants::RENDERER)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
+    : _renderer(factory.ensureBuilder<Renderer>(manifest, constants::RENDERER)), _attachments(factory.makeBuilderListObject<AttachmentBuilder>(manifest, constants::TEXTURE)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
       _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_LOAD, ATTACHMENT_OP_BIT_STORE})),
       _depth_stencil_op(Documents::getAttribute<AttachmentOp>(manifest, "depth-stencil-op", {ATTACHMENT_OP_BIT_LOAD, ATTACHMENT_OP_BIT_STORE}))
 {
-    for(const document& i : manifest->children(constants::TEXTURE))
-        _attachments.emplace_back(factory.ensureBuilder<Texture>(i), i);
-
     CHECK(_attachments.size(), "No texture attachment defined in manifest: \"%s\"", Documents::toString(manifest).c_str());
 }
 
 sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
 {
     Configure configure = {_color_attachment_op, _depth_stencil_op, _clear_mask};
-    for(const auto& i : std::views::keys(_attachments))
+    for(const AttachmentBuilder& i : _attachments)
     {
-        sp<Texture> tex = i->build(args);
+        sp<Texture> tex = i._texture->build(args);
         if(const Texture::Usage usage = tex->usage(); usage == Texture::USAGE_AUTO || usage.has(Texture::USAGE_COLOR_ATTACHMENT))
-            configure._color_attachments.push_back(std::move(tex));
+            configure._color_attachments.emplace_back(std::move(tex), i._clear_value);
         else
         {
             CHECK(configure._depth_stencil_attachment == nullptr, "Only one depth-stencil attachment allowed");
@@ -59,6 +57,11 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
         }
     }
     return Ark::instance().renderController()->makeRenderTarget(_renderer->build(args), std::move(configure));
+}
+
+RenderTarget::BUILDER::AttachmentBuilder::AttachmentBuilder(BeanFactory& factory, const document& manifest)
+    : _texture(factory.ensureBuilder<Texture>(manifest)), _clear_value(Documents::getAttributeValue<V4>(manifest, "clear-value", V4(0)))
+{
 }
 
 RenderTarget::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest)

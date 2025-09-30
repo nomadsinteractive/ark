@@ -317,10 +317,10 @@ public:
             if(const RenderTargetContext& renderTarget = gc.renderTarget(); renderTarget._create_config)
             {
                 const RenderTarget::Configure& rtCreateConfig = *renderTarget._create_config;
-                for(const sp<Texture>& i : rtCreateConfig._color_attachments)
+                for(const auto& [t, cv] : rtCreateConfig._color_attachments)
                 {
                     colorTargetDescriptions[numColorTargets] = {
-                        i->delegate().cast<TextureSDL3_GPU>()->textureFormat(),
+                        t->delegate().cast<TextureSDL3_GPU>()->textureFormat(),
                         numColorTargets == 0 ? blendState : SDL_GPUColorTargetBlendState{}
                     };
                     ++ numColorTargets;

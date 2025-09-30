@@ -1,6 +1,5 @@
 #pragma once
 
-#include <list>
 #include <type_traits>
 
 #include "core/base/api.h"
@@ -164,7 +163,7 @@ public:
         sp<Scope> _references;
         sp<Dictionary<document>> _document_refs;
 
-        std::list<Factory> _factories;
+        List<Factory> _factories;
         Map<String, sp<BeanFactory>> _packages;
     };
 
@@ -387,12 +386,12 @@ public:
     template<typename... Args> void expand(const String& expr, sp<IBuilder<Args>>&... args) {
         const String value = Strings::unwrap(expr.strip(), '(', ')');
         CHECK(value, "Empty value being built");
-        auto elements = Strings::split<std::list<String>>(value, ',');
+        auto elements = Strings::split<List<String>>(value, ',');
         doExpand<Args...>(elements, args...);
     }
 
 private:
-    template<typename T, typename... Args> void doExpand(std::list<String>& elems, sp<IBuilder<T>>& builder, sp<IBuilder<Args>>&... args) {
+    template<typename T, typename... Args> void doExpand(List<String>& elems, sp<IBuilder<T>>& builder, sp<IBuilder<Args>>&... args) {
         if(elems.empty())
             builder = sp<IBuilder<T>>::template make<typename IBuilder<T>::Null>();
         else {

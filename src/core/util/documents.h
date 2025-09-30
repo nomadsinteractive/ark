@@ -40,8 +40,8 @@ public:
     template<typename T> static T ensureAttribute(const document& doc, const String& name) {
         return Strings::eval<T>(ensureAttribute(doc, name));
     }
-    template<typename T> static std::vector<T> ensureAttributeList(const document& doc, const String& name, const String& childName = "") {
-        std::vector<T> list;
+    template<typename T> static Vector<T> ensureAttributeList(const document& doc, const String& name, const String& childName = "") {
+        Vector<T> list;
         for(const document& i : childName ? doc->children(childName) : doc->children())
             list.push_back(ensureAttribute<T>(i, name));
         return list;
@@ -64,7 +64,7 @@ public:
 
     static String getAttributeValue(const document& doc, const String& path, const String& defValue = String());
 
-    static attribute findAttribute(const document& doc, const std::vector<String>& paths);
+    static attribute findAttribute(const document& doc, const Vector<String>& paths);
 
 private:
     static bool isPlatformSpecific(const String& platform);

@@ -68,7 +68,7 @@ void RenderViewOpenGL::onRenderFrame(const V4 backgroundColor, RenderCommand& re
     renderCommand.draw(_graphics_context);
 }
 
-void RenderViewOpenGL::initialize(uint32_t width, uint32_t height)
+void RenderViewOpenGL::initialize(const uint32_t width, const uint32_t height)
 {
     LOGD("Width: %d, Height: %d", width, height);
 #if !defined(__APPLE__)

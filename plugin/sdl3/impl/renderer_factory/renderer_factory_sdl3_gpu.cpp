@@ -136,12 +136,12 @@ public:
         const SDL_GPULoadOp loadOp = configure._color_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? SDL_GPU_LOADOP_DONT_CARE
                                                 : configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
         const SDL_GPUStoreOp storeOp = configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE;
-        for(const sp<Texture>& _ : _configure._color_attachments)
+        for(const auto& [t, cv] : _configure._color_attachments)
             _render_targets.push_back({
                 nullptr,
                 0,
                 0,
-                {0, 0, 0, 0},
+                {cv.x(), cv.y(), cv.z(), cv.w()},
                 loadOp,
                 storeOp
             });
@@ -150,7 +150,7 @@ public:
     void draw(GraphicsContext& graphicsContext) override
     {
         for(size_t i = 0; i < _render_targets.size(); ++i)
-            _render_targets.at(i).texture = reinterpret_cast<SDL_GPUTexture*>(_configure._color_attachments.at(i)->id());
+            _render_targets.at(i).texture = reinterpret_cast<SDL_GPUTexture*>(_configure._color_attachments.at(i)._texture->id());
         if(_configure._depth_stencil_attachment)
             _depth_stencil_target->texture = reinterpret_cast<SDL_GPUTexture*>(_configure._depth_stencil_attachment->id());
 

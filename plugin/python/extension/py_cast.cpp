@@ -262,6 +262,7 @@ Traits PyCast::toTraits(PyObject* args, const size_t offset)
     Traits traits;
     if(const Py_ssize_t size = PyTuple_Size(args); size > 0)
         for(size_t i = offset; i < size; ++i)
+        {
             if(PyObject* v = PyTuple_GetItem(args, i); PythonExtension::instance().isPyArkTypeObject(Py_TYPE(v)))
             {
                 Box component(*reinterpret_cast<PyArkType::Instance*>(v)->box);
@@ -269,6 +270,7 @@ Traits PyCast::toTraits(PyObject* args, const size_t offset)
             }
             else
                 traits.put(ensureCppObject<TypeId>(reinterpret_cast<PyObject*>(Py_TYPE(v))), PyInstance::own(v).toBox());
+        }
     return traits;
 }
 
