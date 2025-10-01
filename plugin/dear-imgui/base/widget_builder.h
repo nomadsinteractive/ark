@@ -48,6 +48,11 @@ public:
     sp<Observer> smallButton(const String& label);
 
 //  [[script::bindings::auto]]
+    sp<Boolean> treeNode(String label);
+//  [[script::bindings::auto]]
+    void treePop();
+
+//  [[script::bindings::auto]]
     void checkbox(const String& label, const sp<Boolean>& option);
 //  [[script::bindings::auto]]
     void radioButton(const String& label, const sp<Integer>& option, int32_t group);

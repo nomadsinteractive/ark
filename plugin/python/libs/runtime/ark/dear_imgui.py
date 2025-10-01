@@ -116,6 +116,12 @@ class WidgetBuilder:
     def small_button(self, label: str) -> Observer:
         pass
 
+    def tree_node(self, label: str) -> Boolean:
+        pass
+
+    def tree_pop(self):
+        pass
+
     def checkbox(self, label: str, option: Boolean):
         pass
 

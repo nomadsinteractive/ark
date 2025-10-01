@@ -83,17 +83,26 @@ class Window:
         if self.is_open is not None:
             self.is_open.set(True)
         self.ready()
+        self.on_show()
 
-    def hide(self):
+    def close(self):
         if self.is_open is not None:
             self.is_open.set(False)
-
         self._renderer.reset(None)
+        self.on_close()
 
     def discard(self):
         self._discarded.discard()
+        self._widget = None
+        self.on_close()
 
     def on_create(self, builder: dear_imgui.WidgetBuilder):
+        pass
+
+    def on_show(self):
+        pass
+
+    def on_close(self):
         pass
 
 

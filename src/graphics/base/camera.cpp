@@ -23,21 +23,66 @@
 
 namespace ark {
 
-struct Camera::Stub {
-    Stub()
-        : _position(nullptr, V3(0, 0, 1)), _up(nullptr, V3(0, 1, 0)) {
+struct PerspectiveStub {
+    PerspectiveStub(sp<Numeric> fov, sp<Numeric> aspect, sp<Numeric> clipNear, sp<Numeric> clipFar)
+        : _fov(sp<VariableWrapper<float>>::make(std::move(fov))), _aspect(sp<VariableWrapper<float>>::make(std::move(aspect))), _clip_near(sp<VariableWrapper<float>>::make(std::move(clipNear))), _clip_far(sp<VariableWrapper<float>>::make(std::move(clipFar))) {
     }
 
-    OptionalVar<Vec3> _position;
-    OptionalVar<Vec3> _target;
-    OptionalVar<Vec3> _up;
+    sp<VariableWrapper<float>> _fov;
+    sp<VariableWrapper<float>> _aspect;
+    sp<VariableWrapper<float>> _clip_near;
+    sp<VariableWrapper<float>> _clip_far;
+};
+
+struct LookAtStub {
+    LookAtStub(sp<Vec3> position, sp<Vec3> target, sp<Vec3> up)
+        : _position(sp<VariableWrapper<V3>>::make(std::move(position))), _target(sp<VariableWrapper<V3>>::make(std::move(target))), _up(sp<VariableWrapper<V3>>::make(std::move(up))) {
+    }
+
+    sp<VariableWrapper<V3>> _position;
+    sp<VariableWrapper<V3>> _target;
+    sp<VariableWrapper<V3>> _up;
+};
+
+struct Camera::Stub {
+    Optional<PerspectiveStub> _perspective;
+    Optional<LookAtStub> _look_at;
+
+    void perspective(sp<Numeric> fov, sp<Numeric> aspect, sp<Numeric> clipNear, sp<Numeric> clipFar)
+    {
+        if(_perspective)
+        {
+            _perspective->_fov->reset(std::move(fov));
+            _perspective->_aspect->reset(std::move(aspect));
+            _perspective->_clip_near->reset(std::move(clipNear));
+            _perspective->_clip_far->reset(std::move(clipFar));
+        }
+        else
+        {
+            _perspective = {{std::move(fov), std::move(aspect), std::move(clipNear), std::move(clipFar)}};
+        }
+    }
+
+    void lookAt(sp<Vec3> position, sp<Vec3> target, sp<Vec3> up)
+    {
+        if(_look_at)
+        {
+            _look_at->_position->reset(std::move(position));
+            _look_at->_target->reset(std::move(target));
+            _look_at->_up->reset(std::move(up));
+        }
+        else
+        {
+            _look_at = {{std::move(position), std::move(target), std::move(up)}};
+        }
+    }
 };
 
 namespace {
 
-class OrthoMatrixVariable final : public Mat4 {
+class OrthoMat4 final : public Mat4 {
 public:
-    OrthoMatrixVariable(sp<Camera::Delegate> delegate, sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip)
+    OrthoMat4(sp<Camera::Delegate> delegate, sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip)
         : _delegate(std::move(delegate)), _left_top(std::move(leftTop)), _right_bottom(std::move(rightBottom)), _clip(std::move(clip)),
           _matrix(calcMatrix()) {
     }
@@ -72,11 +117,10 @@ private:
     M4 _matrix;
 };
 
-class FrustumMatrixVariable final : public Mat4 {
+class PerspectiveMat4 final : public Mat4 {
 public:
-    FrustumMatrixVariable(sp<Camera::Delegate> delegate, sp<Camera::Stub> cameraStub)
-        : _delegate(std::move(delegate)), _camera_stub(std::move(cameraStub)), _matrix(_delegate->lookAt(_camera_stub->_position.val(), _camera_stub->_target.val(), _camera_stub->_up.val()))
-    {
+    PerspectiveMat4(const sp<Camera::Delegate>& delegate, const sp<Camera::Stub>& camera)
+        : _delegate(delegate), _camera(camera), _matrix(_delegate->perspective(_camera->_perspective->_fov->val(), _camera->_perspective->_aspect->val(), _camera->_perspective->_clip_near->val(), _camera->_perspective->_clip_far->val())) {
     }
 
     M4 val() override
@@ -84,10 +128,11 @@ public:
         return _matrix;
     }
 
-    bool update(const uint64_t timestamp) override {
-        if(UpdatableUtil::update(timestamp, _camera_stub->_position, _camera_stub->_target, _camera_stub->_up))
+    bool update(const uint64_t timestamp) override
+    {
+        if(const Optional<PerspectiveStub>& perspective = _camera->_perspective; UpdatableUtil::update(timestamp, perspective->_fov, perspective->_aspect, perspective->_clip_near, perspective->_clip_far))
         {
-            _matrix = _delegate->lookAt(_camera_stub->_position.val(), _camera_stub->_target.val(), _camera_stub->_up.val());
+            _matrix = _delegate->perspective(perspective->_fov->val(), perspective->_aspect->val(), perspective->_clip_near->val(), perspective->_clip_far->val());
             return true;
         }
         return false;
@@ -95,7 +140,34 @@ public:
 
 private:
     sp<Camera::Delegate> _delegate;
-    sp<Camera::Stub> _camera_stub;
+    sp<Camera::Stub> _camera;
+    M4 _matrix;
+};
+
+class LookAtMat4 final : public Mat4 {
+public:
+    LookAtMat4(const sp<Camera::Delegate>& delegate, const sp<Camera::Stub>& camera)
+        : _delegate(delegate), _camera(camera), _matrix(_delegate->lookAt(_camera->_look_at->_position->val(), _camera->_look_at->_target->val(), _camera->_look_at->_up->val())) {
+    }
+
+    M4 val() override
+    {
+        return _matrix;
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        if(const Optional<LookAtStub>& lookAt = _camera->_look_at; lookAt && UpdatableUtil::update(timestamp, lookAt->_position, lookAt->_target, lookAt->_up))
+        {
+            _matrix = _delegate->lookAt(lookAt->_position->val(), lookAt->_target->val(), lookAt->_up->val());
+            return true;
+        }
+        return false;
+    }
+
+private:
+    sp<Camera::Delegate> _delegate;
+    sp<Camera::Stub> _camera;
     M4 _matrix;
 };
 
@@ -136,9 +208,8 @@ Camera::Camera(const enums::CoordinateSystem coordinateSystem)
 Camera::Camera(const Camera& other)
     : Camera(other._coordinate_system, other._delegate, other._view, other._projection)
 {
-    _stub->_position.reset(sp<Vec3>::make<Vec3::Const>(other._stub->_position.val()));
-    _stub->_target.reset(sp<Vec3>::make<Vec3::Const>(other._stub->_target.val()));
-    _stub->_up.reset(sp<Vec3>::make<Vec3::Const>(other._stub->_up.val()));
+    if(const Optional<LookAtStub>& lookAt = other._stub->_look_at)
+        _stub->_look_at = {{Vec3Type::freeze(lookAt->_position), Vec3Type::freeze(lookAt->_target), Vec3Type::freeze(lookAt->_up)}};
 }
 
 Camera::Camera(const enums::CoordinateSystem coordinateSystem, sp<Delegate> delegate, sp<Mat4> view, sp<Mat4> projection)
@@ -155,7 +226,7 @@ void Camera::ortho(const V2& leftTop, const V2& rightBottom, const V2& clip)
 
 void Camera::ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip)
 {
-    _projection->set(sp<Mat4>::make<OrthoMatrixVariable>(_delegate, std::move(leftTop), std::move(rightBottom), std::move(clip)));
+    _projection->set(sp<Mat4>::make<OrthoMat4>(_delegate, std::move(leftTop), std::move(rightBottom), std::move(clip)));
 }
 
 void Camera::ortho(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
@@ -169,18 +240,17 @@ void Camera::frustum(const float left, const float right, const float bottom, co
     _projection->set(_delegate->frustum(left, right, bottom, top, clipNear, clipFar));
 }
 
-void Camera::perspective(const float fov, const float aspect, const float clipNear, const float clipFar)
+void Camera::perspective(const float fov, const float aspect, const float clipNear, const float clipFar) const
 {
     CHECK_WARN(clipFar > clipNear && clipNear > 0, sclipNearclipFarPlaneWarning, clipNear, clipFar);
+    _stub->perspective(sp<Numeric>::make<Numeric::Const>(fov), sp<Numeric>::make<Numeric::Const>(aspect), sp<Numeric>::make<Numeric::Const>(clipNear), sp<Numeric>::make<Numeric::Const>(clipFar));
     _projection->set(_delegate->perspective(fov, aspect, clipNear, clipFar));
 }
 
-void Camera::lookAt(const V3& position, const V3& target, const V3& up)
+void Camera::perspective(sp<Numeric> fov, sp<Numeric> aspect, sp<Numeric> clipNear, sp<Numeric> clipFar) const
 {
-    _stub->_position.reset(sp<Vec3>::make<Vec3::Const>(position));
-    _stub->_target.reset(sp<Vec3>::make<Vec3::Const>(target));
-    _stub->_up.reset(sp<Vec3>::make<Vec3::Const>(up));
-    _view->set(_delegate->lookAt(position, target, up));
+    _stub->perspective(std::move(fov), std::move(aspect), std::move(clipNear), std::move(clipFar));
+    _projection->set(sp<Mat4>::make<PerspectiveMat4>(_delegate, _stub));
 }
 
 sp<Vec3> Camera::toWorldPosition(sp<Vec3> screenPosition) const
@@ -189,12 +259,16 @@ sp<Vec3> Camera::toWorldPosition(sp<Vec3> screenPosition) const
     return sp<Vec3>::make<WorldPosition>(Ark::instance().applicationContext()->renderEngine(), std::move(vpInverse), std::move(screenPosition));
 }
 
-void Camera::lookAt(sp<Vec3> position, sp<Vec3> target, sp<Vec3> up)
+void Camera::lookAt(const V3 position, const V3 target, const V3 up) const
 {
-    _stub->_position.reset(std::move(position));
-    _stub->_target.reset(std::move(target));
-    _stub->_up.reset(std::move(up));
-    _view->set(sp<Mat4>::make<FrustumMatrixVariable>(_delegate, _stub));
+    _stub->lookAt(sp<Vec3>::make<Vec3::Const>(position), sp<Vec3>::make<Vec3::Const>(target), sp<Vec3>::make<Vec3::Const>(up));
+    _view->set(_delegate->lookAt(position, target, up));
+}
+
+void Camera::lookAt(sp<Vec3> position, sp<Vec3> target, sp<Vec3> up) const
+{
+    _stub->lookAt(std::move(position), std::move(target), std::move(up));
+    _view->set(sp<Mat4>::make<LookAtMat4>(_delegate, _stub));
 }
 
 V3 Camera::toViewportPosition(const V3& worldPosition) const
@@ -211,26 +285,25 @@ sp<Vec3> Camera::toViewportPosition(sp<Vec3> worldPosition) const
 
 sp<Vec3> Camera::position() const
 {
-    return _stub->_position.toVar();
+    return _stub->_look_at ? _stub->_look_at->_position : nullptr;
 }
 
 sp<Vec3> Camera::target() const
 {
-    return _stub->_target.toVar();
+    return _stub->_look_at ? _stub->_look_at->_target : nullptr;
 }
 
 sp<Vec3> Camera::up() const
 {
-    return _stub->_up.toVar();
+    return _stub->_look_at ? _stub->_look_at->_up : nullptr;
 }
 
 void Camera::assign(const Camera& other)
 {
     _coordinate_system = other._coordinate_system;
     _delegate = other._delegate;
-    _stub->_position.reset(other._stub->_position.toVar());
-    _stub->_target.reset(other._stub->_target.toVar());
-    _stub->_up.reset(other._stub->_up.toVar());
+    if(const Optional<LookAtStub>& lookAt = other._stub->_look_at)
+        _stub->lookAt(lookAt->_position, lookAt->_target, lookAt->_up);
     _view->set(other.view());
     _projection->set(other.projection());
 }
@@ -271,7 +344,7 @@ Camera Camera::createDefaultCamera()
     return defaultCamera;
 }
 
-M4 Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
+M4 Camera::DelegateLH_ZO::frustum(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
 {
     return {glm::frustumLH_ZO(left, right, bottom, top, clipNear, clipFar)};
 }
@@ -281,17 +354,17 @@ M4 Camera::DelegateLH_ZO::lookAt(const V3& position, const V3& target, const V3&
     return {glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z()))};
 }
 
-M4 Camera::DelegateLH_ZO::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
+M4 Camera::DelegateLH_ZO::ortho(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
 {
     return {glm::orthoLH_ZO(left, right, bottom, top, clipNear, clipFar)};
 }
 
-M4 Camera::DelegateLH_ZO::perspective(float fov, float aspect, float clipNear, float clipFar)
+M4 Camera::DelegateLH_ZO::perspective(const float fov, const float aspect, const float clipNear, const float clipFar)
 {
     return {glm::perspectiveLH_ZO(fov, aspect, clipNear, clipFar)};
 }
 
-M4 Camera::DelegateRH_ZO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
+M4 Camera::DelegateRH_ZO::frustum(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
 {
     return {glm::frustumRH_ZO(left, right, bottom, top, clipNear, clipFar)};
 }

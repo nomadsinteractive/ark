@@ -136,9 +136,31 @@ private:
     bool _toggleable;
 };
 
+class TreeNode final : public WidgetGroup {
+public:
+    TreeNode(const sp<Boolean::Impl>& returnValue, String label)
+        : _return_value(returnValue), _label(std::move(label)) {
+    }
+
+    void render() override
+    {
+        const bool r = ImGui::TreeNode(_label.c_str());
+        if(r)
+        {
+            WidgetGroup::render();
+            ImGui::TreePop();
+        }
+        _return_value->set(r);
+    }
+
+private:
+    sp<Boolean::Impl> _return_value;
+    String _label;
+};
+
 class Table final : public WidgetGroup {
 public:
-    Table(const sp<Boolean::Impl>& returnValue, String strId, int32_t columns, int32_t flags)
+    Table(const sp<Boolean::Impl>& returnValue, String strId, const int32_t columns, const int32_t flags)
         : _return_value(returnValue), _str_id(std::move(strId)), _columns(columns), _flags(flags) {
     }
 
@@ -489,6 +511,18 @@ sp<Observer> WidgetBuilder::smallButton(const String& label)
     sp<Observer> observer = sp<Observer>::make();
     addCallback<String>(ImGui::SmallButton, label, observer);
     return observer;
+}
+
+sp<Boolean> WidgetBuilder::treeNode(String label)
+{
+    sp<Boolean::Impl> returnValue = sp<Boolean::Impl>::make(true);
+    addWidgetGroupAndPush(sp<WidgetGroup>::make<TreeNode>(returnValue, std::move(label)));
+    return returnValue;
+}
+
+void WidgetBuilder::treePop()
+{
+    pop();
 }
 
 void WidgetBuilder::checkbox(const String& label, const sp<Boolean>& option)
