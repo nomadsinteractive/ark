@@ -119,10 +119,10 @@ Optional<SDL_GPUDepthStencilTargetInfo> toDepthStencilTargetInfo(const RenderTar
     const SDL_GPUDepthStencilTargetInfo depthStencilTargetInfo = {
         nullptr,
         1.0f,
-        !configure._depth_stencil_op || configure._depth_stencil_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? SDL_GPU_LOADOP_DONT_CARE
-                                                : configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD,
-        configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE,
-        configure._clear_bits.has(RenderTarget::CLEAR_BIT_STENCIL) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_DONT_CARE,
+        !configure._depth_attachment_op || configure._depth_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? SDL_GPU_LOADOP_DONT_CARE
+                                                : configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD,
+        configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE,
+        SDL_GPU_LOADOP_CLEAR,
         SDL_GPU_STOREOP_DONT_CARE,
     };
     return {depthStencilTargetInfo};
@@ -261,7 +261,7 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
 {
     _gpu_device = SDL_CreateGPUDevice(
             SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-#if ARK_FLAG_DEBUG
+#if ARK_FLAG_BUILD_TYPE
             true,
 #else
             false,

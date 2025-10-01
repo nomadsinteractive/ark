@@ -24,7 +24,7 @@ public:
 
     class Declaration {
     public:
-        Declaration(const String& name, const String& type, uint32_t length, sp<String> source);
+        Declaration(String name, String type, uint32_t length, sp<String> source);
         DEFAULT_COPY_AND_ASSIGN(Declaration);
 
         const String& name() const;

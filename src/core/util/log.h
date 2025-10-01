@@ -26,7 +26,7 @@ public:
 
 }
 
-#if ARK_FLAG_DEBUG == 1
+#if ARK_FLAG_BUILD_TYPE == 1
     #define  LOGD(...)     ark::Log::d(ark::Log::func(__ARK_FUNCTION__).c_str(), ark::Strings::sprintf(__VA_ARGS__).c_str())
 #else
     #define  LOGD(...)

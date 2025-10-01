@@ -12,7 +12,7 @@
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
 
-#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_ANDROID)
+#if defined(ARK_FLAG_BUILD_TYPE) && !defined(ARK_PLATFORM_ANDROID)
 #define ARK_VK_DEBUG_LAYER_ENABLED  1
 #else
 #define ARK_VK_DEBUG_LAYER_ENABLED  0
@@ -71,7 +71,7 @@ VKInstance::VKInstance()
 
 VKInstance::~VKInstance()
 {
-#ifdef ARK_FLAG_DEBUG
+#ifdef ARK_FLAG_BUILD_TYPE
     PFN_vkDestroyDebugUtilsMessengerEXT pfnDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT");
     if(_callback1)
         pfnDestroyDebugUtilsMessengerEXT(_instance, _callback1, nullptr);

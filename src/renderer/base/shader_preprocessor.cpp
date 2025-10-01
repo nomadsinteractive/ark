@@ -225,9 +225,9 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms)
         DCHECK(pos != 0, "Illegal uniform name: %s", i->name().c_str());
         if(_main.contains(pos == String::npos ? i->name() : i->name().substr(0, pos)) && !_declaration_uniforms.has(i->name()))
         {
-            const String type = i->declaredType();
+            String type = i->declaredType();
             sp<String> declaration = sp<String>::make(i->declaration("uniform "));
-            _declaration_uniforms.vars().push_back(i->name(), Declaration(i->name(), type, i->length(), declaration));
+            _declaration_uniforms.vars().push_back(i->name(), Declaration(i->name(), std::move(type), i->length(), declaration));
             if(pos == String::npos)
                 _uniform_declaration_codes.push_back(std::move(declaration));
         }
@@ -688,8 +688,8 @@ void ShaderPreprocessor::Source::insertBefore(const String& statement, const Str
     }
 }
 
-ShaderPreprocessor::Declaration::Declaration(const String& name, const String& type, const uint32_t length, sp<String> source)
-    : _name(name), _type(type), _length(length), _usage(RenderUtil::toAttributeLayoutType(_name, _type)), _source(std::move(source))
+ShaderPreprocessor::Declaration::Declaration(String name, String type, const uint32_t length, sp<String> source)
+    : _name(std::move(name)), _type(std::move(type)), _length(length), _usage(RenderUtil::toAttributeLayoutType(_name, _type)), _source(std::move(source))
 {
 }
 

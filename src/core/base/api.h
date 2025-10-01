@@ -69,7 +69,7 @@
 #   define DPROFILER_LOG(...)
 #endif
 
-#if ARK_FLAG_DEBUG
+#if !defined(ARK_FLAG_PUBLISHING_BUILD) || !defined(ARK_FLAG_BUILD_TYPE) || ARK_FLAG_BUILD_TYPE < ARK_FLAG_PUBLISHING_BUILD
 #   define DFATAL(...) FATAL(__VA_ARGS__)
 #   define DCHECK(cond, ...) CHECK(cond, __VA_ARGS__)
 #   define DCHECK_WARN(cond, ...) CHECK_WARN(cond, __VA_ARGS__)
@@ -101,7 +101,7 @@ enum THREAD_NAME_ID {
 typedef void(*fnTraceCallback)(const char* func, const char* condition, const char* message);
 
 void ARK_API __message__(fnTraceCallback callback, const char* func, const char* condition, const char* format = "", ...);
-#ifndef ARK_FLAG_DEBUG
+#ifndef ARK_FLAG_BUILD_TYPE
 [[noreturn]]
 #endif
 

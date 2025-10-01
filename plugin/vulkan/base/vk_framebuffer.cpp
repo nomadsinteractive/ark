@@ -95,7 +95,7 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
 
     VkClearValue clearDepthStencil;
     clearDepthStencil.depthStencil = { 1.0f, 0 };
-    if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
+    if(_configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
         _clear_values.push_back(clearDepthStencil);
 
     _render_pass_begin_info.renderArea = _scissor;
@@ -163,9 +163,9 @@ VkRenderPass VKFramebuffer::Stub::acquire()
         attachments.push_back(depthstencilView);
 
         VkAttachmentDescription depthAttachmentDescription = {};
-        const VkAttachmentLoadOp loadOp = !_configure._depth_stencil_op || _configure._depth_stencil_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
-                                          : _configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-        const VkAttachmentStoreOp storeOp = _configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        const VkAttachmentLoadOp loadOp = !_configure._depth_attachment_op || _configure._depth_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
+                                          : _configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        const VkAttachmentStoreOp storeOp = _configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachmentDescription.format = fbDepthFormat;
         depthAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
         depthAttachmentDescription.loadOp = loadOp;
@@ -176,7 +176,7 @@ VkRenderPass VKFramebuffer::Stub::acquire()
         depthAttachmentDescription.finalLayout = depthAttachmentDescription.initialLayout;
         attachmentDescriptions.push_back(depthAttachmentDescription);
     }
-    VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), (_configure._depth_stencil_op == RenderTarget::ATTACHMENT_OP_BIT_LOAD && !_configure._depth_test_write_enabled) ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+    VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), (_configure._depth_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_LOAD && !_configure._depth_test_write_enabled) ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
                                                                                                                                                                                                 : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 
     VkSubpassDescription subpassDescription = {};

@@ -16,6 +16,7 @@ namespace ark {
 //[[script::bindings::extends(Renderer)]]
 class ARK_API RenderTarget final : public Renderer {
 public:
+[[deprecated]]
     enum ClearBits {
         CLEAR_BIT_NONE = 0,
         CLEAR_BIT_COLOR = 1,
@@ -36,13 +37,12 @@ public:
 
     struct Attachment {
         sp<Texture> _texture;
-        V4 _clear_color;
+        V4 _clear_value;
     };
 
     struct Configure {
         AttachmentOp _color_attachment_op;
-        AttachmentOp _depth_stencil_op;
-        ClearBitSet _clear_bits;
+        AttachmentOp _depth_attachment_op;
         Vector<Attachment> _color_attachments;
         sp<Texture> _depth_stencil_attachment;
         bool _depth_test_write_enabled = true;
@@ -73,7 +73,6 @@ public:
 
         sp<Builder<Renderer>> _renderer;
         Vector<AttachmentBuilder> _attachments;
-        ClearBitSet _clear_mask;
         AttachmentOp _color_attachment_op;
         AttachmentOp _depth_stencil_op;
     };

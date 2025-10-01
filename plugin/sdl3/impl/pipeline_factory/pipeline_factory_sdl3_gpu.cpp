@@ -65,7 +65,7 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineLayout&
         binaries.size() * sizeof(uint32_t),
         entrypoint,
         stageBit == enums::SHADER_STAGE_BIT_VERTEX ? SDL_SHADERCROSS_SHADERSTAGE_VERTEX : SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT,
-#ifdef ARK_FLAG_DEBUG
+#ifdef ARK_FLAG_BUILD_TYPE
         true,
 #else
         false,
@@ -487,7 +487,7 @@ public:
                 binaries.size() * sizeof(uint32_t),
                 entrypoint,
                 SDL_SHADERCROSS_SHADERSTAGE_COMPUTE,
-        #ifdef ARK_FLAG_DEBUG
+        #ifdef ARK_FLAG_BUILD_TYPE
                 true,
         #else
                 false,

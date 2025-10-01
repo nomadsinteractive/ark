@@ -34,7 +34,7 @@ const sp<Resource>& RenderTarget::fbo() const
 }
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _renderer(factory.ensureBuilder<Renderer>(manifest, constants::RENDERER)), _attachments(factory.makeBuilderListObject<AttachmentBuilder>(manifest, constants::TEXTURE)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
+    : _renderer(factory.ensureBuilder<Renderer>(manifest, constants::RENDERER)), _attachments(factory.makeBuilderListObject<AttachmentBuilder>(manifest, constants::TEXTURE)),
       _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_LOAD, ATTACHMENT_OP_BIT_STORE})),
       _depth_stencil_op(Documents::getAttribute<AttachmentOp>(manifest, "depth-stencil-op", {ATTACHMENT_OP_BIT_LOAD, ATTACHMENT_OP_BIT_STORE}))
 {
@@ -43,7 +43,7 @@ RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
 {
-    Configure configure = {_color_attachment_op, _depth_stencil_op, _clear_mask};
+    Configure configure = {_color_attachment_op, _depth_stencil_op};
     for(const AttachmentBuilder& i : _attachments)
     {
         sp<Texture> tex = i._texture->build(args);

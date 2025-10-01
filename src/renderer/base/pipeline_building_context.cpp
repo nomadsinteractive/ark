@@ -17,25 +17,6 @@ namespace ark {
 
 namespace {
 
-class AlignedUploader final : public Uploader {
-public:
-    AlignedUploader(sp<Uploader> delegate, const size_t alignedSize)
-        : Uploader(alignedSize), _delegate(std::move(delegate)) {
-        CHECK(_delegate->size() <= alignedSize, "Alignment is lesser than delegate's size(%d)", _delegate->size());
-    }
-
-    void upload(Writable& buf) override {
-        _delegate->upload(buf);
-    }
-
-    bool update(const uint64_t timestamp) override {
-        return _delegate->update(timestamp);
-    }
-
-private:
-    sp<Uploader> _delegate;
-};
-
 Attribute makePredefinedAttribute(const String& name, const String& type)
 {
     const Attribute::Usage layoutType = RenderUtil::toAttributeLayoutType(name, type);
@@ -51,6 +32,22 @@ Attribute makePredefinedAttribute(const String& name, const String& type)
         return {Attribute::USAGE_POSITION, "a_Position", Attribute::TYPE_FLOAT, type, std::min<uint32_t>(3, static_cast<uint32_t>(type.at(3) - '0')), false};
     }
     return RenderUtil::makePredefinedAttribute("a_" + name, type, layoutType);
+}
+
+bool checkUnsuedUniforms(const Table<String, sp<Uniform>>& uniforms, const Vector<ShaderPreprocessor*>& stages)
+{
+    for(const String& i : uniforms.keys())
+    {
+        bool contains = false;
+        for(const ShaderPreprocessor* stage : stages)
+            if(stage->_declaration_uniforms.has(i))
+            {
+                contains = true;
+                break;
+            }
+        DCHECK(contains, "Uniform \"%s\" declared in manifest but it is not used in all stages", i.c_str());
+    }
+    return true;
 }
 
 }
@@ -220,6 +217,7 @@ void PipelineBuildingContext::initializeUniforms()
             for(const String& i : uniformNames)
                 ubo->addUniform(_uniforms.at(i));
         }
+    DCHECK(checkUnsuedUniforms(_uniforms, _stages), "");
 }
 
 const Vector<ShaderPreprocessor*>& PipelineBuildingContext::stages() const
@@ -258,15 +256,12 @@ void PipelineBuildingContext::addUniform(sp<Uniform> uniform)
 void PipelineBuildingContext::addAttribute(const String& name, const String& type, const uint32_t divisor)
 {
     if(_vertex_attributes.find(name) == _vertex_attributes.end())
-    {
         _vertex_attributes.push_back(name, {name, type, divisor});
-        // doAddAttribute(name, type, divisor);
-    }
 }
 
 Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, const uint32_t divisor, const enums::ShaderStageBit stage)
 {
-    if(_attributes.find(name) == _attributes.end())
+    if(!_attributes.contains(name))
     {
         Attribute attr = makePredefinedAttribute(name, type);
         attr.setDivisor(divisor);

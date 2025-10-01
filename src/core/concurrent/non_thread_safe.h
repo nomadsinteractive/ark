@@ -42,7 +42,7 @@ public:
     }
 
     void threadCheck() const {
-#if ARK_FLAG_DEBUG
+#if ARK_FLAG_BUILD_TYPE
         if constexpr(ENABLED) {
             // Most of the instances should be safely accessed on core thread.
             if(__thread_check__(THREAD_NAME_ID_CORE))
@@ -56,7 +56,7 @@ public:
     }
 
 private:
-#if ARK_FLAG_DEBUG
+#if ARK_FLAG_BUILD_TYPE
     mutable std::thread::id _owner_thread_id;
     mutable std::thread::id _synchronized_thread_id;
 #endif

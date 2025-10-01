@@ -476,7 +476,7 @@ Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, enums::ShaderS
             Vector<uint32_t> spirv;
             spv::SpvBuildLogger logger;
             glslang::SpvOptions spvOptions;
-#ifdef ARK_FLAG_DEBUG
+#ifdef ARK_FLAG_BUILD_TYPE
             spvOptions.disableOptimizer = false;
             spvOptions.optimizeSize = false;
             spvOptions.disassemble = false;

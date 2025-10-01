@@ -14,7 +14,7 @@
 
 namespace ark::plugin::python {
 
-#if ARK_FLAG_DEBUG
+#if ARK_FLAG_BUILD_TYPE
 
 void setThreadFlag();
 bool getThreadFlag();

@@ -13,7 +13,7 @@ static std::thread::id _thread_ids[THREAD_NAME_ID_COUNT];
 void __fatal__(const char* func, const char* condition, const char* message)
 {
     const String str = Strings::sprintf("%s%s", condition ? Strings::sprintf("\"%s\" failed! ", condition).c_str() : "", message);
-#if ARK_FLAG_DEBUG
+#if ARK_FLAG_BUILD_TYPE
     uint32_t raise = 1;
 #else
     constexpr bool raise = true;

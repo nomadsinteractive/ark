@@ -17,18 +17,19 @@ namespace ark::plugin::opengl {
 
 namespace {
 
-struct PreDrawElementsToFBO final : RenderCommand {
-    PreDrawElementsToFBO(sp<GLFramebuffer> fbo, const int32_t width, const int32_t height, const uint32_t drawBufferCount, const int32_t clearMask)
-        : _fbo(std::move(fbo)), _width(width), _height(height), _clear_mask(clearMask), _clear_color_value(0, 0, 0, 0), _clear_depth_value(1.0f),
-          _clear_stencil_value(0), _draw_buffer_count(drawBufferCount) {
+class PreDrawElementsToFBO final : public RenderCommand {
+public:
+    PreDrawElementsToFBO(sp<GLFramebuffer> fbo, const int32_t width, const int32_t height, const RenderTarget::ClearBitSet clearBits)
+    : _fbo(std::move(fbo)), _width(width), _height(height), _clear_bits(clearBits), _clear_depth_value(1.0f), _clear_stencil_value(0) {
     }
 
     void draw(GraphicsContext& /*graphicsContext*/) override {
         glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_fbo->id()));
         glViewport(0, 0, _width, _height);
         const RenderTarget::Configure& configure = _fbo->configure();
-        if(_clear_mask) {
-            if(const uint32_t mds = _clear_mask & RenderTarget::CLEAR_BIT_DEPTH_STENCIL) {
+        if(_clear_bits)
+            if(const RenderTarget::ClearBitSet mds = _clear_bits & RenderTarget::CLEAR_BIT_DEPTH_STENCIL)
+            {
                 if(mds == RenderTarget::CLEAR_BIT_DEPTH_STENCIL)
                     glClearBufferfi(GL_DEPTH_STENCIL, 0, _clear_depth_value, _clear_stencil_value);
                 else if(mds == RenderTarget::CLEAR_BIT_DEPTH)
@@ -36,26 +37,24 @@ struct PreDrawElementsToFBO final : RenderCommand {
                 else
                     glClearBufferiv(GL_STENCIL, 0, &_clear_stencil_value);
             }
-        }
 
         if(configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
-            for(size_t i = 0; i < _draw_buffer_count; ++i)
-                glClearBufferfv(GL_COLOR, static_cast<GLint>(i), reinterpret_cast<GLfloat *>(&_clear_color_value));
+            for(size_t i = 0; i < configure._color_attachments.size(); ++i)
+                glClearBufferfv(GL_COLOR, static_cast<GLint>(i), reinterpret_cast<const GLfloat *>(&configure._color_attachments.at(i)._clear_value));
     }
 
+private:
     sp<GLFramebuffer> _fbo;
     GLsizei _width, _height;
-    int32_t _clear_mask;
-
-    V4 _clear_color_value;
+    RenderTarget::ClearBitSet _clear_bits;
     float _clear_depth_value;
     int32_t _clear_stencil_value;
-
-    uint32_t _draw_buffer_count;
 };
 
-struct PostDrawElementsToFBO final : RenderCommand {
-    void draw(GraphicsContext& graphicsContext) override {
+class PostDrawElementsToFBO final : public RenderCommand {
+public:
+    void draw(GraphicsContext& graphicsContext) override
+    {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         const auto [width, height] = graphicsContext.renderContext()->displayResolution();
@@ -65,8 +64,8 @@ struct PostDrawElementsToFBO final : RenderCommand {
 
 }
 
-GLFramebufferRenderer::GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<Renderer> renderer, uint32_t drawBufferCount, int32_t clearMask)
-    : _renderer(std::move(renderer)), _pre_draw(sp<PreDrawElementsToFBO>::make(std::move(fbo), width, height, drawBufferCount, clearMask)), _post_draw(sp<PostDrawElementsToFBO>::make())
+GLFramebufferRenderer::GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<Renderer> renderer, const RenderTarget::ClearBitSet clearBits)
+    : _renderer(std::move(renderer)), _pre_draw(sp<RenderCommand>::make<PreDrawElementsToFBO>(std::move(fbo), width, height, clearBits)), _post_draw(sp<RenderCommand>::make<PostDrawElementsToFBO>())
 {
 }
 

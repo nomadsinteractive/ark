@@ -40,14 +40,14 @@ void setVersion(const enums::RendererVersion version, RenderEngineContext& glCon
     glContext.setVersion(version);
 }
 
-int32_t toClearMaskBits(const RenderTarget::Configure& configure)
+RenderTarget::ClearBitSet toClearBitSet(const RenderTarget::Configure& configure)
 {
-    RenderTarget::ClearBitSet clearMask = configure._clear_bits;
-    if(configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_LOAD))
-        clearMask.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, false);
+    RenderTarget::ClearBitSet clearBits(RenderTarget::CLEAR_BIT_ALL);
+    if(configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_LOAD))
+        clearBits.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, false);
     else
-        clearMask.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR));
-    return clearMask.bits();
+        clearBits.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR));
+    return clearBits;
 }
 
 }
@@ -97,10 +97,9 @@ sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(enums::CoordinateSystem
 sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
     const auto [width, height] = RenderUtil::getRenderTargetResolution(configure);
-    const int32_t clearBitMask = toClearMaskBits(configure);
-    const uint32_t drawBufferCount = static_cast<uint32_t>(configure._color_attachments.size());
+    const RenderTarget::ClearBitSet clearBits = toClearBitSet(configure);
     sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(Ark::instance().renderController()->recycler(), std::move(configure));
-    sp<Renderer> fboRenderer = sp<Renderer>::make<GLFramebufferRenderer>(fbo, width, height, renderer, drawBufferCount, clearBitMask);
+    sp<Renderer> fboRenderer = sp<Renderer>::make<GLFramebufferRenderer>(fbo, width, height, renderer, clearBits);
     return sp<RenderTarget>::make(std::move(renderer), std::move(fbo), std::move(fboRenderer));
 }
 

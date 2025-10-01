@@ -117,9 +117,9 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         GL_CHECK_ERROR(glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, depthTexture->width(), depthTexture->height()));
         for(const GLenum i : depthInputs)
         {
-            if(_configure._depth_stencil_op != RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE && _configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_LOAD))
+            if(_configure._depth_attachment_op != RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE && _configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_LOAD))
                 GL_CHECK_ERROR(glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id())));
-            if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
+            if(_configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
                 GL_CHECK_ERROR(glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id())));
         }
         GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, depthStencilAttachment, GL_TEXTURE_2D, static_cast<GLuint>(depthTexture->id()), 0));
