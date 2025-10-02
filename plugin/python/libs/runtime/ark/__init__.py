@@ -1007,6 +1007,22 @@ class Camera:
         pass
 
     @property
+    def fov(self) -> Optional["Numeric"]:
+        pass
+
+    @property
+    def aspect(self) -> Optional["Numeric"]:
+        pass
+
+    @property
+    def clip_near(self) -> Optional["Numeric"]:
+        pass
+
+    @property
+    def clip_far(self) -> Optional["Numeric"]:
+        pass
+
+    @property
     def position(self) -> Optional["Vec3"]:
         return None
 
@@ -1054,6 +1070,9 @@ class Camera:
         pass
 
     def to_viewport_position(self, position: TYPE_VEC3) -> "Vec3":
+        pass
+
+    def assign(self, camera: "Camera"):
         pass
 
 

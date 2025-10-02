@@ -55,11 +55,13 @@ public:
         M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
+    struct Stub;
+
 public:
 //  [[script::bindings::auto]]
     Camera(enums::CoordinateSystem coordinateSystem = enums::COORDINATE_SYSTEM_DEFAULT);
     Camera(const Camera& other);
-    Camera(enums::CoordinateSystem coordinateSystem, sp<Delegate> delegate, sp<Mat4> view = nullptr, sp<Mat4> projection = nullptr);
+    Camera(enums::CoordinateSystem coordinateSystem, sp<Delegate> delegate, sp<Mat4> view = nullptr, sp<Mat4> projection = nullptr, sp<Stub> stub = nullptr);
 
 //  [[script::bindings::auto]]
     void ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip);
@@ -110,8 +112,6 @@ public:
     bool isLHS() const;
 
     static Camera createDefaultCamera();
-
-    struct Stub;
 
 private:
     enums::CoordinateSystem _coordinate_system;

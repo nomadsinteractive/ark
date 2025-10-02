@@ -48,6 +48,16 @@ struct Camera::Stub {
     Optional<PerspectiveStub> _perspective;
     Optional<LookAtStub> _look_at;
 
+    Stub() = default;
+    Stub(const Stub& other)
+    {
+        if(const Optional<PerspectiveStub>& opt = other._perspective)
+            _perspective = {{opt->_fov->wrapped(), opt->_aspect->wrapped(), opt->_clip_far->wrapped(), opt->_clip_near->wrapped()}};
+
+        if(const Optional<LookAtStub>& opt = other._look_at)
+            _look_at = {{opt->_position->wrapped(), opt->_target->wrapped(), opt->_up->wrapped()}};
+    }
+
     void perspective(sp<Numeric> fov, sp<Numeric> aspect, sp<Numeric> clipNear, sp<Numeric> clipFar)
     {
         if(_perspective)
@@ -206,15 +216,13 @@ Camera::Camera(const enums::CoordinateSystem coordinateSystem)
 }
 
 Camera::Camera(const Camera& other)
-    : Camera(other._coordinate_system, other._delegate, other._view, other._projection)
+    : Camera(other._coordinate_system, other._delegate, other._view, other._projection, sp<Stub>::make(*other._stub))
 {
-    if(const Optional<LookAtStub>& lookAt = other._stub->_look_at)
-        _stub->_look_at = {{Vec3Type::freeze(lookAt->_position), Vec3Type::freeze(lookAt->_target), Vec3Type::freeze(lookAt->_up)}};
 }
 
-Camera::Camera(const enums::CoordinateSystem coordinateSystem, sp<Delegate> delegate, sp<Mat4> view, sp<Mat4> projection)
+Camera::Camera(const enums::CoordinateSystem coordinateSystem, sp<Delegate> delegate, sp<Mat4> view, sp<Mat4> projection, sp<Stub> stub)
     : _coordinate_system(coordinateSystem), _delegate(std::move(delegate)), _view(sp<Mat4>::make<Mat4Wrapper>(view ? std::move(view) : Mat4Type::create())), _projection(sp<Mat4>::make<Mat4Wrapper>(projection ? std::move(projection) : Mat4Type::create())),
-      _vp(sp<Mat4>::make<Mat4Wrapper>(Mat4Type::matmul(_projection.cast<Mat4>(), _view.cast<Mat4>()))), _stub(sp<Stub>::make())
+      _vp(sp<Mat4>::make<Mat4Wrapper>(Mat4Type::matmul(_projection.cast<Mat4>(), _view.cast<Mat4>()))), _stub(stub ? std::move(stub) : sp<Stub>::make())
 {
     CHECK(_coordinate_system == enums::COORDINATE_SYSTEM_LHS || _coordinate_system == enums::COORDINATE_SYSTEM_RHS, "Camera's coordinate system should be either LHS or RHS");
 }
@@ -303,7 +311,7 @@ void Camera::assign(const Camera& other)
     _coordinate_system = other._coordinate_system;
     _delegate = other._delegate;
     if(const Optional<LookAtStub>& lookAt = other._stub->_look_at)
-        _stub->lookAt(lookAt->_position, lookAt->_target, lookAt->_up);
+        _stub->lookAt(lookAt->_position->wrapped(), lookAt->_target->wrapped(), lookAt->_up->wrapped());
     _view->set(other.view());
     _projection->set(other.projection());
 }
