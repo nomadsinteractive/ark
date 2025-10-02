@@ -306,6 +306,26 @@ sp<Vec3> Camera::up() const
     return _stub->_look_at ? _stub->_look_at->_up : nullptr;
 }
 
+sp<Numeric> Camera::fov() const
+{
+    return _stub->_perspective ? _stub->_perspective->_fov : nullptr;
+}
+
+sp<Numeric> Camera::aspect() const
+{
+    return _stub->_perspective ? _stub->_perspective->_aspect : nullptr;
+}
+
+sp<Numeric> Camera::clipNear() const
+{
+    return _stub->_perspective ? _stub->_perspective->_clip_near : nullptr;
+}
+
+sp<Numeric> Camera::clipFar() const
+{
+    return _stub->_perspective ? _stub->_perspective->_clip_far : nullptr;
+}
+
 void Camera::assign(const Camera& other)
 {
     _coordinate_system = other._coordinate_system;

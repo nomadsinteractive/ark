@@ -96,6 +96,15 @@ public:
     sp<Vec3> up() const;
 
 //  [[script::bindings::property]]
+    sp<Numeric> fov() const;
+//  [[script::bindings::property]]
+    sp<Numeric> aspect() const;
+//  [[script::bindings::property]]
+    sp<Numeric> clipNear() const;
+//  [[script::bindings::property]]
+    sp<Numeric> clipFar() const;
+
+//  [[script::bindings::property]]
     sp<Mat4> view() const;
 //  [[script::bindings::property]]
     void setView(sp<Mat4> view);
