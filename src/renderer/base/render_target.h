@@ -16,8 +16,7 @@ namespace ark {
 //[[script::bindings::extends(Renderer)]]
 class ARK_API RenderTarget final : public Renderer {
 public:
-[[deprecated]]
-    enum ClearBits {
+    enum [[deprecated]] ClearBits {
         CLEAR_BIT_NONE = 0,
         CLEAR_BIT_COLOR = 1,
         CLEAR_BIT_DEPTH = 2,
