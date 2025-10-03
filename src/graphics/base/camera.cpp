@@ -52,7 +52,7 @@ struct Camera::Stub {
     Stub(const Stub& other)
     {
         if(const Optional<PerspectiveStub>& opt = other._perspective)
-            _perspective = {{opt->_fov->wrapped(), opt->_aspect->wrapped(), opt->_clip_far->wrapped(), opt->_clip_near->wrapped()}};
+            _perspective = {{opt->_fov->wrapped(), opt->_aspect->wrapped(), opt->_clip_near->wrapped(), opt->_clip_far->wrapped()}};
 
         if(const Optional<LookAtStub>& opt = other._look_at)
             _look_at = {{opt->_position->wrapped(), opt->_target->wrapped(), opt->_up->wrapped()}};
@@ -130,7 +130,8 @@ private:
 class PerspectiveMat4 final : public Mat4 {
 public:
     PerspectiveMat4(const sp<Camera::Delegate>& delegate, const sp<Camera::Stub>& camera)
-        : _delegate(delegate), _camera(camera), _matrix(_delegate->perspective(_camera->_perspective->_fov->val(), _camera->_perspective->_aspect->val(), _camera->_perspective->_clip_near->val(), _camera->_perspective->_clip_far->val())) {
+        : _delegate(delegate), _camera(camera) {
+        update(Timestamp::now());
     }
 
     M4 val() override
@@ -157,7 +158,8 @@ private:
 class LookAtMat4 final : public Mat4 {
 public:
     LookAtMat4(const sp<Camera::Delegate>& delegate, const sp<Camera::Stub>& camera)
-        : _delegate(delegate), _camera(camera), _matrix(_delegate->lookAt(_camera->_look_at->_position->val(), _camera->_look_at->_target->val(), _camera->_look_at->_up->val())) {
+        : _delegate(delegate), _camera(camera) {
+        update(Timestamp::now());
     }
 
     M4 val() override
@@ -330,12 +332,14 @@ void Camera::assign(const Camera& other)
 {
     _coordinate_system = other._coordinate_system;
     _delegate = other._delegate;
-    if(const Optional<PerspectiveStub>& perspective = other._stub->_perspective)
-        _stub->perspective(perspective->_fov->wrapped(), perspective->_aspect->wrapped(), perspective->_clip_near->wrapped(), perspective->_clip_far->wrapped());
-    if(const Optional<LookAtStub>& lookAt = other._stub->_look_at)
-        _stub->lookAt(lookAt->_position->wrapped(), lookAt->_target->wrapped(), lookAt->_up->wrapped());
-    _view->set(other.view());
-    _projection->set(other.projection());
+    if(const Optional<PerspectiveStub>& opt = other._stub->_perspective)
+        perspective(opt->_fov->wrapped(), opt->_aspect->wrapped(), opt->_clip_near->wrapped(), opt->_clip_far->wrapped());
+    else
+        _projection->set(other.projection());
+    if(const Optional<LookAtStub>& opt = other._stub->_look_at)
+        lookAt(opt->_position->wrapped(), opt->_target->wrapped(), opt->_up->wrapped());
+    else
+        _view->set(other.view());
 }
 
 sp<Mat4> Camera::view() const
