@@ -44,7 +44,7 @@ private:
     float _distance;
 };
 
-float _atan2(const V2& val)
+float _atan2(const V2 val)
 {
     return Math::atan2(val.y(), val.x());
 }
@@ -55,13 +55,13 @@ sp<Vec2> Vec2Type::create(sp<Numeric> x, sp<Numeric> y)
 {
     ASSERT(x);
     if(!y)
-        return sp<Vec2>::make<Vec2Impl>(std::move(x));
-    return sp<Vec2>::make<Vec2Impl>(std::move(x), std::move(y));
+        return wrap(sp<Vec2>::make<Vec2Impl>(std::move(x)));
+    return wrap(sp<Vec2>::make<Vec2Impl>(std::move(x), std::move(y)));
 }
 
-sp<Vec2> Vec2Type::create(float x, float y)
+sp<Vec2> Vec2Type::create(const float x, const float y)
 {
-    return sp<Vec2>::make<Vec2Impl>(x, y);
+    return wrap(sp<Vec2>::make<Vec2Impl>(x, y));
 }
 
 sp<Vec3> Vec2Type::extend(sp<Vec2> self, sp<Numeric> z)

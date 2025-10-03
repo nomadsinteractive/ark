@@ -63,6 +63,9 @@ public:
     Camera(const Camera& other);
     Camera(enums::CoordinateSystem coordinateSystem, sp<Delegate> delegate, sp<Mat4> view = nullptr, sp<Mat4> projection = nullptr, sp<Stub> stub = nullptr);
 
+//  [[script::bindings::property]]
+    enums::CoordinateSystem coordinateSystem() const;
+
 //  [[script::bindings::auto]]
     void ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip);
 //  [[script::bindings::auto]]
@@ -107,11 +110,11 @@ public:
 //  [[script::bindings::property]]
     sp<Mat4> view() const;
 //  [[script::bindings::property]]
-    void setView(sp<Mat4> view);
+    void setView(sp<Mat4> view) const;
 //  [[script::bindings::property]]
     sp<Mat4> projection() const;
 //  [[script::bindings::property]]
-    void setProjection(sp<Mat4> projection);
+    void setProjection(sp<Mat4> projection) const;
 //  [[script::bindings::property]]
     sp<Mat4> vp() const;
 

@@ -1007,6 +1007,10 @@ class Camera:
         pass
 
     @property
+    def coordinate_system(self) -> int:
+        return 0
+
+    @property
     def fov(self) -> Optional["Numeric"]:
         pass
 

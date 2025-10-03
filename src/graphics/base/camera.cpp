@@ -229,6 +229,11 @@ Camera::Camera(const enums::CoordinateSystem coordinateSystem, sp<Delegate> dele
     CHECK(_coordinate_system == enums::COORDINATE_SYSTEM_LHS || _coordinate_system == enums::COORDINATE_SYSTEM_RHS, "Camera's coordinate system should be either LHS or RHS");
 }
 
+enums::CoordinateSystem Camera::coordinateSystem() const
+{
+    return _coordinate_system;
+}
+
 void Camera::ortho(const V2& leftTop, const V2& rightBottom, const V2& clip)
 {
     ortho(leftTop.x(), rightBottom.x(), rightBottom.y(), leftTop.y(), clip.x(), clip.y());
@@ -347,7 +352,7 @@ sp<Mat4> Camera::view() const
     return _view;
 }
 
-void Camera::setView(sp<Mat4> view)
+void Camera::setView(sp<Mat4> view) const
 {
     _view->set(std::move(view));
 }
@@ -357,7 +362,7 @@ sp<Mat4> Camera::projection() const
     return _projection;
 }
 
-void Camera::setProjection(sp<Mat4> projection)
+void Camera::setProjection(sp<Mat4> projection) const
 {
     _projection->set(std::move(projection));
 }

@@ -9,15 +9,15 @@ namespace ark {
 
 sp<Vec4> Vec4Type::create(const float x, const float y, const float z, const float w)
 {
-    return sp<Vec4>::make<Vec4Impl>(x, y, z, w);
+    return wrap(sp<Vec4>::make<Vec4Impl>(x, y, z, w));
 }
 
 sp<Vec4> Vec4Type::create(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeric> w)
 {
     ASSERT((x && y && z && w) || (x && !y && !z && !w));
     if(!y)
-        return sp<Vec4>::make<Vec4Impl>(std::move(x));
-    return sp<Vec4>::make<Vec4Impl>(std::move(x), std::move(y), std::move(z), std::move(w));
+        return wrap(sp<Vec4>::make<Vec4Impl>(std::move(x)));
+    return wrap(sp<Vec4>::make<Vec4Impl>(std::move(x), std::move(y), std::move(z), std::move(w)));
 }
 
 sp<Numeric> Vec4Type::w(const sp<Vec4>& self)

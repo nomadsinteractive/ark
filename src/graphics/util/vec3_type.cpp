@@ -51,13 +51,13 @@ sp<Vec3> Vec3Type::create(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z)
 {
     ASSERT((x && y && z) || (x && !y && !z));
     if(!y)
-        return sp<Vec3>::make<Vec3Impl>(std::move(x));
-    return sp<Vec3>::make<Vec3Impl>(std::move(x), std::move(y), std::move(z));
+        return wrap(sp<Vec3>::make<Vec3Impl>(std::move(x)));
+    return wrap(sp<Vec3>::make<Vec3Impl>(std::move(x), std::move(y), std::move(z)));
 }
 
 sp<Vec3> Vec3Type::create(float x, float y, float z)
 {
-    return sp<Vec3>::make<Vec3Impl>(x, y, z);
+    return wrap(sp<Vec3>::make<Vec3Impl>(x, y, z));
 }
 
 sp<Vec4> Vec3Type::extend(sp<Vec3> self, sp<Numeric> w)
