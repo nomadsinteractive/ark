@@ -16,16 +16,6 @@ namespace ark {
 //[[script::bindings::extends(Renderer)]]
 class ARK_API RenderTarget final : public Renderer {
 public:
-    enum [[deprecated]] ClearBits {
-        CLEAR_BIT_NONE = 0,
-        CLEAR_BIT_COLOR = 1,
-        CLEAR_BIT_DEPTH = 2,
-        CLEAR_BIT_STENCIL = 4,
-        CLEAR_BIT_DEPTH_STENCIL = 6,
-        CLEAR_BIT_ALL = 7
-    };
-    typedef BitSet<ClearBits> ClearBitSet;
-
     enum AttachmentOpBits {
         ATTACHMENT_OP_BIT_LOAD = 1,
         ATTACHMENT_OP_BIT_CLEAR = 2,

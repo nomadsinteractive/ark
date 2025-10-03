@@ -31,7 +31,7 @@ list(APPEND LOCAL_SRC_LIST
     3rdparty/cmft/src/cmft/common/stb_image.cpp
 )
 
-ark_setup_tools(gen_plugin_class)
+ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(cmft builtin ark::plugin::cmft texture_uploader)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})

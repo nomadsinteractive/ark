@@ -74,18 +74,6 @@ sp<Renderer> RenderTarget::RENDERER_BUILDER::build(const Scope& args)
     return _impl.build(args);
 }
 
-template<> ARK_API RenderTarget::ClearBitSet StringConvert::eval<RenderTarget::ClearBitSet>(const String& str)
-{
-    constexpr RenderTarget::ClearBitSet::LookupTable<5> clearBits = {{
-            {"none", RenderTarget::CLEAR_BIT_NONE},
-            {"color", RenderTarget::CLEAR_BIT_COLOR},
-            {"depth", RenderTarget::CLEAR_BIT_DEPTH},
-            {"stencil", RenderTarget::CLEAR_BIT_STENCIL},
-            {"all", RenderTarget::CLEAR_BIT_ALL}
-        }};
-    return RenderTarget::ClearBitSet::toBitSet(str, clearBits);
-}
-
 template<> RenderTarget::AttachmentOp StringConvert::eval<RenderTarget::AttachmentOp>(const String& str)
 {
     constexpr RenderTarget::AttachmentOp::LookupTable<4> opBits = {{

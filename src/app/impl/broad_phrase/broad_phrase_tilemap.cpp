@@ -30,11 +30,6 @@ RefId toCandidateId(const int32_t layerId, const int32_t row, const int32_t col)
 }
 
 
-BroadPhrase::Candidate makeCandidate(const RefId candidateId, const sp<Shape>& shape, const V2& position, sp<CollisionFilter> collisionFilter)
-{
-    return {candidateId, V3(position, 0), constants::QUATERNION_ONE, shape, std::move(collisionFilter)};
-}
-
 void addCandidate(BroadPhraseCallback& callback, const TilemapLayer& tilemapLayer, Set<int32_t>& candidateIdSet, const int32_t row, const int32_t col, const int32_t layerId, const V2& tl, const V2& tileSize)
 {
     if(row >= 0 && static_cast<uint32_t>(row) < tilemapLayer.rowCount() && col >= 0 && static_cast<uint32_t>(col) < tilemapLayer.colCount())

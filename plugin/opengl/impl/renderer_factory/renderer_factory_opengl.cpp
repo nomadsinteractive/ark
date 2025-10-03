@@ -40,16 +40,6 @@ void setVersion(const enums::RendererVersion version, RenderEngineContext& glCon
     glContext.setVersion(version);
 }
 
-RenderTarget::ClearBitSet toClearBitSet(const RenderTarget::Configure& configure)
-{
-    RenderTarget::ClearBitSet clearBits(RenderTarget::CLEAR_BIT_ALL);
-    if(configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_LOAD))
-        clearBits.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, false);
-    else
-        clearBits.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR));
-    return clearBits;
-}
-
 }
 
 RendererFactoryOpenGL::RendererFactoryOpenGL()
@@ -97,9 +87,8 @@ sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(enums::CoordinateSystem
 sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
     const auto [width, height] = RenderUtil::getRenderTargetResolution(configure);
-    const RenderTarget::ClearBitSet clearBits = toClearBitSet(configure);
     sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(Ark::instance().renderController()->recycler(), std::move(configure));
-    sp<Renderer> fboRenderer = sp<Renderer>::make<GLFramebufferRenderer>(fbo, width, height, renderer, clearBits);
+    sp<Renderer> fboRenderer = sp<Renderer>::make<GLFramebufferRenderer>(fbo, width, height, renderer);
     return sp<RenderTarget>::make(std::move(renderer), std::move(fbo), std::move(fboRenderer));
 }
 

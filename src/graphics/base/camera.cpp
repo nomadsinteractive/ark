@@ -330,6 +330,8 @@ void Camera::assign(const Camera& other)
 {
     _coordinate_system = other._coordinate_system;
     _delegate = other._delegate;
+    if(const Optional<PerspectiveStub>& perspective = other._stub->_perspective)
+        _stub->perspective(perspective->_fov->wrapped(), perspective->_aspect->wrapped(), perspective->_clip_near->wrapped(), perspective->_clip_far->wrapped());
     if(const Optional<LookAtStub>& lookAt = other._stub->_look_at)
         _stub->lookAt(lookAt->_position->wrapped(), lookAt->_target->wrapped(), lookAt->_up->wrapped());
     _view->set(other.view());

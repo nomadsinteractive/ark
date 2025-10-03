@@ -46,7 +46,7 @@ endif()
 ark_compile_definition_option(ARK_USE_LIBPNG "Use libpng decoding library" ON)
 ark_compile_definition_option(ARK_USE_STB_IMAGE "Use stb image decoding library" ON)
 
-ark_compile_definition_option(ARK_FLAG_PUBLISHING_BUILD "This is a build for publishing. Disabling all unnecessary modules" OFF 100)
+ark_compile_definition_option(ARK_FLAG_PUBLISHING_BUILD "This is a build for publishing. Disabling all unnecessary modules" OFF)
 
 list(APPEND LOCAL_INCLUDE_DIRS .)
 list(APPEND LOCAL_INCLUDE_DIRS src)
