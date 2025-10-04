@@ -18,7 +18,7 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Rigidbody> createBody(const sp<Collider>& self, Rigidbody::BodyType bodyType, sp<Shape> shape = nullptr, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Shape> createShape(const sp<Collider>& self, const NamedHash& type, sp<Vec3> size = nullptr, sp<Vec3> origin = nullptr);
+    static sp<Shape> createShape(const sp<Collider>& self, const NamedHash& type, Optional<V3> scale = {}, sp<Vec3> origin = nullptr);
 //  [[script::bindings::classmethod]]
     static Vector<RayCastManifold> rayCast(const sp<Collider>& self, const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr);
 

@@ -35,7 +35,7 @@ bool collisionFilterTest(const sp<CollisionFilter>& cf1, const sp<CollisionFilte
 
 float calcOccupyRadius(const Shape& shape)
 {
-    const V3 size = shape.size().val();
+    const V3 size = shape.scale().value();
     const V3 pivot = shape.origin().val();
     const V3 pm(std::max(std::abs(pivot.x()), std::abs(1.0f - pivot.x())), std::max(std::abs(pivot.y()), std::abs(1.0f - pivot.y())), std::max(std::abs(pivot.z()), std::abs(1.0f - pivot.z())));
     const V3 sm = pm * size;
@@ -48,25 +48,17 @@ class ColliderImpl::RigidbodyImpl final : public RigidbodyController {
 public:
     RigidbodyImpl(const Stub& stub, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
         : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter))), _collider_stub(stub), _position_updated(true),
-          _size_updated(false), _occupy_radius(0)
+          _occupy_radius(0)
     {
     }
 
     bool update(const uint64_t timestamp)
     {
-        if(const OptionalVar<Vec3>& size = _rigidbody_stub->_shape->size())
-            _size_updated = size.update(timestamp) | _size_updated;
         _position_updated = _rigidbody_stub->_position.update(timestamp) | _position_updated;
 
         const V3 pos = _rigidbody_stub->_position.val();
-        if(_size_updated || _position_updated)
+        if(_position_updated)
         {
-            if(_size_updated)
-            {
-                _collider_stub.narrowPhrase()->updateShapeDef(_rigidbody_stub->_shape->implementation(), _rigidbody_stub->_shape->size().val());
-                updateOccupyRadius();
-                _size_updated = false;
-            }
             _collider_stub.updateBroadPhraseCandidate(_rigidbody_stub->_ref->id(), pos, V3(_occupy_radius * 2));
             _position_updated = false;
             return true;
@@ -144,7 +136,6 @@ public:
     Set<RefId> _static_contacts;
 
     bool _position_updated;
-    bool _size_updated;
 
     float _occupy_radius;
 
@@ -243,16 +234,16 @@ Rigidbody::Impl ColliderImpl::createBody(const Rigidbody::BodyType type, sp<Shap
 {
     CHECK(type == Rigidbody::BODY_TYPE_KINEMATIC || type == Rigidbody::BODY_TYPE_DYNAMIC || type == Rigidbody::BODY_TYPE_STATIC || type == Rigidbody::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
     if(!shape->implementation())
-        shape = createShape(shape->type(), shape->size() ? shape->size().toVar() : sp<Vec3>(), shape->origin() ? shape->origin().toVar() : sp<Vec3>());
+        shape = createShape(shape->type(), shape->scale(), shape->origin() ? shape->origin().toVar() : sp<Vec3>());
     const sp<RigidbodyImpl> rigidbodyImpl = _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
     sp<Rigidbody::Stub> stub = rigidbodyImpl->_rigidbody_stub;
     return Rigidbody::Impl{std::move(stub), nullptr, rigidbodyImpl};
 }
 
-sp<Shape> ColliderImpl::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)
+sp<Shape> ColliderImpl::createShape(const NamedHash& type, Optional<V3> scale, sp<Vec3> origin)
 {
-    auto [_implementation, _size] = _stub->narrowPhrase()->createShapeDef(type.hash(), size ? Optional<V3>(size->val()) : Optional<V3>());
-    return sp<Shape>::make(type, size ? std::move(size) : sp<Vec3>::make<Vec3::Const>(_size), std::move(origin), std::move(_implementation));
+    auto [_implementation, _size] = _stub->narrowPhrase()->createShapeDef(type.hash(), scale);
+    return sp<Shape>::make(type, scale ? std::move(scale) : Optional<V3>(_size), std::move(origin), std::move(_implementation));
 }
 
 Vector<RayCastManifold> ColliderImpl::rayCast(const V3 from, const V3 to, const sp<CollisionFilter>& collisionFilter)

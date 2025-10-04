@@ -4,13 +4,13 @@
 
 namespace ark {
 
-Shape::Shape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)
-    : Shape(type, std::move(size), std::move(origin), {})
+Shape::Shape(const NamedHash& type, Optional<V3> scale, sp<Vec3> origin)
+    : Shape(type, std::move(scale), std::move(origin), {})
 {
 }
 
-Shape::Shape(const NamedHash& type, sp<Vec3> size, sp<Vec3> orgin, Box implementation)
-    : _type(type), _size(std::move(size)), _origin(std::move(orgin)), _implementation(std::move(implementation))
+Shape::Shape(const NamedHash& type, Optional<V3> scale, sp<Vec3> orgin, Box implementation)
+    : _type(type), _scale(std::move(scale)), _origin(std::move(orgin)), _implementation(std::move(implementation))
 {
 }
 
@@ -19,9 +19,9 @@ const NamedHash& Shape::type() const
     return _type;
 }
 
-const OptionalVar<Vec3>& Shape::size() const
+const Optional<V3>& Shape::scale() const
 {
-    return _size;
+    return _scale;
 }
 
 const OptionalVar<Vec3>& Shape::origin() const

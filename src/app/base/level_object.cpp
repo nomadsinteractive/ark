@@ -42,7 +42,7 @@ sp<Rigidbody> makeRigidBody(LevelLibrary& library, const sp<Collider>& collider,
         return nullptr;
 
     if(!library.shape())
-        library.setShape(collider->createShape(library.name(), library.size()));
+        library.setShape(collider->createShape(library.name()));
 
     const sp<Transform3D> transform = makeTransform(obj.rotation(), obj.scale());
     if(bodyType != Rigidbody::BODY_TYPE_DYNAMIC)
