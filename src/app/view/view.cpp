@@ -203,7 +203,7 @@ View::~View()
 TypeId View::onPoll(WiringContext& context)
 {
     context.setComponent(layoutSize());
-    context.setComponent(sp<Shape>::make(Shape::TYPE_AABB, layoutSize()));
+    context.setComponent(sp<Shape>::make(Shape::TYPE_AABB, layoutSize()->val()));
     return constants::TYPE_ID_NONE;
 }
 

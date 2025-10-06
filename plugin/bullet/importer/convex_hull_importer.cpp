@@ -13,23 +13,9 @@
 
 namespace ark::plugin::bullet {
 
-ConvexHullRigidBodyImporter::ConvexHullRigidBodyImporter(sp<ModelLoader> modelLoader)
-    : _model_loader(std::move(modelLoader))
-{
-}
+namespace {
 
-void ConvexHullRigidBodyImporter::import(ColliderBullet& collider, const document& manifest)
-{
-    std::unordered_map<TypeId, sp<CollisionShapeRef>>& shapes = collider.collisionShapes();
-    for(const document& i : manifest->children("model"))
-    {
-        const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
-        Model model = _model_loader->loadModel(type);
-        shapes[type] = makeCollisionShape(model, Documents::getAttribute<float>(i, "mass", 1.0f));
-    }
-}
-
-sp<CollisionShapeRef> ConvexHullRigidBodyImporter::makeCollisionShape(const Model& model, btScalar mass)
+sp<CollisionShapeRef> makeCollisionShape(const Model& model, btScalar mass)
 {
     const sp<btConvexHullShape> convexHullShape = sp<btConvexHullShape>::make();
 
@@ -40,7 +26,24 @@ sp<CollisionShapeRef> ConvexHullRigidBodyImporter::makeCollisionShape(const Mode
 
     convexHullShape->recalcLocalAabb();
     convexHullShape->optimizeConvexHull();
-    return sp<CollisionShapeRef>::make(convexHullShape, mass);
+    return sp<CollisionShapeRef>::make(convexHullShape, model.content()->size()->val());
+}
+
+}
+ConvexHullRigidBodyImporter::ConvexHullRigidBodyImporter(sp<ModelLoader> modelLoader)
+    : _model_loader(std::move(modelLoader))
+{
+}
+
+void ConvexHullRigidBodyImporter::import(ColliderBullet& collider, const document& manifest)
+{
+    HashMap<HashId, sp<CollisionShapeRef>>& shapes = collider.collisionShapes();
+    for(const document& i : manifest->children("model"))
+    {
+        const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
+        Model model = _model_loader->loadModel(type);
+        shapes[type] = makeCollisionShape(model, Documents::getAttribute<float>(i, "mass", 1.0f));
+    }
 }
 
 ConvexHullRigidBodyImporter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

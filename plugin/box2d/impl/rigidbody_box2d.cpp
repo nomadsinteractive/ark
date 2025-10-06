@@ -178,7 +178,7 @@ RigidbodyBox2D::RigidbodyBox2D(const ColliderBox2D& world, Rigidbody::BodyType t
 
 //TODO: Manual rotation
 RigidbodyBox2D::RigidbodyBox2D(const sp<Stub>& stub, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const OptionalVar<Numeric>& rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
-    : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(size)), sp<_RigidBodyPosition>::make(stub, position), sp<Vec4>::make<RotationAxisTheta>(sp<Vec3>::make<Vec3::Const>(V3(constants::AXIS_Z)), sp<Numeric>::make<_RigidBodyRotation>(stub)), std::move(collisionFilter))),
+    : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, sp<ark::Shape>::make(0, size), sp<_RigidBodyPosition>::make(stub, position), sp<Vec4>::make<RotationAxisTheta>(sp<Vec3>::make<Vec3::Const>(V3(constants::AXIS_Z)), sp<Numeric>::make<_RigidBodyRotation>(stub)), std::move(collisionFilter))),
       _stub(stub)
 {
     _stub->_body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);

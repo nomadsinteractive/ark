@@ -20,7 +20,7 @@ namespace {
 class BvhCollisionShape : public CollisionShapeRef {
 public:
     BvhCollisionShape(sp<btCollisionShape> shape, btTriangleIndexVertexArray* tiva)
-        : CollisionShapeRef(std::move(shape), 0), _tiva(tiva) {
+        : CollisionShapeRef(std::move(shape)), _tiva(tiva) {
     }
 
 private:
@@ -36,7 +36,7 @@ BvhRigidbodyImporter::BvhRigidbodyImporter(sp<ModelLoader> modelLoader)
 
 void BvhRigidbodyImporter::import(ColliderBullet& collider, const document& manifest)
 {
-    std::unordered_map<TypeId, sp<CollisionShapeRef>>& shapes = collider.collisionShapes();
+    HashMap<HashId, sp<CollisionShapeRef>>& shapes = collider.collisionShapes();
     for(const document& i : manifest->children("model"))
     {
         const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);

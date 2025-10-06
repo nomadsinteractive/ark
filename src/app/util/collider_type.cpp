@@ -18,7 +18,7 @@ sp<Rigidbody> ColliderType::createBody(const sp<Collider>& self, Rigidbody::Body
     return sp<Rigidbody>::make(std::move(impl), false);
 }
 
-sp<Shape> ColliderType::createShape(const sp<Collider>& self, const NamedHash& type, Optional<V3> scale, sp<Vec3> origin)
+sp<Shape> ColliderType::createShape(const sp<Collider>& self, const NamedHash& type, Optional<V3> scale, V3 origin)
 {
     return self->createShape(type, std::move(scale), std::move(origin));
 }

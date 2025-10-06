@@ -22,15 +22,15 @@ namespace {
 
 class GImpactCollisionShape final : public CollisionShapeRef {
 public:
-    GImpactCollisionShape(sp<btCollisionShape> shape, btTriangleIndexVertexArray* tiva, btScalar mass)
-        : CollisionShapeRef(std::move(shape), mass), _tiva(tiva) {
+    GImpactCollisionShape(sp<btCollisionShape> shape, btTriangleIndexVertexArray* tiva)
+        : CollisionShapeRef(std::move(shape)), _tiva(tiva) {
     }
 
 private:
     op<btTriangleIndexVertexArray> _tiva;
 };
 
-sp<CollisionShapeRef> makeCollisionShape(const Model& model, btScalar mass)
+sp<CollisionShapeRef> makeCollisionShape(const Model& model)
 {
     constexpr PHY_ScalarType indexType = sizeof(element_index_t) == 4 ? PHY_INTEGER : PHY_SHORT;
     btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray();
@@ -50,7 +50,7 @@ sp<CollisionShapeRef> makeCollisionShape(const Model& model, btScalar mass)
     const sp<btGImpactMeshShape> gImpactShape = sp<btGImpactMeshShape>::make(tiva);
     gImpactShape->postUpdate();
     gImpactShape->updateBound();
-    return sp<CollisionShapeRef>::make<GImpactCollisionShape>(gImpactShape, tiva, mass);
+    return sp<CollisionShapeRef>::make<GImpactCollisionShape>(gImpactShape, tiva);
 }
 
 }
@@ -65,12 +65,12 @@ void GImpactRigidbodyImporter::import(ColliderBullet& collider, const document& 
     btCollisionDispatcher * dispatcher = static_cast<btCollisionDispatcher*>(collider.btDynamicWorld()->getDispatcher());
     btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher);
 
-    std::unordered_map<TypeId, sp<CollisionShapeRef>>& shapes = collider.collisionShapes();
+    HashMap<HashId, sp<CollisionShapeRef>>& shapes = collider.collisionShapes();
     for(const document& i : manifest->children("model"))
     {
         const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
         Model model = _model_loader->loadModel(type);
-        shapes[type] = makeCollisionShape(model, Documents::getAttribute<float>(i, "mass", 1.0f));
+        shapes[type] = makeCollisionShape(model);
     }
 }
 

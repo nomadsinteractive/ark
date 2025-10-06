@@ -2823,7 +2823,7 @@ class Shape:
         pass
 
     @property
-    def size(self) -> Optional[Vec3]:
+    def scale(self) -> Optional[tuple[float, float, float]]:
         return None
 
     @property

@@ -22,15 +22,15 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Shape(const NamedHash& type = {Shape::TYPE_NONE}, Optional<V3> scale = {}, sp<Vec3> origin = nullptr);
-    Shape(const NamedHash& type, Optional<V3> scale, sp<Vec3> orgin, Box implementation);
+    Shape(const NamedHash& type = {Shape::TYPE_NONE}, Optional<V3> scale = {}, V3 origin = V3(0));
+    Shape(const NamedHash& type, Optional<V3> scale, V3 orgin, Box implementation);
 
 //  [[script::bindings::property]]
     const NamedHash& type() const;
 //  [[script::bindings::property]]
-    const Optional<V3>& scale() const;
+    V3 origin() const;
 //  [[script::bindings::property]]
-    const OptionalVar<Vec3>& origin() const;
+    const Optional<V3>& scale() const;
 
     const Box& implementation() const;
     void setImplementation(Box implementation);
@@ -46,8 +46,8 @@ public:
 
 private:
     NamedHash _type;
+    V3 _origin;
     Optional<V3> _scale;
-    OptionalVar<Vec3> _origin;
 
     Box _implementation;
 };

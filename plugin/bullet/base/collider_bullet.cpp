@@ -23,7 +23,7 @@
 #include "bullet/base/collision_object_ref.h"
 #include "bullet/base/collision_shape_ref.h"
 #include "bullet/base/rigidbody_bullet.h"
-#include "core/types/ref.h"
+
 
 namespace ark::plugin::bullet {
 
@@ -82,7 +82,7 @@ private:
     sp<btMotionState> _motion_state;
 };
 
-sp<CollisionShapeRef> makeConvexHullCollisionShape(const Model& model, btScalar mass)
+sp<btConvexHullShape> makeConvexHullCollisionShape(const Model& model)
 {
     CHECK(!model.meshes().empty(), "ConvexHullRigidBodyImporter only works with Mesh based models");
 
@@ -97,7 +97,7 @@ sp<CollisionShapeRef> makeConvexHullCollisionShape(const Model& model, btScalar 
 
     convexHullShape->recalcLocalAabb();
     convexHullShape->optimizeConvexHull();
-    return sp<CollisionShapeRef>::make(std::move(convexHullShape), mass);
+    return convexHullShape;
 }
 
 sp<CollisionObjectRef> makeRigidBody(btDynamicsWorld* world, sp<CollisionShapeRef> shape, sp<btMotionState> motionState, const Rigidbody::BodyType bodyType, const btScalar mass, const sp<CollisionFilter>& collisionFilter)
@@ -105,7 +105,7 @@ sp<CollisionObjectRef> makeRigidBody(btDynamicsWorld* world, sp<CollisionShapeRe
     DASSERT(bodyType == Rigidbody::BODY_TYPE_STATIC || bodyType == Rigidbody::BODY_TYPE_DYNAMIC || bodyType == Rigidbody::BODY_TYPE_KINEMATIC);
 
     btVector3 localInertia(0, 0, 0);
-    btCollisionShape* btShape = shape->btShape();
+    btCollisionShape* btShape = shape->btShape().get();
     if(mass != 0.f)
         btShape->calculateLocalInertia(mass, localInertia);
 
@@ -128,7 +128,7 @@ sp<CollisionObjectRef> makeRigidBody(btDynamicsWorld* world, sp<CollisionShapeRe
 sp<CollisionObjectRef> makeGhostObject(btDynamicsWorld* world, sp<CollisionShapeRef> shape, Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter)
 {
     btGhostObject* ghostObject = new btGhostObject();
-    ghostObject->setCollisionShape(shape->btShape());
+    ghostObject->setCollisionShape(shape->btShape().get());
     ghostObject->setCollisionFlags(ghostObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     ghostObject->setUserIndex(-1);
     if(collisionFilter)
@@ -141,6 +141,32 @@ sp<CollisionObjectRef> makeGhostObject(btDynamicsWorld* world, sp<CollisionShape
 RigidbodyBullet getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject)
 {
     return RigidbodyBullet::fromCollisionObjectPointer(collisionObject->getUserPointer());
+}
+
+sp<CollisionShapeRef> createCollisionShape(const NamedHash& type, const Optional<V3>& scale, ModelLoader& modelLoader)
+{
+    const V3 s = scale ? scale.value() : V3(1.0f);;
+    switch(type.hash())
+    {
+        case Shape::TYPE_AABB:
+        case Shape::TYPE_BOX:
+            return sp<CollisionShapeRef>::make(sp<btCollisionShape>::make<btBoxShape>(btVector3(s.x() / 2, s.y() / 2, s.z() / 2)), scale.value());
+        case Shape::TYPE_BALL:
+            return sp<CollisionShapeRef>::make(sp<btCollisionShape>::make<btSphereShape>(s.x() / 2), scale.value());
+        case Shape::TYPE_CAPSULE:
+        {
+            const float diameter = std::min(s.x(), s.z());
+            ASSERT(diameter > 0);
+            const float radius = diameter / 2.0f;
+            const float height = s.y() - diameter;
+            CHECK_WARN(height >= 0, "When constructing a btCapsuleShapeY, its height(%.2f) should be greater than its diameter(%.2f)", scale->y(), diameter);
+            return sp<CollisionShapeRef>::make(sp<btCollisionShape>::make<btCapsuleShape>(radius, std::max(height, 0.0f)), scale.value());
+        }
+        default:
+            const sp<Model> model = modelLoader.loadModel(type.hash());
+            CHECK(model, "Failed to load model[%ud(\"%s\")]", type.hash(), type.name().c_str());
+            return sp<CollisionShapeRef>::make(makeConvexHullCollisionShape(model), model->content()->size()->val());
+    }
 }
 
 struct BtRigibodyObject {
@@ -207,7 +233,7 @@ struct ColliderBullet::Stub final : Updatable {
     }
 
     sp<ModelLoader> _model_loader;
-    HashMap<TypeId, sp<CollisionShapeRef>> _collision_shapes;
+    HashMap<HashId, sp<CollisionShapeRef>> _collision_shapes;
 
     op<btDefaultCollisionConfiguration> _collision_configuration;
     op<btCollisionDispatcher> _collision_dispatcher;
@@ -235,42 +261,12 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
     sp<CollisionShapeRef> cs = shape->asImplementation<CollisionShapeRef>();
     if(!cs)
     {
-        if(const auto iter = _stub->_collision_shapes.find(shape->type().hash()); iter == _stub->_collision_shapes.end())
-        {
-            btCollisionShape* btShape = nullptr;
-            const V3 size = shape->size().val();
-            switch(shape->type().hash())
-            {
-            case Shape::TYPE_AABB:
-            case Shape::TYPE_BOX:
-                btShape = new btBoxShape(btVector3(size.x() / 2, size.y() / 2, size.z() / 2));
-                break;
-            case Shape::TYPE_BALL:
-                btShape = new btSphereShape(size.x() / 2);
-                break;
-            case Shape::TYPE_CAPSULE:
-                {
-                    const float diameter = std::min(size.x(), size.z());
-                    ASSERT(diameter > 0);
-                    const float radius = diameter / 2.0f;
-                    const float height = size.y() - diameter;
-                    CHECK_WARN(height >= 0, "When constructing a btCapsuleShapeY, its height(%.2f) should be greater than its diameter(%.2f)", size.y(), diameter);
-                    btShape = new btCapsuleShape(radius, std::max(height, 0.0f));
-                    break;
-                }
-            default:
-                FATAL("Undefined shape type %d(%s) in this world", shape->type().hash(), shape->type().name().c_str());
-                break;
-            }
-            cs = sp<CollisionShapeRef>::make(sp<btCollisionShape>::adopt(btShape), 1.0f);
-        }
-        else
-            cs = iter->second;
+        cs = ensureCollisionShapeRef(shape->type(), shape->scale());
+        shape->setImplementation(Box(cs));
     }
 
     if(type == Rigidbody::BODY_TYPE_SENSOR || type == Rigidbody::BODY_TYPE_GHOST)
     {
-        sp<Vec3> originPosition = shape->origin() ? Vec3Type::add(position, shape->origin().val()) : position;
         sp<CollisionObjectRef> btGhostObjectRef = makeGhostObject(btDynamicWorld(), std::move(cs), type, collisionFilter);
         sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btGhostObjectRef), type, std::move(shape), std::move(position), rotation, std::move(collisionFilter), std::move(discarded));
         sp<Rigidbody::Stub> stub = impl->stub();
@@ -278,15 +274,16 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
         return {std::move(stub), nullptr, impl};
     }
 
+    CHECK(type != Rigidbody::BODY_TYPE_DYNAMIC || position, "Dynamic rigidbody must have a position");
     btTransform btTrans;
-    const V3 origin = shape->origin().val();
+    const V3 origin = shape->origin();
     const V3 pos = position->val() + origin;
     const V4 quat = rotation ? rotation->val() : constants::QUATERNION_ONE;
     btTrans.setIdentity();
     btTrans.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
     btTrans.setRotation(btQuaternion(quat.x(), quat.y(), quat.z(), quat.w()));
 
-    const float mass = type == Rigidbody::BODY_TYPE_DYNAMIC ? cs->mass() : 0;
+    const float mass = type == Rigidbody::BODY_TYPE_DYNAMIC ? cs->size().x() * cs->size().y() * cs->size().z() : 0;
     sp<btMotionState> motionState = sp<btDefaultMotionState>::make(btTrans);
     sp<CollisionObjectRef> btRigidbodyRef = makeRigidBody(btDynamicWorld(), std::move(cs), motionState, type, mass, collisionFilter);
     sp<Vec3> btPosition = type == Rigidbody::BODY_TYPE_STATIC ? sp<Vec3>::make<Vec3::Const>(pos - origin) : sp<Vec3>::make<DynamicPosition>(motionState, origin);
@@ -296,18 +293,10 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
     return {std::move(stub), nullptr, impl};
 }
 
-sp<Shape> ColliderBullet::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)
+sp<Shape> ColliderBullet::createShape(const NamedHash& type, Optional<V3> scale, const V3 origin)
 {
-    const HashId shapeType = type.hash();
-    if(shapeType == Shape::TYPE_AABB || shapeType == Shape::TYPE_BOX || shapeType == Shape::TYPE_BALL || shapeType == Shape::TYPE_CAPSULE)
-        return sp<Shape>::make(type, std::move(size), std::move(origin));
-
-    const sp<Model> model = _stub->_model_loader->loadModel(shapeType);
-    CHECK(model, "Failed to load model[%ud(\"%s\")]", type.hash(), type.name().c_str());
-    sp<Vec3> contentSize = size ? std::move(size) : sp<Vec3>(model->content()->size());
-    const V3 contentSizeValue = contentSize->val();
-    sp<CollisionShapeRef> collisionShape = makeConvexHullCollisionShape(model, contentSizeValue.x() * contentSizeValue.y() * contentSizeValue.z());
-    return sp<Shape>::make(type, std::move(contentSize), std::move(origin), Box(std::move(collisionShape)));
+    sp<CollisionShapeRef> collisionShape = createCollisionShape(type, scale, _stub->_model_loader);
+    return sp<Shape>::make(type, std::move(scale), origin, Box(std::move(collisionShape)));
 }
 
 void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup, int32_t filterMask) const
@@ -329,7 +318,7 @@ void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<Colli
     }
 }
 
-Vector<RayCastManifold> ColliderBullet::rayCast(V3 from, V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
+Vector<RayCastManifold> ColliderBullet::rayCast(const V3 from, const V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
     const btVector3 btFrom(from.x(), from.y(), from.z());
     const btVector3 btTo(to.x(), to.y(), to.z());
@@ -356,12 +345,12 @@ btDiscreteDynamicsWorld* ColliderBullet::btDynamicWorld() const
     return _stub->_dynamics_world.get();
 }
 
-const HashMap<TypeId, sp<CollisionShapeRef>>& ColliderBullet::collisionShapes() const
+const HashMap<HashId, sp<CollisionShapeRef>>& ColliderBullet::collisionShapes() const
 {
     return _stub->_collision_shapes;
 }
 
-HashMap<TypeId, sp<CollisionShapeRef>>& ColliderBullet::collisionShapes()
+HashMap<HashId, sp<CollisionShapeRef>>& ColliderBullet::collisionShapes()
 {
     return _stub->_collision_shapes;
 }
@@ -380,8 +369,7 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
         const Rigidbody::Stub& rigidbody = i._bt_rigidbody_ref.stub();
         rigidbody._position.update(timestamp);
         rigidbody._rotation.update(timestamp);
-        rigidbody._shape->origin().update(timestamp);
-        const V3 pos = rigidbody._position.val() + rigidbody._shape->origin().val();
+        const V3 pos = rigidbody._position.val() + rigidbody._shape->origin();
         const V4 quaternion = rigidbody._rotation.val();
         btTransform transform;
         transform.setIdentity();
@@ -461,6 +449,33 @@ void ColliderBullet::addTickContactInfo(const sp<CollisionObjectRef>& rigidBody,
     if(!contactInfo._last_tick.contains(contact))
         if(const RigidbodyBullet& obj = getRigidBodyFromCollisionObject(contact->collisionObject()); obj.validate())
             callback->onBeginContact(obj.makeShadow(), CollisionManifold(cp, normal));
+}
+
+sp<CollisionShapeRef> ColliderBullet::ensureCollisionShapeRef(const NamedHash& type, const Optional<V3>& scale) const
+{
+    if(const auto iter = _stub->_collision_shapes.find(type.hash()); iter == _stub->_collision_shapes.end())
+    {
+        switch(type.hash())
+        {
+            case Shape::TYPE_AABB:
+            case Shape::TYPE_BOX:
+            case Shape::TYPE_BALL:
+            case Shape::TYPE_CAPSULE:
+                return createCollisionShape(type, scale, _stub->_model_loader);
+                break;
+            default:
+                sp<CollisionShapeRef> cs = createCollisionShape(type, scale, _stub->_model_loader);
+                _stub->_collision_shapes.insert({type.hash(), cs});
+                if(!scale)
+                    return cs;
+                const V3 s = scale.value();
+                CHECK_WARN(s.x() == s.y() == s.z(), "We are now only support uniform scaling shapes");
+                sp<btCollisionShape> uniformShape = sp<btCollisionShape>::make<btUniformScalingShape>(static_cast<btConvexShape*>(cs->btShape().get()), s.x());
+                return sp<CollisionShapeRef>::make(cs->btShape(), cs->size() * s);
+        }
+    }
+    else
+        return iter->second;
 }
 
 ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

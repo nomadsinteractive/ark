@@ -18,11 +18,9 @@
 
 namespace ark::plugin::bullet {
 
-//[[script::bindings::extends(Collider)]]
-//[[script::bindings::name("World")]]
 class ARK_PLUGIN_BULLET_API ColliderBullet final : public Collider, Implements<ColliderBullet, Collider> {
 public:
-    class RigidbodyImporter {
+    class [[deprecated]] RigidbodyImporter {
     public:
         virtual ~RigidbodyImporter() = default;
 
@@ -33,16 +31,15 @@ public:
     ColliderBullet(V3 gravity, sp<ModelLoader> modelLoader);
 
     Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr) override;
-    sp<Shape> createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin) override;
+    sp<Shape> createShape(const NamedHash& type, Optional<V3> scale, V3 origin) override;
     Vector<RayCastManifold> rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter = nullptr) override;
 
-//  [[script::bindings::auto]]
     void rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup = 1, int32_t filterMask = -1) const;
 
     btDiscreteDynamicsWorld* btDynamicWorld() const;
 
-    const HashMap<TypeId, sp<CollisionShapeRef>>& collisionShapes() const;
-    HashMap<TypeId, sp<CollisionShapeRef>>& collisionShapes();
+    const HashMap<HashId, sp<CollisionShapeRef>>& collisionShapes() const;
+    HashMap<HashId, sp<CollisionShapeRef>>& collisionShapes();
 
     void markForDestroy(sp<CollisionObjectRef> collisionBody) const;
 
@@ -84,6 +81,7 @@ private:
     static void myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btScalar timeStep);
 
     void addTickContactInfo(const sp<CollisionObjectRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<CollisionObjectRef>& contact, const V3& cp, const V3& normal);
+    sp<CollisionShapeRef> ensureCollisionShapeRef(const NamedHash& type, const Optional<V3>& scale) const;
 
 private:
     sp<Stub> _stub;

@@ -36,7 +36,7 @@ bool collisionFilterTest(const sp<CollisionFilter>& cf1, const sp<CollisionFilte
 float calcOccupyRadius(const Shape& shape)
 {
     const V3 size = shape.scale().value();
-    const V3 pivot = shape.origin().val();
+    const V3 pivot = shape.origin();
     const V3 pm(std::max(std::abs(pivot.x()), std::abs(1.0f - pivot.x())), std::max(std::abs(pivot.y()), std::abs(1.0f - pivot.y())), std::max(std::abs(pivot.z()), std::abs(1.0f - pivot.z())));
     const V3 sm = pm * size;
     return Math::sqrt(Math::hypot2(sm));
@@ -234,16 +234,16 @@ Rigidbody::Impl ColliderImpl::createBody(const Rigidbody::BodyType type, sp<Shap
 {
     CHECK(type == Rigidbody::BODY_TYPE_KINEMATIC || type == Rigidbody::BODY_TYPE_DYNAMIC || type == Rigidbody::BODY_TYPE_STATIC || type == Rigidbody::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
     if(!shape->implementation())
-        shape = createShape(shape->type(), shape->scale(), shape->origin() ? shape->origin().toVar() : sp<Vec3>());
+        shape = createShape(shape->type(), shape->scale(), shape->origin());
     const sp<RigidbodyImpl> rigidbodyImpl = _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
     sp<Rigidbody::Stub> stub = rigidbodyImpl->_rigidbody_stub;
     return Rigidbody::Impl{std::move(stub), nullptr, rigidbodyImpl};
 }
 
-sp<Shape> ColliderImpl::createShape(const NamedHash& type, Optional<V3> scale, sp<Vec3> origin)
+sp<Shape> ColliderImpl::createShape(const NamedHash& type, Optional<V3> scale, const V3 origin)
 {
     auto [_implementation, _size] = _stub->narrowPhrase()->createShapeDef(type.hash(), scale);
-    return sp<Shape>::make(type, scale ? std::move(scale) : Optional<V3>(_size), std::move(origin), std::move(_implementation));
+    return sp<Shape>::make(type, scale ? std::move(scale) : Optional<V3>(_size), origin, std::move(_implementation));
 }
 
 Vector<RayCastManifold> ColliderImpl::rayCast(const V3 from, const V3 to, const sp<CollisionFilter>& collisionFilter)

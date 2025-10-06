@@ -47,7 +47,7 @@ Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shap
     const BodyCreateInfo& manifest = iter->second;
     const sp<Rotation> rot = rotation.asInstance<Rotation>();
     const sp<RotationAxisTheta> axisTheta = rot ? rot.asInstance<RotationAxisTheta>() : sp<RotationAxisTheta>();
-    const sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->size().val(), axisTheta ? axisTheta->theta() : nullptr, std::move(collisionFilter), manifest);
+    const sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->scale().value(), axisTheta ? axisTheta->theta() : nullptr, std::move(collisionFilter), manifest);
     if(axisTheta)
         body->setAngle(axisTheta->theta()->val());
     CHECK(!discarded, "Unimplemented");
@@ -65,9 +65,9 @@ Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shap
     return {body->rigidbodyStub(), nullptr, body};
 }
 
-sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)
+sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, Optional<V3> scale, const V3 origin)
 {
-    return sp<ark::Shape>::make(type, std::move(size), std::move(origin));
+    return sp<ark::Shape>::make(type, std::move(scale), origin);
 }
 
 Vector<RayCastManifold> ColliderBox2D::rayCast(V3 from, V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
