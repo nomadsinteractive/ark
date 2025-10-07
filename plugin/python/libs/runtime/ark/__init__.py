@@ -2880,6 +2880,9 @@ class RigidbodyController:
     def friction(self, friction: float):
         pass
 
+    def apply_linear_velocity(self, linear_velocity: TYPE_VEC3) -> Future:
+        pass
+
     def apply_central_impulse(self, impulse: TYPE_FLOAT3):
         pass
 
