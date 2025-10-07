@@ -20,7 +20,11 @@ public:
     bool update(const uint64_t timestamp) override
     {
         if(_linear_velocity->update(timestamp))
+        {
             _rigidbody_controller->setLinearVelocity(_linear_velocity->val());
+            return true;
+        }
+        return false;
     }
 
 private:
@@ -37,7 +41,7 @@ bool RigidbodyControllerType::active(const sp<RigidbodyController>& self)
 
 void RigidbodyControllerType::setActive(const sp<RigidbodyController>& self, const bool active)
 {
-    setActive(self, active);
+    self->setActive(active);
 }
 
 V3 RigidbodyControllerType::linearVelocity(const sp<RigidbodyController>& self)
