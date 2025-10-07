@@ -43,12 +43,15 @@ public:
     float angle();
     void setAngle(float rad);
 
-    float angularVelocity();
-    void setAngularVelocity(float omega);
-
     V3 linearVelocity() const override;
-    void setLinearVelocity(const V3& velocity) override;
-    void applyCentralImpulse(const V3& impulse) override;
+    void setLinearVelocity(V3 velocity) override;
+
+    V3 angularVelocity() const override;
+    void setAngularVelocity(V3 velocity) override;
+    V3 angularFactor() const override;
+    void setAngularFactor(V3 factor) override;
+
+    void applyCentralImpulse(V3 impulse) override;
     float friction() const override;
     void setFriction(float friction) override;
 

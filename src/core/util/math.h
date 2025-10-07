@@ -94,9 +94,8 @@ public:
         return n && !(n & (n - 1));
     }
 
-    template<class T> static std::enable_if_t<!std::numeric_limits<T>::is_integer, bool> almostEqual(T x, T y, int32_t ulp = 4) {
-        return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
-               || std::abs(x - y) < std::numeric_limits<T>::min();
+    template<class T> static std::enable_if_t<!std::numeric_limits<T>::is_integer, bool> almostEqual(T x, T y, uint32_t ulp = 4) {
+        return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp || std::abs(x - y) < std::numeric_limits<T>::min();
     }
 
     template<typename T> static typename T::size_type levensteinDistance(const T& source, const T& target) {

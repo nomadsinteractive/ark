@@ -242,7 +242,7 @@ struct ColliderBullet::Stub final : Updatable {
     op<btConstraintSolver> _solver;
     op<btDiscreteDynamicsWorld> _dynamics_world;
 
-    FList<BtRigibodyObject, BtRigibodyObject::ListFilter> _ghost_objects;
+    FList<BtRigibodyObject, BtRigibodyObject::ListFilter> _passive_objects;
     Vector<sp<CollisionObjectRef>> _mark_for_destroys;
 
     sp<Numeric> _app_clock_interval;
@@ -270,11 +270,11 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
         sp<CollisionObjectRef> btGhostObjectRef = makeGhostObject(btDynamicWorld(), std::move(cs), type, collisionFilter);
         sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btGhostObjectRef), type, std::move(shape), std::move(position), rotation, std::move(collisionFilter), std::move(discarded));
         sp<Rigidbody::Stub> stub = impl->stub();
-        _stub->_ghost_objects.emplace_back(BtRigibodyObject(*impl));
+        _stub->_passive_objects.emplace_back(BtRigibodyObject(*impl));
         return {std::move(stub), nullptr, impl};
     }
 
-    CHECK(type != Rigidbody::BODY_TYPE_DYNAMIC || position, "Dynamic rigidbody must have a position");
+    CHECK(position, "Dynamic/Kinematic/Static rigidbody must have a position");
     btTransform btTrans;
     const V3 origin = shape->origin();
     const V3 pos = position->val() + origin;
@@ -364,7 +364,7 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
 {
     const ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
     const uint64_t timestamp = self->_stub->_timestamp;
-    for(const BtRigibodyObject& i : self->_stub->_ghost_objects)
+    for(const BtRigibodyObject& i : self->_stub->_passive_objects)
     {
         const Rigidbody::Stub& rigidbody = i._bt_rigidbody_ref.stub();
         rigidbody._position.update(timestamp);
@@ -469,7 +469,7 @@ sp<CollisionShapeRef> ColliderBullet::ensureCollisionShapeRef(const NamedHash& t
                 if(!scale)
                     return cs;
                 const V3 s = scale.value();
-                CHECK_WARN(s.x() == s.y() == s.z(), "We are now only support uniform scaling shapes");
+                CHECK_WARN(s.x() == s.y() && s.y() == s.z(), "We are now only support uniform scaling shapes");
                 sp<btCollisionShape> uniformShape = sp<btCollisionShape>::make<btUniformScalingShape>(static_cast<btConvexShape*>(cs->btShape().get()), s.x());
                 return sp<CollisionShapeRef>::make(cs->btShape(), cs->size() * s);
         }

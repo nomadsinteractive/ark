@@ -28,15 +28,18 @@ public:
     void setActive(bool active) override;
 
     V3 linearVelocity() const override;
-    void setLinearVelocity(const V3& velocity) override;
+    void setLinearVelocity(V3 velocity) override;
 
-    void applyCentralImpulse(const V3& impulse) override;
+    V3 angularVelocity() const override;
+    void setAngularVelocity(V3 velocity) override;
+
+    V3 angularFactor() const override;
+    void setAngularFactor(V3 factor) override;
+
+    void applyCentralImpulse(V3 impulse) override;
 
     float friction() const override;
     void setFriction(float friction) override;
-
-    V3 angularFactor() const;
-    void setAngularFactor(const V3& factor);
 
     const sp<Ref>& ref() const;
     const sp<Rigidbody::Stub>& stub() const;

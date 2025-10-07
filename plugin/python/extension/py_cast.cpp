@@ -137,7 +137,7 @@ sp<Vec2> PyCast::toVec2(PyObject* object)
     {
         PyObject* x, *y;
         if(PyArg_ParseTuple(object, "OO", &x, &y))
-            return Vec2Type::create(toNumeric(x).value(), toNumeric(y).value());
+            return sp<Vec2>::make<Vec2Impl>(std::move(toNumeric(x).value()), std::move(toNumeric(y).value()));
         PyErr_Clear();
     }
     return toSharedPtrOrNull<Vec2>(object);
@@ -149,7 +149,7 @@ sp<Vec3> PyCast::toVec3(PyObject* object)
     {
         PyObject* x, *y, *z;
         if(PyArg_ParseTuple(object, "OOO", &x, &y, &z))
-            return Vec3Type::create(toNumeric(x).value(), toNumeric(y).value(), toNumeric(z).value());
+            return sp<Vec3>::make<Vec3Impl>(std::move(toNumeric(x).value()), std::move(toNumeric(y).value()), std::move(toNumeric(z).value()));
         PyErr_Clear();
     }
     return toSharedPtrOrNull<Vec3>(object);
@@ -161,7 +161,7 @@ sp<Vec4> PyCast::toVec4(PyObject* object)
     {
         PyObject* x, *y, *z, *w = nullptr;
         if(PyArg_ParseTuple(object, "OOOO", &x, &y, &z, &w))
-            return Vec4Type::create(toNumeric(x).value(), toNumeric(y).value(), toNumeric(z).value(), toNumeric(w).value());
+            return sp<Vec4>::make<Vec4Impl>(std::move(toNumeric(x).value()), std::move(toNumeric(y).value()), std::move(toNumeric(z).value()), std::move(toNumeric(w).value()));
         PyErr_Clear();
     }
     return toSharedPtrOrNull<Vec4>(object);

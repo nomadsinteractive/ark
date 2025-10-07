@@ -105,12 +105,34 @@ public:
         return V3(0);
     }
 
-    void setLinearVelocity(const V3& velocity) override
+    void setLinearVelocity(const V3 velocity) override
     {
         FATAL("Unimplemented");
     }
 
-    void applyCentralImpulse(const V3& impulse) override
+    V3 angularVelocity() const override
+    {
+        FATAL("Unimplemented");
+        return V3(0);
+    }
+
+    void setAngularVelocity(V3 velocity) override
+    {
+        FATAL("Unimplemented");
+    }
+
+    V3 angularFactor() const override
+    {
+        FATAL("Unimplemented");
+        return V3(0);
+    }
+
+    void setAngularFactor(V3 factor) override
+    {
+        FATAL("Unimplemented");
+    }
+
+    void applyCentralImpulse(const V3 impulse) override
     {
         FATAL("Unimplemented");
     }

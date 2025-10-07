@@ -204,28 +204,37 @@ void RigidbodyBox2D::setAngle(float rad)
     _stub->body()->SetTransform(_stub->_body->GetWorldCenter(), rad);
 }
 
-float RigidbodyBox2D::angularVelocity()
-{
-    return _stub->body()->GetAngularVelocity();
-}
-
-void RigidbodyBox2D::setAngularVelocity(float omega)
-{
-    _stub->body()->SetAngularVelocity(omega);
-}
-
 V3 RigidbodyBox2D::linearVelocity() const
 {
     const b2Vec2 velocity = _stub->body()->GetLinearVelocity();
     return {velocity.x, velocity.y, 0};
 }
 
-void RigidbodyBox2D::setLinearVelocity(const V3& velocity)
+V3 RigidbodyBox2D::angularVelocity() const
+{
+    return V3(0, 0, _stub->body()->GetAngularVelocity());
+}
+
+void RigidbodyBox2D::setAngularVelocity(const V3 velocity)
+{
+    _stub->body()->SetAngularVelocity(velocity.z());
+}
+
+V3 RigidbodyBox2D::angularFactor() const
+{
+    return V3(0, 0, 1);
+}
+
+void RigidbodyBox2D::setAngularFactor(const V3 /*factor*/)
+{
+}
+
+void RigidbodyBox2D::setLinearVelocity(const V3 velocity)
 {
     _stub->body()->SetLinearVelocity(b2Vec2(velocity.x(), velocity.y()));
 }
 
-void RigidbodyBox2D::applyCentralImpulse(const V3& impulse)
+void RigidbodyBox2D::applyCentralImpulse(const V3 impulse)
 {
     _stub->body()->ApplyLinearImpulseToCenter(b2Vec2(impulse.x(), impulse.y()), true);
 }

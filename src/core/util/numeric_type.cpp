@@ -25,6 +25,34 @@
 
 namespace ark {
 
+namespace {
+
+class BooleanAlmostEqual final : public Boolean {
+public:
+    BooleanAlmostEqual(sp<Numeric> a1, sp<Numeric> a2, const float tolerance)
+        : _a1(std::move(a1)), _a2(std::move(a2)), _tolerance(std::max(tolerance, std::numeric_limits<float>::min()))
+    {
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        return UpdatableUtil::update(timestamp, _a1, _a2);
+    }
+
+    bool val() override
+    {
+        return std::abs(_a1->val() - _a2->val()) <= _tolerance;
+    }
+
+private:
+    sp<Numeric> _a1;
+    sp<Numeric> _a2;
+    float _tolerance;
+};
+
+}
+
+
 sp<NumericWrapper> NumericType::create(float value)
 {
     return sp<NumericWrapper>::make(value);
@@ -300,6 +328,11 @@ sp<Numeric> NumericType::round(sp<Numeric> self)
 sp<Numeric> NumericType::integral(const sp<Numeric>& self, const sp<Numeric>& t)
 {
     return sp<Numeric>::make<Integral<float>>(self, t ? t : Ark::instance().appClock()->duration());
+}
+
+sp<Boolean> NumericType::almostEqual(sp<Numeric> self, sp<Numeric> other, float tolerance)
+{
+    return sp<Boolean>::make<BooleanAlmostEqual>(std::move(self), std::move(other), tolerance);
 }
 
 sp<Numeric> NumericType::normalize(sp<Numeric> self)

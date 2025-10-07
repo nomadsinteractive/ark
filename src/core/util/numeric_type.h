@@ -113,6 +113,9 @@ public:
     static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
 
 //  [[script::bindings::classmethod]]
+    static sp<Boolean> almostEqual(sp<Numeric> self, sp<Numeric> other, float tolerance);
+
+//  [[script::bindings::classmethod]]
     static sp<Numeric> normalize(sp<Numeric> self);
 
 //  [[script::bindings::classmethod]]

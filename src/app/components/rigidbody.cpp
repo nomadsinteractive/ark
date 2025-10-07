@@ -72,8 +72,13 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
             _impl._stub->_position.reset(position);
     }
 
-    if(sp<Vec4> rotation = context.getComponent<Rotation>())
-        _impl._stub->_rotation.reset(std::move(rotation));
+    if(const sp<Rotation> rotation = context.getComponent<Rotation>())
+    {
+        if(type() == BODY_TYPE_DYNAMIC)
+            rotation->reset(_impl._stub->_rotation.toVar());
+        else
+            _impl._stub->_rotation.reset(std::move(rotation));
+    }
 
     if(sp<Boolean> discarded = context.getComponent<Discarded>())
         _impl._stub->_ref->setDiscarded(std::move(discarded));

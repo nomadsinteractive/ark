@@ -1162,6 +1162,9 @@ class Numeric(_Scalar):
 
     def sod(self, s0: float, f: float, z: float = 1.0, r: float = 0, t: Optional["Numeric"] = None) -> Self:
         pass
+
+    def almost_equal(self, other: TYPE_NUMERIC, tolerance: float = 0.0) -> Boolean:
+        pass
     
     def normalize(self) -> Self:
         pass
@@ -1253,10 +1256,6 @@ class Vec2(_Var):
     @property
     def xy(self) -> "Vec2":
         return self
-
-    @xy.setter
-    def xy(self, val):
-        pass
 
     @y.setter
     def y(self, v):
@@ -1362,25 +1361,33 @@ class Vec3(Vec2):
         pass
 
     @property
-    def vz(self):
-        return self._z
-
-    @vz.setter
-    def vz(self, vz):
-        pass
-
-    @property
     def xyz(self) -> "Vec3":
         return self
 
-    @xyz.setter
-    def xyz(self, v):
+    @property
+    def xz(self) -> Vec2:
+        return self
+
+    @property
+    def yx(self) -> Vec2:
+        return self
+
+    @property
+    def yz(self) -> Vec2:
+        return self
+
+    @property
+    def zx(self) -> Vec2:
+        return self
+
+    @property
+    def zy(self) -> Vec2:
+        return self
+
+    def cross(self, other: TYPE_VEC3) -> "Vec3":
         pass
 
-    def cross(self, other) -> "Vec3":
-        pass
-
-    def extend(self, w: Union[float, Numeric]) -> "Vec4":
+    def extend(self, w: TYPE_NUMERIC) -> "Vec4":
         pass
 
 
@@ -2847,6 +2854,22 @@ class RigidbodyController:
 
     @linear_velocity.setter
     def linear_velocity(self, linear_velocity: TYPE_FLOAT3):
+        pass
+
+    @property
+    def angular_velocity(self) -> TYPE_FLOAT3:
+        return 0, 0, 0
+
+    @angular_velocity.setter
+    def angular_velocity(self, angular_velocity: TYPE_FLOAT3):
+        pass
+
+    @property
+    def angular_factor(self) -> TYPE_FLOAT3:
+        return 0, 0, 0
+
+    @angular_factor.setter
+    def angular_factor(self, angular_factor: TYPE_FLOAT3):
         pass
 
     @property
