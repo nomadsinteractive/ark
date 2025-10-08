@@ -208,6 +208,62 @@ private:
     sp<Vec3> _screen_position;
 };
 
+class RUF2Quaternion final : public Vec4 {
+public:
+    RUF2Quaternion(sp<Vec3> right, sp<Vec3> up, sp<Vec3> front)
+        : _right(std::move(right)), _up(std::move(up)), _front(std::move(front))
+    {
+        update(Timestamp::now());
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        if(UpdatableUtil::update(timestamp, _front, _right, _up))
+        {
+            _quaternion = doUpdate();
+            return true;
+        }
+        return false;
+    }
+
+    V4 val() override
+    {
+        return _quaternion;
+    }
+
+private:
+
+    V4 doUpdate() const
+    {
+        const V3 F = _front->val();
+        const V3 R = _right->val();
+        const V3 U = _up->val();
+        if(const float trace = R.x() + U.y() + F.z(); trace > 0)
+        {
+            const double s = 0.5f / std::sqrt(trace + 1.0f);
+            return V4((U.z() - F.y()) * s, (F.x() - R.z()) * s, (R.y() - U.x()) * s, 0.25f / s);
+        }
+        if(R.x() > U.y() && R.x() > F.z())
+        {
+            const double s = 2.0f * std::sqrt(1.0f + R.x() - U.y() - F.z());
+            return V4(0.25f * s, (U.x() + R.y()) / s, (F.x() + R.z()) / s, (U.z() - F.y()) / s);
+        }
+        if(U.y() > F.z())
+        {
+            const double s = 2.0f * sqrt(1.0f + U.y() - R.x() - F.z());
+            return V4((U.x() + R.y()) / s, 0.25f * s, (F.y() + U.z()) / s, (F.x() - R.z()) / s);
+        }
+        const double s = 2.0 * sqrt(1.0f + F.z() - R.x() - U.y());
+        return V4((F.x() + R.z()) / s, (F.y() + U.z()) / s, 0.25f * s, (R.y() - U.x()) / s);
+    }
+
+private:
+    sp<Vec3> _right;
+    sp<Vec3> _up;
+    sp<Vec3> _front;
+    V4 _quaternion;
+};
+
 constexpr char sclipNearclipFarPlaneWarning[] = "ClipNear: %.2f, ClipFar: %.2f. Far plane should be further than near plane, and distance to the near plane should be greater than zero.";
 
 }
@@ -345,6 +401,16 @@ void Camera::assign(const Camera& other)
         lookAt(opt->_position->wrapped(), opt->_target->wrapped(), opt->_up->wrapped());
     else
         _view->set(other.view());
+}
+
+std::tuple<sp<Vec3>, sp<Vec3>, sp<Vec4>> Camera::getFrustumSlice(const float z) const
+{
+    sp<Mat4> vpInverse = Mat4Type::inverse(_vp);
+    sp<Vec3> position = Mat4Type::matmul(vpInverse, V3(0, 0, z));
+    sp<Vec3> right = Mat4Type::matmul(vpInverse, V3(1, 0, z));
+    sp<Vec3> up = Mat4Type::matmul(vpInverse, V3(0, 1, z));
+    sp<Vec3> front = Vec3Type::cross(right, up);
+    return {std::move(position), nullptr, sp<Vec4>::make<RUF2Quaternion>(std::move(right), std::move(up), std::move(front))};
 }
 
 sp<Mat4> Camera::view() const

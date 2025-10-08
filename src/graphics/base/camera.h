@@ -121,6 +121,9 @@ public:
 //  [[script::bindings::auto]]
     void assign(const Camera& other);
 
+//  [[script::bindings::auto]]
+    std::tuple<sp<Vec3>, sp<Vec3>, sp<Vec4>> getFrustumSlice(float z) const;
+
     bool isLHS() const;
 
     static Camera createDefaultCamera();

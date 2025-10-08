@@ -2,6 +2,7 @@
 
 #include <array>
 #include <functional>
+#include <tuple>
 
 #include <Python.h>
 
@@ -265,6 +266,20 @@ private:
         PyBridge::PyTuple_SetItem(pyPair, 0, toPyObject(value.first));
         PyBridge::PyTuple_SetItem(pyPair, 1, toPyObject(value.second));
         return pyPair;
+    }
+
+    template <typename> struct is_tuple: std::false_type {};
+    template <typename ...T> struct is_tuple<std::tuple<T...>>: std::true_type {};
+    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<is_tuple<T>::value>*) {
+        PyObject* pyTuple = PyBridge::PyTuple_New(std::tuple_size_v<T>);
+        if constexpr(std::tuple_size_v<T> > 0)
+            toPyObject_tuple<T, 0, std::tuple_size_v<T>>(value, pyTuple);
+        return pyTuple;
+    }
+    template<typename T, Py_ssize_t I, Py_ssize_t N> static void toPyObject_tuple(const T& value, PyObject* pyTuple) {
+        PyBridge::PyTuple_SetItem(pyTuple, I, toPyObject(std::get<I>(value)));
+        if constexpr(I < N - 1)
+            toPyObject_tuple<T, I + 1, N>(value, pyTuple);
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, ...) {
         return toPyObject_impl<T>(value);
