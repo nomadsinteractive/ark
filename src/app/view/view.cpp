@@ -200,11 +200,10 @@ View::~View()
     _stub->discard();
 }
 
-TypeId View::onPoll(WiringContext& context)
+void View::onPoll(WiringContext& context)
 {
     context.setComponent(layoutSize());
     context.setComponent(sp<Shape>::make(Shape::TYPE_AABB, layoutSize()->val()));
-    return constants::TYPE_ID_NONE;
 }
 
 void View::onWire(const WiringContext& context, const Box& self)

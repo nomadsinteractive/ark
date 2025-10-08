@@ -3043,7 +3043,7 @@ class Collider:
     def create_body(self, body_type: int | Integer, shape: Optional[Shape] = None, position: Optional[TYPE_VEC3] = None, rotation: Optional[TYPE_VEC4] = None, collision_filter: Optional[CollisionFilter] = None, discarded: Optional[Boolean] = None) -> Rigidbody:
         pass
 
-    def create_shape(self, shape_id: TYPE_NAMED_HASH, size: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None) -> Shape:
+    def create_shape(self, shape_id: TYPE_NAMED_HASH, scale: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None) -> Shape:
         pass
 
     def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> list[RayCastManifold]:

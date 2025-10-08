@@ -22,7 +22,7 @@ public:
     View(sp<LayoutParam> layoutParam, String name = "", sp<Vec3> position = nullptr, sp<Boolean> discarded = nullptr);
     ~View() override;
 
-    TypeId onPoll(WiringContext& context) override;
+    void onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context, const Box& self) override;
 
     void onPoll(WiringContext& context, const document& component) override;

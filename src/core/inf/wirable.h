@@ -23,6 +23,12 @@ public:
             }
         }
 
+        template<typename T> bool hasComponent() const {
+            if(const auto iter = _intermedia_map.find(Type<T>::id()); iter != _intermedia_map.end())
+                return true;
+            return _components.has<T>();
+        }
+
         template<typename T> sp<T> getComponent() const {
             if(const auto iter = _intermedia_map.find(Type<T>::id()); iter != _intermedia_map.end())
                 return iter->second.template toPtr<T>();
@@ -42,7 +48,7 @@ public:
             setIntermediaComponent(std::move(component));
         }
 
-        template<typename T> void addComponent(sp<T> component) {
+        template<typename T> [[deprecated]] void addComponent(sp<T> component) {
             setIntermediaComponent(component);
             _intermedia_list.emplace_back(std::move(component));
         }
@@ -73,10 +79,7 @@ public:
 
     virtual ~Wirable() = default;
 
-    virtual TypeId onPoll(WiringContext& context) {
-        return constants::TYPE_ID_NONE;
-    }
-
+    virtual void onPoll(WiringContext& context) {}
     virtual void onWire(const WiringContext& context, const Box& self) = 0;
 
 };

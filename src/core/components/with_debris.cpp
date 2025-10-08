@@ -29,10 +29,16 @@ WithDebris::WithDebris()
     : _tracker(sp<Tracker>::make()) {
 }
 
+void WithDebris::onPoll(WiringContext& context)
+{
+    if(!context.hasComponent<Tracker>())
+        context.setComponent(sp<Tracker>::make());
+}
+
 void WithDebris::onWire(const WiringContext& context, const Box& self)
 {
     Vector<WeakPtr<Debris>> debris = std::move(_tracker->_debris);
-    _tracker = ensureTracker(context);
+    _tracker = context.ensureComponent<Tracker>();
 
     for(WeakPtr<Debris>& i : debris)
         _tracker->_debris.push_back(std::move(i));
@@ -60,7 +66,7 @@ sp<WithDebris::Tracker> WithDebris::ensureTracker(const WiringContext& context)
         return tracker;
 
     sp<Tracker> tracker = sp<Tracker>::make();
-    const_cast<WiringContext&>(context).addComponent(tracker);
+    const_cast<WiringContext&>(context).setComponent(tracker);
     return tracker;
 }
 

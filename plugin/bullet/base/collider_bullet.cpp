@@ -295,7 +295,7 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
 
 sp<Shape> ColliderBullet::createShape(const NamedHash& type, Optional<V3> scale, const V3 origin)
 {
-    sp<CollisionShapeRef> collisionShape = createCollisionShape(type, scale, _stub->_model_loader);
+    sp<CollisionShapeRef> collisionShape = ensureCollisionShapeRef(type, scale);
     return sp<Shape>::make(type, std::move(scale), origin, Box(std::move(collisionShape)));
 }
 
@@ -453,29 +453,33 @@ void ColliderBullet::addTickContactInfo(const sp<CollisionObjectRef>& rigidBody,
 
 sp<CollisionShapeRef> ColliderBullet::ensureCollisionShapeRef(const NamedHash& type, const Optional<V3>& scale) const
 {
+    switch(type.hash())
+    {
+        case Shape::TYPE_AABB:
+        case Shape::TYPE_BOX:
+        case Shape::TYPE_BALL:
+        case Shape::TYPE_CAPSULE:
+            return createCollisionShape(type, scale, _stub->_model_loader);
+        default:
+            break;
+    }
+
+    sp<CollisionShapeRef> cs;
     if(const auto iter = _stub->_collision_shapes.find(type.hash()); iter == _stub->_collision_shapes.end())
     {
-        switch(type.hash())
-        {
-            case Shape::TYPE_AABB:
-            case Shape::TYPE_BOX:
-            case Shape::TYPE_BALL:
-            case Shape::TYPE_CAPSULE:
-                return createCollisionShape(type, scale, _stub->_model_loader);
-                break;
-            default:
-                sp<CollisionShapeRef> cs = createCollisionShape(type, scale, _stub->_model_loader);
-                _stub->_collision_shapes.insert({type.hash(), cs});
-                if(!scale)
-                    return cs;
-                const V3 s = scale.value();
-                CHECK_WARN(s.x() == s.y() && s.y() == s.z(), "We are now only support uniform scaling shapes");
-                sp<btCollisionShape> uniformShape = sp<btCollisionShape>::make<btUniformScalingShape>(static_cast<btConvexShape*>(cs->btShape().get()), s.x());
-                return sp<CollisionShapeRef>::make(cs->btShape(), cs->size() * s);
-        }
+        cs = createCollisionShape(type, scale, _stub->_model_loader);
+        _stub->_collision_shapes.insert({type.hash(), cs});
     }
     else
-        return iter->second;
+        cs = iter->second;
+
+    if(!scale)
+        return cs;
+
+    const V3 s = scale.value();
+    CHECK_WARN(s.x() == s.y() && s.y() == s.z(), "We are now only support uniform scaling shapes");
+    sp<btCollisionShape> uniformShape = sp<btCollisionShape>::make<btUniformScalingShape>(static_cast<btConvexShape*>(cs->btShape().get()), s.x());
+    return sp<CollisionShapeRef>::make(uniformShape, cs->size() * s);
 }
 
 ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

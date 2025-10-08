@@ -45,8 +45,7 @@ Entity::Entity(Traits components)
     for(const auto& [k, v] : _components.table())
         if(!v.isEnum())
             if(const sp<Wirable> wirable = v.as<Wirable>())
-                if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
-                    _components.add(typeId, v);
+                wirable->onPoll(context);
 
     preWire();
     for(const auto& [k, v] : _components.table())
@@ -69,8 +68,7 @@ Entity::Entity(Vector<Component> components)
                 if(sp<Wirable::Niche> niche = k.as<Wirable::Niche>())
                     niches.push_back(std::move(niche));
                 if(const sp<Wirable> wirable = k.as<Wirable>())
-                    if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
-                        _components.add(typeId, k);
+                    wirable->onPoll(context);
             }
         }
     }
@@ -146,11 +144,9 @@ void Entity::setComponent(const TypeId typeId, Box component)
     if(const sp<Wirable> wirable = component.as<Wirable>())
     {
         Wirable::WiringContext context(_components);
-        if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
-            _components.add(typeId, component);
+        wirable->onPoll(context);
         wirable->onWire(context, component);
     }
-
     _components.add(typeId, std::move(component));
 }
 
