@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base/timestamp.h"
+#include "core/base/wrapper.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
@@ -27,7 +28,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(OptionalVar);
 
     explicit operator bool() const {
-        return static_cast<bool>(this->_stub->_delegate);
+        return static_cast<bool>(this->_stub->wrapped());
     }
 
     ValType val() const {
@@ -46,8 +47,12 @@ public:
         return this->_stub;
     }
 
+    sp<T> wrapper() const {
+        return this->_stub;
+    }
+
     const sp<T>& wrapped() const {
-        return this->_stub->_delegate;
+        return this->_stub->wrapped();
     }
 
     void reset(sp<T> delegate) {
@@ -59,32 +64,31 @@ public:
     }
 
 private:
-    class Stub final : public Variable<ValType> {
+    class Stub final : public Wrapper<T>, public Variable<ValType> {
     public:
         Stub(sp<T> delegate, ValType defaultVal) noexcept
-            : _delegate(std::move(delegate)), _default_val(std::move(defaultVal)) {
+            : Wrapper<T>(std::move(delegate)), _default_val(std::move(defaultVal)) {
         }
 
         bool update(uint64_t timestamp) override {
-            return (_delegate ? _delegate->update(timestamp) : false) || _timestamp.update(timestamp);
+            return (this->_wrapped ? this->_wrapped->update(timestamp) : false) || _timestamp.update(timestamp);
         }
 
         ValType val() override {
-            return _delegate ? _delegate->val() : _default_val;
+            return this->_wrapped ? this->_wrapped->val() : _default_val;
         }
 
         void reset(sp<T> delegate) {
-            _delegate = std::move(delegate);
+            this->_wrapped = std::move(delegate);
             _timestamp.markDirty();
         }
 
         void reset(ValType value) {
             _default_val = std::move(value);
-            _delegate = nullptr;
+            this->_wrapped = nullptr;
             _timestamp.markDirty();
         }
 
-        sp<T> _delegate;
         ValType _default_val;
         Timestamp _timestamp;
     };
