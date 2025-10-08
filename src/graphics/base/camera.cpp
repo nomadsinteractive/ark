@@ -403,14 +403,16 @@ void Camera::assign(const Camera& other)
         _view->set(other.view());
 }
 
-std::tuple<sp<Vec3>, sp<Vec3>, sp<Vec4>> Camera::getFrustumSlice(const float z) const
+sp<Mat4> Camera::toFrustumSliceMatrix(const float z) const
 {
     sp<Mat4> vpInverse = Mat4Type::inverse(_vp);
     sp<Vec3> position = Mat4Type::matmul(vpInverse, V3(0, 0, z));
-    sp<Vec3> right = Mat4Type::matmul(vpInverse, V3(1, 0, z));
-    sp<Vec3> up = Mat4Type::matmul(vpInverse, V3(0, 1, z));
-    sp<Vec3> front = Vec3Type::cross(right, up);
-    return {std::move(position), nullptr, sp<Vec4>::make<RUF2Quaternion>(std::move(right), std::move(up), std::move(front))};
+    sp<Vec3> right = Vec3Type::sub(Mat4Type::matmul(vpInverse, V3(1, 0, z)), position);
+    sp<Vec3> up = Vec3Type::sub(Mat4Type::matmul(std::move(vpInverse), V3(0, 1, z)), position);
+    sp<Vec3> front = sp<Vec3>::make<Vec3::Const>(V3(0));
+    const Constants& constants = Global<Constants>();
+    sp<Mat4> matrix = Mat4Type::create(Vec3Type::extend(std::move(right), constants.NUMERIC_ZERO), Vec3Type::extend(std::move(up), constants.NUMERIC_ZERO), Vec3Type::extend(std::move(front), constants.NUMERIC_ZERO), sp<Vec4>::make<Vec4::Const>(V4(0, 0, 0, 1)));
+    return Mat4Type::translate(std::move(matrix), std::move(position));
 }
 
 sp<Mat4> Camera::view() const

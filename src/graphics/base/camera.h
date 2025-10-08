@@ -122,7 +122,7 @@ public:
     void assign(const Camera& other);
 
 //  [[script::bindings::auto]]
-    std::tuple<sp<Vec3>, sp<Vec3>, sp<Vec4>> getFrustumSlice(float z) const;
+    sp<Mat4> toFrustumSliceMatrix(float z) const;
 
     bool isLHS() const;
 

@@ -1076,6 +1076,9 @@ class Camera:
     def to_viewport_position(self, position: TYPE_VEC3) -> "Vec3":
         pass
 
+    def to_frustum_slice_matrix(self, z: float) -> "Mat4":
+        pass
+
     def assign(self, camera: "Camera"):
         pass
 
