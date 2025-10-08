@@ -1,7 +1,5 @@
 #include "graphics/impl/transform/transform_trs_3d.h"
 
-#include "core/util/updatable_util.h"
-
 #include "graphics/base/mat.h"
 #include "graphics/base/v4.h"
 #include "graphics/util/matrix_util.h"

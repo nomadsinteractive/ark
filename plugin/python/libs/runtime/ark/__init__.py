@@ -1076,7 +1076,7 @@ class Camera:
     def to_viewport_position(self, position: TYPE_VEC3) -> "Vec3":
         pass
 
-    def to_frustum_slice_matrix(self, z: float) -> "Mat4":
+    def to_frustum_slice_matrix(self, z: float, normalize = False) -> "Mat4":
         pass
 
     def assign(self, camera: "Camera"):
@@ -1468,6 +1468,17 @@ class Translation(Vec3):
         super().__init__(*translate)
 
     def reset(self, position: TYPE_VEC3):
+        pass
+
+    def to_matrix(self) -> Mat4:
+        pass
+
+
+class Scale(Vec3):
+    def __init__(self, scale: TYPE_VEC3):
+        super().__init__(*scale)
+
+    def reset(self, scale: TYPE_VEC3):
         pass
 
     def to_matrix(self) -> Mat4:

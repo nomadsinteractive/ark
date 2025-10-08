@@ -13,6 +13,7 @@
 #include "graphics/impl/transform/transform_impl.h"
 #include "graphics/base/transform_3d.h"
 #include "graphics/components/rotation.h"
+#include "graphics/components/scale.h"
 #include "graphics/components/translation.h"
 #include "graphics/util/vec3_type.h"
 
@@ -190,8 +191,13 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
 
     if(auto transform = context.getComponent<Transform>())
         setTransform(std::move(transform));
-    else if(sp<Vec4> rotation = context.getComponent<Rotation>())
-        setTransform(sp<Transform>::make<Transform3D>(std::move(rotation)));
+    else
+    {
+        sp<Vec4> rotation = context.getComponent<Rotation>();
+        sp<Vec3> scale = context.getComponent<Scale>();
+        if(rotation || scale)
+            setTransform(sp<Transform>::make<Transform3D>(std::move(rotation), std::move(scale)));
+    }
 
     if(const sp<Visibility> visibility = context.getComponent<Visibility>(); visibility && !_visible)
         setVisible(visibility);

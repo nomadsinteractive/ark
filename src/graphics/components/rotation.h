@@ -15,7 +15,7 @@ namespace ark {
 class ARK_API Rotation final : public Vec4, public Wrapper<Vec4> {
 public:
 //  [[script::bindings::auto]]
-    Rotation(const V4& quaternion);
+    Rotation(V4 quaternion);
 //  [[script::bindings::auto]]
     Rotation(sp<Vec4> quaternion);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotation);

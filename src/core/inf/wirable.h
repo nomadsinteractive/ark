@@ -2,7 +2,6 @@
 
 #include "core/forwarding.h"
 #include "core/base/constants.h"
-#include "core/base/string.h"
 #include "core/collection/traits.h"
 
 namespace ark {
@@ -39,7 +38,7 @@ public:
         }
 
         template<typename T> void setComponent(sp<T> component) {
-            CHECK_WARN(!(_upload_on_close && (_components.has<T>() || _intermedia_map.find(Type<T>::id()) != _intermedia_map.end())), "Overriding component: \"%s\"", Class::ensureClass<T>()->name());
+            CHECK_WARN(!(_upload_on_close && (_components.has<T>() || _intermedia_map.contains(Type<T>::id()))), "Overriding component: \"%s\"", Class::ensureClass<T>()->name());
             setIntermediaComponent(std::move(component));
         }
 

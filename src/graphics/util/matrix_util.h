@@ -42,12 +42,6 @@ public:
     static M4 transpose(const M4& matrix);
 
     static M4 inverse(const M4& matrix);
-
-    static M4 ortho(float left, float right, float bottom, float top, float near, float far);
-    static M4 lookAt(const V3& position, const V3& target, const V3& up);
-    static M4 frustum(float left, float right, float bottom, float top, float near, float far);
-    static M4 perspective(float fov, float aspect, float near, float far);
-
 };
 
 }

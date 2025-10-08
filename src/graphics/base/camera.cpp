@@ -12,6 +12,7 @@
 
 #include "graphics/base/mat.h"
 #include "graphics/base/viewport.h"
+#include "graphics/components/translation.h"
 #include "graphics/util/matrix_util.h"
 #include "graphics/util/mat4_type.h"
 #include "graphics/util/vec3_type.h"
@@ -403,16 +404,21 @@ void Camera::assign(const Camera& other)
         _view->set(other.view());
 }
 
-sp<Mat4> Camera::toFrustumSliceMatrix(const float z) const
+sp<Mat4> Camera::toFrustumSliceMatrix(const float z, const bool normalize) const
 {
     sp<Mat4> vpInverse = Mat4Type::inverse(_vp);
     sp<Vec3> position = Mat4Type::matmul(vpInverse, V3(0, 0, z));
     sp<Vec3> right = Vec3Type::sub(Mat4Type::matmul(vpInverse, V3(1, 0, z)), position);
     sp<Vec3> up = Vec3Type::sub(Mat4Type::matmul(std::move(vpInverse), V3(0, 1, z)), position);
     sp<Vec3> front = sp<Vec3>::make<Vec3::Const>(V3(0));
+    if(normalize)
+    {
+        right = Vec3Type::normalize(right);
+        up = Vec3Type::normalize(up);
+    }
     const Constants& constants = Global<Constants>();
     sp<Mat4> matrix = Mat4Type::create(Vec3Type::extend(std::move(right), constants.NUMERIC_ZERO), Vec3Type::extend(std::move(up), constants.NUMERIC_ZERO), Vec3Type::extend(std::move(front), constants.NUMERIC_ZERO), sp<Vec4>::make<Vec4::Const>(V4(0, 0, 0, 1)));
-    return Mat4Type::translate(std::move(matrix), std::move(position));
+    return Mat4Type::matmul(sp<Translation>::make(std::move(position))->toMatrix(), std::move(matrix));
 }
 
 sp<Mat4> Camera::view() const

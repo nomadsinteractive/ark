@@ -122,7 +122,7 @@ public:
     void assign(const Camera& other);
 
 //  [[script::bindings::auto]]
-    sp<Mat4> toFrustumSliceMatrix(float z) const;
+    sp<Mat4> toFrustumSliceMatrix(float z, bool normalize = false) const;
 
     bool isLHS() const;
 

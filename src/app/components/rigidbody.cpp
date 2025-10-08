@@ -101,7 +101,7 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
         if(const sp<RenderObject> renderObject = context.getComponent<RenderObject>())
         {
             renderObject->setPosition(position().toVar());
-            renderObject->setTransform(sp<Transform>::make<Transform3D>(rotation().toVar(), nullptr, nullptr));
+            TransformType::setRotation(renderObject->transform(), rotation().toVar());
         }
 
     if(!_impl._stub->_collision_callback)

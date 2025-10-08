@@ -33,8 +33,6 @@ public:
     static GLenum getTextureFormat(Texture::Usage usage, Texture::Format format, uint8_t channels);
     static GLenum getPixelType(int32_t format, const Bitmap& bitmap);
 
-    static void renderCubemap(GraphicsContext& graphicsContext, uint32_t id, RenderController& renderController, const sp<Pipeline>& pipeline, Texture& texture, int32_t width, int32_t height);
-
     static void glTexImage2D(uint32_t index, int32_t n, const void* data);
 };
 

@@ -12,7 +12,7 @@ namespace ark {
 
 namespace {
 
-class Translate {
+class TranslateOP {
 public:
     M4 operator()(const V3& v1) const {
         return glm::translate(glm::mat4(1.0f), *reinterpret_cast<const glm::vec3*>(&v1));
@@ -43,7 +43,7 @@ void Translation::reset(sp<Vec3> position)
 
 sp<Mat4> Translation::toMatrix() const
 {
-    return sp<Mat4>::make<VariableOP1<M4, V3>>(Translate(), _wrapped);
+    return sp<Mat4>::make<VariableOP1<M4, V3>>(TranslateOP(), _wrapped);
 }
 
 }

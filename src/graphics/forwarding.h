@@ -43,6 +43,7 @@ class Renderer;
 class RenderGroup;
 class RenderLayerSnapshot;
 class Rotation;
+class Scale;
 class Shape;
 class Size;
 class SurfaceController;

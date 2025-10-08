@@ -9,23 +9,31 @@ namespace ark {
 
 namespace {
 
+M4 toMatrix(const V4 t, const V4 b, const V4 n, const V4 w) {
+    const float values[16] = {t.x(), t.y(), t.z(), t.w(), b.x(), b.y(), b.z(), b.w(), n.x(), n.y(), n.z(), n.w(), w.x(), w.y(), w.z(), w.w()};
+    return M4(values);
+}
+
 class TBNMat4 final : public Mat4 {
 public:
     TBNMat4(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w)
         : _t(std::move(t)), _b(std::move(b)), _n(std::move(n)), _w(std::move(w)) {
+        update(Timestamp::now());
     }
 
-    M4 val() override {
-        return toMatrix(_t->val(), _b->val(), _n->val(), _w->val());
+    M4 val() override
+    {
+        return _matrix;
     }
 
-    bool update(const uint64_t timestamp) override {
-        return UpdatableUtil::update(timestamp, _t, _b, _n, _w);
-    }
-
-    static M4 toMatrix(const V4 t, const V4 b, const V4 n, const V4 w) {
-        const float values[16] = {t.x(), b.x(), n.x(), w.x(), t.y(), b.y(), n.y(), w.y(), t.z(), b.z(), n.z(), w.z(), t.w(), b.w(), n.w(), w.w()};
-        return M4(values);
+    bool update(const uint64_t timestamp) override
+    {
+        if(UpdatableUtil::update(timestamp, _t, _b, _n, _w))
+        {
+            _matrix = toMatrix(_t->val(), _b->val(), _n->val(), _w->val());
+            return true;
+        }
+        return false;
     }
 
 private:
@@ -33,6 +41,7 @@ private:
     sp<Vec4> _b;
     sp<Vec4> _n;
     sp<Vec4> _w;
+    M4 _matrix;
 };
 
 }
@@ -48,7 +57,7 @@ Mat4Impl::Mat4Impl(sp<Mat4> other) noexcept
 }
 
 Mat4Impl::Mat4Impl(const V4 t, const V4 b, const V4 n, const V4 w) noexcept
-    : _impl(sp<VariableWrapper<M4>>::make(TBNMat4::toMatrix(t, b, n, w)))
+    : _impl(sp<VariableWrapper<M4>>::make(toMatrix(t, b, n, w)))
 {
 }
 
@@ -62,7 +71,7 @@ M4 Mat4Impl::val()
     return _impl->val();
 }
 
-bool Mat4Impl::update(uint64_t timestamp)
+bool Mat4Impl::update(const uint64_t timestamp)
 {
     return _impl->update(timestamp);
 }

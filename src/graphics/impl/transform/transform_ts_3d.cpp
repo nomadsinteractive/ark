@@ -1,7 +1,5 @@
 #include "graphics/impl/transform/transform_ts_3d.h"
 
-#include "core/util/updatable_util.h"
-
 #include "graphics/base/mat.h"
 #include "graphics/base/v3.h"
 #include "graphics/util/matrix_util.h"
@@ -22,7 +20,7 @@ TransformTS3D::TransformTS3D(const TransformImpl& transform)
 {
 }
 
-bool TransformTS3D::update(uint64_t timestamp)
+bool TransformTS3D::update(const uint64_t timestamp)
 {
     return _stub->update(timestamp);
 }

@@ -152,24 +152,4 @@ M4 MatrixUtil::inverse(const M4& matrix)
     return glm::inverse(glm::make_mat4(matrix.value()));
 }
 
-M4 MatrixUtil::ortho(float left, float right, float bottom, float top, float near, float far)
-{
-    return {glm::ortho(left, right, bottom, top, near, far)};
-}
-
-M4 MatrixUtil::lookAt(const V3& position, const V3& target, const V3& up)
-{
-    return {glm::lookAt(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z()))};
-}
-
-M4 MatrixUtil::frustum(float left, float right, float bottom, float top, float near, float far)
-{
-    return {glm::frustum(left, right, bottom, top, near, far)};
-}
-
-M4 MatrixUtil::perspective(float fov, float aspect, float near, float far)
-{
-    return {glm::perspective(fov, aspect, near, far)};
-}
-
 }
