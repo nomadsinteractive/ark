@@ -25,6 +25,9 @@ public:
     sp<Mat4> toMatrix() const;
 
 private:
+    Translation(const sp<Vec3Wrapper>& vec3Wrapper);
+
+private:
     sp<Vec3> _delegate;
     sp<Wrapper<Vec3>> _wrapper;
 };

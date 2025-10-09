@@ -23,10 +23,13 @@ public:
 }
 
 Translation::Translation(sp<Vec3> translate)
+    : Translation(sp<Vec3Wrapper>::make(std::move(translate)))
 {
-    const sp<Vec3Wrapper> vec3Wrapper = sp<Vec3Wrapper>::make(std::move(translate));
-    _delegate = vec3Wrapper;
-    _wrapper = vec3Wrapper;
+}
+
+Translation::Translation(const sp<Vec3Wrapper>& vec3Wrapper)
+    : _delegate(vec3Wrapper), _wrapper(vec3Wrapper)
+{
 }
 
 Translation::Translation(sp<Vec3> delegate, sp<Wrapper<Vec3>> wrapper)

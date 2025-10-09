@@ -178,6 +178,8 @@ void RenderObject::onPoll(WiringContext& context)
 {
     if(!context.hasInterface<Translation>())
         context.setInterface(sp<Translation>::make(_position.toVar(), _position.toWrapper()));
+    if(!context.hasInterface<Rotation>())
+        context.setInterface(sp<Rotation>::make(_transform->rotation().toVar(), _transform->rotation().toWrapper()));
 }
 
 void RenderObject::onWire(const WiringContext& context, const Box& self)

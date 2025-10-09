@@ -76,13 +76,13 @@ private:
 };
 
 TransformImpl::TransformImpl(const TransformType::Type type, sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation)
-    : _type(type), _stub(sp<Stub>::make(Stub{{std::move(translation)}, {std::move(rotation), constants::QUATERNION_ONE}, {std::move(scale), constants::SCALE_ONE}}))
+    : Transform(std::move(rotation), std::move(scale), std::move(translation)), _type(type)
 {
     doUpdateDelegate();
 }
 
 TransformImpl::TransformImpl(sp<Transform> delegate)
-    : Wrapper(std::move(delegate)), _type(TransformType::TYPE_DELEGATED), _stub(sp<Stub>::make(Stub{{}, {nullptr, constants::QUATERNION_ONE}, {nullptr, constants::SCALE_ONE}}))
+    : Wrapper(std::move(delegate)), _type(TransformType::TYPE_DELEGATED)
 {
     doUpdateDelegate();
 }
@@ -117,31 +117,16 @@ M4 TransformImpl::val()
     return _wrapped->val();
 }
 
-const OptionalVar<Vec4>& TransformImpl::rotation() const
-{
-    return _stub->_rotation;
-}
-
 void TransformImpl::setRotation(sp<Vec4> rotation)
 {
     _stub->_rotation.reset(std::move(rotation));
     doUpdateDelegate();
 }
 
-const OptionalVar<Vec3>& TransformImpl::scale() const
-{
-    return _stub->_scale;
-}
-
 void TransformImpl::setScale(sp<Vec3> scale)
 {
     _stub->_scale.reset(std::move(scale));
     doUpdateDelegate();
-}
-
-const OptionalVar<Vec3>& TransformImpl::translation() const
-{
-    return _stub->_translation;
 }
 
 void TransformImpl::setTranslation(sp<Vec3> translation)
@@ -162,11 +147,6 @@ void TransformImpl::doUpdateDelegate()
     _stub->_timestamp.markDirty();
     if(_type != TransformType::TYPE_NONE && _type != TransformType::TYPE_DELEGATED)
         _wrapped = makeDelegate();
-}
-
-bool TransformImpl::Stub::update(const uint64_t timestamp) const
-{
-    return UpdatableUtil::update(timestamp, _translation, _rotation, _scale, _timestamp);
 }
 
 sp<Transform> TransformImpl::makeDelegate() const

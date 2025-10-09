@@ -71,14 +71,11 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
         if(const sp<Rotation> rotation = context.getInterface<Rotation>())
             rotation->reset(_impl._stub->_rotation.toVar());
     }
-    else if(const sp<Translation> position = context.getComponent<Translation>())
-        _impl._stub->_position.reset(position);
-
-    if(const sp<Rotation> rotation = context.getComponent<Rotation>())
+    else
     {
-        if(type() == BODY_TYPE_DYNAMIC)
-            rotation->reset(_impl._stub->_rotation.toVar());
-        else
+        if(sp<Vec3> position = context.getComponent<Translation>())
+            _impl._stub->_position.reset(std::move(position));
+        if(sp<Vec4> rotation = context.getComponent<Rotation>())
             _impl._stub->_rotation.reset(std::move(rotation));
     }
 
@@ -98,13 +95,6 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
         _impl._stub->_tags = std::move(impl._stub->_tags);
         _is_shadow = false;
     }
-
-    if(type() == BODY_TYPE_DYNAMIC)
-        if(const sp<RenderObject> renderObject = context.getComponent<RenderObject>())
-        {
-            renderObject->setPosition(position().toVar());
-            TransformType::setRotation(renderObject->transform(), rotation().toVar());
-        }
 
     if(!_impl._stub->_collision_callback)
         if(auto collisionCallback = context.getComponent<CollisionCallback>())

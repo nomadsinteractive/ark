@@ -2,6 +2,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/variable.h"
+#include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/mat.h"
@@ -10,6 +11,8 @@ namespace ark {
 
 class ARK_API Transform : public Mat4 {
 public:
+    Transform();
+    Transform(sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation);
     ~Transform() override = default;
 
     class ARK_API Snapshot {
@@ -31,6 +34,20 @@ public:
         TypeId _magic;
     };
 
+    struct Stub {
+        OptionalVar<Vec3> _translation;
+        OptionalVar<Vec4> _rotation;
+        OptionalVar<Vec3> _scale;
+
+        Timestamp _timestamp;
+
+        bool update(uint64_t timestamp) const;
+    };
+
+    const OptionalVar<Vec4>& rotation() const;
+    const OptionalVar<Vec3>& scale() const;
+    const OptionalVar<Vec3>& translation() const;
+
     [[nodiscard]] virtual Snapshot snapshot() = 0;
 
     virtual V4 transform(const Snapshot& snapshot, const V4& xyzw) = 0;
@@ -39,6 +56,9 @@ public:
     M4 val() override {
         return toMatrix(snapshot());
     }
+
+protected:
+    sp<Stub> _stub;
 };
 
 }

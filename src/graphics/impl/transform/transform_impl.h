@@ -27,13 +27,8 @@ public:
     V4 transform(const Snapshot& snapshot, const V4& xyzw) override;
     M4 toMatrix(const Snapshot& snapshot) override;
 
-    const OptionalVar<Vec4>& rotation() const;
     void setRotation(sp<Vec4> rotation);
-
-    const OptionalVar<Vec3>& scale() const;
     void setScale(sp<Vec3> scale);
-
-    const OptionalVar<Vec3>& translation() const;
     void setTranslation(sp<Vec3> translation);
 
     void reset(sp<Mat4> transform);
@@ -45,21 +40,10 @@ private:
 
     void doUpdateDelegate();
 
-    struct Stub {
-        OptionalVar<Vec3> _translation;
-        OptionalVar<Vec4> _rotation;
-        OptionalVar<Vec3> _scale;
-
-        Timestamp _timestamp;
-
-        bool update(uint64_t timestamp) const;
-    };
-
     class TransformDelegateMat4;
 
 private:
     TransformType::Type _type;
-    sp<Stub> _stub;
 
     friend class TransformTS2D;
     friend class TransformTS3D;

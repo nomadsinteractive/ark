@@ -16,7 +16,7 @@ public:
     M4 toMatrix(const Snapshot& snapshot) override;
 
 private:
-    sp<TransformImpl::Stub> _stub;
+    sp<Stub> _stub;
 };
 
 }

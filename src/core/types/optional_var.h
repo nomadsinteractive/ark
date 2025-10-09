@@ -44,11 +44,11 @@ public:
     }
 
     sp<T> toVar() const {
-        return this->_stub.cast<T>();
+        return this->_stub.template cast<T>();
     }
 
     sp<Wrapper<T>> toWrapper() const {
-        return this->_stub.cast<Wrapper<T>>();
+        return this->_stub.template cast<Wrapper<T>>();
     }
 
     const sp<T>& wrapped() const {

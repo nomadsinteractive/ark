@@ -14,9 +14,7 @@ sp<Transform> TransformType::create(sp<Mat4> matrix)
 
 sp<Vec3> TransformType::translation(const sp<Transform>& self)
 {
-    if(const sp<TransformImpl> transform = self.asInstance<TransformImpl>())
-        return transform->translation().toVar();
-    return nullptr;
+    return self->translation().toVar();
 }
 
 void TransformType::setTranslation(const sp<Transform>& self, sp<Vec3> translation)
@@ -27,9 +25,7 @@ void TransformType::setTranslation(const sp<Transform>& self, sp<Vec3> translati
 
 sp<Vec4> TransformType::rotation(const sp<Transform>& self)
 {
-    if(const sp<TransformImpl> transform = self.asInstance<TransformImpl>())
-        return transform->rotation().toVar();
-    return nullptr;
+    return self->rotation().toVar();
 }
 
 void TransformType::setRotation(const sp<Transform>& self, sp<Vec4> rotation)
@@ -40,9 +36,7 @@ void TransformType::setRotation(const sp<Transform>& self, sp<Vec4> rotation)
 
 sp<Vec3> TransformType::scale(const sp<Transform>& self)
 {
-    if(const sp<TransformImpl> transform = self.asInstance<TransformImpl>())
-        return transform->scale().toVar();
-    return nullptr;
+    return self->scale().toVar();
 }
 
 void TransformType::setScale(const sp<Transform>& self, sp<Vec3> scale)
