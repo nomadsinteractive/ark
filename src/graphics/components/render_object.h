@@ -77,6 +77,7 @@ public:
     State updateState(const RenderRequest& renderRequest) override;
     Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, State state) override;
 
+    void onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context, const Box& self) override;
 
 //  [[plugin::builder]]

@@ -90,6 +90,10 @@ typedef Variable<V2i> Vec2i;
 typedef Variable<V3i> Vec3i;
 typedef Variable<V4i> Vec4i;
 
+typedef VariableWrapper<V2> Vec2Wrapper;
+typedef VariableWrapper<V3> Vec3Wrapper;
+typedef VariableWrapper<V4> Vec4Wrapper;
+
 typedef VariableWrapper<M3> Mat3Wrapper;
 typedef VariableWrapper<M4> Mat4Wrapper;
 

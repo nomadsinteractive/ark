@@ -9,10 +9,11 @@
 namespace ark {
 
 //[[script::bindings::extends(Vec3)]]
-class ARK_API Translation final : public Wrapper<Vec3>, public Vec3 {
+class ARK_API Translation final : public Vec3 {
 public:
 //  [[script::bindings::constructor]]
     Translation(sp<Vec3> translate);
+    Translation(sp<Vec3> delegate, sp<Wrapper<Vec3>> wrapper);
 
     bool update(uint64_t timestamp) override;
     V3 val() override;
@@ -22,6 +23,10 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Mat4> toMatrix() const;
+
+private:
+    sp<Vec3> _delegate;
+    sp<Wrapper<Vec3>> _wrapper;
 };
 
 }

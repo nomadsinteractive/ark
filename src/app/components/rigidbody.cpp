@@ -64,13 +64,15 @@ void Rigidbody::discard()
 
 void Rigidbody::onWire(const WiringContext& context, const Box& self)
 {
-    if(const sp<Translation> position = context.getComponent<Translation>())
+    if(type() == BODY_TYPE_DYNAMIC)
     {
-        if(type() == BODY_TYPE_DYNAMIC)
-            position->reset(_impl._stub->_position.toVar());
-        else
-            _impl._stub->_position.reset(position);
+        if(const sp<Translation> translation = context.getInterface<Translation>())
+            translation->reset(_impl._stub->_position.toVar());
+        if(const sp<Rotation> rotation = context.getInterface<Rotation>())
+            rotation->reset(_impl._stub->_rotation.toVar());
     }
+    else if(const sp<Translation> position = context.getComponent<Translation>())
+        _impl._stub->_position.reset(position);
 
     if(const sp<Rotation> rotation = context.getComponent<Rotation>())
     {

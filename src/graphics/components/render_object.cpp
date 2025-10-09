@@ -174,6 +174,12 @@ Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshot
     return {state, typeId, std::move(model)};
 }
 
+void RenderObject::onPoll(WiringContext& context)
+{
+    if(!context.hasInterface<Translation>())
+        context.setInterface(sp<Translation>::make(_position.toVar(), _position.toWrapper()));
+}
+
 void RenderObject::onWire(const WiringContext& context, const Box& self)
 {
     const sp<View> view = context.getComponent<View>();

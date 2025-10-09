@@ -31,14 +31,14 @@ WithDebris::WithDebris()
 
 void WithDebris::onPoll(WiringContext& context)
 {
-    if(!context.hasComponent<Tracker>())
-        context.setComponent(sp<Tracker>::make());
+    if(!context.hasInterface<Tracker>())
+        context.setInterface(sp<Tracker>::make());
 }
 
 void WithDebris::onWire(const WiringContext& context, const Box& self)
 {
     Vector<WeakPtr<Debris>> debris = std::move(_tracker->_debris);
-    _tracker = context.ensureComponent<Tracker>();
+    _tracker = context.ensureInterface<Tracker>();
 
     for(WeakPtr<Debris>& i : debris)
         _tracker->_debris.push_back(std::move(i));

@@ -89,7 +89,7 @@ void Level::doLoad(const String& src)
                 const float fovy = Documents::ensureAttribute<float>(j, "fov_y");
                 const float clipNear = Documents::ensureAttribute<float>(j, "clip-near");
                 const float clipFar = Documents::ensureAttribute<float>(j, "clip-far");
-                const M4 matrix = Rotation::toMatrix(sp<Vec4>::make<Vec4::Const>(obj._rotation ? obj._rotation.value() : constants::QUATERNION_ONE))->val();
+                const M4 matrix = Rotation(sp<Vec4>::make<Vec4::Const>(obj._rotation ? obj._rotation.value() : constants::QUATERNION_ONE)).toMatrix()->val();
                 const V3 front = MatrixUtil::mul(matrix, V3(0, -1.0f, 0));
                 const V3 up = MatrixUtil::mul(matrix, V3(0, 0, -1.0f));
                 Camera c = Ark::instance().createCamera(enums::COORDINATE_SYSTEM_RHS, false, Ark::instance().renderController()->renderEngine()->isBackendLHS());

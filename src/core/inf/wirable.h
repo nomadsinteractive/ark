@@ -15,22 +15,45 @@ public:
         }
         ~WiringContext() {
             if(_upload_on_close) {
-                for(Box& i : _intermedia_list)
-                    _components.add(i.typeId(), std::move(i));
-
-                for(auto& [k, v] : _intermedia_map)
+                for(auto& [k, v] : _component_map)
                     _components.add(k, std::move(v));
             }
         }
 
+        template<typename T> bool hasInterface() const {
+            if(const auto iter = _interface_map.find(Type<T>::id()); iter != _interface_map.end())
+                return true;
+            return _components.has<T>();
+        }
+
+        template<typename T> sp<T> getInterface() const {
+            if(const auto iter = _interface_map.find(Type<T>::id()); iter != _interface_map.end())
+                return iter->second.template toPtr<T>();
+            if(sp<T> interfaceObj = _components.get<T>())
+                return interfaceObj;
+            return nullptr;
+        }
+
+        template<typename T> void setInterface(sp<T> interfaceObj) {
+            DCHECK(!(_components.has<T>() || _interface_map.contains(Type<T>::id())), "Overriding interface: \"%s\"", Class::ensureClass<T>()->name());
+            if(!_components.has<T>())
+                _interface_map.insert_or_assign(Type<T>::id(), Box(std::move(interfaceObj)));
+        }
+
+        template<typename T> sp<T> ensureInterface() const {
+            sp<T> interfaceObj = getInterface<T>();
+            CHECK(interfaceObj, "Interface \"%s\" does not exist", Class::ensureClass<T>()->name());
+            return interfaceObj;
+        }
+
         template<typename T> bool hasComponent() const {
-            if(const auto iter = _intermedia_map.find(Type<T>::id()); iter != _intermedia_map.end())
+            if(const auto iter = _component_map.find(Type<T>::id()); iter != _component_map.end())
                 return true;
             return _components.has<T>();
         }
 
         template<typename T> sp<T> getComponent() const {
-            if(const auto iter = _intermedia_map.find(Type<T>::id()); iter != _intermedia_map.end())
+            if(const auto iter = _component_map.find(Type<T>::id()); iter != _component_map.end())
                 return iter->second.template toPtr<T>();
             if(sp<T> component = _components.get<T>())
                 return component;
@@ -44,13 +67,9 @@ public:
         }
 
         template<typename T> void setComponent(sp<T> component) {
-            CHECK_WARN(!(_upload_on_close && (_components.has<T>() || _intermedia_map.contains(Type<T>::id()))), "Overriding component: \"%s\"", Class::ensureClass<T>()->name());
-            setIntermediaComponent(std::move(component));
-        }
-
-        template<typename T> [[deprecated]] void addComponent(sp<T> component) {
-            setIntermediaComponent(component);
-            _intermedia_list.emplace_back(std::move(component));
+            CHECK_WARN(!(_upload_on_close && (_components.has<T>() || _component_map.contains(Type<T>::id()))), "Overriding component: \"%s\"", Class::ensureClass<T>()->name());
+            if(!(_upload_on_close && _components.has<T>()))
+                _component_map.insert_or_assign(Type<T>::id(), Box(std::move(component)));
         }
 
         template<typename T> T getEnum(T defaultValue) const {
@@ -58,16 +77,10 @@ public:
         }
 
     private:
-        template<typename T> void setIntermediaComponent(sp<T> component) {
-            if(!(_upload_on_close && _components.has<T>()))
-                _intermedia_map.insert_or_assign(Type<T>::id(), Box(std::move(component)));
-        }
-
-    private:
         Traits& _components;
         bool _upload_on_close;
-        Vector<Box> _intermedia_list;
-        Map<TypeId, Box> _intermedia_map;
+        Map<TypeId, Box> _component_map;
+        Map<TypeId, Box> _interface_map;
     };
 
     class Niche {
