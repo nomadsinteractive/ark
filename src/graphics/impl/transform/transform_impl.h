@@ -5,7 +5,6 @@
 #include "core/forwarding.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/mat.h"
@@ -14,7 +13,7 @@
 
 namespace ark {
 
-class ARK_API TransformImpl : public Wrapper<Transform>, public Transform, Implements<TransformImpl, Transform, Mat4> {
+class ARK_API TransformImpl : public Transform, public Wrapper<Transform>, Implements<TransformImpl, Transform, Mat4> {
 public:
     TransformImpl(TransformType::Type type = TransformType::TYPE_NONE, sp<Vec4> rotation = nullptr, sp<Vec3> scale = nullptr, sp<Vec3> translation = nullptr);
     explicit TransformImpl(sp<Transform> delegate);
@@ -44,11 +43,6 @@ private:
 
 private:
     TransformType::Type _type;
-
-    friend class TransformTS2D;
-    friend class TransformTS3D;
-    friend class TransformTRS2D;
-    friend class TransformTRS3D;
 };
 
 }

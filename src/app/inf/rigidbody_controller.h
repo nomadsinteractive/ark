@@ -23,6 +23,10 @@ public:
     virtual float friction() const = 0;
     virtual void setFriction(float friction) = 0;
 
+    virtual float mass() const = 0;
+    virtual void setMass(float mass) = 0;
+
+    virtual void applyCentralForce(V3 force) = 0;
     virtual void applyCentralImpulse(V3 impulse) = 0;
 };
 

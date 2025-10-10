@@ -144,6 +144,11 @@ void Entity::setComponent(const TypeId typeId, Box component)
     if(const sp<Wirable> wirable = component.as<Wirable>())
     {
         Wirable::WiringContext context(_components);
+
+        for(const Box& i : _components.table().values())
+            if(const sp<Wirable> w = i.as<Wirable>())
+                w->onPoll(context);
+
         wirable->onPoll(context);
         wirable->onWire(context, component);
     }

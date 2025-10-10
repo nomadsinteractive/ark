@@ -132,6 +132,11 @@ public:
         FATAL("Unimplemented");
     }
 
+    void applyCentralForce(V3 force) override
+    {
+        FATAL("Unimplemented");
+    }
+
     void applyCentralImpulse(const V3 impulse) override
     {
         FATAL("Unimplemented");
@@ -144,6 +149,17 @@ public:
 
     void setFriction(float friction) override
     {
+        FATAL("Unimplemented");
+    }
+
+    float mass() const override
+    {
+        return 0;
+    }
+
+    void setMass(float mass) override
+    {
+        FATAL("Unimplemented");
     }
 
     float updateOccupyRadius()

@@ -36,9 +36,18 @@ public:
 //  [[script::bindings::property]]
     static void setFriction(const sp<RigidbodyController>& self, float friction);
 
+//  [[script::bindings::property]]
+    static float mass(const sp<RigidbodyController>& self);
+//  [[script::bindings::property]]
+    static void setMass(const sp<RigidbodyController>& self, float mass);
+
 //  [[script::bindings::classmethod]]
     static sp<Future> applyLinearVelocity(sp<RigidbodyController> self, sp<Vec3> linearVelocity);
 
+//  [[script::bindings::classmethod]]
+    static sp<Future> applyCentralForce(const sp<RigidbodyController>& self, V3 force);
+//  [[script::bindings::classmethod]]
+    static sp<Future> applyCentralForce(const sp<RigidbodyController>& self, sp<Vec3> force);
 //  [[script::bindings::classmethod]]
     static void applyCentralImpulse(const sp<RigidbodyController>& self, V3 impulse);
 };

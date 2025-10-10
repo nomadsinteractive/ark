@@ -106,13 +106,25 @@ uint32_t Random::rand() const
     return (*_generator)();
 }
 
-float Random::randf() const
+int32_t Random::randint(const int32_t a, const int32_t b) const
 {
-    std::uniform_real_distribution<float> dis(0.0, 1.0);
+    std::uniform_int_distribution<int32_t> dis(a, b);
     return dis(*_generator);
 }
 
-sp<Integer> Random::randint(const int32_t a, const int32_t b) const
+int64_t Random::randint(const int64_t a, const int64_t b) const
+{
+    std::uniform_int_distribution<int64_t> dis(a, b);
+    return dis(*_generator);
+}
+
+float Random::uniform(const float a, const float b) const
+{
+    std::uniform_real_distribution<float> dis(a, b);
+    return dis(*_generator);
+}
+
+sp<Integer> Random::randInteger(const int32_t a, const int32_t b) const
 {
     sp<Integer> g = sp<Integer>::make<Distribution<std::uniform_int_distribution<int32_t>, int32_t>>(std::uniform_int_distribution<int32_t>(a, b), _generator);
     if(_nonvolatile)
@@ -120,7 +132,7 @@ sp<Integer> Random::randint(const int32_t a, const int32_t b) const
     return g;
 }
 
-sp<Integer> Random::randint(sp<Integer> a, sp<Integer> b) const
+sp<Integer> Random::randInteger(sp<Integer> a, sp<Integer> b) const
 {
     sp<Integer> g = sp<Integer>::make<DynamicDistribution<std::uniform_int_distribution<int32_t>, int32_t>>(std::move(a), std::move(b), _generator);
     if(_nonvolatile)
@@ -128,7 +140,7 @@ sp<Integer> Random::randint(sp<Integer> a, sp<Integer> b) const
     return g;
 }
 
-sp<Numeric> Random::uniform(const float a, const float b)
+sp<Numeric> Random::randNumeric(const float a, const float b)
 {
     sp<Numeric> g = sp<Numeric>::make<Distribution<std::uniform_real_distribution<float>, float>>(std::uniform_real_distribution<float>(a, b), _generator);
     if(_nonvolatile)
@@ -136,7 +148,7 @@ sp<Numeric> Random::uniform(const float a, const float b)
     return g;
 }
 
-sp<Numeric> Random::uniform(sp<Numeric> a, sp<Numeric> b)
+sp<Numeric> Random::randNumeric(sp<Numeric> a, sp<Numeric> b)
 {
     sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::uniform_real_distribution<float>, float>>(std::move(a), std::move(b), _generator);
     if(_nonvolatile)

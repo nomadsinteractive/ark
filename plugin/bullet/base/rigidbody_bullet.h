@@ -22,8 +22,6 @@ public:
     bool validate() const;
     bool unique() const;
 
-    void applyCentralForce(const V3& force);
-
     bool active() const override;
     void setActive(bool active) override;
 
@@ -36,10 +34,14 @@ public:
     V3 angularFactor() const override;
     void setAngularFactor(V3 factor) override;
 
+    void applyCentralForce(V3 force) override;
     void applyCentralImpulse(V3 impulse) override;
 
     float friction() const override;
     void setFriction(float friction) override;
+
+    float mass() const override;
+    void setMass(float mass) override;
 
     const sp<Ref>& ref() const;
     const sp<Rigidbody::Stub>& stub() const;

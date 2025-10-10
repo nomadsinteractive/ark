@@ -36,10 +36,40 @@ template<typename T> Optional<T> toCppInteger(PyObject* object)
 {
     if(PyLong_Check(object))
     {
+        T val = 0;
         if constexpr(std::is_unsigned_v<T>)
-            return {static_cast<T>(PyLong_AsUnsignedLongLong(object))};
+        {
+            if constexpr(sizeof(T) == sizeof(uint64_t))
+                val = static_cast<T>(PyLong_AsUnsignedLongLong(object));
+            else
+            {
+                static_assert(sizeof(T) < sizeof(uint64_t));
+                val = static_cast<T>(PyLong_AsUnsignedLong(object));
+            }
+            PyObject* err = PyErr_Occurred();
+            if(!err)
+                return {val};
+            if(PyErr_GivenExceptionMatches(err, PyExc_OverflowError))
+            {
+                PyErr_Clear();
+                return {};
+            }
+            return {};
+        }
         else
-            return {static_cast<T>(PyLong_AsLongLong(object))};
+        {
+            int32_t overflow = 0;
+            if constexpr(sizeof(T) == sizeof(int64_t))
+                val = static_cast<T>(PyLong_AsLongLongAndOverflow(object, &overflow));
+            else
+            {
+                static_assert(sizeof(T) < sizeof(int64_t));
+                val = static_cast<T>(PyLong_AsLongAndOverflow(object, &overflow));
+            }
+            if(overflow != 0 || PyErr_Occurred())
+                return {};
+            return {val};
+        }
     }
 
     if(PyIndex_Check(object))

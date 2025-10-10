@@ -9,7 +9,8 @@ Use it for:
 3. Unit test(maybe)
 
 """
-from typing import Callable, TypeVar, Union, Optional, Tuple, Any, Self, Sequence
+from collections.abc import Callable, Sequence
+from typing import TypeVar, Union, Optional, Tuple, Any, Self
 
 
 TYPE_INTEGER = Union[int, "Integer"]
@@ -21,7 +22,9 @@ TYPE_RECT = tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_
 TYPE_VEC2 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC], "Vec2"]
 TYPE_VEC3 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], "Vec3"]
 TYPE_VEC4 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], "Vec4"]
-TYPE_RECTI = tuple[int, int, int, int]
+TYPE_INT2 = tuple[int, int]
+TYPE_INT3 = tuple[int, int, int]
+TYPE_INT4 = tuple[int, int, int, int]
 TYPE_FLOAT2 = tuple[float, float]
 TYPE_FLOAT3 = tuple[float, float, float]
 TYPE_FLOAT4 = tuple[float, float, float, float]
@@ -172,7 +175,7 @@ class Writable:
 
 class ModelLoader:
 
-    def load_model(self, resid: int) -> Optional[Model]:
+    def load_model(self, resid: int) -> Optional["Model"]:
         pass
 
 
@@ -2341,13 +2344,16 @@ class Random:
     def rand(self) -> int:
         return 0
 
-    def randf(self) -> float:
+    def randint(self, a: int, b: int) -> int:
         return 0
 
-    def randint(self, a: TYPE_INTEGER, b: TYPE_INTEGER) -> Integer:
+    def uniform(self, a: float, b: float) -> float:
+        return 0
+
+    def rand_integer(self, a: TYPE_INTEGER, b: TYPE_INTEGER) -> Integer:
         return Integer(0)
 
-    def uniform(self, a: TYPE_NUMERIC, b: TYPE_NUMERIC) -> Numeric:
+    def rand_numeric(self, a: TYPE_NUMERIC, b: TYPE_NUMERIC) -> Numeric:
         return Numeric(0)
 
     def normal(self, mean: TYPE_NUMERIC, sigma: TYPE_NUMERIC) -> Numeric:
@@ -2401,20 +2407,8 @@ class Math:
         pass
 
     @staticmethod
-    def distance(a, b):
+    def distance(a, b) -> TYPE_NUMERIC:
         pass
-
-    @staticmethod
-    def rand() -> int:
-        return 0
-
-    @staticmethod
-    def randf() -> float:
-        return 0
-
-    @staticmethod
-    def randfv(a: Optional[Numeric], b: Optional[Numeric], is_volatile: bool = True) -> Numeric:
-        return Numeric(0)
 
     @staticmethod
     def atan(x):
@@ -2429,19 +2423,11 @@ class Math:
         pass
 
     @staticmethod
-    def bezier(p0, p1, p2, t):
-        pass
-
-    @staticmethod
-    def quadratic(a, b, c):
-        return 0, 0
-
-    @staticmethod
-    def projectile(dx, dy, v, g, sid):
-        return 0, 0
-
-    @staticmethod
     def tanh(x):
+        return 0
+
+    @staticmethod
+    def hash(x: Union[int, float, TYPE_FLOAT2, TYPE_FLOAT3, TYPE_FLOAT4]):
         return 0
 
 
@@ -2580,13 +2566,13 @@ class TilemapLayer(Renderer):
     def get_tile(self, col: int, row: int) -> Optional[Tile]:
         pass
 
-    def get_tile_rect(self, rect: TYPE_RECTI) -> list[int]:
+    def get_tile_rect(self, rect: TYPE_INT4) -> list[int]:
         pass
 
     def set_tile(self, col: int, row: int, tile: Union[int, RenderObject, Tile, None]):
         pass
 
-    def set_tile_rect(self, tiles: list[int], dest: TYPE_RECTI):
+    def set_tile_rect(self, tiles: list[int], dest: TYPE_INT4):
         pass
 
     def foreach_tile(self, callback: Callable[[int, int, Tile], bool]):
@@ -2894,7 +2880,18 @@ class RigidbodyController:
     def friction(self, friction: float):
         pass
 
+    @property
+    def mass(self) -> float:
+        return 0
+
+    @mass.setter
+    def mass(self, mass: float):
+        pass
+
     def apply_linear_velocity(self, linear_velocity: TYPE_VEC3) -> Future:
+        pass
+
+    def apply_central_force(self, force: TYPE_FLOAT3):
         pass
 
     def apply_central_impulse(self, impulse: TYPE_FLOAT3):

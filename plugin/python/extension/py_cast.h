@@ -292,26 +292,27 @@ private:
         return toCppObject_impl<T>(obj);
     }
     template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, std::enable_if_t<!std::is_same_v<T, std::string> && !std::is_same_v<T, std::wstring>, decltype(&T::push_back)>*) {
-        Py_ssize_t len = !PyBridge::isPyDictExact(obj) ? PyBridge::PyObject_Size(obj) : -1;
-        if(len == -1)
-            return Optional<T>();
+        if(const Py_ssize_t len = !PyBridge::isPyDictExact(obj) ? PyBridge::PyObject_Size(obj) : -1; len == -1)
+            return {};
+
         T col;
         if(copyToCppObject<U>(obj, std::back_inserter(col)))
             return col;
-        return Optional<T>();
+        return {};
     }
     template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, std::enable_if_t<std::is_same_v<T, typename std::array<U, sizeof(T) / sizeof(U)>>>*) {
-        Py_ssize_t len = !PyBridge::isPyDictExact(obj) ? PyBridge::PyObject_Size(obj) : -1;
-        if(len != sizeof(T) / sizeof(U))
-            return Optional<T>();
+        if(const Py_ssize_t len = !PyBridge::isPyDictExact(obj) ? PyBridge::PyObject_Size(obj) : -1; len != sizeof(T) / sizeof(U))
+            return {};
+
         std::array<U, sizeof(T) / sizeof(U)> array;
         if(copyToCppObject<U>(obj, array.begin()))
             return array;
-        return Optional<T>();
+        return {};
     }
     template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
         if(const Py_ssize_t len = !PyBridge::isPyDictExact(obj) ? PyBridge::PyObject_Size(obj) : -1; len == -1)
             return {};
+
         T col;
         if(copyToCppObject<U>(obj, std::inserter(col, col.begin())))
             return col;

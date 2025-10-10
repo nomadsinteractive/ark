@@ -21,89 +21,6 @@
 
 namespace ark {
 
-namespace {
-
-template<typename T> class Randomizer {
-public:
-    Randomizer()
-        : _generator(_random_device()), _distribution(std::numeric_limits<T>::min(), std::numeric_limits<T>::max()) {
-    }
-
-    T rand()
-    {
-        return _distribution(_generator);
-    }
-
-private:
-    std::random_device _random_device;
-    std::mt19937 _generator;
-    std::uniform_int_distribution<> _distribution;
-};
-
-class VolatileRandfv final : public Numeric {
-public:
-    VolatileRandfv(sp<Numeric> a, sp<Numeric> b)
-        : _a(std::move(a)), _b(std::move(b), 1.0f)
-    {
-    }
-
-    float val() override
-    {
-        const float a = _a.val();
-        const float b = _b.val();
-        return Math::randf() * (b - a) + a;
-    }
-
-    bool update(const uint64_t timestamp) override
-    {
-        return true;
-    }
-
-private:
-    OptionalVar<Numeric> _a;
-    OptionalVar<Numeric> _b;
-};
-
-class Randfv final : public Numeric {
-public:
-    Randfv(sp<Numeric> a, sp<Numeric> b)
-        : _a(std::move(a)), _b(std::move(b), 1.0f), _value(doGenerate())
-    {
-    }
-
-    float val() override
-    {
-        const float a = _a.val();
-        const float b = _b.val();
-        return Math::randf() * (b - a) + a;
-    }
-
-    bool update(const uint64_t timestamp) override
-    {
-        const bool dirty = _timestamp.update(timestamp);
-        if(dirty)
-            _value = doGenerate();
-        return dirty;
-    }
-
-private:
-    float doGenerate() const
-    {
-        const float a = _a.val();
-        const float b = _b.val();
-        return Math::randf() * (b - a) + a;
-    }
-
-private:
-    OptionalVar<Numeric> _a;
-    OptionalVar<Numeric> _b;
-
-    Timestamp _timestamp;
-    float _value;
-};
-
-}
-
 uint32_t Math::log2(uint32_t x)
 {
     constexpr uint32_t tab32[32] = {
@@ -229,24 +146,6 @@ V4 Math::round(const V4 x)
     return {std::round(x.x()), std::round(x.y()), std::round(x.z()), std::round(x.w())};
 }
 
-int32_t Math::rand()
-{
-    static Randomizer<int32_t> randomizer;
-    return randomizer.rand();
-}
-
-float Math::randf()
-{
-    return static_cast<float>(static_cast<int64_t>(rand()) - std::numeric_limits<int32_t>::min()) / static_cast<float>(std::numeric_limits<uint32_t>::max());
-}
-
-sp<Numeric> Math::randfv(sp<Numeric> a, sp<Numeric> b, const bool isVolatile)
-{
-    if(isVolatile)
-        return sp<Numeric>::make<VolatileRandfv>(std::move(a), std::move(b));
-    return sp<Numeric>::make<Randfv>(std::move(a), std::move(b));
-}
-
 float Math::hypot(const float dx, const float dy)
 {
     return sqrt(dx * dx + dy * dy);
@@ -361,6 +260,74 @@ uint32_t Math::hash64(uint64_t x)
     x = x + (x << 6);
     x = x ^ (x >> 22);
     return x;
+}
+
+uint32_t Math::hashf(const float x)
+{
+    return hash32(*reinterpret_cast<const uint32_t *>(&x));
+}
+
+uint32_t Math::hash(const uint32_t x)
+{
+    return hash32(x);
+}
+
+uint32_t Math::hash(const uint64_t x)
+{
+    return hash64(x);
+}
+
+uint32_t Math::hash(const float x)
+{
+    return hashf(x);
+}
+
+uint32_t Math::hash(const V2i x)
+{
+    uint32_t val = hash32(x[0]);
+    hashCombine(val, hash32(x[1]));
+    return val;
+}
+
+uint32_t Math::hash(const V3i x)
+{
+    uint32_t val = hash32(x[0]);
+    hashCombine(val, hash32(x[1]));
+    hashCombine(val, hash32(x[2]));
+    return val;
+}
+
+uint32_t Math::hash(const V4i x)
+{
+    uint32_t val = hash32(x[0]);
+    hashCombine(val, hash32(x[1]));
+    hashCombine(val, hash32(x[2]));
+    hashCombine(val, hash32(x[3]));
+    return val;
+}
+
+uint32_t Math::hash(const V2 x)
+{
+    uint32_t val = hashf(x.x());
+    hashCombine(val, hashf(x.y()));
+    return val;
+}
+
+uint32_t Math::hash(const V3 x)
+{
+    uint32_t val = hashf(x.x());
+    hashCombine(val, hashf(x.y()));
+    hashCombine(val, hashf(x.z()));
+    return val;
+}
+
+uint32_t Math::hash(const V4 x)
+{
+    uint32_t val = hashf(x.x());
+    hashCombine(val, hashf(x.y()));
+    hashCombine(val, hashf(x.z()));
+    hashCombine(val, hashf(x.w()));
+    return val;
 }
 
 float Math::normalize(const float v1)

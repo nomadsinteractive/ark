@@ -15,8 +15,8 @@ struct SnapshotTS3D {
 
 }
 
-TransformTS3D::TransformTS3D(const TransformImpl& transform)
-    : _stub(transform._stub)
+TransformTS3D::TransformTS3D(const Transform& transform)
+    : Transform(transform)
 {
 }
 

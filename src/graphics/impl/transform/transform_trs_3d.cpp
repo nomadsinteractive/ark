@@ -6,8 +6,8 @@
 
 namespace ark {
 
-TransformTRS3D::TransformTRS3D(const TransformImpl& transform)
-    : _stub(transform._stub)
+TransformTRS3D::TransformTRS3D(const Transform& transform)
+    : Transform(transform)
 {
 }
 

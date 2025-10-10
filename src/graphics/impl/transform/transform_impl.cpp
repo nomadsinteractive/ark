@@ -46,13 +46,13 @@ public:
 
 class TransformImpl::TransformDelegateMat4 final : public Transform {
 public:
-    TransformDelegateMat4(const TransformImpl& transform, sp<Mat4> matrix)
-        : _transform(transform), _matrix(std::move(matrix)) {
+    TransformDelegateMat4(const Transform& transform, sp<Mat4> matrix)
+        : Transform(transform), _matrix(std::move(matrix)) {
     }
 
     bool update(const uint64_t timestamp) override
     {
-        return UpdatableUtil::update(timestamp, _transform._stub, _matrix);
+        return UpdatableUtil::update(timestamp, _stub, _matrix);
     }
 
     Snapshot snapshot() override
@@ -71,7 +71,6 @@ public:
     }
 
 private:
-    const TransformImpl& _transform;
     sp<Mat4> _matrix;
 };
 
@@ -88,7 +87,7 @@ TransformImpl::TransformImpl(sp<Transform> delegate)
 }
 
 TransformImpl::TransformImpl(sp<Mat4> delegate)
-    : TransformImpl(sp<Transform>::make<TransformDelegateMat4>(*this, std::move(delegate)))
+    : Transform(), Wrapper(sp<Transform>::make<TransformDelegateMat4>(*this, std::move(delegate))), _type(TransformType::TYPE_DELEGATED)
 {
 }
 

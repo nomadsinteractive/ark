@@ -131,7 +131,7 @@ public:
     static sp<Numeric> round(sp<Numeric> self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t);
+    static sp<Numeric> lerp(sp<Numeric> self, sp<Numeric> b, sp<Numeric> t);
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> track(sp<Numeric> self, float s0, float speed, float distance, sp<Future> future = nullptr, sp<Numeric> t = nullptr);

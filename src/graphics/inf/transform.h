@@ -2,6 +2,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/variable.h"
+#include "core/inf/wirable.h"
 #include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
@@ -9,7 +10,7 @@
 
 namespace ark {
 
-class ARK_API Transform : public Mat4 {
+class ARK_API Transform : public Mat4, public Wirable {
 public:
     Transform();
     Transform(sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation);
@@ -47,6 +48,9 @@ public:
     const OptionalVar<Vec4>& rotation() const;
     const OptionalVar<Vec3>& scale() const;
     const OptionalVar<Vec3>& translation() const;
+
+    void onPoll(WiringContext& context) override;
+    void onWire(const WiringContext& context, const Box& self) override;
 
     [[nodiscard]] virtual Snapshot snapshot() = 0;
 

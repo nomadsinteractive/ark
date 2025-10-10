@@ -296,6 +296,14 @@ float RigidbodyBox2D::mass() const
     return _stub->body()->GetMass();
 }
 
+void RigidbodyBox2D::setMass(const float mass)
+{
+    b2MassData massData;
+    _stub->body()->GetMassData(&massData);
+    massData.mass = mass;
+    _stub->body()->SetMassData(&massData);
+}
+
 void RigidbodyBox2D::applyTorque(float torque, bool wake)
 {
     _stub->body()->ApplyTorque(torque, wake);
@@ -306,9 +314,9 @@ void RigidbodyBox2D::applyForce(const V2& force, const V2& point, bool wake)
     _stub->body()->ApplyForce(b2Vec2(force.x(), force.y()), b2Vec2(point.x(), point.y()), wake);
 }
 
-void RigidbodyBox2D::applyForceToCenter(const V2& force, bool wake)
+void RigidbodyBox2D::applyCentralForce(const V3 force)
 {
-    _stub->body()->ApplyForceToCenter(b2Vec2(force.x(), force.y()), wake);
+    _stub->body()->ApplyForceToCenter(b2Vec2(force.x(), force.y()), true);
 }
 
 void RigidbodyBox2D::applyLinearImpulse(const V2& impulse, const V2& point, bool wake)
@@ -329,17 +337,17 @@ void RigidbodyBox2D::setTransform(const V2& position, float angle)
 
 sp<Future> RigidbodyBox2D::applyLinearVelocity(const sp<Vec2>& velocity)
 {
-    const sp<Future> future = sp<Future>::make();
-    const sp<ManualLinearVelocity> task = sp<ManualLinearVelocity>::make(_stub, velocity, future);
-    Ark::instance().applicationContext()->addPreComposeRunnable(task, future->isCanceled());
+    sp<Future> future = sp<Future>::make();
+    sp<ManualLinearVelocity> task = sp<ManualLinearVelocity>::make(_stub, velocity, future);
+    Ark::instance().applicationContext()->addPreComposeRunnable(std::move(task), future->isDoneOrCanceled());
     return future;
 }
 
 sp<Future> RigidbodyBox2D::applyRotate(const sp<Numeric>& rotate)
 {
-    const sp<Future> future = sp<Future>::make();
-    const sp<Runnable> task = sp<ManualApplyRotate>::make(_stub, rotate, future);
-    Ark::instance().applicationContext()->addPreComposeRunnable(task, future->isCanceled());
+    sp<Future> future = sp<Future>::make();
+    sp<Runnable> task = sp<ManualApplyRotate>::make(_stub, rotate, future);
+    Ark::instance().applicationContext()->addPreComposeRunnable(std::move(task), future->isDoneOrCanceled());
     return future;
 }
 

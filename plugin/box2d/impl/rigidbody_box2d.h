@@ -55,6 +55,11 @@ public:
     float friction() const override;
     void setFriction(float friction) override;
 
+    float mass() const override;
+    void setMass(float mass) override;
+
+    void applyCentralForce(V3 force) override;
+
     bool active() const override;
     void setActive(bool active) override;
 
@@ -66,11 +71,9 @@ public:
 
     float x() const;
     float y() const;
-    float mass() const;
 
     void applyTorque(float torque, bool wake = true);
     void applyForce(const V2& force, const V2& point, bool wake = true);
-    void applyForceToCenter(const V2& force, bool wake = true);
     void applyLinearImpulse(const V2& impulse, const V2& point, bool wake = true);
     void applyAngularImpulse(float impulse, bool wake = true);
 

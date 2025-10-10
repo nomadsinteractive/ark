@@ -32,6 +32,27 @@ private:
     sp<Vec3> _linear_velocity;
 };
 
+class UpdatableApplyCentralForce final : public Updatable {
+public:
+    UpdatableApplyCentralForce(sp<RigidbodyController> rigidbodyController, sp<Vec3> centralForce)
+        : _rigidbody_controller(std::move(rigidbodyController)), _central_force(std::move(centralForce)) {
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        if(_central_force->update(timestamp))
+        {
+            _rigidbody_controller->applyCentralForce(_central_force->val());
+            return true;
+        }
+        return false;
+    }
+
+private:
+    sp<RigidbodyController> _rigidbody_controller;
+    sp<Vec3> _central_force;
+};
+
 }
 
 bool RigidbodyControllerType::active(const sp<RigidbodyController>& self)
@@ -84,10 +105,33 @@ void RigidbodyControllerType::setFriction(const sp<RigidbodyController>& self, f
     self->setFriction(friction);
 }
 
+float RigidbodyControllerType::mass(const sp<RigidbodyController>& self)
+{
+    return self->mass();
+}
+
+void RigidbodyControllerType::setMass(const sp<RigidbodyController>& self, const float mass)
+{
+    self->setMass(mass);
+}
+
 sp<Future> RigidbodyControllerType::applyLinearVelocity(sp<RigidbodyController> self, sp<Vec3> linearVelocity)
 {
     sp<Future> future = sp<Future>::make();
     Ark::instance().renderController()->addPreComposeUpdatable(sp<Updatable>::make<UpdatableApplyLinearVelocity>(std::move(self), std::move(linearVelocity)), future->isDoneOrCanceled());
+    return future;
+}
+
+sp<Future> RigidbodyControllerType::applyCentralForce(const sp<RigidbodyController>& self, const V3 force)
+{
+    self->applyCentralForce(force);
+    return nullptr;
+}
+
+sp<Future> RigidbodyControllerType::applyCentralForce(const sp<RigidbodyController>& self, sp<Vec3> force)
+{
+    sp<Future> future = sp<Future>::make();
+    Ark::instance().renderController()->addPreComposeUpdatable(sp<Updatable>::make<UpdatableApplyCentralForce>(std::move(self), std::move(force)), future->isDoneOrCanceled());
     return future;
 }
 

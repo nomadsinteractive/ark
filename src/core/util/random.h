@@ -19,18 +19,23 @@ public:
 
 //  [[script::bindings::auto]]
     uint32_t rand() const;
-//  [[script::bindings::auto]]
-    float randf() const;
 
 //  [[script::bindings::auto]]
-    sp<Integer> randint(int32_t a, int32_t b) const;
+    int32_t randint(int32_t a, int32_t b) const;
 //  [[script::bindings::auto]]
-    sp<Integer> randint(sp<Integer> a, sp<Integer> b) const;
+    int64_t randint(int64_t a, int64_t b) const;
+//  [[script::bindings::auto]]
+    float uniform(float a, float b) const;
 
 //  [[script::bindings::auto]]
-    sp<Numeric> uniform(float a, float b);
+    sp<Integer> randInteger(int32_t a, int32_t b) const;
 //  [[script::bindings::auto]]
-    sp<Numeric> uniform(sp<Numeric> a, sp<Numeric> b);
+    sp<Integer> randInteger(sp<Integer> a, sp<Integer> b) const;
+
+//  [[script::bindings::auto]]
+    sp<Numeric> randNumeric(float a, float b);
+//  [[script::bindings::auto]]
+    sp<Numeric> randNumeric(sp<Numeric> a, sp<Numeric> b);
 
 //  [[script::bindings::auto]]
     sp<Numeric> normal(float mean, float sigma);

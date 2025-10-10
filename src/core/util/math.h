@@ -142,7 +142,7 @@ public:
         return std::make_pair(nearest, ldmin);
     }
 
-    template<typename T, typename U> static void hashCombine(T& seed, const U& v) {
+    template<typename T, typename U> static void hashCombine(T& seed, U v) {
         std::hash<U> hasher;
         seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
@@ -187,13 +187,6 @@ public:
     static int32_t floor(float x);
 
 //  [[script::bindings::auto]]
-    static int32_t rand();
-//  [[script::bindings::auto]]
-    static float randf();
-//  [[script::bindings::auto]]
-    static sp<Numeric> randfv(sp<Numeric> a = nullptr, sp<Numeric> b = nullptr, bool isVolatile = true);
-
-//  [[script::bindings::auto]]
     static float hypot(float dx, float dy);
 //  [[script::bindings::auto]]
     static float hypot2(float dx, float dy);
@@ -208,7 +201,6 @@ public:
     static float distance(V3 a, V3 b);
 //  [[script::bindings::auto]]
     static float distance(V4 a, V4 b);
-
 //  [[script::bindings::auto]]
     static sp<Numeric> distance(sp<Vec2> a, sp<Vec2> b);
 //  [[script::bindings::auto]]
@@ -237,6 +229,26 @@ public:
 
     static uint32_t hash32(uint32_t x);
     static uint32_t hash64(uint64_t x);
+    static uint32_t hashf(float x);
+
+//  [[script::bindings::auto]]
+    static uint32_t hash(uint32_t x);
+//  [[script::bindings::auto]]
+    static uint32_t hash(uint64_t x);
+//  [[script::bindings::auto]]
+    static uint32_t hash(float x);
+//  [[script::bindings::auto]]
+    static uint32_t hash(V2i x);
+//  [[script::bindings::auto]]
+    static uint32_t hash(V3i x);
+//  [[script::bindings::auto]]
+    static uint32_t hash(V4i x);
+//  [[script::bindings::auto]]
+    static uint32_t hash(V2 x);
+//  [[script::bindings::auto]]
+    static uint32_t hash(V3 x);
+//  [[script::bindings::auto]]
+    static uint32_t hash(V4 x);
 
     static float round(float x);
     static V2 round(V2 x);

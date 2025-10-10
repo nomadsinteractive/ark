@@ -287,9 +287,9 @@ String NumericType::str(const sp<Numeric>& self)
     return Strings::sprintf("%.2f", update(self));
 }
 
-sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)
+sp<Numeric> NumericType::lerp(sp<Numeric> self, sp<Numeric> b, sp<Numeric> t)
 {
-    return sp<Numeric>::make<Lerp<float, float>>(self, b, t);
+    return sp<Numeric>::make<Lerp<float, float>>(std::move(self), std::move(b), std::move(t));
 }
 
 sp<Numeric> NumericType::track(sp<Numeric> self, float s0, float speed, float distance, sp<Future> future, sp<Numeric> t)

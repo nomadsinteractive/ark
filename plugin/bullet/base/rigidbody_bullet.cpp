@@ -79,11 +79,6 @@ Rigidbody RigidbodyBullet::makeShadow() const
     return {{_stub->_rigidbody_stub, nullptr}, true};
 }
 
-void RigidbodyBullet::applyCentralForce(const V3& force)
-{
-    _stub->_collision_object_ref->rigidBody()->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
-}
-
 bool RigidbodyBullet::active() const
 {
     return _stub->_collision_object_ref->rigidBody()->isActive();
@@ -121,6 +116,11 @@ void RigidbodyBullet::setAngularVelocity(const V3 velocity)
     _stub->_collision_object_ref->rigidBody()->setAngularVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
 }
 
+void RigidbodyBullet::applyCentralForce(const V3 force)
+{
+    _stub->_collision_object_ref->rigidBody()->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
+}
+
 void RigidbodyBullet::applyCentralImpulse(const V3 impulse)
 {
     _stub->_collision_object_ref->rigidBody()->applyCentralImpulse(btVector3(impulse.x(), impulse.y(), impulse.z()));
@@ -134,6 +134,16 @@ float RigidbodyBullet::friction() const
 void RigidbodyBullet::setFriction(const float friction)
 {
     _stub->_collision_object_ref->collisionObject()->setFriction(friction);
+}
+
+float RigidbodyBullet::mass() const
+{
+    return _stub->_collision_object_ref->rigidBody()->getMass();
+}
+
+void RigidbodyBullet::setMass(const float mass)
+{
+    _stub->_collision_object_ref->rigidBody()->setMassProps(mass, _stub->_collision_object_ref->rigidBody()->getLocalInertia());
 }
 
 V3 RigidbodyBullet::angularFactor() const
