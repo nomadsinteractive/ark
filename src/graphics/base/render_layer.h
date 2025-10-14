@@ -50,7 +50,6 @@ public:
 
     sp<LayerContext> makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const;
     sp<LayerContext> addLayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr) const;
-    void addLayerContext(sp<LayerContext> layerContext);
 
     void addRenderBatch(sp<RenderBatch> renderBatch);
 

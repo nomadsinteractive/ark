@@ -62,7 +62,7 @@ private:
     RenderLayerSnapshot(const RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub);
 
     bool doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext);
-    bool addDiscardedState(LayerContext& lc, void* stateKey);
+    bool addDiscardedState(LayerContext& lc, const void* stateKey);
     void addDiscardedLayerContext(LayerContext& lc);
     void addDiscardedLayerContexts(const Vector<sp<LayerContext>>& layerContexts);
 

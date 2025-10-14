@@ -1,5 +1,7 @@
 #include "graphics/base/render_layer_snapshot.h"
 
+#include <ranges>
+
 #include "core/util/log.h"
 
 #include "graphics/base/layer_context.h"
@@ -69,7 +71,7 @@ void RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, Ve
     for(auto iter = layerContexts.begin(); iter != layerContexts.end(); )
     {
         const sp<LayerContext>& layerContext = *iter;
-        if(const OptionalVar<Boolean>& discarded = layerContext->discarded(); (!discarded && layerContext.unique()) || discarded.val())
+        if(const OptionalVar<Boolean>& discarded = layerContext->discarded(); discarded.val())
         {
             addDiscardedLayerContext(layerContext);
             iter = layerContexts.erase(iter);
@@ -83,13 +85,13 @@ void RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, Ve
     }
 }
 
-bool RenderLayerSnapshot::addDiscardedState(LayerContext& lc, void* stateKey)
+bool RenderLayerSnapshot::addDiscardedState(LayerContext& lc, const void* stateKey)
 {
     if(const auto iter = lc._element_states.find(stateKey); iter != lc._element_states.end())
     {
-        const LayerContext::ElementState& elementState = iter->second;
+        LayerContext::ElementState& elementState = iter->second;
         const bool v = static_cast<bool>(elementState._index);
-        _elements_deleted.push_back(elementState);
+        _elements_deleted.push_back(std::move(elementState));
         lc._element_states.erase(iter);
         return v;
     }
@@ -98,8 +100,8 @@ bool RenderLayerSnapshot::addDiscardedState(LayerContext& lc, void* stateKey)
 
 void RenderLayerSnapshot::addDiscardedLayerContext(LayerContext& lc)
 {
-    for(const auto& [k, v] : lc._element_states)
-        _elements_deleted.push_back(v);
+    for(auto& v : lc._element_states | std::views::values)
+        _elements_deleted.push_back(std::move(v));
     lc._renderables.clear();
     lc._element_states.clear();
 }

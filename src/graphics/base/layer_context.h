@@ -68,7 +68,7 @@ private:
     Vector<sp<Renderable>> _created_push_front;
     Vector<sp<Renderable>> _created_push_back;
 
-    HashMap<void*, ElementState> _element_states;
+    HashMap<const void*, ElementState> _element_states;
 
     Timestamp _timestamp;
 

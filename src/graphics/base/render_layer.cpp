@@ -67,7 +67,7 @@ RenderLayerSnapshot RenderLayer::snapshot(const RenderRequest& renderRequest)
     {
         const sp<RenderBatch>& i = *iter;
         Vector<sp<LayerContext>>& layerContexts = i->snapshot(renderRequest);
-        if(i->discarded() ? i->discarded()->val() : i.unique())
+        if(i->discarded() && i->discarded()->val())
         {
             renderLayerSnapshot.addDiscardedLayerContexts(layerContexts);
             iter = _render_batches.erase(iter);
@@ -105,15 +105,6 @@ sp<LayerContext> RenderLayer::addLayerContext(sp<ModelLoader> modelLoader, sp<Ve
     sp<LayerContext> layerContext = makeLayerContext(std::move(modelLoader), std::move(position), std::move(visible), std::move(discarded));
     _render_batch->addLayerContext(layerContext);
     return layerContext;
-}
-
-void RenderLayer::addLayerContext(sp<LayerContext> layerContext)
-{
-    if(!layerContext->modelLoader())
-        layerContext->setModelLoader(_stub->_model_loader);
-    if(!layerContext->varyings())
-        layerContext->setVaryings(_stub->_varyings);
-    _render_batch->addLayerContext(std::move(layerContext));
 }
 
 void RenderLayer::addRenderBatch(sp<RenderBatch> renderBatch)
