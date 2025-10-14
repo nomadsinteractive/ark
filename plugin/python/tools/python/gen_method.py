@@ -436,7 +436,7 @@ class GenOperatorMethod(GenMethod):
 
     def _gen_parse_tuple_code(self, lines, declares, args):
         if self._operator == 'call':
-            return super()._gen_parse_tuple_code(lines, declares, args)
+            super()._gen_parse_tuple_code(lines, declares, args)
 
     @property
     def err_return_value(self):

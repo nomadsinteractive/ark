@@ -5,7 +5,6 @@
 #include "core/base/constants.h"
 #include "core/base/expression.h"
 #include "core/base/named_hash.h"
-#include "core/impl/integer/integer_by_array.h"
 #include "core/impl/variable/at_least.h"
 #include "core/impl/variable/at_most.h"
 #include "core/impl/variable/clamp.h"
@@ -143,39 +142,44 @@ int32_t IntegerType::toInt32(const sp<Integer>& self)
     return val(self);
 }
 
+int32_t IntegerType::toIndex(const sp<Integer>& self)
+{
+    return val(self);
+}
+
 float IntegerType::toFloat(const sp<Integer>& self)
 {
-    return static_cast<float>(update(self));
+    return static_cast<float>(toInt32(self));
 }
 
-sp<Boolean> IntegerType::gt(const sp<Integer>& self, const sp<Integer>& other)
+sp<Boolean> IntegerType::gt(sp<Integer> self, sp<Integer> other)
 {
-    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::GT<int32_t>>>(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::GT<int32_t>>>(std::move(self), std::move(other));
 }
 
-sp<Boolean> IntegerType::ge(const sp<Integer>& self, const sp<Integer>& other)
+sp<Boolean> IntegerType::ge(sp<Integer> self, sp<Integer> other)
 {
-    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::GE<int32_t>>>(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::GE<int32_t>>>(std::move(self), std::move(other));
 }
 
-sp<Boolean> IntegerType::lt(const sp<Integer>& self, const sp<Integer>& other)
+sp<Boolean> IntegerType::lt(sp<Integer> self, sp<Integer> other)
 {
-    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::LT<int32_t>>>(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::LT<int32_t>>>(std::move(self), std::move(other));
 }
 
-sp<Boolean> IntegerType::le(const sp<Integer>& self, const sp<Integer>& other)
+sp<Boolean> IntegerType::le(sp<Integer> self, sp<Integer> other)
 {
-    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::LE<int32_t>>>(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::LE<int32_t>>>(std::move(self), std::move(other));
 }
 
-sp<Boolean> IntegerType::eq(const sp<Integer>& self, const sp<Integer>& other)
+sp<Boolean> IntegerType::eq(sp<Integer> self, sp<Integer> other)
 {
-    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::EQ<int32_t>>>(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::EQ<int32_t>>>(std::move(self), std::move(other));
 }
 
-sp<Boolean> IntegerType::ne(const sp<Integer>& self, const sp<Integer>& other)
+sp<Boolean> IntegerType::ne(sp<Integer> self, sp<Integer> other)
 {
-    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::NE<int32_t>>>(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::NE<int32_t>>>(std::move(self), std::move(other));
 }
 
 sp<Boolean> IntegerType::dirty(sp<Integer> self)
@@ -220,11 +224,6 @@ int32_t IntegerType::update(const sp<Integer>& self)
 sp<Integer> IntegerType::freeze(const sp<Integer>& self)
 {
     return sp<Integer>::make<Integer::Const>(update(self));
-}
-
-sp<Integer> IntegerType::repeat(Vector<int32_t> array, IntegerType::Repeat repeat, sp<Runnable> observer)
-{
-    return sp<Integer>::make<IntegerByArray>(sp<IntArray>::make<IntArray::Vector>(std::move(array)), repeat, std::move(observer));
 }
 
 sp<Integer> IntegerType::atLeast(sp<Integer> self, sp<Integer> a1, sp<Runnable> observer)

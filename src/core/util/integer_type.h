@@ -14,16 +14,6 @@ namespace ark {
 //[[script::bindings::class("Integer")]]
 class ARK_API IntegerType final {
 public:
-//  [[script::bindings::enumeration]]
-    enum Repeat {
-        REPEAT_NONE = 0,
-        REPEAT_REVERSE = 1,
-        REPEAT_ACTION_MASK = 3,
-        REPEAT_LOOP = 4,
-        REPEAT_LAST = 8,
-        REPEAT_NOTIFY = 16
-    };
-
 //  [[script::bindings::constructor]]
     static sp<Integer> create(int32_t value);
 //  [[script::bindings::constructor]]
@@ -59,29 +49,28 @@ public:
     static sp<Integer> absolute(sp<Integer> self);
 //  [[script::bindings::operator(int)]]
     static int32_t toInt32(const sp<Integer>& self);
+//  [[script::bindings::operator(index)]]
+    static int32_t toIndex(const sp<Integer>& self);
 //  [[script::bindings::operator(float)]]
     static float toFloat(const sp<Integer>& self);
 
 //  [[script::bindings::operator(>)]]
-    static sp<Boolean> gt(const sp<Integer>& self, const sp<Integer>& other);
+    static sp<Boolean> gt(sp<Integer> self, sp<Integer> other);
 //  [[script::bindings::operator(>=)]]
-    static sp<Boolean> ge(const sp<Integer>& self, const sp<Integer>& other);
+    static sp<Boolean> ge(sp<Integer> self, sp<Integer> other);
 //  [[script::bindings::operator(<)]]
-    static sp<Boolean> lt(const sp<Integer>& self, const sp<Integer>& other);
+    static sp<Boolean> lt(sp<Integer> self, sp<Integer> other);
 //  [[script::bindings::operator(<=)]]
-    static sp<Boolean> le(const sp<Integer>& self, const sp<Integer>& other);
+    static sp<Boolean> le(sp<Integer> self, sp<Integer> other);
 //  [[script::bindings::operator(==)]]
-    static sp<Boolean> eq(const sp<Integer>& self, const sp<Integer>& other);
+    static sp<Boolean> eq(sp<Integer> self, sp<Integer> other);
 //  [[script::bindings::operator(!=)]]
-    static sp<Boolean> ne(const sp<Integer>& self, const sp<Integer>& other);
+    static sp<Boolean> ne(sp<Integer> self, sp<Integer> other);
 //  [[script::bindings::classmethod]]
     static sp<Boolean> dirty(sp<Integer> self);
 
 //  [[script::bindings::property]]
     static int32_t val(const sp<Integer>& self);
-
-//  [[script::bindings::auto]]
-    static sp<Integer> repeat(Vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE, sp<Runnable> observer = nullptr);
 
 //  [[script::bindings::classmethod]]
     static void set(const sp<Integer>& self, int32_t value);
@@ -134,7 +123,6 @@ public:
     private:
         DICTIONARY _delegate;
     };
-
 };
 
 }

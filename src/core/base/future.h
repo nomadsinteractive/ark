@@ -25,6 +25,11 @@ public:
 //  [[script::bindings::property]]
     sp<Boolean> isDoneOrCanceled() const;
 
+//  [[script::bindings::property]]
+    const sp<Runnable>& observer() const;
+//  [[script::bindings::property]]
+    void setObserver(sp<Runnable> observer);
+
     void run() override;
 
 private:

@@ -53,6 +53,16 @@ sp<Boolean> Future::isDoneOrCanceled() const
     return BooleanType::__or__(_done.toVar(), _canceled.toVar());
 }
 
+const sp<Runnable>& Future::observer() const
+{
+    return _observer;
+}
+
+void Future::setObserver(sp<Runnable> observer)
+{
+    _observer = std::move(observer);
+}
+
 void Future::run()
 {
     notify();
