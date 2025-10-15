@@ -811,6 +811,12 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     GLint linkstatus = 0;
     GL_CHECK_ERROR(glGetProgramiv(id, GL_LINK_STATUS, &linkstatus));
     CHECK(linkstatus, "Program link failed: %s", getLinkingInformation(id, _stages).c_str());
+    GLint programSize = 0;
+    GL_CHECK_ERROR(glGetProgramiv(id, GL_PROGRAM_BINARY_LENGTH, &programSize));
+    Vector<uint8_t> binaryData(programSize);
+    GLenum binaryFormat;
+    GL_CHECK_ERROR(glGetProgramBinary(id, programSize, &programSize, &binaryFormat, binaryData.data()));
+    LOGD("Compile and link success, program size: %d", programSize);
 }
 
 ResourceRecycleFunc GLPipeline::recycle()

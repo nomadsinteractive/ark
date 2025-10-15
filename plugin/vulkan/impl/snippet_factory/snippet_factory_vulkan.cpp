@@ -1,5 +1,7 @@
 #include "vulkan/impl/snippet_factory/snippet_factory_vulkan.h"
 
+#include <ranges>
+
 #include "core/util/strings.h"
 
 #include "renderer/base/render_controller.h"
@@ -26,6 +28,11 @@ public:
         }
 
         const PipelineLayout& pipelineLayout = pipelineDescriptor.layout();
+        for(const auto& renderStage : context.renderStages() | std::views::values)
+            renderStage->_predefined_macros.emplace_back("#define ARK_USE_VULKAN");
+        if(const auto& computeStage = context.computingStage())
+            computeStage->_predefined_macros.emplace_back("#define ARK_USE_VULKAN");
+
         if(ShaderPreprocessor* vertex = context.tryGetRenderStage(enums::SHADER_STAGE_BIT_VERTEX))
         {
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", pipelineLayout.samplers().size(), 2);

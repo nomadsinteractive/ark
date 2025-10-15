@@ -56,13 +56,13 @@ void VKUtil::checkResult(const VkResult result)
     CHECK(result == VK_SUCCESS, "Vulkan error: %s", vks::tools::errorString(result).c_str());
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::loadShader(const VkDevice device, const String& resid, enums::ShaderStageBit stage)
+VkPipelineShaderStageCreateInfo VKUtil::loadShader(const VkDevice device, const String& resid, const enums::ShaderStageBit stage)
 {
     const String content = Strings::loadFromReadable(Ark::instance().openAsset(resid));
     return createShader(device, content, stage);
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::createShader(const VkDevice device, const String& source, enums::ShaderStageBit stage)
+VkPipelineShaderStageCreateInfo VKUtil::createShader(const VkDevice device, const String& source, const enums::ShaderStageBit stage)
 {
     const Vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage, enums::RENDERING_BACKEND_BIT_VULKAN);
     VkShaderModuleCreateInfo moduleCreateInfo = {VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
