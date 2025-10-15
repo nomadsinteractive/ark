@@ -123,6 +123,8 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Mat4> toFrustumSliceMatrix(float z, bool normalize = false) const;
+//  [[script::bindings::auto]]
+    std::pair<sp<Vec3>, sp<Mat4>> toFrustumSliceCenterAndMatrix(float z, bool normalize = false) const;
 
     bool isLHS() const;
 

@@ -32,9 +32,9 @@ namespace ark::plugin::python {
 
 namespace {
 
-template<typename T> Optional<T> toCppInteger(PyObject* object)
+template<typename T> Optional<T> toCppInteger(PyObject* object, const bool exactCheck = false)
 {
-    if(PyLong_Check(object))
+    if(exactCheck ? PyLong_CheckExact(object) : PyLong_Check(object))
     {
         T val = 0;
         if constexpr(std::is_unsigned_v<T>)
@@ -72,7 +72,7 @@ template<typename T> Optional<T> toCppInteger(PyObject* object)
         }
     }
 
-    if(PyIndex_Check(object))
+    if(!exactCheck && PyIndex_Check(object))
     {
         PyObject* pyobj = PyNumber_Index(object);
         Optional<T> opt = PyLong_AsUnsignedLong(pyobj);
@@ -341,8 +341,10 @@ template<> ARK_PLUGIN_PYTHON_API Optional<NamedHash> PyCast::toCppObject_impl<Na
 {
     if(Optional<String> strOpt = toStringExact(object))
         return {NamedHash(std::move(strOpt.value()))};
-    if(Optional<int32_t> intOpt = toCppInteger<int32_t>(object))
+    if(Optional<int32_t> intOpt = toCppInteger<int32_t>(object, true))
         return {NamedHash(intOpt.value())};
+    if(PythonExtension::instance().isPyArkTypeObject(Py_TYPE(object)) && reinterpret_cast<PyArkType::Instance*>(object)->box->isEnum())
+        return {NamedHash(reinterpret_cast<PyArkType::Instance*>(object)->box->toInteger())};
     return {};
 }
 

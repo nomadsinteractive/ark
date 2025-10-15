@@ -406,6 +406,12 @@ void Camera::assign(const Camera& other)
 
 sp<Mat4> Camera::toFrustumSliceMatrix(const float z, const bool normalize) const
 {
+    auto [center, matrix] = toFrustumSliceCenterAndMatrix(z, normalize);
+    return Mat4Type::matmul(sp<Translation>::make(std::move(center))->toMatrix(), std::move(matrix));
+}
+
+std::pair<sp<Vec3>, sp<Mat4>> Camera::toFrustumSliceCenterAndMatrix(const float z, const bool normalize) const
+{
     sp<Mat4> vpInverse = Mat4Type::inverse(_vp);
     sp<Vec3> position = Mat4Type::matmul(vpInverse, V3(0, 0, z));
     sp<Vec3> right = Vec3Type::sub(Mat4Type::matmul(vpInverse, V3(1, 0, z)), position);
@@ -413,12 +419,12 @@ sp<Mat4> Camera::toFrustumSliceMatrix(const float z, const bool normalize) const
     sp<Vec3> front = sp<Vec3>::make<Vec3::Const>(V3(0));
     if(normalize)
     {
-        right = Vec3Type::normalize(right);
-        up = Vec3Type::normalize(up);
+        right = Vec3Type::normalize(std::move(right));
+        up = Vec3Type::normalize(std::move(up));
     }
     const Constants& constants = Global<Constants>();
     sp<Mat4> matrix = Mat4Type::create(Vec3Type::extend(std::move(right), constants.NUMERIC_ZERO), Vec3Type::extend(std::move(up), constants.NUMERIC_ZERO), Vec3Type::extend(std::move(front), constants.NUMERIC_ZERO), sp<Vec4>::make<Vec4::Const>(V4(0, 0, 0, 1)));
-    return Mat4Type::matmul(sp<Translation>::make(std::move(position))->toMatrix(), std::move(matrix));
+    return {std::move(position), std::move(matrix)};
 }
 
 sp<Mat4> Camera::view() const

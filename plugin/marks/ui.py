@@ -2,7 +2,7 @@ import inspect
 from collections.abc import Sequence
 from typing import Callable, Any, Optional
 
-from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, Math, TYPE_BOOLEAN, Discarded
+from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, Math, TYPE_BOOLEAN, Discarded, Random
 from ark import dear_imgui
 
 
@@ -274,7 +274,7 @@ class NoiseGeneratorWindow(Window):
         float_arrays = []
         component_size = self._components.val
         for i in range(component_size):
-            generator = self._noise.Generator(generator_type, Math.rand(), self._frequency.val)
+            generator = self._noise.Generator(generator_type, Random().rand(), self._frequency.val)
             if self._enable_fractal:
                 generator.set_fractal_octaves(self._fractal_octaves.val)
                 generator.set_fractal_gain(self._fractal_gain.val)

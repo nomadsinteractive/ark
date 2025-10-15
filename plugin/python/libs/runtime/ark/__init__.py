@@ -1082,6 +1082,9 @@ class Camera:
     def to_frustum_slice_matrix(self, z: float, normalize = False) -> "Mat4":
         pass
 
+    def to_frustum_slice_center_and_matrix(self, z: float, normalize = False) -> tuple["Vec3", "Mat4"]:
+        pass
+
     def assign(self, camera: "Camera"):
         pass
 

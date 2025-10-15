@@ -96,7 +96,7 @@ PyObject* PythonExtension::toPyObject(const Box& box)
 
 bool PythonExtension::isPyObject(const TypeId type) const
 {
-    return (type == Type<PyInstance>::id()) || _type_by_id.find(type) != _type_by_id.end();
+    return (type == Type<PyInstance>::id()) || _type_by_id.contains(type);
 }
 
 void PythonExtension::printStack() const
