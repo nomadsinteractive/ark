@@ -268,7 +268,7 @@ struct GLPipeline::Stub {
 
     bool shouldBeBinded(const enums::ShaderStageSet& stages) const
     {
-        return _is_compute_pipeline ? stages.has(enums::SHADER_STAGE_BIT_COMPUTE) : !stages.has(enums::SHADER_STAGE_BIT_COMPUTE);
+        return _is_compute_pipeline ? stages.contains(enums::SHADER_STAGE_BIT_COMPUTE) : !stages.contains(enums::SHADER_STAGE_BIT_COMPUTE);
     }
 
     bool _is_compute_pipeline;

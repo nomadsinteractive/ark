@@ -211,12 +211,12 @@ void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<Uploadi
             if(front._strategy == enums::UPLOAD_STRATEGY_RELOAD && front._resource.id() != 0)
                 front._resource.recycle(graphicsContext);
 
-            if((front._strategy.has(enums::UPLOAD_STRATEGY_ONCE)) || front._strategy == enums::UPLOAD_STRATEGY_RELOAD)
+            if((front._strategy.contains(enums::UPLOAD_STRATEGY_ONCE)) || front._strategy == enums::UPLOAD_STRATEGY_RELOAD)
                 front._resource.upload(graphicsContext);
 
-            if(front._strategy.has(enums::UPLOAD_STRATEGY_ON_EVERY_FRAME))
+            if(front._strategy.contains(enums::UPLOAD_STRATEGY_ON_EVERY_FRAME))
                 _on_every_frame.append(front._priority, std::move(front._resource));
-            else if(front._strategy.has(enums::UPLOAD_STRATEGY_ON_SURFACE_READY))
+            else if(front._strategy.contains(enums::UPLOAD_STRATEGY_ON_SURFACE_READY))
                 _on_surface_ready.append(front._priority, std::move(front._resource));
         }
     }
@@ -238,7 +238,7 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
 
 void RenderController::upload(sp<Resource> resource, const enums::UploadStrategy strategy, sp<Updatable> updatable, sp<Future> future, const enums::UploadPriority priority)
 {
-    if(strategy.has(enums::UPLOAD_STRATEGY_ON_CHANGE))
+    if(strategy.contains(enums::UPLOAD_STRATEGY_ON_CHANGE))
     {
         CHECK(updatable, "An updatable must be specified using \"on_change\" upload strategy");
         sp<Boolean> discarded = future ? future->isCanceled() : sp<Boolean>::make<BooleanByWeakRef<Resource>>(resource, 1);
@@ -255,7 +255,7 @@ void RenderController::uploadBuffer(const Buffer& buffer, sp<Uploader> uploader,
         future = sp<Future>::make(nullptr, sp<Boolean>::make<BooleanByWeakRef<Buffer::Delegate>>(buffer.delegate(), 1));
     buffer.delegate()->setSize(uploader->size());
     Uploader& uploaderInstance = *uploader;
-    sp<Updatable> updatable = strategy.has(enums::UPLOAD_STRATEGY_ON_CHANGE) ? sp<Updatable>::make<BufferUpdatable>(*this, std::move(uploader), buffer.delegate()) : sp<Updatable>();
+    sp<Updatable> updatable = strategy.contains(enums::UPLOAD_STRATEGY_ON_CHANGE) ? sp<Updatable>::make<BufferUpdatable>(*this, std::move(uploader), buffer.delegate()) : sp<Updatable>();
     //TODO: make this mess a bit more cleaner
     if(strategy == enums::UPLOAD_STRATEGY_ON_CHANGE)
         upload(nullptr, strategy, std::move(updatable), std::move(future), priority);
@@ -300,7 +300,7 @@ Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uplo
 Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uploader)
 {
     enums::UploadStrategy us = uploader ? enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY : enums::UPLOAD_STRATEGY_ON_SURFACE_READY;
-    if(usage.has(Buffer::USAGE_BIT_DYNAMIC) && uploader)
+    if(usage.contains(Buffer::USAGE_BIT_DYNAMIC) && uploader)
         us = us | enums::UPLOAD_STRATEGY_ON_CHANGE;
     return makeBuffer(usage, std::move(uploader), us);
 }

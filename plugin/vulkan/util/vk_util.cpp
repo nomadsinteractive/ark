@@ -93,10 +93,10 @@ void VKUtil::createImage(const VKDevice& device, const VkImageCreateInfo& imageC
 
 VkImageLayout VKUtil::toImageLayout(const Texture::Usage usage)
 {
-    if(usage.has(Texture::USAGE_ATTACHMENT))
+    if(usage.contains(Texture::USAGE_ATTACHMENT))
         return toAttachmentImageLayout(usage);
 
-    if(usage.has(Texture::USAGE_SAMPLER))
+    if(usage.contains(Texture::USAGE_SAMPLER))
         return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     return VK_IMAGE_LAYOUT_GENERAL;
@@ -115,7 +115,7 @@ VkImageLayout VKUtil::toAttachmentImageLayout(const Texture::Usage usage)
         default:
             break;
     }
-    if(usage.has(Texture::USAGE_SAMPLER) || usage.has(Texture::USAGE_STORAGE))
+    if(usage.contains(Texture::USAGE_SAMPLER) || usage.contains(Texture::USAGE_STORAGE))
         return VK_IMAGE_LAYOUT_GENERAL;
     return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 }
@@ -222,10 +222,10 @@ VkStencilOp VKUtil::toStencilOp(const PipelineDescriptor::StencilFunc func)
 
 VkImageAspectFlags VKUtil::toTextureAspect(const Texture::Usage usage)
 {
-    VkImageAspectFlags vkFlags = usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) ? 0 : VK_IMAGE_ASPECT_COLOR_BIT;
-    if(usage.has(Texture::USAGE_DEPTH_ATTACHMENT))
+    VkImageAspectFlags vkFlags = usage.contains(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) ? 0 : VK_IMAGE_ASPECT_COLOR_BIT;
+    if(usage.contains(Texture::USAGE_DEPTH_ATTACHMENT))
         vkFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;
-    if(usage.has(Texture::USAGE_STENCIL_ATTACHMENT))
+    if(usage.contains(Texture::USAGE_STENCIL_ATTACHMENT))
         vkFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;
     return vkFlags;
 }
@@ -258,7 +258,7 @@ VkFormat findSupportedDepthFormat(const VkPhysicalDevice physicalDevice, const V
 
 VkFormat VKUtil::getSupportedDepthFormat(const VkPhysicalDevice physicalDevice, const Texture::Format format, const Texture::Usage usage)
 {
-    const bool hasStencil = usage.has(Texture::USAGE_STENCIL_ATTACHMENT);
+    const bool hasStencil = usage.contains(Texture::USAGE_STENCIL_ATTACHMENT);
     VkFormat depthFormat = VK_FORMAT_UNDEFINED;
     switch(format & Texture::FORMAT_BIT_MASK)
     {

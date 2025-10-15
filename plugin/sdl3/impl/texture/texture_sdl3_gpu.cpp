@@ -28,7 +28,7 @@ SDL_GPUTextureFormat toChannelFormat(const SDL_GPUTextureFormat* channelFormat, 
 
 SDL_GPUTextureFormat toTextureFormat(const Bitmap& bitmap, const Texture::Format format, const Texture::Usage usage)
 {
-    if(usage.has(Texture::USAGE_DEPTH_ATTACHMENT))
+    if(usage.contains(Texture::USAGE_DEPTH_ATTACHMENT))
         return SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
 
     constexpr SDL_GPUTextureFormat sdlFormats[] = {
@@ -49,13 +49,13 @@ SDL_GPUTextureUsageFlags toTextureUsageFlags(const Texture::Usage usage)
         return SDL_GPU_TEXTUREUSAGE_SAMPLER;
 
     SDL_GPUTextureUsageFlags flags = 0;
-    if(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
+    if(usage.contains(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
         flags |= SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
-    if(usage.has(Texture::USAGE_COLOR_ATTACHMENT))
+    if(usage.contains(Texture::USAGE_COLOR_ATTACHMENT))
         flags |= SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
-    if(usage.has(Texture::USAGE_SAMPLER))
+    if(usage.contains(Texture::USAGE_SAMPLER))
         flags |= SDL_GPU_TEXTUREUSAGE_SAMPLER;
-    if(usage.has(Texture::USAGE_STORAGE))
+    if(usage.contains(Texture::USAGE_STORAGE))
         flags |= SDL_GPU_TEXTUREUSAGE_GRAPHICS_STORAGE_READ | SDL_GPU_TEXTUREUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_TEXTUREUSAGE_COMPUTE_STORAGE_WRITE;
     return flags;
 }

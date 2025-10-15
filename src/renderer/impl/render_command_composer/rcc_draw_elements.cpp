@@ -40,7 +40,7 @@ DrawingContext RCCDrawElements::compose(const RenderRequest& renderRequest, cons
         size_t offset = 0;
         for(const RenderLayerSnapshot::Element& i : snapshot._elements)
         {
-            if(i._snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
+            if(i._snapshot._state.contains(Renderable::RENDERABLE_STATE_DIRTY))
             {
                 VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesCount, offset);
                 i._snapshot._model->writeRenderable(writer, i._snapshot);

@@ -127,9 +127,9 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
         Renderable& renderable = iter->first;
         Renderable::State& s = iter->second;
         const Renderable::State newState = renderable.updateState(renderRequest);
-        const bool visibilityChanged = s.has(Renderable::RENDERABLE_STATE_VISIBLE) != newState.has(Renderable::RENDERABLE_STATE_VISIBLE);
+        const bool visibilityChanged = s.contains(Renderable::RENDERABLE_STATE_VISIBLE) != newState.contains(Renderable::RENDERABLE_STATE_VISIBLE);
         s = {newState, static_cast<Renderable::StateBits>(s.bits() & (Renderable::RENDERABLE_STATE_NEW | Renderable::RENDERABLE_STATE_DISCARDED))};
-        if(Renderable::State state = s; state.has(Renderable::RENDERABLE_STATE_DISCARDED))
+        if(Renderable::State state = s; state.contains(Renderable::RENDERABLE_STATE_DISCARDED))
         {
             LOGD("delete: %p", &renderable);
             verticesDirty = true;
@@ -142,9 +142,9 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
                 state.set(Renderable::RENDERABLE_STATE_NEW, true);
             if(reload)
                 state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
-            if(state.has(Renderable::RENDERABLE_STATE_VISIBLE))
+            if(state.contains(Renderable::RENDERABLE_STATE_VISIBLE))
                 state.set(Renderable::RENDERABLE_STATE_VISIBLE, layerSnapshot._visible);
-            if(s.has(Renderable::RENDERABLE_STATE_NEW))
+            if(s.contains(Renderable::RENDERABLE_STATE_NEW))
             {
                 state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
                 s.set(Renderable::RENDERABLE_STATE_NEW, false);

@@ -107,7 +107,7 @@ struct CameraDelegateCHS final : Camera::Delegate {
 sp<RendererFactory> chooseRenderFactory(const Vector<sp<RendererFactory>>& rendererFactories, const enums::RenderingBackendBit renderingBackend)
 {
     for(const sp<RendererFactory>& i : rendererFactories)
-        if(i->features()._supported_backends.has(renderingBackend))
+        if(i->features()._supported_backends.contains(renderingBackend))
             return i;
     FATAL("Unable to find a suitable RendererFactory for: %d", renderingBackend);
     return nullptr;

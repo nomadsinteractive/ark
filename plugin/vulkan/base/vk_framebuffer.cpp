@@ -89,13 +89,13 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
       _viewport(vks::initializers::viewport(static_cast<float>(_resolution.width), static_cast<float>(_resolution.height), 0, 1.0f))
 {
 
-    if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
+    if(_configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
         for(const auto& [t, cv] : _configure._color_attachments)
             _clear_values.push_back(VkClearValue{cv.x(), cv.y(), cv.z(), cv.w()});
 
     VkClearValue clearDepthStencil;
     clearDepthStencil.depthStencil = { 1.0f, 0 };
-    if(_configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
+    if(_configure._depth_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
         _clear_values.push_back(clearDepthStencil);
 
     _render_pass_begin_info.renderArea = _scissor;
@@ -132,8 +132,8 @@ VkRenderPass VKFramebuffer::Stub::acquire()
     Vector<VkImageView> attachments;
 
     const VkAttachmentLoadOp colorAttachmentLoadOp = !_configure._color_attachment_op || _configure._color_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
-                                                     : _configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-    const VkAttachmentStoreOp colorAttachmentStoreOp = _configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                                                     : _configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+    const VkAttachmentStoreOp colorAttachmentStoreOp = _configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
     for(const auto& [t, cv] : _configure._color_attachments)
     {
         VkAttachmentDescription colorAttachmentDescription = {};
@@ -164,8 +164,8 @@ VkRenderPass VKFramebuffer::Stub::acquire()
 
         VkAttachmentDescription depthAttachmentDescription = {};
         const VkAttachmentLoadOp loadOp = !_configure._depth_attachment_op || _configure._depth_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
-                                          : _configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-        const VkAttachmentStoreOp storeOp = _configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                                          : _configure._depth_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        const VkAttachmentStoreOp storeOp = _configure._depth_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachmentDescription.format = fbDepthFormat;
         depthAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
         depthAttachmentDescription.loadOp = loadOp;

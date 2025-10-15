@@ -140,7 +140,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     {
         const RenderLayerSnapshot::Element& s = renderLayerItems.at(i);
         const Renderable::Snapshot& snapshot = s._snapshot;
-        if(reload || s._snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
+        if(reload || s._snapshot._state.contains(Renderable::RENDERABLE_STATE_DIRTY))
             if(!snapshot._varyings_snapshot._sub_properties.empty())
             {
                 const auto iter = _model_instances.find(i);
@@ -165,7 +165,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         {
             const RenderLayerSnapshot::Element& s = renderLayerItems.at(nodeInstance->snapshotIndex());
             const Renderable::Snapshot& snapshot = s._snapshot;
-            if(reload || snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
+            if(reload || snapshot._state.contains(Renderable::RENDERABLE_STATE_DIRTY))
                 if(snapshot._varyings_snapshot._buffers.length() > 0)
                 {
                     const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(snapshot._type);
@@ -174,7 +174,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                     writer.next();
                     if(hasModelMatrix)
                     {
-                        const bool visible = snapshot._state.has(Renderable::RENDERABLE_STATE_VISIBLE);
+                        const bool visible = snapshot._state.contains(Renderable::RENDERABLE_STATE_VISIBLE);
                         const M4 modelMatrix = visible ? MatrixUtil::translate({}, snapshot._position) * MatrixUtil::scale(snapshot._transform->toMatrix(snapshot._transform_snapshot), toScale(snapshot._size, metrics)) * nodeInstance->globalTransform()
                                                        : MatrixUtil::scale(M4(), V3(0));
                         writer.writeAttribute(modelMatrix, Attribute::USAGE_MODEL_MATRIX);

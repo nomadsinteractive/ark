@@ -309,7 +309,7 @@ void ShaderPreprocessor::insertUBOStruct(const PipelineLayout::UBO& ubo, const i
 
 bool ShaderPreprocessor::hasUBO(const PipelineLayout::UBO& ubo) const
 {
-    if(ubo._stages.has(_shader_stage))
+    if(ubo._stages.contains(_shader_stage))
     {
         for(const auto& i : ubo.uniforms().values())
             if(!_declaration_uniforms.has(i->name()))

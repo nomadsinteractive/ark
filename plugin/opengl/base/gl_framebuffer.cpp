@@ -66,7 +66,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
     for(const auto& [t, cv] : _configure._color_attachments)
     {
         const Texture::Usage usage = t->parameters()->_usage;
-        ASSERT(usage == Texture::USAGE_AUTO || usage.has(Texture::USAGE_COLOR_ATTACHMENT));
+        ASSERT(usage == Texture::USAGE_AUTO || usage.contains(Texture::USAGE_COLOR_ATTACHMENT));
         ASSERT(t->id() != 0);
         const GLenum attachment = GL_COLOR_ATTACHMENT0 + (bindings++);
         attachments.push_back(t->id(), attachment);
@@ -117,15 +117,15 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         GL_CHECK_ERROR(glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, depthTexture->width(), depthTexture->height()));
         for(const GLenum i : depthInputs)
         {
-            if(_configure._depth_attachment_op != RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE && _configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_LOAD))
+            if(_configure._depth_attachment_op != RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE && _configure._depth_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_LOAD))
                 GL_CHECK_ERROR(glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id())));
-            if(_configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
+            if(_configure._depth_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_STORE))
                 GL_CHECK_ERROR(glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id())));
         }
         GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, depthStencilAttachment, GL_TEXTURE_2D, static_cast<GLuint>(depthTexture->id()), 0));
     }
 
-    if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
+    if(_configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_STORE))
         for(const auto [k, v] : attachments)
         {
             GL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, v, GL_TEXTURE_2D, static_cast<GLuint>(k), 0));

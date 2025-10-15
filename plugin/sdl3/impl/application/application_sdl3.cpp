@@ -382,7 +382,7 @@ void ApplicationSDL3::initialize()
 
     const ApplicationManifest::Window& window = Ark::instance().manifest()->window();
 
-    if(window._flags.has(ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR))
+    if(window._flags.contains(ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR))
         SDL_ShowCursor();
     else
         SDL_HideCursor();
@@ -397,10 +397,10 @@ void ApplicationSDL3::initialize()
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, static_cast<int32_t>(_surface_size->widthAsFloat()));
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, static_cast<int32_t>(_surface_size->heightAsFloat()));
 
-    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, window._flags.has(ApplicationManifest::WINDOW_FLAG_FULL_SCREEN));
-    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, window._flags.has(ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED));
-    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN, window._flags.has(ApplicationManifest::WINDOW_FLAG_MAXINIZED));
-    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, window._flags.has(ApplicationManifest::WINDOW_FLAG_RESIZABLE));
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, window._flags.contains(ApplicationManifest::WINDOW_FLAG_FULL_SCREEN));
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, window._flags.contains(ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED));
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN, window._flags.contains(ApplicationManifest::WINDOW_FLAG_MAXINIZED));
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, window._flags.contains(ApplicationManifest::WINDOW_FLAG_RESIZABLE));
 
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN, _use_open_gl);
 

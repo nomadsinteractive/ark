@@ -47,12 +47,12 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
     for(const AttachmentBuilder& i : _attachments)
     {
         sp<Texture> tex = i._texture->build(args);
-        if(const Texture::Usage usage = tex->usage(); usage == Texture::USAGE_AUTO || usage.has(Texture::USAGE_COLOR_ATTACHMENT))
+        if(const Texture::Usage usage = tex->usage(); usage == Texture::USAGE_AUTO || usage.contains(Texture::USAGE_COLOR_ATTACHMENT))
             configure._color_attachments.emplace_back(std::move(tex), i._clear_value);
         else
         {
             CHECK(configure._depth_stencil_attachment == nullptr, "Only one depth-stencil attachment allowed");
-            CHECK(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Texture has no depth stencil usage: %d", usage);
+            CHECK(usage.contains(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Texture has no depth stencil usage: %d", usage);
             configure._depth_stencil_attachment = std::move(tex);
         }
     }

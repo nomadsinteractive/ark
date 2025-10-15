@@ -44,13 +44,13 @@ void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, 
 VkImageUsageFlags toTextureUsage(const Texture::Usage usage)
 {
     VkImageUsageFlags vkFlags = usage == Texture::USAGE_AUTO ? VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT : 0;
-    if(usage.has(Texture::USAGE_COLOR_ATTACHMENT))
+    if(usage.contains(Texture::USAGE_COLOR_ATTACHMENT))
         vkFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    if(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
+    if(usage.contains(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
         vkFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-    if(usage.has(Texture::USAGE_SAMPLER))
+    if(usage.contains(Texture::USAGE_SAMPLER))
         vkFlags |= VK_IMAGE_USAGE_SAMPLED_BIT;
-    if(usage.has(Texture::USAGE_STORAGE))
+    if(usage.contains(Texture::USAGE_STORAGE))
         vkFlags |= VK_IMAGE_USAGE_STORAGE_BIT;
     return vkFlags;
 }
@@ -164,7 +164,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
     const bool isCubemap = _num_faces == 6;
 
     VkDevice logicalDevice = _renderer->vkLogicalDevice();
-    if(_parameters->_usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
+    if(_parameters->_usage.contains(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
     {
         const VkFormat fbDepthFormat = VKUtil::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), _parameters->_format, _parameters->_usage);
         VkImageCreateInfo image = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
@@ -192,7 +192,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         VKUtil::checkResult(vkCreateImageView(logicalDevice, &depthStencilView, nullptr, &_descriptor.imageView));
 
         _descriptor.imageLayout = VKUtil::toImageLayout(_parameters->_usage);
-        if(_parameters->_usage.has(Texture::USAGE_SAMPLER))
+        if(_parameters->_usage.contains(Texture::USAGE_SAMPLER))
             doCreateSamplerDescriptor(logicalDevice);
 
         return;
@@ -236,7 +236,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         doUploadBitmap(bitmap, imageDataSize, images);
     }
 
-    if(_parameters->_usage == Texture::USAGE_AUTO || _parameters->_usage.has(Texture::USAGE_SAMPLER))
+    if(_parameters->_usage == Texture::USAGE_AUTO || _parameters->_usage.contains(Texture::USAGE_SAMPLER))
         doCreateSamplerDescriptor(logicalDevice);
 
     // Create image view

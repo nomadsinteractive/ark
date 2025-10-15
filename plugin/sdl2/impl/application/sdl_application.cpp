@@ -378,7 +378,7 @@ void SDLApplication::initialize()
 
     const ApplicationManifest::Window& window = Ark::instance().manifest()->window();
 
-    SDL_ShowCursor(window._flags.has(ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
+    SDL_ShowCursor(window._flags.contains(ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
 
     _main_window = SDL_CreateWindow(window._title.c_str(), toWindowPosition(window._position_x), toWindowPosition(window._position_y), static_cast<int32_t>(_surface_size->widthAsFloat()), static_cast<int32_t>(_surface_size->heightAsFloat()), toSDLWindowFlag(_application_context, window._flags) | SDL_WINDOW_ALLOW_HIGHDPI);
     if(!_main_window)
@@ -409,13 +409,13 @@ uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicati
     const enums::RendererVersion version = applicationContext->renderEngine()->version();
 
     uint32_t windowFlag = SDL_WINDOW_SHOWN;
-    if(appWindowFlag.has(ApplicationManifest::WINDOW_FLAG_FULL_SCREEN))
+    if(appWindowFlag.contains(ApplicationManifest::WINDOW_FLAG_FULL_SCREEN))
         windowFlag |= SDL_WINDOW_FULLSCREEN;
-    if(appWindowFlag.has(ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED))
+    if(appWindowFlag.contains(ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED))
         windowFlag |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    if(appWindowFlag.has(ApplicationManifest::WINDOW_FLAG_MAXINIZED))
+    if(appWindowFlag.contains(ApplicationManifest::WINDOW_FLAG_MAXINIZED))
         windowFlag |= SDL_WINDOW_MAXIMIZED;
-    if(appWindowFlag.has(ApplicationManifest::WINDOW_FLAG_RESIZABLE))
+    if(appWindowFlag.contains(ApplicationManifest::WINDOW_FLAG_RESIZABLE))
         windowFlag |= SDL_WINDOW_RESIZABLE;
 
     _use_open_gl = version < enums::RENDERER_VERSION_VULKAN_11;

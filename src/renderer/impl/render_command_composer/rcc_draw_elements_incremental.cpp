@@ -33,7 +33,7 @@ DrawingContext RCCDrawElementsIncremental::compose(const RenderRequest& renderRe
     for(const RenderLayerSnapshot::Element& i : snapshot._elements)
     {
         const Renderable::State& s = i._snapshot._state;
-        if(const bool hasStateNew = s.has(Renderable::RENDERABLE_STATE_NEW); hasStateNew || s.has(Renderable::RENDERABLE_STATE_DIRTY))
+        if(const bool hasStateNew = s.contains(Renderable::RENDERABLE_STATE_NEW); hasStateNew || s.contains(Renderable::RENDERABLE_STATE_DIRTY))
         {
             const Model& model = i._snapshot._model;
             const uint32_t vertexCount = static_cast<uint32_t>(model.vertexCount());
@@ -55,7 +55,7 @@ DrawingContext RCCDrawElementsIncremental::compose(const RenderRequest& renderRe
         for(const RenderLayerSnapshot::Element& i : snapshot._elements)
         {
             const Model& model = i._snapshot._model;
-            if(i._snapshot._state.has(Renderable::RENDERABLE_STATE_VISIBLE))
+            if(i._snapshot._state.contains(Renderable::RENDERABLE_STATE_VISIBLE))
                 offset += model.writeIndices(indices.data() + offset, i._element_state._index.value());
             else
                 offset += static_cast<element_index_t>(model.indices()->size() / sizeof(element_index_t));

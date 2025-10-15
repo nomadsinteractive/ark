@@ -27,17 +27,17 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_fbo->id()));
         glViewport(0, 0, _width, _height);
         const RenderTarget::Configure& configure = _fbo->configure();
-        if(configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
+        if(configure._depth_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
         {
-            if(configure._depth_stencil_attachment->usage() == Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+            if(configure._depth_stencil_attachment->usage().has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
                 glClearBufferfi(GL_DEPTH_STENCIL, 0, _clear_depth_value, _clear_stencil_value);
-            else if(configure._depth_stencil_attachment->usage() == Texture::USAGE_DEPTH_ATTACHMENT)
+            else if(configure._depth_stencil_attachment->usage().has(Texture::USAGE_DEPTH_ATTACHMENT))
                 glClearBufferfv(GL_DEPTH, 0, &_clear_depth_value);
             else
                 glClearBufferiv(GL_STENCIL, 0, &_clear_stencil_value);
         }
 
-        if(configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
+        if(configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
             for(size_t i = 0; i < configure._color_attachments.size(); ++i)
                 glClearBufferfv(GL_COLOR, static_cast<GLint>(i), reinterpret_cast<const GLfloat *>(&configure._color_attachments.at(i)._clear_value));
     }

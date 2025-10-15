@@ -120,8 +120,8 @@ Optional<SDL_GPUDepthStencilTargetInfo> toDepthStencilTargetInfo(const RenderTar
         nullptr,
         1.0f,
         !configure._depth_attachment_op || configure._depth_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? SDL_GPU_LOADOP_DONT_CARE
-                                                : configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD,
-        configure._depth_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE,
+                                                : configure._depth_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD,
+        configure._depth_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE,
         SDL_GPU_LOADOP_CLEAR,
         SDL_GPU_STOREOP_DONT_CARE,
     };
@@ -134,8 +134,8 @@ public:
         : _configure(std::move(configure)), _depth_stencil_target(toDepthStencilTargetInfo(_configure))
     {
         const SDL_GPULoadOp loadOp = configure._color_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? SDL_GPU_LOADOP_DONT_CARE
-                                                : configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
-        const SDL_GPUStoreOp storeOp = configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE;
+                                                : configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
+        const SDL_GPUStoreOp storeOp = configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE;
         for(const auto& [t, cv] : _configure._color_attachments)
             _render_targets.push_back({
                 nullptr,
@@ -286,13 +286,13 @@ sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const
 
 sp<Buffer::Delegate> RendererFactorySDL3_GPU::createBuffer(const Buffer::Usage usage)
 {
-    if(usage.has(Buffer::USAGE_BIT_STORAGE))
+    if(usage.contains(Buffer::USAGE_BIT_STORAGE))
         return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE);
-    if(usage.has(Buffer::USAGE_BIT_VERTEX))
-        return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX);
-    if(usage.has(Buffer::USAGE_BIT_INDEX))
-        return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX);
-    if(usage.has(Buffer::USAGE_BIT_DRAW_INDIRECT))
+    if(usage.contains(Buffer::USAGE_BIT_VERTEX))
+        return usage.contains(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX);
+    if(usage.contains(Buffer::USAGE_BIT_INDEX))
+        return usage.contains(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX);
+    if(usage.contains(Buffer::USAGE_BIT_DRAW_INDIRECT))
         return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDIRECT);
     FATAL("Unknow buffer type: %d", usage.bits());
     return nullptr;

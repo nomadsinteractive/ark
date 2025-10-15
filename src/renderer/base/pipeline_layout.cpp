@@ -135,12 +135,12 @@ sp<RenderBufferSnapshot> PipelineLayout::takeBufferSnapshot(const RenderRequest&
 {
     Vector<RenderBufferSnapshot::UBOSnapshot> uboSnapshot;
     for(const UBO& i : _ubos)
-        if(isComputeStage ? i._stages.has(enums::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(enums::SHADER_STAGE_BIT_VERTEX) || i._stages.has(enums::SHADER_STAGE_BIT_FRAGMENT)))
+        if(isComputeStage ? i._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE) : (i._stages.contains(enums::SHADER_STAGE_BIT_VERTEX) || i._stages.contains(enums::SHADER_STAGE_BIT_FRAGMENT)))
             uboSnapshot.push_back(i.snapshot(renderRequest));
 
     Vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
     for(const SSBO& i : _ssbos)
-        if(isComputeStage ? i._stages.has(enums::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(enums::SHADER_STAGE_BIT_VERTEX) || i._stages.has(enums::SHADER_STAGE_BIT_FRAGMENT)))
+        if(isComputeStage ? i._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE) : (i._stages.contains(enums::SHADER_STAGE_BIT_VERTEX) || i._stages.contains(enums::SHADER_STAGE_BIT_FRAGMENT)))
             ssboSnapshot.emplace_back(i._binding._location, i._buffer.snapshot());
 
     return sp<RenderBufferSnapshot>::make(RenderBufferSnapshot{std::move(uboSnapshot), std::move(ssboSnapshot)});

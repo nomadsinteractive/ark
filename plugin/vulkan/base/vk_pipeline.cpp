@@ -636,7 +636,7 @@ void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const Vector
 
 bool VKPipeline::shouldStageNeedBinding(const enums::ShaderStageSet stages) const
 {
-    return _is_compute_pipeline ? stages.has(enums::SHADER_STAGE_BIT_COMPUTE) : (stages.has(enums::SHADER_STAGE_BIT_VERTEX) || stages.has(enums::SHADER_STAGE_BIT_FRAGMENT));
+    return _is_compute_pipeline ? stages.contains(enums::SHADER_STAGE_BIT_COMPUTE) : (stages.contains(enums::SHADER_STAGE_BIT_VERTEX) || stages.contains(enums::SHADER_STAGE_BIT_FRAGMENT));
 }
 
 bool VKPipeline::shouldRebind(const uint64_t tick) const

@@ -34,7 +34,7 @@ GLenum toBufferGLTarget(const Buffer::Usage usage)
 {
     constexpr GLenum types[] = {GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER, GL_DRAW_INDIRECT_BUFFER, GL_SHADER_STORAGE_BUFFER};
     for(uint32_t i = Buffer::USAGE_BIT_VERTEX; i <= Buffer::USAGE_BIT_STORAGE; ++i)
-        if(usage.has(static_cast<Buffer::UsageBit>(i)))
+        if(usage.contains(static_cast<Buffer::UsageBit>(i)))
             return types[i];
 
     FATAL("Unknown buffer type: %d", usage.bits());
@@ -43,9 +43,9 @@ GLenum toBufferGLTarget(const Buffer::Usage usage)
 
 GLenum toBufferGLUsage(const Buffer::Usage usage)
 {
-    if(usage.has(Buffer::USAGE_BIT_STORAGE))
+    if(usage.contains(Buffer::USAGE_BIT_STORAGE))
         return GL_DYNAMIC_READ;
-    return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+    return usage.contains(Buffer::USAGE_BIT_DYNAMIC) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 }
 
 }

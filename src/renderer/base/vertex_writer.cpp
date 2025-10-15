@@ -89,7 +89,7 @@ void VertexWriter::setRenderable(const Renderable::Snapshot& renderObject)
     _transform_snapshot = &renderObject._transform_snapshot;
     _translate = renderObject._position;
     _varying_contents = renderObject._varyings_snapshot.getDivided(0)._content;
-    _visible = renderObject._state.has(Renderable::RENDERABLE_STATE_VISIBLE);
+    _visible = renderObject._state.contains(Renderable::RENDERABLE_STATE_VISIBLE);
 }
 
 void VertexWriter::writeNormal(const V3 normal)
