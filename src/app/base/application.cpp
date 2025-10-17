@@ -20,16 +20,17 @@
 #include "app/base/event.h"
 #include "app/base/surface.h"
 #include "app/base/surface_updater.h"
+#include "core/inf/asset.h"
 
 namespace ark {
 
 namespace {
 
-class AssetStringBundle final : public StringBundle {
+class StringBundleInAsset final : public StringBundle {
 public:
     Optional<String> getString(const String& name) override {
-        const sp<Readable> readable = Ark::instance().openAsset(name);
-        return {Strings::loadFromReadable(readable)};
+        const sp<Asset> asset = Ark::instance().getAsset(name);
+        return asset ? Optional<String>(Strings::loadFromReadable(asset->open())) : Optional<String>();
     }
 
     Vector<String> getStringArray(const String& /*resid*/) override {
@@ -136,7 +137,7 @@ void Application::onCreate()
     LOGD("");
     __thread_init__(THREAD_NAME_ID_MAIN);
     const Global<StringTable> stringTable;
-    stringTable->addStringBundle("asset", sp<AssetStringBundle>::make());
+    stringTable->addStringBundle("asset", sp<StringBundle>::make<StringBundleInAsset>());
     sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
     _surface = sp<Surface>::make(std::move(renderView), _application_context);
     _surface_updater_created = sp<Runnable>::make<OnSurfaceUpdatePostCreated>(_surface->updater(), _application_context, _application_delegate);

@@ -10,7 +10,7 @@ namespace ark {
 class ARK_API StringTable {
 public:
 
-    void addStringBundle(const String& name, const sp<StringBundle>& stringTable);
+    void addStringBundle(const String& name, sp<StringBundle> stringTable);
     sp<StringBundle> getStringBundle(const String& name) const;
 
     Optional<String> getString(const String& stringTableName, const String& stringName, bool alert) const;

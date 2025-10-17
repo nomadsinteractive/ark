@@ -6,6 +6,7 @@
 
 #include "renderer/base/render_controller.h"
 #include "renderer/base/recycler.h"
+#include "renderer/base/texture.h"
 #include "renderer/util/render_util.h"
 
 #include "vulkan/base/vk_device.h"
@@ -117,6 +118,12 @@ bool VKTexture::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
     return false;
 }
 
+VkSamplerAddressMode toSamplerAddressMode(const Texture::Filter filter)
+{
+    constexpr std::array<VkSamplerAddressMode, Texture::FILTER_COUNT> vkAddressModes = {VK_SAMPLER_ADDRESS_MODE_REPEAT, VK_SAMPLER_ADDRESS_MODE_REPEAT, VK_SAMPLER_ADDRESS_MODE_REPEAT, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, VK_SAMPLER_ADDRESS_MODE_REPEAT, VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE};
+    return vkAddressModes[filter];
+}
+
 void VKTexture::doCreateSamplerDescriptor(const VkDevice logicalDevice)
 {
     // Create a texture sampler
@@ -127,9 +134,9 @@ void VKTexture::doCreateSamplerDescriptor(const VkDevice logicalDevice)
     sampler.magFilter = _parameters->_mag_filter == Texture::FILTER_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
     sampler.minFilter = _parameters->_min_filter == Texture::FILTER_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
     sampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    sampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler.addressModeU = toSamplerAddressMode(_parameters->_wrap_r);
+    sampler.addressModeV = toSamplerAddressMode(_parameters->_wrap_s);
+    sampler.addressModeW = toSamplerAddressMode(_parameters->_wrap_t);
     sampler.mipLodBias = 0.0f;
     sampler.compareOp = VK_COMPARE_OP_NEVER;
     sampler.minLod = 0.0f;

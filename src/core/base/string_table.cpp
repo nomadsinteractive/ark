@@ -7,20 +7,20 @@ namespace ark {
 
 namespace {
 
-class MergedStringBundle final : public StringBundle {
+class StringBundleComposite final : public StringBundle {
 public:
-    MergedStringBundle(sp<StringBundle> d1, sp<StringBundle> d2)
+    StringBundleComposite(sp<StringBundle> d1, sp<StringBundle> d2)
         : _d1(std::move(d1)), _d2(std::move(d2)) {
     }
 
     Optional<String> getString(const String& name) override {
         Optional<String> value = _d1->getString(name);
-        return value ? value : _d2->getString(name);
+        return value ? std::move(value) : _d2->getString(name);
     }
 
     Vector<String> getStringArray(const String& resid) override {
         Vector<String> sa = _d1->getStringArray(resid);
-        return sa.size() ? sa : _d2->getStringArray(resid);
+        return sa.size() ? std::move(sa) : _d2->getStringArray(resid);
     }
 
 private:
@@ -30,13 +30,13 @@ private:
 
 }
 
-void StringTable::addStringBundle(const String& name, const sp<StringBundle>& stringTable)
+void StringTable::addStringBundle(const String& name, sp<StringBundle> stringTable)
 {
     ASSERT(stringTable);
     if(const auto iter = _string_bundle_by_name.find(name); iter != _string_bundle_by_name.end())
-        _string_bundle_by_name[name] = sp<MergedStringBundle>::make(iter->second, stringTable);
+        _string_bundle_by_name[name] = sp<StringBundle>::make<StringBundleComposite>(iter->second, std::move(stringTable));
     else
-        _string_bundle_by_name[name] = stringTable;
+        _string_bundle_by_name[name] = std::move(stringTable);
 }
 
 sp<StringBundle> StringTable::getStringBundle(const String& name) const
@@ -54,7 +54,7 @@ Optional<String> StringTable::getString(const String& stringTableName, const Str
     return str;
 }
 
-Optional<String> StringTable::getString(const String& name, bool alert) const
+Optional<String> StringTable::getString(const String& name, const bool alert) const
 {
     const auto pos = name.find('/');
     CHECK(pos != String::npos, "The name \"%s\" doest follow [stringtablename/stringname] pattern", name.c_str());
@@ -73,8 +73,8 @@ Vector<String> StringTable::getStringArray(const String& stringTableName, const 
 
 Vector<String> StringTable::getStringArray(const String& name, const bool alert) const
 {
-    auto pos = name.find('/');
-    DCHECK(pos != String::npos, "The name \"%s\" doest follow [stringtablename/stringname] pattern", name.c_str());
+    const auto pos = name.find('/');
+    CHECK(pos != String::npos, "The name \"%s\" doest follow [stringtablename/stringname] pattern", name.c_str());
     return getStringArray(name.substr(0, pos), name.substr(pos + 1), alert);
 }
 
