@@ -104,6 +104,9 @@ VkImageLayout VKUtil::toImageLayout(const Texture::Usage usage)
 
 VkImageLayout VKUtil::toAttachmentImageLayout(const Texture::Usage usage)
 {
+    if(usage.contains(Texture::USAGE_SAMPLER) || usage.contains(Texture::USAGE_STORAGE))
+        return VK_IMAGE_LAYOUT_GENERAL;
+
     switch(usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
         case Texture::USAGE_DEPTH_ATTACHMENT:
@@ -115,8 +118,6 @@ VkImageLayout VKUtil::toAttachmentImageLayout(const Texture::Usage usage)
         default:
             break;
     }
-    if(usage.contains(Texture::USAGE_SAMPLER) || usage.contains(Texture::USAGE_STORAGE))
-        return VK_IMAGE_LAYOUT_GENERAL;
     return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 }
 

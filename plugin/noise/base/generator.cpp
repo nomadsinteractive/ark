@@ -16,6 +16,14 @@ namespace ark::plugin::noise {
 
 namespace {
 
+void normalize(FloatArray& floatArray)
+{
+    const size_t length = floatArray.length();
+    float* buf = floatArray.buf();
+    for(size_t i = 0; i < length; ++i)
+        buf[i] = (buf[i] + 1.0f) * 0.5f;
+}
+
 class RunnableGenUniformGrid2D final : public Runnable {
 public:
     RunnableGenUniformGrid2D(FastNoise::SmartNode<FastNoise::Generator> generator, sp<Future> future, sp<FloatArray> floatArray, const RectI& bounds, const int32_t seed, const float frequency)
@@ -26,6 +34,7 @@ public:
     void run() override
     {
         _generator->GenUniformGrid2D(_float_array->buf(), _bounds.left(), _bounds.top(), _bounds.width(), _bounds.height(), _frequency, _seed);
+        normalize(_float_array);
         Ark::instance().applicationContext()->executorMain()->execute(_future);
     }
 
@@ -137,7 +146,10 @@ sp<FloatArray> Generator::noiseMap2d(const RectI& bounds, sp<Future> future) con
     if(future)
         Ark::instance().applicationContext()->executorThreadPool()->execute(sp<Runnable>::make<RunnableGenUniformGrid2D>(_stub->_generator, std::move(future), floatArray, bounds, _seed, _frequency));
     else
+    {
         _stub->_generator->GenUniformGrid2D(floatArray->buf(), bounds.left(), bounds.top(), bounds.width(), bounds.height(), _frequency, _seed);
+        normalize(floatArray);
+    }
     return floatArray;
 }
 
