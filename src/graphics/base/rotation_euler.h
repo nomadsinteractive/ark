@@ -9,21 +9,19 @@
 
 namespace ark {
 
-//[[script::bindings::extends(Vec4)]]
 class ARK_API RotationEuler final : public Vec4, public Wrapper<Vec4> {
 public:
-//  [[script::bindings::auto]]
     RotationEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
 
     V4 val() override;
     bool update(uint64_t timestamp) override;
 
-//  [[script::bindings::property]]
     const sp<Numeric>& pitch() const;
-//  [[script::bindings::property]]
     const sp<Numeric>& yaw() const;
-//  [[script::bindings::property]]
     const sp<Numeric>& roll() const;
+
+//  [[script::bindings::constructor]]
+    static sp<Rotation> create(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
 
 private:
     void doUpdate();

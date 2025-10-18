@@ -9,19 +9,18 @@
 
 namespace ark {
 
-//[[script::bindings::extends(Vec4)]]
 class ARK_API RotationAxisTheta final : public Vec4, public Wrapper<Vec4> {
 public:
-//  [[script::bindings::auto]]
     RotationAxisTheta(sp<Vec3> axis, sp<Numeric> theta);
 
     V4 val() override;
     bool update(uint64_t timestamp) override;
 
-//  [[script::bindings::property]]
     const sp<Vec3>& axis() const;
-//  [[script::bindings::property]]
     const sp<Numeric>& theta() const;
+
+//  [[script::bindings::constructor]]
+    static sp<Rotation> create(sp<Vec3> axis, sp<Numeric> theta);
 
 private:
     void doUpdate();

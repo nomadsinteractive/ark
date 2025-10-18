@@ -3,7 +3,6 @@
 #include "core/base/api.h"
 #include "core/base/wrapper.h"
 #include "core/inf/variable.h"
-#include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -42,7 +41,15 @@ public:
     sp<RotationEuler> getEuler() const;
 
 //  [[script::bindings::auto]]
+    sp<Vec3> applyTo(sp<Vec3> v) const;
+//  [[script::bindings::auto]]
+    sp<Vec4> applyTo(sp<Vec4> v) const;
+
+//  [[script::bindings::auto]]
     sp<Mat4> toMatrix() const;
+
+//  [[script::bindings::operator(*)]]
+    static sp<Rotation> mul(sp<Rotation> lhs, sp<Rotation> rhs);
 
 private:
     Rotation(const sp<Vec4Wrapper>& vec4Wrapper);

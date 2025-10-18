@@ -5,6 +5,7 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_dirty_mark.h"
 #include "core/impl/variable/variable_wrapper.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/rotation_axis_theta.h"
 #include "graphics/base/rotation_euler.h"
@@ -40,6 +41,99 @@ public:
 private:
     sp<Vec4> _quaternion;
     M4 _matrix;
+};
+
+class Vec3MulitplyPosition final : public Vec3 {
+public:
+    Vec3MulitplyPosition(sp<Vec4> quaternion, sp<Vec3> position)
+        : _quaternion(std::move(quaternion)), _position(std::move(position)) {
+        update(Timestamp::now());
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        if(UpdatableUtil::update(timestamp, _quaternion, _position))
+        {
+            const V4 quat = _quaternion->val();
+            const V3 dir = _position->val();
+            const glm::vec3 v = glm::rotate(glm::quat(quat.w(), quat.x(), quat.y(), quat.z()), glm::vec3(dir.x(), dir.y(), dir.z()));
+            _value = V3(v.x, v.y, v.z);
+            return true;
+        }
+        return false;
+    }
+
+    V3 val() override
+    {
+        return _value;
+    }
+
+private:
+    sp<Vec4> _quaternion;
+    sp<Vec3> _position;
+    V3 _value;
+};
+
+class Vec4MulitplyPosition final : public Vec4 {
+public:
+    Vec4MulitplyPosition(sp<Vec4> quaternion, sp<Vec4> position)
+        : _quaternion(std::move(quaternion)), _position(std::move(position)) {
+        update(Timestamp::now());
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        if(UpdatableUtil::update(timestamp, _quaternion, _position))
+        {
+            const V4 quat = _quaternion->val();
+            const V4 dir = _position->val();
+            const glm::vec4 v = glm::rotate(glm::quat(quat.w(), quat.x(), quat.y(), quat.z()), glm::vec4(dir.x(), dir.y(), dir.z(), dir.w()));
+            _value = V4(v.x, v.y, v.z, v.w);
+            return true;
+        }
+        return false;
+    }
+
+    V4 val() override
+    {
+        return _value;
+    }
+
+private:
+    sp<Vec4> _quaternion;
+    sp<Vec4> _position;
+    V4 _value;
+};
+
+class Vec4MulitplyQuaternion final : public Vec4 {
+public:
+    Vec4MulitplyQuaternion(sp<Vec4> quaternion1, sp<Vec4> quaternion2)
+        : _quaternion1(std::move(quaternion1)), _quaternion2(std::move(quaternion2)) {
+        update(Timestamp::now());
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        if(UpdatableUtil::update(timestamp, _quaternion1, _quaternion2))
+        {
+            const V4 quat1 = _quaternion1->val();
+            const V4 quat2 = _quaternion2->val();
+            const glm::quat v = glm::quat(quat1.w(), quat1.x(), quat1.y(), quat1.z()) * glm::quat(quat2.w(), quat2.x(), quat2.y(), quat2.z());
+            _value = V4(v.x, v.y, v.z, v.w);
+            return true;
+        }
+        return false;
+    }
+
+    V4 val() override
+    {
+        return _value;
+    }
+
+private:
+    sp<Vec4> _quaternion1;
+    sp<Vec4> _quaternion2;
+    V4 _value;
 };
 
 }
@@ -79,7 +173,7 @@ void Rotation::reset(sp<Vec4> quaternion)
     VariableDirtyMark<V4>::markDirty(_wrapper, std::move(quaternion));
 }
 
-void Rotation::setRotation(const V3 axis, float theta)
+void Rotation::setRotation(const V3 axis, const float theta)
 {
     setRotation(sp<Vec3>::make<Vec3::Const>(axis), sp<Numeric>::make<Numeric::Const>(theta));
 }
@@ -94,7 +188,7 @@ sp<RotationAxisTheta> Rotation::getAxisTheta() const
     return _delegate.asInstance<RotationAxisTheta>();
 }
 
-void Rotation::setEuler(float pitch, float yaw, float roll)
+void Rotation::setEuler(const float pitch, const float yaw, const float roll)
 {
     setEuler(sp<Numeric::Const>::make(pitch), sp<Numeric::Const>::make(yaw), sp<Numeric::Const>::make(roll));
 }
@@ -109,9 +203,24 @@ sp<RotationEuler> Rotation::getEuler() const
     return _delegate.asInstance<RotationEuler>();
 }
 
+sp<Vec3> Rotation::applyTo(sp<Vec3> v) const
+{
+    return sp<Vec3>::make<Vec3MulitplyPosition>(_delegate, std::move(v));
+}
+
+sp<Vec4> Rotation::applyTo(sp<Vec4> v) const
+{
+    return sp<Vec4>::make<Vec4MulitplyPosition>(_delegate, std::move(v));
+}
+
 sp<Mat4> Rotation::toMatrix() const
 {
     return sp<Mat4>::make<Mat4Quaternion>(_delegate);
+}
+
+sp<Rotation> Rotation::mul(sp<Rotation> lhs, sp<Rotation> rhs)
+{
+    return sp<Rotation>::make(sp<Vec4>::make<Vec4MulitplyQuaternion>(lhs, rhs));
 }
 
 }

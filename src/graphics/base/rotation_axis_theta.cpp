@@ -3,6 +3,8 @@
 #include "core/util/math.h"
 #include "core/util/updatable_util.h"
 
+#include "graphics/components/rotation.h"
+
 namespace ark {
 
 RotationAxisTheta::RotationAxisTheta(sp<Vec3> axis, sp<Numeric> theta)
@@ -34,6 +36,11 @@ const sp<Vec3>& RotationAxisTheta::axis() const
 const sp<Numeric>& RotationAxisTheta::theta() const
 {
     return _theta;
+}
+
+sp<Rotation> RotationAxisTheta::create(sp<Vec3> axis, sp<Numeric> theta)
+{
+    return sp<Rotation>::make(sp<Vec4>::make<RotationAxisTheta>(std::move(axis), std::move(theta)));
 }
 
 void RotationAxisTheta::doUpdate()

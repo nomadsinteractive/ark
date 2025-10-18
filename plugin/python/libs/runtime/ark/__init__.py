@@ -2242,36 +2242,6 @@ class Event:
         return 0
 
 
-class RotationAxisTheta(Vec4):
-    def __init__(self, axis: TYPE_VEC3, theta: TYPE_NUMERIC):
-        super().__init__(0)
-
-    @property
-    def axis(self) -> Vec3:
-        pass
-
-    @property
-    def theta(self) -> Numeric:
-        pass
-
-
-class RotationEuler(Vec4):
-    def __init__(self, pitch: TYPE_NUMERIC, yaw: TYPE_NUMERIC, roll: TYPE_NUMERIC):
-        super().__init__(0)
-
-    @property
-    def pitch(self) -> Vec3:
-        pass
-
-    @property
-    def yaw(self) -> Numeric:
-        pass
-
-    @property
-    def roll(self) -> Numeric:
-        pass
-
-
 class Rotation(Vec4):
     def __init__(self, quaternion: TYPE_VEC4):
         super().__init__(0)
@@ -2287,6 +2257,16 @@ class Rotation(Vec4):
 
     def to_matrix(self) -> Mat4:
         pass
+
+
+class RotationAxisTheta(Rotation):
+    def __init__(self, axis: TYPE_VEC3, theta: TYPE_NUMERIC):
+        super().__init__((0, 0, 0, 0))
+
+
+class RotationEuler(Rotation):
+    def __init__(self, pitch: TYPE_NUMERIC, yaw: TYPE_NUMERIC, roll: TYPE_NUMERIC):
+        super().__init__((0, 0, 0, 0))
 
 
 class Transform(Mat4):

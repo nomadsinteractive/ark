@@ -4,6 +4,8 @@
 
 #include "core/util/updatable_util.h"
 
+#include "graphics/components/rotation.h"
+
 namespace ark {
 
 RotationEuler::RotationEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
@@ -40,6 +42,11 @@ const sp<Numeric>& RotationEuler::yaw() const
 const sp<Numeric>& RotationEuler::roll() const
 {
     return _roll;
+}
+
+sp<Rotation> RotationEuler::create(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
+{
+    return sp<Rotation>::make(sp<Vec4>::make<RotationEuler>(std::move(pitch), std::move(yaw), std::move(roll)));
 }
 
 void RotationEuler::doUpdate()
