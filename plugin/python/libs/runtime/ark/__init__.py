@@ -1862,9 +1862,6 @@ class LevelObject:
     def create_render_object(self) -> "RenderObject":
         pass
 
-    def create_rigidbody(self, collider: "Collider", body_type: int, shapes: dict[str, "Shape"], collision_filter: "CollisionFilter") -> "Rigidbody":
-        pass
-
 
 class LevelLayer:
 
@@ -1880,9 +1877,6 @@ class LevelLayer:
         pass
 
     def create_render_objects(self, layer: Optional["Layer"] = None):
-        pass
-
-    def create_rigidbodies(self, collider: "Collider", body_type: int, collision_filter: Optional["CollisionFilter"] = None):
         pass
 
 
@@ -2255,18 +2249,22 @@ class Rotation(Vec4):
     def set_euler(self, pitch: TYPE_NUMERIC, yaw: TYPE_NUMERIC, roll: TYPE_NUMERIC):
         pass
 
+    def apply_to(self, v: TYPE_VEC3 | TYPE_VEC4) -> Union[TYPE_VEC3, TYPE_VEC4]:
+        pass
+
     def to_matrix(self) -> Mat4:
         pass
 
+    def __mul__(self, other: "Rotation") -> Self:
+        pass
 
-class RotationAxisTheta(Rotation):
-    def __init__(self, axis: TYPE_VEC3, theta: TYPE_NUMERIC):
-        super().__init__((0, 0, 0, 0))
+    @staticmethod
+    def AxisTheta(axis: TYPE_VEC3, theta: TYPE_NUMERIC) -> "Rotation":
+        pass
 
-
-class RotationEuler(Rotation):
-    def __init__(self, pitch: TYPE_NUMERIC, yaw: TYPE_NUMERIC, roll: TYPE_NUMERIC):
-        super().__init__((0, 0, 0, 0))
+    @staticmethod
+    def Euler(pitch: TYPE_NUMERIC, yaw: TYPE_NUMERIC, roll: TYPE_NUMERIC) -> "Rotation":
+        pass
 
 
 class Transform(Mat4):

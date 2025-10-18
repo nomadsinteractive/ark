@@ -34,7 +34,7 @@ AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property]]\s+%s' 
 AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_SETPROP_PATTERN = re.compile(r'\[\[script::bindings::setprop]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader]]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*{')
-AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor|interface)]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor|interface|type)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_AS_MAPPING_PATTERN = re.compile(r'\[\[script::bindings::map\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_AS_SEQUENCE_PATTERN = re.compile(r'\[\[script::bindings::seq\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)]]\s+%s%s' % (ANNOTATION_PATTERN, METHOD_PATTERN))
@@ -448,8 +448,8 @@ class GenInterfaceMethod(GenMethod):
 
 
 class GenStaticMethod(GenMethod):
-    def __init__(self, name, args, return_type):
-        GenMethod.__init__(self, name, args, return_type)
+    def __init__(self, name, args, return_type, is_type: bool = False):
+        GenMethod.__init__(self, name, args, return_type, True, is_type)
         self._flags = self._flags + '|METH_STATIC'
 
     def gen_py_method_def(self, genclass):
@@ -694,8 +694,8 @@ def main(params, paths):
         genclass = get_result_class(binding_classes, filename, main_class)
         method_modifier = x[0]
         name, args, return_type, is_static = GenMethod.split(x[1:])
-        if is_static and method_modifier == 'auto':
-            genmethod = GenStaticMethod(name, args, return_type)
+        if is_static and method_modifier in ('auto', 'type'):
+            genmethod = GenStaticMethod(name, args, return_type, method_modifier == 'type')
         elif genclass.classname == name or method_modifier == 'constructor':
             genmethod = GenConstructorMethod(name, args, is_static)
         elif is_static and method_modifier == 'classmethod':

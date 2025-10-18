@@ -38,11 +38,6 @@ const sp<Numeric>& RotationAxisTheta::theta() const
     return _theta;
 }
 
-sp<Rotation> RotationAxisTheta::create(sp<Vec3> axis, sp<Numeric> theta)
-{
-    return sp<Rotation>::make(sp<Vec4>::make<RotationAxisTheta>(std::move(axis), std::move(theta)));
-}
-
 void RotationAxisTheta::doUpdate()
 {
     const V3 axis = _axis->val();

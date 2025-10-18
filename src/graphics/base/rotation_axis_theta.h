@@ -19,9 +19,6 @@ public:
     const sp<Vec3>& axis() const;
     const sp<Numeric>& theta() const;
 
-//  [[script::bindings::constructor]]
-    static sp<Rotation> create(sp<Vec3> axis, sp<Numeric> theta);
-
 private:
     void doUpdate();
 

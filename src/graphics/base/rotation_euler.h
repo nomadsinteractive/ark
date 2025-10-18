@@ -20,9 +20,6 @@ public:
     const sp<Numeric>& yaw() const;
     const sp<Numeric>& roll() const;
 
-//  [[script::bindings::constructor]]
-    static sp<Rotation> create(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
-
 private:
     void doUpdate();
 

@@ -27,18 +27,14 @@ public:
     void reset(sp<Vec4> quaternion);
 
 //  [[script::bindings::auto]]
-    void setRotation(V3 axis, float theta);
+    void setAxisTheta(V3 axis, float theta);
 //  [[script::bindings::auto]]
-    void setRotation(sp<Vec3> axis, sp<Numeric> theta);
-//  [[script::bindings::auto]]
-    sp<RotationAxisTheta> getAxisTheta() const;
+    void setAxisTheta(sp<Vec3> axis, sp<Numeric> theta);
 
 //  [[script::bindings::auto]]
     void setEuler(float pitch, float yaw, float roll);
 //  [[script::bindings::auto]]
     void setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
-//  [[script::bindings::auto]]
-    sp<RotationEuler> getEuler() const;
 
 //  [[script::bindings::auto]]
     sp<Vec3> applyTo(sp<Vec3> v) const;
@@ -50,6 +46,11 @@ public:
 
 //  [[script::bindings::operator(*)]]
     static sp<Rotation> mul(sp<Rotation> lhs, sp<Rotation> rhs);
+
+//  [[script::bindings::type]]
+    static sp<Rotation> AxisTheta(sp<Vec3> axis, sp<Numeric> theta);
+//  [[script::bindings::type]]
+    static sp<Rotation> Euler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
 
 private:
     Rotation(const sp<Vec4Wrapper>& vec4Wrapper);

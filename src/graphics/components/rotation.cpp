@@ -173,19 +173,14 @@ void Rotation::reset(sp<Vec4> quaternion)
     VariableDirtyMark<V4>::markDirty(_wrapper, std::move(quaternion));
 }
 
-void Rotation::setRotation(const V3 axis, const float theta)
+void Rotation::setAxisTheta(const V3 axis, const float theta)
 {
-    setRotation(sp<Vec3>::make<Vec3::Const>(axis), sp<Numeric>::make<Numeric::Const>(theta));
+    setAxisTheta(sp<Vec3>::make<Vec3::Const>(axis), sp<Numeric>::make<Numeric::Const>(theta));
 }
 
-void Rotation::setRotation(sp<Vec3> axis, sp<Numeric> theta)
+void Rotation::setAxisTheta(sp<Vec3> axis, sp<Numeric> theta)
 {
     reset(sp<Vec4>::make<RotationAxisTheta>(std::move(axis), std::move(theta)));
-}
-
-sp<RotationAxisTheta> Rotation::getAxisTheta() const
-{
-    return _delegate.asInstance<RotationAxisTheta>();
 }
 
 void Rotation::setEuler(const float pitch, const float yaw, const float roll)
@@ -196,11 +191,6 @@ void Rotation::setEuler(const float pitch, const float yaw, const float roll)
 void Rotation::setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
 {
     reset(sp<Vec4>::make<RotationEuler>(std::move(pitch), std::move(yaw), std::move(roll)));
-}
-
-sp<RotationEuler> Rotation::getEuler() const
-{
-    return _delegate.asInstance<RotationEuler>();
 }
 
 sp<Vec3> Rotation::applyTo(sp<Vec3> v) const
@@ -221,6 +211,16 @@ sp<Mat4> Rotation::toMatrix() const
 sp<Rotation> Rotation::mul(sp<Rotation> lhs, sp<Rotation> rhs)
 {
     return sp<Rotation>::make(sp<Vec4>::make<Vec4MulitplyQuaternion>(lhs, rhs));
+}
+
+sp<Rotation> Rotation::AxisTheta(sp<Vec3> axis, sp<Numeric> theta)
+{
+    return sp<Rotation>::make(sp<Vec4>::make<RotationAxisTheta>(std::move(axis), std::move(theta)));
+}
+
+sp<Rotation> Rotation::Euler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
+{
+    return sp<Rotation>::make(sp<Vec4>::make<RotationEuler>(std::move(pitch), std::move(yaw), std::move(roll)));
 }
 
 }
