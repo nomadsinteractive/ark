@@ -17,6 +17,7 @@
 
 #include "dear-imgui/forwarding.h"
 #include "dear-imgui/api.h"
+#include "dear-imgui/base/imgui_type.h"
 #include "dear-imgui/inf/widget.h"
 
 namespace ark::plugin::dear_imgui {
@@ -111,6 +112,9 @@ public:
     void sliderFloat3(const String& label, const sp<Vec3>& value, float vMin, float vMax, const String& format = "%.3f", float power = 1.0f);
 //  [[script::bindings::auto]]
     void sliderFloat4(const String& label, const sp<Vec4>& value, float vMin, float vMax, const String& format = "%.3f", float power = 1.0f);
+
+//  [[script::bindings::auto]]
+    void sliderScalar(String label, sp<Vec2> value, sp<Vec2> vMin, sp<Vec2> vMax, Optional<String> format = {});
 
 //  [[script::bindings::auto]]
     void colorEdit3(const String& label, const sp<Vec3>& value, int32_t flags = 0);

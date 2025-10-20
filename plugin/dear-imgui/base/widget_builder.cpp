@@ -377,9 +377,40 @@ private:
     std::function<bool(const char*, T*)> _func;
 };
 
+template<typename T, typename IMPL> class InputWithScalarN final : public Widget {
+public:
+    typedef std::function<bool(const char* label, void* p_data, const void* p_min, const void* p_max, const char* format)> FuncType;
+
+    InputWithScalarN(FuncType func, String label, sp<Variable<T>> value, sp<Variable<T>> vmin, sp<Variable<T>> vmax, Optional<String> format)
+        :  _func(std::move(func)), _label(std::move(label)), _value(std::move(value)), _vmin(std::move(vmin)), _vmax(std::move(vmax)), _format(std::move(format)) {
+    }
+
+    void render() override {
+        T v = _value->val();
+        const T vmin = _value->val();
+        const T vmax = _value->val();
+        if(_func(_label.c_str(), &v, &vmin, &vmax, _format ? _format->c_str() : nullptr))
+        {
+            if(const sp<VariableWrapper<T>> wrapper = _value.template asInstance<VariableWrapper<T>>())
+                return wrapper->set(v);
+
+            const sp<IMPL> impl = _value.template ensureInstance<IMPL>("Mutablable variable required.");
+            impl->set(v);
+        }
+    }
+
+private:
+    FuncType _func;
+    String _label;
+    sp<Variable<T>> _value;
+    sp<Variable<T>> _vmin;
+    sp<Variable<T>> _vmax;
+    Optional<String> _format;
+};
+
 template<typename T> class WidgetInputText final : public Widget {
 public:
-    WidgetInputText(String label, sp<T> value, size_t maxLength, sp<StringVar> hint, sp<Observer> observer, const ImGuiInputTextFlags flags)
+    WidgetInputText(String label, sp<T> value, const size_t maxLength, sp<StringVar> hint, sp<Observer> observer, const ImGuiInputTextFlags flags)
         : _label(std::move(label)), _value(std::move(value)), _hint(std::move(hint)), _observer(std::move(observer)), _flags(flags), _text_buf(maxLength) {
         updateInputText();
     }
@@ -639,6 +670,13 @@ void WidgetBuilder::sliderFloat3(const String& label, const sp<Vec3>& value, flo
 void WidgetBuilder::sliderFloat4(const String& label, const sp<Vec4>& value, float vMin, float vMax, const String& format, float power)
 {
     addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([vMin, vMax, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), vMin, vMax, format.c_str(), power); }, label, value));
+}
+
+void WidgetBuilder::sliderScalar(String label, sp<Vec2> value, sp<Vec2> vMin, sp<Vec2> vMax, Optional<String> format)
+{
+    addWidget(sp<Widget>::make<InputWithScalarN<V2, Vec2Impl>>([](const char* label, void* p_data, const void* p_min, const void* p_max, const char* format) {
+        return ImGui::SliderScalarN(label, ImGuiDataType_Float, p_data, 2, p_min, p_max, format);
+    }, std::move(label), std::move(value), std::move(vMin), std::move(vMax), std::move(format)));
 }
 
 void WidgetBuilder::colorEdit3(const String& label, const sp<Vec3>& value, int32_t flags)
