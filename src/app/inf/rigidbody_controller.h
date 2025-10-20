@@ -14,6 +14,9 @@ public:
     virtual V3 linearVelocity() const = 0;
     virtual void setLinearVelocity(V3 velocity) = 0;
 
+    virtual V3 linearFactor() const = 0;
+    virtual void setLinearFactor(V3 factor) = 0;
+
     virtual V3 angularVelocity() const = 0;
     virtual void setAngularVelocity(V3 velocity) = 0;
 

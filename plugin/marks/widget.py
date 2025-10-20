@@ -1,6 +1,6 @@
 import math
 
-from ark import Rotation, Vec3, Numeric, Vec4, RotationEuler, RotationAxisTheta
+from ark import Rotation, Vec3, Numeric, Vec4
 from ark import dear_imgui
 
 
@@ -16,8 +16,8 @@ class RotationEditor:
         self._quaternion_real = Numeric(0)
         self._quaternion_ijk = Vec3(1, 0, 0)
 
-        self._rotation_axis = RotationAxisTheta(self._axis, self._theta)
-        self._rotation_euler = RotationEuler(self._euler_pitch, self._euler_yaw, self._euler_roll)
+        self._rotation_axis = Rotation.AxisTheta(self._axis, self._theta)
+        self._rotation_euler = Rotation.Euler(self._euler_pitch, self._euler_yaw, self._euler_roll)
 
     def build(self, builder: dear_imgui.WidgetBuilder):
         builder.begin_tab_bar('Rotation', 0)

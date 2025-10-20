@@ -104,6 +104,17 @@ void RigidbodyBullet::setLinearVelocity(const V3 velocity)
     _stub->_collision_object_ref->rigidBody()->setLinearVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
 }
 
+V3 RigidbodyBullet::linearFactor() const
+{
+    const btVector3& factor = _stub->_collision_object_ref->rigidBody()->getLinearFactor();
+    return V3(factor.x(), factor.y(), factor.z());
+}
+
+void RigidbodyBullet::setLinearFactor(const V3 factor)
+{
+    _stub->_collision_object_ref->rigidBody()->setLinearFactor(btVector3(factor.x(), factor.y(), factor.z()));
+}
+
 V3 RigidbodyBullet::angularVelocity() const
 {
     const btVector3& velocity = _stub->_collision_object_ref->rigidBody()->getAngularVelocity();

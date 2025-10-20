@@ -110,6 +110,17 @@ public:
         FATAL("Unimplemented");
     }
 
+    V3 linearFactor() const override
+    {
+        FATAL("Unimplemented");
+        return V3(0);
+    }
+
+    void setLinearFactor(V3 factor) override
+    {
+        FATAL("Unimplemented");
+    }
+
     V3 angularVelocity() const override
     {
         FATAL("Unimplemented");

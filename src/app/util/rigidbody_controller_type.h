@@ -22,6 +22,11 @@ public:
     static void setLinearVelocity(const sp<RigidbodyController>& self, V3 velocity);
 
 //  [[script::bindings::property]]
+    static V3 linearFactor(const sp<RigidbodyController>& self);
+//  [[script::bindings::property]]
+    static void setLinearFactor(const sp<RigidbodyController>& self, V3 factor);
+
+//  [[script::bindings::property]]
     static V3 angularVelocity(const sp<RigidbodyController>& self);
 //  [[script::bindings::property]]
     static void setAngularVelocity(const sp<RigidbodyController>& self, V3 velocity);

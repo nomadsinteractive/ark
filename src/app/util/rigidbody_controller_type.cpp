@@ -75,6 +75,16 @@ void RigidbodyControllerType::setLinearVelocity(const sp<RigidbodyController>& s
     self->setLinearVelocity(velocity);
 }
 
+V3 RigidbodyControllerType::linearFactor(const sp<RigidbodyController>& self)
+{
+    return self->linearFactor();
+}
+
+void RigidbodyControllerType::setLinearFactor(const sp<RigidbodyController>& self, const V3 factor)
+{
+    self->setLinearFactor(factor);
+}
+
 V3 RigidbodyControllerType::angularVelocity(const sp<RigidbodyController>& self)
 {
     return self->angularVelocity();

@@ -2838,6 +2838,14 @@ class RigidbodyController:
         pass
 
     @property
+    def linear_factor(self) -> TYPE_FLOAT3:
+        return 0, 0, 0
+
+    @linear_factor.setter
+    def linear_factor(self, linear_factor: TYPE_FLOAT3):
+        pass
+
+    @property
     def angular_velocity(self) -> TYPE_FLOAT3:
         return 0, 0, 0
 

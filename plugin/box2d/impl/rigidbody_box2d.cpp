@@ -234,6 +234,15 @@ void RigidbodyBox2D::setLinearVelocity(const V3 velocity)
     _stub->body()->SetLinearVelocity(b2Vec2(velocity.x(), velocity.y()));
 }
 
+V3 RigidbodyBox2D::linearFactor() const
+{
+    return V3(1, 1, 0);
+}
+
+void RigidbodyBox2D::setLinearFactor(V3 factor)
+{
+}
+
 void RigidbodyBox2D::applyCentralImpulse(const V3 impulse)
 {
     _stub->body()->ApplyLinearImpulseToCenter(b2Vec2(impulse.x(), impulse.y()), true);

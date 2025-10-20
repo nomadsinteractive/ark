@@ -46,6 +46,9 @@ public:
     V3 linearVelocity() const override;
     void setLinearVelocity(V3 velocity) override;
 
+    V3 linearFactor() const override;
+    void setLinearFactor(V3 factor) override;
+
     V3 angularVelocity() const override;
     void setAngularVelocity(V3 velocity) override;
     V3 angularFactor() const override;
