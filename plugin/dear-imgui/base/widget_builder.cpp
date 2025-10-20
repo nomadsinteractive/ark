@@ -19,6 +19,64 @@
 
 namespace ark::plugin::dear_imgui {
 
+const ImGuiDataTypeInfo GDataTypeInfo[] =
+{
+    { sizeof(char),             "S8",   "%d",   "%d"    },  // ImGuiDataType_S8
+    { sizeof(unsigned char),    "U8",   "%u",   "%u"    },
+    { sizeof(short),            "S16",  "%d",   "%d"    },  // ImGuiDataType_S16
+    { sizeof(unsigned short),   "U16",  "%u",   "%u"    },
+    { sizeof(int),              "S32",  "%d",   "%d"    },  // ImGuiDataType_S32
+    { sizeof(unsigned int),     "U32",  "%u",   "%u"    },
+#ifdef _MSC_VER
+    { sizeof(ImS64),            "S64",  "%I64d","%I64d" },  // ImGuiDataType_S64
+    { sizeof(ImU64),            "U64",  "%I64u","%I64u" },
+#else
+    { sizeof(ImS64),            "S64",  "%lld", "%lld"  },  // ImGuiDataType_S64
+    { sizeof(ImU64),            "U64",  "%llu", "%llu"  },
+#endif
+    { sizeof(float),            "float", "%.3f","%f"    },  // ImGuiDataType_Float (float are promoted to double in va_arg)
+    { sizeof(double),           "double","%f",  "%lf"   },  // ImGuiDataType_Double
+    { sizeof(bool),             "bool", "%d",   "%d"    },  // ImGuiDataType_Bool
+    { 0,                        "char*","%s",   "%s"    },  // ImGuiDataType_String
+};
+
+bool SliderScalarN(const char* label, ImGuiDataType data_type, void* v, int components, const void* v_min, const void* v_max, const char* format, ImGuiSliderFlags flags = 0)
+{
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+
+    ImGuiContext& g = *GImGui;
+    bool value_changed = false;
+    ImGui::BeginGroup();
+    ImGui::PushID(label);
+    ImGui::PushMultiItemsWidths(components, ImGui::CalcItemWidth());
+    size_t type_size = GDataTypeInfo[data_type].Size;
+    for (int i = 0; i < components; i++)
+    {
+        ImGui::PushID(i);
+        if (i > 0)
+            ImGui::SameLine(0, g.Style.ItemInnerSpacing.x);
+        value_changed |= ImGui::SliderScalar("", data_type, v, v_min, v_max, format, flags);
+        ImGui::PopID();
+        ImGui::PopItemWidth();
+        v = (void*)((char*)v + type_size);
+        v_min = (const void*)((const char*)v_min + type_size);
+        v_max = (const void*)((const char*)v_max + type_size);
+    }
+    ImGui::PopID();
+
+    const char* label_end = ImGui::FindRenderedTextEnd(label);
+    if (label != label_end)
+    {
+        ImGui::SameLine(0, g.Style.ItemInnerSpacing.x);
+        ImGui::TextEx(label, label_end);
+    }
+
+    ImGui::EndGroup();
+    return value_changed;
+}
+
 class WidgetGroup : public Widget {
 public:
     ~WidgetGroup() override = default;
@@ -387,8 +445,8 @@ public:
 
     void render() override {
         T v = _value->val();
-        const T vmin = _value->val();
-        const T vmax = _value->val();
+        const T vmin = _vmin->val();
+        const T vmax = _vmax->val();
         if(_func(_label.c_str(), &v, &vmin, &vmax, _format ? _format->c_str() : nullptr))
         {
             if(const sp<VariableWrapper<T>> wrapper = _value.template asInstance<VariableWrapper<T>>())
@@ -675,7 +733,7 @@ void WidgetBuilder::sliderFloat4(const String& label, const sp<Vec4>& value, flo
 void WidgetBuilder::sliderScalar(String label, sp<Vec2> value, sp<Vec2> vMin, sp<Vec2> vMax, Optional<String> format)
 {
     addWidget(sp<Widget>::make<InputWithScalarN<V2, Vec2Impl>>([](const char* label, void* p_data, const void* p_min, const void* p_max, const char* format) {
-        return ImGui::SliderScalarN(label, ImGuiDataType_Float, p_data, 2, p_min, p_max, format);
+        return SliderScalarN(label, ImGuiDataType_Float, p_data, 2, p_min, p_max, format);
     }, std::move(label), std::move(value), std::move(vMin), std::move(vMax), std::move(format)));
 }
 

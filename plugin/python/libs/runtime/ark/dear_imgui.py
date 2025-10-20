@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Optional, Union
 
-from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, Vec2, Vec4, Vec3, TYPE_BOOLEAN
+from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, Vec2, Vec4, Vec3, TYPE_BOOLEAN, TYPE_VEC2
 
 
 class Widget:
@@ -77,6 +77,9 @@ class WidgetBuilder:
         pass
 
     def slider_float4(self, label: str, value: Vec4, v_min: float, v_max: float, prompt_format: str = '%.3f'):
+        pass
+
+    def slider_scalar(self, label: str, value: Vec2, v_min: TYPE_VEC2, v_max: TYPE_VEC2, format: Optional[str] = None):
         pass
 
     def input_float(self, label: str, v: Numeric, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0):

@@ -17,7 +17,6 @@
 
 #include "dear-imgui/forwarding.h"
 #include "dear-imgui/api.h"
-#include "dear-imgui/base/imgui_type.h"
 #include "dear-imgui/inf/widget.h"
 
 namespace ark::plugin::dear_imgui {
