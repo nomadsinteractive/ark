@@ -83,14 +83,4 @@ void Layer::clear()
     _layer_context->clear();
 }
 
-Layer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)),
-      _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)) {
-}
-
-sp<Layer> Layer::BUILDER::build(const Scope& args)
-{
-    return sp<Layer>::make(_render_layer->build(args)->addLayerContext(_model_loader.build(args), _position.build(args), _visible.build(args)));
-}
-
 }

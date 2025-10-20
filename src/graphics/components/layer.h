@@ -48,20 +48,6 @@ public:
 
     const sp<LayerContext>& context() const;
 
-//  [[plugin::builder]]
-    class BUILDER final : public Builder<Layer> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        sp<Layer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<RenderLayer>> _render_layer;
-        SafeBuilder<ModelLoader> _model_loader;
-        SafeBuilder<Boolean> _visible;
-        SafeBuilder<Vec3> _position;
-    };
-
 private:
     sp<LayerContext> _layer_context;
 
