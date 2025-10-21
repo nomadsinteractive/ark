@@ -737,6 +737,20 @@ void WidgetBuilder::sliderScalar(String label, sp<Vec2> value, sp<Vec2> vMin, sp
     }, std::move(label), std::move(value), std::move(vMin), std::move(vMax), std::move(format)));
 }
 
+void WidgetBuilder::sliderScalar(String label, sp<Vec3> value, sp<Vec3> vMin, sp<Vec3> vMax, Optional<String> format)
+{
+    addWidget(sp<Widget>::make<InputWithScalarN<V3, Vec3Impl>>([](const char* label, void* p_data, const void* p_min, const void* p_max, const char* format) {
+        return SliderScalarN(label, ImGuiDataType_Float, p_data, 3, p_min, p_max, format);
+    }, std::move(label), std::move(value), std::move(vMin), std::move(vMax), std::move(format)));
+}
+
+void WidgetBuilder::sliderScalar(String label, sp<Vec4> value, sp<Vec4> vMin, sp<Vec4> vMax, Optional<String> format)
+{
+    addWidget(sp<Widget>::make<InputWithScalarN<V4, Vec4Impl>>([](const char* label, void* p_data, const void* p_min, const void* p_max, const char* format) {
+        return SliderScalarN(label, ImGuiDataType_Float, p_data, 4, p_min, p_max, format);
+    }, std::move(label), std::move(value), std::move(vMin), std::move(vMax), std::move(format)));
+}
+
 void WidgetBuilder::colorEdit3(const String& label, const sp<Vec3>& value, int32_t flags)
 {
     addWidget(sp<Widget>::make<InputWithType<V3, Vec3Impl>>([flags](const char* l, V3* v) { return ImGui::ColorEdit3(l, reinterpret_cast<float*>(v), flags); }, label, value));

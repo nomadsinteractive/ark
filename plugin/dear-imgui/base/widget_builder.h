@@ -114,6 +114,10 @@ public:
 
 //  [[script::bindings::auto]]
     void sliderScalar(String label, sp<Vec2> value, sp<Vec2> vMin, sp<Vec2> vMax, Optional<String> format = {});
+//  [[script::bindings::auto]]
+    void sliderScalar(String label, sp<Vec3> value, sp<Vec3> vMin, sp<Vec3> vMax, Optional<String> format = {});
+//  [[script::bindings::auto]]
+    void sliderScalar(String label, sp<Vec4> value, sp<Vec4> vMin, sp<Vec4> vMax, Optional<String> format = {});
 
 //  [[script::bindings::auto]]
     void colorEdit3(const String& label, const sp<Vec3>& value, int32_t flags = 0);
