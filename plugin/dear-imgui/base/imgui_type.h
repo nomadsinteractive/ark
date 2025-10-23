@@ -72,9 +72,40 @@ enum ImGuiInputTextFlags
         ImGuiSliderFlags_ClampOnInput       = ImGuiSliderFlags_::ImGuiSliderFlags_ClampOnInput,
         ImGuiSliderFlags_ClampZeroRange     = ImGuiSliderFlags_::ImGuiSliderFlags_ClampZeroRange,
         ImGuiSliderFlags_NoSpeedTweaks      = ImGuiSliderFlags_::ImGuiSliderFlags_NoSpeedTweaks,
-        ImGuiSliderFlags_AlwaysClamp        = ImGuiSliderFlags_::ImGuiSliderFlags_AlwaysClamp,
-        ImGuiSliderFlags_InvalidMask_       = ImGuiSliderFlags_::ImGuiSliderFlags_InvalidMask_
+        ImGuiSliderFlags_AlwaysClamp        = ImGuiSliderFlags_::ImGuiSliderFlags_AlwaysClamp
     };
+
+//  [[script::bindings::enumeration]]
+enum ImGuiColorEditFlags {
+    ImGuiColorEditFlags_None            = ImGuiColorEditFlags_::ImGuiColorEditFlags_None,
+    ImGuiColorEditFlags_NoAlpha         = ImGuiColorEditFlags_::ImGuiColorEditFlags_NoAlpha,
+    ImGuiColorEditFlags_NoPicker        = ImGuiColorEditFlags_::ImGuiColorEditFlags_NoPicker,
+    ImGuiColorEditFlags_NoOptions       = ImGuiColorEditFlags_::ImGuiColorEditFlags_NoOptions,
+    ImGuiColorEditFlags_NoSmallPreview  = ImGuiColorEditFlags_::ImGuiColorEditFlags_NoSmallPreview,
+    ImGuiColorEditFlags_NoInputs        = ImGuiColorEditFlags_::ImGuiColorEditFlags_NoInputs,
+    ImGuiColorEditFlags_NoTooltip       = ImGuiColorEditFlags_::ImGuiColorEditFlags_NoTooltip,
+    ImGuiColorEditFlags_NoLabel         = ImGuiColorEditFlags_::ImGuiColorEditFlags_NoLabel,
+    ImGuiColorEditFlags_NoSidePreview   = ImGuiColorEditFlags_::ImGuiColorEditFlags_NoSidePreview,
+    ImGuiColorEditFlags_NoDragDrop      = ImGuiColorEditFlags_::ImGuiColorEditFlags_NoDragDrop,
+    ImGuiColorEditFlags_NoBorder        = ImGuiColorEditFlags_::ImGuiColorEditFlags_NoBorder,
+
+    ImGuiColorEditFlags_AlphaOpaque     = ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaOpaque,
+    ImGuiColorEditFlags_AlphaNoBg       = ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaNoBg,
+    ImGuiColorEditFlags_AlphaPreviewHalf= ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaPreviewHalf,
+
+    ImGuiColorEditFlags_AlphaBar        = ImGuiColorEditFlags_::ImGuiColorEditFlags_AlphaBar,
+    ImGuiColorEditFlags_HDR             = ImGuiColorEditFlags_::ImGuiColorEditFlags_HDR,
+    ImGuiColorEditFlags_DisplayRGB      = ImGuiColorEditFlags_::ImGuiColorEditFlags_DisplayRGB,
+    ImGuiColorEditFlags_DisplayHSV      = ImGuiColorEditFlags_::ImGuiColorEditFlags_DisplayHSV,
+    ImGuiColorEditFlags_DisplayHex      = ImGuiColorEditFlags_::ImGuiColorEditFlags_DisplayHex,
+    ImGuiColorEditFlags_Uint8           = ImGuiColorEditFlags_::ImGuiColorEditFlags_Uint8,
+    ImGuiColorEditFlags_Float           = ImGuiColorEditFlags_::ImGuiColorEditFlags_Float,
+    ImGuiColorEditFlags_PickerHueBar    = ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueBar,
+    ImGuiColorEditFlags_PickerHueWheel  = ImGuiColorEditFlags_::ImGuiColorEditFlags_PickerHueWheel,
+    ImGuiColorEditFlags_InputRGB        = ImGuiColorEditFlags_::ImGuiColorEditFlags_InputRGB,
+    ImGuiColorEditFlags_InputHSV        = ImGuiColorEditFlags_::ImGuiColorEditFlags_InputHSV
+};
+
 };
 
 }

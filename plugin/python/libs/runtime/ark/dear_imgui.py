@@ -4,6 +4,76 @@ from typing import Optional, Union
 from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, Vec2, Vec4, Vec3, TYPE_BOOLEAN, TYPE_VEC2
 
 
+class Imgui:
+    ImGuiInputTextFlags_None = 0
+    ImGuiInputTextFlags_CharsDecimal = 0
+    ImGuiInputTextFlags_CharsHexadecimal = 0
+    ImGuiInputTextFlags_CharsScientific = 0
+    ImGuiInputTextFlags_CharsUppercase = 0
+    ImGuiInputTextFlags_CharsNoBlank = 0
+
+    ImGuiInputTextFlags_AllowTabInput = 0
+    ImGuiInputTextFlags_EnterReturnsTrue = 0
+    ImGuiInputTextFlags_EscapeClearsAll = 0
+    ImGuiInputTextFlags_CtrlEnterForNewLine = 0
+
+    ImGuiInputTextFlags_ReadOnly = 0
+    ImGuiInputTextFlags_Password = 0
+    ImGuiInputTextFlags_AlwaysOverwrite = 0
+    ImGuiInputTextFlags_AutoSelectAll = 0
+    ImGuiInputTextFlags_ParseEmptyRefVal = 0
+    ImGuiInputTextFlags_DisplayEmptyRefVal = 0
+    ImGuiInputTextFlags_NoHorizontalScroll = 0
+    ImGuiInputTextFlags_NoUndoRedo = 0
+
+    ImGuiInputTextFlags_ElideLeft = 0
+
+    ImGuiInputTextFlags_CallbackCompletion = 0
+    ImGuiInputTextFlags_CallbackHistory = 0
+    ImGuiInputTextFlags_CallbackAlways = 0
+    ImGuiInputTextFlags_CallbackCharFilter = 0
+    ImGuiInputTextFlags_CallbackResize = 0
+    ImGuiInputTextFlags_CallbackEdit = 0
+
+    ImGuiSliderFlags_None = 0
+    ImGuiSliderFlags_Logarithmic = 0
+    ImGuiSliderFlags_NoRoundToFormat = 0
+    ImGuiSliderFlags_NoInput = 0
+    ImGuiSliderFlags_WrapAround = 0
+    ImGuiSliderFlags_ClampOnInput = 0
+    ImGuiSliderFlags_ClampZeroRange = 0
+    ImGuiSliderFlags_NoSpeedTweaks = 0
+    ImGuiSliderFlags_AlwaysClamp = 0
+
+    ImGuiColorEditFlags_None = 0
+    ImGuiColorEditFlags_NoAlpha = 0
+    ImGuiColorEditFlags_NoPicker = 0
+    ImGuiColorEditFlags_NoOptions = 0
+    ImGuiColorEditFlags_NoSmallPreview = 0
+    ImGuiColorEditFlags_NoInputs = 0
+    ImGuiColorEditFlags_NoTooltip = 0
+    ImGuiColorEditFlags_NoLabel = 0
+    ImGuiColorEditFlags_NoSidePreview = 0
+    ImGuiColorEditFlags_NoDragDrop = 0
+    ImGuiColorEditFlags_NoBorder = 0
+
+    ImGuiColorEditFlags_AlphaOpaque = 0
+    ImGuiColorEditFlags_AlphaNoBg = 0
+    ImGuiColorEditFlags_AlphaPreviewHalf = 0
+
+    ImGuiColorEditFlags_AlphaBar = 0
+    ImGuiColorEditFlags_HDR = 0
+    ImGuiColorEditFlags_DisplayRGB = 0
+    ImGuiColorEditFlags_DisplayHSV = 0
+    ImGuiColorEditFlags_DisplayHex = 0
+    ImGuiColorEditFlags_Uint8 = 0
+    ImGuiColorEditFlags_Float = 0
+    ImGuiColorEditFlags_PickerHueBar = 0
+    ImGuiColorEditFlags_PickerHueWheel = 0
+    ImGuiColorEditFlags_InputRGB = 0
+    ImGuiColorEditFlags_InputHSV = 0
+
+
 class Widget:
     def __init__(self, delegate: Optional["Widget", Sequence["Widget"]] = None):
         pass

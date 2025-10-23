@@ -121,13 +121,13 @@ public:
     void sliderScalar(String label, sp<Vec4> value, sp<Vec4> vMin, sp<Vec4> vMax, Optional<String> format = {}, Imgui::ImGuiSliderFlags flags = Imgui::ImGuiSliderFlags_None);
 
 //  [[script::bindings::auto]]
-    void colorEdit3(const String& label, const sp<Vec3>& value, int32_t flags = 0);
+    void colorEdit3(const String& label, const sp<Vec3>& value, Imgui::ImGuiColorEditFlags flags = Imgui::ImGuiColorEditFlags_None);
 //  [[script::bindings::auto]]
-    void colorEdit4(const String& label, const sp<Vec4>& value, int32_t flags = 0);
+    void colorEdit4(const String& label, const sp<Vec4>& value, Imgui::ImGuiColorEditFlags flags = Imgui::ImGuiColorEditFlags_None);
 //  [[script::bindings::auto]]
-    void colorPicker3(const String& label, const sp<Vec3>& value, int32_t flags = 0);
+    void colorPicker3(const String& label, const sp<Vec3>& value, Imgui::ImGuiColorEditFlags flags = Imgui::ImGuiColorEditFlags_None);
 //  [[script::bindings::auto]]
-    void colorPicker4(const String& label, const sp<Vec4>& value, int32_t flags = 0);
+    void colorPicker4(const String& label, const sp<Vec4>& value, Imgui::ImGuiColorEditFlags flags = Imgui::ImGuiColorEditFlags_None);
 
 //  [[script::bindings::auto]]
     sp<Boolean> beginTable(String strId, int32_t columns, int32_t flags = 0);
