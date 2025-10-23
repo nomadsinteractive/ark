@@ -680,74 +680,74 @@ void WidgetBuilder::sliderInt(const String& label, const sp<Integer>& value, con
     addWidget(sp<Widget>::make<Input<int32_t>>([vMin, vMax, format](const char* l, int32_t* v) { return ImGui::SliderInt(l, v, vMin, vMax, format.c_str()); }, label, value));
 }
 
-void WidgetBuilder::inputFloat(const String& label, const sp<Numeric>& value, float step, float step_fast, const String& format, int32_t extra_flags)
+void WidgetBuilder::inputFloat(const String& label, const sp<Numeric>& value, float step, float step_fast, const String& format, const Imgui::ImGuiInputTextFlags flags)
 {
-    addWidget(sp<Widget>::make<Input<float>>([step, step_fast, format, extra_flags](const char* l, float* v) { return ImGui::InputFloat(l, v, step, step_fast, format.c_str(), extra_flags); }, label, value));
+    addWidget(sp<Widget>::make<Input<float>>([step, step_fast, format, flags](const char* l, float* v) { return ImGui::InputFloat(l, v, step, step_fast, format.c_str(), flags); }, label, value));
 }
 
-void WidgetBuilder::inputFloat2(const String& label, const sp<Vec2>& value, const String& format, int32_t flags)
+void WidgetBuilder::inputFloat2(const String& label, const sp<Vec2>& value, const String& format, const Imgui::ImGuiInputTextFlags flags)
 {
     addWidget(sp<Widget>::make<InputWithType<V2, Vec2Impl>>([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
-void WidgetBuilder::inputFloat3(const String& label, const sp<Size>& value, const String& format, int32_t flags)
+void WidgetBuilder::inputFloat3(const String& label, const sp<Size>& value, const String& format, const Imgui::ImGuiInputTextFlags flags)
 {
     inputFloat3(label, value->impl().cast<Vec3>(), format, flags);
 }
 
-void WidgetBuilder::inputFloat3(const String& label, const sp<Vec3>& value, const String& format, int32_t flags)
+void WidgetBuilder::inputFloat3(const String& label, const sp<Vec3>& value, const String& format, const Imgui::ImGuiInputTextFlags flags)
 {
     addWidget(sp<Widget>::make<InputWithType<V3, Vec3Impl>>([format, flags](const char* l, V3* v) { return ImGui::InputFloat3(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
-void WidgetBuilder::inputFloat4(const String& label, const sp<Vec4>& value, const String& format, int32_t flags)
+void WidgetBuilder::inputFloat4(const String& label, const sp<Vec4>& value, const String& format, const Imgui::ImGuiInputTextFlags flags)
 {
     addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([format, flags](const char* l, V4* v) { return ImGui::InputFloat4(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
-void WidgetBuilder::sliderFloat(const String& label, const sp<Numeric>& value, float vMin, float vMax, const String& format, float power)
+void WidgetBuilder::sliderFloat(String label, const sp<Numeric>& value, float vMin, float vMax, const String& format, const Imgui::ImGuiSliderFlags flags)
 {
-    addWidget(sp<Widget>::make<Input<float>>([vMin, vMax, format, power](const char* l, float* v) { return ImGui::SliderFloat(l, v, vMin, vMax, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<Input<float>>([vMin, vMax, format, flags](const char* l, float* v) { return ImGui::SliderFloat(l, v, vMin, vMax, format.c_str(), flags); }, std::move(label), value));
 }
 
-void WidgetBuilder::sliderFloat2(const String& label, const sp<Vec2>& value, float vMin, float vMax, const String& format, float power)
+void WidgetBuilder::sliderFloat2(String label, const sp<Vec2>& value, float vMin, float vMax, const String& format, const Imgui::ImGuiSliderFlags flags)
 {
-    addWidget(sp<Widget>::make<InputWithType<V2, Vec2Impl>>([vMin, vMax, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), vMin, vMax, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V2, Vec2Impl>>([vMin, vMax, format, flags](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), vMin, vMax, format.c_str(), flags); }, std::move(label), value));
 }
 
-void WidgetBuilder::sliderFloat3(const String& label, const sp<Size>& value, float vMin, float vMax, const String& format, float power)
+void WidgetBuilder::sliderFloat3(String label, const sp<Size>& value, const float vMin, const float vMax, const String& format, const Imgui::ImGuiSliderFlags flags)
 {
-    sliderFloat3(label, value->impl().cast<Vec3>(), vMin, vMax, format, power);
+    sliderFloat3(std::move(label), value->impl().cast<Vec3>(), vMin, vMax, format, flags);
 }
 
-void WidgetBuilder::sliderFloat3(const String& label, const sp<Vec3>& value, float vMin, float vMax, const String& format, float power)
+void WidgetBuilder::sliderFloat3(String label, const sp<Vec3>& value, float vMin, float vMax, const String& format, const Imgui::ImGuiSliderFlags flags)
 {
-    addWidget(sp<Widget>::make<InputWithType<V3, Vec3Impl>>([vMin, vMax, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), vMin, vMax, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V3, Vec3Impl>>([vMin, vMax, format, flags](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), vMin, vMax, format.c_str(), flags); }, std::move(label), value));
 }
 
-void WidgetBuilder::sliderFloat4(const String& label, const sp<Vec4>& value, float vMin, float vMax, const String& format, float power)
+void WidgetBuilder::sliderFloat4(String label, const sp<Vec4>& value, float vMin, float vMax, const String& format, const Imgui::ImGuiSliderFlags flags)
 {
-    addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([vMin, vMax, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), vMin, vMax, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([vMin, vMax, format, flags](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), vMin, vMax, format.c_str(), flags); }, std::move(label), value));
 }
 
-void WidgetBuilder::sliderScalar(String label, sp<Vec2> value, sp<Vec2> vMin, sp<Vec2> vMax, Optional<String> format)
+void WidgetBuilder::sliderScalar(String label, sp<Vec2> value, sp<Vec2> vMin, sp<Vec2> vMax, Optional<String> format, const Imgui::ImGuiSliderFlags flags)
 {
-    addWidget(sp<Widget>::make<InputWithScalarN<V2, Vec2Impl>>([](const char* label, void* p_data, const void* p_min, const void* p_max, const char* format) {
-        return SliderScalarN(label, ImGuiDataType_Float, p_data, 2, p_min, p_max, format);
+    addWidget(sp<Widget>::make<InputWithScalarN<V2, Vec2Impl>>([flags](const char* label, void* p_data, const void* p_min, const void* p_max, const char* format) {
+        return SliderScalarN(label, ImGuiDataType_Float, p_data, 2, p_min, p_max, format, flags);
     }, std::move(label), std::move(value), std::move(vMin), std::move(vMax), std::move(format)));
 }
 
-void WidgetBuilder::sliderScalar(String label, sp<Vec3> value, sp<Vec3> vMin, sp<Vec3> vMax, Optional<String> format)
+void WidgetBuilder::sliderScalar(String label, sp<Vec3> value, sp<Vec3> vMin, sp<Vec3> vMax, Optional<String> format, const Imgui::ImGuiSliderFlags flags)
 {
-    addWidget(sp<Widget>::make<InputWithScalarN<V3, Vec3Impl>>([](const char* label, void* p_data, const void* p_min, const void* p_max, const char* format) {
-        return SliderScalarN(label, ImGuiDataType_Float, p_data, 3, p_min, p_max, format);
+    addWidget(sp<Widget>::make<InputWithScalarN<V3, Vec3Impl>>([flags](const char* label, void* p_data, const void* p_min, const void* p_max, const char* format) {
+        return SliderScalarN(label, ImGuiDataType_Float, p_data, 3, p_min, p_max, format, flags);
     }, std::move(label), std::move(value), std::move(vMin), std::move(vMax), std::move(format)));
 }
 
-void WidgetBuilder::sliderScalar(String label, sp<Vec4> value, sp<Vec4> vMin, sp<Vec4> vMax, Optional<String> format)
+void WidgetBuilder::sliderScalar(String label, sp<Vec4> value, sp<Vec4> vMin, sp<Vec4> vMax, Optional<String> format, const Imgui::ImGuiSliderFlags flags)
 {
-    addWidget(sp<Widget>::make<InputWithScalarN<V4, Vec4Impl>>([](const char* label, void* p_data, const void* p_min, const void* p_max, const char* format) {
-        return SliderScalarN(label, ImGuiDataType_Float, p_data, 4, p_min, p_max, format);
+    addWidget(sp<Widget>::make<InputWithScalarN<V4, Vec4Impl>>([flags](const char* label, void* p_data, const void* p_min, const void* p_max, const char* format) {
+        return SliderScalarN(label, ImGuiDataType_Float, p_data, 4, p_min, p_max, format, flags);
     }, std::move(label), std::move(value), std::move(vMin), std::move(vMax), std::move(format)));
 }
 

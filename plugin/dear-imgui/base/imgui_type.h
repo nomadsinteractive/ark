@@ -27,6 +27,54 @@ public:
         ImGuiDataType_String = ImGuiDataType_::ImGuiDataType_String,
         ImGuiDataType_COUNT = ImGuiDataType_::ImGuiDataType_COUNT
     };
+
+//  [[script::bindings::enumeration]]
+enum ImGuiInputTextFlags
+{
+    ImGuiInputTextFlags_None                = ImGuiInputTextFlags_::ImGuiInputTextFlags_None,
+    ImGuiInputTextFlags_CharsDecimal        = ImGuiInputTextFlags_::ImGuiInputTextFlags_CharsDecimal,
+    ImGuiInputTextFlags_CharsHexadecimal    = ImGuiInputTextFlags_::ImGuiInputTextFlags_CharsHexadecimal,
+    ImGuiInputTextFlags_CharsScientific     = ImGuiInputTextFlags_::ImGuiInputTextFlags_CharsScientific,
+    ImGuiInputTextFlags_CharsUppercase      = ImGuiInputTextFlags_::ImGuiInputTextFlags_CharsUppercase,
+    ImGuiInputTextFlags_CharsNoBlank        = ImGuiInputTextFlags_::ImGuiInputTextFlags_CharsNoBlank,
+
+    ImGuiInputTextFlags_AllowTabInput       = ImGuiInputTextFlags_::ImGuiInputTextFlags_AllowTabInput,
+    ImGuiInputTextFlags_EnterReturnsTrue    = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue,
+    ImGuiInputTextFlags_EscapeClearsAll     = ImGuiInputTextFlags_::ImGuiInputTextFlags_EscapeClearsAll,
+    ImGuiInputTextFlags_CtrlEnterForNewLine = ImGuiInputTextFlags_::ImGuiInputTextFlags_CtrlEnterForNewLine,
+
+    ImGuiInputTextFlags_ReadOnly            = ImGuiInputTextFlags_::ImGuiInputTextFlags_ReadOnly,
+    ImGuiInputTextFlags_Password            = ImGuiInputTextFlags_::ImGuiInputTextFlags_Password,
+    ImGuiInputTextFlags_AlwaysOverwrite     = ImGuiInputTextFlags_::ImGuiInputTextFlags_AlwaysOverwrite,
+    ImGuiInputTextFlags_AutoSelectAll       = ImGuiInputTextFlags_::ImGuiInputTextFlags_AutoSelectAll,
+    ImGuiInputTextFlags_ParseEmptyRefVal    = ImGuiInputTextFlags_::ImGuiInputTextFlags_ParseEmptyRefVal,
+    ImGuiInputTextFlags_DisplayEmptyRefVal  = ImGuiInputTextFlags_::ImGuiInputTextFlags_DisplayEmptyRefVal,
+    ImGuiInputTextFlags_NoHorizontalScroll  = ImGuiInputTextFlags_::ImGuiInputTextFlags_NoHorizontalScroll,
+    ImGuiInputTextFlags_NoUndoRedo          = ImGuiInputTextFlags_::ImGuiInputTextFlags_NoUndoRedo,
+
+    ImGuiInputTextFlags_ElideLeft			= ImGuiInputTextFlags_::ImGuiInputTextFlags_ElideLeft,
+
+    ImGuiInputTextFlags_CallbackCompletion  = ImGuiInputTextFlags_::ImGuiInputTextFlags_CallbackCompletion,
+    ImGuiInputTextFlags_CallbackHistory     = ImGuiInputTextFlags_::ImGuiInputTextFlags_CallbackHistory,
+    ImGuiInputTextFlags_CallbackAlways      = ImGuiInputTextFlags_::ImGuiInputTextFlags_CallbackAlways,
+    ImGuiInputTextFlags_CallbackCharFilter  = ImGuiInputTextFlags_::ImGuiInputTextFlags_CallbackCharFilter,
+    ImGuiInputTextFlags_CallbackResize      = ImGuiInputTextFlags_::ImGuiInputTextFlags_CallbackResize,
+    ImGuiInputTextFlags_CallbackEdit        = ImGuiInputTextFlags_::ImGuiInputTextFlags_CallbackEdit
+};
+
+//  [[script::bindings::enumeration]]
+    enum ImGuiSliderFlags {
+        ImGuiSliderFlags_None               = ImGuiSliderFlags_::ImGuiSliderFlags_None,
+        ImGuiSliderFlags_Logarithmic        = ImGuiSliderFlags_::ImGuiSliderFlags_Logarithmic,
+        ImGuiSliderFlags_NoRoundToFormat    = ImGuiSliderFlags_::ImGuiSliderFlags_NoRoundToFormat,
+        ImGuiSliderFlags_NoInput            = ImGuiSliderFlags_::ImGuiSliderFlags_NoInput,
+        ImGuiSliderFlags_WrapAround         = ImGuiSliderFlags_::ImGuiSliderFlags_WrapAround,
+        ImGuiSliderFlags_ClampOnInput       = ImGuiSliderFlags_::ImGuiSliderFlags_ClampOnInput,
+        ImGuiSliderFlags_ClampZeroRange     = ImGuiSliderFlags_::ImGuiSliderFlags_ClampZeroRange,
+        ImGuiSliderFlags_NoSpeedTweaks      = ImGuiSliderFlags_::ImGuiSliderFlags_NoSpeedTweaks,
+        ImGuiSliderFlags_AlwaysClamp        = ImGuiSliderFlags_::ImGuiSliderFlags_AlwaysClamp,
+        ImGuiSliderFlags_InvalidMask_       = ImGuiSliderFlags_::ImGuiSliderFlags_InvalidMask_
+    };
 };
 
 }

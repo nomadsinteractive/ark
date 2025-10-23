@@ -17,6 +17,7 @@
 
 #include "dear-imgui/forwarding.h"
 #include "dear-imgui/api.h"
+#include "dear-imgui/base/imgui_type.h"
 #include "dear-imgui/inf/widget.h"
 
 namespace ark::plugin::dear_imgui {
@@ -91,33 +92,33 @@ public:
     void sliderInt(const String& label, const sp<Integer>& value, int32_t vMin, int32_t vMax, const String& format = "%d");
 
 //  [[script::bindings::auto]]
-    void inputFloat(const String& label, const sp<Numeric>& v, float step = 0.0f, float step_fast = 0.0f, const String& format = "%.3f", int32_t extra_flags = 0);
+    void inputFloat(const String& label, const sp<Numeric>& v, float step = 0.0f, float step_fast = 0.0f, const String& format = "%.3f", Imgui::ImGuiInputTextFlags flags = Imgui::ImGuiInputTextFlags_None);
 //  [[script::bindings::auto]]
-    void inputFloat2(const String& label, const sp<Vec2>& value, const String& format = "%.3f", int32_t flags = 0);
+    void inputFloat2(const String& label, const sp<Vec2>& value, const String& format = "%.3f", Imgui::ImGuiInputTextFlags flags = Imgui::ImGuiInputTextFlags_None);
 //  [[script::bindings::auto]]
-    void inputFloat3(const String& label, const sp<Size>& value, const String& format = "%.3f", int32_t flags = 0);
+    void inputFloat3(const String& label, const sp<Size>& value, const String& format = "%.3f", Imgui::ImGuiInputTextFlags flags = Imgui::ImGuiInputTextFlags_None);
 //  [[script::bindings::auto]]
-    void inputFloat3(const String& label, const sp<Vec3>& value, const String& format = "%.3f", int32_t flags = 0);
+    void inputFloat3(const String& label, const sp<Vec3>& value, const String& format = "%.3f", Imgui::ImGuiInputTextFlags flags = Imgui::ImGuiInputTextFlags_None);
 //  [[script::bindings::auto]]
-    void inputFloat4(const String& label, const sp<Vec4>& value, const String& format = "%.3f", int32_t flags = 0);
+    void inputFloat4(const String& label, const sp<Vec4>& value, const String& format = "%.3f", Imgui::ImGuiInputTextFlags flags = Imgui::ImGuiInputTextFlags_None);
 
 //  [[script::bindings::auto]]
-    void sliderFloat(const String& label, const sp<Numeric>& value, float vMin, float vMax, const String& format = "%.3f", float power = 1.0f);
+    void sliderFloat(String label, const sp<Numeric>& value, float vMin, float vMax, const String& format = "%.3f", Imgui::ImGuiSliderFlags flags = Imgui::ImGuiSliderFlags_None);
 //  [[script::bindings::auto]]
-    void sliderFloat2(const String& label, const sp<Vec2>& value, float vMin, float vMax, const String& format = "%.3f", float power = 1.0f);
+    void sliderFloat2(String label, const sp<Vec2>& value, float vMin, float vMax, const String& format = "%.3f", Imgui::ImGuiSliderFlags flags = Imgui::ImGuiSliderFlags_None);
 //  [[script::bindings::auto]]
-    void sliderFloat3(const String& label, const sp<Size>& value, float vMin, float vMax, const String& format = "%.3f", float power = 1.0f);
+    void sliderFloat3(String label, const sp<Size>& value, float vMin, float vMax, const String& format = "%.3f", Imgui::ImGuiSliderFlags flags = Imgui::ImGuiSliderFlags_None);
 //  [[script::bindings::auto]]
-    void sliderFloat3(const String& label, const sp<Vec3>& value, float vMin, float vMax, const String& format = "%.3f", float power = 1.0f);
+    void sliderFloat3(String label, const sp<Vec3>& value, float vMin, float vMax, const String& format = "%.3f", Imgui::ImGuiSliderFlags flags = Imgui::ImGuiSliderFlags_None);
 //  [[script::bindings::auto]]
-    void sliderFloat4(const String& label, const sp<Vec4>& value, float vMin, float vMax, const String& format = "%.3f", float power = 1.0f);
+    void sliderFloat4(String label, const sp<Vec4>& value, float vMin, float vMax, const String& format = "%.3f", Imgui::ImGuiSliderFlags flags = Imgui::ImGuiSliderFlags_None);
 
 //  [[script::bindings::auto]]
-    void sliderScalar(String label, sp<Vec2> value, sp<Vec2> vMin, sp<Vec2> vMax, Optional<String> format = {});
+    void sliderScalar(String label, sp<Vec2> value, sp<Vec2> vMin, sp<Vec2> vMax, Optional<String> format = {}, Imgui::ImGuiSliderFlags flags = Imgui::ImGuiSliderFlags_None);
 //  [[script::bindings::auto]]
-    void sliderScalar(String label, sp<Vec3> value, sp<Vec3> vMin, sp<Vec3> vMax, Optional<String> format = {});
+    void sliderScalar(String label, sp<Vec3> value, sp<Vec3> vMin, sp<Vec3> vMax, Optional<String> format = {}, Imgui::ImGuiSliderFlags flags = Imgui::ImGuiSliderFlags_None);
 //  [[script::bindings::auto]]
-    void sliderScalar(String label, sp<Vec4> value, sp<Vec4> vMin, sp<Vec4> vMax, Optional<String> format = {});
+    void sliderScalar(String label, sp<Vec4> value, sp<Vec4> vMin, sp<Vec4> vMax, Optional<String> format = {}, Imgui::ImGuiSliderFlags flags = Imgui::ImGuiSliderFlags_None);
 
 //  [[script::bindings::auto]]
     void colorEdit3(const String& label, const sp<Vec3>& value, int32_t flags = 0);
