@@ -136,6 +136,41 @@ private:
     V4 _value;
 };
 
+class VectorReorientQuaternion final : public Vec4 {
+public:
+    VectorReorientQuaternion(sp<Vec3> u, sp<Vec3> v)
+        : _u(std::move(u)), _v(std::move(v))
+    {
+        update(Timestamp::now());
+    }
+
+    V4 val() override
+    {
+        return _value;
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        if(UpdatableUtil::update(timestamp, _u, _v))
+        {
+            const V3 u = _u->val();
+            const V3 v = _v->val();
+            const glm::quat q(glm::vec3(u.x(), u.y(), u.z()), glm::vec3(v.x(), v.y(), v.z()));
+            _value = V4(q.x, q.y, q.z, q.w);
+            return true;
+        }
+        return false;
+    }
+
+private:
+    void doUpdate();
+
+private:
+    sp<Vec3> _u;
+    sp<Vec3> _v;
+    V4 _value;
+};
+
 }
 
 Rotation::Rotation(const V4 quaternion)
@@ -208,19 +243,29 @@ sp<Mat4> Rotation::toMatrix() const
     return sp<Mat4>::make<Mat4Quaternion>(_delegate);
 }
 
+sp<Rotation> Rotation::freeze() const
+{
+    return sp<Rotation>::make(_delegate->val());
+}
+
 sp<Rotation> Rotation::mul(sp<Rotation> lhs, sp<Rotation> rhs)
 {
     return sp<Rotation>::make(sp<Vec4>::make<Vec4MulitplyQuaternion>(lhs, rhs));
 }
 
-sp<Rotation> Rotation::AxisTheta(sp<Vec3> axis, sp<Numeric> theta)
+sp<Rotation> Rotation::axisTheta(sp<Vec3> axis, sp<Numeric> theta)
 {
     return sp<Rotation>::make(sp<Vec4>::make<RotationAxisTheta>(std::move(axis), std::move(theta)));
 }
 
-sp<Rotation> Rotation::Euler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
+sp<Rotation> Rotation::eulerAngle(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
 {
     return sp<Rotation>::make(sp<Vec4>::make<RotationEuler>(std::move(pitch), std::move(yaw), std::move(roll)));
+}
+
+sp<Rotation> Rotation::vectorReorientation(sp<Vec3> u, sp<Vec3> v)
+{
+    return sp<Rotation>::make(sp<Vec4>::make<VectorReorientQuaternion>(std::move(u), std::move(v)));
 }
 
 }

@@ -130,7 +130,7 @@ public:
     void colorPicker4(const String& label, const sp<Vec4>& value, Imgui::ImGuiColorEditFlags flags = Imgui::ImGuiColorEditFlags_None);
 
 //  [[script::bindings::auto]]
-    sp<Boolean> beginTable(String strId, int32_t columns, int32_t flags = 0);
+    sp<Boolean> beginTable(String strId, int32_t columns, Imgui::ImGuiTableFlags flags = Imgui::ImGuiTableFlags_None);
 //  [[script::bindings::auto]]
     void endTable();
 //  [[script::bindings::auto]]
@@ -167,11 +167,11 @@ public:
     void image(sp<Texture> texture, sp<Vec2> size = nullptr, const V2& uv0 = V2(0), const V2& uv1 = V2(1.0f), sp<Vec4> color = nullptr, sp<Vec4> borderColor = nullptr);
 
 //  [[script::bindings::auto]]
-    sp<Boolean> beginTabBar(String strId, int32_t flags = 0);
+    sp<Boolean> beginTabBar(String strId, Imgui::ImGuiTabBarFlags flags = Imgui::ImGuiTabBarFlags_None);
 //  [[script::bindings::auto]]
     void endTabBar();
 //  [[script::bindings::auto]]
-    sp<Boolean> beginTabItem(String label, const sp<Boolean>& pOpen = nullptr, int32_t flags = 0);
+    sp<Boolean> beginTabItem(String label, const sp<Boolean>& pOpen = nullptr, Imgui::ImGuiTabItemFlags flags = Imgui::ImGuiTabItemFlags_None);
 //  [[script::bindings::auto]]
     void endTabItem();
 

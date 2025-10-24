@@ -2255,17 +2255,23 @@ class Rotation(Vec4):
     def to_matrix(self) -> Mat4:
         pass
 
+    def freeze(self) -> Self:
+        pass
+
     def __mul__(self, other: "Rotation") -> Self:
         pass
 
     @staticmethod
-    def AxisTheta(axis: TYPE_VEC3, theta: TYPE_NUMERIC) -> "Rotation":
+    def axis_theta(axis: TYPE_VEC3, theta: TYPE_NUMERIC) -> "Rotation":
         pass
 
     @staticmethod
-    def Euler(pitch: TYPE_NUMERIC, yaw: TYPE_NUMERIC, roll: TYPE_NUMERIC) -> "Rotation":
+    def euler_angle(pitch: TYPE_NUMERIC, yaw: TYPE_NUMERIC, roll: TYPE_NUMERIC) -> "Rotation":
         pass
 
+    @staticmethod
+    def vector_reorientation(u: TYPE_VEC3, v: TYPE_VEC3) -> "Rotation":
+        pass
 
 class Transform(Mat4):
     TYPE_NONE = 0
@@ -3219,7 +3225,7 @@ class Entity:
     def tag(self) -> Any:
         pass
 
-    def add_component(self, component: Any):
+    def add_components(self, components: Sequence[Any]):
         pass
 
     def get_component_list(self, ctype: type[T]) -> list[T]:

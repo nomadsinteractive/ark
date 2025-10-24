@@ -200,10 +200,10 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
         setTransform(std::move(transform));
     else
     {
-        sp<Vec4> rotation = context.getComponent<Rotation>();
-        sp<Vec3> scale = context.getComponent<Scale>();
-        if(rotation || scale)
-            setTransform(sp<Transform>::make<Transform3D>(std::move(rotation), std::move(scale)));
+        if(sp<Vec4> rotation = context.getComponent<Rotation>())
+            TransformType::setRotation(_transform, std::move(rotation));
+        if(sp<Vec3> scale = context.getComponent<Scale>())
+            TransformType::setScale(_transform, std::move(scale));
     }
 
     if(const sp<Visibility> visibility = context.getComponent<Visibility>(); visibility && !_visible)

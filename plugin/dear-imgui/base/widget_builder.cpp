@@ -771,7 +771,7 @@ void WidgetBuilder::colorPicker4(const String& label, const sp<Vec4>& value, con
     addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([flags](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v), flags); }, label, value));
 }
 
-sp<Boolean> WidgetBuilder::beginTable(String strId, int32_t columns, int32_t flags)
+sp<Boolean> WidgetBuilder::beginTable(String strId, int32_t columns, const Imgui::ImGuiTableFlags flags)
 {
     sp<Boolean::Impl> returnValue = sp<Boolean::Impl>::make(true);
     addWidgetGroupAndPush(sp<WidgetGroup>::make<Table>(returnValue, std::move(strId), columns, flags));
@@ -891,7 +891,7 @@ void WidgetBuilder::spacing()
     addFunctionCall(ImGui::Spacing);
 }
 
-sp<Boolean> WidgetBuilder::beginTabBar(String strId, const int32_t flags)
+sp<Boolean> WidgetBuilder::beginTabBar(String strId, const Imgui::ImGuiTabBarFlags flags)
 {
     sp<BooleanWrapper> isOpen = sp<BooleanWrapper>::make(false);
     addWidgetGroupAndPush(sp<WidgetGroup>::make<TabBar>(std::move(strId), flags, isOpen));
@@ -903,7 +903,7 @@ void WidgetBuilder::endTabBar()
     pop();
 }
 
-sp<Boolean> WidgetBuilder::beginTabItem(String label, const sp<Boolean>& pOpen, int32_t flags)
+sp<Boolean> WidgetBuilder::beginTabItem(String label, const sp<Boolean>& pOpen, const Imgui::ImGuiTabItemFlags flags)
 {
     DCHECK_WARN(!pOpen || pOpen.isInstance<BooleanWrapper>(), "p_open should be a BooleanWrapper instance");
     sp<BooleanWrapper> activated = sp<BooleanWrapper>::make(false);

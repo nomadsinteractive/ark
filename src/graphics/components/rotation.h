@@ -43,14 +43,18 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Mat4> toMatrix() const;
+//  [[script::bindings::auto]]
+    sp<Rotation> freeze() const;
 
 //  [[script::bindings::operator(*)]]
     static sp<Rotation> mul(sp<Rotation> lhs, sp<Rotation> rhs);
 
-//  [[script::bindings::type]]
-    static sp<Rotation> AxisTheta(sp<Vec3> axis, sp<Numeric> theta);
-//  [[script::bindings::type]]
-    static sp<Rotation> Euler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
+//  [[script::bindings::auto]]
+    static sp<Rotation> axisTheta(sp<Vec3> axis, sp<Numeric> theta);
+//  [[script::bindings::auto]]
+    static sp<Rotation> eulerAngle(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
+//  [[script::bindings::auto]]
+    static sp<Rotation> vectorReorientation(sp<Vec3> u, sp<Vec3> v);
 
 private:
     Rotation(const sp<Vec4Wrapper>& vec4Wrapper);

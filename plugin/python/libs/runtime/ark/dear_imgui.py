@@ -73,6 +73,73 @@ class Imgui:
     ImGuiColorEditFlags_InputRGB = 0
     ImGuiColorEditFlags_InputHSV = 0
 
+    ImGuiTableFlags_None = 0
+    ImGuiTableFlags_Resizable = 0
+    ImGuiTableFlags_Reorderable = 0
+    ImGuiTableFlags_Hideable = 0
+    ImGuiTableFlags_Sortable = 0
+    ImGuiTableFlags_NoSavedSettings = 0
+    ImGuiTableFlags_ContextMenuInBody = 0
+
+    ImGuiTableFlags_RowBg = 0
+    ImGuiTableFlags_BordersInnerH = 0
+    ImGuiTableFlags_BordersOuterH = 0
+    ImGuiTableFlags_BordersInnerV = 0
+    ImGuiTableFlags_BordersOuterV = 0
+    ImGuiTableFlags_BordersH = 0
+    ImGuiTableFlags_BordersV = 0
+    ImGuiTableFlags_BordersInner = 0
+    ImGuiTableFlags_BordersOuter = 0
+    ImGuiTableFlags_Borders = 0
+    ImGuiTableFlags_NoBordersInBody = 0
+    ImGuiTableFlags_NoBordersInBodyUntilResize = 0
+
+    ImGuiTableFlags_SizingFixedFit = 0
+    ImGuiTableFlags_SizingFixedSame = 0
+    ImGuiTableFlags_SizingStretchProp = 0
+    ImGuiTableFlags_SizingStretchSame = 0
+
+    ImGuiTableFlags_NoHostExtendX = 0
+    ImGuiTableFlags_NoHostExtendY = 0
+    ImGuiTableFlags_NoKeepColumnsVisible = 0
+    ImGuiTableFlags_PreciseWidths = 0
+
+    ImGuiTableFlags_NoClip = 0
+
+    ImGuiTableFlags_PadOuterX = 0
+    ImGuiTableFlags_NoPadOuterX = 0
+    ImGuiTableFlags_NoPadInnerX = 0
+
+    ImGuiTableFlags_ScrollX = 0
+    ImGuiTableFlags_ScrollY = 0
+
+    ImGuiTableFlags_SortMulti = 0
+    ImGuiTableFlags_SortTristate = 0
+
+    ImGuiTableFlags_HighlightHoveredColumn = 0
+
+    ImGuiTabBarFlags_None = 0
+    ImGuiTabBarFlags_Reorderable = 0
+    ImGuiTabBarFlags_AutoSelectNewTabs = 0
+    ImGuiTabBarFlags_TabListPopupButton = 0
+    ImGuiTabBarFlags_NoCloseWithMiddleMouseButton = 0
+    ImGuiTabBarFlags_NoTabListScrollingButtons = 0
+    ImGuiTabBarFlags_NoTooltip = 0
+    ImGuiTabBarFlags_DrawSelectedOverline = 0
+    ImGuiTabBarFlags_FittingPolicyResizeDown = 0
+    ImGuiTabBarFlags_FittingPolicyScroll = 0
+
+    ImGuiTabItemFlags_None = 0
+    ImGuiTabItemFlags_UnsavedDocument = 0
+    ImGuiTabItemFlags_SetSelected = 0
+    ImGuiTabItemFlags_NoCloseWithMiddleMouseButton = 0
+    ImGuiTabItemFlags_NoPushId = 0
+    ImGuiTabItemFlags_NoTooltip = 0
+    ImGuiTabItemFlags_NoReorder = 0
+    ImGuiTabItemFlags_Leading = 0
+    ImGuiTabItemFlags_Trailing = 0
+    ImGuiTabItemFlags_NoAssumedClosure = 0
+
 
 class Widget:
     def __init__(self, delegate: Optional["Widget", Sequence["Widget"]] = None):

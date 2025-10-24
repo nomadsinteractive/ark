@@ -74,11 +74,10 @@ PY_RETURN_NONE = 'return PyBridge::incRefNone()'
 
 
 class GenMethod(object):
-    def __init__(self, name, args, return_type, is_static: bool = False, is_type: bool = False):
+    def __init__(self, name, args, return_type, is_static: bool = False):
         self._name = name
         self._return_type = return_type
         self._is_static = is_static
-        self._is_type = is_type
         self._arguments = parse_method_arguments(args)
         self._has_args_argument = args and self._arguments[-1].type_compare('Traits')
         self._has_kwargs_argument = args and self._arguments[-1].type_compare('Scope')
@@ -100,7 +99,7 @@ class GenMethod(object):
 
     def gen_py_method_def_tp(self, genclass):
         trycatch_suffix = '_r' if 't' in get_params() else ''
-        return f'{{"{self._name if self._is_type else acg.camel_case_to_snake_case(self._name)}", (PyCFunction) {genclass.py_class_name}::{self._name}{trycatch_suffix}, {self._flags}, nullptr}}'
+        return f'{{"{acg.camel_case_to_snake_case(self._name)}", (PyCFunction) {genclass.py_class_name}::{self._name}{trycatch_suffix}, {self._flags}, nullptr}}'
 
     def gen_py_return(self):
         return 'PyObject*'

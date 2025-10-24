@@ -46,6 +46,8 @@ public:
     bool hasComponent(TypeId typeId) const;
 //  [[script::bindings::auto]]
     void addComponent(Box component);
+//  [[script::bindings::auto]]
+    void addComponents(Vector<Box> components);
 //  [[script::bindings::map(get)]]
     Optional<Box> getComponent(TypeId typeId) const;
 //  [[script::bindings::map(set)]]

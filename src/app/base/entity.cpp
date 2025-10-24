@@ -36,6 +36,14 @@ private:
     sp<Ref> _ref;
 };
 
+bool containsWirable(const Vector<Box>& components)
+{
+    for(const Box& i : components)
+        if(const sp<Wirable> wirable = i.as<Wirable>())
+            return true;
+    return false;
+}
+
 }
 
 Entity::Entity(Traits components)
@@ -129,6 +137,37 @@ void Entity::addComponent(Box component)
     setComponent(component.typeId(), std::move(component));
 }
 
+void Entity::addComponents(Vector<Box> components)
+{
+    {
+        Traits traits;
+        for(const Box& i : components)
+            traits.put(i.typeId(), i);
+        Wirable::WiringContext context(traits, false);
+        for(const Box& i : components)
+            if(const sp<Wirable> wirable = i.as<Wirable>())
+                wirable->onPoll(context);
+        for(const Box& i : _components.table().values())
+            if(const sp<Wirable> w = i.isEnum() ? sp<Wirable>() : i.as<Wirable>())
+                w->onWire(context, i);
+    }
+    if(containsWirable(components))
+    {
+        Wirable::WiringContext context(_components);
+        for(const Box& i : _components.table().values())
+            if(const sp<Wirable> w = i.isEnum() ? sp<Wirable>() : i.as<Wirable>())
+                w->onPoll(context);
+        for(const Box& i : components)
+            if(const sp<Wirable> wirable = i.as<Wirable>())
+                wirable->onPoll(context);
+        for(const Box& i : components)
+            if(const sp<Wirable> wirable = i.as<Wirable>())
+                wirable->onWire(context, i);
+    }
+    for(Box& i : components)
+        _components.add(i.typeId(), std::move(i));
+}
+
 bool Entity::hasComponent(const TypeId typeId) const
 {
     return _components.has(typeId);
@@ -141,6 +180,16 @@ Optional<Box> Entity::getComponent(const TypeId typeId) const
 
 void Entity::setComponent(const TypeId typeId, Box component)
 {
+    {
+        Traits traits;
+        traits.put(typeId, component);
+        Wirable::WiringContext context(traits, false);
+        if(const sp<Wirable> wirable = component.as<Wirable>())
+            wirable->onPoll(context);
+        for(const Box& i : _components.table().values())
+            if(const sp<Wirable> w = i.isEnum() ? sp<Wirable>() : i.as<Wirable>())
+                w->onWire(context, i);
+    }
     if(const sp<Wirable> wirable = component.as<Wirable>())
     {
         Wirable::WiringContext context(_components);

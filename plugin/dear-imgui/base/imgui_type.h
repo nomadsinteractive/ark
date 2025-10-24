@@ -106,6 +106,85 @@ enum ImGuiColorEditFlags {
     ImGuiColorEditFlags_InputHSV        = ImGuiColorEditFlags_::ImGuiColorEditFlags_InputHSV
 };
 
+//  [[script::bindings::enumeration]]
+enum ImGuiTableFlags
+{
+    ImGuiTableFlags_None                       = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_Resizable                  = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_Reorderable                = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_Hideable                   = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_Sortable                   = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_NoSavedSettings            = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_ContextMenuInBody          = ImGuiTableFlags_::ImGuiTableFlags_None,
+
+    ImGuiTableFlags_RowBg                      = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_BordersInnerH              = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_BordersOuterH              = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_BordersInnerV              = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_BordersOuterV              = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_BordersH                   = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_BordersV                   = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_BordersInner               = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_BordersOuter               = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_Borders                    = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_NoBordersInBody            = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_NoBordersInBodyUntilResize = ImGuiTableFlags_::ImGuiTableFlags_None,
+
+    ImGuiTableFlags_SizingFixedFit             = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_SizingFixedSame            = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_SizingStretchProp          = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_SizingStretchSame          = ImGuiTableFlags_::ImGuiTableFlags_None,
+
+    ImGuiTableFlags_NoHostExtendX              = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_NoHostExtendY              = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_NoKeepColumnsVisible       = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_PreciseWidths              = ImGuiTableFlags_::ImGuiTableFlags_None,
+
+    ImGuiTableFlags_NoClip                     = ImGuiTableFlags_::ImGuiTableFlags_None,
+
+    ImGuiTableFlags_PadOuterX                  = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_NoPadOuterX                = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_NoPadInnerX                = ImGuiTableFlags_::ImGuiTableFlags_None,
+
+    ImGuiTableFlags_ScrollX                    = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_ScrollY                    = ImGuiTableFlags_::ImGuiTableFlags_None,
+
+    ImGuiTableFlags_SortMulti                  = ImGuiTableFlags_::ImGuiTableFlags_None,
+    ImGuiTableFlags_SortTristate               = ImGuiTableFlags_::ImGuiTableFlags_None,
+
+    ImGuiTableFlags_HighlightHoveredColumn     = ImGuiTableFlags_::ImGuiTableFlags_None,
+};
+
+//  [[script::bindings::enumeration]]
+enum ImGuiTabBarFlags
+{
+    ImGuiTabBarFlags_None                           = ImGuiTabBarFlags_::ImGuiTabBarFlags_None,
+    ImGuiTabBarFlags_Reorderable                    = ImGuiTabBarFlags_::ImGuiTabBarFlags_Reorderable,
+    ImGuiTabBarFlags_AutoSelectNewTabs              = ImGuiTabBarFlags_::ImGuiTabBarFlags_AutoSelectNewTabs,
+    ImGuiTabBarFlags_TabListPopupButton             = ImGuiTabBarFlags_::ImGuiTabBarFlags_TabListPopupButton,
+    ImGuiTabBarFlags_NoCloseWithMiddleMouseButton   = ImGuiTabBarFlags_::ImGuiTabBarFlags_NoCloseWithMiddleMouseButton,
+    ImGuiTabBarFlags_NoTabListScrollingButtons      = ImGuiTabBarFlags_::ImGuiTabBarFlags_NoTabListScrollingButtons,
+    ImGuiTabBarFlags_NoTooltip                      = ImGuiTabBarFlags_::ImGuiTabBarFlags_NoTooltip,
+    ImGuiTabBarFlags_DrawSelectedOverline           = ImGuiTabBarFlags_::ImGuiTabBarFlags_DrawSelectedOverline,
+    ImGuiTabBarFlags_FittingPolicyResizeDown        = ImGuiTabBarFlags_::ImGuiTabBarFlags_FittingPolicyResizeDown,
+    ImGuiTabBarFlags_FittingPolicyScroll            = ImGuiTabBarFlags_::ImGuiTabBarFlags_FittingPolicyScroll
+};
+
+//  [[script::bindings::enumeration]]
+enum ImGuiTabItemFlags
+{
+    ImGuiTabItemFlags_None                          = ImGuiTabItemFlags_::ImGuiTabItemFlags_None,
+    ImGuiTabItemFlags_UnsavedDocument               = ImGuiTabItemFlags_::ImGuiTabItemFlags_UnsavedDocument,
+    ImGuiTabItemFlags_SetSelected                   = ImGuiTabItemFlags_::ImGuiTabItemFlags_SetSelected,
+    ImGuiTabItemFlags_NoCloseWithMiddleMouseButton  = ImGuiTabItemFlags_::ImGuiTabItemFlags_NoCloseWithMiddleMouseButton,
+    ImGuiTabItemFlags_NoPushId                      = ImGuiTabItemFlags_::ImGuiTabItemFlags_NoPushId,
+    ImGuiTabItemFlags_NoTooltip                     = ImGuiTabItemFlags_::ImGuiTabItemFlags_NoTooltip,
+    ImGuiTabItemFlags_NoReorder                     = ImGuiTabItemFlags_::ImGuiTabItemFlags_NoReorder,
+    ImGuiTabItemFlags_Leading                       = ImGuiTabItemFlags_::ImGuiTabItemFlags_Leading,
+    ImGuiTabItemFlags_Trailing                      = ImGuiTabItemFlags_::ImGuiTabItemFlags_Trailing,
+    ImGuiTabItemFlags_NoAssumedClosure              = ImGuiTabItemFlags_::ImGuiTabItemFlags_NoAssumedClosure
+};
+
 };
 
 }
