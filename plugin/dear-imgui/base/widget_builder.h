@@ -25,7 +25,9 @@ namespace ark::plugin::dear_imgui {
 class ARK_PLUGIN_DEAR_IMGUI_API WidgetBuilder {
 public:
 //  [[script::bindings::auto]]
-    WidgetBuilder(const sp<Renderer>& imguiRenderer);
+    WidgetBuilder(const sp<Imgui>& imgui);
+//  [[script::bindings::auto]]
+    WidgetBuilder(const sp<RendererImgui>& imgui);
 
 //  [[script::bindings::auto]]
     bool begin(String name, sp<Boolean> isOpen = nullptr, Imgui::ImGuiWindowFlags flags = Imgui::ImGuiWindowFlags_None);

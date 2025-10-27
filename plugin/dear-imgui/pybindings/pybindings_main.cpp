@@ -1,6 +1,8 @@
+#include "base/imgui_type.h"
 #include "core/base/plugin.h"
 
 #include "core/base/api.h"
+#include "core/base/resource_loader.h"
 #include "core/types/shared_ptr.h"
 
 #include "generated/py_dear-imgui_bindings.h"
@@ -10,6 +12,11 @@ using namespace ark::plugin::dear_imgui;
 using namespace ark::plugin::python;
 
 namespace {
+
+template<typename T> Box PyArkResourceLoader_loadFunction(PyArkType::Instance& inst, const String& id, const Scope& args) {
+    const sp<T> bean = inst.unpack<ResourceLoader>()->load<T>(id, args);
+    return Box(bean);
+}
 
 PyMethodDef ARK_DEAR_IMGUI_METHODS[] = {
     {nullptr, nullptr, 0, nullptr}
@@ -27,6 +34,8 @@ public:
 
     void initialize(PyObject* dearimguimodule) {
         __init_py_dear_imgui_bindings__(dearimguimodule);
+        Map<TypeId, PyArkType::LoaderFunction>& loader = PyArkType::loaders();
+        loader[Type<Imgui>::id()] = PyArkResourceLoader_loadFunction<Imgui>;
     }
 };
 

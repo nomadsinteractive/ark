@@ -4,6 +4,29 @@ from typing import Optional, Union
 from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, Vec2, Vec4, Vec3, TYPE_BOOLEAN, TYPE_VEC2
 
 
+class ImGuiViewport:
+
+    @property
+    def id(self) -> Integer:
+        pass
+
+    @property
+    def pos(self) -> Vec2:
+        pass
+
+    @property
+    def size(self) -> Vec2:
+        pass
+
+    @property
+    def work_pos(self) -> Vec2:
+        pass
+
+    @property
+    def work_size(self) -> Vec2:
+        pass
+
+
 class Imgui:
     ImGuiInputTextFlags_None = 0
     ImGuiInputTextFlags_CharsDecimal = 0
@@ -139,6 +162,16 @@ class Imgui:
     ImGuiTabItemFlags_Leading = 0
     ImGuiTabItemFlags_Trailing = 0
     ImGuiTabItemFlags_NoAssumedClosure = 0
+
+    @staticmethod
+    def get_main_viewport() -> ImGuiViewport:
+        pass
+
+    def add_widget(self, widget: "Widget", discarded: Optional[TYPE_BOOLEAN]):
+        pass
+
+    def show(self, discarded: Optional[TYPE_BOOLEAN]):
+        pass
 
 
 class Widget:

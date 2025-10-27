@@ -539,8 +539,13 @@ bool Items_VectorGetter(void* data, int idx, const char** out_text)
 
 }
 
-WidgetBuilder::WidgetBuilder(const sp<Renderer>& imguiRenderer)
-    : _renderer_context(imguiRenderer.ensureInstance<RendererImgui>()->rendererContext()), _stub(sp<Stub>::make())
+WidgetBuilder::WidgetBuilder(const sp<Imgui>& imgui)
+    : WidgetBuilder(imgui->_renderer)
+{
+}
+
+WidgetBuilder::WidgetBuilder(const sp<RendererImgui>& imgui)
+    : _renderer_context(imgui.ensureInstance<RendererImgui>()->rendererContext()), _stub(sp<Stub>::make())
 {
     push(sp<WidgetGroup>::make());
 }

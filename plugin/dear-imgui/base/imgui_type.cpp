@@ -35,6 +35,11 @@ void Imgui::addWidget(sp<Widget> widget, sp<Boolean> discarded) const
     _renderer->addRenderer(WidgetType::toRenderer(std::move(widget)), {std::move(discarded)});
 }
 
+void Imgui::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded) const
+{
+    _renderer->addRenderer(std::move(renderer), {std::move(discarded)});
+}
+
 void Imgui::show(sp<Boolean> discarded) const
 {
     const sp<ApplicationFacade>& facade = Ark::instance().applicationContext()->applicationFacade();

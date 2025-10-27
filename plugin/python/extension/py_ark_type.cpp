@@ -3,6 +3,7 @@
 #include "core/base/scope.h"
 #include "core/components/discarded.h"
 #include "core/inf/debris.h"
+#include "core/types/global.h"
 #include "core/util/log.h"
 
 #include "python/extension/py_cast.h"
@@ -78,6 +79,10 @@ int __clear__(PyArkType::Instance* self)
     return 0;
 }
 
+struct TypeLoader {
+    Map<TypeId, PyArkType::LoaderFunction> _functions;
+};
+
 }
 
 PyArkType::PyArkType(const String& name, const String& doc, PyTypeObject* base, unsigned long flags)
@@ -123,13 +128,9 @@ PyObject* PyArkType::create(const Box& box)
     return reinterpret_cast<PyObject*>(self);
 }
 
-std::map<TypeId, PyArkType::LoaderFunction>& PyArkType::ensureLoader(const String& name)
+Map<TypeId, PyArkType::LoaderFunction>& PyArkType::loaders()
 {
-    auto iter = _loaders.find(name);
-    if(iter != _loaders.end())
-        return iter->second;
-    _loaders[name] = std::map<TypeId, LoaderFunction>();
-    return _loaders[name];
+    return Global<TypeLoader>()->_functions;
 }
 
 void PyArkType::onReady()
@@ -145,16 +146,9 @@ int32_t PyArkType::doReady(TypeId typeId)
     return PyType_Ready(&_py_type_object);
 }
 
-const std::map<TypeId, PyArkType::LoaderFunction>& PyArkType::getLoader(const String& name) const
-{
-    auto iter = _loaders.find(name);
-    DCHECK(iter != _loaders.end(), "Loader \"%s\" not found.", name.c_str());
-    return iter->second;
-}
-
 PyObject* PyArkType::load(Instance& inst, const String& loader, TypeId typeId, const String& id, const Scope& args) const
 {
-    const std::map<TypeId, LoaderFunction>& functions = getLoader(loader);
+    const Map<TypeId, LoaderFunction>& functions = loaders();
     const auto iter = functions.find(typeId);
     DCHECK(iter != functions.end(), "Loader \"%s\" has no LoaderFunction for %d", loader.c_str(), typeId);
     return PythonExtension::instance().toPyObject(iter->second(inst, id, args));

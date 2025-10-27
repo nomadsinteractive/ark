@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include <Python.h>
 
 #include "core/forwarding.h"
@@ -60,17 +58,15 @@ public:
     PyObject* create(const Box& box);
 
     typedef Box (*LoaderFunction)(Instance&, const String&, const Scope&);
-    Map<TypeId, LoaderFunction>& ensureLoader(const String& name);
+    static Map<TypeId, LoaderFunction>& loaders();
 
     void onReady();
 
 protected:
     Map<String, Box> _enum_constants;
-    Map<String, Map<TypeId, LoaderFunction>> _loaders;
 
 private:
     int32_t doReady(TypeId typeId);
-    const Map<TypeId, LoaderFunction>& getLoader(const String& name) const;
 
     static PyTypeObject* basetype();
 

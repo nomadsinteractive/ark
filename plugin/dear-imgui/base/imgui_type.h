@@ -207,8 +207,11 @@ public:
 //  [[script::bindings::auto]]
     static sp<ImGuiViewportType> getMainViewport();
 
+//  [[script::bindings::auto]]
     void addWidget(sp<Widget> widget, sp<Boolean> discarded) const;
-
+//  [[script::bindings::auto]]
+    void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded) const;
+//  [[script::bindings::auto]]
     void show(sp<Boolean> discarded) const;
 
 //  [[plugin::builder("imgui")]]
@@ -226,6 +229,8 @@ public:
 
 private:
     sp<RendererImgui> _renderer;
+
+    friend class WidgetBuilder;
 };
 
 }

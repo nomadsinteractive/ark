@@ -64,7 +64,7 @@ class Window:
         self._renderer = Renderer()
         self._widget = None
 
-    def ready(self, imgui: Renderer):
+    def ready(self, imgui: dear_imgui.Imgui):
         if self._widget is None:
             builder = dear_imgui.WidgetBuilder(imgui)
             builder.begin(self.title, self.is_open)
@@ -282,7 +282,7 @@ class NoiseGeneratorWindow(Window):
 
 
 class MarkStudio:
-    def __init__(self, application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
+    def __init__(self, application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
         global _mark_studio
         _mark_studio = self
 
@@ -292,6 +292,7 @@ class MarkStudio:
         self._resolution = resolution
 
         self._renderer = Renderer()
+        self._widget = dear_imgui.Widget()
         self._imgui.add_renderer(self._renderer, self._discarded)
         self._windows: list[Window] = [ConsoleWindow(console_cmds, True), NoiseGeneratorWindow(False)]
         self.on_create()
@@ -331,9 +332,10 @@ class MarkStudio:
         builder.add_widget(builder.make_demo_widget(imgui_demo_is_open))
         builder.add_widget(builder.make_about_widget(imgui_about_is_open))
         self._renderer.reset(builder.make_widget().to_renderer())
+        self._widget.reset(builder.make_widget())
 
     @property
-    def imgui(self) -> Renderer:
+    def imgui(self) -> dear_imgui.Imgui:
         return self._imgui
 
     @property
@@ -352,8 +354,10 @@ class MarkStudio:
         self._discarded.set(True)
         self._discarded = Boolean(False)
 
-        self._application_facade.surface_controller.add_renderer(self._imgui, self._discarded, priority=Renderer.PRIORITY_CONTROL)
-        self._application_facade.push_event_listener(self._imgui, self._discarded)
+        self._imgui.show(self._discarded)
+
+        # self._application_facade.surface_controller.add_renderer(self._imgui, self._discarded, priority=Renderer.PRIORITY_CONTROL)
+        # self._application_facade.push_event_listener(self._imgui, self._discarded)
 
     def close(self):
         global _mark_studio
@@ -386,7 +390,7 @@ def close_mark_studio():
         _mark_studio.close()
 
 
-def show_mark_studio(application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
+def show_mark_studio(application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
     if not _mark_studio or _mark_studio.discarded:
         mark_studio = MarkStudio(application_facade, imgui, resolution, quick_bar_items, console_cmds)
         mark_studio.show()
