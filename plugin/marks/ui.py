@@ -2,11 +2,11 @@ import inspect
 from collections.abc import Sequence
 from typing import Callable, Any, Optional
 
-from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, Math, TYPE_BOOLEAN, Discarded, Random
+from ark import Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, TYPE_BOOLEAN, Discarded, Random
 from ark import dear_imgui
 
 
-class QuickBarItem:
+class ToolbarItem:
     def __init__(self, text: str, on_click: Callable[[], None]):
         self.text = text
         self.on_click = on_click
@@ -57,24 +57,21 @@ class ConsoleCommand:
 
 
 class Window:
-    def __init__(self, title: str = '', is_open: Optional[TYPE_BOOLEAN] = None):
+    def __init__(self, title: str = '', is_open: Optional[TYPE_BOOLEAN] = None, flags: int = 0):
         self.title = title
         self.is_open = None if is_open is None else Boolean(is_open)
+        self._flags = flags
         self._discarded = Discarded()
-        self._renderer = Renderer()
         self._widget = None
 
     def ready(self, imgui: dear_imgui.Imgui):
         if self._widget is None:
             builder = dear_imgui.WidgetBuilder(imgui)
-            builder.begin(self.title, self.is_open)
-            self.on_create(builder)
-            builder.end()
+            self.on_ready(builder)
 
             self._widget = builder.make_widget()
-            imgui.add_renderer(self._renderer, self._discarded)
-
-        self._renderer.reset(self._widget.to_renderer())
+            self._discarded = Discarded()
+            imgui.add_widget(self._widget, self._discarded)
 
     def show(self):
         if self.is_open is not None:
@@ -85,13 +82,17 @@ class Window:
     def close(self):
         if self.is_open is not None:
             self.is_open.set(False)
-        self._renderer.reset(None)
         self.on_close()
 
     def discard(self):
         self._discarded.discard()
         self._widget = None
         self.on_close()
+
+    def on_ready(self, builder: dear_imgui.WidgetBuilder):
+        builder.begin(self.title, self.is_open, self._flags)
+        self.on_create(builder)
+        builder.end()
 
     def on_create(self, builder: dear_imgui.WidgetBuilder):
         pass
@@ -103,39 +104,48 @@ class Window:
         pass
 
 
-class MainWindow(Window):
-    def __init__(self, mark_studio: "MarkStudio", is_open: Optional[TYPE_BOOLEAN] = None, quick_bar_items: Optional[list[QuickBarItem]] = None):
+class ToolbarWindow(Window):
+    def __init__(self, mark_studio: "MarkStudio", is_open: Optional[TYPE_BOOLEAN] = None, toolbar_items: Sequence[ToolbarItem] = tuple()):
         self._mark_studio = mark_studio
-        self._quick_bar_items = quick_bar_items or []
-        self._quick_bar_widget = dear_imgui.Widget()
-        super().__init__('My Ark Studio', is_open)
+        self._toolbar_items = toolbar_items
+        self._toolbar_widget = dear_imgui.Widget()
+        super().__init__('', is_open, dear_imgui.Imgui.ImGuiWindowFlags_NoTitleBar
+                                                        | dear_imgui.Imgui.ImGuiWindowFlags_NoResize
+                                                        | dear_imgui.Imgui.ImGuiWindowFlags_NoMove
+                                                        | dear_imgui.Imgui.ImGuiWindowFlags_NoScrollbar
+                                                        | dear_imgui.Imgui.ImGuiWindowFlags_NoSavedSettings)
         self.ready(mark_studio.imgui)
 
+    def on_ready(self, builder: dear_imgui.WidgetBuilder):
+        if self._toolbar_items:
+            viewport = dear_imgui.Imgui.get_main_viewport()
+            builder.set_next_window_pos(viewport.pos + (0, 24))
+            builder.set_next_window_size((viewport.size.x, 24))
+            super().on_ready(builder)
+
     def on_create(self, builder: dear_imgui.WidgetBuilder):
-        builder.add_widget(self._quick_bar_widget)
-        self._build_quick_bar()
+        builder.add_widget(self._toolbar_widget)
 
-    def _build_quick_bar(self):
-        quick_bar_builder = self._mark_studio.make_widget_builder()
+        toolbar_builder = self._mark_studio.make_widget_builder()
 
-        for i, j in enumerate(self._quick_bar_items):
+        for i, j in enumerate(self._toolbar_items):
             if i != 0:
-                quick_bar_builder.same_line()
-            quick_bar_builder.small_button(j.text).add_callback(self._make_quickbar_onclick(j))
+                toolbar_builder.same_line()
+            toolbar_builder.small_button(j.text).add_callback(self._make_quickbar_onclick(j))
 
-        self._quick_bar_widget.reset(quick_bar_builder.make_widget())
+        self._toolbar_widget.reset(toolbar_builder.make_widget())
 
-    def _make_quickbar_onclick(self, quick_bar_item: QuickBarItem):
+    def _make_quickbar_onclick(self, toolbar_item: ToolbarItem):
 
         def onclick():
             self._mark_studio.close()
-            quick_bar_item.on_click()
+            toolbar_item.on_click()
 
         return onclick
 
 
 class ConsoleWindow(Window):
-    def __init__(self, console_cmds: list[ConsoleCommand], is_open: Optional[bool]):
+    def __init__(self, console_cmds: Sequence[ConsoleCommand], is_open: Optional[bool]):
         self._console_cmds = console_cmds
         super().__init__('Command Console', is_open)
 
@@ -155,7 +165,7 @@ class ConsoleWindow(Window):
         builder.separator()
         builder.add_widget(self._make_cmd_tab_widget(self._console_cmds))
 
-    def _make_cmd_tab_widget(self, console_cmds: list[ConsoleCommand]) -> dear_imgui.Widget:
+    def _make_cmd_tab_widget(self, console_cmds: Sequence[ConsoleCommand]) -> dear_imgui.Widget:
         tab_title_builder = _mark_studio.make_widget_builder()
         tab_panel_wrapper = dear_imgui.Widget()
         console_cmds_count = len(console_cmds)
@@ -282,7 +292,7 @@ class NoiseGeneratorWindow(Window):
 
 
 class MarkStudio:
-    def __init__(self, application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
+    def __init__(self, application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, toolbar_items: Sequence[ToolbarItem] = tuple(), console_cmds: Sequence[ConsoleCommand] = tuple()):
         global _mark_studio
         _mark_studio = self
 
@@ -291,13 +301,12 @@ class MarkStudio:
         self._discarded = Boolean(False)
         self._resolution = resolution
 
-        self._renderer = Renderer()
         self._widget = dear_imgui.Widget()
-        self._imgui.add_renderer(self._renderer, self._discarded)
+        self._imgui.add_widget(self._widget)
         self._windows: list[Window] = [ConsoleWindow(console_cmds, True), NoiseGeneratorWindow(False)]
         self.on_create()
 
-        self._main_window = MainWindow(self, None, quick_bar_items)
+        self._main_window = ToolbarWindow(self, None, toolbar_items)
 
     @property
     def windows(self) -> tuple[Window, ...]:
@@ -331,7 +340,6 @@ class MarkStudio:
 
         builder.add_widget(builder.make_demo_widget(imgui_demo_is_open))
         builder.add_widget(builder.make_about_widget(imgui_about_is_open))
-        self._renderer.reset(builder.make_widget().to_renderer())
         self._widget.reset(builder.make_widget())
 
     @property
@@ -355,9 +363,6 @@ class MarkStudio:
         self._discarded = Boolean(False)
 
         self._imgui.show(self._discarded)
-
-        # self._application_facade.surface_controller.add_renderer(self._imgui, self._discarded, priority=Renderer.PRIORITY_CONTROL)
-        # self._application_facade.push_event_listener(self._imgui, self._discarded)
 
     def close(self):
         global _mark_studio
@@ -390,7 +395,7 @@ def close_mark_studio():
         _mark_studio.close()
 
 
-def show_mark_studio(application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
+def show_mark_studio(application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, toolbar_items: Sequence[ToolbarItem] = tuple(), console_cmds: Sequence[ConsoleCommand] = tuple()):
     if not _mark_studio or _mark_studio.discarded:
-        mark_studio = MarkStudio(application_facade, imgui, resolution, quick_bar_items, console_cmds)
+        mark_studio = MarkStudio(application_facade, imgui, resolution, toolbar_items, console_cmds)
         mark_studio.show()

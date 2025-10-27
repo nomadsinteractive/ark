@@ -79,9 +79,4 @@ void WidgetType::reset(const sp<Widget>& self, sp<Widget> wrapped)
     Ark::instance().applicationContext()->deferUnref(wrapper->reset(std::move(wrapped)));
 }
 
-sp<Renderer> WidgetType::toRenderer(sp<Widget> self)
-{
-    return sp<Renderer>::make<RendererWidget>(std::move(self));
-}
-
 }

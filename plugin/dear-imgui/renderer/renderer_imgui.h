@@ -1,8 +1,6 @@
 #pragma once
 
 #include "core/concurrent/lf_stack.h"
-#include "core/inf/builder.h"
-#include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/inf/renderer.h"
@@ -15,34 +13,19 @@
 
 #include "dear-imgui/forwarding.h"
 
-struct ImDrawData;
-struct ImGuiIO;
-
 namespace ark::plugin::dear_imgui {
 
-class RendererImgui final : public Renderer, public Renderer::Group, public EventListener, public Implements<RendererImgui, Renderer, Renderer::Group, EventListener> {
+class RendererImgui final : public Renderer, public EventListener {
 public:
     RendererImgui(sp<Shader> shader, sp<Texture> texture);
     ~RendererImgui() override;
 
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
-    void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
     bool onEvent(const Event& event) override;
 
+    void addWidget(sp<Widget> widget, sp<Boolean> discarded);
+
     const sp<RendererContext>& rendererContext() const;
-
-//  [[plugin::builder("imgui")]]
-    class BUILDER final : public Builder<Renderer> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        sp<Renderer> build(const Scope& args) override;
-
-    private:
-        document _manifest;
-        sp<Camera> _camera;
-        sp<Builder<Shader>> _shader;
-    };
 
     struct DrawCommand {
         DrawCommand(RenderController& renderController);
@@ -67,8 +50,6 @@ public:
 private:
     void MyImGuiRenderFunction(const RenderRequest& renderRequest, ImDrawData* draw_data) const;
 
-    sp<DrawCommandRecycler> obtainDrawCommandRecycler(Texture* texture);
-
 private:
     sp<Shader> _shader;
     sp<RenderEngine> _render_engine;
@@ -76,8 +57,8 @@ private:
 
     sp<RendererContext> _renderer_context;
 
-    Vector<sp<Renderer>> _renderers;
-    Vector<sp<Renderer>> _renderer_increasement;
+    D_FList<sp<Widget>> _widgets;
+    Vector<std::pair<sp<Widget>, sp<Boolean>>> _widget_increasement;
 
     sp<BooleanWrapper> _text_input_enabled;
 };

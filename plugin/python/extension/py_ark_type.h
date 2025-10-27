@@ -50,7 +50,7 @@ public:
 
     TypeId typeId() const;
 
-    PyObject* load(Instance& inst, const String& loader, TypeId typeId, const String& id, const Scope& args) const;
+    PyObject* load(Instance& inst, TypeId typeId, const String& id, const Scope& args) const;
 
     PyObject* getPyObject();
     PyTypeObject* getPyTypeObject();

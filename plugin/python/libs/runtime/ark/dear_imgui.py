@@ -28,6 +28,30 @@ class ImGuiViewport:
 
 
 class Imgui:
+    ImGuiWindowFlags_None = 0
+    ImGuiWindowFlags_NoTitleBar = 0
+    ImGuiWindowFlags_NoResize = 0
+    ImGuiWindowFlags_NoMove = 0
+    ImGuiWindowFlags_NoScrollbar = 0
+    ImGuiWindowFlags_NoScrollWithMouse = 0
+    ImGuiWindowFlags_NoCollapse = 0
+    ImGuiWindowFlags_AlwaysAutoResize = 0
+    ImGuiWindowFlags_NoBackground = 0
+    ImGuiWindowFlags_NoSavedSettings = 0
+    ImGuiWindowFlags_NoMouseInputs = 0
+    ImGuiWindowFlags_MenuBar = 0
+    ImGuiWindowFlags_HorizontalScrollbar = 0
+    ImGuiWindowFlags_NoFocusOnAppearing = 0
+    ImGuiWindowFlags_NoBringToFrontOnFocus = 0
+    ImGuiWindowFlags_AlwaysVerticalScrollbar = 0
+    ImGuiWindowFlags_AlwaysHorizontalScrollbar = 0
+    ImGuiWindowFlags_NoNavInputs = 0
+    ImGuiWindowFlags_NoNavFocus = 0
+    ImGuiWindowFlags_UnsavedDocument = 0
+    ImGuiWindowFlags_NoNav = 0
+    ImGuiWindowFlags_NoDecoration = 0
+    ImGuiWindowFlags_NoInputs = 0
+
     ImGuiInputTextFlags_None = 0
     ImGuiInputTextFlags_CharsDecimal = 0
     ImGuiInputTextFlags_CharsHexadecimal = 0
@@ -167,7 +191,7 @@ class Imgui:
     def get_main_viewport() -> ImGuiViewport:
         pass
 
-    def add_widget(self, widget: "Widget", discarded: Optional[TYPE_BOOLEAN]):
+    def add_widget(self, widget: "Widget", discarded: Optional[TYPE_BOOLEAN] = None):
         pass
 
     def show(self, discarded: Optional[TYPE_BOOLEAN]):
@@ -190,6 +214,12 @@ class Widget:
 
 class WidgetBuilder:
     def __init__(self, renderer):
+        pass
+
+    def set_next_window_pos(self, pos: TYPE_VEC2):
+        pass
+
+    def set_next_window_size(self, pos: TYPE_VEC2):
         pass
 
     def begin(self, title: str, is_open: Optional[Boolean] = None, flags: int = 0):

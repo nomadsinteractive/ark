@@ -22,9 +22,6 @@ public:
 
 //  [[script::bindings::classmethod]]
     static void reset(const sp<Widget>& self, sp<Widget> wrapped = nullptr);
-
-//  [[script::bindings::classmethod]]
-    static sp<Renderer> toRenderer(sp<Widget> self);
 };
 
 }

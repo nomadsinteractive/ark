@@ -26,8 +26,12 @@ class ARK_PLUGIN_DEAR_IMGUI_API WidgetBuilder {
 public:
 //  [[script::bindings::auto]]
     WidgetBuilder(const sp<Imgui>& imgui);
-//  [[script::bindings::auto]]
     WidgetBuilder(const sp<RendererImgui>& imgui);
+
+//  [[script::bindings::auto]]
+    void setNextWindowPos(sp<Vec2> pos);
+//  [[script::bindings::auto]]
+    void setNextWindowSize(sp<Vec2> size);
 
 //  [[script::bindings::auto]]
     bool begin(String name, sp<Boolean> isOpen = nullptr, Imgui::ImGuiWindowFlags flags = Imgui::ImGuiWindowFlags_None);

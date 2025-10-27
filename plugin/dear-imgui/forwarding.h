@@ -12,4 +12,6 @@ class WidgetGroup;
 
 }
 
+struct ImDrawData;
 struct ImGuiViewport;
+struct ImGuiIO;

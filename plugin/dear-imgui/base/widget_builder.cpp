@@ -382,6 +382,24 @@ private:
     V2 _value;
 };
 
+
+class SetImVec2 final : public Widget {
+public:
+    SetImVec2(std::function<void(ImVec2)> func, sp<Vec2> value)
+        : _func(std::move(func)), _value(std::move(value)) {
+    }
+
+    void render() override
+    {
+        const V2 value = _value->val();
+        _func(ImVec2(value.x(), value.y()));
+    }
+
+private:
+    std::function<void(ImVec2)> _func;
+    sp<Vec2> _value;
+};
+
 class FunctionCall final : public Widget {
 public:
     FunctionCall(std::function<void()> func)
@@ -545,9 +563,23 @@ WidgetBuilder::WidgetBuilder(const sp<Imgui>& imgui)
 }
 
 WidgetBuilder::WidgetBuilder(const sp<RendererImgui>& imgui)
-    : _renderer_context(imgui.ensureInstance<RendererImgui>()->rendererContext()), _stub(sp<Stub>::make())
+    : _renderer_context(imgui->rendererContext()), _stub(sp<Stub>::make())
 {
     push(sp<WidgetGroup>::make());
+}
+
+void WidgetBuilder::setNextWindowPos(sp<Vec2> pos)
+{
+    addWidget(sp<Widget>::make<SetImVec2>([] (const ImVec2 v) {
+        ImGui::SetNextWindowPos(v);
+    }, std::move(pos)));
+}
+
+void WidgetBuilder::setNextWindowSize(sp<Vec2> size)
+{
+    addWidget(sp<Widget>::make<SetImVec2>([] (const ImVec2 v) {
+        ImGui::SetNextWindowSize(v);
+    }, std::move(size)));
 }
 
 bool WidgetBuilder::begin(String name, sp<Boolean> isOpen, const Imgui::ImGuiWindowFlags flags)

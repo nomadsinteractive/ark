@@ -17,32 +17,32 @@ namespace ark::plugin::dear_imgui {
 class ARK_PLUGIN_DEAR_IMGUI_API Imgui {
 public:
 //  [[script::bindings::enumeration]]
-    enum ImGuiWindowFlags
-    {
-        ImGuiWindowFlags_None                   = ImGuiWindowFlags_::ImGuiWindowFlags_None,
-        ImGuiWindowFlags_NoTitleBar             = ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar,
-        ImGuiWindowFlags_NoResize               = ImGuiWindowFlags_::ImGuiWindowFlags_NoResize,
-        ImGuiWindowFlags_NoMove                 = ImGuiWindowFlags_::ImGuiWindowFlags_NoMove,
-        ImGuiWindowFlags_NoScrollbar            = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar,
-        ImGuiWindowFlags_NoScrollWithMouse      = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse,
-        ImGuiWindowFlags_NoCollapse             = ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse,
-        ImGuiWindowFlags_AlwaysAutoResize       = ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysAutoResize,
-        ImGuiWindowFlags_NoBackground           = ImGuiWindowFlags_::ImGuiWindowFlags_NoBackground,
-        ImGuiWindowFlags_NoSavedSettings        = ImGuiWindowFlags_::ImGuiWindowFlags_NoSavedSettings,
-        ImGuiWindowFlags_NoMouseInputs          = ImGuiWindowFlags_::ImGuiWindowFlags_NoMouseInputs,
-        ImGuiWindowFlags_MenuBar                = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar,
-        ImGuiWindowFlags_HorizontalScrollbar    = ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar,
-        ImGuiWindowFlags_NoFocusOnAppearing     = ImGuiWindowFlags_::ImGuiWindowFlags_NoFocusOnAppearing,
-        ImGuiWindowFlags_NoBringToFrontOnFocus  = ImGuiWindowFlags_::ImGuiWindowFlags_NoBringToFrontOnFocus,
-        ImGuiWindowFlags_AlwaysVerticalScrollbar= ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysVerticalScrollbar,
-        ImGuiWindowFlags_AlwaysHorizontalScrollbar=ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysHorizontalScrollbar,
-        ImGuiWindowFlags_NoNavInputs            = ImGuiWindowFlags_::ImGuiWindowFlags_NoNavInputs,
-        ImGuiWindowFlags_NoNavFocus             = ImGuiWindowFlags_::ImGuiWindowFlags_NoNavFocus,
-        ImGuiWindowFlags_UnsavedDocument        = ImGuiWindowFlags_::ImGuiWindowFlags_UnsavedDocument,
-        ImGuiWindowFlags_NoNav                  = ImGuiWindowFlags_::ImGuiWindowFlags_NoNav,
-        ImGuiWindowFlags_NoDecoration           = ImGuiWindowFlags_::ImGuiWindowFlags_NoDecoration,
-        ImGuiWindowFlags_NoInputs               = ImGuiWindowFlags_::ImGuiWindowFlags_NoInputs
-    };
+enum ImGuiWindowFlags
+{
+    ImGuiWindowFlags_None                   = ImGuiWindowFlags_::ImGuiWindowFlags_None,
+    ImGuiWindowFlags_NoTitleBar             = ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar,
+    ImGuiWindowFlags_NoResize               = ImGuiWindowFlags_::ImGuiWindowFlags_NoResize,
+    ImGuiWindowFlags_NoMove                 = ImGuiWindowFlags_::ImGuiWindowFlags_NoMove,
+    ImGuiWindowFlags_NoScrollbar            = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar,
+    ImGuiWindowFlags_NoScrollWithMouse      = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse,
+    ImGuiWindowFlags_NoCollapse             = ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse,
+    ImGuiWindowFlags_AlwaysAutoResize       = ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysAutoResize,
+    ImGuiWindowFlags_NoBackground           = ImGuiWindowFlags_::ImGuiWindowFlags_NoBackground,
+    ImGuiWindowFlags_NoSavedSettings        = ImGuiWindowFlags_::ImGuiWindowFlags_NoSavedSettings,
+    ImGuiWindowFlags_NoMouseInputs          = ImGuiWindowFlags_::ImGuiWindowFlags_NoMouseInputs,
+    ImGuiWindowFlags_MenuBar                = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar,
+    ImGuiWindowFlags_HorizontalScrollbar    = ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar,
+    ImGuiWindowFlags_NoFocusOnAppearing     = ImGuiWindowFlags_::ImGuiWindowFlags_NoFocusOnAppearing,
+    ImGuiWindowFlags_NoBringToFrontOnFocus  = ImGuiWindowFlags_::ImGuiWindowFlags_NoBringToFrontOnFocus,
+    ImGuiWindowFlags_AlwaysVerticalScrollbar= ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysVerticalScrollbar,
+    ImGuiWindowFlags_AlwaysHorizontalScrollbar=ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysHorizontalScrollbar,
+    ImGuiWindowFlags_NoNavInputs            = ImGuiWindowFlags_::ImGuiWindowFlags_NoNavInputs,
+    ImGuiWindowFlags_NoNavFocus             = ImGuiWindowFlags_::ImGuiWindowFlags_NoNavFocus,
+    ImGuiWindowFlags_UnsavedDocument        = ImGuiWindowFlags_::ImGuiWindowFlags_UnsavedDocument,
+    ImGuiWindowFlags_NoNav                  = ImGuiWindowFlags_::ImGuiWindowFlags_NoNav,
+    ImGuiWindowFlags_NoDecoration           = ImGuiWindowFlags_::ImGuiWindowFlags_NoDecoration,
+    ImGuiWindowFlags_NoInputs               = ImGuiWindowFlags_::ImGuiWindowFlags_NoInputs
+};
 
 //  [[script::bindings::enumeration]]
 enum ImGuiInputTextFlags
@@ -79,17 +79,17 @@ enum ImGuiInputTextFlags
 };
 
 //  [[script::bindings::enumeration]]
-    enum ImGuiSliderFlags {
-        ImGuiSliderFlags_None               = ImGuiSliderFlags_::ImGuiSliderFlags_None,
-        ImGuiSliderFlags_Logarithmic        = ImGuiSliderFlags_::ImGuiSliderFlags_Logarithmic,
-        ImGuiSliderFlags_NoRoundToFormat    = ImGuiSliderFlags_::ImGuiSliderFlags_NoRoundToFormat,
-        ImGuiSliderFlags_NoInput            = ImGuiSliderFlags_::ImGuiSliderFlags_NoInput,
-        ImGuiSliderFlags_WrapAround         = ImGuiSliderFlags_::ImGuiSliderFlags_WrapAround,
-        ImGuiSliderFlags_ClampOnInput       = ImGuiSliderFlags_::ImGuiSliderFlags_ClampOnInput,
-        ImGuiSliderFlags_ClampZeroRange     = ImGuiSliderFlags_::ImGuiSliderFlags_ClampZeroRange,
-        ImGuiSliderFlags_NoSpeedTweaks      = ImGuiSliderFlags_::ImGuiSliderFlags_NoSpeedTweaks,
-        ImGuiSliderFlags_AlwaysClamp        = ImGuiSliderFlags_::ImGuiSliderFlags_AlwaysClamp
-    };
+enum ImGuiSliderFlags {
+    ImGuiSliderFlags_None               = ImGuiSliderFlags_::ImGuiSliderFlags_None,
+    ImGuiSliderFlags_Logarithmic        = ImGuiSliderFlags_::ImGuiSliderFlags_Logarithmic,
+    ImGuiSliderFlags_NoRoundToFormat    = ImGuiSliderFlags_::ImGuiSliderFlags_NoRoundToFormat,
+    ImGuiSliderFlags_NoInput            = ImGuiSliderFlags_::ImGuiSliderFlags_NoInput,
+    ImGuiSliderFlags_WrapAround         = ImGuiSliderFlags_::ImGuiSliderFlags_WrapAround,
+    ImGuiSliderFlags_ClampOnInput       = ImGuiSliderFlags_::ImGuiSliderFlags_ClampOnInput,
+    ImGuiSliderFlags_ClampZeroRange     = ImGuiSliderFlags_::ImGuiSliderFlags_ClampZeroRange,
+    ImGuiSliderFlags_NoSpeedTweaks      = ImGuiSliderFlags_::ImGuiSliderFlags_NoSpeedTweaks,
+    ImGuiSliderFlags_AlwaysClamp        = ImGuiSliderFlags_::ImGuiSliderFlags_AlwaysClamp
+};
 
 //  [[script::bindings::enumeration]]
 enum ImGuiColorEditFlags {
@@ -208,9 +208,7 @@ public:
     static sp<ImGuiViewportType> getMainViewport();
 
 //  [[script::bindings::auto]]
-    void addWidget(sp<Widget> widget, sp<Boolean> discarded) const;
-//  [[script::bindings::auto]]
-    void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded) const;
+    void addWidget(sp<Widget> widget, sp<Boolean> discarded = nullptr) const;
 //  [[script::bindings::auto]]
     void show(sp<Boolean> discarded) const;
 

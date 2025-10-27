@@ -419,7 +419,7 @@ class GenLoaderMethod(GenMethod):
         return self.gen_py_method_def_tp(genclass)
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]):
-        return 'PythonExtension::instance().ensurePyArkType(reinterpret_cast<PyObject*>(self))->load(*self, "%s", %s);' % (self._name, ', '.join(argvalues))
+        return 'PythonExtension::instance().ensurePyArkType(reinterpret_cast<PyObject*>(self))->load(*self, %s);' % ', '.join(argvalues)
 
     def need_unpack_statement(self):
         return False

@@ -146,11 +146,11 @@ int32_t PyArkType::doReady(TypeId typeId)
     return PyType_Ready(&_py_type_object);
 }
 
-PyObject* PyArkType::load(Instance& inst, const String& loader, TypeId typeId, const String& id, const Scope& args) const
+PyObject* PyArkType::load(Instance& inst, const TypeId typeId, const String& id, const Scope& args) const
 {
     const Map<TypeId, LoaderFunction>& functions = loaders();
     const auto iter = functions.find(typeId);
-    DCHECK(iter != functions.end(), "Loader \"%s\" has no LoaderFunction for %d", loader.c_str(), typeId);
+    CHECK(iter != functions.end(), "No LoaderFunction defined for %d", typeId);
     return PythonExtension::instance().toPyObject(iter->second(inst, id, args));
 }
 

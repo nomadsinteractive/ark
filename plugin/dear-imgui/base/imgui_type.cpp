@@ -32,12 +32,7 @@ sp<ImGuiViewportType> Imgui::getMainViewport()
 
 void Imgui::addWidget(sp<Widget> widget, sp<Boolean> discarded) const
 {
-    _renderer->addRenderer(WidgetType::toRenderer(std::move(widget)), {std::move(discarded)});
-}
-
-void Imgui::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded) const
-{
-    _renderer->addRenderer(std::move(renderer), {std::move(discarded)});
+    _renderer->addWidget(std::move(widget), std::move(discarded));
 }
 
 void Imgui::show(sp<Boolean> discarded) const
