@@ -28,7 +28,7 @@ public:
     WidgetBuilder(const sp<Renderer>& imguiRenderer);
 
 //  [[script::bindings::auto]]
-    bool begin(String name, sp<Boolean> isOpen = nullptr);
+    bool begin(String name, sp<Boolean> isOpen = nullptr, Imgui::ImGuiWindowFlags flags = Imgui::ImGuiWindowFlags_None);
 //  [[script::bindings::auto]]
     void end();
 

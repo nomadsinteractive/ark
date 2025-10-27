@@ -98,14 +98,15 @@ namespace {
 
 class Window final : public WidgetGroup {
 public:
-    Window(String name, sp<BooleanWrapper> isOpen)
-        : _name(std::move(name)), _is_open(std::move(isOpen)) {
+    Window(String name, sp<BooleanWrapper> isOpen, const ImGuiWindowFlags flags)
+        : _name(std::move(name)), _is_open(std::move(isOpen)), _flags(flags) {
     }
 
     void render() override {
-        if(const bool isOpen = _is_open->val()) {
+        if(const bool isOpen = _is_open->val())
+        {
             bool isOpenArg = isOpen;
-            if(ImGui::Begin(_name.c_str(), &isOpenArg))
+            if(ImGui::Begin(_name.c_str(), &isOpenArg, _flags))
                 WidgetGroup::render();
             ImGui::End();
             if(isOpen != isOpenArg)
@@ -116,6 +117,7 @@ public:
 private:
     String _name;
     sp<BooleanWrapper> _is_open;
+    ImGuiWindowFlags _flags;
 };
 
 class MainMenuBar final : public WidgetGroup {
@@ -292,18 +294,19 @@ private:
 
 class WindowNoClose final : public WidgetGroup {
 public:
-    WindowNoClose(String name)
-        : _name(std::move(name)) {
+    WindowNoClose(String name, const ImGuiWindowFlags flags)
+        : _name(std::move(name)), _flags(flags) {
     }
 
     void render() override {
-        if(ImGui::Begin(_name.c_str(), nullptr))
+        if(ImGui::Begin(_name.c_str(), nullptr, _flags))
             WidgetGroup::render();
         ImGui::End();
     }
 
 private:
     String _name;
+    ImGuiWindowFlags _flags;
 };
 
 class WidgetText final : public Widget {
@@ -542,10 +545,10 @@ WidgetBuilder::WidgetBuilder(const sp<Renderer>& imguiRenderer)
     push(sp<WidgetGroup>::make());
 }
 
-bool WidgetBuilder::begin(String name, sp<Boolean> isOpen)
+bool WidgetBuilder::begin(String name, sp<Boolean> isOpen, const Imgui::ImGuiWindowFlags flags)
 {
     CHECK(isOpen == nullptr || isOpen.isInstance<BooleanWrapper>(), "isOpen parameter must be either BooleanWrapper instance or nullptr");
-    sp<WidgetGroup> window = isOpen ? sp<WidgetGroup>::make<Window>(std::move(name), std::move(isOpen)) : sp<WidgetGroup>::make<WindowNoClose>(std::move(name));
+    sp<WidgetGroup> window = isOpen ? sp<WidgetGroup>::make<Window>(std::move(name), std::move(isOpen), flags) : sp<WidgetGroup>::make<WindowNoClose>(std::move(name), flags);
     addWidgetGroupAndPush(std::move(window));
     return true;
 }

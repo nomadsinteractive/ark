@@ -64,11 +64,8 @@ class Window:
         self._renderer = Renderer()
         self._widget = None
 
-    def ready(self, imgui: Renderer | None = None):
+    def ready(self, imgui: Renderer):
         if self._widget is None:
-            if imgui is None:
-                imgui = _mark_studio.imgui
-
             builder = dear_imgui.WidgetBuilder(imgui)
             builder.begin(self.title, self.is_open)
             self.on_create(builder)
@@ -82,7 +79,7 @@ class Window:
     def show(self):
         if self.is_open is not None:
             self.is_open.set(True)
-        self.ready()
+        self.ready(_mark_studio.imgui)
         self.on_show()
 
     def close(self):
@@ -119,7 +116,7 @@ class MainWindow(Window):
         self._build_quick_bar()
 
     def _build_quick_bar(self):
-        quick_bar_builder = dear_imgui.WidgetBuilder(self._mark_studio.imgui)
+        quick_bar_builder = self._mark_studio.make_widget_builder()
 
         for i, j in enumerate(self._quick_bar_items):
             if i != 0:
@@ -138,8 +135,7 @@ class MainWindow(Window):
 
 
 class ConsoleWindow(Window):
-    def __init__(self, imgui: Renderer, console_cmds: list[ConsoleCommand], is_open: Optional[bool]):
-        self._imgui = imgui
+    def __init__(self, console_cmds: list[ConsoleCommand], is_open: Optional[bool]):
         self._console_cmds = console_cmds
         super().__init__('Command Console', is_open)
 
@@ -160,7 +156,7 @@ class ConsoleWindow(Window):
         builder.add_widget(self._make_cmd_tab_widget(self._console_cmds))
 
     def _make_cmd_tab_widget(self, console_cmds: list[ConsoleCommand]) -> dear_imgui.Widget:
-        tab_title_builder = dear_imgui.WidgetBuilder(self._imgui)
+        tab_title_builder = _mark_studio.make_widget_builder()
         tab_panel_wrapper = dear_imgui.Widget()
         console_cmds_count = len(console_cmds)
         for i, j in enumerate(console_cmds):
@@ -173,7 +169,7 @@ class ConsoleWindow(Window):
         return dear_imgui.Widget([tab_title_widget, tab_panel_wrapper])
 
     def _make_tab_panel_widget(self, console_cmd: ConsoleCommand, tab_panel: dear_imgui.Widget):
-        builder = dear_imgui.WidgetBuilder(self._imgui)
+        builder = _mark_studio.make_widget_builder()
         sub_tab_panel = dear_imgui.Widget()
         public_properties = console_cmd.get_public_properties()
         builder.push_id(id(console_cmd.delegate))
@@ -210,7 +206,7 @@ class ConsoleWindow(Window):
         return _callback
 
     def _create_sub_panel(self, sub_tab_panel: dear_imgui.Widget, widget: dear_imgui.Widget):
-        builder = dear_imgui.WidgetBuilder(self._imgui)
+        builder = _mark_studio.make_widget_builder()
         builder.new_line()
         builder.separator()
         builder.add_widget(widget)
@@ -287,6 +283,9 @@ class NoiseGeneratorWindow(Window):
 
 class MarkStudio:
     def __init__(self, application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
+        global _mark_studio
+        _mark_studio = self
+
         self._application_facade = application_facade
         self._imgui = imgui
         self._discarded = Boolean(False)
@@ -294,7 +293,7 @@ class MarkStudio:
 
         self._renderer = Renderer()
         self._imgui.add_renderer(self._renderer, self._discarded)
-        self._windows: list[Window] = [ConsoleWindow(self._imgui, console_cmds, True), NoiseGeneratorWindow(False)]
+        self._windows: list[Window] = [ConsoleWindow(console_cmds, True), NoiseGeneratorWindow(False)]
         self.on_create()
 
         self._main_window = MainWindow(self, None, quick_bar_items)
@@ -357,6 +356,9 @@ class MarkStudio:
         self._application_facade.push_event_listener(self._imgui, self._discarded)
 
     def close(self):
+        global _mark_studio
+        _mark_studio = None
+
         self._imgui = None
         self._discarded.set(True)
         return True
@@ -380,14 +382,11 @@ def get_mark_studio() -> Optional[MarkStudio]:
 
 
 def close_mark_studio():
-    global _mark_studio
     if _mark_studio and not _mark_studio.discarded:
         _mark_studio.close()
-    _mark_studio = None
 
 
 def show_mark_studio(application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
-    global _mark_studio
     if not _mark_studio or _mark_studio.discarded:
-        _mark_studio = MarkStudio(application_facade, imgui, resolution, quick_bar_items, console_cmds)
-        _mark_studio.show()
+        mark_studio = MarkStudio(application_facade, imgui, resolution, quick_bar_items, console_cmds)
+        mark_studio.show()

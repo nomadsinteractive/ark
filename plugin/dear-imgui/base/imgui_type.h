@@ -3,29 +3,45 @@
 #include <imgui.h>
 
 #include "core/forwarding.h"
+#include "core/inf/builder.h"
+#include "core/inf/variable.h"
+
+#include "graphics/base/v2.h"
 
 #include "dear-imgui/forwarding.h"
 #include "dear-imgui/api.h"
+#include "dear-imgui/renderer/renderer_imgui.h"
 
 namespace ark::plugin::dear_imgui {
 
 class ARK_PLUGIN_DEAR_IMGUI_API Imgui {
 public:
 //  [[script::bindings::enumeration]]
-    enum ImGuiDataType {
-        ImGuiDataType_S8 = ImGuiDataType_::ImGuiDataType_S8,
-        ImGuiDataType_U8 = ImGuiDataType_::ImGuiDataType_U8,
-        ImGuiDataType_S16 = ImGuiDataType_::ImGuiDataType_S16,
-        ImGuiDataType_U16 = ImGuiDataType_::ImGuiDataType_U16,
-        ImGuiDataType_S32 = ImGuiDataType_::ImGuiDataType_S32,
-        ImGuiDataType_U32 = ImGuiDataType_::ImGuiDataType_U32,
-        ImGuiDataType_S64 = ImGuiDataType_::ImGuiDataType_S64,
-        ImGuiDataType_U64 = ImGuiDataType_::ImGuiDataType_U64,
-        ImGuiDataType_Float = ImGuiDataType_::ImGuiDataType_Float,
-        ImGuiDataType_Double = ImGuiDataType_::ImGuiDataType_Double,
-        ImGuiDataType_Bool = ImGuiDataType_::ImGuiDataType_Bool,
-        ImGuiDataType_String = ImGuiDataType_::ImGuiDataType_String,
-        ImGuiDataType_COUNT = ImGuiDataType_::ImGuiDataType_COUNT
+    enum ImGuiWindowFlags
+    {
+        ImGuiWindowFlags_None                   = ImGuiWindowFlags_::ImGuiWindowFlags_None,
+        ImGuiWindowFlags_NoTitleBar             = ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar,
+        ImGuiWindowFlags_NoResize               = ImGuiWindowFlags_::ImGuiWindowFlags_NoResize,
+        ImGuiWindowFlags_NoMove                 = ImGuiWindowFlags_::ImGuiWindowFlags_NoMove,
+        ImGuiWindowFlags_NoScrollbar            = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollbar,
+        ImGuiWindowFlags_NoScrollWithMouse      = ImGuiWindowFlags_::ImGuiWindowFlags_NoScrollWithMouse,
+        ImGuiWindowFlags_NoCollapse             = ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse,
+        ImGuiWindowFlags_AlwaysAutoResize       = ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysAutoResize,
+        ImGuiWindowFlags_NoBackground           = ImGuiWindowFlags_::ImGuiWindowFlags_NoBackground,
+        ImGuiWindowFlags_NoSavedSettings        = ImGuiWindowFlags_::ImGuiWindowFlags_NoSavedSettings,
+        ImGuiWindowFlags_NoMouseInputs          = ImGuiWindowFlags_::ImGuiWindowFlags_NoMouseInputs,
+        ImGuiWindowFlags_MenuBar                = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar,
+        ImGuiWindowFlags_HorizontalScrollbar    = ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar,
+        ImGuiWindowFlags_NoFocusOnAppearing     = ImGuiWindowFlags_::ImGuiWindowFlags_NoFocusOnAppearing,
+        ImGuiWindowFlags_NoBringToFrontOnFocus  = ImGuiWindowFlags_::ImGuiWindowFlags_NoBringToFrontOnFocus,
+        ImGuiWindowFlags_AlwaysVerticalScrollbar= ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysVerticalScrollbar,
+        ImGuiWindowFlags_AlwaysHorizontalScrollbar=ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysHorizontalScrollbar,
+        ImGuiWindowFlags_NoNavInputs            = ImGuiWindowFlags_::ImGuiWindowFlags_NoNavInputs,
+        ImGuiWindowFlags_NoNavFocus             = ImGuiWindowFlags_::ImGuiWindowFlags_NoNavFocus,
+        ImGuiWindowFlags_UnsavedDocument        = ImGuiWindowFlags_::ImGuiWindowFlags_UnsavedDocument,
+        ImGuiWindowFlags_NoNav                  = ImGuiWindowFlags_::ImGuiWindowFlags_NoNav,
+        ImGuiWindowFlags_NoDecoration           = ImGuiWindowFlags_::ImGuiWindowFlags_NoDecoration,
+        ImGuiWindowFlags_NoInputs               = ImGuiWindowFlags_::ImGuiWindowFlags_NoInputs
     };
 
 //  [[script::bindings::enumeration]]
@@ -185,6 +201,31 @@ enum ImGuiTabItemFlags
     ImGuiTabItemFlags_NoAssumedClosure              = ImGuiTabItemFlags_::ImGuiTabItemFlags_NoAssumedClosure
 };
 
+public:
+    Imgui(sp<RendererImgui> renderer);
+
+//  [[script::bindings::auto]]
+    static sp<ImGuiViewportType> getMainViewport();
+
+    void addWidget(sp<Widget> widget, sp<Boolean> discarded) const;
+
+    void show(sp<Boolean> discarded) const;
+
+//  [[plugin::builder("imgui")]]
+    class BUILDER final : public Builder<Imgui> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest);
+
+        sp<Imgui> build(const Scope& args) override;
+
+    private:
+        document _manifest;
+        sp<Camera> _camera;
+        sp<Builder<Shader>> _shader;
+    };
+
+private:
+    sp<RendererImgui> _renderer;
 };
 
 }

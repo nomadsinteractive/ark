@@ -223,7 +223,7 @@ const sp<RendererContext>& RendererImgui::rendererContext() const
     return _renderer_context;
 }
 
-void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, ImDrawData* draw_data)
+void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, ImDrawData* draw_data) const
 {
     for (int i = 0; i < draw_data->CmdListsCount; i++)
     {

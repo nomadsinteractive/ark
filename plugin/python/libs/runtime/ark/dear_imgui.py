@@ -159,7 +159,7 @@ class WidgetBuilder:
     def __init__(self, renderer):
         pass
 
-    def begin(self, title: str, is_open: Optional[Boolean] = None):
+    def begin(self, title: str, is_open: Optional[Boolean] = None, flags: int = 0):
         pass
 
     def end(self):
