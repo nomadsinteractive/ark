@@ -3036,6 +3036,7 @@ class NarrowPhrase:
 
 
 class Collider:
+
     def create_body(self, body_type: int | Integer, shape: Optional[Shape] = None, position: Optional[TYPE_VEC3] = None, rotation: Optional[TYPE_VEC4] = None, collision_filter: Optional[CollisionFilter] = None, discarded: Optional[Boolean] = None) -> Rigidbody:
         pass
 
