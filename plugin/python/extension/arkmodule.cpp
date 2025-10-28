@@ -155,6 +155,18 @@ PyObject* ark_getApplicationFacade(PyObject* /*self*/, PyObject* /*args*/)
     return PyCast::toPyObject(Ark::instance().applicationContext()->applicationFacade());
 }
 
+PyObject* ark_hashId(PyObject* /*self*/, PyObject* args)
+{
+    PyObject* arg0 = nullptr;
+    if(!PyArg_ParseTuple(args, "O", &arg0))
+        Py_RETURN_FALSE;
+
+    if(const Optional<TypeId> opt = PyCast::toCppObject<TypeId>(arg0))
+        return PyCast::toPyObject(opt->_hash);
+
+    return PyCast::toPyObject(PyObject_Hash(arg0));
+}
+
 PyObject* ark_trace_(PyObject* /*self*/, PyObject* /*args*/)
 {
     TRACE(true, "");
@@ -177,6 +189,7 @@ PyMethodDef ARK_METHODS[] = {
     {"is_ndc_y_up",  ark_is_NDC_Y_Up, METH_VARARGS, "is_ndc_y_up"},
     {"get_ref_manager",  ark_getRefManager, METH_VARARGS, "get_ref_manager"},
     {"facade",  ark_getApplicationFacade, METH_VARARGS, "get ApplicationFacade interface"},
+    {"hash_id",  ark_hashId, METH_VARARGS, "hash function"},
     {"__trace__",  ark_trace_, METH_VARARGS, "__trace__"},
     {nullptr, nullptr, 0, nullptr}
 };

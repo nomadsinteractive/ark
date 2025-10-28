@@ -76,6 +76,10 @@ def facade() -> "ApplicationFacade":
     return None
 
 
+def hash_id(obj: Any) -> int:
+    return 0
+
+
 def build_type() -> int:
     return 0
 
