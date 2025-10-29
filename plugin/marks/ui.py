@@ -109,11 +109,11 @@ class ToolbarWindow(Window):
         self._mark_studio = mark_studio
         self._toolbar_items = toolbar_items
         self._toolbar_widget = dear_imgui.Widget()
-        super().__init__('', is_open, dear_imgui.Imgui.ImGuiWindowFlags_NoTitleBar
-                                                        | dear_imgui.Imgui.ImGuiWindowFlags_NoResize
-                                                        | dear_imgui.Imgui.ImGuiWindowFlags_NoMove
-                                                        | dear_imgui.Imgui.ImGuiWindowFlags_NoScrollbar
-                                                        | dear_imgui.Imgui.ImGuiWindowFlags_NoSavedSettings)
+        super().__init__('Toolbar', is_open, dear_imgui.Imgui.ImGuiWindowFlags_NoTitleBar
+                                                | dear_imgui.Imgui.ImGuiWindowFlags_NoResize
+                                                | dear_imgui.Imgui.ImGuiWindowFlags_NoMove
+                                                | dear_imgui.Imgui.ImGuiWindowFlags_NoScrollbar
+                                                | dear_imgui.Imgui.ImGuiWindowFlags_NoSavedSettings)
         self.ready(mark_studio.imgui)
 
     def on_ready(self, builder: dear_imgui.WidgetBuilder):

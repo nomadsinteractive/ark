@@ -55,7 +55,6 @@ public:
 
     Map<String, Attribute> _attributes;
     Map<String, sp<StringVar>> _definitions;
-    Vector<LayoutBinding> _layout_bindings;
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
     Table<String, sp<Texture>> _images;
@@ -96,7 +95,6 @@ private:
     void loadPredefinedSampler(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadPredefinedImage(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadPredefinedBuffer(BeanFactory& factory, const Scope& args, const document& manifest);
-    void loadLayoutBindings(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest);
 
     Map<enums::ShaderStageBit, op<ShaderPreprocessor>> _rendering_stages;

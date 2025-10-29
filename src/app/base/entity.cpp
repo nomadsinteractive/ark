@@ -120,16 +120,7 @@ const sp<Ref>& Entity::ref() const
 void Entity::discard()
 {
     _ref->discard();
-    if(_discarded)
-        _discarded->discard();
     _components.table().clear();
-}
-
-sp<Discarded> Entity::discarded()
-{
-    if(!_discarded)
-        _discarded = sp<Discarded>::make(_components.get<Discarded>().cast<Boolean>());
-    return _discarded;
 }
 
 void Entity::addComponent(Box component)

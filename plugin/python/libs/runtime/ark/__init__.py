@@ -382,6 +382,9 @@ class Boolean(_Var):
     def __and__(self, other) -> "Boolean":
         pass
 
+    def __bool__(self):
+        return False
+
 
 class Behavior:
     def __init__(self, delegate: Any):
@@ -1229,9 +1232,6 @@ class Discarded(Boolean):
 
     def observe(self, observer: Observer) -> Boolean:
         pass
-
-    def __bool__(self):
-        return False
 
 
 class Vec2i:

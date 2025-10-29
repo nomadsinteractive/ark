@@ -41,8 +41,6 @@ public:
 //  [[script::bindings::auto]]
     void discard();
 //  [[script::bindings::auto]]
-    sp<Discarded> discarded();
-//  [[script::bindings::auto]]
     bool hasComponent(TypeId typeId) const;
 //  [[script::bindings::auto]]
     void addComponent(Box component);
@@ -80,7 +78,6 @@ private:
 
 private:
     sp<Ref> _ref;
-    sp<Discarded> _discarded;
     Traits _components;
 };
 

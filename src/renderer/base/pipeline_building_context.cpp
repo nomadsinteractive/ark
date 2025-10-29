@@ -50,6 +50,18 @@ bool checkUnsuedUniforms(const Table<String, sp<Uniform>>& uniforms, const Vecto
     return true;
 }
 
+sp<Uniform> loadUniform(BeanFactory& factory, const Scope& args, const String& name, const String& type, const String& value)
+{
+    const sp<Builder<Uploader>> builder = factory.ensureBuilderByTypeValue<sp<Uploader>>(type, value);
+    sp<Uploader> uploader = builder->build(args);
+    const uint32_t size = static_cast<uint32_t>(uploader->size());
+    const Uniform::Type uType = Uniform::toType(type);
+    const uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
+    CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
+    CHECK_WARN(uType != Uniform::TYPE_F3, "We strongly against declaring vec3 uniform type for \"%s\"", name.c_str());
+    return sp<Uniform>::make(std::move(name), uType, componentSize, size / componentSize, std::move(uploader));
+}
+
 }
 
 PipelineBuildingContext::PipelineBuildingContext()
@@ -69,7 +81,6 @@ void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory
     loadPredefinedUniform(factory, args, manifest);
     loadPredefinedSampler(factory, args, manifest);
     loadPredefinedImage(factory, args, manifest);
-    loadLayoutBindings(factory, args, manifest);
     loadPredefinedBuffer(factory, args, manifest);
     loadDefinitions(factory, args, manifest);
     loadPredefinedAttribute(manifest);
@@ -323,14 +334,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const String& name = Documents::ensureAttribute(i, constants::NAME);
         const String& type = Documents::ensureAttribute(i, constants::TYPE);
         const String& value = Documents::ensureAttribute(i, constants::VALUE);
-        const sp<Builder<Uploader>> builder = factory.ensureBuilderByTypeValue<sp<Uploader>>(type, value);
-        sp<Uploader> uploader = builder->build(args);
-        const uint32_t size = static_cast<uint32_t>(uploader->size());
-        const Uniform::Type uType = Uniform::toType(type);
-        const uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
-        CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
-        CHECK_WARN(uType != Uniform::TYPE_F3, "We strongly against declaring vec3 uniform type for \"%s\"", name.c_str());
-        addUniform(sp<Uniform>::make(std::move(name), uType, componentSize, size / componentSize, std::move(uploader)));
+        addUniform(loadUniform(factory, args, name, type, value));
     }
 }
 
@@ -372,23 +376,6 @@ void PipelineBuildingContext::loadPredefinedBuffer(BeanFactory& factory, const S
         String name = Documents::getAttribute(i, constants::NAME);
         CHECK(!_ssbos.has(name), "Buffer object \"%s\" redefined", name.c_str());
         _ssbos.push_back(name, factory.ensure<Buffer>(i, args));
-    }
-}
-
-void PipelineBuildingContext::loadLayoutBindings(BeanFactory& factory, const Scope& args, const document& manifest)
-{
-    for(const document& i : manifest->children(constants::LAYOUT))
-    {
-        const int32_t binding = Documents::getAttribute(i, "binding", -1);
-        String name = Documents::getAttribute(i, constants::NAME);
-        CHECK(name != "" || binding != -1, "Pipeline layout should have either name or binding defined: %s", Documents::toString(i).c_str());
-        const LayoutBindingType type = Documents::getAttribute(i, constants::TYPE, LAYOUT_BINDING_TYPE_AUTO);
-        if(type == LAYOUT_BINDING_TYPE_AUTO)
-        {
-            FATAL("LAYOUT_BINDING_TYPE_AUTO Unimplemented");
-        }
-        const Texture::Usage usage = Documents::getAttribute<Texture::Usage>(i, "usage", {Texture::USAGE_AUTO});
-        _layout_bindings.push_back({type, factory.ensure<Texture>(i, args), usage, std::move(name), binding});
     }
 }
 
