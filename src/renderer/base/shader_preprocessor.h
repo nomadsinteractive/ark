@@ -141,7 +141,7 @@ public:
     void initialize(PipelineBuildingContext& context);
     void initializeAsFirst(PipelineBuildingContext& context);
 
-    void setupUniforms(Table<String, sp<Uniform>>& uniforms);
+    void setupUniforms(const Table<String, sp<Uniform>>& uniforms);
 
     const char* inVarPrefix() const;
     const char* outVarPrefix() const;
@@ -173,6 +173,7 @@ private:
 
     sp<String> addUniform(const String& type, const String& name, uint32_t length, String declaration);
     uint32_t getUniformSize(Uniform::Type type, const String& declaredType) const;
+    uint32_t getUniformStructSize(const String& declaredType) const;
 
     void insertUBOStruct(const PipelineLayout::UBO& ubo, int32_t spaceSet);
 

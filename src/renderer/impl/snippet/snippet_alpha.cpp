@@ -13,7 +13,7 @@ void SnippetAlpha::preInitialize(PipelineBuildingContext& context)
 
 sp<Snippet> SnippetAlpha::DICTIONARY::build(const Scope& /*args*/)
 {
-    return sp<SnippetAlpha>::make();
+    return sp<Snippet>::make<SnippetAlpha>();
 }
 
 }

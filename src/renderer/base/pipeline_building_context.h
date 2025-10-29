@@ -15,12 +15,11 @@ namespace ark {
 
 class ARK_API PipelineBuildingContext {
 public:
-    PipelineBuildingContext();
-    PipelineBuildingContext(String vertex, String fragment);
+    PipelineBuildingContext(BeanFactory factory, const Scope& args);
 
     DISALLOW_COPY_AND_ASSIGN(PipelineBuildingContext);
 
-    void loadManifest(const document& manifest, BeanFactory& factory, const Scope& args);
+    void loadManifest(const document& manifest);
 
     void initialize(const Camera& camera);
 
@@ -30,14 +29,6 @@ public:
         LAYOUT_BINDING_TYPE_SAMPLER,
         LAYOUT_BINDING_TYPE_SSBO,
         LAYOUT_BINDING_TYPE_UBO
-    };
-
-    struct LayoutBinding {
-        LayoutBindingType _type;
-        sp<Texture> _texture;
-        Texture::Usage _usage;
-        String _name;
-        int32_t _binding;
     };
 
     struct VertexAttribute {
@@ -52,6 +43,8 @@ public:
     };
 
     sp<PipelineLayout> _pipeline_layout;
+    BeanFactory _factory;
+    const Scope& _args;
 
     Map<String, Attribute> _attributes;
     Map<String, sp<StringVar>> _definitions;
@@ -91,11 +84,11 @@ private:
     void tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, const sp<Mat4>& matrix);
 
     void loadPredefinedAttribute(const document& manifest);
-    void loadPredefinedUniform(BeanFactory& factory, const Scope& args, const document& manifest);
-    void loadPredefinedSampler(BeanFactory& factory, const Scope& args, const document& manifest);
-    void loadPredefinedImage(BeanFactory& factory, const Scope& args, const document& manifest);
-    void loadPredefinedBuffer(BeanFactory& factory, const Scope& args, const document& manifest);
-    void loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest);
+    void loadPredefinedUniform(const document& manifest);
+    void loadPredefinedSampler(const document& manifest);
+    void loadPredefinedImage(const document& manifest);
+    void loadPredefinedBuffer(const document& manifest);
+    void loadDefinitions(const document& manifest);
 
     Map<enums::ShaderStageBit, op<ShaderPreprocessor>> _rendering_stages;
     op<ShaderPreprocessor> _computing_stage;

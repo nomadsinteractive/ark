@@ -13,7 +13,7 @@ void SnippetTint::preInitialize(PipelineBuildingContext& context)
 
 sp<Snippet> SnippetTint::DICTIONARY::build(const Scope& /*args*/)
 {
-    return sp<SnippetTint>::make();
+    return sp<Snippet>::make<SnippetTint>();
 }
 
 }

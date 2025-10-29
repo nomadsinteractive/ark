@@ -102,21 +102,20 @@ sp<Snippet> createCoreSnippet(sp<Snippet> next)
     return coreSnippet;
 }
 
-sp<Snippet> createSnippet(const Camera& camera, sp<Snippet> snippet, PipelineBuildingContext& buildingContext)
+PipelineDescriptor::Configuration initConfiguration(PipelineDescriptor::Configuration configuration, PipelineBuildingContext& buildingContext, const Camera& camera)
 {
-    snippet = createCoreSnippet(std::move(snippet));
-    snippet->preInitialize(buildingContext);
+    configuration._snippet = createCoreSnippet(std::move(configuration._snippet));
+    configuration._snippet->preInitialize(buildingContext);
     buildingContext.initialize(camera);
-    return snippet;
+    return configuration;
 }
 
 }
 
 PipelineDescriptor::PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, Configuration configuration)
-    : _camera(std::move(camera)), _configuration(std::move(configuration)), _building_context(std::move(buildingContext)), _layout(_building_context->_pipeline_layout),
+    : _camera(std::move(camera)), _configuration(initConfiguration(std::move(configuration), buildingContext, _camera)), _building_context(std::move(buildingContext)), _layout(_building_context->_pipeline_layout),
       _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _definitions(_building_context->toDefinitions())
 {
-    _configuration._snippet = createSnippet(_camera, std::move(_configuration._snippet), _building_context);
     if(const op<ShaderPreprocessor>& computeStage = _building_context->computingStage())
     {
         V3i numWorkGroupsArray;

@@ -104,13 +104,11 @@ Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifes
 
 sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 {
-    sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(args);
-    buildingContext->loadManifest(_manifest, _factory, args);
-
     sp<Snippet> snippet;
     for(const sp<Builder<Snippet>>& i : _snippets)
         snippet = SnippetComposite::compose(std::move(snippet), i->build(args));
 
+    sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(args);
     const sp<Camera> camera = _camera.build(args);
     PipelineDescriptor::Configuration configuration = _configuration.build(args);
     configuration._snippet = std::move(snippet);
@@ -119,7 +117,7 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const Scope& args) const
 {
-    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make();
+    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_factory, args);
     const auto [vertexOpt, vertexIndex] = findStageManifest(enums::SHADER_STAGE_BIT_VERTEX, _stages);
     const auto [fragmentOpt, fragmentIndex] = findStageManifest(enums::SHADER_STAGE_BIT_FRAGMENT, _stages);
     const auto [computeOpt, computeIndex] = findStageManifest(enums::SHADER_STAGE_BIT_COMPUTE, _stages);
@@ -134,6 +132,8 @@ sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(co
         CHECK(computeOpt, "Shader must have at least one stage defined");
     if(computeOpt)
         context->addStage(std::move(*computeOpt->_source->build(args)), computeOpt->_manifest, enums::SHADER_STAGE_BIT_COMPUTE, fragmentOpt && fragmentIndex < computeIndex ? enums::SHADER_STAGE_BIT_FRAGMENT : enums::SHADER_STAGE_BIT_NONE);
+
+    context->loadManifest(_manifest);
     return context;
 }
 

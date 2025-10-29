@@ -460,7 +460,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
     for(const auto& [name, i, bindingSet] : _pipeline_bindings.samplers())
         if(shouldStageNeedBinding(bindingSet._stages))
         {
-            CHECK_WARN(i, "Pipeline has unbound sampler");
+            CHECK_WARN(i, "Pipeline has unbound sampler \"%s\"", name.c_str());
             if(i)
             {
                 const sp<VKTexture> texture = i->delegate();

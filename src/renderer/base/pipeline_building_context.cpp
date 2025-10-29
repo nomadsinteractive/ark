@@ -64,25 +64,18 @@ sp<Uniform> loadUniform(BeanFactory& factory, const Scope& args, const String& n
 
 }
 
-PipelineBuildingContext::PipelineBuildingContext()
-    : _pipeline_layout(sp<PipelineLayout>::make())
+PipelineBuildingContext::PipelineBuildingContext(BeanFactory factory, const Scope& args)
+    : _pipeline_layout(sp<PipelineLayout>::make()), _factory(std::move(factory)), _args(args)
 {
 }
 
-PipelineBuildingContext::PipelineBuildingContext(String vertex, String fragment)
-    : PipelineBuildingContext()
+void PipelineBuildingContext::loadManifest(const document& manifest)
 {
-    addStage(std::move(vertex), nullptr, enums::SHADER_STAGE_BIT_VERTEX, enums::SHADER_STAGE_BIT_NONE);
-    addStage(std::move(fragment), nullptr, enums::SHADER_STAGE_BIT_FRAGMENT, enums::SHADER_STAGE_BIT_VERTEX);
-}
-
-void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory& factory, const Scope& args)
-{
-    loadPredefinedUniform(factory, args, manifest);
-    loadPredefinedSampler(factory, args, manifest);
-    loadPredefinedImage(factory, args, manifest);
-    loadPredefinedBuffer(factory, args, manifest);
-    loadDefinitions(factory, args, manifest);
+    loadPredefinedUniform(manifest);
+    loadPredefinedSampler(manifest);
+    loadPredefinedImage(manifest);
+    loadPredefinedBuffer(manifest);
+    loadDefinitions(manifest);
     loadPredefinedAttribute(manifest);
 }
 
@@ -210,6 +203,23 @@ void PipelineBuildingContext::initialize(const Camera& camera)
 void PipelineBuildingContext::initializeUniforms()
 {
     for(ShaderPreprocessor* i : _stages)
+    {
+        for(const auto& [k, v] : i->_declaration_uniforms.vars())
+            if(!_uniforms.has(k))
+                addUniform(loadUniform(_factory, _args, k, v.type(), "$" + k));
+
+        for(const auto& [k, v] : i->_declaration_samplers.vars())
+            if(!_samplers.has(k))
+                if(Optional<sp<Texture>> sampler = _args.getObject<sp<Texture>>(k))
+                    _samplers.push_back(k, std::move(sampler.value()));
+
+        for(const auto& [k, v] : i->_declaration_images.vars())
+            if(!_images.has(k))
+                if(Optional<sp<Texture>> image = _args.getObject<sp<Texture>>(k))
+                    _images.push_back(k, std::move(image.value()));
+    }
+
+    for(ShaderPreprocessor* i : _stages)
         i->setupUniforms(_uniforms);
 
     int32_t binding = 0;
@@ -327,24 +337,24 @@ void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
     }
 }
 
-void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const Scope& args, const document& manifest)
+void PipelineBuildingContext::loadPredefinedUniform(const document& manifest)
 {
     for(const document& i : manifest->children("uniform"))
     {
         const String& name = Documents::ensureAttribute(i, constants::NAME);
         const String& type = Documents::ensureAttribute(i, constants::TYPE);
         const String& value = Documents::ensureAttribute(i, constants::VALUE);
-        addUniform(loadUniform(factory, args, name, type, value));
+        addUniform(loadUniform(_factory, _args, name, type, value));
     }
 }
 
-void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const Scope& args, const document& manifest)
+void PipelineBuildingContext::loadPredefinedSampler(const document& manifest)
 {
     uint32_t binding = 0;
     for(const document& i : manifest->children("sampler"))
     {
         String name = Documents::getAttribute(i, constants::NAME);
-        sp<Texture> texture = factory.ensure<Texture>(i, args);
+        sp<Texture> texture = _factory.ensure<Texture>(i, _args);
         if(!name)
             name = Strings::sprintf("u_Texture%d", binding);
         CHECK(!_samplers.has(name), "Sampler \"%s\" redefined", name.c_str());
@@ -353,13 +363,13 @@ void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const 
     }
 }
 
-void PipelineBuildingContext::loadPredefinedImage(BeanFactory& factory, const Scope& args, const document& manifest)
+void PipelineBuildingContext::loadPredefinedImage(const document& manifest)
 {
     uint32_t binding = 0;
     for(const document& i : manifest->children("image"))
     {
         String name = Documents::getAttribute(i, constants::NAME);
-        sp<Texture> texture = factory.ensure<Texture>(i, args);
+        sp<Texture> texture = _factory.ensure<Texture>(i, _args);
         if(!name)
             name = Strings::sprintf("u_Image%d", binding);
         CHECK(!_images.has(name), "Image \"%s\" redefined", name.c_str());
@@ -369,13 +379,13 @@ void PipelineBuildingContext::loadPredefinedImage(BeanFactory& factory, const Sc
     }
 }
 
-void PipelineBuildingContext::loadPredefinedBuffer(BeanFactory& factory, const Scope& args, const document& manifest)
+void PipelineBuildingContext::loadPredefinedBuffer(const document& manifest)
 {
     for(const document& i : manifest->children("buffer"))
     {
         String name = Documents::getAttribute(i, constants::NAME);
         CHECK(!_ssbos.has(name), "Buffer object \"%s\" redefined", name.c_str());
-        _ssbos.push_back(name, factory.ensure<Buffer>(i, args));
+        _ssbos.push_back(name, _factory.ensure<Buffer>(i, _args));
     }
 }
 
@@ -418,13 +428,13 @@ void PipelineBuildingContext::initializeStages(const Camera& camera)
     }
 }
 
-void PipelineBuildingContext::loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest)
+void PipelineBuildingContext::loadDefinitions(const document& manifest)
 {
     for(const document& i : manifest->children("define"))
     {
         String name = Documents::getAttribute(i, constants::NAME);
         CHECK_WARN(!_definitions.contains(name), "Definition \"%s\" redefined", name.c_str());
-        _definitions.insert(std::make_pair(name, factory.ensureBuilder<StringVar>(i, constants::VALUE)->build(args)));
+        _definitions.insert(std::make_pair(name, _factory.ensureBuilder<StringVar>(i, constants::VALUE)->build(_args)));
     }
 }
 

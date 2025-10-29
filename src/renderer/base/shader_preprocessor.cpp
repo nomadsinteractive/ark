@@ -209,16 +209,8 @@ ShaderPreprocessor::Stage ShaderPreprocessor::preprocess() const
     return {_manifest, _shader_stage, genDeclarations(_main.str())};
 }
 
-void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms)
+void ShaderPreprocessor::setupUniforms(const Table<String, sp<Uniform>>& uniforms)
 {
-    for(const auto& [name, declare] : _declaration_uniforms.vars())
-        if(!uniforms.has(name))
-        {
-            Uniform::Type type = Uniform::toType(declare.type());
-            uniforms.push_back(name, sp<Uniform>::make(name, declare.type(), type, type == Uniform::TYPE_STRUCT ? getUniformSize(type, declare.type())
-                                                                                                                : Uniform::getComponentSize(type), declare.length(), nullptr));
-        }
-
     for(const sp<Uniform>& i : uniforms.values())
     {
         const String::size_type pos = i->name().find('[');
@@ -362,7 +354,12 @@ uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& de
     if(type != Uniform::TYPE_STRUCT)
         return Uniform::getComponentSize(type);
 
-    const String source = _struct_definitions.at(declaredType);
+    return getUniformStructSize(declaredType);
+}
+
+uint32_t ShaderPreprocessor::getUniformStructSize(const String& declaredType) const
+{
+    const String& source = _struct_definitions.at(declaredType);
     uint32_t size = 0;
     for(const String& i : source.split(';'))
     {
