@@ -12,6 +12,7 @@ CollisionObjectRef::CollisionObjectRef(btCollisionObject* collisionObject, sp<Co
 
 btRigidBody* CollisionObjectRef::rigidBody() const
 {
+    CHECK(_collision_object, "CollisionObject has beed destroyed");
     btRigidBody* body = btRigidBody::upcast(_collision_object.get());
     CHECK(body, "CollisionObject(%d) is not a btRigidBody instance", _collision_object->getInternalType());
     return body;

@@ -75,6 +75,16 @@ void RigidbodyControllerType::setLinearVelocity(const sp<RigidbodyController>& s
     self->setLinearVelocity(velocity);
 }
 
+V3 RigidbodyControllerType::centralForce(const sp<RigidbodyController>& self)
+{
+    return self->centralForce();
+}
+
+void RigidbodyControllerType::setCentralForce(const sp<RigidbodyController>& self, const V3 force)
+{
+    self->setCentralForce(force);
+}
+
 V3 RigidbodyControllerType::linearFactor(const sp<RigidbodyController>& self)
 {
     return self->linearFactor();
@@ -125,22 +135,18 @@ void RigidbodyControllerType::setMass(const sp<RigidbodyController>& self, const
     self->setMass(mass);
 }
 
-sp<Future> RigidbodyControllerType::applyLinearVelocity(sp<RigidbodyController> self, sp<Vec3> linearVelocity)
+sp<Future> RigidbodyControllerType::applyLinearVelocity(sp<RigidbodyController> self, sp<Vec3> linearVelocity, sp<Future> future)
 {
-    sp<Future> future = sp<Future>::make();
+    if(!future)
+        future = sp<Future>::make();
     Ark::instance().renderController()->addPreComposeUpdatable(sp<Updatable>::make<UpdatableApplyLinearVelocity>(std::move(self), std::move(linearVelocity)), future->isDoneOrCanceled());
     return future;
 }
 
-sp<Future> RigidbodyControllerType::applyCentralForce(const sp<RigidbodyController>& self, const V3 force)
+sp<Future> RigidbodyControllerType::applyCentralForce(const sp<RigidbodyController>& self, sp<Vec3> force, sp<Future> future)
 {
-    self->applyCentralForce(force);
-    return nullptr;
-}
-
-sp<Future> RigidbodyControllerType::applyCentralForce(const sp<RigidbodyController>& self, sp<Vec3> force)
-{
-    sp<Future> future = sp<Future>::make();
+    if(!future)
+        future = sp<Future>::make();
     Ark::instance().renderController()->addPreComposeUpdatable(sp<Updatable>::make<UpdatableApplyCentralForce>(std::move(self), std::move(force)), future->isDoneOrCanceled());
     return future;
 }

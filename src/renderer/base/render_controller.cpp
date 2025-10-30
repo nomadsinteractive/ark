@@ -375,14 +375,16 @@ void RenderController::onPreCompose(const uint64_t timestamp)
 
     _defered_instances.clear();
 
-    DPROFILER_LOG("Updatables", _on_pre_compose_updatable.items().size());
-    for(const sp<Updatable>& i : _on_pre_compose_updatable.update(timestamp))
-        i->update(timestamp);
-
-    DPROFILER_LOG("Runnables", _on_pre_compose_runnable.items().size());
-    for(const sp<Runnable>& runnable : _on_pre_compose_runnable.update(timestamp))
-        runnable->run();
-
+    {
+        DPROFILER_LOG("Updatables", _on_pre_compose_updatable.items().size());
+        for(const sp<Updatable>& i : _on_pre_compose_updatable.update(timestamp))
+            i->update(timestamp);
+    }
+    {
+        DPROFILER_LOG("Runnables", _on_pre_compose_runnable.items().size());
+        for(const sp<Runnable>& runnable : _on_pre_compose_runnable.update(timestamp))
+            runnable->run();
+    }
     for(auto iter = _on_pre_render_sync.begin(); iter != _on_pre_render_sync.end(); )
     {
         UpdatableSynchronized<bool>& i = *iter;

@@ -91,7 +91,7 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
 
     if(_configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
         for(const auto& [t, cv] : _configure._color_attachments)
-            _clear_values.push_back(VkClearValue{cv.x(), cv.y(), cv.z(), cv.w()});
+            _clear_values.push_back({{{cv.x(), cv.y(), cv.z(), cv.w()}}});
 
     VkClearValue clearDepthStencil;
     clearDepthStencil.depthStencil = { 1.0f, 0 };

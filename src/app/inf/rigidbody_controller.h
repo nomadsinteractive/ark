@@ -11,6 +11,9 @@ public:
     virtual bool active() const = 0;
     virtual void setActive(bool active) = 0;
 
+    virtual V3 centralForce() const = 0;
+    virtual void setCentralForce(V3 force) = 0;
+
     virtual V3 linearVelocity() const = 0;
     virtual void setLinearVelocity(V3 velocity) = 0;
 

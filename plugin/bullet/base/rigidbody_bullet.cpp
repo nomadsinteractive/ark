@@ -92,6 +92,17 @@ void RigidbodyBullet::setActive(const bool active)
         _stub->_collision_object_ref->rigidBody()->setActivationState(WANTS_DEACTIVATION);
 }
 
+V3 RigidbodyBullet::centralForce() const
+{
+    const btVector3 force = _stub->_collision_object_ref->rigidBody()->getTotalForce();
+    return {force.x(), force.y(), force.z()};
+}
+
+void RigidbodyBullet::setCentralForce(V3 force)
+{
+    _stub->_collision_object_ref->rigidBody()->applyCentralForce({force.x(), force.y(), force.z()});
+}
+
 V3 RigidbodyBullet::linearVelocity() const
 {
     const btVector3& velocity = _stub->_collision_object_ref->rigidBody()->getLinearVelocity();

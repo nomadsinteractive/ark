@@ -43,6 +43,9 @@ public:
     float angle();
     void setAngle(float rad);
 
+    V3 centralForce() const override;
+    void setCentralForce(V3 force) override;
+
     V3 linearVelocity() const override;
     void setLinearVelocity(V3 velocity) override;
 
@@ -51,6 +54,7 @@ public:
 
     V3 angularVelocity() const override;
     void setAngularVelocity(V3 velocity) override;
+
     V3 angularFactor() const override;
     void setAngularFactor(V3 factor) override;
 

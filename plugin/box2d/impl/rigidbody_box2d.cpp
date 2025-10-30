@@ -204,6 +204,16 @@ void RigidbodyBox2D::setAngle(float rad)
     _stub->body()->SetTransform(_stub->_body->GetWorldCenter(), rad);
 }
 
+V3 RigidbodyBox2D::centralForce() const
+{
+    return V3(0);
+}
+
+void RigidbodyBox2D::setCentralForce(const V3 force)
+{
+    _stub->body()->ApplyForceToCenter({force.x(), force.y()}, true);
+}
+
 V3 RigidbodyBox2D::linearVelocity() const
 {
     const b2Vec2 velocity = _stub->body()->GetLinearVelocity();

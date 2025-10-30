@@ -2848,6 +2848,14 @@ class RigidbodyController:
         pass
 
     @property
+    def central_force(self) -> TYPE_FLOAT3:
+        return 0, 0, 0
+
+    @central_force.setter
+    def central_force(self, central_force: TYPE_FLOAT3):
+        pass
+
+    @property
     def linear_factor(self) -> TYPE_FLOAT3:
         return 0, 0, 0
 
@@ -2887,10 +2895,10 @@ class RigidbodyController:
     def mass(self, mass: float):
         pass
 
-    def apply_linear_velocity(self, linear_velocity: TYPE_VEC3) -> Future:
+    def apply_linear_velocity(self, linear_velocity: TYPE_VEC3, future: Optional[Future] = None) -> Future:
         pass
 
-    def apply_central_force(self, force: TYPE_FLOAT3):
+    def apply_central_force(self, force: TYPE_VEC3, future: Optional[Future] = None) -> Future:
         pass
 
     def apply_central_impulse(self, impulse: TYPE_FLOAT3):

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/forwarding.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/base/v3.h"
 
@@ -20,6 +21,11 @@ public:
     static V3 linearVelocity(const sp<RigidbodyController>& self);
 //  [[script::bindings::property]]
     static void setLinearVelocity(const sp<RigidbodyController>& self, V3 velocity);
+
+//  [[script::bindings::property]]
+    static V3 centralForce(const sp<RigidbodyController>& self);
+//  [[script::bindings::property]]
+    static void setCentralForce(const sp<RigidbodyController>& self, V3 force);
 
 //  [[script::bindings::property]]
     static V3 linearFactor(const sp<RigidbodyController>& self);
@@ -47,12 +53,9 @@ public:
     static void setMass(const sp<RigidbodyController>& self, float mass);
 
 //  [[script::bindings::classmethod]]
-    static sp<Future> applyLinearVelocity(sp<RigidbodyController> self, sp<Vec3> linearVelocity);
-
+    static sp<Future> applyLinearVelocity(sp<RigidbodyController> self, sp<Vec3> linearVelocity, sp<Future> future = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Future> applyCentralForce(const sp<RigidbodyController>& self, V3 force);
-//  [[script::bindings::classmethod]]
-    static sp<Future> applyCentralForce(const sp<RigidbodyController>& self, sp<Vec3> force);
+    static sp<Future> applyCentralForce(const sp<RigidbodyController>& self, sp<Vec3> force, sp<Future> future = nullptr);
 //  [[script::bindings::classmethod]]
     static void applyCentralImpulse(const sp<RigidbodyController>& self, V3 impulse);
 };

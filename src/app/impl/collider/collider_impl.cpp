@@ -99,6 +99,17 @@ public:
     {
     }
 
+    V3 centralForce() const override
+    {
+        FATAL("Unimplemented");
+        return V3(0);
+    }
+
+    void setCentralForce(const V3 force) override
+    {
+        FATAL("Unimplemented");
+    }
+
     V3 linearVelocity() const override
     {
         FATAL("Unimplemented");
