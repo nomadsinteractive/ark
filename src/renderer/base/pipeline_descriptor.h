@@ -169,7 +169,7 @@ public:
     const PipelineLayout::VertexDescriptor& vertexDescriptor() const;
 
     Vector<BindedTexture> makeBindingSamplers() const;
-    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> makeBindingImages() const;
+    Vector<BindedTexture> makeBindingImages() const;
 
     void preCompile(GraphicsContext& graphicsContext);
     Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;

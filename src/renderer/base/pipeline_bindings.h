@@ -34,7 +34,7 @@ public:
 
     const Vector<std::pair<uint32_t, Buffer>>& instanceBuffers() const;
     const Vector<PipelineDescriptor::BindedTexture>& samplers() const;
-    const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images() const;
+    const Vector<PipelineDescriptor::BindedTexture>& images() const;
 
     const sp<Pipeline>& ensurePipeline(GraphicsContext& graphicsContext);
     const sp<Pipeline>& ensureRenderPipeline(GraphicsContext& graphicsContext);

@@ -133,9 +133,9 @@ struct GLPipeline::Stub {
         }
 
         const Vector<String>& imageNames = pipelineBindings.pipelineLayout()->images().keys();
-        const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images = pipelineBindings.images();
+        const Vector<PipelineDescriptor::BindedTexture>& images = pipelineBindings.images();
         for(size_t i = 0; i < images.size(); ++i)
-            if(const sp<Texture>& image = images.at(i).first)
+            if(const sp<Texture>& image = images.at(i)._texture)
             {
                 const String& name = imageNames.at(i);
                 bindImage(image, name, static_cast<uint32_t>(i));

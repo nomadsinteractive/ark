@@ -477,10 +477,10 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
             }
         }
 
-    for(const auto& [i, bindingSet] : _pipeline_bindings.images())
+    for(const auto& [name, i, bindingSet] : _pipeline_bindings.images())
         if(shouldStageNeedBinding(bindingSet._stages))
         {
-            CHECK_WARN(i, "Pipeline has unbound image");
+            CHECK_WARN(i, "Pipeline has unbound image \"%s\"", name.c_str());
             if(i)
             {
                 const sp<VKTexture> texture = i->delegate();
@@ -645,7 +645,7 @@ bool VKPipeline::shouldRebind(const uint64_t tick) const
     for(const auto& [name, i, bindingSet] : _pipeline_bindings.samplers())
         if(i->update(tick))
             rebindNeeded = true;
-    for(const auto& [i, bindingSet] : _pipeline_bindings.images())
+    for(const auto& [name, i, bindingSet] : _pipeline_bindings.images())
         if(i->update(tick))
             rebindNeeded = true;
     for(const sp<Boolean>& i : _rebind_signals)

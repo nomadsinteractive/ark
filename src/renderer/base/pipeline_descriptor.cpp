@@ -221,14 +221,14 @@ Vector<PipelineDescriptor::BindedTexture> PipelineDescriptor::makeBindingSampler
     return samplers;
 }
 
-Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> PipelineDescriptor::makeBindingImages() const
+Vector<PipelineDescriptor::BindedTexture> PipelineDescriptor::makeBindingImages() const
 {
     const PipelineLayout& pipelineLayout = _layout;
     DASSERT(_predefined_images.size() == pipelineLayout._images.size());
 
-    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> bindingImages;
+    Vector<BindedTexture> bindingImages;
     for(size_t i = 0; i < pipelineLayout._images.size(); ++i)
-        bindingImages.emplace_back(_predefined_images.values().at(i), pipelineLayout._images.values().at(i));
+        bindingImages.emplace_back(_predefined_images.keys().at(i), _predefined_images.values().at(i), pipelineLayout._images.values().at(i));
     return bindingImages;
 }
 

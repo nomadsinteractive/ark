@@ -74,7 +74,7 @@ struct PipelineBindings::Stub {
 
     Vector<std::pair<uint32_t, Buffer>> _instance_buffers;
     Vector<PipelineDescriptor::BindedTexture> _samplers;
-    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _images;
+    Vector<PipelineDescriptor::BindedTexture> _images;
 };
 
 PipelineBindings::PipelineBindings(const enums::DrawMode drawMode, const enums::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> instanceBuffers)
@@ -127,7 +127,7 @@ const Vector<PipelineDescriptor::BindedTexture>& PipelineBindings::samplers() co
     return _stub->_samplers;
 }
 
-const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineBindings::images() const
+const Vector<PipelineDescriptor::BindedTexture>& PipelineBindings::images() const
 {
     return _stub->_images;
 }
