@@ -265,10 +265,11 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
         shape->setImplementation(Box(cs));
     }
 
-    if(type == Rigidbody::BODY_TYPE_SENSOR || type == Rigidbody::BODY_TYPE_GHOST)
+    if(type == Rigidbody::BODY_TYPE_SENSOR || type == Rigidbody::BODY_TYPE_GHOST || type == Rigidbody::BODY_TYPE_KINEMATIC)
     {
-        sp<CollisionObjectRef> btGhostObjectRef = makeGhostObject(btDynamicWorld(), std::move(cs), type, collisionFilter);
-        sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btGhostObjectRef), type, std::move(shape), std::move(position), rotation, std::move(collisionFilter), std::move(discarded));
+        sp<CollisionObjectRef> collisionObjectRef = type == Rigidbody::BODY_TYPE_KINEMATIC ? makeRigidBody(btDynamicWorld(), std::move(cs), nullptr, type, 0, collisionFilter)
+                                                                                           : makeGhostObject(btDynamicWorld(), std::move(cs), type, collisionFilter);
+        sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(collisionObjectRef), type, std::move(shape), std::move(position), rotation, std::move(collisionFilter), std::move(discarded));
         sp<Rigidbody::Stub> stub = impl->stub();
         _stub->_passive_objects.emplace_back(BtRigibodyObject(*impl));
         return {std::move(stub), nullptr, impl};
