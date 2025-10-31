@@ -19,8 +19,8 @@ public:
         return _a->val().cross(_b->val());
     }
 
-    bool update(const uint64_t timestamp) override {
-        return UpdatableUtil::update(timestamp, _a, _b);
+    bool update(uint32_t tick) override {
+        return UpdatableUtil::update(tick, _a, _b);
     }
 
 private:
@@ -40,8 +40,8 @@ public:
         return {normalized.x, normalized.y, normalized.z};
     }
 
-    bool update(const uint64_t timestamp) override {
-        return _wrapped->update(timestamp);
+    bool update(uint32_t tick) override {
+        return _wrapped->update(tick);
     }
 };
 

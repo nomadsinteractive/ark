@@ -22,9 +22,9 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return _ref->discarded().update(timestamp);
+        return _ref->discarded().update(tick);
     }
 
     bool val() override

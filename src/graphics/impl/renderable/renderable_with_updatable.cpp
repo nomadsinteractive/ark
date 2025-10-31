@@ -13,7 +13,7 @@ RenderableWithUpdatable::RenderableWithUpdatable(sp<Renderable> delegate, sp<Upd
 Renderable::State RenderableWithUpdatable::updateState(const RenderRequest& renderRequest)
 {
     const State state = _wrapped->updateState(renderRequest);
-    if(_updatable->update(renderRequest.timestamp()))
+    if(_updatable->update(renderRequest.tick()))
         return state | RENDERABLE_STATE_DIRTY;
     return state;
 }

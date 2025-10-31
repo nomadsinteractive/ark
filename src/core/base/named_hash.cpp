@@ -49,7 +49,7 @@ HashId NamedHash::hash() const
     return _hash;
 }
 
-bool NamedHash::update(uint64_t /*timestamp*/)
+bool NamedHash::update(uint32_t /*tick*/)
 {
     return false;
 }

@@ -24,7 +24,7 @@ public:
         return _value;
     }
 
-    bool update(const uint64_t timestamp) const {
+    bool update(const uint32_t timestamp) const {
         return _timestamp.update(timestamp);
     }
 

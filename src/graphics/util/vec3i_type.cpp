@@ -17,9 +17,9 @@ public:
         : _x(std::move(x)), _y(std::move(y)), _z(std::move(z)) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return UpdatableUtil::update(timestamp, _x, _y, _z);
+        return UpdatableUtil::update(tick, _x, _y, _z);
     }
 
     V3i val() override

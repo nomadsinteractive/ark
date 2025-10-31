@@ -22,8 +22,8 @@ public:
         return _s0;
     }
 
-    bool update(uint64_t timestamp) override {
-        return _t->update(timestamp);
+    bool update(uint32_t tick) override {
+        return _t->update(tick);
     }
 
 private:
@@ -52,8 +52,8 @@ public:
         return s2;
     }
 
-    bool update(uint64_t timestamp) override {
-        return _t->update(timestamp);
+    bool update(uint32_t tick) override {
+        return _t->update(tick);
     }
 
 private:

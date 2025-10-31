@@ -57,7 +57,7 @@ LayoutLength::LayoutLength(sp<Numeric> value, const LengthType type)
 {
 }
 
-bool LayoutLength::update(const uint64_t timestamp) const
+bool LayoutLength::update(const uint32_t timestamp) const
 {
     return _value.update(timestamp);
 }

@@ -73,7 +73,7 @@ public:
     Varyings(const Scope& kwargs = {});
     Varyings(const PipelineLayout& pipelineLayout);
 
-    bool update(uint64_t timestamp);
+    bool update(uint32_t timestamp);
 
 //  [[script::bindings::getprop]]
     Box getProperty(const String& name) const;

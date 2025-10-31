@@ -45,7 +45,7 @@ void RenderGroup::render(RenderRequest& renderRequest, const V3& position, const
         sp<Renderer> firstRenderer, lastRenderer;
         sp<DrawDecoratorGroupWrapper> firstDrawDecorator;
         for(auto& [k, v] : _phrases)
-            for(const sp<Renderer>& i : v.update(renderRequest.timestamp()))
+            for(const sp<Renderer>& i : v.update(renderRequest.tick()))
             {
                 if(!firstRenderer)
                 {
@@ -65,7 +65,7 @@ void RenderGroup::render(RenderRequest& renderRequest, const V3& position, const
     }
     else
         for(auto& v : std::views::values(_phrases))
-            for(const sp<Renderer>& i : v.update(renderRequest.timestamp()))
+            for(const sp<Renderer>& i : v.update(renderRequest.tick()))
                 i->render(renderRequest, position, nullptr);
 }
 

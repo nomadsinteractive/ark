@@ -19,7 +19,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mat4Impl);
 
     M4 val() override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
     void set(const M4& mat);
     void set(sp<Mat4> mat);

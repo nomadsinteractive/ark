@@ -25,7 +25,7 @@ public:
         : _stub(stub), _uv(uv) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         return false;
     }

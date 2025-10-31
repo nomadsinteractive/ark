@@ -8,15 +8,15 @@ class ARK_API Timestamp {
 public:
     Timestamp();
 
-    bool update(uint64_t timestamp) const;
+    bool update(uint32_t tick) const;
 
     void markClean();
     void markDirty();
 
-    static uint64_t now();
+    static uint32_t now();
 
 private:
-    mutable uint64_t _last_modified;
+    mutable uint32_t _last_modified;
 };
 
 }

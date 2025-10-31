@@ -27,8 +27,8 @@ public:
         return v;
     }
 
-    bool update(uint64_t timestamp) override {
-        return UpdatableUtil::update(timestamp, _delegate, _plane);
+    bool update(uint32_t tick) override {
+        return UpdatableUtil::update(tick, _delegate, _plane);
     }
 
 private:

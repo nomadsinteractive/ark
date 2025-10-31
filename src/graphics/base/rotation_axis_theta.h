@@ -14,7 +14,7 @@ public:
     RotationAxisTheta(sp<Vec3> axis, sp<Numeric> theta);
 
     V4 val() override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
     const sp<Vec3>& axis() const;
     const sp<Numeric>& theta() const;

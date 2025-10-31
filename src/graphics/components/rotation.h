@@ -21,7 +21,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotation);
 
     V4 val() override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
 //  [[script::bindings::auto]]
     void reset(sp<Vec4> quaternion);

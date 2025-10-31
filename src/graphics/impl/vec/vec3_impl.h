@@ -21,7 +21,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Vec3Impl);
 
     V3 val() override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
     const sp<NumericWrapper>& x() const;
     const sp<NumericWrapper>& y() const;

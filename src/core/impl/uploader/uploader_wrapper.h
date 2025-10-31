@@ -11,7 +11,7 @@ class UploaderWrapper final : public Wrapper<Uploader>, public Uploader {
 public:
     UploaderWrapper(sp<Uploader> delegate);
 
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
     void upload(Writable& buf) override;
 
     void setDelegate(sp<Uploader> delegate);

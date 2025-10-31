@@ -37,9 +37,9 @@ Scale::Scale(sp<Vec3> delegate, sp<Wrapper<Vec3>> wrapper)
 {
 }
 
-bool Scale::update(const uint64_t timestamp)
+bool Scale::update(uint32_t tick)
 {
-    return _delegate->update(timestamp);
+    return _delegate->update(tick);
 }
 
 V3 Scale::val()

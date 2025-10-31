@@ -27,14 +27,14 @@ public:
         return _op2(std::move(lv), std::move(rv));
     }
 
-    bool update(const uint64_t timestamp) override {
-        const bool d1 = _update_sfinae(_lv, timestamp, nullptr);
-        const bool d2 = _update_sfinae(_rv, timestamp, nullptr);
+    bool update(uint32_t tick) override {
+        const bool d1 = _update_sfinae(_lv, tick, nullptr);
+        const bool d2 = _update_sfinae(_rv, tick, nullptr);
         return d1 || d2;
     }
 
 private:
-    template<typename V> static bool _update_sfinae(const V& p, uint64_t timestamp, decltype(p->update(0))* /*args*/) {
+    template<typename V> static bool _update_sfinae(const V& p, uint32_t timestamp, decltype(p->update(0))* /*args*/) {
         return p->update(timestamp);
     }
 

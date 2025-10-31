@@ -18,8 +18,8 @@ public:
         return _value;
     }
 
-    bool update(uint64_t timestamp) override {
-        if(!UpdatableUtil::update(timestamp, _delegate, _min, _max))
+    bool update(uint32_t tick) override {
+        if(!UpdatableUtil::update(tick, _delegate, _min, _max))
             return false;
 
         doClamp();

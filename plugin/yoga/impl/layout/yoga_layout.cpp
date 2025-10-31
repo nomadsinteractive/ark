@@ -126,14 +126,14 @@ YGNodeRef doInflate(const YogaConfig& config, const Layout::Hierarchy& hierarchy
     return ygNode;
 }
 
-template<typename T, typename U> Optional<T> updateVar(uint64_t timestamp, U& var)
+template<typename T, typename U> Optional<T> updateVar(uint32_t timestamp, U& var)
 {
     if(!timestamp || var.update(timestamp))
         return {var.val()};
     return {};
 }
 
-bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, const uint64_t timestamp)
+bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, const uint32_t timestamp)
 {
     const LayoutParam& layoutParam = layoutNode._layout_param;
 
@@ -234,7 +234,7 @@ void updateLayoutResult(const Layout::Hierarchy& hierarchy)
         updateLayoutResult(i);
 }
 
-bool doUpdate(const Layout::Hierarchy& hierarchy, const uint64_t timestamp)
+bool doUpdate(const Layout::Hierarchy& hierarchy, const uint32_t timestamp)
 {
     bool dirty = false;
     const Layout::Node& layoutNode = hierarchy._node;
@@ -260,12 +260,12 @@ public:
         YGNodeFreeRecursive(_yg_node);
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         const LayoutParam& layoutParam = _hierarchy._node->_layout_param;
         ASSERT(layoutParam.width().type() != LayoutLength::LENGTH_TYPE_PERCENTAGE && layoutParam.height().type() != LayoutLength::LENGTH_TYPE_PERCENTAGE);
 
-        if(!doUpdate(_hierarchy, timestamp))
+        if(!doUpdate(_hierarchy, tick))
             return false;
 
         const float availableWidth = layoutParam.width().isAuto() ? YGUndefined : layoutParam.contentWidth();

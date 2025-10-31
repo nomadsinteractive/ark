@@ -38,7 +38,7 @@ private:
 
     struct GlyphModel {
         GlyphModel();
-        GlyphModel(sp<Model> model, uint64_t timestamp);
+        GlyphModel(sp<Model> model, uint32_t timestamp);
 
         sp<Model> _model;
         uint64_t _timestamp;
@@ -47,11 +47,11 @@ private:
     struct GlyphBundle {
         GlyphBundle(AtlasGlyphAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font& font, bool isLHS);
 
-        const GlyphModel& ensureGlyphModel(uint64_t timestamp, int32_t c, bool reload);
+        const GlyphModel& ensureGlyphModel(uint32_t timestamp, int32_t c, bool reload);
 
-        bool prepareOne(uint64_t timestamp, int32_t c, int32_t ckey);
+        bool prepareOne(uint32_t timestamp, int32_t c, int32_t ckey);
 
-        void reload(uint64_t timestamp);
+        void reload(uint32_t timestamp);
 
         AtlasGlyphAttachment& _atlas_attachment;
 

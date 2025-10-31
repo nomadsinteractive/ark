@@ -12,9 +12,9 @@ bool BooleanByTimeout::val()
     return _duration->val() > _timeout;
 }
 
-bool BooleanByTimeout::update(const uint64_t timestamp)
+bool BooleanByTimeout::update(uint32_t tick)
 {
-    return _duration->update(timestamp);
+    return _duration->update(tick);
 }
 
 }

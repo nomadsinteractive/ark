@@ -28,14 +28,14 @@ struct View::Stub final : Updatable {
     {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         if(_hierarchy)
         {
-            const bool positionDirty = _position.update(timestamp);
-            return _hierarchy->updateLayout(_layout_node, timestamp) || positionDirty;
+            const bool positionDirty = _position.update(tick);
+            return _hierarchy->updateLayout(_layout_node, tick) || positionDirty;
         }
-        return UpdatableUtil::update(timestamp, _layout_node->_layout_param, _position, _discarded);
+        return UpdatableUtil::update(tick, _layout_node->_layout_param, _position, _discarded);
     }
 
     void discard()
@@ -123,9 +123,9 @@ public:
         : _stub(std::move(stub)), _updatable(std::move(updatable)) {
     }
 
-    bool update(const uint64_t timestamp) override {
-        const bool dirty = _updatable->update(timestamp);
-        return _stub->_layout_node ? _stub->_layout_node->size().update(timestamp) | dirty : dirty;
+    bool update(uint32_t tick) override {
+        const bool dirty = _updatable->update(tick);
+        return _stub->_layout_node ? _stub->_layout_node->size().update(tick) | dirty : dirty;
     }
 
     float val() override {
@@ -148,9 +148,9 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return _updatable->update(timestamp);
+        return _updatable->update(tick);
     }
 
     V3 val() override
@@ -178,10 +178,10 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         const sp<View::Stub> stub = findLayoutTopView(_stub);
-        return stub ? stub->update(timestamp) : false;
+        return stub ? stub->update(tick) : false;
     }
 
 private:
@@ -225,7 +225,7 @@ void View::onPoll(WiringContext& context, const document& component)
     }
 }
 
-bool View::update(const uint64_t timestamp) const
+bool View::update(const uint32_t timestamp) const
 {
     return _stub->update(timestamp);
 }

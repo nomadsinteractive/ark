@@ -22,7 +22,7 @@ public:
 //  [[script::bindings::property]]
     const String& name() const;
 
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
     int32_t val() override;
 
 //  [[script::bindings::auto]]

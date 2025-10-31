@@ -262,7 +262,7 @@ PipelineLayout::UBO::UBO(const uint32_t binding)
 {
 }
 
-void PipelineLayout::UBO::doSnapshot(const uint64_t timestamp, const bool force) const
+void PipelineLayout::UBO::doSnapshot(const uint32_t timestamp, const bool force) const
 {
     uint8_t* buf = _buffer->buf();
     uint8_t* dirtyFlags = _dirty_flags->buf();
@@ -281,7 +281,7 @@ void PipelineLayout::UBO::doSnapshot(const uint64_t timestamp, const bool force)
 
 RenderBufferSnapshot::UBOSnapshot PipelineLayout::UBO::snapshot(const RenderRequest& renderRequest) const
 {
-    doSnapshot(renderRequest.timestamp(), false);
+    doSnapshot(renderRequest.tick(), false);
     RenderBufferSnapshot::UBOSnapshot ubo = {
         renderRequest.allocator().sbrkSpan(_dirty_flags->size()),
         renderRequest.allocator().sbrkSpan(_buffer->size())

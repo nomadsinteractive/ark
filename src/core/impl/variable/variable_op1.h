@@ -20,8 +20,8 @@ public:
         return _func(_arg->val());
     }
 
-    bool update(uint64_t timestamp) override {
-        return _arg->update(timestamp);
+    bool update(uint32_t tick) override {
+        return _arg->update(tick);
     }
 
 private:

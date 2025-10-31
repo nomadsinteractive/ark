@@ -22,7 +22,7 @@ void UploaderSnapshot::upload(Writable& writable)
         writable.write(j.data(), j.size(), i);
 }
 
-bool UploaderSnapshot::update(uint64_t /*timestamp*/)
+bool UploaderSnapshot::update(uint32_t /*tick*/)
 {
     return false;
 }

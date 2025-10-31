@@ -161,12 +161,6 @@ class Readable:
     pass
 
 
-class Updatable:
-
-    def update(self, timestamp: int):
-        pass
-
-
 class Runnable:
 
     def __call__(self):
@@ -2054,7 +2048,7 @@ class Layer:
     def discarded(self) -> Boolean:
         pass
 
-    def add(self, render_object: RenderObject, discarded: Boolean = None, updatable: Optional[Updatable] = None, insert_position: int = Enum.INSERT_POSITION_BACK):
+    def add(self, render_object: RenderObject, discarded: Boolean = None, updatable: Any = None, insert_position: int = Enum.INSERT_POSITION_BACK):
         pass
 
     def clear(self):

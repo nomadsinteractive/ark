@@ -24,7 +24,7 @@ public:
     {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         return false;
     }
@@ -53,13 +53,13 @@ public:
         }
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         bool dirty = false;
         _size = 0;
         for(Node& i : _uploaders)
         {
-            i._dirty = i._uploader->update(timestamp) || i._dirty || i._offset != _size;
+            i._dirty = i._uploader->update(tick) || i._dirty || i._offset != _size;
             i._offset = _size;
             _size += i._uploader->size();
             dirty = i._dirty || dirty;
@@ -136,9 +136,9 @@ public:
         : Uploader(delegate->size()), Wrapper(std::move(delegate)), _message(std::move(message)) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        const bool dirty = _wrapped->update(timestamp);
+        const bool dirty = _wrapped->update(tick);
         TRACE(dirty, _message.c_str());
         return dirty;
     }

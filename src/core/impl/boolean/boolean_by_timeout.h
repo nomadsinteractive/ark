@@ -11,7 +11,7 @@ public:
     BooleanByTimeout(sp<Numeric> duration, float timeout);
 
     bool val() override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
 private:
     sp<Numeric> _duration;

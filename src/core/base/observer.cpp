@@ -22,8 +22,8 @@ public:
         return _value.val();
     }
 
-    bool update(const uint64_t timestamp) override {
-        return _value.update(timestamp);
+    bool update(uint32_t tick) override {
+        return _value.update(tick);
     }
 
 private:

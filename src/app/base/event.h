@@ -188,7 +188,7 @@ public:
         MotionInfo _motion;
     };
 
-    Event(Action action, uint64_t timestamp, const EventInfo& info);
+    Event(Action action, uint32_t timestamp, const EventInfo& info);
     Event(const Event& other, const V2& xy);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Event);
 

@@ -17,7 +17,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mat2Impl);
 
     M2 val() override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
 private:
     sp<VariableWrapper<M2>> _impl;

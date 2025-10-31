@@ -35,9 +35,9 @@ V3 Size::val()
     return _impl->val();
 }
 
-bool Size::update(const uint64_t timestamp)
+bool Size::update(uint32_t tick)
 {
-    return _impl->update(timestamp);
+    return _impl->update(tick);
 }
 
 float Size::widthAsFloat() const

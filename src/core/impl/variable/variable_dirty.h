@@ -13,8 +13,8 @@ public:
         :  Wrapper<Variable<T>>(std::move(delegate)), _dirty(false) {
     }
 
-    bool update(uint64_t timestamp) override {
-        if(this->_wrapped->update(timestamp)) {
+    bool update(uint32_t tick) override {
+        if(this->_wrapped->update(tick)) {
             _dirty = true;
             return true;
         }

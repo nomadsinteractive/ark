@@ -25,8 +25,8 @@ public:
         return value;
     }
 
-    bool update(uint64_t timestamp) override {
-        return UpdatableUtil::update(timestamp, this->_wrapped, _boundary);
+    bool update(uint32_t tick) override {
+        return UpdatableUtil::update(tick, this->_wrapped, _boundary);
     }
 
 private:

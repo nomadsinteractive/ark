@@ -17,7 +17,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mat3Impl);
 
     M3 val() override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
 private:
     sp<VariableWrapper<M3>> _impl;

@@ -69,7 +69,7 @@ public:
         const Vector<std::pair<uintptr_t, size_t>>& slots() const;
 
         void initialize();
-        void doSnapshot(uint64_t timestamp, bool force) const;
+        void doSnapshot(uint32_t timestamp, bool force) const;
 
         uint32_t _binding;
         Table<String, sp<Uniform>> _uniforms;

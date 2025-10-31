@@ -60,7 +60,7 @@ public:
                 float flexGrow = 0, LayoutLength flexBasis = {}, sp<Vec4> margins = nullptr, sp<Vec4> paddings = nullptr, sp<Vec3> offset = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutParam);
 
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
     const sp<Layout>& layout() const;
     void setLayout(sp<Layout> layout);

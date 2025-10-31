@@ -15,7 +15,7 @@ public:
     Translation(sp<Vec3> translate);
     Translation(sp<Vec3> delegate, sp<Wrapper<Vec3>> wrapper);
 
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
     V3 val() override;
 
 //  [[script::bindings::auto]]

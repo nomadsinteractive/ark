@@ -32,7 +32,7 @@ public:
         return _stub->_body->GetAngle();
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return true;
     }
 
@@ -50,7 +50,7 @@ public:
         return V3(_stub->_body->GetPosition().x, _stub->_body->GetPosition().y, 0);
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    virtual bool update(uint32_t /*tick*/) override {
         return true;
     }
 
@@ -72,7 +72,7 @@ public:
         return V3(x, y, 0);
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    virtual bool update(uint32_t /*tick*/) override {
         return true;
     }
 
@@ -93,7 +93,7 @@ public:
         return rotation;
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    virtual bool update(uint32_t /*tick*/) override {
         return true;
     }
 

@@ -27,7 +27,7 @@ public:
     LayoutLength(sp<Numeric> value, LayoutLength::LengthType type = LayoutLength::LENGTH_TYPE_AUTO);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutLength);
 
-    bool update(uint64_t timestamp) const;
+    bool update(uint32_t timestamp) const;
 
 //  [[script::bindings::property]]
     const OptionalVar<Numeric>& value() const;

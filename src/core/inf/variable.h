@@ -29,8 +29,8 @@ public:
         return _value;
     }
 
-    bool update(uint64_t timestamp) override {
-        return _timestamp.update(timestamp);
+    bool update(uint32_t tick) override {
+        return _timestamp.update(tick);
     }
 
     void set(T value) {
@@ -56,7 +56,7 @@ public:
         return _value;
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return false;
     }
 

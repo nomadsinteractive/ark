@@ -11,7 +11,7 @@ class UploaderElementIndices : public Uploader {
 public:
     UploaderElementIndices(std::vector<element_index_t> elementIndices, std::vector<element_index_t> vertexIndices);
 
-    virtual bool update(uint64_t timestamp) override;
+    virtual bool update(uint32_t tick) override;
     virtual void upload(Writable& writable) override;
 
 private:

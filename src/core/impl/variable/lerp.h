@@ -18,13 +18,13 @@ public:
         return _val;
     }
 
-    bool update(uint64_t timestamp) override {
-        bool dirty = UpdatableUtil::update(timestamp, _a, _b);
+    bool update(uint32_t tick) override {
+        bool dirty = UpdatableUtil::update(tick, _a, _b);
         if(dirty) {
             _a_freezed = _a->val();
             _delta_freezed = _b->val() - _a_freezed;
         }
-        if(_v->update(timestamp) || dirty) {
+        if(_v->update(tick) || dirty) {
             _val = _a_freezed + _delta_freezed * _v->val();
             return true;
         }

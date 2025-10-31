@@ -17,9 +17,9 @@ public:
         : _rigidbody_controller(std::move(rigidbodyController)), _linear_velocity(std::move(linearVelocity)) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(_linear_velocity->update(timestamp))
+        if(_linear_velocity->update(tick))
         {
             _rigidbody_controller->setLinearVelocity(_linear_velocity->val());
             return true;
@@ -38,9 +38,9 @@ public:
         : _rigidbody_controller(std::move(rigidbodyController)), _central_force(std::move(centralForce)) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(_central_force->update(timestamp))
+        if(_central_force->update(tick))
         {
             _rigidbody_controller->applyCentralForce(_central_force->val());
             return true;

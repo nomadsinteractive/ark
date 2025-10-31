@@ -41,7 +41,7 @@ public:
     Clock(const Clock& other) = default;
 
     uint64_t val() override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
 //  [[script::bindings::property]]
     uint64_t tick() const;

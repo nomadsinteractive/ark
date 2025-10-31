@@ -157,11 +157,11 @@ void RenderObject::hide()
 
 Renderable::State RenderObject::updateState(const RenderRequest& renderRequest)
 {
-    bool dirty = _timestamp.update(renderRequest.timestamp());
-    if((_discarded.update(renderRequest.timestamp()) || dirty) && _discarded.val())
+    bool dirty = _timestamp.update(renderRequest.tick());
+    if((_discarded.update(renderRequest.tick()) || dirty) && _discarded.val())
         return {RENDERABLE_STATE_DISCARDED};
 
-    dirty = UpdatableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || dirty;
+    dirty = UpdatableUtil::update(renderRequest.tick(), _visible, _type, _position, _size, _transform, _varyings, _visible) || dirty;
     return {dirty ? RENDERABLE_STATE_DIRTY : RENDERABLE_STATE_NONE, _visible.val() ? RENDERABLE_STATE_VISIBLE : RENDERABLE_STATE_NONE};
 }
 

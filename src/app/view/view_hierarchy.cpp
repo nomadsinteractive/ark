@@ -18,7 +18,7 @@ bool ViewHierarchy::isLayoutTopView() const
     return static_cast<bool>(_layout);
 }
 
-bool ViewHierarchy::updateDescendantLayout(uint64_t timestamp)
+bool ViewHierarchy::updateDescendantLayout(uint32_t timestamp)
 {
     bool isDirty = false;
     for(const sp<View>& i: updateChildren())
@@ -61,7 +61,7 @@ Layout::Hierarchy ViewHierarchy::toLayoutHierarchy(sp<Layout::Node> layoutNode) 
     return hierarchy;
 }
 
-bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp)
+bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint32_t timestamp)
 {
     bool hierarchyDirty = _timestamp.update(timestamp);
     if(const bool hierarchyChanged = updateHierarchy(); hierarchyChanged || hierarchyDirty)

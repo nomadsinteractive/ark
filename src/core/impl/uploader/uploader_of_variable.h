@@ -20,8 +20,8 @@ public:
         buf.writeObject(static_cast<T>(_var->val()));
     }
 
-    bool update(uint64_t timestamp) override {
-        return _var->update(timestamp);
+    bool update(uint32_t tick) override {
+        return _var->update(tick);
     }
 
 private:

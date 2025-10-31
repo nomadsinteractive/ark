@@ -13,7 +13,7 @@ public:
         : Uploader(shaderLayout->getStreamLayout(0).stride() * vertices->length()), _shader_layout(std::move(shaderLayout)), _vertices(std::move(vertices)), _bounds(bounds) {
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return false;
     }
 

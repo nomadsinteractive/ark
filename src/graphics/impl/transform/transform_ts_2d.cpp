@@ -22,9 +22,9 @@ TransformTS2D::TransformTS2D(const Transform& transform)
 {
 }
 
-bool TransformTS2D::update(const uint64_t timestamp)
+bool TransformTS2D::update(uint32_t tick)
 {
-    return _stub->update(timestamp);
+    return _stub->update(tick);
 }
 
 Transform::Snapshot TransformTS2D::snapshot()

@@ -34,9 +34,9 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return UpdatableUtil::update(timestamp, _a1, _a2);
+        return UpdatableUtil::update(tick, _a1, _a2);
     }
 
     bool val() override

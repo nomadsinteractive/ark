@@ -9,7 +9,7 @@ public:
     UploaderSnapshot(Uploader& delegate);
 
     void upload(Writable& writable) override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
 private:
     Map<size_t, Vector<uint8_t>> _strips;

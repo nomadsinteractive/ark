@@ -9,7 +9,7 @@ class TransformTS3D final : public Transform {
 public:
     TransformTS3D(const Transform& transform);
 
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
     Snapshot snapshot() override;
     V4 transform(const Snapshot& snapshot, const V4& xyzw) override;
     M4 toMatrix(const Snapshot& snapshot) override;

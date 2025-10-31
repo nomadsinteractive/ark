@@ -22,9 +22,9 @@ public:
         CHECK_WARN(_byte_array->size() == sizeof(T), "Bytearray (size %d) is longer than type\"%d\"(size %d)", _byte_array->size(), Type<T>::id(), sizeof(T));
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(_timestamp.update(timestamp))
+        if(_timestamp.update(tick))
             return true;
 
         const T v = *_ptr;

@@ -37,9 +37,9 @@ Translation::Translation(sp<Vec3> delegate, sp<Wrapper<Vec3>> wrapper)
 {
 }
 
-bool Translation::update(const uint64_t timestamp)
+bool Translation::update(uint32_t tick)
 {
-    return _delegate->update(timestamp);
+    return _delegate->update(tick);
 }
 
 V3 Translation::val()

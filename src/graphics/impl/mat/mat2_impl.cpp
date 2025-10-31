@@ -22,8 +22,8 @@ public:
         return M2(values);
     }
 
-    bool update(uint64_t timestamp) override {
-        return UpdatableUtil::update(timestamp, _t, _b);
+    bool update(uint32_t tick) override {
+        return UpdatableUtil::update(tick, _t, _b);
     }
 
 private:
@@ -55,9 +55,9 @@ M2 Mat2Impl::val()
     return _impl->val();
 }
 
-bool Mat2Impl::update(uint64_t timestamp)
+bool Mat2Impl::update(uint32_t tick)
 {
-    return _impl->update(timestamp);
+    return _impl->update(tick);
 }
 
 }

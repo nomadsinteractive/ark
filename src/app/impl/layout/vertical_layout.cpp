@@ -14,11 +14,11 @@ public:
         : _hierarchy(std::move(hierarchy)), _align_items(alignItems) {
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(uint32_t tick) override {
         float totalHeight = 0;
         for(const auto& [node, child_nodes] : _hierarchy._child_nodes) {
             DCHECK_WARN(child_nodes.empty(), "VerticalLayout is not a recursively layout for now");
-            node->update(timestamp);
+            node->update(tick);
             totalHeight += node->occupyHeight();
         }
 

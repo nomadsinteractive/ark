@@ -22,8 +22,8 @@ public:
         : _value(std::move(value)) {
     }
 
-    bool update(const uint64_t timestamp) override {
-        return _timestamp.update(timestamp);
+    bool update(uint32_t tick) override {
+        return _timestamp.update(tick);
     }
 
     void set(String value)
@@ -46,8 +46,8 @@ public:
         : _delegate(std::move(delegate)), _value(Strings::toString(_delegate->val())) {
     }
 
-    bool update(const uint64_t timestamp) override {
-        if(_delegate->update(timestamp)) {
+    bool update(uint32_t tick) override {
+        if(_delegate->update(tick)) {
             _value = Strings::toString(_delegate->val());
             return true;
         }
@@ -71,9 +71,9 @@ public:
         doUpdate();
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        const bool dirty = _value->update(timestamp);
+        const bool dirty = _value->update(tick);
         if(dirty)
             doUpdate();
         return dirty;
@@ -113,10 +113,10 @@ public:
         doUpdate();
     }
 
-    bool update(const uint64_t timestamp) override {
+    bool update(uint32_t tick) override {
         bool dirty = false;
         for(const sp<StringVar>& i : _list)
-            dirty = i->update(timestamp) | dirty;
+            dirty = i->update(tick) | dirty;
         if(dirty)
             doUpdate();
         return dirty;

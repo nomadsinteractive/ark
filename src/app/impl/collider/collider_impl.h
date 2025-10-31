@@ -54,7 +54,7 @@ public:
         void updateBroadPhraseCandidate(RefId id, const V3& position, const V3& size) const;
         void removeBroadPhraseCandidate(RefId id);
 
-        bool update(uint64_t timestamp) override;
+        bool update(uint32_t tick) override;
 
     private:
         void broadPhraseSearch(BroadPhraseCallback& callback, V3 position, V3 size, const sp<CollisionFilter>& collisionFilter) const;

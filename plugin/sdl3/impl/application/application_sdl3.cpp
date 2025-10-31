@@ -428,7 +428,7 @@ void ApplicationSDL3::initialize()
 #endif
 }
 
-void ApplicationSDL3::pollEvents(uint64_t timestamp)
+void ApplicationSDL3::pollEvents(uint32_t timestamp)
 {
     const bool textInputEnabled = _application_context->applicationFacade() ? _application_context->applicationFacade()->textInputEnabled().val() : false;
     if(textInputEnabled && !SDL_TextInputActive(_main_window))

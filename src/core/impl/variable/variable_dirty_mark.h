@@ -18,10 +18,10 @@ public:
         return this->_wrapped->val();
     }
 
-    bool update(uint64_t timestamp) override {
-        this->_wrapped->update(timestamp);
+    bool update(uint32_t tick) override {
+        this->_wrapped->update(tick);
         DCHECK(_wrapper.wrapped().get() == this, "Trying to overwrite a wrapper which doesn't contain myself");
-        if(!_timestamp.update(timestamp)) {
+        if(!_timestamp.update(tick)) {
             sp<Variable<T>> delegate = std::move(this->_wrapped);
             _wrapper.reset(std::move(delegate));
         }

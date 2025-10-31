@@ -26,9 +26,9 @@ public:
         return _matrix;
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(UpdatableUtil::update(timestamp, _t, _b, _n, _w))
+        if(UpdatableUtil::update(tick, _t, _b, _n, _w))
         {
             _matrix = toMatrix(_t->val(), _b->val(), _n->val(), _w->val());
             return true;
@@ -71,9 +71,9 @@ M4 Mat4Impl::val()
     return _impl->val();
 }
 
-bool Mat4Impl::update(const uint64_t timestamp)
+bool Mat4Impl::update(uint32_t tick)
 {
-    return _impl->update(timestamp);
+    return _impl->update(tick);
 }
 
 void Mat4Impl::set(const M4& mat)

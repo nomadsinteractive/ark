@@ -51,8 +51,8 @@ private:
             return _synchronized;
         }
 
-        bool update(uint64_t timestamp) override {
-            if(_delegate->update(timestamp)) {
+        bool update(uint32_t tick) override {
+            if(_delegate->update(tick)) {
                 _synchronized->set(_delegate->val());
                 return true;
             }
@@ -113,7 +113,7 @@ public:
 
     void addPreRenderRequest(sp<Runnable> task, sp<Boolean> canceled);
 
-    void onPreCompose(uint64_t timestamp);
+    void onPreCompose(uint32_t tick);
     void deferUnref(Box box);
 
     GraphicsBufferAllocator& gba();

@@ -113,9 +113,9 @@ public:
         : _layout_node(std::move(layoutNode)) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return _layout_node->size().update(timestamp);
+        return _layout_node->size().update(tick);
     }
 
     V2 val() override
@@ -182,7 +182,7 @@ public:
 
     State updateState(const RenderRequest& renderRequest) override {
         const State state = _delegate->updateState(renderRequest);
-        if(_layout_node->update(renderRequest.timestamp()))
+        if(_layout_node->update(renderRequest.tick()))
             return state | RENDERABLE_STATE_DIRTY;
         return state;
     }
@@ -249,9 +249,9 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(_hierarchy._node->update(timestamp))
+        if(_hierarchy._node->update(tick))
         {
             doFlexLayout(_hierarchy._child_nodes, _layout_info);
             return true;
@@ -266,9 +266,9 @@ public:
         : UpdatableLabel(std::move(hierarchy), layoutInfo) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(_hierarchy._node->update(timestamp))
+        if(_hierarchy._node->update(tick))
         {
             const LayoutParam& layoutParam = _hierarchy._node->_layout_param;
             const V2 parentSize(layoutParam.width().value().val(), layoutParam.height().value().val());
@@ -287,9 +287,9 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(_hierarchy._node->update(timestamp))
+        if(_hierarchy._node->update(tick))
         {
             const LayoutParam& layoutParam = _hierarchy._node->_layout_param;
             const V2 parentSize(layoutParam.width().value().val(), layoutParam.height().value().val());
@@ -307,9 +307,9 @@ public:
         : _boundaries(std::move(boundaries)) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return _boundaries->update(timestamp);
+        return _boundaries->update(tick);
     }
 
     float val() override
@@ -328,9 +328,9 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(!_layout_width->update(timestamp))
+        if(!_layout_width->update(tick))
             return false;
 
         doLayout();
@@ -452,7 +452,7 @@ struct Text::Content {
     {
     }
 
-    bool update(const uint64_t timestamp)
+    bool update(const uint32_t timestamp)
     {
         const bool contentDirty = _text->update(timestamp);
         const bool layoutDirty = _timestamp.update(timestamp);
@@ -557,7 +557,7 @@ public:
 
     Vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override {
         _layer_contexts.clear();
-        _content->update(renderRequest.timestamp());
+        _content->update(renderRequest.tick());
         _layer_contexts.push_back(_content->_layer_context);
         return _layer_contexts;
     }

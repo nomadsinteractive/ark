@@ -18,8 +18,8 @@ public:
         : Wrapper<Variable<U>>(std::move(delegate)), _indices(indices) {
     }
 
-    bool update(uint64_t timestamp) override {
-        return this->_wrapped->update(timestamp);
+    bool update(uint32_t tick) override {
+        return this->_wrapped->update(tick);
     }
 
     T val() override {

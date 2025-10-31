@@ -19,9 +19,9 @@ V4 RotationEuler::val()
     return _val;
 }
 
-bool RotationEuler::update(const uint64_t timestamp)
+bool RotationEuler::update(uint32_t tick)
 {
-    if(UpdatableUtil::update(timestamp, _pitch, _yaw, _roll))
+    if(UpdatableUtil::update(tick, _pitch, _yaw, _roll))
     {
         doUpdate();
         return true;

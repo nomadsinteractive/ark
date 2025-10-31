@@ -423,7 +423,7 @@ uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicati
     return windowFlag;
 }
 
-void SDLApplication::pollEvents(uint64_t timestamp)
+void SDLApplication::pollEvents(uint32_t timestamp)
 {
     const bool textInputEnabled = _application_context->applicationFacade() ? _application_context->applicationFacade()->textInputEnabled().val() : false;
     if(textInputEnabled && !SDL_IsTextInputActive())

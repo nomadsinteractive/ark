@@ -20,9 +20,9 @@ bool Discarded::val()
     return _discarded->val();
 }
 
-bool Discarded::update(const uint64_t timestamp)
+bool Discarded::update(uint32_t tick)
 {
-    return _discarded->update(timestamp);
+    return _discarded->update(tick);
 }
 
 void Discarded::discard() const

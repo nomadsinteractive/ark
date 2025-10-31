@@ -18,9 +18,9 @@ V4 RotationAxisTheta::val()
     return _val;
 }
 
-bool RotationAxisTheta::update(const uint64_t timestamp)
+bool RotationAxisTheta::update(uint32_t tick)
 {
-    if(UpdatableUtil::update(timestamp, _axis, _theta))
+    if(UpdatableUtil::update(tick, _axis, _theta))
     {
         doUpdate();
         return true;

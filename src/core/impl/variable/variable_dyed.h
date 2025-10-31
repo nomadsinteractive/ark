@@ -15,9 +15,9 @@ public:
         :  Wrapper<Variable<T>>(std::move(delegate)), _condition(std::move(condition), true), _message(std::move(message)) {
     }
 
-    bool update(uint64_t timestamp) override {
-        _condition.update(timestamp);
-        return this->_wrapped->update(timestamp);
+    bool update(uint32_t tick) override {
+        _condition.update(tick);
+        return this->_wrapped->update(tick);
     }
 
     T val() override {

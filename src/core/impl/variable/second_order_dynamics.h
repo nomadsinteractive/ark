@@ -57,8 +57,8 @@ public:
         return _y;
     }
 
-    bool update(const uint64_t timestamp) override {
-        return UpdatableUtil::update(timestamp, _x, _t);
+    bool update(uint32_t tick) override {
+        return UpdatableUtil::update(tick, _x, _t);
     }
 
 private:

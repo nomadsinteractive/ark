@@ -19,8 +19,8 @@ public:
         return _value;
     }
 
-    bool update(uint64_t timestamp) override {
-        if(!UpdatableUtil::update(timestamp, _delegate, _expectation))
+    bool update(uint32_t tick) override {
+        if(!UpdatableUtil::update(tick, _delegate, _expectation))
             return false;
 
         _value = _delegate->val();

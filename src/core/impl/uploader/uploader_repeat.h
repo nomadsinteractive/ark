@@ -9,7 +9,7 @@ class UploaderRepeat final : public Uploader {
 public:
     UploaderRepeat(sp<Uploader> delegate, size_t length, size_t stride = 0);
 
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
     void upload(Writable& writable) override;
 
 private:

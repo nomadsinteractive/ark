@@ -71,7 +71,7 @@ public:
         : _steady_clock(Platform::getSteadyClock()), _val(_steady_clock->val()) {
     }
 
-    bool update(uint64_t /*timestamp*/) override
+    bool update(uint32_t /*tick*/) override
     {
         _val = _steady_clock->val();
         return true;

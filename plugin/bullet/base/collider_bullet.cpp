@@ -35,7 +35,7 @@ public:
         : _motion_state(std::move(motionState)), _origin(origin) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         return true;
     }
@@ -65,7 +65,7 @@ public:
         : _motion_state(std::move(motionState)) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         return true;
     }
@@ -209,9 +209,9 @@ struct ColliderBullet::Stub final : Updatable {
         discard();
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        _timestamp = timestamp;
+        _timestamp = tick;
         _dynamics_world->stepSimulation(_app_clock_interval->val());
         return true;
     }
@@ -363,7 +363,7 @@ void ColliderBullet::markForDestroy(sp<CollisionObjectRef> collisionBody) const
 void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
 {
     const ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
-    const uint64_t timestamp = self->_stub->_timestamp;
+    const uint32_t timestamp = self->_stub->_timestamp;
     for(const BtRigibodyObject& i : self->_stub->_passive_objects)
     {
         const Rigidbody::Stub& rigidbody = i._bt_rigidbody_ref.stub();

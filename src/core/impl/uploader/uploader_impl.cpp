@@ -22,12 +22,12 @@ UploaderImpl::UploaderImpl(const Map<size_t, sp<Uploader>>& uploaderMap, const s
         CHECK(calculateUploaderSize() <= _size, "Uploader size overflow, size %zd is not long enough to fit all the inputs", _size);
 }
 
-bool UploaderImpl::update(const uint64_t timestamp)
+bool UploaderImpl::update(uint32_t tick)
 {
     bool dirty = false;
     for(UploaderStub& i : _uploaders)
     {
-        i._dirty_updated = i._uploader->update(timestamp);
+        i._dirty_updated = i._uploader->update(tick);
         dirty = dirty || i._dirty_updated || i._dirty_marked;
     }
     return dirty;

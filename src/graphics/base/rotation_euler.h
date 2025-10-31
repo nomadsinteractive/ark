@@ -14,7 +14,7 @@ public:
     RotationEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
 
     V4 val() override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
     const sp<Numeric>& pitch() const;
     const sp<Numeric>& yaw() const;

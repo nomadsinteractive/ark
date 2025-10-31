@@ -42,7 +42,7 @@ public:
 
         Timestamp _timestamp;
 
-        bool update(uint64_t timestamp) const;
+        bool update(uint32_t timestamp) const;
     };
 
     const OptionalVar<Vec4>& rotation() const;

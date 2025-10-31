@@ -22,7 +22,7 @@ public:
 public:
     LayerContext(sp<Shader> shader = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr, sp<Varyings> varyings = nullptr);
 
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
     const sp<Shader>& shader() const;
 

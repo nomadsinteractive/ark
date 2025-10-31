@@ -21,7 +21,7 @@ public:
         return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
     }
 
-    bool update(uint64_t /*timestamp*/) override
+    bool update(uint32_t /*tick*/) override
     {
         return true;
     }

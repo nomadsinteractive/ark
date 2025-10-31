@@ -14,7 +14,7 @@ RenderableWithVisible::RenderableWithVisible(sp<Renderable> delegate, sp<Boolean
 Renderable::State RenderableWithVisible::updateState(const RenderRequest& renderRequest)
 {
     State state = _wrapped->updateState(renderRequest);
-    if(_visible->update(renderRequest.timestamp()) && !_visible->val())
+    if(_visible->update(renderRequest.tick()) && !_visible->val())
         state.set(RENDERABLE_STATE_VISIBLE, false);
     return static_cast<StateBits>(state.bits());
 }

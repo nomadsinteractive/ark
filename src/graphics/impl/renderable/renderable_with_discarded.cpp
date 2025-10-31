@@ -12,7 +12,7 @@ RenderableWithDiscarded::RenderableWithDiscarded(sp<Renderable> delegate, sp<Boo
 Renderable::State RenderableWithDiscarded::updateState(const RenderRequest& renderRequest)
 {
     const State state = _wrapped->updateState(renderRequest);
-    _discarded->update(renderRequest.timestamp());
+    _discarded->update(renderRequest.tick());
     if(_discarded->val())
         return state | RENDERABLE_STATE_DISCARDED;
     return state;

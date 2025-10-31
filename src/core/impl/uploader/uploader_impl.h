@@ -11,7 +11,7 @@ public:
     UploaderImpl(size_t size);
     UploaderImpl(const Map<size_t, sp<Uploader>>& uploaderMap, size_t size = 0);
 
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
     void upload(Writable& writable) override;
 
     void put(size_t offset, sp<Uploader> uploader);

@@ -27,7 +27,7 @@ public:
 
     void onPoll(WiringContext& context, const document& component) override;
 
-    bool update(uint64_t timestamp) const;
+    bool update(uint32_t timestamp) const;
 
     const sp<Layout::Node>& layoutNode() const;
 

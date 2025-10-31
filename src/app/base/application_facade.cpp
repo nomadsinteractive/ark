@@ -29,8 +29,8 @@ public:
         : _condition(std::move(condition)), _future(std::move(future)) {
     }
 
-    bool update(const uint64_t timestamp) override {
-        const bool dirty = _condition->update(timestamp);
+    bool update(uint32_t tick) override {
+        const bool dirty = _condition->update(tick);
         if(_condition->val())
             _future->notify();
         return dirty;
@@ -47,9 +47,9 @@ public:
         : _xy(std::move(xy)), _height(height) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return UpdatableUtil::update(timestamp, _xy);
+        return UpdatableUtil::update(tick, _xy);
     }
 
     V2 val() override
@@ -69,9 +69,9 @@ public:
         : _xy(std::move(xy)), _viewport_xy(viewportXY), _resolution(std::move(resolution)) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return UpdatableUtil::update(timestamp, _xy, _resolution);
+        return UpdatableUtil::update(tick, _xy, _resolution);
     }
 
     V2 val() override

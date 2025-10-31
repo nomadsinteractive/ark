@@ -19,10 +19,10 @@ void SurfaceController::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded
     _renderer_phrase.add(priority, std::move(renderer), std::move(discarded), std::move(visible));
 }
 
-void SurfaceController::requestUpdate(const uint64_t timestamp)
+void SurfaceController::requestUpdate(const uint32_t tick)
 {
     const V3 position(0);
-    RenderRequest renderRequest(timestamp, _allocator_pool);
+    RenderRequest renderRequest(tick, _allocator_pool);
     _renderer_phrase.render(renderRequest, position, nullptr);
     _render_requests.push(std::move(renderRequest));
 }

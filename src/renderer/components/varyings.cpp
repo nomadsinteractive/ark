@@ -27,7 +27,7 @@ public:
         : Uploader(length * sizeof(T)), _data(length) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         return false;
     }
@@ -101,7 +101,7 @@ Varyings::Varyings(const PipelineLayout& pipelineLayout)
     }
 }
 
-bool Varyings::update(const uint64_t timestamp)
+bool Varyings::update(const uint32_t timestamp)
 {
     bool dirty = _timestamp.update(timestamp);
     for(const auto& [i, j] : _sub_properties)

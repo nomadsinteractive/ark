@@ -35,7 +35,7 @@ public:
         return this->_stub->val();
     }
 
-    bool update(uint64_t timestamp) const {
+    bool update(uint32_t timestamp) const {
         return this->_stub->update(timestamp);
     }
 
@@ -70,8 +70,8 @@ private:
             : Wrapper<T>(std::move(delegate)), _default_val(std::move(defaultVal)) {
         }
 
-        bool update(uint64_t timestamp) override {
-            return (this->_wrapped ? this->_wrapped->update(timestamp) : false) || _timestamp.update(timestamp);
+        bool update(uint32_t tick) override {
+            return (this->_wrapped ? this->_wrapped->update(tick) : false) || _timestamp.update(tick);
         }
 
         ValType val() override {

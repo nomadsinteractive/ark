@@ -6,14 +6,14 @@
 
 namespace ark {
 
-RenderRequest::RenderRequest(uint64_t timestamp, sp<Allocator::Pool> allocatorPool)
-    : _stub(sp<Stub>::make(timestamp, std::move(allocatorPool)))
+RenderRequest::RenderRequest(const uint32_t tick, sp<Allocator::Pool> allocatorPool)
+    : _stub(sp<Stub>::make(tick, std::move(allocatorPool)))
 {
 }
 
-uint64_t RenderRequest::timestamp() const
+uint32_t RenderRequest::tick() const
 {
-    return _stub->_timestamp;
+    return _stub->_tick;
 }
 
 Allocator& RenderRequest::allocator() const
@@ -36,8 +36,8 @@ void RenderRequest::addRenderCommand(sp<RenderCommand> renderCommand) const
     _stub->_render_command_pipe_line->add(std::move(renderCommand));
 }
 
-RenderRequest::Stub::Stub(const uint64_t timestamp, sp<Allocator::Pool> allocatorPool)
-    : _timestamp(timestamp), _allocator(std::move(allocatorPool)), _render_command_pipe_line(sp<RenderCommandPipeline>::make())
+RenderRequest::Stub::Stub(const uint32_t tick, sp<Allocator::Pool> allocatorPool)
+    : _tick(tick), _allocator(std::move(allocatorPool)), _render_command_pipe_line(sp<RenderCommandPipeline>::make())
 {
 }
 

@@ -34,7 +34,7 @@ public:
             : _condition(std::move(filter), DF) {
         }
 
-        void update(const uint64_t timestamp) const {
+        void update(const uint32_t timestamp) const {
             _condition.update(timestamp);
         }
 
@@ -52,7 +52,7 @@ public:
             : _op1(std::move(s1)), _op2(std::move(s2)) {
         }
 
-        void update(uint64_t timestamp) const {
+        void update(uint32_t timestamp) const {
             _op1.update(timestamp);
             _op2.update(timestamp);
         }
@@ -89,7 +89,7 @@ private:
 public:
     template<typename U> class FilteredIterator : public IteratorBase<U> {
     public:
-        FilteredIterator(ListImpl& list, U iterator, uint64_t timestamp = 0)
+        FilteredIterator(ListImpl& list, U iterator, uint32_t timestamp = 0)
             : IteratorBase<U>(std::move(iterator)), _list(list), _timestamp(timestamp) {
             forward();
         }
@@ -149,7 +149,7 @@ public:
 
     class UpdatedList {
     public:
-        UpdatedList(ListImpl& items, const uint64_t timestamp)
+        UpdatedList(ListImpl& items, const uint32_t timestamp)
             : _items(items), _timestamp(timestamp) {
         }
 
@@ -176,7 +176,7 @@ public:
         _items.emplace_back(std::move(item), std::move(filter));
     }
 
-    UpdatedList update(uint64_t timestamp) {
+    UpdatedList update(uint32_t timestamp) {
         return UpdatedList(_items, timestamp);
     }
 

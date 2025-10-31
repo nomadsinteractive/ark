@@ -16,7 +16,7 @@ public:
         return _weak_ref.useCount() <= _use_count;
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return true;
     }
 

@@ -10,9 +10,9 @@ UploaderRepeat::UploaderRepeat(sp<Uploader> delegate, size_t length, size_t stri
     ASSERT(_stride >= _delegate->size());
 }
 
-bool UploaderRepeat::update(uint64_t timestamp)
+bool UploaderRepeat::update(uint32_t tick)
 {
-    return _delegate->update(timestamp);
+    return _delegate->update(tick);
 }
 
 void UploaderRepeat::upload(Writable& writable)

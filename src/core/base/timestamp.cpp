@@ -9,15 +9,17 @@
 namespace ark {
 
 Timestamp::Timestamp()
-    : _last_modified(std::numeric_limits<uint64_t>::max())
+    : _last_modified(std::numeric_limits<uint32_t>::max())
 {
 }
 
-bool Timestamp::update(const uint64_t timestamp) const
+bool Timestamp::update(const uint32_t tick) const
 {
-    if(_last_modified >= timestamp)
+    if(_last_modified == tick)
+        return true;
+    if(_last_modified > tick)
     {
-        _last_modified = timestamp;
+        _last_modified = tick;
         return true;
     }
     return false;
@@ -30,10 +32,10 @@ void Timestamp::markClean()
 
 void Timestamp::markDirty()
 {
-    _last_modified = std::numeric_limits<uint64_t>::max();
+    _last_modified = std::numeric_limits<uint32_t>::max();
 }
 
-uint64_t Timestamp::now()
+uint32_t Timestamp::now()
 {
     return Ark::instance().applicationContext()->tick();
 }

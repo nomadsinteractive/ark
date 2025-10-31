@@ -9,7 +9,7 @@ UploaderElementIndices::UploaderElementIndices(std::vector<element_index_t> elem
 {
 }
 
-bool UploaderElementIndices::update(uint64_t /*timestamp*/)
+bool UploaderElementIndices::update(uint32_t /*tick*/)
 {
     return false;
 }

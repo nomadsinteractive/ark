@@ -34,9 +34,9 @@ V4 Vec4Impl::val()
     return {_x->val(), _y->val(), _z->val(), _w->val()};
 }
 
-bool Vec4Impl::update(const uint64_t timestamp)
+bool Vec4Impl::update(uint32_t tick)
 {
-    return UpdatableUtil::update(timestamp, _x, _y, _z, _w);
+    return UpdatableUtil::update(tick, _x, _y, _z, _w);
 }
 
 const sp<NumericWrapper>& Vec4Impl::x() const

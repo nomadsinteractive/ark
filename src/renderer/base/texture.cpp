@@ -164,7 +164,7 @@ const sp<Texture::Uploader>& Texture::uploader() const
     return _stub->_uploader;
 }
 
-bool Texture::update(const uint64_t timestamp) const
+bool Texture::update(const uint32_t timestamp) const
 {
     return _stub->_timestamp.update(timestamp);
 }

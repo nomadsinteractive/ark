@@ -60,7 +60,7 @@ ModelLoaderText::GlyphBundle::GlyphBundle(AtlasGlyphAttachment& atlasAttachment,
     ASSERT(_font);
 }
 
-bool ModelLoaderText::GlyphBundle::prepareOne(const uint64_t timestamp, const int32_t c, const int32_t ckey)
+bool ModelLoaderText::GlyphBundle::prepareOne(const uint32_t timestamp, const int32_t c, const int32_t ckey)
 {
     if(Optional<Alphabet::Metrics> optMetrics = _alphabet->measure(c))
     {
@@ -94,7 +94,7 @@ bool ModelLoaderText::GlyphBundle::prepareOne(const uint64_t timestamp, const in
     return true;
 }
 
-void ModelLoaderText::GlyphBundle::reload(const uint64_t timestamp)
+void ModelLoaderText::GlyphBundle::reload(const uint32_t timestamp)
 {
     Vector<int32_t> reloadVector;
     for(const auto& [k, v] : _glyphs)
@@ -110,7 +110,7 @@ void ModelLoaderText::GlyphBundle::reload(const uint64_t timestamp)
         ensureGlyphModel(timestamp, i, false);
 }
 
-const ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(const uint64_t timestamp, const int32_t c, const bool reload)
+const ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(const uint32_t timestamp, const int32_t c, const bool reload)
 {
     const auto iter = _glyphs.find(c);
     if(iter == _glyphs.end())
@@ -157,7 +157,7 @@ void ModelLoaderText::AtlasGlyphAttachment::initialize(uint32_t textureWidth, ui
 
 bool ModelLoaderText::AtlasGlyphAttachment::resize(const uint32_t textureWidth, const uint32_t textureHeight)
 {
-    const uint64_t timestamp = Ark::instance().appClock()->tick();
+    const uint32_t timestamp = Ark::instance().appClock()->tick();
 
     initialize(textureWidth, textureHeight);
 
@@ -184,7 +184,7 @@ ModelLoaderText::GlyphModel::GlyphModel()
 {
 }
 
-ModelLoaderText::GlyphModel::GlyphModel(sp<Model> model, const uint64_t timestamp)
+ModelLoaderText::GlyphModel::GlyphModel(sp<Model> model, const uint32_t timestamp)
     : _model(std::move(model)), _timestamp(timestamp)
 {
 }

@@ -52,7 +52,7 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp)
+    bool update(const uint32_t timestamp)
     {
         _position_updated = _rigidbody_stub->_position.update(timestamp) | _position_updated;
 
@@ -337,7 +337,7 @@ void ColliderImpl::Stub::removeBroadPhraseCandidate(const RefId id)
             coordinator->remove(id);
 }
 
-bool ColliderImpl::Stub::update(const uint64_t timestamp)
+bool ColliderImpl::Stub::update(uint32_t tick)
 {
     DPROFILER_TRACE("CollisionTest", ApplicationProfiler::CATEGORY_PHYSICS);
 
@@ -348,7 +348,7 @@ bool ColliderImpl::Stub::update(const uint64_t timestamp)
         if(ref && !ref->isDiscarded())
         {
             RigidbodyImpl& body = ref->instance<RigidbodyImpl>();
-            const bool dirty = body.update(timestamp);
+            const bool dirty = body.update(tick);
             if(body._rigidbody_stub->_ref->discarded().val())
                 _phrase_remove.insert(id);
             else if(dirty && body._rigidbody_stub->_type != Rigidbody::BODY_TYPE_STATIC)

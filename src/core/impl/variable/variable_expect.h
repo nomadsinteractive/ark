@@ -14,9 +14,9 @@ public:
         :  Wrapper<Variable<T>>(std::move(delegate)), _expectation(std::move(expectation)), _future(std::move(future)) {
     }
 
-    bool update(uint64_t timestamp) override {
-        _expectation->update(timestamp);
-        return this->_wrapped->update(timestamp);
+    bool update(uint32_t tick) override {
+        _expectation->update(tick);
+        return this->_wrapped->update(tick);
     }
 
     bool val() override {

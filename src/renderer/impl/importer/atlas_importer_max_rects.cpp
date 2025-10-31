@@ -23,7 +23,7 @@ public:
 
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return false;
     }
 

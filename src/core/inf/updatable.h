@@ -8,8 +8,7 @@ class ARK_API Updatable {
 public:
     virtual ~Updatable() = default;
 
-//  [[script::bindings::interface]]
-    virtual bool update(uint64_t timestamp) = 0;
+    virtual bool update(uint32_t tick) = 0;
 };
 
 }

@@ -17,8 +17,8 @@ public:
 
     bool isLayoutTopView() const;
 
-    bool updateDescendantLayout(uint64_t timestamp);
-    bool updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp);
+    bool updateDescendantLayout(uint32_t timestamp);
+    bool updateLayout(const sp<Layout::Node>& layoutNode, uint32_t timestamp);
 
     const Vector<sp<View>>& updateChildren();
     void markHierarchyDirty();

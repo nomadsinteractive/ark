@@ -49,7 +49,7 @@ void Transform::onWire(const WiringContext& context, const Box& self)
         _stub->_scale.reset(std::move(scale));
 }
 
-bool Transform::Stub::update(const uint64_t timestamp) const
+bool Transform::Stub::update(const uint32_t timestamp) const
 {
     return UpdatableUtil::update(timestamp, _translation, _rotation, _scale, _timestamp);
 }

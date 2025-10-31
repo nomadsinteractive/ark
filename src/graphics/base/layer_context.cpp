@@ -20,9 +20,9 @@ LayerContext::LayerContext(sp<Shader> shader, sp<ModelLoader> modelLoader, sp<Ve
 {
 }
 
-bool LayerContext::update(const uint64_t timestamp)
+bool LayerContext::update(uint32_t tick)
 {
-    return _timestamp.update(timestamp);
+    return _timestamp.update(tick);
 }
 
 const sp<Shader>& LayerContext::shader() const
@@ -129,7 +129,7 @@ bool LayerContext::processNewCreated()
 
 LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout)
 {
-    const bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _discarded, _varyings);
+    const bool dirty = UpdatableUtil::update(renderRequest.tick(), _position, _visible, _discarded, _varyings);
     if(!_varyings)
         _varyings = sp<Varyings>::make(pipelineLayout);
     return {dirty, _position.val(), _visible.val(), _discarded.val(), _varyings->snapshot(pipelineLayout, renderRequest.allocator()), std::move(renderLayer)};

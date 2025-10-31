@@ -19,10 +19,10 @@ LayoutParam::LayoutParam(LayoutLength width, LayoutLength height, sp<Layout> lay
 {
 }
 
-bool LayoutParam::update(const uint64_t timestamp)
+bool LayoutParam::update(uint32_t tick)
 {
-    const bool dirty = _timestamp.update(timestamp);
-    return UpdatableUtil::update(timestamp, _width, _height, _margins, _paddings, _flex_basis) || dirty;
+    const bool dirty = _timestamp.update(tick);
+    return UpdatableUtil::update(tick, _width, _height, _margins, _paddings, _flex_basis) || dirty;
 }
 
 const sp<Layout>& LayoutParam::layout() const

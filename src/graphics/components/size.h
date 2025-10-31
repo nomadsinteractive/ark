@@ -21,7 +21,7 @@ public:
     Size(sp<Numeric> width, sp<Numeric> height, sp<Numeric> depth = nullptr);
 
     V3 val() override;
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
 
     float widthAsFloat() const;
     float heightAsFloat() const;

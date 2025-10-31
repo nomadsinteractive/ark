@@ -12,9 +12,9 @@ public:
         : _transform(std::move(transform)), _matrix(matrix), _origin(origin) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return _transform->update(timestamp);
+        return _transform->update(tick);
     }
 
     Snapshot snapshot() override
@@ -47,7 +47,7 @@ RenderableWithTransform::RenderableWithTransform(sp<Renderable> delegate, sp<Mat
 
 Renderable::State RenderableWithTransform::updateState(const RenderRequest& renderRequest)
 {
-    const bool dirty = _transform->update(renderRequest.timestamp());
+    const bool dirty = _transform->update(renderRequest.tick());
     const State state = _wrapped->updateState(renderRequest);
     return dirty ? state | RENDERABLE_STATE_DIRTY : state;
 }

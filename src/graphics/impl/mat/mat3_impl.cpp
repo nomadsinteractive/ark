@@ -25,9 +25,9 @@ public:
         return _matrix;
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(UpdatableUtil::update(timestamp, _t, _b, _n))
+        if(UpdatableUtil::update(tick, _t, _b, _n))
         {
             _matrix = toMatrix(_t->val(), _b->val(), _n->val());
             return true;
@@ -65,9 +65,9 @@ M3 Mat3Impl::val()
     return _impl->val();
 }
 
-bool Mat3Impl::update(uint64_t timestamp)
+bool Mat3Impl::update(uint32_t tick)
 {
-    return _impl->update(timestamp);
+    return _impl->update(tick);
 }
 
 }

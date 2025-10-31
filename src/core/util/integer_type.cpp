@@ -30,11 +30,11 @@ public:
         updateSubscription();
     }
 
-    bool update(const uint64_t timestamp) override {
-        const bool indexDirty = _index->update(timestamp);
+    bool update(uint32_t tick) override {
+        const bool indexDirty = _index->update(tick);
         if(indexDirty)
             updateSubscription();
-        return _subscribed->update(timestamp) || indexDirty;
+        return _subscribed->update(tick) || indexDirty;
     }
 
     int32_t val() override {

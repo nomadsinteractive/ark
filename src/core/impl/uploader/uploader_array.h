@@ -19,7 +19,7 @@ public:
         buf.write(_vector->buf(), _vector->size(), 0);
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return false;
     }
 

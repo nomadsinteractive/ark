@@ -23,8 +23,8 @@ public:
         return this->_wrapped->val();
     }
 
-    bool update(uint64_t timestamp) override {
-        return this->_wrapped->update(timestamp) || _timestamp.update(timestamp);
+    bool update(uint32_t tick) override {
+        return this->_wrapped->update(tick) || _timestamp.update(tick);
     }
 
     void set(T value) {

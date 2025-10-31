@@ -18,9 +18,9 @@ public:
         return _condition->val() ? _a->val() : _b->val();
     }
 
-    bool update(const uint64_t timestamp) override {
-        const bool dirty = _condition->update(timestamp);
-        return (_condition->val() ? _a->update(timestamp) : _b->update(timestamp)) || dirty;
+    bool update(uint32_t tick) override {
+        const bool dirty = _condition->update(tick);
+        return (_condition->val() ? _a->update(tick) : _b->update(tick)) || dirty;
     }
 
 private:

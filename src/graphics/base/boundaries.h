@@ -40,7 +40,7 @@ public:
 //  [[script::bindings::auto]]
     bool ptin(const V3& point) const;
 
-    bool update(uint64_t timestamp) const;
+    bool update(uint32_t timestamp) const;
 
 private:
     sp<Vec3> _aabb_min;

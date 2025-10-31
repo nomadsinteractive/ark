@@ -19,7 +19,7 @@ public:
     explicit TransformImpl(sp<Transform> delegate);
     explicit TransformImpl(sp<Mat4> delegate);
 
-    bool update(uint64_t timestamp) override;
+    bool update(uint32_t tick) override;
     M4 val() override;
 
     Snapshot snapshot() override;

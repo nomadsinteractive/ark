@@ -21,7 +21,7 @@ class TransformNone final : public Transform {
 public:
     TransformNone() = default;
 
-    bool update(uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         return false;
     }
@@ -50,9 +50,9 @@ public:
         : Transform(transform), _matrix(std::move(matrix)) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return UpdatableUtil::update(timestamp, _stub, _matrix);
+        return UpdatableUtil::update(tick, _stub, _matrix);
     }
 
     Snapshot snapshot() override
@@ -106,9 +106,9 @@ M4 TransformImpl::toMatrix(const Snapshot& snapshot)
     return _wrapped->toMatrix(snapshot);
 }
 
-bool TransformImpl::update(const uint64_t timestamp)
+bool TransformImpl::update(uint32_t tick)
 {
-    return _wrapped->update(timestamp);
+    return _wrapped->update(tick);
 }
 
 M4 TransformImpl::val()

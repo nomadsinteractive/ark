@@ -19,7 +19,7 @@ public:
         return _distribution(*_generator);
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return true;
     }
 
@@ -39,7 +39,7 @@ public:
         return dis(*_generator);
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return true;
     }
 
@@ -56,11 +56,11 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(!timestamp || _timestamp != timestamp)
+        if(!tick || _timestamp != tick)
         {
-            _timestamp = timestamp;
+            _timestamp = tick;
             _value = _generator->val();
             return true;
         }

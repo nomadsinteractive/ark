@@ -12,11 +12,11 @@ public:
         :  _target(std::move(target)), _t(std::move(t)), _value(s0), _speed(speed), _distance(distance), _future(std::move(future)), _t0(0) {
     }
 
-    bool update(const uint64_t timestamp) override {
+    bool update(uint32_t tick) override {
         if(_future && _future->isDoneOrCanceled()->val())
             return false;
 
-        const bool dirty = _target->update(timestamp);
+        const bool dirty = _target->update(tick);
         const float t1 = _t->val();
         const T targetValue = _target->val();
         const T vec = targetValue - _value;

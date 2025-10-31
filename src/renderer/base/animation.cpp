@@ -18,7 +18,7 @@ struct AnimationSession {
         ASSERT(_duration_in_ticks);
     }
 
-    bool update(const uint64_t timestamp) const
+    bool update(const uint32_t timestamp) const
     {
         return _tick->update(timestamp);
     }
@@ -41,9 +41,9 @@ public:
         : _session(std::move(session)), _node_index(nodeIndex) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return _session->update(timestamp);
+        return _session->update(tick);
     }
 
     M4 val() override
@@ -62,9 +62,9 @@ public:
         : _session(std::move(session)), _transform_path(std::move(transformPath)) {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return _session->update(timestamp);
+        return _session->update(tick);
     }
 
     M4 val() override

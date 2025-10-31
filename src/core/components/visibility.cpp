@@ -20,9 +20,9 @@ bool Visibility::val()
     return _visible->val();
 }
 
-bool Visibility::update(uint64_t timestamp)
+bool Visibility::update(uint32_t tick)
 {
-    return _visible->update(timestamp);
+    return _visible->update(tick);
 }
 
 void Visibility::show()

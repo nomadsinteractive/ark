@@ -99,7 +99,7 @@ public:
         : Uploader(cols * rows * 2 * 3 * sizeof(element_index_t)), _cols(cols), _rows(rows) {
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return false;
     }
 

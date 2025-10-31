@@ -70,8 +70,8 @@ public:
         : _render_controller(renderController), _buffer(std::move(buffer)), _uploader(std::move(uploader)) {
     }
 
-    bool update(uint64_t timestamp) override {
-        const bool dirty = _uploader->update(timestamp) || _buffer->id() == 0;
+    bool update(uint32_t tick) override {
+        const bool dirty = _uploader->update(tick) || _buffer->id() == 0;
         if(dirty)
             _render_controller.upload(sp<Resource>::make<ResourceUploadBufferSnapshot>(_buffer, _uploader), enums::UPLOAD_STRATEGY_ONCE);
         return dirty;
@@ -105,7 +105,7 @@ public:
         }
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return false;
     }
 
@@ -145,7 +145,7 @@ public:
         }
     }
 
-    bool update(uint64_t /*timestamp*/) override {
+    bool update(uint32_t /*tick*/) override {
         return false;
     }
 
@@ -370,7 +370,7 @@ void RenderController::addPreRenderRequest(sp<Runnable> task, sp<Boolean> cancel
     _on_pre_render_sync.push_back(std::move(var));
 }
 
-void RenderController::onPreCompose(const uint64_t timestamp)
+void RenderController::onPreCompose(const uint32_t tick)
 {
     DPROFILER_TRACE("RendererPreUpdate");
 
@@ -378,18 +378,18 @@ void RenderController::onPreCompose(const uint64_t timestamp)
 
     {
         DPROFILER_LOG("Updatables", _on_pre_compose_updatable.items().size());
-        for(const sp<Updatable>& i : _on_pre_compose_updatable.update(timestamp))
-            i->update(timestamp);
+        for(const sp<Updatable>& i : _on_pre_compose_updatable.update(tick))
+            i->update(tick);
     }
     {
         DPROFILER_LOG("Runnables", _on_pre_compose_runnable.items().size());
-        for(const sp<Runnable>& runnable : _on_pre_compose_runnable.update(timestamp))
+        for(const sp<Runnable>& runnable : _on_pre_compose_runnable.update(tick))
             runnable->run();
     }
     for(auto iter = _on_pre_render_sync.begin(); iter != _on_pre_render_sync.end(); )
     {
         UpdatableSynchronized<bool>& i = *iter;
-        i.update(timestamp);
+        i.update(tick);
         if(i.synchronized()->val())
             iter = _on_pre_render_sync.erase(iter);
         else

@@ -20,10 +20,10 @@ public:
             buf.writeObject(_vector[i]->val(), sizeof(T), i * ALIGN);
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(uint32_t tick) override {
         bool dirty = false;
         for(const sp<Variable<T>>& i : _vector)
-            dirty = i->update(timestamp) || dirty;
+            dirty = i->update(tick) || dirty;
         return dirty;
     }
 

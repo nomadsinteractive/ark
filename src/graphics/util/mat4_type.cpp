@@ -145,7 +145,7 @@ sp<Mat4> Mat4Type::translate(sp<Mat4> self, sp<Vec3> translation)
 
 sp<Mat4> Mat4Type::inverse(sp<Mat4> self)
 {
-    return sp<Mat4>::make<VariableCached<M4>>(sp<Mat4>::make<VariableOP1<M4>>(MatrixOperators::Inverse(), std::move(self)));
+    return VariableCached<M4>::create<VariableOP1<M4>>(MatrixOperators::Inverse(), std::move(self));
 }
 
 M4 Mat4Type::update(const sp<Mat4>& self)

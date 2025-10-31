@@ -27,9 +27,9 @@ public:
         return (v - _initial_tick) / 1000000.0f;
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return _ticker->update(timestamp);
+        return _ticker->update(tick);
     }
 
 private:
@@ -50,9 +50,9 @@ public:
         return _paused ? _paused : _wrapped->val() - _bypass;
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return _paused ? false : _wrapped->update(timestamp);
+        return _paused ? false : _wrapped->update(tick);
     }
 
     void pause()
@@ -137,9 +137,9 @@ uint64_t Clock::val()
     return _ticker->val();
 }
 
-bool Clock::update(const uint64_t timestamp)
+bool Clock::update(uint32_t tick)
 {
-    return _ticker->update(timestamp);
+    return _ticker->update(tick);
 }
 
 uint64_t Clock::tick() const

@@ -367,7 +367,7 @@ public:
         _value = {vec2.x, vec2.y};
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
         return true;
     }

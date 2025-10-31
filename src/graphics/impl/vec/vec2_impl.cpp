@@ -33,9 +33,9 @@ V2 Vec2Impl::val()
     return {_x->val(), _y->val()};
 }
 
-bool Vec2Impl::update(const uint64_t timestamp)
+bool Vec2Impl::update(uint32_t tick)
 {
-    return UpdatableUtil::update(timestamp, _x, _y);
+    return UpdatableUtil::update(tick, _x, _y);
 }
 
 const sp<NumericWrapper>& Vec2Impl::x() const

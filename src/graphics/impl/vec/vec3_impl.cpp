@@ -35,9 +35,9 @@ V3 Vec3Impl::val()
     return {_x->val(), _y->val(), _z->val()};
 }
 
-bool Vec3Impl::update(const uint64_t timestamp)
+bool Vec3Impl::update(uint32_t tick)
 {
-    return UpdatableUtil::update(timestamp, _x, _y, _z);
+    return UpdatableUtil::update(tick, _x, _y, _z);
 }
 
 const sp<NumericWrapper>& Vec3Impl::x() const

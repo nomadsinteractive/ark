@@ -30,7 +30,7 @@ public:
 private:
     void initialize();
 
-    void pollEvents(uint64_t timestamp);
+    void pollEvents(uint32_t timestamp);
 
 private:
     SDL_Window* _main_window;

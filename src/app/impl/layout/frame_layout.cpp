@@ -15,11 +15,11 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp) override {
+    bool update(uint32_t tick) override {
         Layout::Node& rootNode = _hierarchy._node;
-        bool dirty = rootNode.update(timestamp);
+        bool dirty = rootNode.update(tick);
         for(const Layout::Hierarchy& i : _hierarchy._child_nodes)
-            if(i._node->update(timestamp))
+            if(i._node->update(tick))
             {
                 i._node->setSize(LayoutUtil::calcItemSize(i._node, rootNode));
 

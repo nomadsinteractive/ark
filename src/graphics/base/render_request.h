@@ -13,10 +13,10 @@ namespace ark {
 class ARK_API RenderRequest {
 public:
     RenderRequest() = default;
-    RenderRequest(uint64_t timestamp, sp<Allocator::Pool> allocatorPool);
+    RenderRequest(uint32_t tick, sp<Allocator::Pool> allocatorPool);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderRequest);
 
-    uint64_t timestamp() const;
+    uint32_t tick() const;
     Allocator& allocator() const;
 
     void onRenderFrame(V4 backgroundColor, RenderView& renderView) const;
@@ -25,9 +25,9 @@ public:
 
 public:
     struct Stub {
-        Stub(uint64_t timestamp, sp<Allocator::Pool> allocatorPool);
+        Stub(uint32_t tick, sp<Allocator::Pool> allocatorPool);
 
-        uint64_t _timestamp;
+        uint32_t _tick;
         Allocator _allocator;
 
         sp<RenderCommandPipeline> _render_command_pipe_line;

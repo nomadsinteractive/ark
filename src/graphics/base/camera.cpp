@@ -102,8 +102,8 @@ public:
         return _matrix;
     }
 
-    bool update(const uint64_t timestamp) override {
-        if(UpdatableUtil::update(timestamp, _left_top, _right_bottom, _clip)) {
+    bool update(uint32_t tick) override {
+        if(UpdatableUtil::update(tick, _left_top, _right_bottom, _clip)) {
             _matrix = calcMatrix();
             return true;
         }
@@ -140,9 +140,9 @@ public:
         return _matrix;
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(const Optional<PerspectiveStub>& perspective = _camera->_perspective; UpdatableUtil::update(timestamp, perspective->_fov, perspective->_aspect, perspective->_clip_near, perspective->_clip_far))
+        if(const Optional<PerspectiveStub>& perspective = _camera->_perspective; UpdatableUtil::update(tick, perspective->_fov, perspective->_aspect, perspective->_clip_near, perspective->_clip_far))
         {
             _matrix = _delegate->perspective(perspective->_fov->val(), perspective->_aspect->val(), perspective->_clip_near->val(), perspective->_clip_far->val());
             return true;
@@ -168,9 +168,9 @@ public:
         return _matrix;
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(const Optional<LookAtStub>& lookAt = _camera->_look_at; lookAt && UpdatableUtil::update(timestamp, lookAt->_position, lookAt->_target, lookAt->_up))
+        if(const Optional<LookAtStub>& lookAt = _camera->_look_at; lookAt && UpdatableUtil::update(tick, lookAt->_position, lookAt->_target, lookAt->_up))
         {
             _matrix = _delegate->lookAt(lookAt->_position->val(), lookAt->_target->val(), lookAt->_up->val());
             return true;
@@ -191,9 +191,9 @@ public:
     {
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        return UpdatableUtil::update(timestamp, _view_projecttion_inverse, _screen_position);
+        return UpdatableUtil::update(tick, _view_projecttion_inverse, _screen_position);
     }
 
     V3 val() override
@@ -217,9 +217,9 @@ public:
         update(Timestamp::now());
     }
 
-    bool update(const uint64_t timestamp) override
+    bool update(uint32_t tick) override
     {
-        if(UpdatableUtil::update(timestamp, _front, _right, _up))
+        if(UpdatableUtil::update(tick, _front, _right, _up))
         {
             _quaternion = doUpdate();
             return true;
