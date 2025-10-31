@@ -52,9 +52,6 @@ void ExecutorWorkerThread::Worker::run()
     const sp<Strategy> strategy = _strategy;
     strategy->onStart();
     while(_thread.status() != Thread::THREAD_STATE_TERMINATED)
-    {
-        _thread.wait(std::chrono::milliseconds(1));
-
         if(Optional<sp<Runnable>> optTask = _pending_tasks.pop())
         {
             do
@@ -69,10 +66,13 @@ void ExecutorWorkerThread::Worker::run()
             } while(optTask);
 
             strategy->onBusy();
+            std::this_thread::yield();
         }
         else
+        {
             strategy->onIdle(_thread);
-    }
+            _thread.wait(std::chrono::milliseconds(1));
+        }
     strategy->onExit();
 }
 

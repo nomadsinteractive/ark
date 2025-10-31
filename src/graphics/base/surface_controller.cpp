@@ -10,38 +10,36 @@
 namespace ark {
 
 SurfaceController::SurfaceController()
-    : _allocator_pool(sp<Allocator::Pool>::make()), _render_requests(sp<OCSQueue<RenderRequest>>::make())
+    : _allocator_pool(sp<Allocator::Pool>::make())
 {
 }
 
-void SurfaceController::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible, RendererType::Priority priority)
+void SurfaceController::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible, const RendererType::Priority priority)
 {
     _renderer_phrase.add(priority, std::move(renderer), std::move(discarded), std::move(visible));
 }
 
 void SurfaceController::requestUpdate(const uint64_t timestamp)
 {
-    const size_t size = _render_requests->size();
-    if(size < 3)
-    {
-        const V3 position(0);
-        RenderRequest renderRequest(timestamp, _allocator_pool);
-        _renderer_phrase.render(renderRequest, position, nullptr);
-        _render_requests->add(std::move(renderRequest));
-    }
-    DCHECK_WARN(size < 3, "Frame skipped. RenderCommand size: %d. Rendering thread busy?", size);
+    const V3 position(0);
+    RenderRequest renderRequest(timestamp, _allocator_pool);
+    _renderer_phrase.render(renderRequest, position, nullptr);
+    _render_requests.push(std::move(renderRequest));
 }
 
-void SurfaceController::onRenderFrame(const V4 backgroundColor, RenderView& renderView) const
+void SurfaceController::onRenderFrame(const V4 backgroundColor, RenderView& renderView)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
-
-    RenderRequest renderRequest;
-    do {
+    while(true)
+    {
+        if(Optional<RenderRequest> optRequest = _render_requests.pop())
+        {
+            const RenderRequest renderRequest = std::move(optRequest.value());
+            renderRequest.onRenderFrame(backgroundColor, renderView);
+            break;
+        }
         std::this_thread::yield();
-    } while(!_render_requests->pop(renderRequest));
-
-    renderRequest.onRenderFrame(backgroundColor, renderView);
+    }
 }
 
 }

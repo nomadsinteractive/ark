@@ -65,9 +65,9 @@ public:
     }
 };
 
-class Ticker final : public Variable<uint64_t> {
+class SteadyClock final : public Variable<uint64_t> {
 public:
-    Ticker()
+    SteadyClock()
         : _steady_clock(Platform::getSteadyClock()), _val(_steady_clock->val()) {
     }
 
@@ -124,7 +124,7 @@ ApplicationContext::AppClock::AppClock(sp<Numeric> timeScale)
 {
 }
 
-uint64_t ApplicationContext::AppClock::onTick()
+uint32_t ApplicationContext::AppClock::onTick()
 {
     const uint64_t nextTimestamp = _steady->val();
     _time_scale.update(nextTimestamp);
@@ -142,10 +142,10 @@ uint64_t ApplicationContext::AppClock::onTick()
 }
 
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
-    : _ticker(sp<Variable<uint64_t>>::make<Ticker>()), _cursor_position(sp<Vec2Impl>::make()), _cursor_frag_coord(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
-      _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_ticker)),
-      _worker_strategy(sp<ExecutorWorkerStrategy>::make()), _main_thread_executor(sp<ExecutorScheduled>::make()), _core_thread_executor(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")),
-      _thread_pool_executor(sp<Executor>::make<ExecutorThreadPool>(_core_thread_executor)), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
+    : _steady_clock(sp<Variable<uint64_t>>::make<SteadyClock>()), _cursor_position(sp<Vec2Impl>::make()), _cursor_frag_coord(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
+      _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_steady_clock)),
+      _worker_strategy(sp<ExecutorWorkerStrategy>::make()), _main_executor(sp<ExecutorScheduled>::make()), _core_executor(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")),
+      _thread_pool_executor(sp<Executor>::make<ExecutorThreadPool>(_core_executor)), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
 {
     const Ark& ark = Ark::instance();
 
@@ -170,9 +170,9 @@ void ApplicationContext::initialize(const document& manifest)
 
 void ApplicationContext::finalize() const
 {
-    _core_thread_executor.cast<ExecutorWorkerThread>()->terminate();
+    _core_executor.cast<ExecutorWorkerThread>()->terminate();
     _thread_pool_executor.cast<ExecutorThreadPool>()->releaseAll(true);
-    _core_thread_executor.cast<ExecutorWorkerThread>()->tryJoin();
+    _core_executor.cast<ExecutorWorkerThread>()->tryJoin();
 }
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)
@@ -259,7 +259,7 @@ const sp<Interpreter>& ApplicationContext::interpreter() const
 
 const sp<Executor>& ApplicationContext::coreExecutor() const
 {
-    return _core_thread_executor;
+    return _core_executor;
 }
 
 const sp<Executor>& ApplicationContext::threadPoolExecutor() const
@@ -284,7 +284,7 @@ const sp<Clock>& ApplicationContext::appClock() const
 
 void ApplicationContext::pushAppClock(sp<Numeric> timeScale)
 {
-    _app_clocks.push_back(AppClock(std::move(timeScale)));
+    _app_clocks.emplace_back(std::move(timeScale));
     _message_loops.push_back(makeMessageLoop(_app_clocks.back()._clock));
 }
 
@@ -302,17 +302,17 @@ const sp<Numeric::Impl>& ApplicationContext::appClockInterval() const
     return _app_clocks.back()._interval;
 }
 
-uint64_t ApplicationContext::tick() const
+uint32_t ApplicationContext::tick() const
 {
     return _app_clocks.back()._tick;
 }
 
-uint64_t ApplicationContext::onTick()
+uint32_t ApplicationContext::onTick()
 {
-    uint64_t timestamp = 0;
+    uint32_t tick = 0;
     for(AppClock& i : _app_clocks)
-        timestamp = i.onTick();
-    return timestamp;
+        tick = i.onTick();
+    return tick;
 }
 
 const sp<Vec2Impl>& ApplicationContext::cursorPosition() const
@@ -359,22 +359,22 @@ const sp<MessageLoop>& ApplicationContext::messageLoop() const
 
 void ApplicationContext::runOnMainThread(const sp<Runnable>& task) const
 {
-    _main_thread_executor->execute(task);
+    _main_executor->execute(task);
 }
 
 void ApplicationContext::runOnMainThread(std::function<void()> task) const
 {
-    _main_thread_executor->execute(sp<Runnable>::make<RunnableByFunction>(std::move(task)));
+    _main_executor->execute(sp<Runnable>::make<RunnableByFunction>(std::move(task)));
 }
 
 void ApplicationContext::runOnCoreThread(sp<Runnable> task) const
 {
-    _core_thread_executor->execute(std::move(task));
+    _core_executor->execute(std::move(task));
 }
 
 void ApplicationContext::runOnCoreThread(std::function<void()> task) const
 {
-    _core_thread_executor->execute(sp<Runnable>::make<RunnableByFunction>(std::move(task)));
+    _core_executor->execute(sp<Runnable>::make<RunnableByFunction>(std::move(task)));
 }
 
 void ApplicationContext::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)
@@ -398,7 +398,7 @@ Vector<String> ApplicationContext::getStringArray(const String& resid)
 
 sp<Runnable> ApplicationContext::defer(const sp<Runnable>& task) const
 {
-    return sp<Runnable>::make<DeferedRunnable>(_core_thread_executor, task);
+    return sp<Runnable>::make<DeferedRunnable>(_core_executor, task);
 }
 
 V4 ApplicationContext::backgroundColor() const
@@ -425,8 +425,8 @@ void ApplicationContext::resume()
 
 void ApplicationContext::updateState()
 {
-    _ticker->update(0);
-    _main_thread_executor->run();
+    _steady_clock->update(0);
+    _main_executor->run();
 }
 
 bool ApplicationContext::isPaused() const

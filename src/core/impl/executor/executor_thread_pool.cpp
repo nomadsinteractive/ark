@@ -36,7 +36,7 @@ public:
     void onExit() override
     {
         bool removed = false;
-        const volatile std::scoped_lock<std::mutex> guard(_stub->_mutex);
+        const std::lock_guard guard(_stub->_mutex);
         for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads.clear())
             if(i->strategy().get() != this)
                 _stub->_worker_threads.push(i);

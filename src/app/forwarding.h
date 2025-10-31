@@ -41,7 +41,6 @@ class Rigidbody;
 class RigidbodyController;
 class SearchingNodeProvider;
 class Surface;
-class SurfaceUpdater;
 class View;
 
 }

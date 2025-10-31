@@ -17,18 +17,17 @@ public:
 
     const sp<RenderView>& renderView() const;
     const sp<SurfaceController>& controller() const;
-    const sp<SurfaceUpdater>& updater() const;
+    const sp<Runnable>& updateRequester() const;
 
-    void onSurfaceCreated();
-    void onSurfaceChanged(uint32_t width, uint32_t height);
-    void onRenderFrame(V4 backgroundColor);
+    void onSurfaceCreated() const;
+    void onSurfaceChanged(uint32_t width, uint32_t height) const;
+    void onRenderFrame(V4 backgroundColor) const;
 
 private:
     sp<RenderView> _render_view;
 
     sp<SurfaceController> _surface_controller;
-    sp<SurfaceUpdater> _updater;
-
+    sp<Runnable> _updater;
 };
 
 }

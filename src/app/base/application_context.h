@@ -48,8 +48,8 @@ public:
 
     const sp<Numeric::Impl>& appClockInterval() const;
 
-    uint64_t tick() const;
-    uint64_t onTick();
+    uint32_t tick() const;
+    uint32_t onTick();
 
     const sp<Vec2Impl>& cursorPosition() const;
 
@@ -110,14 +110,14 @@ private:
         uint64_t _timestamp;
         uint32_t _tick;
 
-        uint64_t onTick();
+        uint32_t onTick();
     };
 
     class ExecutorWorkerStrategy;
 
 private:
     Vector<String> _argv;
-    sp<Variable<uint64_t>> _ticker;
+    sp<Variable<uint64_t>> _steady_clock;
     sp<Vec2Impl> _cursor_position;
     sp<Vec2Impl> _cursor_frag_coord;
 
@@ -132,8 +132,8 @@ private:
 
     sp<ExecutorWorkerStrategy> _worker_strategy;
 
-    sp<ExecutorScheduled> _main_thread_executor;
-    sp<Executor> _core_thread_executor;
+    sp<ExecutorScheduled> _main_executor;
+    sp<Executor> _core_executor;
     sp<Executor> _thread_pool_executor;
 
     Vector<sp<MessageLoop>> _message_loops;
