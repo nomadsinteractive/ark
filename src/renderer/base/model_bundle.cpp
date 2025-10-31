@@ -177,8 +177,8 @@ void ModelBundle::importModel(const NamedHash& type, String manifest, sp<Future>
 void ModelBundle::importModel(const NamedHash& type, const Manifest& manifest, sp<Future> future)
 {
     const ApplicationContext& applicationContext = Ark::instance().applicationContext();
-    sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(type.hash(), manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
-    applicationContext.executorThreadPool()->execute(std::move(task));
+    sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(type.hash(), manifest, _stub, nullptr, applicationContext.coreExecutor(), std::move(future));
+    applicationContext.threadPoolExecutor()->execute(std::move(task));
 }
 
 void ModelBundle::importMaterials(String manifest) const

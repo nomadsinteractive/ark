@@ -14,17 +14,16 @@ RefManager::~RefManager()
 
 sp<Ref> RefManager::makeRef(void* instance, sp<Boolean> discarded)
 {
-    RefId refId;
-    if(_recycled_ids.pop(refId))
+    if(Optional<RefId> optRefId = _recycled_ids.pop())
     {
-        WeakPtr<Ref>& wp = _ref_slots[refId];
-        DCHECK(!wp, "Ref(%d) has been already allocated while making a new Ref", refId);
-        sp<Ref> ref = sp<Ref>::make(refId, instance, std::move(discarded));
+        WeakPtr<Ref>& wp = _ref_slots[optRefId.value()];
+        DCHECK(!wp, "Ref(%d) has been already allocated while making a new Ref", optRefId.value());
+        sp<Ref> ref = sp<Ref>::make(optRefId.value(), instance, std::move(discarded));
         wp = {ref};
         return ref;
     }
-    refId = static_cast<RefId>(_ref_slots.size());
-    sp<Ref> ref = sp<Ref>::make(refId, instance, std::move(discarded));
+
+    sp<Ref> ref = sp<Ref>::make(static_cast<RefId>(_ref_slots.size()), instance, std::move(discarded));
     _ref_slots.emplace_back(ref);
     return ref;
 }

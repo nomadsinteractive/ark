@@ -163,9 +163,6 @@ public:
     }
 
 private:
-    void doUpdate();
-
-private:
     sp<Vec3> _u;
     sp<Vec3> _v;
     V4 _value;

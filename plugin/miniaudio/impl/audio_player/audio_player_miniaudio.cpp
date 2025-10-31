@@ -87,7 +87,7 @@ ma_result _decoder_seek_proc(ma_decoder* pDecoder, ma_int64 byteOffset, ma_seek_
 }
 
 AudioPlayerMiniAudio::AudioPlayerMiniAudio()
-    : _executor(Ark::instance().applicationContext()->executorThreadPool())
+    : _executor(Ark::instance().applicationContext()->threadPoolExecutor())
 {
 }
 

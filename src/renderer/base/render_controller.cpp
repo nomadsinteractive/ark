@@ -204,8 +204,9 @@ void RenderController::onSurfaceReady(GraphicsContext& graphicsContext)
 
 void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<UploadingRenderResource>& items)
 {
-    UploadingRenderResource front;
-    while(items.pop(front)) {
+    while(Optional<UploadingRenderResource> optFront = items.pop())
+    {
+        UploadingRenderResource front = std::move(optFront.value());
         if(!front._resource.isCancelled())
         {
             if(front._strategy == enums::UPLOAD_STRATEGY_RELOAD && front._resource.id() != 0)

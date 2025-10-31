@@ -35,7 +35,7 @@ public:
     {
         _generator->GenUniformGrid2D(_float_array->buf(), _bounds.left(), _bounds.top(), _bounds.width(), _bounds.height(), _frequency, _seed);
         normalize(_float_array);
-        Ark::instance().applicationContext()->executorMain()->execute(_future);
+        Ark::instance().applicationContext()->coreExecutor()->execute(_future);
     }
 
 private:
@@ -144,7 +144,7 @@ sp<FloatArray> Generator::noiseMap2d(const RectI& bounds, sp<Future> future) con
     ASSERT(bounds.width() > 0 && bounds.height() > 0);
     sp<FloatArray> floatArray = FloatArrayType::create(bounds.width() * bounds.height());
     if(future)
-        Ark::instance().applicationContext()->executorThreadPool()->execute(sp<Runnable>::make<RunnableGenUniformGrid2D>(_stub->_generator, std::move(future), floatArray, bounds, _seed, _frequency));
+        Ark::instance().applicationContext()->threadPoolExecutor()->execute(sp<Runnable>::make<RunnableGenUniformGrid2D>(_stub->_generator, std::move(future), floatArray, bounds, _seed, _frequency));
     else
     {
         _stub->_generator->GenUniformGrid2D(floatArray->buf(), bounds.left(), bounds.top(), bounds.width(), bounds.height(), _frequency, _seed);

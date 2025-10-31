@@ -14,11 +14,6 @@ namespace ark {
 
 class ARK_API ApplicationManifest {
 public:
-    enum MessageLoopType {
-        MESSAGE_LOOP_TYPE_CORE,
-        MESSAGE_LOOP_TYPE_RENDER
-    };
-
     enum WindowFlagBits {
         WINDOW_FLAG_NONE = 0,
         WINDOW_FLAG_SHOW_CURSOR = 1,
@@ -38,7 +33,6 @@ public:
         String _dir;
         String _filename;
         String _title;
-        MessageLoopType _message_loop;
     };
 
     struct Window {

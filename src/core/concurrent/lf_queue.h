@@ -12,18 +12,18 @@ public:
         : _ins(&_recycler), _outs(&_recycler) {
     }
 
-//[[ark::threadsafe]]
+//  [[ark::threadsafe]]
     void push(T data) {
         _ins.push(std::move(data));
     }
 
-//[[ark::threadsafe]]
-    bool pop(T& data) {
-        if(_outs.pop(data))
-            return true;
-        for(const T& i : _ins.clear())
-            _outs.push(i);
-        return _outs.pop(data);
+//  [[ark::threadsafe]]
+    Optional<T> pop() {
+        if(Optional<T> opt = _outs.pop())
+            return opt;
+        for(T& i : _ins.clear())
+            _outs.push(std::move(i));
+        return _outs.pop();
     }
 
 private:

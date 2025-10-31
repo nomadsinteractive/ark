@@ -1,7 +1,8 @@
 #pragma once
 
-#include "core/concurrent/internal.h"
 #include "core/forwarding.h"
+#include "core/concurrent/internal.h"
+#include "core/types/optional.h"
 
 namespace ark {
 
@@ -24,11 +25,12 @@ public:
         delete _owned_recycler;
     }
 
+//  [[ark::threadsafe]]
     ClearIterable clear() {
         return ClearIterable(_delegate.release(), _recycler->release());
     }
 
-//[[deprecated]]
+    [[deprecated]]
     bool empty() const {
         return _delegate.head() == nullptr;
     }
@@ -49,19 +51,19 @@ public:
         return nullptr;
     }
 
-//[[ark::threadsafe]]
+//  [[ark::threadsafe]]
     void push(T data) {
         _delegate.push(obtain(std::move(data)));
     }
 
-//[[ark::threadsafe]]
-    bool pop(T& data) {
+//  [[ark::threadsafe]]
+    Optional<T> pop() {
         if(Node* head = _delegate.pop()) {
-            data = head->data();
+            Optional<T> data = std::move(head->data());
             _recycler->put(head);
-            return true;
+            return data;
         }
-        return false;
+        return {};
     }
 
     template<typename U> ClearIterable assign(const U& other) {

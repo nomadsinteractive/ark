@@ -31,18 +31,14 @@ uint8_t* Allocator::sbrk(size_t size, size_t alignment)
     return ptr;
 }
 
-uint8_t* Allocator::_sbrk(size_t size)
+uint8_t* Allocator::_sbrk(const size_t size)
 {
     ASSERT(size < _block_size);
 
     while(true) {
-
-        sp<Block> locked;
-        if(!_actived.pop(locked))
-            locked = _pool ? _pool->obtain() : sp<Block>::make(_block_size);
-
-        uint8_t* ptr = locked->allocate(size);
-        if(ptr)
+        Optional<sp<Block>> optLocked = _actived.pop();
+        sp<Block> locked = optLocked ? std::move(optLocked.value()) : (_pool ? _pool->obtain() : sp<Block>::make(_block_size));
+        if(uint8_t* ptr = locked->allocate(size))
         {
             _actived.push(std::move(locked));
             return ptr;
@@ -85,11 +81,10 @@ Allocator::Pool::Pool(size_t blockSize)
 
 sp<Allocator::Block> Allocator::Pool::obtain()
 {
-    sp<Block> block;
-    if(_blocks.pop(block))
+    Optional<sp<Block>> optBlock = _blocks.pop();
+    sp<Block> block = optBlock ? std::move(optBlock.value()) : sp<Block>::make(_block_size);
+    if(optBlock)
         block->reset();
-    else
-        block = sp<Block>::make(_block_size);
     return block;
 }
 

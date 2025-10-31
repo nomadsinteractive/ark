@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/concurrent/lf_stack.h"
 #include "core/inf/array.h"
 #include "core/inf/readable.h"
@@ -11,13 +9,13 @@
 
 namespace ark {
 
-class ARK_API AudioMixer : public Readable {
+class ARK_API AudioMixer final : public Readable {
 public:
     AudioMixer(uint32_t bufferLength);
 
-    virtual uint32_t read(void* buffer, uint32_t size) override;
-    virtual int32_t seek(int32_t position, int32_t whence) override;
-    virtual int32_t remaining() override;
+    uint32_t read(void* buffer, uint32_t size) override;
+    int32_t seek(int32_t position, int32_t whence) override;
+    int32_t remaining() override;
 
     sp<Future> addTrack(const sp<Readable>& readable, AudioPlayer::PlayOption option);
     bool empty() const;

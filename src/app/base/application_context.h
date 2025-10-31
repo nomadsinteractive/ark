@@ -36,8 +36,8 @@ public:
     const sp<ResourceLoader>& resourceLoader() const;
     const sp<Interpreter>& interpreter() const;
 
-    const sp<Executor>& executorMain() const;
-    const sp<Executor>& executorThreadPool() const;
+    const sp<Executor>& coreExecutor() const;
+    const sp<Executor>& threadPoolExecutor() const;
 
     const Vector<String>& argv() const;
 
@@ -128,13 +128,13 @@ private:
     sp<Clock> _sys_clock;
     Vector<AppClock> _app_clocks;
 
+    sp<MessageLoop> _message_loop_core;
     sp<ExecutorWorkerStrategy> _worker_strategy;
 
-    sp<Executor> _executor_main;
-    sp<Executor> _executor_thread_pool;
+    sp<Executor> _core_executor;
+    sp<Executor> _thread_pool_executor;
 
     sp<MessageLoop> _message_loop_renderer;
-    sp<MessageLoop> _message_loop_core;
 
     Vector<sp<MessageLoop>> _app_message_loops;
 

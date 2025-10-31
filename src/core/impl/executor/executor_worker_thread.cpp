@@ -55,18 +55,18 @@ void ExecutorWorkerThread::Worker::run()
     {
         _thread.wait(std::chrono::milliseconds(1));
 
-        sp<Runnable> task;
-        if(_pending_tasks.pop(task))
+        if(Optional<sp<Runnable>> optTask = _pending_tasks.pop())
         {
             do
             {
                 try {
-                    task->run();
+                    optTask.value()->run();
                 }
                 catch(const std::exception& e) {
                     strategy->onException(e);
                 }
-            } while(_pending_tasks.pop(task));
+                optTask = _pending_tasks.pop();
+            } while(optTask);
 
             strategy->onBusy();
         }

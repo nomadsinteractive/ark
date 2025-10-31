@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_CONCURRENT_INTERNAL_H_
-#define ARK_CORE_CONCURRENT_INTERNAL_H_
+#pragma once
 
 #include <atomic>
 #include <chrono>
@@ -8,9 +7,7 @@
 
 #include "core/base/api.h"
 
-namespace ark {
-namespace internal {
-namespace concurrent {
+namespace ark::internal::concurrent {
 
 template<typename T> class _Node {
 public:
@@ -376,7 +373,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

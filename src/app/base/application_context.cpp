@@ -145,9 +145,9 @@ uint64_t ApplicationContext::AppClock::onTick()
 
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
     : _ticker(sp<Variable<uint64_t>>::make<Ticker>()), _cursor_position(sp<Vec2Impl>::make()), _cursor_frag_coord(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
-      _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_ticker)),
-      _worker_strategy(sp<ExecutorWorkerStrategy>::make(sp<MessageLoop>::make(_ticker))), _executor_main(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")),
-      _executor_thread_pool(sp<Executor>::make<ExecutorThreadPool>(_executor_main)), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
+      _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_ticker)), _message_loop_core(sp<MessageLoop>::make(_ticker)),
+      _worker_strategy(sp<ExecutorWorkerStrategy>::make(_message_loop_core)), _core_executor(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")),
+      _thread_pool_executor(sp<Executor>::make<ExecutorThreadPool>(_core_executor)), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
 {
     const Ark& ark = Ark::instance();
 
@@ -163,7 +163,6 @@ void ApplicationContext::initialize(const document& manifest)
     _resource_loader->import(doc, _resource_loader->beanFactory());
 
     _message_loop_renderer = sp<MessageLoop>::make(_ticker);
-    _message_loop_core = ark.manifest()->application()._message_loop == ApplicationManifest::MESSAGE_LOOP_TYPE_RENDER ? _message_loop_renderer : _worker_strategy->_message_loop;
 
     pushAppClock();
 
@@ -175,9 +174,9 @@ void ApplicationContext::initialize(const document& manifest)
 
 void ApplicationContext::finalize() const
 {
-    _executor_main.cast<ExecutorWorkerThread>()->terminate();
-    _executor_thread_pool.cast<ExecutorThreadPool>()->releaseAll(true);
-    _executor_main.cast<ExecutorWorkerThread>()->tryJoin();
+    _core_executor.cast<ExecutorWorkerThread>()->terminate();
+    _thread_pool_executor.cast<ExecutorThreadPool>()->releaseAll(true);
+    _core_executor.cast<ExecutorWorkerThread>()->tryJoin();
 }
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)
@@ -262,14 +261,14 @@ const sp<Interpreter>& ApplicationContext::interpreter() const
     return _interpreter;
 }
 
-const sp<Executor>& ApplicationContext::executorMain() const
+const sp<Executor>& ApplicationContext::coreExecutor() const
 {
-    return _executor_main;
+    return _core_executor;
 }
 
-const sp<Executor>& ApplicationContext::executorThreadPool() const
+const sp<Executor>& ApplicationContext::threadPoolExecutor() const
 {
-    return _executor_thread_pool;
+    return _thread_pool_executor;
 }
 
 const Vector<String>& ApplicationContext::argv() const

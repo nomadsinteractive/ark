@@ -64,14 +64,6 @@ void ApplicationManifest::load(const String& src)
     _window._position_y = Documents::getAttributeValue<int32_t>(_content, "window/y", WINDOW_POSITION_CENTERED);
     _window._scale = Documents::getAttributeValue<float>(_content, "window/scale", 1.0f);
 
-    const String messageLoopType = Documents::getAttributeValue(_content, "application/message-loop", "core");
-    if(messageLoopType == "core")
-        _application._message_loop = MESSAGE_LOOP_TYPE_CORE;
-    else if(messageLoopType == "render")
-        _application._message_loop = MESSAGE_LOOP_TYPE_RENDER;
-    else
-        DFATAL("Unknow application message-loop: \"%s\". Should be \"core\" or \"render\"", messageLoopType.c_str());
-
     _resource_loader = _content->getChild("resource-loader");
     if(!_resource_loader)
         _resource_loader = sp<DOMDocument>::make("resource-loader");

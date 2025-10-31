@@ -19,7 +19,7 @@ void SurfaceController::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded
     _renderer_phrase.add(priority, std::move(renderer), std::move(discarded), std::move(visible));
 }
 
-void SurfaceController::requestUpdate(uint64_t timestamp)
+void SurfaceController::requestUpdate(const uint64_t timestamp)
 {
     const size_t size = _render_requests->size();
     if(size < 3)

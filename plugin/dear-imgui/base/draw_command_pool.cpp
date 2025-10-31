@@ -39,9 +39,8 @@ DrawCommandPool::DrawCommandPool(const Shader& shader, const sp<RenderController
 
 sp<RendererImgui::DrawCommandRecycler> DrawCommandPool::obtainDrawCommandRecycler()
 {
-    sp<RendererImgui::DrawCommand> drawCommand;
-    if(!_draw_commands->pop(drawCommand))
-        drawCommand = sp<RendererImgui::DrawCommand>::make(_render_controller);
+    Optional<sp<RendererImgui::DrawCommand>> optDrawCommand = _draw_commands->pop();
+    sp<RendererImgui::DrawCommand> drawCommand = optDrawCommand ? std::move(optDrawCommand.value()) : sp<RendererImgui::DrawCommand>::make(_render_controller);
     return sp<RendererImgui::DrawCommandRecycler>::make(_draw_commands, drawCommand);
 }
 

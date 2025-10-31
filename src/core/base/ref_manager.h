@@ -19,7 +19,7 @@ public:
 
 private:
     Vector<WeakPtr<Ref>> _ref_slots;
-    LFStack<uint32_t> _recycled_ids;
+    LFStack<RefId> _recycled_ids;
 
     sp<Ref> _ref_null;
 };
