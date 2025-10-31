@@ -243,14 +243,14 @@ void ApplicationFacade::exit()
 sp<Future> ApplicationFacade::post(sp<Runnable> task, const float delay, sp<Boolean> canceled) const
 {
     sp<Future> future = sp<Future>::make(std::move(task), std::move(canceled));
-    _context->messageLoopApp()->post(future, delay, future->isDoneOrCanceled());
+    _context->messageLoop()->post(future, delay, future->isDoneOrCanceled());
     return future;
 }
 
 sp<Future> ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boolean> canceled, const uint32_t countDown) const
 {
     sp<Future> future = sp<Future>::make(std::move(task), std::move(canceled), countDown);
-    _context->messageLoopApp()->schedule(future, interval, future->isDoneOrCanceled());
+    _context->messageLoop()->schedule(future, interval, future->isDoneOrCanceled());
     return future;
 }
 

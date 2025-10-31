@@ -5,7 +5,6 @@
 #include "core/base/message_loop.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
-#include "core/impl/executor/executor_worker_thread.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -48,8 +47,9 @@ public:
     sp<Clock> popAppClock();
 
     const sp<Numeric::Impl>& appClockInterval() const;
-    uint64_t timestamp() const;
-    uint64_t onRenderTick();
+
+    uint64_t tick() const;
+    uint64_t onTick();
 
     const sp<Vec2Impl>& cursorPosition() const;
 
@@ -61,12 +61,13 @@ public:
     void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);
-    const sp<MessageLoop>& messageLoopApp() const;
-    const sp<MessageLoop>& messageLoopCore() const;
-    const sp<MessageLoop>& messageLoopRenderer() const;
+    const sp<MessageLoop>& messageLoop() const;
 
-    void runAtCoreThread(sp<Runnable> task) const;
-    void runAtCoreThread(std::function<void()> task) const;
+    void runOnMainThread(const sp<Runnable>& task) const;
+    void runOnMainThread(std::function<void()> task) const;
+
+    void runOnCoreThread(sp<Runnable> task) const;
+    void runOnCoreThread(std::function<void()> task) const;
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
     Optional<String> getString(const String& resid, bool alert);
@@ -80,7 +81,7 @@ public:
     void pause();
     void resume();
 
-    void updateRenderState();
+    void updateState();
 
     bool isPaused() const;
 
@@ -101,12 +102,13 @@ private:
         sp<Variable<uint64_t>> _steady;
         OptionalVar<Numeric> _time_scale;
 
-        sp<Variable<uint64_t>::Impl> _tick;
+        sp<Variable<uint64_t>::Impl> _time_ns;
         sp<Numeric::Impl> _interval;
 
         sp<Clock> _clock;
 
         uint64_t _timestamp;
+        uint32_t _tick;
 
         uint64_t onTick();
     };
@@ -128,15 +130,13 @@ private:
     sp<Clock> _sys_clock;
     Vector<AppClock> _app_clocks;
 
-    sp<MessageLoop> _message_loop_core;
     sp<ExecutorWorkerStrategy> _worker_strategy;
 
-    sp<Executor> _core_executor;
+    sp<ExecutorScheduled> _main_thread_executor;
+    sp<Executor> _core_thread_executor;
     sp<Executor> _thread_pool_executor;
 
-    sp<MessageLoop> _message_loop_renderer;
-
-    Vector<sp<MessageLoop>> _app_message_loops;
+    Vector<sp<MessageLoop>> _message_loops;
 
     sp<ResourceLoader> _resource_loader;
     sp<StringTable> _string_table;

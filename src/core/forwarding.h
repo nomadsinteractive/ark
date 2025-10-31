@@ -68,6 +68,7 @@ class DOMElement;
 class Discarded;
 class Enum;
 class Executor;
+class ExecutorScheduled;
 class ExecutorThreadPool;
 class Uploader;
 class Future;

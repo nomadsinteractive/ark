@@ -5,6 +5,7 @@
 #include "core/ark.h"
 #include "core/base/future.h"
 #include "core/inf/array.h"
+#include "core/inf/executor.h"
 #include "core/inf/runnable.h"
 #include "core/util/float_array_type.h"
 

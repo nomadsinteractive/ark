@@ -8,6 +8,7 @@
 #include "core/base/string_table.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/executor/executor_worker_thread.h"
+#include "core/impl/executor/executor_scheduled.h"
 #include "core/impl/executor/executor_thread_pool.h"
 #include "core/impl/runnable/runnable_by_function.h"
 #include "core/inf/interpreter.h"
@@ -36,16 +37,16 @@ namespace {
 
 class DeferedRunnable final : public Runnable {
 public:
-    DeferedRunnable(const sp<MessageLoop>& messageLoop, sp<Runnable> runnable)
-        : _message_loop(messageLoop), _runnable(std::move(runnable)) {
+    DeferedRunnable(const sp<Executor>& messageLoop, sp<Runnable> runnable)
+        : _executor(messageLoop), _runnable(std::move(runnable)) {
     }
 
     void run() override {
-        _message_loop->post(_runnable, 0);
+        _executor->execute(_runnable);
     }
 
 private:
-    sp<MessageLoop> _message_loop;
+    sp<Executor> _executor;
     sp<Runnable> _runnable;
 };
 
@@ -90,9 +91,6 @@ private:
 
 class ApplicationContext::ExecutorWorkerStrategy final : public ExecutorWorkerThread::Strategy {
 public:
-    ExecutorWorkerStrategy(sp<MessageLoop> messageLoop)
-        : _message_loop(std::move(messageLoop)) {
-    }
 
     void onStart() override
     {
@@ -104,8 +102,7 @@ public:
 
     void onBusy() override
     {
-        _message_loop->pollOnce();
-        for(const sp<MessageLoop>& i : _app_message_loops)
+        for(const sp<MessageLoop>& i : _message_loops)
             i->pollOnce();
     }
 
@@ -119,12 +116,11 @@ public:
         throw e;
     }
 
-    sp<MessageLoop> _message_loop;
-    U_FList<sp<MessageLoop>> _app_message_loops;
+    U_FList<sp<MessageLoop>> _message_loops;
 };
 
 ApplicationContext::AppClock::AppClock(sp<Numeric> timeScale)
-    : _steady(Platform::getSteadyClock()), _time_scale(std::move(timeScale), 1.0f), _tick(sp<Variable<uint64_t>::Impl>::make(0)), _interval(sp<Numeric::Impl>::make(0)), _clock(sp<Clock>::make(_tick)), _timestamp(_steady->val())
+    : _steady(Platform::getSteadyClock()), _time_scale(std::move(timeScale), 1.0f), _time_ns(sp<Variable<uint64_t>::Impl>::make(0)), _interval(sp<Numeric::Impl>::make(0)), _clock(sp<Clock>::make(_time_ns)), _timestamp(_steady->val()), _tick(0)
 {
 }
 
@@ -136,18 +132,20 @@ uint64_t ApplicationContext::AppClock::onTick()
     const float timeScale = _time_scale.val();
     const uint64_t interval = std::min<uint64_t>(nextTimestamp - _timestamp, 1000000 / 60) * timeScale;
     _interval->set(interval / 1000000.0f);
-    _tick->set(_tick->val() + interval);
-
-    const uint64_t timestamp = _timestamp;
+    _time_ns->set(_time_ns->val() + interval);
     _timestamp = nextTimestamp;
-    return timestamp;
+
+    const uint32_t tick = _tick;
+    if(interval)
+        _tick ++;
+    return tick;
 }
 
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
     : _ticker(sp<Variable<uint64_t>>::make<Ticker>()), _cursor_position(sp<Vec2Impl>::make()), _cursor_frag_coord(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
-      _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_ticker)), _message_loop_core(sp<MessageLoop>::make(_ticker)),
-      _worker_strategy(sp<ExecutorWorkerStrategy>::make(_message_loop_core)), _core_executor(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")),
-      _thread_pool_executor(sp<Executor>::make<ExecutorThreadPool>(_core_executor)), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
+      _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_ticker)),
+      _worker_strategy(sp<ExecutorWorkerStrategy>::make()), _main_thread_executor(sp<ExecutorScheduled>::make()), _core_thread_executor(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")),
+      _thread_pool_executor(sp<Executor>::make<ExecutorThreadPool>(_core_thread_executor)), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
 {
     const Ark& ark = Ark::instance();
 
@@ -162,8 +160,6 @@ void ApplicationContext::initialize(const document& manifest)
     _resource_loader = createResourceLoaderImpl(manifest, nullptr);
     _resource_loader->import(doc, _resource_loader->beanFactory());
 
-    _message_loop_renderer = sp<MessageLoop>::make(_ticker);
-
     pushAppClock();
 
     if(const document& interpreter = ark.manifest()->interpreter())
@@ -174,9 +170,9 @@ void ApplicationContext::initialize(const document& manifest)
 
 void ApplicationContext::finalize() const
 {
-    _core_executor.cast<ExecutorWorkerThread>()->terminate();
+    _core_thread_executor.cast<ExecutorWorkerThread>()->terminate();
     _thread_pool_executor.cast<ExecutorThreadPool>()->releaseAll(true);
-    _core_executor.cast<ExecutorWorkerThread>()->tryJoin();
+    _core_thread_executor.cast<ExecutorWorkerThread>()->tryJoin();
 }
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)
@@ -263,7 +259,7 @@ const sp<Interpreter>& ApplicationContext::interpreter() const
 
 const sp<Executor>& ApplicationContext::coreExecutor() const
 {
-    return _core_executor;
+    return _core_thread_executor;
 }
 
 const sp<Executor>& ApplicationContext::threadPoolExecutor() const
@@ -289,7 +285,7 @@ const sp<Clock>& ApplicationContext::appClock() const
 void ApplicationContext::pushAppClock(sp<Numeric> timeScale)
 {
     _app_clocks.push_back(AppClock(std::move(timeScale)));
-    _app_message_loops.push_back(makeMessageLoop(_app_clocks.back()._clock));
+    _message_loops.push_back(makeMessageLoop(_app_clocks.back()._clock));
 }
 
 sp<Clock> ApplicationContext::popAppClock()
@@ -297,7 +293,7 @@ sp<Clock> ApplicationContext::popAppClock()
     ASSERT(!_app_clocks.empty());
     sp<Clock> clock = std::move(_app_clocks.back()._clock);
     _app_clocks.pop_back();
-    _app_message_loops.pop_back();
+    _message_loops.pop_back();
     return clock;
 }
 
@@ -306,12 +302,12 @@ const sp<Numeric::Impl>& ApplicationContext::appClockInterval() const
     return _app_clocks.back()._interval;
 }
 
-uint64_t ApplicationContext::timestamp() const
+uint64_t ApplicationContext::tick() const
 {
-    return _app_clocks.back()._timestamp;
+    return _app_clocks.back()._tick;
 }
 
-uint64_t ApplicationContext::onRenderTick()
+uint64_t ApplicationContext::onTick()
 {
     uint64_t timestamp = 0;
     for(AppClock& i : _app_clocks)
@@ -352,33 +348,33 @@ void ApplicationContext::pushEventListener(sp<EventListener> eventListener, sp<B
 sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)
 {
     sp<MessageLoop> messageLoop = sp<MessageLoop>::make(clock->ticker());
-    _worker_strategy->_app_message_loops.emplace_back(messageLoop);
+    _worker_strategy->_message_loops.emplace_back(messageLoop);
     return messageLoop;
 }
 
-const sp<MessageLoop>& ApplicationContext::messageLoopApp() const
+const sp<MessageLoop>& ApplicationContext::messageLoop() const
 {
-    return _app_message_loops.back();
+    return _message_loops.back();
 }
 
-const sp<MessageLoop>& ApplicationContext::messageLoopCore() const
+void ApplicationContext::runOnMainThread(const sp<Runnable>& task) const
 {
-    return _message_loop_core;
+    _main_thread_executor->execute(task);
 }
 
-const sp<MessageLoop>& ApplicationContext::messageLoopRenderer() const
+void ApplicationContext::runOnMainThread(std::function<void()> task) const
 {
-    return _message_loop_renderer;
+    _main_thread_executor->execute(sp<Runnable>::make<RunnableByFunction>(std::move(task)));
 }
 
-void ApplicationContext::runAtCoreThread(sp<Runnable> task) const
+void ApplicationContext::runOnCoreThread(sp<Runnable> task) const
 {
-    _message_loop_core->post(std::move(task), 0);
+    _core_thread_executor->execute(std::move(task));
 }
 
-void ApplicationContext::runAtCoreThread(std::function<void()> task) const
+void ApplicationContext::runOnCoreThread(std::function<void()> task) const
 {
-    _message_loop_core->post(sp<RunnableByFunction>::make(std::move(task)), 0);
+    _core_thread_executor->execute(sp<Runnable>::make<RunnableByFunction>(std::move(task)));
 }
 
 void ApplicationContext::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)
@@ -402,7 +398,7 @@ Vector<String> ApplicationContext::getStringArray(const String& resid)
 
 sp<Runnable> ApplicationContext::defer(const sp<Runnable>& task) const
 {
-    return sp<Runnable>::make<DeferedRunnable>(_message_loop_core, task);
+    return sp<Runnable>::make<DeferedRunnable>(_core_thread_executor, task);
 }
 
 V4 ApplicationContext::backgroundColor() const
@@ -427,10 +423,10 @@ void ApplicationContext::resume()
     _sys_clock->resume();
 }
 
-void ApplicationContext::updateRenderState()
+void ApplicationContext::updateState()
 {
     _ticker->update(0);
-    _message_loop_renderer->pollOnce();
+    _main_thread_executor->run();
 }
 
 bool ApplicationContext::isPaused() const

@@ -19,7 +19,7 @@ void SurfaceUpdater::run()
 {
     DPROFILER_TRACE("SurfaceUpdate");
     DTHREAD_CHECK(THREAD_NAME_ID_CORE);
-    const uint64_t timestamp = _application_context->onRenderTick();
+    const uint64_t timestamp = _application_context->onTick();
     _application_context->renderController()->onPreCompose(timestamp);
     _surface_controller->requestUpdate(timestamp);
 }

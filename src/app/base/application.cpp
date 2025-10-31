@@ -45,7 +45,7 @@ public:
     }
 
     void run() override {
-        _application_context->updateRenderState();
+        _application_context->updateState();
     }
 
 private:
@@ -60,8 +60,8 @@ public:
 
     void run() override {
         DPROFILER_TRACE("MainFrame", ApplicationProfiler::CATEGORY_RENDER_FRAME);
-        _application_context->runAtCoreThread(_run_at_core);
-        _application_context->updateRenderState();
+        _application_context->runOnCoreThread(_run_at_core);
+        _application_context->updateState();
         _application_delegate->onSurfaceDraw();
     }
 
@@ -141,7 +141,7 @@ void Application::onCreate()
     sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
     _surface = sp<Surface>::make(std::move(renderView), _application_context);
     _surface_updater_created = sp<Runnable>::make<OnSurfaceUpdatePostCreated>(_surface->updater(), _application_context, _application_delegate);
-    _application_context->runAtCoreThread([this] () {
+    _application_context->runOnCoreThread([this] () {
         onCreateTask();
     });
 }
@@ -150,7 +150,7 @@ void Application::onPause()
 {
     LOGD("");
     setSurfaceUpdater(false);
-    _application_context->runAtCoreThread([this] () {
+    _application_context->runOnCoreThread([this] () {
         onPauseTask();
     });
     _application_context->pause();
@@ -159,7 +159,7 @@ void Application::onPause()
 void Application::onResume()
 {
     LOGD("");
-    _application_context->runAtCoreThread([this] () {
+    _application_context->runOnCoreThread([this] () {
         onResumeTask();
         setSurfaceUpdater(true);
     });
@@ -173,7 +173,7 @@ void Application::onDestroy()
     const sp<ApplicationDelegate> applicationDelegate = _application_delegate;
     const sp<ApplicationContext> applicationContext = _application_context;
     _application_context->resume();
-    _application_context->runAtCoreThread([applicationDelegate] () {
+    _application_context->runOnCoreThread([applicationDelegate] () {
         applicationDelegate->onDestroy();
     });
 }
@@ -196,7 +196,7 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
     _surface_size->setWidth(static_cast<float>(width));
     _surface_size->setHeight(static_cast<float>(height));
 
-    _application_context->runAtCoreThread([this] () {
+    _application_context->runOnCoreThread([this] () {
         _application_context->renderController()->reset();
     });
 
@@ -212,7 +212,7 @@ void Application::onSurfaceUpdate()
 
 bool Application::onEvent(const Event& event)
 {
-    _application_context->runAtCoreThread([this, event] () {
+    _application_context->runOnCoreThread([this, event] () {
         onEventTask(event);
     });
     return true;

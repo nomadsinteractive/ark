@@ -258,9 +258,9 @@ public:
 
     void setMouseCapture(bool enabled) override {
 #ifdef _WIN32
-        _application_context->messageLoopRenderer()->post([enabled] () {
+        _application_context->runOnMainThread([enabled] () {
             doSetMouseCapture(enabled);
-        }, 0);
+        });
 #else
         doSetMouseCapture(enabled);
 #endif
@@ -310,7 +310,7 @@ int ApplicationSDL3::run()
 
     onCreate();
     onSurfaceCreated();
-    _application_context->updateRenderState();
+    _application_context->updateState();
 
     while(!gQuit)
     {

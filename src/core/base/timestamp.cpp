@@ -35,7 +35,7 @@ void Timestamp::markDirty()
 
 uint64_t Timestamp::now()
 {
-    return Ark::instance().applicationContext()->timestamp();
+    return Ark::instance().applicationContext()->tick();
 }
 
 }
