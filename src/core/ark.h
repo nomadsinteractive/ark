@@ -68,8 +68,6 @@ public:
 
     void deferUnref(Box box) const;
 
-    int32_t runTests();
-
 private:
     void push();
 

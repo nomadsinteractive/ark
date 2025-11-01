@@ -17,7 +17,6 @@ set(ARK_RUNTIME_SHARED_LIBRARY ${PROJECT_NAME})
 set(ARK_RUNTIME_STATIC_LIBRARY ${PROJECT_NAME}_static)
 set(ARK_EXECUTABLE_NAME ${PROJECT_NAME} CACHE STRING "Executable filename")
 set(ARK_EXECUTABLE_ICON "" CACHE FILEPATH "Executable file icon path")
-set(ARK_TESTCASES_EXECUTABLE_NAME ${PROJECT_NAME}-testcases)
 
 set(ARK_INCLUDE_DIRS ${ARK_SRC_DIR} ${ARK_SRC_DIR}/src ${ARK_SRC_DIR}/platform/${SYSTEM} ${ARK_SRC_DIR}/platform/any)
 set(ARK_STATIC_LIBRARIES ${ARK_RUNTIME_STATIC_LIBRARY})
@@ -34,7 +33,6 @@ ark_add_resource_dir(src platform plugin tools test samples)
 ark_add_resource_file(README.md LICENSE vcpkg.json)
 
 ark_compile_definition_option(ARK_USE_STATIC_RUNTIME_LIBRARY "Use ark static runtime library" OFF)
-ark_compile_definition_option(ARK_BUILD_TESTS "Build testcases" ON)
 
 option(ARK_BUILD_PLUGIN_FMOD "Build fmod plugin" OFF)
 
@@ -202,17 +200,6 @@ if(ARK_BUILD_STATIC_PLUGINS)
 endif()
 list(APPEND LOCAL_SHARED_LIBRARY_DEPENDENCIES ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} ${LOCAL_RUNTIME_LIBRARY_SRC_LIST} ${LOCAL_RES_LIST})
 
-if(ARK_BUILD_TESTS)
-    set(GENERATED_RUN_TESTS ${ARK_GENERATED_FILE_DIRECTORY}/testcase_launchpad.cpp)
-    aux_source_directory(test/base TEST_SRC_LIST)
-    aux_source_directory(test/testcase TEST_SRC_LIST)
-    add_custom_command(OUTPUT ${GENERATED_RUN_TESTS}
-        COMMAND ${Python_EXECUTABLE} ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py ${ARK_SRC_DIR}/test/testcase ${GENERATED_RUN_TESTS}
-        DEPENDS ${TEST_SRC_LIST} ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    list(APPEND TEST_SRC_LIST ${GENERATED_RUN_TESTS})
-endif()
-
 if(ARK_USE_STATIC_RUNTIME_LIBRARY)
     set(ARK_LIBRARIES ${ARK_RUNTIME_STATIC_LIBRARY})
     ark_add_static_library(${ARK_RUNTIME_STATIC_LIBRARY} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} ${TEST_SRC_LIST})
@@ -223,10 +210,6 @@ endif()
 
 target_compile_definitions(${ARK_LIBRARIES} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
 target_link_libraries(${ARK_LIBRARIES} PRIVATE ${ARK_DEPENDENCY_3RDPARTY_LIBRARIES} ${ARK_STATIC_PLUGINS})
-
-if(ARK_BUILD_TESTS)
-    ark_add_executable(${ARK_TESTCASES_EXECUTABLE_NAME} test/main.cpp ${ARK_LIBRARIES} ${ARK_DEPENDENCY_LIBRARIES})
-endif()
 
 if(NOT ANDROID AND NOT IOS)
     set(LOCAL_LAUNCHER_NAME ${PROJECT_NAME}-launcher)

@@ -84,7 +84,7 @@ public:
 
 private:
     sp<Variable<uint64_t>> _steady_clock;
-    std::atomic<uint64_t> _val;
+    uint64_t _val;
 };
 
 }
