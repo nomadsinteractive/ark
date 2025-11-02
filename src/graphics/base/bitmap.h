@@ -49,7 +49,7 @@ public:
     void draw(int32_t x, int32_t y, void* buf, uint32_t width, uint32_t height, uint32_t stride) const;
 
 //  [[script::bindings::auto]]
-    void dump(const String& filename) const;
+    void dump(StringView filepath) const;
 
     template<typename T> class Util {
     private:

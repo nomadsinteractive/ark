@@ -913,6 +913,9 @@ class Bitmap:
     def byte_array(self) -> Optional[ByteArray]:
         return None
 
+    def dump(self, filepath: str):
+        pass
+
 
 class ApplicationManifest:
 

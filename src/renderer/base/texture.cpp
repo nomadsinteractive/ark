@@ -156,6 +156,7 @@ void Texture::reset(const Texture& texture)
 {
     _stub->_delegate = texture._stub->_delegate;
     _stub->_size->reset(*texture._stub->_size->freeze());
+    _stub->_uploader = texture.uploader();
     _stub->_timestamp.markDirty();
 }
 

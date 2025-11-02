@@ -231,7 +231,7 @@ void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, const uint32_t
     addNinePatch(type, textureWidth, textureHeight, ninePatch, atlas.getItemBounds(type).translate(1, 1));
 }
 
-void Atlas::AttachmentNinePatch::addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds)
+void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds)
 {
     _nine_patch_vertices[type] = {
         sp<Vertices>::make<VerticesNinePatchTriangleStripsRHS>(bounds, ninePatch, textureWidth, textureHeight),

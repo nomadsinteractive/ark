@@ -128,23 +128,23 @@ void Bitmap::draw(const int32_t x, const int32_t y, void* buf, const uint32_t wi
             }
 }
 
-void Bitmap::dump(const String& filename) const
+void Bitmap::dump(const StringView filepath) const
 {
     const int32_t pixel_size = _channels;
     const int32_t depth = 8;
 
-    FILE* fp = fopen(filename.c_str(), "wb");
+    FILE* fp = fopen(filepath.data(), "wb");
     if(!fp)
         return;
 
-    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if(png_ptr != NULL)
+    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    if(png_ptr != nullptr)
     {
         png_infop info_ptr = png_create_info_struct(png_ptr);
 
         /* Set up error handling. */
 
-        if(info_ptr != NULL && !setjmp(png_jmpbuf(png_ptr)))
+        if(info_ptr != nullptr && !setjmp(png_jmpbuf(png_ptr)))
         {
             /* Set image attributes. */
             uint32_t x, y;
@@ -179,7 +179,7 @@ void Bitmap::dump(const String& filename) const
 
             png_init_io(png_ptr, fp);
             png_set_rows(png_ptr, info_ptr, row_pointers);
-            png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
+            png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, nullptr);
 
             for(y = 0; y < _height; y++)
             {
