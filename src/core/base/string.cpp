@@ -200,14 +200,14 @@ std::pair<String, Optional<String>> String::cut(char sep) const
 {
     if(const size_type pos = find(sep); pos != npos)
         return std::make_pair(substr(0, pos).strip(), substr(pos + 1).strip());
-    return std::make_pair(*this, Optional<String>());
+    return {*this, {}};
 }
 
 std::pair<Optional<String>, String> String::rcut(const char sep) const
 {
     if(const size_type pos = rfind(sep); pos != npos)
-        return std::make_pair(substr(0, pos).strip(), substr(pos + 1).strip());
-    return std::make_pair(Optional<String>(), *this);
+        return {substr(0, pos).strip(), substr(pos + 1).strip()};
+    return {{}, *this};
 }
 
 void String::insert(size_type pos, const String& str)

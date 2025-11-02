@@ -26,12 +26,12 @@ public:
         : _obj(obj), _importer(std::move(importer)), _outputer(std::move(outputer)) {
     }
 
-    virtual void import(const sp<Readable>& src) override {
+    void import(const sp<Readable>& src) override {
         DASSERT(_importer);
         _importer->import(_obj, src);
     }
 
-    virtual void output(const sp<Writable>& out) override {
+    void output(const sp<Writable>& out) override {
         DASSERT(_outputer);
         _outputer->output(_obj, out);
     }

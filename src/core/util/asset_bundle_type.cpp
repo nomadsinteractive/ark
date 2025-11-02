@@ -90,7 +90,7 @@ Vector<String> AssetBundleType::listAssets(const sp<AssetBundle>& self)
     return self->listAssets();
 }
 
-sp<Asset> AssetBundleType::get(const sp<AssetBundle>& self, const String& name)
+sp<Asset> AssetBundleType::getAsset(const sp<AssetBundle>& self, const String& name)
 {
     return self->getAsset(name);
 }

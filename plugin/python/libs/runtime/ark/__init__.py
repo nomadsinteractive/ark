@@ -64,7 +64,7 @@ def open_asset(filename: str):
     return load_asset(filename)
 
 
-def load_asset_bundle(filepath: str) -> Optional['AssetBundle']:
+def load_asset_bundle(filepath: str) -> Optional["AssetBundle""]:
     pass
 
 
@@ -192,10 +192,10 @@ class AssetBundle:
     def get_asset(self, path: str) -> Asset:
         pass
 
-    def get_bundle(self, path: str) -> 'AssetBundle':
+    def get_bundle(self, path: str) -> "AssetBundle":
         pass
 
-    def list_assets(self, regex: str = '') -> list[Asset]:
+    def list_assets(self) -> list[str]:
         pass
 
 

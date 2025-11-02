@@ -4,7 +4,7 @@
 
 namespace ark {
 
-class Constraint {
+class ARK_API Constraint {
 public:
     Constraint(Box implementation);
     ~Constraint();

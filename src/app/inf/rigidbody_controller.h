@@ -7,7 +7,7 @@
 
 namespace ark {
 
-class RigidbodyController {
+class ARK_API RigidbodyController {
 public:
     virtual ~RigidbodyController() = default;
 

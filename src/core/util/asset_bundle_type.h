@@ -15,7 +15,7 @@ public:
     static Vector<String> listAssets(const sp<AssetBundle>& self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Asset> get(const sp<AssetBundle>& self, const String& name);
+    static sp<Asset> getAsset(const sp<AssetBundle>& self, const String& name);
 //  [[script::bindings::classmethod]]
     static sp<AssetBundle> getBundle(const sp<AssetBundle>& self, const String& path);
 
