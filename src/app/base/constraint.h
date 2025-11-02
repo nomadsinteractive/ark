@@ -6,15 +6,11 @@ namespace ark {
 
 class Constraint {
 public:
-//  [[script::bindings::enumeration]]
-    enum Type {
-        TYPE_FIXED,
-        TYPE_GEAR,
-        TYPE_HINGE,
-        TYPE_SLIDE
-    };
-
     Constraint(Box implementation);
+    ~Constraint();
+
+//  [[script::bindings::auto]]
+    void discard();
 
 private:
     Box _implementation;

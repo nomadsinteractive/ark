@@ -16,7 +16,8 @@ public:
 
     sp<Asset> getAsset(const String& name) override;
     sp<AssetBundle> getBundle(const String& path) override;
-    Vector<sp<Asset>> listAssets(const String& regex) override;
+
+    Vector<String> listAssets() override;
 
     bool hasEntry(const String& name) const;
 

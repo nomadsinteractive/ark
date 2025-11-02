@@ -26,22 +26,22 @@ public:
     void setActive(bool active) override;
 
     V3 centralForce() const override;
-    void setCentralForce(V3 force) override;
+    void setCentralForce(const V3& force) override;
 
     V3 linearVelocity() const override;
-    void setLinearVelocity(V3 velocity) override;
+    void setLinearVelocity(const V3& velocity) override;
 
     V3 linearFactor() const override;
-    void setLinearFactor(V3 factor) override;
+    void setLinearFactor(const V3& factor) override;
 
     V3 angularVelocity() const override;
-    void setAngularVelocity(V3 velocity) override;
+    void setAngularVelocity(const V3& velocity) override;
 
     V3 angularFactor() const override;
-    void setAngularFactor(V3 factor) override;
+    void setAngularFactor(const V3& factor) override;
 
-    void applyCentralForce(V3 force) override;
-    void applyCentralImpulse(V3 impulse) override;
+    void applyCentralForce(const V3& force) override;
+    void applyCentralImpulse(const V3& impulse) override;
 
     float friction() const override;
     void setFriction(float friction) override;

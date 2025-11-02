@@ -76,10 +76,11 @@ Rect toUVRect(const Atlas::Item& item)
 Atlas::Atlas(sp<Texture> texture)
     : _texture(std::move(texture))
 {
+    DASSERT(_texture);
 }
 
 Atlas::Atlas(sp<Texture> texture, const String& src)
-    : _texture(std::move(texture))
+    : Atlas(std::move(texture))
 {
     if(src.endsWith(".xml"))
         addImporter(sp<AtlasImporter>::make<AtlasImporterGenericXML>("", 0.5f, 0.5f), Ark::instance().openAsset(src));
@@ -262,7 +263,6 @@ Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<Atlas> Atlas::BUILDER::build(const Scope& args)
 {
     sp<Texture> texture = _texture.build(args);
-    DASSERT(texture);
     const sp<Atlas> atlas = sp<Atlas>::make(std::move(texture));
 
     for(const sp<Builder<AtlasImporter>>& i : _importers)

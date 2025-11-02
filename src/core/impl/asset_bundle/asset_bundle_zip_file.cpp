@@ -119,7 +119,7 @@ sp<AssetBundle> AssetBundleZipFile::getBundle(const String& path)
     return sp<AssetBundle>::make<AssetBundleWithPrefix>(sp<AssetBundle>::make<AssetBundleZipFile>(*this), path.endsWith("/") ? path : path + "/");
 }
 
-Vector<sp<Asset>> AssetBundleZipFile::listAssets(const String& regex)
+Vector<String> AssetBundleZipFile::listAssets()
 {
     DFATAL("Unimplemented");
     return {};

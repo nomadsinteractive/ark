@@ -57,7 +57,7 @@ public:
         return nullptr;
     }
 
-    Vector<sp<Asset>> listAssets(const String& regex) override {
+    Vector<String> listAssets() override {
         DFATAL("Unimplemented");
         return {};
     }
@@ -85,9 +85,9 @@ private:
 
 }
 
-Vector<sp<Asset>> AssetBundleType::listAssets(const sp<AssetBundle>& self, const String& regex)
+Vector<String> AssetBundleType::listAssets(const sp<AssetBundle>& self)
 {
-    return self->listAssets(regex);
+    return self->listAssets();
 }
 
 sp<Asset> AssetBundleType::get(const sp<AssetBundle>& self, const String& name)

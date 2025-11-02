@@ -44,7 +44,7 @@ public:
         return nullptr;
     }
 
-    virtual String location() override {
+    String location() override {
         return _location;
     }
 
@@ -73,10 +73,10 @@ sp<Asset> AssetBundleDarwin::getAsset(const String& name)
 
 sp<AssetBundle> AssetBundleDarwin::getBundle(const String& path)
 {
-    return sp<AssetBundleDarwin>::make(Platform::pathJoin(_directory, path));
+    return sp<AssetBundle>::make<AssetBundleDarwin>(Platform::pathJoin(_directory, path));
 }
 
-Vector<sp<Asset>> AssetBundleDarwin::listAssets(const String& regex)
+Vector<String> AssetBundleDarwin::listAssets()
 {
     return {};
 }

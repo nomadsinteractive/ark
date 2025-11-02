@@ -70,7 +70,7 @@ sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, Optional<V3> sc
     return sp<ark::Shape>::make(type, std::move(scale), origin);
 }
 
-sp<Constraint> ColliderBox2D::createConstraint(Constraint::Type type, Rigidbody& rigidbodyA, Rigidbody& rigidbodyB, const V3& contactPoint)
+sp<Constraint> ColliderBox2D::createFixedConstraint(Rigidbody& rigidbodyA, Rigidbody& rigidbodyB)
 {
     return nullptr;
 }

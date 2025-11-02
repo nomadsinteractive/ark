@@ -209,7 +209,7 @@ V3 RigidbodyBox2D::centralForce() const
     return V3(0);
 }
 
-void RigidbodyBox2D::setCentralForce(const V3 force)
+void RigidbodyBox2D::setCentralForce(const V3& force)
 {
     _stub->body()->ApplyForceToCenter({force.x(), force.y()}, true);
 }
@@ -225,7 +225,7 @@ V3 RigidbodyBox2D::angularVelocity() const
     return V3(0, 0, _stub->body()->GetAngularVelocity());
 }
 
-void RigidbodyBox2D::setAngularVelocity(const V3 velocity)
+void RigidbodyBox2D::setAngularVelocity(const V3& velocity)
 {
     _stub->body()->SetAngularVelocity(velocity.z());
 }
@@ -235,11 +235,11 @@ V3 RigidbodyBox2D::angularFactor() const
     return V3(0, 0, 1);
 }
 
-void RigidbodyBox2D::setAngularFactor(const V3 /*factor*/)
+void RigidbodyBox2D::setAngularFactor(const V3& /*factor*/)
 {
 }
 
-void RigidbodyBox2D::setLinearVelocity(const V3 velocity)
+void RigidbodyBox2D::setLinearVelocity(const V3& velocity)
 {
     _stub->body()->SetLinearVelocity(b2Vec2(velocity.x(), velocity.y()));
 }
@@ -249,11 +249,11 @@ V3 RigidbodyBox2D::linearFactor() const
     return V3(1, 1, 0);
 }
 
-void RigidbodyBox2D::setLinearFactor(V3 factor)
+void RigidbodyBox2D::setLinearFactor(const V3& factor)
 {
 }
 
-void RigidbodyBox2D::applyCentralImpulse(const V3 impulse)
+void RigidbodyBox2D::applyCentralImpulse(const V3& impulse)
 {
     _stub->body()->ApplyLinearImpulseToCenter(b2Vec2(impulse.x(), impulse.y()), true);
 }
@@ -333,7 +333,7 @@ void RigidbodyBox2D::applyForce(const V2& force, const V2& point, bool wake)
     _stub->body()->ApplyForce(b2Vec2(force.x(), force.y()), b2Vec2(point.x(), point.y()), wake);
 }
 
-void RigidbodyBox2D::applyCentralForce(const V3 force)
+void RigidbodyBox2D::applyCentralForce(const V3& force)
 {
     _stub->body()->ApplyForceToCenter(b2Vec2(force.x(), force.y()), true);
 }

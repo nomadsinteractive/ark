@@ -105,7 +105,7 @@ public:
         return V3(0);
     }
 
-    void setCentralForce(const V3 force) override
+    void setCentralForce(const V3& force) override
     {
         FATAL("Unimplemented");
     }
@@ -116,7 +116,7 @@ public:
         return V3(0);
     }
 
-    void setLinearVelocity(const V3 velocity) override
+    void setLinearVelocity(const V3& velocity) override
     {
         FATAL("Unimplemented");
     }
@@ -127,7 +127,7 @@ public:
         return V3(0);
     }
 
-    void setLinearFactor(V3 factor) override
+    void setLinearFactor(const V3& factor) override
     {
         FATAL("Unimplemented");
     }
@@ -138,7 +138,7 @@ public:
         return V3(0);
     }
 
-    void setAngularVelocity(V3 velocity) override
+    void setAngularVelocity(const V3& velocity) override
     {
         FATAL("Unimplemented");
     }
@@ -149,17 +149,17 @@ public:
         return V3(0);
     }
 
-    void setAngularFactor(V3 factor) override
+    void setAngularFactor(const V3& factor) override
     {
         FATAL("Unimplemented");
     }
 
-    void applyCentralForce(V3 force) override
+    void applyCentralForce(const V3& force) override
     {
         FATAL("Unimplemented");
     }
 
-    void applyCentralImpulse(const V3 impulse) override
+    void applyCentralImpulse(const V3& impulse) override
     {
         FATAL("Unimplemented");
     }
@@ -306,7 +306,7 @@ sp<Shape> ColliderImpl::createShape(const NamedHash& type, Optional<V3> scale, c
     return sp<Shape>::make(type, scale ? std::move(scale) : Optional<V3>(_size), origin, std::move(_implementation));
 }
 
-sp<Constraint> ColliderImpl::createConstraint(Constraint::Type type, Rigidbody& rigidbodyA, Rigidbody& rigidbodyB, const V3& contactPoint)
+sp<Constraint> ColliderImpl::createFixedConstraint(Rigidbody& rigidbodyA, Rigidbody& rigidbodyB)
 {
     return nullptr;
 }

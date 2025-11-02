@@ -18,7 +18,6 @@
 #include "graphics/components/shape.h"
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
-#include "app/util/collider_type.h"
 #include "graphics/base/transform_3d.h"
 #include "graphics/components/render_object.h"
 
@@ -187,7 +186,7 @@ Rigidbody::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<Rigidbody> Rigidbody::BUILDER::build(const Scope& args)
 {
     const sp<Collider> collider = _collider->build(args);
-    sp<Rigidbody> rigidbody = ColliderType::createBody(collider, _body_type.build(args), _shape.build(args), _position.build(args), _rotation.build(args), _collision_filter.build(args), _discarded.build(args));
+    sp<Rigidbody> rigidbody = Collider::createBody(collider, _body_type.build(args), _shape.build(args), _position.build(args), _rotation.build(args), _collision_filter.build(args), _discarded.build(args));
     if(sp<CollisionCallback> collisionCallback = _collision_callback.build(args))
         rigidbody->setCollisionCallback(std::move(collisionCallback));
     return rigidbody;
@@ -195,18 +194,14 @@ sp<Rigidbody> Rigidbody::BUILDER::build(const Scope& args)
 
 template<> ARK_API Rigidbody::BodyType StringConvert::eval<Rigidbody::BodyType>(const String& str)
 {
-    if(str == "static")
-        return Rigidbody::BODY_TYPE_STATIC;
-    if(str == "kinematic")
-        return Rigidbody::BODY_TYPE_KINEMATIC;
-    if(str == "dynamic")
-        return Rigidbody::BODY_TYPE_DYNAMIC;
-    if(str == "sensor")
-        return Rigidbody::BODY_TYPE_SENSOR;
-    if(str == "ghost")
-        return Rigidbody::BODY_TYPE_GHOST;
-    FATAL("Unknow body type \"%s\"", str.c_str());
-    return Rigidbody::BODY_TYPE_STATIC;
+    constexpr enums::LookupTable<Rigidbody::BodyType, 5> table = {{
+        {"static", Rigidbody::BODY_TYPE_STATIC},
+        {"kinematic", Rigidbody::BODY_TYPE_KINEMATIC},
+        {"dynamic", Rigidbody::BODY_TYPE_DYNAMIC},
+        {"sensor", Rigidbody::BODY_TYPE_SENSOR},
+        {"ghost", Rigidbody::BODY_TYPE_GHOST}
+    }};
+    return enums::lookup(table, str);
 }
 
 void Rigidbody::onBeginContact(const Rigidbody& rigidbody, const CollisionManifold& manifold) const

@@ -40,6 +40,4 @@ sp<AtlasImporter> AtlasImporterCharacters::BUILDER::build(const Scope& /*args*/)
     return sp<AtlasImporterCharacters>::make(_characters, _font_width, _font_height);
 }
 
-
-
 }

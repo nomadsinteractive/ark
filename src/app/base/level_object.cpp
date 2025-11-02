@@ -7,12 +7,11 @@
 
 #include "graphics/base/transform_3d.h"
 #include "graphics/components/render_object.h"
+#include "graphics/util/vec3_type.h"
+#include "graphics/util/vec4_type.h"
 
 #include "app/base/level_library.h"
 #include "app/inf/collider.h"
-#include "app/util/collider_type.h"
-#include "graphics/util/vec3_type.h"
-#include "graphics/util/vec4_type.h"
 
 namespace ark {
 
@@ -46,9 +45,9 @@ sp<Rigidbody> makeRigidBody(LevelLibrary& library, const sp<Collider>& collider,
 
     const sp<Transform3D> transform = makeTransform(obj.rotation(), obj.scale());
     if(bodyType != Rigidbody::BODY_TYPE_DYNAMIC)
-        return ColliderType::createBody(collider, bodyType, library.shape(), obj.renderObject()->position(), transform->rotation().wrapped(), collisionFilter);
+        return Collider::createBody(collider, bodyType, library.shape(), obj.renderObject()->position(), transform->rotation().wrapped(), collisionFilter);
 
-    sp<Rigidbody> rigidbody = ColliderType::createBody(collider, bodyType, library.shape(), Vec3Type::freeze(obj.renderObject()->position()), Vec4Type::freeze(transform->rotation().wrapped()), collisionFilter);
+    sp<Rigidbody> rigidbody = Collider::createBody(collider, bodyType, library.shape(), Vec3Type::freeze(obj.renderObject()->position()), Vec4Type::freeze(transform->rotation().wrapped()), collisionFilter);
     obj.renderObject()->setPosition(rigidbody->position().wrapped());
     transform->setRotation(rigidbody->rotation().wrapped());
     return rigidbody;

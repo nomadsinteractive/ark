@@ -31,17 +31,13 @@ sp<AssetBundle> AssetBundleDirectory::getBundle(const String& path)
     return nullptr;
 }
 
-Vector<sp<Asset>> AssetBundleDirectory::listAssets(const String& regex)
+Vector<String> AssetBundleDirectory::listAssets()
 {
-    Vector<sp<Asset>> assets;
+    Vector<String> assets;
     if(Platform::isDirectory(_directory))
     {
-        const std::regex namePattern(regex.c_str());
         for(const std::filesystem::path& i : std::filesystem::directory_iterator(_directory.c_str()))
-        {
-            if(regex.empty() || std::regex_match(i.filename().string(), namePattern))
-                assets.push_back(sp<Asset>::make<AssetFile>(i.string()));
-        }
+            assets.emplace_back(i.filename().string());
     }
     return assets;
 }

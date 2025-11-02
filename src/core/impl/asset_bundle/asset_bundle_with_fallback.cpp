@@ -1,5 +1,7 @@
 #include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
 
+#include "core/base/string.h"
+
 namespace ark {
 
 AssetBundleWithFallback::AssetBundleWithFallback(sp<AssetBundle> delegate, sp<AssetBundle> fallback)
@@ -21,10 +23,10 @@ sp<AssetBundle> AssetBundleWithFallback::getBundle(const String& path)
     return assetBundle ? assetBundle : _fallback->getBundle(path);
 }
 
-Vector<sp<Asset>> AssetBundleWithFallback::listAssets(const String& regex)
+Vector<String> AssetBundleWithFallback::listAssets()
 {
-    Vector<sp<Asset>> assets = _delegate->listAssets(regex);
-    return assets.size() > 0 ? assets : _fallback->listAssets(regex);
+    Vector<String> assets = _delegate->listAssets();
+    return assets.size() > 0 ? assets : _fallback->listAssets();
 }
 
 }

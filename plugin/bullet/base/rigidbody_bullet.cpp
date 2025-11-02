@@ -94,11 +94,11 @@ void RigidbodyBullet::setActive(const bool active)
 
 V3 RigidbodyBullet::centralForce() const
 {
-    const btVector3 force = _stub->_collision_object_ref->rigidBody()->getTotalForce();
+    const btVector3& force = _stub->_collision_object_ref->rigidBody()->getTotalForce();
     return {force.x(), force.y(), force.z()};
 }
 
-void RigidbodyBullet::setCentralForce(V3 force)
+void RigidbodyBullet::setCentralForce(const V3& force)
 {
     _stub->_collision_object_ref->rigidBody()->applyCentralForce({force.x(), force.y(), force.z()});
 }
@@ -109,7 +109,7 @@ V3 RigidbodyBullet::linearVelocity() const
     return {velocity.x(), velocity.y(), velocity.z()};
 }
 
-void RigidbodyBullet::setLinearVelocity(const V3 velocity)
+void RigidbodyBullet::setLinearVelocity(const V3& velocity)
 {
     _stub->_collision_object_ref->rigidBody()->setActivationState(DISABLE_DEACTIVATION);
     _stub->_collision_object_ref->rigidBody()->setLinearVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
@@ -121,7 +121,7 @@ V3 RigidbodyBullet::linearFactor() const
     return V3(factor.x(), factor.y(), factor.z());
 }
 
-void RigidbodyBullet::setLinearFactor(const V3 factor)
+void RigidbodyBullet::setLinearFactor(const V3& factor)
 {
     _stub->_collision_object_ref->rigidBody()->setLinearFactor(btVector3(factor.x(), factor.y(), factor.z()));
 }
@@ -132,18 +132,18 @@ V3 RigidbodyBullet::angularVelocity() const
     return V3(velocity.x(), velocity.y(), velocity.z());
 }
 
-void RigidbodyBullet::setAngularVelocity(const V3 velocity)
+void RigidbodyBullet::setAngularVelocity(const V3& velocity)
 {
     _stub->_collision_object_ref->rigidBody()->setActivationState(DISABLE_DEACTIVATION);
     _stub->_collision_object_ref->rigidBody()->setAngularVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
 }
 
-void RigidbodyBullet::applyCentralForce(const V3 force)
+void RigidbodyBullet::applyCentralForce(const V3& force)
 {
     _stub->_collision_object_ref->rigidBody()->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
 }
 
-void RigidbodyBullet::applyCentralImpulse(const V3 impulse)
+void RigidbodyBullet::applyCentralImpulse(const V3& impulse)
 {
     _stub->_collision_object_ref->rigidBody()->applyCentralImpulse(btVector3(impulse.x(), impulse.y(), impulse.z()));
 }
@@ -174,7 +174,7 @@ V3 RigidbodyBullet::angularFactor() const
     return {factor.x(), factor.y(), factor.z()};
 }
 
-void RigidbodyBullet::setAngularFactor(const V3 factor)
+void RigidbodyBullet::setAngularFactor(const V3& factor)
 {
     _stub->_collision_object_ref->rigidBody()->setAngularFactor(btVector3(factor.x(), factor.y(), factor.z()));
 }

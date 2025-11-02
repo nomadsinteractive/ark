@@ -18,6 +18,7 @@
 #include "app/base/application_context.h"
 #include "app/base/collision_filter.h"
 #include "app/base/collision_manifold.h"
+#include "app/base/constraint.h"
 #include "app/inf/collision_callback.h"
 
 #include "bullet/base/collision_object_ref.h"
@@ -81,6 +82,22 @@ public:
 private:
     sp<btMotionState> _motion_state;
 };
+
+class BtConstraintWrapper {
+public:
+    BtConstraintWrapper(const sp<btDiscreteDynamicsWorld>& dynamicsWorld, btTypedConstraint* constraint)
+        : _dynamics_world(dynamicsWorld), _constraint(constraint) {
+    }
+    ~BtConstraintWrapper()
+    {
+        _dynamics_world->removeConstraint(_constraint.get());
+    }
+
+private:
+    sp<btDiscreteDynamicsWorld> _dynamics_world;
+    op<btTypedConstraint> _constraint;
+};
+
 
 sp<btConvexHullShape> makeConvexHullCollisionShape(const Model& model)
 {
@@ -198,7 +215,7 @@ struct BtRigibodyObject {
 struct ColliderBullet::Stub final : Updatable {
     Stub(const V3 gravity, sp<ModelLoader> modelLoader)
         : _model_loader(std::move(modelLoader)), _collision_configuration(new btDefaultCollisionConfiguration()), _collision_dispatcher(new btCollisionDispatcher(_collision_configuration)),
-          _broadphase(new btDbvtBroadphase()), _solver(new btSequentialImpulseConstraintSolver()), _dynamics_world(new btDiscreteDynamicsWorld(_collision_dispatcher, _broadphase, _solver, _collision_configuration)),
+          _broadphase(new btDbvtBroadphase()), _solver(new btSequentialImpulseConstraintSolver()), _dynamics_world(sp<btDiscreteDynamicsWorld>::make(_collision_dispatcher, _broadphase, _solver, _collision_configuration)),
           _app_clock_interval(Ark::instance().applicationContext()->appClockInterval())
     {
         _dynamics_world->setGravity(btVector3(gravity.x(), gravity.y(), gravity.z()));
@@ -240,7 +257,7 @@ struct ColliderBullet::Stub final : Updatable {
 
     op<btBroadphaseInterface> _broadphase;
     op<btConstraintSolver> _solver;
-    op<btDiscreteDynamicsWorld> _dynamics_world;
+    sp<btDiscreteDynamicsWorld> _dynamics_world;
 
     FList<BtRigibodyObject, BtRigibodyObject::ListFilter> _passive_objects;
     Vector<sp<CollisionObjectRef>> _mark_for_destroys;
@@ -300,24 +317,20 @@ sp<Shape> ColliderBullet::createShape(const NamedHash& type, Optional<V3> scale,
     return sp<Shape>::make(type, std::move(scale), origin, Box(std::move(collisionShape)));
 }
 
-sp<Constraint> ColliderBullet::createConstraint(const Constraint::Type type, Rigidbody& rigidbodyA, Rigidbody& rigidbodyB, const V3& contactPoint)
+sp<Constraint> ColliderBullet::createFixedConstraint(Rigidbody& rigidbodyA, Rigidbody& rigidbodyB)
 {
-    CHECK(type == Constraint::TYPE_FIXED, "Only fixed constraint is supported by now");
-    if(type == Constraint::TYPE_FIXED)
-    {
-        const sp<RigidbodyBullet> btRigidbodyA = rigidbodyA.controller().cast<RigidbodyBullet>();
-        const sp<RigidbodyBullet> btRigidbodyB = rigidbodyB.controller().cast<RigidbodyBullet>();
-        btRigidBody& btBodyA = *btRigidbodyA->_stub->_collision_object_ref->rigidBody();
-        btRigidBody& btBodyB = *btRigidbodyB->_stub->_collision_object_ref->rigidBody();
-        btTransform globalFrame;
-        globalFrame.setIdentity();
-        globalFrame.setOrigin(btVector3(0, 0, 0));
-        const btTransform frameInA = btBodyA.getWorldTransform().inverse() * globalFrame;
-        const btTransform frameInB = btBodyB.getWorldTransform().inverse() * globalFrame;
-        btTypedConstraint* constraint = new btFixedConstraint(btBodyA, btBodyB, frameInA, frameInB);
-        _stub->_dynamics_world->addConstraint(constraint);
-    }
-    return nullptr;
+    const sp<RigidbodyBullet> btRigidbodyA = rigidbodyA.controller().cast<RigidbodyBullet>();
+    const sp<RigidbodyBullet> btRigidbodyB = rigidbodyB.controller().cast<RigidbodyBullet>();
+    btRigidBody& btBodyA = *btRigidbodyA->_stub->_collision_object_ref->rigidBody();
+    btRigidBody& btBodyB = *btRigidbodyB->_stub->_collision_object_ref->rigidBody();
+    btTransform globalFrame;
+    globalFrame.setIdentity();
+    globalFrame.setOrigin(btBodyA.getWorldTransform().getOrigin());
+    const btTransform frameInA = btBodyA.getWorldTransform().inverse() * globalFrame;
+    const btTransform frameInB = btBodyB.getWorldTransform().inverse() * globalFrame;
+    btTypedConstraint* constraint = new btFixedConstraint(btBodyA, btBodyB, frameInA, frameInB);
+    _stub->_dynamics_world->addConstraint(constraint, true);
+    return sp<Constraint>::make(Box(sp<BtConstraintWrapper>::make(_stub->_dynamics_world, constraint)));
 }
 
 void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup, int32_t filterMask) const

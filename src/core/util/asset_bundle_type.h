@@ -12,7 +12,7 @@ class ARK_API AssetBundleType final {
 public:
 
 //  [[script::bindings::classmethod]]
-    static Vector<sp<Asset>> listAssets(const sp<AssetBundle>& self, const String& regex = "");
+    static Vector<String> listAssets(const sp<AssetBundle>& self);
 
 //  [[script::bindings::classmethod]]
     static sp<Asset> get(const sp<AssetBundle>& self, const String& name);
