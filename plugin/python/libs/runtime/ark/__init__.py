@@ -64,7 +64,7 @@ def open_asset(filename: str):
     return load_asset(filename)
 
 
-def load_asset_bundle(filepath: str) -> Optional["AssetBundle""]:
+def load_asset_bundle(filepath: str) -> Optional["AssetBundle"]:
     pass
 
 
