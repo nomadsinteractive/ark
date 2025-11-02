@@ -32,7 +32,8 @@ public:
     void run() override;
 
     Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<ark::Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr) override;
-    sp<ark::Shape> createShape(const NamedHash& type, Optional<V3> scale, V3 origin) override;
+    sp<ark::Shape> createShape(const NamedHash& type, Optional<V3> scale, const V3& origin) override;
+    sp<Constraint> createConstraint(Constraint::Type type, Rigidbody& rigidbodyA, Rigidbody& rigidbodyB, const V3& contactPoint) override;
     Vector<RayCastManifold> rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
 
     b2World& world() const;

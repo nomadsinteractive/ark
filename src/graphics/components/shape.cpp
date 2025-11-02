@@ -4,12 +4,12 @@
 
 namespace ark {
 
-Shape::Shape(const NamedHash& type, Optional<V3> scale, const V3 origin)
-    : Shape(type, std::move(scale), std::move(origin), {})
+Shape::Shape(const NamedHash& type, Optional<V3> scale, const V3& origin)
+    : Shape(type, std::move(scale), origin, {})
 {
 }
 
-Shape::Shape(const NamedHash& type, Optional<V3> scale, const V3 orgin, Box implementation)
+Shape::Shape(const NamedHash& type, Optional<V3> scale, const V3& orgin, Box implementation)
     : _type(type), _origin(orgin), _scale(std::move(scale)), _implementation(std::move(implementation))
 {
 }

@@ -3037,12 +3037,23 @@ class NarrowPhrase:
     pass
 
 
+class Constraint:
+
+    TYPE_FIXED = 0
+    TYPE_GEAR = 1
+    TYPE_HINGE = 2
+    TYPE_SLIDE = 3
+
+
 class Collider:
 
     def create_body(self, body_type: int | Integer, shape: Optional[Shape] = None, position: Optional[TYPE_VEC3] = None, rotation: Optional[TYPE_VEC4] = None, collision_filter: Optional[CollisionFilter] = None, discarded: Optional[Boolean] = None) -> Rigidbody:
         pass
 
     def create_shape(self, shape_id: TYPE_NAMED_HASH, scale: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None) -> Shape:
+        pass
+
+    def create_constraint(self, type_id: int, rigidbody_a: Rigidbody, rigidbody_b: Rigidbody) -> Constraint:
         pass
 
     def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> list[RayCastManifold]:

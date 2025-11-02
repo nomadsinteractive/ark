@@ -22,8 +22,8 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Shape(const NamedHash& type = {Shape::TYPE_NONE}, Optional<V3> scale = {}, V3 origin = V3(0));
-    Shape(const NamedHash& type, Optional<V3> scale, V3 orgin, Box implementation);
+    Shape(const NamedHash& type = {Shape::TYPE_NONE}, Optional<V3> scale = {}, const V3& origin = V3(0));
+    Shape(const NamedHash& type, Optional<V3> scale, const V3& orgin, Box implementation);
 
 //  [[script::bindings::property]]
     const NamedHash& type() const;

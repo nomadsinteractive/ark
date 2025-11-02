@@ -19,6 +19,7 @@ class Collider;
 class CollisionCallback;
 class CollisionFilter;
 class CollisionManifold;
+class Constraint;
 class Entity;
 class Event;
 class EventDispatcher;

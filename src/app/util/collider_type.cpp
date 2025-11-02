@@ -18,9 +18,14 @@ sp<Rigidbody> ColliderType::createBody(const sp<Collider>& self, Rigidbody::Body
     return sp<Rigidbody>::make(std::move(impl), false);
 }
 
-sp<Shape> ColliderType::createShape(const sp<Collider>& self, const NamedHash& type, Optional<V3> scale, V3 origin)
+sp<Shape> ColliderType::createShape(const sp<Collider>& self, const NamedHash& type, Optional<V3> scale, const V3& origin)
 {
-    return self->createShape(type, std::move(scale), std::move(origin));
+    return self->createShape(type, std::move(scale), origin);
+}
+
+sp<Constraint> ColliderType::createConstraint(const sp<Collider>& self, const Constraint::Type type,  Rigidbody& rigidbodyA, Rigidbody& rigidbodyB, const V3& contactPoint)
+{
+    return self->createConstraint(type, rigidbodyA, rigidbodyB, contactPoint);
 }
 
 Vector<RayCastManifold> ColliderType::rayCast(const sp<Collider>& self, const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)

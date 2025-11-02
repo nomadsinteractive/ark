@@ -300,10 +300,15 @@ Rigidbody::Impl ColliderImpl::createBody(const Rigidbody::BodyType type, sp<Shap
     return Rigidbody::Impl{std::move(stub), nullptr, rigidbodyImpl};
 }
 
-sp<Shape> ColliderImpl::createShape(const NamedHash& type, Optional<V3> scale, const V3 origin)
+sp<Shape> ColliderImpl::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)
 {
     auto [_implementation, _size] = _stub->narrowPhrase()->createShapeDef(type.hash(), scale);
     return sp<Shape>::make(type, scale ? std::move(scale) : Optional<V3>(_size), origin, std::move(_implementation));
+}
+
+sp<Constraint> ColliderImpl::createConstraint(Constraint::Type type, Rigidbody& rigidbodyA, Rigidbody& rigidbodyB, const V3& contactPoint)
+{
+    return nullptr;
 }
 
 Vector<RayCastManifold> ColliderImpl::rayCast(const V3 from, const V3 to, const sp<CollisionFilter>& collisionFilter)

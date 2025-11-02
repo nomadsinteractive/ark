@@ -294,10 +294,30 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
     return {std::move(stub), nullptr, impl};
 }
 
-sp<Shape> ColliderBullet::createShape(const NamedHash& type, Optional<V3> scale, const V3 origin)
+sp<Shape> ColliderBullet::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)
 {
     sp<CollisionShapeRef> collisionShape = ensureCollisionShapeRef(type, scale);
     return sp<Shape>::make(type, std::move(scale), origin, Box(std::move(collisionShape)));
+}
+
+sp<Constraint> ColliderBullet::createConstraint(const Constraint::Type type, Rigidbody& rigidbodyA, Rigidbody& rigidbodyB, const V3& contactPoint)
+{
+    CHECK(type == Constraint::TYPE_FIXED, "Only fixed constraint is supported by now");
+    if(type == Constraint::TYPE_FIXED)
+    {
+        const sp<RigidbodyBullet> btRigidbodyA = rigidbodyA.controller().cast<RigidbodyBullet>();
+        const sp<RigidbodyBullet> btRigidbodyB = rigidbodyB.controller().cast<RigidbodyBullet>();
+        btRigidBody& btBodyA = *btRigidbodyA->_stub->_collision_object_ref->rigidBody();
+        btRigidBody& btBodyB = *btRigidbodyB->_stub->_collision_object_ref->rigidBody();
+        btTransform globalFrame;
+        globalFrame.setIdentity();
+        globalFrame.setOrigin(btVector3(0, 0, 0));
+        const btTransform frameInA = btBodyA.getWorldTransform().inverse() * globalFrame;
+        const btTransform frameInB = btBodyB.getWorldTransform().inverse() * globalFrame;
+        btTypedConstraint* constraint = new btFixedConstraint(btBodyA, btBodyB, frameInA, frameInB);
+        _stub->_dynamics_world->addConstraint(constraint);
+    }
+    return nullptr;
 }
 
 void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup, int32_t filterMask) const

@@ -65,9 +65,14 @@ Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shap
     return {body->rigidbodyStub(), nullptr, body};
 }
 
-sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, Optional<V3> scale, const V3 origin)
+sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)
 {
     return sp<ark::Shape>::make(type, std::move(scale), origin);
+}
+
+sp<Constraint> ColliderBox2D::createConstraint(Constraint::Type type, Rigidbody& rigidbodyA, Rigidbody& rigidbodyB, const V3& contactPoint)
+{
+    return nullptr;
 }
 
 Vector<RayCastManifold> ColliderBox2D::rayCast(V3 from, V3 to, const sp<CollisionFilter>& /*collisionFilter*/)

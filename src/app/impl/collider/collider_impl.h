@@ -20,7 +20,8 @@ public:
     ColliderImpl(Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase, RenderController& renderController);
 
     Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded) override;
-    sp<Shape> createShape(const NamedHash& type, Optional<V3> scale, V3 origin) override;
+    sp<Shape> createShape(const NamedHash& type, Optional<V3> scale, const V3& origin) override;
+    sp<Constraint> createConstraint(Constraint::Type type, Rigidbody& rigidbodyA, Rigidbody& rigidbodyB, const V3& contactPoint) override;
     Vector<RayCastManifold> rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
 
 //  [[plugin::resource-loader]]

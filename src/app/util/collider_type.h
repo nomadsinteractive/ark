@@ -7,6 +7,7 @@
 #include "graphics/forwarding.h"
 
 #include "app/forwarding.h"
+#include "app/base/constraint.h"
 #include "app/base/raycast_manifold.h"
 #include "app/components/rigidbody.h"
 
@@ -18,7 +19,9 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Rigidbody> createBody(const sp<Collider>& self, Rigidbody::BodyType bodyType, sp<Shape> shape = nullptr, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Shape> createShape(const sp<Collider>& self, const NamedHash& type, Optional<V3> scale = {}, V3 origin = V3(0));
+    static sp<Shape> createShape(const sp<Collider>& self, const NamedHash& type, Optional<V3> scale = {}, const V3& origin = V3(0));
+//  [[script::bindings::classmethod]]
+    static sp<Constraint> createConstraint(const sp<Collider>& self, Constraint::Type type,  Rigidbody& rigidbodyA, Rigidbody& rigidbodyB, const V3& contactPoint);
 //  [[script::bindings::classmethod]]
     static Vector<RayCastManifold> rayCast(const sp<Collider>& self, const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr);
 
