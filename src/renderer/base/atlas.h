@@ -81,7 +81,7 @@ public:
         void import(Atlas& atlas, const document& manifest);
 
         void add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas);
-        void addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Atlas& atlas);
+        void addNinePatch(int32_t type, const Atlas& atlas, const String& s9);
 
     private:
         void addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds);

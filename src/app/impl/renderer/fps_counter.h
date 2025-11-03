@@ -1,47 +1,29 @@
 #pragma once
 
 #include "core/base/string.h"
-#include "core/inf/builder.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
-
-#include "graphics/inf/renderer.h"
-#include "graphics/forwarding.h"
-
-#include "renderer/forwarding.h"
 
 namespace ark {
 
-class FPSCounter : public Renderer {
+class ARK_API FPSCounter final : public StringVar {
 public:
-[[deprecated]]
-    FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<Text>& characters, const String& message);
+//  [[script::bindings::constructor]]
+    FPSCounter(String format, float refreshInterval);
 
-    virtual void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
-
-    void updateFPS(float fps);
-
-//  [[plugin::builder("fps-counter")]]
-    class BUILDER : public Builder<Renderer> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Text>> _characters;
-        String _message;
-        float _interval;
-    };
+    bool update(uint32_t tick) override;
+    StringView val() override;
 
 private:
-    sp<Text> _characters;
-    String _message;
+    String _format;
+    String _value;
 
     uint32_t _frame_rendered;
+    uint32_t _last_tick;
+    uint32_t _last_updated_tick;
     sp<Numeric> _duration;
     float _refresh_interval;
-    float _last_refresh;
-
+    float _last_duration;
 };
 
 }

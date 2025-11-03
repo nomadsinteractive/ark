@@ -203,7 +203,7 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
     const uint32_t textureHeight = atlas.height();
     for(const document& i : manifest->children())
     {
-        const String name = i->name();
+        const String& name = i->name();
         const Rect paddings = Documents::ensureAttribute<Rect>(i, constants::NINE_PATCH_PADDINGS);
         if(name == "default")
         {
@@ -226,9 +226,10 @@ void Atlas::AttachmentNinePatch::add(const int32_t type, const uint32_t textureW
     addNinePatch(type, textureWidth, textureHeight, ninePatches, bounds);
 }
 
-void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, const uint32_t textureWidth, const uint32_t textureHeight, const Rect& ninePatch, const Atlas& atlas)
+void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, const Atlas& atlas, const String& s9)
 {
-    addNinePatch(type, textureWidth, textureHeight, ninePatch, atlas.getItemBounds(type).translate(1, 1));
+    const Rect s9Rect = Strings::eval<Rect>(s9);
+    addNinePatch(type, atlas.width(), atlas.height(), s9Rect, atlas.getItemBounds(type).translate(1, 1));
 }
 
 void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds)

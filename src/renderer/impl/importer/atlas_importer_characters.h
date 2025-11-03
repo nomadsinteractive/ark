@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_IMPORTER_ATLAS_IMPORTER_CHARACTERS_H_
-#define ARK_RENDERER_IMPL_IMPORTER_ATLAS_IMPORTER_CHARACTERS_H_
+#pragma once
 
 #include "core/base/string.h"
 #include "core/inf/builder.h"
@@ -9,14 +8,14 @@
 
 namespace ark {
 
-class AtlasImporterCharacters : public AtlasImporter {
+class AtlasImporterCharacters final : public AtlasImporter {
 public:
     AtlasImporterCharacters(String characters, uint32_t fontWidth, uint32_t fontHeight);
 
-    virtual void import(Atlas& atlas, const sp<Readable>& readable) override;
+    void import(Atlas& atlas, const sp<Readable>& readable) override;
 
 //  [[plugin::builder("characters")]]
-    class BUILDER : public Builder<AtlasImporter> {
+    class BUILDER final : public Builder<AtlasImporter> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
@@ -32,9 +31,6 @@ private:
     String _characters;
     uint32_t _font_width;
     uint32_t _font_height;
-
 };
 
 }
-
-#endif

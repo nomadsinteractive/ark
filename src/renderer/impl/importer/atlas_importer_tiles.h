@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_IMPORTER_ATLAS_IMPORTER_TILES_H_
-#define ARK_RENDERER_IMPL_IMPORTER_ATLAS_IMPORTER_TILES_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/inf/storage.h"
@@ -10,14 +9,14 @@
 
 namespace ark {
 
-class AtlasImporterTiles : public AtlasImporter {
+class AtlasImporterTiles final : public AtlasImporter {
 public:
     AtlasImporterTiles(document manifest, int32_t type, uint32_t tileWidth, uint32_t tileHeight, float pivotX, float pivotY);
 
-    virtual void import(Atlas& atlas, const sp<Readable>& readable) override;
+    void import(Atlas& atlas, const sp<Readable>& readable) override;
 
 //  [[plugin::builder("tiles")]]
-    class BUILDER : public Builder<AtlasImporter> {
+    class BUILDER final : public Builder<AtlasImporter> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
@@ -39,5 +38,3 @@ private:
 };
 
 }
-
-#endif
