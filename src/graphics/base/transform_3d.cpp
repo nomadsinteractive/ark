@@ -9,9 +9,4 @@ Transform3D::Transform3D(sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation
 {
 }
 
-sp<Transform> Transform3D::create(sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation)
-{
-    return sp<Transform>::make<Transform3D>(std::move(rotation), std::move(scale), std::move(translation));
-}
-
 }

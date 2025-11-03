@@ -34,7 +34,8 @@ AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property]]\s+%s' 
 AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_SETPROP_PATTERN = re.compile(r'\[\[script::bindings::setprop]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader]]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*{')
-AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor|interface)]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|interface)]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_CONSTRUCTOR_PATTERN = re.compile(r'\[\[script::bindings::constructor(?:\(([\w_]+)\))?]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_AS_MAPPING_PATTERN = re.compile(r'\[\[script::bindings::map\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_AS_SEQUENCE_PATTERN = re.compile(r'\[\[script::bindings::seq\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)]]\s+%s%s' % (ANNOTATION_PATTERN, METHOD_PATTERN))
@@ -314,15 +315,22 @@ using namespace ark::plugin::python;
 
 
 class GenConstructorMethod(GenMethod):
-    def __init__(self, name, args, is_static):
-        GenMethod.__init__(self, '__init__', args, '')
+    def __init__(self, name, args, is_static, return_type: str = ''):
+        GenMethod.__init__(self, '__init__', args, return_type)
         self._funcname = name
         self._is_static = is_static
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]):
         if self._is_static:
-            return 'self->box = new Box(%s::%s(%s));' % (genclass.classname, self._funcname, ', '.join(argvalues))
-        return 'self->box = new Box(sp<%s>::make(%s));' % (self._funcname, ', '.join(argvalues))
+            cs = f'{genclass.classname}::{self._funcname}({", ".join(argvalues)})'
+        elif self._return_type:
+            cs = f'{self._return_type}::make<{self._funcname}>({", ".join(argvalues)})'
+        else:
+            cs = f'sp<{self._funcname}>::make({", ".join(argvalues)})'
+        return f'self->box = new Box({cs});'
+
+    def gen_return_type(self) -> str:
+        return ''
 
     def gen_py_return(self):
         return 'int'
@@ -696,7 +704,7 @@ def main(params, paths):
         name, args, return_type, is_static = GenMethod.split(x[1:])
         if is_static and method_modifier == 'auto':
             genmethod = GenStaticMethod(name, args, return_type)
-        elif genclass.classname == name or method_modifier == 'constructor':
+        elif genclass.classname == name:
             genmethod = GenConstructorMethod(name, args, is_static)
         elif is_static and method_modifier == 'classmethod':
             genmethod = GenStaticMemberMethod(name, args, return_type)
@@ -704,6 +712,13 @@ def main(params, paths):
             genmethod = GenInterfaceMethod(name, args, return_type)
         else:
             genmethod = GenMemberMethod(name, args, return_type)
+        genclass.add_method(genmethod)
+
+    def autoconstructor(filename, content, main_class, x):
+        genclass = get_result_class(binding_classes, filename, main_class)
+        return_type = x[0]
+        name, args, _, is_static = GenMethod.split(x[1:])
+        genmethod = GenConstructorMethod(name, args, is_static, return_type and f'sp<{return_type}>')
         genclass.add_method(genmethod)
 
     def autooperator(filename, content, main_class, x):
@@ -791,6 +806,7 @@ def main(params, paths):
                               HeaderPattern(AUTOBIND_ANNOTATION_PATTERN, autoannotation),
                               HeaderPattern(AUTOBIND_TYPEDEF_PATTERN, autotypedef),
                               HeaderPattern(AUTOBIND_METHOD_PATTERN, automethod),
+                              HeaderPattern(AUTOBIND_CONSTRUCTOR_PATTERN, autoconstructor),
                               HeaderPattern(AUTOBIND_OPERATOR_PATTERN, autooperator),
                               HeaderPattern(AUTOBIND_AS_MAPPING_PATTERN, autoasmapping),
                               HeaderPattern(AUTOBIND_AS_SEQUENCE_PATTERN, autoassequence),

@@ -171,6 +171,9 @@ class GenMethod(object):
     def _gen_calling_body(self, genclass, calling_lines):
         return calling_lines
 
+    def gen_return_type(self) -> str:
+        return acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
+
     def gen_return_statement(self, return_type: str, py_return: str):
         if acg.type_compare(return_type, py_return):
             return ['return ret;']
@@ -279,7 +282,7 @@ class GenMethod(object):
         if check_args and args:
             bodylines.append("if(%s) %s;" % (' || '.join([f'!obj{i}' for i, j in args]), self.err_return_value))
 
-        r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
+        r = self.gen_return_type()
         argtypes = [' '.join(i.gen_declare(self, 't', 't').split('=')[0].strip().split()[:-1]) for i in self._arguments]
         argvalues = list(gen_method_call_arg(f'obj{i}.value()' if optional_check and i in args_set else f'obj{i}', j, argtypes[i]) for i, j in enumerate(self._arguments))
         callstatement = self._gen_calling_statement(genclass, argvalues)
