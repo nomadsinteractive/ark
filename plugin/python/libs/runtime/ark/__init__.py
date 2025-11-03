@@ -3301,5 +3301,11 @@ class PathFinder:
         pass
 
 
+class FPSCounter(String):
+    def __init__(self, message_format: str = '.1f% FPS', refresh_interval: float = 2.0):
+        super().__init__(message_format)
+
+
+
 def __trace__():
     pass

@@ -9,7 +9,7 @@ namespace ark {
 class ARK_API FPSCounter final : public StringVar {
 public:
 //  [[script::bindings::constructor]]
-    FPSCounter(String format, float refreshInterval);
+    FPSCounter(String messageFormat = "%.1f FPS", float refreshInterval = 2.0f);
 
     bool update(uint32_t tick) override;
     StringView val() override;

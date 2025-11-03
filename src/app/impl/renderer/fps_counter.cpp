@@ -7,8 +7,8 @@
 
 namespace ark {
 
-FPSCounter::FPSCounter(String format, const float refreshInterval)
-    : _format(std::move(format)), _frame_rendered(0), _last_tick(0), _last_updated_tick(0), _duration(Ark::instance().sysClock()->duration()), _refresh_interval(refreshInterval), _last_duration(0)
+FPSCounter::FPSCounter(String messageFormat, const float refreshInterval)
+    : _format(std::move(messageFormat)), _frame_rendered(0), _last_tick(0), _last_updated_tick(0), _duration(Ark::instance().sysClock()->duration()), _refresh_interval(refreshInterval), _last_duration(0)
 {
 }
 
