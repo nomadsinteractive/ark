@@ -9,9 +9,61 @@
 
 namespace ark {
 
-namespace {
+class AssetBundleZipFile::Stub {
+public:
+    Stub(sp<Readable> zipReadable, const String& zipLocation)
+        : _zip_readable(std::move(zipReadable)), _zip_location(Platform::getRealPath(zipLocation)), _size(_zip_readable ? _zip_readable->remaining() : 0)
+    {
+        CHECK(_zip_readable, "Cannot open file %s", _zip_location.c_str());
+        zip_error_t error = {0};
+        _zip_source = zip_source_function_create(_local_zip_source_callback, this, &error);
+        CHECK(_zip_source, "Zip function create error: %s", zip_error_strerror(&error));
+        _zip_archive = zip_open_from_source(_zip_source, 0, &error);
+        CHECK(_zip_archive, "Zip open error: %s", zip_error_strerror(&error));
+    }
+    ~Stub()
+    {
+        zip_close(_zip_archive);
+    }
 
-class ReadableZipFile final : public Readable {
+    const sp<Readable>& readable() const
+    {
+        return _zip_readable;
+    }
+
+    const String& location() const
+    {
+        return _zip_location;
+    }
+    int32_t size() const
+    {
+        return _size;
+    }
+    int32_t position() const
+    {
+        return _size - _zip_readable->remaining();
+    }
+
+    zip_t* archive()
+    {
+        return _zip_archive;
+    }
+
+    zip_source_t* source()
+    {
+        return _zip_source;
+    }
+
+private:
+    sp<Readable> _zip_readable;
+    String _zip_location;
+    int32_t _size;
+
+    zip_t* _zip_archive;
+    zip_source_t* _zip_source;
+};
+
+class AssetBundleZipFile::ReadableZipFile final : public Readable {
 public:
     ReadableZipFile(const sp<AssetBundleZipFile::Stub>& stub, zip_file_t* zf)
         : _stub(stub), _zip_file(zf){
@@ -39,7 +91,7 @@ private:
     zip_file_t* _zip_file;
 };
 
-class AssetZipEntry final : public Asset {
+class AssetBundleZipFile::AssetZipEntry final : public Asset {
 public:
     AssetZipEntry(const sp<AssetBundleZipFile::Stub>& stub, String location, zip_file_t* zf)
         : _stub(stub), _location(std::move(location)), _zip_file(zf){
@@ -59,11 +111,9 @@ private:
     zip_file_t* _zip_file;
 };
 
-}
-
-static zip_int64_t _local_zip_source_callback(void *userdata, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
+zip_int64_t AssetBundleZipFile::_local_zip_source_callback(void *userdata, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 {
-    const AssetBundleZipFile::Stub* stub = static_cast<AssetBundleZipFile::Stub*>(userdata);
+    const Stub* stub = static_cast<Stub*>(userdata);
     switch(cmd)
     {
     case ZIP_SOURCE_TELL:
@@ -128,52 +178,6 @@ Vector<String> AssetBundleZipFile::listAssets()
 bool AssetBundleZipFile::hasEntry(const String& name) const
 {
     return zip_name_locate(_stub->archive(), name.c_str(), 0) != -1;
-}
-
-AssetBundleZipFile::Stub::Stub(sp<Readable> zipReadable, const String& zipLocation)
-    : _zip_readable(std::move(zipReadable)), _zip_location(Platform::getRealPath(zipLocation)), _size(_zip_readable ? _zip_readable->remaining() : 0)
-{
-    CHECK(_zip_readable, "Cannot open file %s", _zip_location.c_str());
-    zip_error_t error = {0};
-    _zip_source = zip_source_function_create(_local_zip_source_callback, this, &error);
-    CHECK(_zip_source, "Zip function create error: %s", zip_error_strerror(&error));
-    _zip_archive = zip_open_from_source(_zip_source, 0, &error);
-    CHECK(_zip_archive, "Zip open error: %s", zip_error_strerror(&error));
-}
-
-AssetBundleZipFile::Stub::~Stub()
-{
-    zip_close(_zip_archive);
-}
-
-const sp<Readable>& AssetBundleZipFile::Stub::readable() const
-{
-    return _zip_readable;
-}
-
-const String& AssetBundleZipFile::Stub::location() const
-{
-    return _zip_location;
-}
-
-int32_t AssetBundleZipFile::Stub::size() const
-{
-    return _size;
-}
-
-int32_t AssetBundleZipFile::Stub::position() const
-{
-    return _size - _zip_readable->remaining();
-}
-
-zip_t* AssetBundleZipFile::Stub::archive()
-{
-    return _zip_archive;
-}
-
-zip_source_t* AssetBundleZipFile::Stub::source()
-{
-    return _zip_source;
 }
 
 }

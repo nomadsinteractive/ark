@@ -1,5 +1,4 @@
-#ifndef ARK_PLATFORM_ANY_PLATFORM_INDEPENDENT_H_
-#define ARK_PLATFORM_ANY_PLATFORM_INDEPENDENT_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -10,8 +9,8 @@ class ARK_API PlatformIndependent {
 public:
 
     static bool isAbsolutePath(const String& path);
-    static bool isDirectory(const String& path);
-    static bool isFile(const String& path);
+    static bool isDirectory(const String& filepath);
+    static bool isFile(const String& filepath);
 
     static char dirSeparator();
     static char pathSeparator();
@@ -22,9 +21,6 @@ public:
 protected:
     static char _DIR_SEPARATOR;
     static char _PATH_SEPARATOR;
-
 };
 
 }
-
-#endif

@@ -21,28 +21,13 @@ public:
 
     bool hasEntry(const String& name) const;
 
-public:
-    class Stub {
-    public:
-        Stub(sp<Readable> zipReadable, const String& zipLocation);
-        ~Stub();
+private:
+    class Stub;
 
-        const sp<Readable>& readable() const;
-        const String& location() const;
-        int32_t size() const;
-        int32_t position() const;
+    class ReadableZipFile;
+    class AssetZipEntry;
 
-        zip_t* archive();
-        zip_source_t* source();
-
-    private:
-        sp<Readable> _zip_readable;
-        String _zip_location;
-        int32_t _size;
-
-        zip_t* _zip_archive;
-        zip_source_t* _zip_source;
-    };
+    static zip_int64_t _local_zip_source_callback(void *userdata, void *data, zip_uint64_t len, zip_source_cmd_t cmd);
 
     sp<Stub> _stub;
 };

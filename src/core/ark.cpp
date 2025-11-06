@@ -55,7 +55,7 @@ namespace {
 Ark* _instance = nullptr;
 List<Ark*> _instance_stack;
 
-M4 changeProjectionHandSide(const M4& projection, bool flipx, bool flipy, bool flipz)
+M4 changeProjectionHandSide(const M4& projection, const bool flipx, const bool flipy, const bool flipz)
 {
     M4 flip;
     if(flipx)
@@ -75,7 +75,7 @@ struct CameraDelegateCHS final : Camera::Delegate {
         ASSERT(_rcs == enums::COORDINATE_SYSTEM_LHS || _rcs == enums::COORDINATE_SYSTEM_RHS);
     }
 
-    M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override
+    M4 frustum(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar) override
     {
         return changeProjectionHandSide(_delegate->frustum(left, right, bottom, top, clipNear, clipFar), _flipx, _flipy, false);
     }
@@ -85,7 +85,7 @@ struct CameraDelegateCHS final : Camera::Delegate {
         return _delegate->lookAt(position, target, up);
     }
 
-    M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override
+    M4 ortho(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar) override
     {
         const bool needFlipY = (_rcs == enums::COORDINATE_SYSTEM_LHS ? bottom < top : bottom > top) != _flipy;
         const bool needFlipZ = (_rcs == enums::COORDINATE_SYSTEM_LHS ? clipNear < clipFar : clipNear > clipFar) != needFlipY;
@@ -93,7 +93,7 @@ struct CameraDelegateCHS final : Camera::Delegate {
         return changeProjectionHandSide(m, false, needFlipY, needFlipZ);
     }
 
-    M4 perspective(float fov, float aspect, float clipNear, float clipFar) override
+    M4 perspective(const float fov, const float aspect, const float clipNear, const float clipFar) override
     {
         return changeProjectionHandSide(_delegate->perspective(fov, aspect, clipNear, clipFar), _flipx, _flipy, false);
     }
@@ -188,6 +188,14 @@ String getMountedPath(const String& root)
     return root + "/";
 }
 
+sp<AssetBundle> createAssetBundle(const ApplicationManifest::Asset& asset)
+{
+    const String filepath = asset._src.protocol() == "external" ? Platform::getExternalStoragePath(asset._src.path()) : asset._src.path();
+    sp<AssetBundle> assetBundle = Platform::getAssetBundle(filepath);
+    CHECK_WARN(assetBundle, "Unable to load AssetBundle, src: %s", asset._src.toString().c_str());
+    return assetBundle;
+}
+
 }
 
 class Ark::ArkAssetBundle {
@@ -227,13 +235,6 @@ public:
     }
 
 private:
-    sp<AssetBundle> createAssetBundle(const ApplicationManifest::Asset& manifest) const
-    {
-        const String filepath = manifest._src.protocol() == "external" ? Platform::getExternalStoragePath(manifest._src.path()) : manifest._src.path();
-        sp<AssetBundle> assetBundle = Platform::getAssetBundle(filepath);
-        CHECK_WARN(assetBundle, "Unable to load AssetBundle, src: %s", manifest._src.toString().c_str());
-        return assetBundle;
-    }
 
     class Mounted {
     public:
@@ -292,7 +293,7 @@ private:
     sp<AssetBundle> _default_asset_bundle;
 };
 
-Ark::Ark(int32_t argc, const char** argv)
+Ark::Ark(const int32_t argc, const char** argv)
     : _argc(argc), _argv(argv)
 {
     push();
@@ -438,7 +439,7 @@ Camera Ark::createCamera(enums::CoordinateSystem cs) const
     return createCamera(cs, false, false);
 }
 
-Camera Ark::createCamera(enums::CoordinateSystem cs, bool flip) const
+Camera Ark::createCamera(const enums::CoordinateSystem cs, const bool flip) const
 {
     return createCamera(cs, flip, flip);
 }
