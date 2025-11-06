@@ -26,7 +26,7 @@ limitations under the License.
 
 #include "core/base/plugin_manager.h"
 #include "core/base/url.h"
-#include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
+#include "core/impl/asset_bundle/asset_bundle_compound.h"
 #include "core/impl/asset_bundle/asset_bundle_zip_file.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/dictionary/dictionary_impl.h"
@@ -226,10 +226,10 @@ public:
 
         for(const Mounted& i : _mounts)
             if(sp<AssetBundle> ia = i.getBundle(url))
-                asset = asset ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(asset), std::move(ia)) : std::move(ia);
+                asset = asset ? sp<AssetBundle>::make<AssetBundleCompound>(std::move(asset), std::move(ia)) : std::move(ia);
 
         if(sp<AssetBundle> fallback = _default_asset_bundle->getBundle(path))
-            return asset ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(asset), std::move(fallback)) : std::move(fallback);
+            return asset ? sp<AssetBundle>::make<AssetBundleCompound>(std::move(asset), std::move(fallback)) : std::move(fallback);
         CHECK(asset, "AssetBundle \"%s\" doesn't exists", path.c_str());
         return asset;
     }

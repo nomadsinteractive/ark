@@ -63,6 +63,8 @@ String PlatformIndependent::pathJoin(const String& p1, const String& p2)
 {
     if(!p1)
         return p2;
+    if(!p2)
+        return p1;
 
     const bool endsWithSeparator = p1.at(p1.length() - 1) == _DIR_SEPARATOR || p1.at(p1.length() - 1) == '/';
     const bool startsWithSeparator = p2 && (p2.at(0) == _DIR_SEPARATOR || p2.at(0) == '/');

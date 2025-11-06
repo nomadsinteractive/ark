@@ -31,12 +31,13 @@ sp<AssetBundle> AssetBundleDirectory::getBundle(const String& path)
     return nullptr;
 }
 
-Vector<String> AssetBundleDirectory::listAssets()
+Vector<String> AssetBundleDirectory::listAssets(const StringView dirname)
 {
     Vector<String> assets;
-    if(Platform::isDirectory(_directory))
+    const String dname = Platform::pathJoin(_directory, dirname);
+    if(Platform::isDirectory(dname))
     {
-        for(const std::filesystem::path& i : std::filesystem::directory_iterator(_directory.c_str()))
+        for(const std::filesystem::path& i : std::filesystem::directory_iterator(dname.c_str()))
             assets.emplace_back(i.filename().string());
     }
     return assets;

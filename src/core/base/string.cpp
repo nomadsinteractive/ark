@@ -7,6 +7,7 @@
 #include "core/base/string_buffer.h"
 #include "core/inf/array.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/strings.h"
 
 namespace ark {
 
@@ -19,6 +20,11 @@ String::String(const char* s)
 
 String::String(std::string str)
     : _str(std::move(str))
+{
+}
+
+String::String(const StringView str)
+    : _str(str)
 {
 }
 
@@ -94,17 +100,7 @@ const char& String::back() const
 
 String String::strip() const
 {
-    const char* front = _str.c_str();
-    const char* back = front + _str.length() - 1;
-    const char* wsFront = front;
-    const char* wsBack = back;
-    while(isspace(*wsFront))
-        ++wsFront;
-    while(wsBack >= wsFront && isspace(*wsBack))
-        --wsBack;
-    if(wsFront == front && wsBack == back)
-        return *this;
-    return wsBack < wsFront ? String() : std::string(wsFront, wsBack + 1);
+    return {std::string(Strings::strip(_str))};
 }
 
 String String::lstrip(char c) const

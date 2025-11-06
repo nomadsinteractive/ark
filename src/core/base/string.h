@@ -18,6 +18,7 @@ public:
 
     String(const char* s);
     String(std::string str);
+    String(StringView str);
     ~String();
 
     String& operator =(const char* other);

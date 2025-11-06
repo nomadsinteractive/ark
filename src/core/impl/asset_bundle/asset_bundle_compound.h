@@ -6,18 +6,18 @@
 
 namespace ark {
 
-class AssetBundleWithFallback final : public AssetBundle {
+class AssetBundleCompound final : public AssetBundle {
 public:
-    AssetBundleWithFallback(sp<AssetBundle> delegate, sp<AssetBundle> fallback);
+    AssetBundleCompound(sp<AssetBundle> a1, sp<AssetBundle> a2);
 
     sp<Asset> getAsset(const String& name) override;
     sp<AssetBundle> getBundle(const String& path) override;
 
-    Vector<String> listAssets() override;
+    Vector<String> listAssets(StringView dirname) override;
 
 private:
-    sp<AssetBundle> _delegate;
-    sp<AssetBundle> _fallback;
+    sp<AssetBundle> _a1;
+    sp<AssetBundle> _a2;
 };
 
 }

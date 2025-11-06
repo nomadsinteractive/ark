@@ -5,7 +5,7 @@ namespace ark {
 AssetBundleWithPrefix::AssetBundleWithPrefix(sp<AssetBundle> delegate, String prefix)
     : _delegate(std::move(delegate)), _prefix(std::move(prefix))
 {
-    DASSERT(_delegate);
+    ASSERT(_delegate);
 }
 
 sp<Asset> AssetBundleWithPrefix::getAsset(const String& name)
@@ -18,9 +18,9 @@ sp<AssetBundle> AssetBundleWithPrefix::getBundle(const String& path)
     return _delegate->getBundle(_prefix + path);
 }
 
-Vector<String> AssetBundleWithPrefix::listAssets()
+Vector<String> AssetBundleWithPrefix::listAssets(const StringView dirname)
 {
-    return _delegate->listAssets();
+    return dirname.empty() ? _delegate->listAssets(_prefix) : _delegate->listAssets(_prefix + dirname);
 }
 
 }

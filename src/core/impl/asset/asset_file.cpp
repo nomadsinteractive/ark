@@ -13,7 +13,7 @@ AssetFile::AssetFile(String filepath)
 
 sp<Readable> AssetFile::open()
 {
-    return sp<FileReadable>::make(_filepath, "rb");
+    return sp<Readable>::make<FileReadable>(_filepath, "rb");
 }
 
 String AssetFile::location()

@@ -11,7 +11,7 @@ public:
     virtual sp<Asset> getAsset(const String& path) = 0;
     virtual sp<AssetBundle> getBundle(const String& path) = 0;
 
-    virtual Vector<String> listAssets() = 0;
+    virtual Vector<String> listAssets(StringView dirname) = 0;
 };
 
 }

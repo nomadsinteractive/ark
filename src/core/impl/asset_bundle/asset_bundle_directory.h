@@ -13,7 +13,7 @@ public:
     sp<Asset> getAsset(const String& name) override;
     sp<AssetBundle> getBundle(const String& path) override;
 
-    Vector<String> listAssets() override;
+    Vector<String> listAssets(StringView dirname) override;
 
 private:
     String _directory;

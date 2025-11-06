@@ -76,7 +76,7 @@ sp<AssetBundle> AssetBundleDarwin::getBundle(const String& path)
     return sp<AssetBundle>::make<AssetBundleDarwin>(Platform::pathJoin(_directory, path));
 }
 
-Vector<String> AssetBundleDarwin::listAssets()
+Vector<String> AssetBundleDarwin::listAssets(StringView dirname)
 {
     return {};
 }

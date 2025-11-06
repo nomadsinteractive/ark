@@ -54,7 +54,7 @@ void AtlasImporterImpl::import(Atlas& atlas, const sp<Readable>& /*readable*/)
     for(const Directory& i : _directories)
     {
         const sp<AssetBundle> assetBundle = Ark::instance().getAssetBundle(i._src);
-        for(const String& j : assetBundle->listAssets())
+        for(const String& j : assetBundle->listAssets(""))
             if(j.endsWith(".png"))
             {
                 auto [name, ext] = j.rcut('.');

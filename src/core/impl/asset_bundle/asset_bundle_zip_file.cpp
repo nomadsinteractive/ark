@@ -9,6 +9,13 @@
 
 namespace ark {
 
+std::pair<Optional<StringView>, StringView> splitpath(const StringView filepath)
+{
+    if(const auto pos = filepath.rfind('/'); pos != StringView::npos)
+        return {filepath.substr(0, pos), filepath.substr(pos + 1)};
+    return {{}, filepath};
+}
+
 class AssetBundleZipFile::Stub {
 public:
     Stub(sp<Readable> zipReadable, const String& zipLocation)
@@ -169,10 +176,22 @@ sp<AssetBundle> AssetBundleZipFile::getBundle(const String& path)
     return sp<AssetBundle>::make<AssetBundleWithPrefix>(sp<AssetBundle>::make<AssetBundleZipFile>(*this), path.endsWith("/") ? path : path + "/");
 }
 
-Vector<String> AssetBundleZipFile::listAssets()
+Vector<String> AssetBundleZipFile::listAssets(const StringView dirname)
 {
-    DFATAL("Unimplemented");
-    return {};
+    Vector<String> assets;
+    const int32_t numOfEntries = zip_get_num_entries(_stub->archive(), 0);
+    for(int32_t i = 0; i < numOfEntries; ++i)
+    {
+        const char* filepath = zip_get_name(_stub->archive(), i, 0);
+        if(const auto [optDirname, filename] = splitpath(filepath); optDirname)
+        {
+            if(optDirname.value() == dirname)
+                assets.emplace_back(filename);
+        }
+        else if(dirname.empty())
+            assets.emplace_back(filename);
+    }
+    return assets;
 }
 
 bool AssetBundleZipFile::hasEntry(const String& name) const

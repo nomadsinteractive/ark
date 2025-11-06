@@ -27,6 +27,8 @@ public:
     static String toUTF8(const std::wstring& text);
     static std::wstring fromUTF8(StringView text);
 
+    static StringView strip(StringView str);
+
     static bool splitFunction(const String& expr, String& func, String& args);
 
     static String capitalizeFirst(const String& name);

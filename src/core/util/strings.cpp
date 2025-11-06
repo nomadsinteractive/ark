@@ -398,6 +398,21 @@ std::wstring Strings::fromUTF8(const StringView text)
     return wide;
 }
 
+StringView Strings::strip(const StringView str)
+{
+    const char* front = str.data();
+    const char* back = front + str.length() - 1;
+    const char* wsFront = front;
+    const char* wsBack = back;
+    while(isspace(*wsFront))
+        ++wsFront;
+    while(wsBack >= wsFront && isspace(*wsBack))
+        --wsBack;
+    if(wsFront == front && wsBack == back)
+        return str;
+    return wsBack < wsFront ? StringView() : StringView(wsFront, wsBack + 1);
+}
+
 bool Strings::splitFunction(const String& expr, String& func, String& args)
 {
     if(const auto idx = expr.find('('); idx && idx != String::npos)

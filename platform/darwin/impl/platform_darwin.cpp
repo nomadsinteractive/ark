@@ -18,7 +18,7 @@
 #endif
 
 #include "core/impl/asset_bundle/asset_bundle_directory.h"
-#include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
+#include "core/impl/asset_bundle/asset_bundle_compound.h"
 #include "core/util/strings.h"
 
 #include "graphics/impl/alphabet/alphabet_true_type.h"
@@ -51,7 +51,7 @@ sp<AssetBundle> Platform::getAssetBundle(const String& path)
     if(isDirectory(path))
     {
         sp<AssetBundle> pathBundle = sp<AssetBundle>::make<AssetBundleDirectory>(path);
-        bundle = bundle ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(bundle), std::move(pathBundle)) : std::move(pathBundle);
+        bundle = bundle ? sp<AssetBundle>::make<AssetBundleCompound>(std::move(bundle), std::move(pathBundle)) : std::move(pathBundle);
     }
     return bundle;
 }

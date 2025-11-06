@@ -57,7 +57,7 @@ public:
         return nullptr;
     }
 
-    Vector<String> listAssets() override {
+    Vector<String> listAssets(StringView dirname) override {
         DFATAL("Unimplemented");
         return {};
     }
@@ -85,9 +85,9 @@ private:
 
 }
 
-Vector<String> AssetBundleType::listAssets(const sp<AssetBundle>& self)
+Vector<String> AssetBundleType::listAssets(const sp<AssetBundle>& self, const StringView dirname)
 {
-    return self->listAssets();
+    return self->listAssets(dirname);
 }
 
 sp<Asset> AssetBundleType::getAsset(const sp<AssetBundle>& self, const String& name)
