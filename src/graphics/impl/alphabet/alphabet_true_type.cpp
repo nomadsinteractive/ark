@@ -11,23 +11,10 @@
 
 namespace ark {
 
-namespace {
-
-sp<Readable> getFontResource(const String& name)
-{
-    if(const String path = Platform::pathJoin(Platform::getDefaultFontDirectory(), name); Platform::isFile(path))
-        return sp<Readable>::make<FileReadable>(path, "rb");
-    return Ark::instance().tryOpenAsset(name);
-}
-
-}
-
 AlphabetTrueType::AlphabetTrueType(const String& src)
     : _free_types(Global<FreeTypes>()), _font(Font::TextSize())
 {
-    sp<Readable> readable = getFontResource(src);
-    CHECK(readable, "Font \"%s\" does not exists", src.c_str());
-    _free_types->ftNewFaceFromReadable(std::move(readable), 0, &_ft_font_face);
+    _free_types->ftNewFaceFromReadable(Ark::instance().openAsset(src), 0, &_ft_font_face);
 }
 
 AlphabetTrueType::~AlphabetTrueType()
@@ -71,7 +58,7 @@ Optional<Alphabet::Metrics> AlphabetTrueType::measure(int32_t c)
     return metrics;
 }
 
-bool AlphabetTrueType::draw(uint32_t c, Bitmap& image, int32_t x, int32_t y)
+bool AlphabetTrueType::draw(uint32_t c, Bitmap& image, const int32_t x, const int32_t y)
 {
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(!glyphIndex)
