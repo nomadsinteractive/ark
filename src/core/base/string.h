@@ -71,12 +71,11 @@ public:
     bool operator ==(StringView other) const;
     bool operator !=(StringView other) const;
     bool operator <(const String& other) const;
-    bool operator >(const String& other) const;
 
     char operator[](std::size_t index) const;
     char& operator[](std::size_t index);
 
-    static size_type npos;
+    constexpr static size_type npos = std::string::npos;
 
     friend ARK_API String operator +(const String& lvalue, const String& rvalue);
     friend ARK_API String operator +(const String& lvalue, const char* rvalue);

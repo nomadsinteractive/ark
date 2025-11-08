@@ -11,8 +11,6 @@
 
 namespace ark {
 
-String::size_type String::npos = std::string::npos;
-
 String::String(const char* s)
     : _str(s)
 {
@@ -309,11 +307,6 @@ bool String::operator !=(const StringView other) const
 bool String::operator <(const String& other) const
 {
     return _str < other._str;
-}
-
-bool String::operator >(const String& other) const
-{
-    return _str > other._str;
 }
 
 char String::operator[](const size_t index) const
