@@ -39,18 +39,6 @@ public:
     bool isAuto() const;
     bool isMatchParent() const;
 
-//  [[plugin::builder]]
-    class BUILDER final : public IBuilder<LayoutLength> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        LayoutLength build(const Scope& args) override;
-
-    private:
-        sp<Builder<Numeric>> _value;
-        LengthType _type;
-    };
-
 //  [[plugin::builder::by-value]]
     class DICTIONARY final : public IBuilder<LayoutLength> {
     public:

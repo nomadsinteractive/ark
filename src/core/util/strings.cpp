@@ -305,6 +305,13 @@ bool wStrToUtf8(const std::wstring& wideStr, String& utf8Str)
     return wStrToUtf8(wideStr.c_str(), wideStr.size(), utf8Str);
 }
 
+bool isVariableCharacter(const char c, const bool allowDash = true)
+{
+    if(!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '.' || (allowDash && c == '-')))
+        return false;
+    return true;
+}
+
 }
 
 sp<IBuilder<String>> Strings::load(const String& resid)
@@ -455,7 +462,7 @@ String Strings::svprintf(const char* format, va_list args)
     size_t size = _vscprintf(format, args) + 1;
 #endif
 #endif
-    std::unique_ptr<char[]> buf(new char[size + 1]);
+    const std::unique_ptr<char[]> buf(new char[size + 1]);
     char* lpstr = buf.get();
     vsnprintf(lpstr, size, format, args);
     lpstr[size] = 0;
@@ -488,13 +495,10 @@ String Strings::dumpMemory(const uint8_t* memory, const size_t length)
 
         sb << " |  ";
         for(size_t j = 0; j < 16; ++j)
-        {
-            size_t offset = i + j;
-            if(offset < length)
+            if(const size_t offset = i + j; offset < length)
                 sb << (std::isprint(memory[offset]) ? static_cast<char>(memory[offset]) : '.');
             else
                 sb << ' ';
-        }
         sb << std::endl;
     }
 
@@ -516,19 +520,15 @@ bool Strings::isNumeric(const String& value)
     return true;
 }
 
-bool Strings::isArgument(const String& value)
+bool Strings::isArgumentOrReference(const String& value)
 {
     const char* str = value.c_str();
-    if(*str != '$')
-        return false;
-    return isVariableName(unwrap(str + 1, '{', '}'), false);
-}
-
-bool Strings::isVariableCharacter(const char c, const bool allowDash)
-{
-    if(!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '.' || (allowDash && c == '-')))
-        return false;
-    return true;
+    if(*str == '$')
+        return isVariableName(unwrap(str + 1, '{', '}'), false);
+//TODO: more strict checks
+    if(*str == '@')
+        return true;
+    return false;
 }
 
 bool Strings::isVariableName(const String& name, const bool allowDash)

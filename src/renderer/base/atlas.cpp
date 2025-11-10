@@ -64,11 +64,11 @@ private:
     sp<Bitmap> _bitmap;
 };
 
-constexpr uint32_t UV_NORMALIZE_RANGE = std::numeric_limits<uint16_t>::max();
+constexpr float UV_NORMALIZE_RANGE = std::numeric_limits<uint16_t>::max() + 1;
 
 Rect toUVRect(const Atlas::Item& item)
 {
-    return Rect(item._uv._ux / static_cast<float>(UV_NORMALIZE_RANGE), item._uv._uy / static_cast<float>(UV_NORMALIZE_RANGE), item._uv._vx / static_cast<float>(UV_NORMALIZE_RANGE), item._uv._vy / static_cast<float>(UV_NORMALIZE_RANGE));
+    return Rect(item._uv._ux / UV_NORMALIZE_RANGE, item._uv._uy / UV_NORMALIZE_RANGE, item._uv._vx / UV_NORMALIZE_RANGE, item._uv._vy / UV_NORMALIZE_RANGE);
 }
 
 }
@@ -177,19 +177,19 @@ const Atlas::Item& Atlas::at(const NamedHash& resid) const
 Rect Atlas::getItemBounds(const int32_t id) const
 {
     const Item& item = at(id);
-    const float nw = _texture->width() / static_cast<float>(UV_NORMALIZE_RANGE);
-    const float nh = _texture->height() / static_cast<float>(UV_NORMALIZE_RANGE);
+    const float nw = _texture->width() / UV_NORMALIZE_RANGE;
+    const float nh = _texture->height() / UV_NORMALIZE_RANGE;
     return {item._uv._ux * nw, item._uv._vy * nh, item._uv._vx * nw, item._uv._uy * nh};
 }
 
 uint16_t Atlas::unnormalize(const float v)
 {
-    return std::min<uint16_t>(v * UV_NORMALIZE_RANGE, UV_NORMALIZE_RANGE);
+    return std::clamp<int32_t>(v * UV_NORMALIZE_RANGE, 0, std::numeric_limits<uint16_t>::max());
 }
 
 uint16_t Atlas::unnormalize(const uint32_t x, const uint32_t s)
 {
-    return static_cast<uint16_t>(std::min<uint32_t>(x * UV_NORMALIZE_RANGE / s, UV_NORMALIZE_RANGE));
+    return std::min<uint32_t>(x * UV_NORMALIZE_RANGE / s, std::numeric_limits<uint16_t>::max());
 }
 
 Atlas::Item Atlas::toItem(const UV uv, const Rect& bounds, const V2& size, const V2& pivot)
@@ -229,7 +229,7 @@ void Atlas::AttachmentNinePatch::add(const int32_t type, const uint32_t textureW
 void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, const Atlas& atlas, const String& s9)
 {
     const Rect s9Rect = Strings::eval<Rect>(s9);
-    addNinePatch(type, atlas.width(), atlas.height(), s9Rect, atlas.getItemBounds(type).translate(1, 1));
+    addNinePatch(type, atlas.width(), atlas.height(), Rect(s9Rect.left(), s9Rect.top(), s9Rect.left() + s9Rect.right(), s9Rect.top() + s9Rect.bottom()), atlas.getItemBounds(type));
 }
 
 void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds)

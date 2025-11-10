@@ -1,6 +1,7 @@
 #include "renderer/impl/importer/atlas_importer_impl.h"
 
 #include "core/ark.h"
+#include "core/base/named_hash.h"
 #include "core/impl/dictionary/loader_bundle.h"
 #include "core/util/documents.h"
 
@@ -12,7 +13,6 @@
 
 #include "app/base/application_bundle.h"
 #include "app/base/application_context.h"
-#include "core/base/named_hash.h"
 
 namespace ark {
 
@@ -51,14 +51,14 @@ void AtlasImporterImpl::import(Atlas& atlas, const sp<Readable>& /*readable*/)
     const ApplicationBundle& applicationBundle = Ark::instance().applicationContext()->applicationBundle();
     const sp<BitmapLoaderBundle> bitmapLoader = applicationBundle.bitmapBundle();
     BitmapLoaderBundle& bitmapLoaderBounds = applicationBundle.bitmapBoundsBundle();
-    for(const Directory& i : _directories)
+    for(const auto& [dirpath] : _directories)
     {
-        const sp<AssetBundle> assetBundle = Ark::instance().getAssetBundle(i._src);
+        const sp<AssetBundle> assetBundle = Ark::instance().getAssetBundle(dirpath);
         for(const String& j : assetBundle->listAssets(""))
             if(j.endsWith(".png"))
             {
                 auto [name, ext] = j.rcut('.');
-                String src = Strings::sprintf("%s/%s", i._src.c_str(), j.c_str());
+                String src = Strings::sprintf("%s/%s", dirpath.c_str(), j.c_str());
                 sp<Bitmap> bounds = bitmapLoaderBounds.get(src);
                 texturePacker.addBitmap(std::move(bounds), sp<Variable<bitmap>>::make<BitmapProvider>(bitmapLoader, std::move(src)), std::move(name.value()));
             }
@@ -67,18 +67,20 @@ void AtlasImporterImpl::import(Atlas& atlas, const sp<Readable>& /*readable*/)
     for(const auto& [name, _, __, uv] : texturePacker.packedBitmaps())
         atlas.add(string_hash(name.c_str()), uv.left(), uv.top(), uv.right(), uv.bottom(), bounds, V2(static_cast<float>(uv.width()), static_cast<float>(uv.height())), V2(0.5f, 0.5f));
 
-    for(const File& i : _files)
+    for(const auto& [manifestSrc, fileSrc] : _files)
     {
-        const document manifest = applicationBundle.loadDocument(i._manifest);
-        CHECK(manifest, "Unable to load manifest \"%s\"", i._manifest.c_str());
+        const document manifest = applicationBundle.loadDocument(manifestSrc);
+        CHECK(manifest, "Unable to load manifest \"%s\"", manifestSrc.c_str());
         for(const document& j : manifest->children())
         {
             const String& n = Documents::ensureAttribute(j, "n");
-            const HashId nid = string_hash(n.c_str());
-            if(const Optional<String> s9 = Documents::getAttributeOptional<String>(j, "s9"); s9 && atlas.has(NamedHash(nid)))
+            if(const HashId nid = string_hash(n.c_str()); atlas.has(nid))
             {
-                const sp<Atlas::AttachmentNinePatch>& aNinePatch = atlas.attachments().ensure<Atlas::AttachmentNinePatch>();
-                aNinePatch->addNinePatch(nid, atlas, s9.value());
+                if(const Optional<String> s9 = Documents::getAttributeOptional<String>(j, "s9"))
+                {
+                    const sp<Atlas::AttachmentNinePatch>& aNinePatch = atlas.attachments().ensure<Atlas::AttachmentNinePatch>();
+                    aNinePatch->addNinePatch(nid, atlas, s9.value());
+                }
             }
         }
     }

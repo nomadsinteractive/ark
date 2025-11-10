@@ -4,9 +4,6 @@
 
 #include "graphics/components/shape.h"
 
-#include "app/base/constraint.h"
-#include "app/inf/collider.h"
-
 namespace ark {
 
 sp<Rigidbody> Collider::createBody(const sp<Collider>& self, Rigidbody::BodyType bodyType, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)

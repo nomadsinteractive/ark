@@ -87,18 +87,8 @@ bool LayoutLength::isMatchParent() const
     return _type == LENGTH_TYPE_PERCENTAGE && _value.val() == 100.0f;
 }
 
-LayoutLength::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(factory.ensureBuilder<Numeric>(manifest, constants::VALUE)), _type(Documents::getAttribute<LengthType>(manifest, constants::TYPE, LENGTH_TYPE_PIXEL))
-{
-}
-
-LayoutLength LayoutLength::BUILDER::build(const Scope& args)
-{
-    return {_value->build(args), _type};
-}
-
 LayoutLength::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _value(value), _value_builder(Strings::isArgument(value) ? factory.ensureBuilder<Numeric>(value) : sp<Builder<Numeric>>())
+    : _value(value), _value_builder(Strings::isArgumentOrReference(value) ? factory.ensureBuilder<Numeric>(value) : sp<Builder<Numeric>>())
 {
 }
 

@@ -82,8 +82,7 @@ public:
     static String stripReference(const String& id);
 
     static bool isNumeric(const String& value);
-    static bool isArgument(const String& value);
-    static bool isVariableCharacter(char c, bool allowDash = true);
+    static bool isArgumentOrReference(const String& value);
     static bool isVariableName(const String& name, bool allowDash = true);
 
 //  [[plugin::builder::by-value]]

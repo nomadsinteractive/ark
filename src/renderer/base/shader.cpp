@@ -1,5 +1,7 @@
 #include "renderer/base/shader.h"
 
+#include <ranges>
+
 #include "core/base/string_table.h"
 #include "core/types/global.h"
 #include "core/util/string_convert.h"
@@ -88,7 +90,7 @@ const sp<PipelineDescriptor>& Shader::pipelineDesciptor() const
 
 sp<PipelineBindings> Shader::makeBindings(Buffer vertexBuffer, enums::DrawMode drawMode, enums::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers) const
 {
-    for(const auto& [divisor, _] : _pipeline_desciptor->layout()->streamLayouts())
+    for(const auto& divisor : _pipeline_desciptor->layout()->streamLayouts() | std::views::keys)
         if(divisor != 0 && !findInKeywordPairs(instanceBuffers, divisor))
             instanceBuffers.emplace_back(divisor, Ark::instance().renderController()->makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC));
 

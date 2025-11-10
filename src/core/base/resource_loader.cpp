@@ -21,7 +21,7 @@ ResourceLoader::~ResourceLoader()
     LOGD("");
 }
 
-void ResourceLoader::import(const document& manifest, BeanFactory& parent)
+void ResourceLoader::import(const document& manifest, BeanFactory& beanFactory)
 {
     for(const document& i : manifest->children("import"))
     {
@@ -29,12 +29,12 @@ void ResourceLoader::import(const document& manifest, BeanFactory& parent)
         const String& src = Documents::ensureAttribute(i, constants::SRC);
         if(const Identifier id = Identifier::parse(src); id.isRef())
         {
-            sp<BeanFactory> package = parent.getPackage(id.ref());
+            sp<BeanFactory> package = beanFactory.getPackage(id.ref());
             CHECK(package, "Package \"%s\" does not exist", src.c_str());
             _bean_factory.addPackage(name, *package);
         }
         else
-            _bean_factory.addPackage(name, parent.ensure<ResourceLoader>(src, {})->beanFactory());
+            _bean_factory.addPackage(name, beanFactory.ensure<ResourceLoader>(src, {})->beanFactory());
     }
 }
 
