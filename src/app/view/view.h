@@ -18,8 +18,13 @@ namespace ark {
 
 class ARK_API View final : public Wirable, public Wirable::Niche {
 public:
+    struct Node;
+    struct Stub;
+
 //  [[script::bindings::auto]]
     View(sp<LayoutParam> layoutParam, String name = "", sp<Vec3> position = nullptr, sp<Boolean> discarded = nullptr);
+    View(sp<Stub> stub);
+
     ~View() override;
 
     void onPoll(WiringContext& context) override;
@@ -27,7 +32,7 @@ public:
 
     void onPoll(WiringContext& context, const document& component) override;
 
-    bool update(uint32_t timestamp) const;
+    bool update(uint32_t tick) const;
 
     const sp<Layout::Node>& layoutNode() const;
 
@@ -37,12 +42,12 @@ public:
 //  [[script::bindings::property]]
     const OptionalVar<Boolean>& discarded() const;
 //  [[script::bindings::property]]
-    void setDiscarded(sp<Boolean> discarded);
+    void setDiscarded(sp<Boolean> discarded) const;
 
 //  [[script::bindings::property]]
     const sp<LayoutParam>& layoutParam() const;
 //  [[script::bindings::property]]
-    void setLayoutParam(sp<LayoutParam> layoutParam);
+    void setLayoutParam(sp<LayoutParam> layoutParam) const;
 
 //  [[script::bindings::property]]
     const sp<Vec3>& layoutPosition();
@@ -50,7 +55,7 @@ public:
     const sp<Size>& layoutSize();
 
 //  [[script::bindings::auto]]
-    void addView(sp<View> view);
+    void addView(sp<View> view) const;
 //  [[script::bindings::auto]]
     sp<View> findView(StringView name) const;
 
@@ -59,6 +64,9 @@ public:
 
     const sp<ViewHierarchy>& hierarchy() const;
 
+//  [[script::bindings::property]]
+    sp<View> parent() const;
+//  [[script::bindings::property]]
     void setParent(const View& view);
 
 //  [[plugin::builder]]
@@ -84,22 +92,15 @@ public:
         sp<Wirable> build(const Scope& args) override;
 
     private:
-        builder<View> _view;
+        sp<Builder<View>> _view;
     };
-
-    struct Stub;
 
 private:
     sp<Updatable>& ensureUpdatableLayout();
-
     void markAsTopView();
 
-protected:
+private:
     sp<Stub> _stub;
-    sp<Updatable> _updatable_layout;
-
-    sp<Vec3> _layout_position;
-    sp<Size> _layout_size;
 
     friend class Activity;
     friend class ViewHierarchy;

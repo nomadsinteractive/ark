@@ -9,8 +9,8 @@
 namespace ark {
 
 struct Arena::Stub {
-    Stub(sp<ResourceLoader> resourceLoader, sp<Renderer> renderer)
-        : _resource_loader(std::move(resourceLoader)), _renderer(std::move(renderer))
+    Stub(sp<ResourceLoader> resourceLoader, sp<Renderer> renderer, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
+        : _resource_loader(std::move(resourceLoader)), _renderer(std::move(renderer)), _render_layers(std::move(renderLayers)), _layers(std::move(layers))
     {
         CHECK(!_renderer || _renderer.isInstance<Renderer::Group>(), "Renderer of an Arena should be nullptr or instance of Renderer::Group");
     }
@@ -46,8 +46,8 @@ struct Arena::Stub {
     sp<ResourceLoader> _resource_loader;
     sp<Renderer> _renderer;
 
-    Map<String, sp<Layer>> _layers;
     Map<String, sp<RenderLayer>> _render_layers;
+    Map<String, sp<Layer>> _layers;
 };
 
 class Arena::LayerBundle final : public BoxBundle {
@@ -80,8 +80,8 @@ private:
     sp<Stub> _stub;
 };
 
-Arena::Arena(sp<ResourceLoader> resourceLoader, sp<Renderer> renderer)
-    : _stub(sp<Stub>::make(std::move(resourceLoader), std::move(renderer))), _layers(sp<LayerBundle>::make(_stub)), _render_layers(sp<RenderLayerBundle>::make(_stub))
+Arena::Arena(sp<ResourceLoader> resourceLoader, sp<Renderer> renderer, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
+    : _stub(sp<Stub>::make(std::move(resourceLoader), std::move(renderer), std::move(renderLayers), std::move(layers))), _layers(sp<BoxBundle>::make<LayerBundle>(_stub)), _render_layers(sp<BoxBundle>::make<RenderLayerBundle>(_stub))
 {
 }
 

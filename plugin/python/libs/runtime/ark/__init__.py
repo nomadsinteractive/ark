@@ -2059,7 +2059,7 @@ class Layer:
 
 
 class Arena:
-    def __init__(self, resource_loader: ResourceLoader, renderer: Optional[Renderer] = None):
+    def __init__(self, resource_loader: ResourceLoader, renderer: Optional[Renderer] = None, render_layers: dict[str, RenderLayer] = None, layers: dict[str, Layer] = None):
         pass
 
     @property
@@ -3158,10 +3158,18 @@ class View:
     def layout_size(self) -> Size:
         pass
 
-    def add_view(self, view: "View"):
+    @property
+    def parent(self) -> Optional[Self]:
         pass
 
-    def find_view(self, name: str) -> Optional["View"]:
+    @parent.setter
+    def parent(self, parent: Self | None):
+        pass
+
+    def add_view(self, view: Self):
+        pass
+
+    def find_view(self, name: str) -> Optional[Self]:
         pass
 
     def make_boundaries(self) -> Boundaries:
