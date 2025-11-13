@@ -64,6 +64,7 @@ public:
 
     void add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot);
 
+    Item& at(const NamedHash& resid);
     const Item& at(const NamedHash& resid) const;
     Rect getItemBounds(int32_t id) const;
 
@@ -75,16 +76,16 @@ public:
 
     class AttachmentNinePatch {
     public:
-        const sp<Vertices>& ensureVerticesTriangleStrips(int32_t type, bool isLHS) const;
-        const sp<Vertices>& ensureVerticesQuads(int32_t type, bool isLHS) const;
+        const sp<Vertices>& ensureVerticesTriangleStrips(HashId type, bool isLHS) const;
+        const sp<Vertices>& ensureVerticesQuads(HashId type, bool isLHS) const;
 
         void import(Atlas& atlas, const document& manifest);
 
-        void add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas);
-        void addNinePatch(int32_t type, const Atlas& atlas, const String& s9);
+        void add(HashId type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas);
+        void addNinePatch(HashId type, const Atlas& atlas, const String& s9);
 
     private:
-        void addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds);
+        void addNinePatch(HashId type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds);
         sp<Vertices> makeNinePatchVertices(uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds) const;
 
         struct NinePatchVertices {
@@ -95,7 +96,7 @@ public:
         };
 
     private:
-        Map<int32_t, NinePatchVertices> _nine_patch_vertices;
+        Map<HashId, NinePatchVertices> _nine_patch_vertices;
     };
 
 //  [[plugin::builder]]

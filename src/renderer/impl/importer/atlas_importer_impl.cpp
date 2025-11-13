@@ -76,6 +76,19 @@ void AtlasImporterImpl::import(Atlas& atlas, const sp<Readable>& /*readable*/)
             const String& n = Documents::ensureAttribute(j, "n");
             if(const HashId nid = string_hash(n.c_str()); atlas.has(nid))
             {
+                const uint32_t w = Documents::getAttribute<uint32_t>(j, "w", 0);
+                const uint32_t h = Documents::getAttribute<uint32_t>(j, "h", 0);
+                const uint32_t ox = Documents::getAttribute<uint32_t>(j, "oX", 0);
+                const uint32_t oy = Documents::getAttribute<uint32_t>(j, "oY", 0);
+                const float ow = static_cast<float>(Documents::getAttribute<uint32_t>(j, "oW", w));
+                const float oh = static_cast<float>(Documents::getAttribute<uint32_t>(j, "oH", h));
+                const float px = Documents::getAttribute<float>(j, "pX", 0.5f);
+                const float py = Documents::getAttribute<float>(j, "pY", 0.5f);
+                const V2 pivot((ox + px * w) / ow, 1.0f - (oy + py * h) / oh);
+                Atlas::Item& item = atlas.at(nid);
+                item._pivot = pivot;
+                item._bounds = item._bounds.translate(0.5f, 0.5f).translate(-pivot.x(), -pivot.y());
+
                 if(const Optional<String> s9 = Documents::getAttributeOptional<String>(j, "s9"))
                 {
                     const sp<Atlas::AttachmentNinePatch>& aNinePatch = atlas.attachments().ensure<Atlas::AttachmentNinePatch>();

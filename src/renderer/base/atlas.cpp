@@ -166,6 +166,14 @@ Atlas::UV Atlas::toUV(const uint32_t ux, const uint32_t uy, const uint32_t vx, c
     return {l, b, r, t};
 }
 
+Atlas::Item& Atlas::at(const NamedHash& resid)
+{
+    const HashId idhash = resid.hash();
+    const auto iter = _items.find(resid.hash());
+    CHECK(iter != _items.end(), "Item[%u](%s) does not exist", idhash, resid.name().c_str());
+    return iter->second;
+}
+
 const Atlas::Item& Atlas::at(const NamedHash& resid) const
 {
     const HashId idhash = resid.hash();
@@ -219,20 +227,20 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
     }
 }
 
-void Atlas::AttachmentNinePatch::add(const int32_t type, const uint32_t textureWidth, const uint32_t textureHeight, const Rect& paddings, const Atlas& atlas)
+void Atlas::AttachmentNinePatch::add(const HashId type, const uint32_t textureWidth, const uint32_t textureHeight, const Rect& paddings, const Atlas& atlas)
 {
     const Rect bounds = atlas.getItemBounds(type);
     const Rect ninePatches(paddings.left(), paddings.top(), bounds.width() - paddings.right(), bounds.height() - paddings.bottom());
     addNinePatch(type, textureWidth, textureHeight, ninePatches, bounds);
 }
 
-void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, const Atlas& atlas, const String& s9)
+void Atlas::AttachmentNinePatch::addNinePatch(const HashId type, const Atlas& atlas, const String& s9)
 {
     const Rect s9Rect = Strings::eval<Rect>(s9);
     addNinePatch(type, atlas.width(), atlas.height(), Rect(s9Rect.left(), s9Rect.top(), s9Rect.left() + s9Rect.right(), s9Rect.top() + s9Rect.bottom()), atlas.getItemBounds(type));
 }
 
-void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds)
+void Atlas::AttachmentNinePatch::addNinePatch(const HashId type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds)
 {
     _nine_patch_vertices[type] = {
         sp<Vertices>::make<VerticesNinePatchTriangleStripsRHS>(bounds, ninePatch, textureWidth, textureHeight),
@@ -242,14 +250,14 @@ void Atlas::AttachmentNinePatch::addNinePatch(const int32_t type, uint32_t textu
     };
 }
 
-const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesTriangleStrips(const int32_t type, const bool isLHS) const
+const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesTriangleStrips(const HashId type, const bool isLHS) const
 {
     const auto iter = _nine_patch_vertices.find(type);
     CHECK(iter != _nine_patch_vertices.end(), "Cannot find type: %d(%s)", type, NamedHash::reverse(type).c_str());
     return isLHS ? iter->second._triangle_strips_lhs : iter->second._triangle_strips_rhs;
 }
 
-const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesQuads(int32_t type, bool isLHS) const
+const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesQuads(const HashId type, const bool isLHS) const
 {
     const auto iter = _nine_patch_vertices.find(type);
     CHECK(iter != _nine_patch_vertices.end(), "Cannot find type: %d", type);
