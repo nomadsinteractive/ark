@@ -56,7 +56,7 @@ DrawingContext RenderLayerSnapshot::toDrawingContext(const RenderRequest& render
     DrawingContext drawingContext(_stub->_pipeline_bindings, _stub->_shader->takeBufferSnapshot(renderRequest, false), std::move(vertices), std::move(indices),
                                   drawCount, std::move(params));
     if(_stub->_scissor)
-        drawingContext._scissor = _stub->_render_controller->renderEngine()->toRendererRect(_scissor);
+        drawingContext._scissor = _stub->_render_controller->renderEngine()->toRendererRect(_scissor, enums::COORDINATE_SYSTEM_LHS);
 
     return drawingContext;
 }
