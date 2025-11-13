@@ -44,7 +44,7 @@ public:
     void setText(std::wstring text) const;
 
 //  [[script::bindings::auto]]
-    void show(sp<Boolean> discarded = nullptr);
+    void show(sp<Boolean> discarded = nullptr, const sp<RenderLayer>& renderLayer = nullptr);
 //  [[script::bindings::auto]]
     void discard();
 
@@ -56,7 +56,7 @@ public:
         sp<Text> build(const Scope& args) override;
 
     private:
-        sp<Builder<RenderLayer>> _render_layer;
+        SafeBuilder<RenderLayer> _render_layer;
         SafeBuilder<StringVar> _text;
         SafeBuilder<Font> _font;
         SafeBuilder<Vec3> _position;

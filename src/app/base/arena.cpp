@@ -1,6 +1,7 @@
 #include "app/base/arena.h"
 
 #include "core/base/resource_loader.h"
+#include "core/components/discarded.h"
 #include "core/inf/dictionary.h"
 
 #include "graphics/base/render_layer.h"
@@ -9,8 +10,8 @@
 namespace ark {
 
 struct Arena::Stub {
-    Stub(sp<ResourceLoader> resourceLoader, sp<Renderer> renderer, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
-        : _resource_loader(std::move(resourceLoader)), _renderer(std::move(renderer)), _render_layers(std::move(renderLayers)), _layers(std::move(layers))
+    Stub(sp<ResourceLoader> resourceLoader, sp<Boolean> discarded, sp<Renderer> renderer, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
+        : _resource_loader(std::move(resourceLoader)), _renderer(std::move(renderer)), _render_layers(std::move(renderLayers)), _layers(std::move(layers)), _discarded(sp<Discarded>::make(std::move(discarded)))
     {
         CHECK(!_renderer || _renderer.isInstance<Renderer::Group>(), "Renderer of an Arena should be nullptr or instance of Renderer::Group");
     }
@@ -37,7 +38,7 @@ struct Arena::Stub {
             CHECK(renderLayer, "Cannot get RenderLayer \"%s\"", name.c_str());
             _render_layers.insert(std::make_pair(name, renderLayer));
             if(_renderer)
-                RendererType::addRenderer(_renderer, renderLayer, {RendererType::PRIORITY_RENDER_LAYER});
+                RendererType::addRenderer(_renderer, renderLayer, {_discarded, RendererType::PRIORITY_RENDER_LAYER});
             return renderLayer;
         }
         return iter->second;
@@ -48,6 +49,8 @@ struct Arena::Stub {
 
     Map<String, sp<RenderLayer>> _render_layers;
     Map<String, sp<Layer>> _layers;
+
+    sp<Discarded> _discarded;
 };
 
 class Arena::LayerBundle final : public BoxBundle {
@@ -80,9 +83,19 @@ private:
     sp<Stub> _stub;
 };
 
-Arena::Arena(sp<ResourceLoader> resourceLoader, sp<Renderer> renderer, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
-    : _stub(sp<Stub>::make(std::move(resourceLoader), std::move(renderer), std::move(renderLayers), std::move(layers))), _layers(sp<BoxBundle>::make<LayerBundle>(_stub)), _render_layers(sp<BoxBundle>::make<RenderLayerBundle>(_stub))
+Arena::Arena(sp<ResourceLoader> resourceLoader, sp<Boolean> discarded, sp<Renderer> renderer, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
+    : _stub(sp<Stub>::make(std::move(resourceLoader), std::move(discarded), std::move(renderer), std::move(renderLayers), std::move(layers))), _layers(sp<BoxBundle>::make<LayerBundle>(_stub)), _render_layers(sp<BoxBundle>::make<RenderLayerBundle>(_stub))
 {
+}
+
+Arena::~Arena()
+{
+    discard();
+}
+
+void Arena::discard() const
+{
+    _stub->_discarded->discard();
 }
 
 const sp<BoxBundle>& Arena::layers() const
@@ -101,7 +114,13 @@ void Arena::onPoll(Wirable::WiringContext& context, const document& component)
     {
         sp<Layer> layer = _stub->getLayer(layerName);
         CHECK(layer, "Layer(%s) not found", layerName.c_str());
-        context.setComponent(std::move(layer));
+        context.setInterface(std::move(layer));
+    }
+    if(const String renderLayerName = Documents::getAttribute(component, "render-layer-name"))
+    {
+        sp<RenderLayer> renderLayer = _stub->getRenderLayer(renderLayerName);
+        CHECK(renderLayer, "RenderLayer(%s) not found", renderLayerName.c_str());
+        context.setInterface(std::move(renderLayer));
     }
 }
 

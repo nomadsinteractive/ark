@@ -1,7 +1,6 @@
 #include "renderer/inf/model_loader.h"
 
 #include "renderer/base/pipeline_bindings.h"
-#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/texture.h"
 
 namespace ark {

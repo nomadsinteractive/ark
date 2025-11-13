@@ -64,14 +64,14 @@ sp<Vec2> Vec2Type::create(const float x, const float y)
     return wrap(sp<Vec2>::make<Vec2Impl>(x, y));
 }
 
-sp<Vec3> Vec2Type::extend(sp<Vec2> self, sp<Numeric> z)
+sp<Vec3> Vec2Type::extend(sp<Vec2> self, sp<Numeric> v)
 {
-    return sp<Vec3>::make<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Extend<V2, float>>>(std::move(self), std::move(z));
+    return sp<Vec3>::make<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Extend<V2, float>>>(std::move(self), std::move(v));
 }
 
-sp<Vec4> Vec2Type::extend(sp<Vec2> self, sp<Vec2> z)
+sp<Vec4> Vec2Type::extend(sp<Vec2> self, sp<Vec2> v)
 {
-    return sp<Vec4>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Extend<V2, V2>>>(std::move(self), std::move(z));
+    return sp<Vec4>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Extend<V2, V2>>>(std::move(self), std::move(v));
 }
 
 sp<Vec2> Vec2Type::fence(sp<Vec2> self, sp<Vec3> plane, sp<Observer> observer)

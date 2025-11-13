@@ -128,9 +128,9 @@ public:
     static sp<Vec2> wrapped(const sp<Vec2>& self);
 **/
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> extend(sp<Vec2> self, sp<Numeric> z);
+    static sp<Vec3> extend(sp<Vec2> self, sp<Numeric> v);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> extend(sp<Vec2> self, sp<Vec2> z);
+    static sp<Vec4> extend(sp<Vec2> self, sp<Vec2> v);
 //  [[script::bindings::classmethod]]
     static sp<Vec2> fence(sp<Vec2> self, sp<Vec3> plane, sp<Observer> observer);
 //  [[script::bindings::classmethod]]

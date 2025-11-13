@@ -218,7 +218,7 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
     if(auto tags = context.getComponent<Tags>())
         _tags = std::move(tags);
 
-    if(const auto layer = context.getComponent<Layer>())
+    if(const auto layer = context.getInterface<Layer>())
     {
         layer->add(self.as<RenderObject>(), nullptr, nullptr, context.getEnum<enums::InsertPosition>(enums::InsertPosition::INSERT_POSITION_BACK));
 

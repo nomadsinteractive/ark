@@ -1320,7 +1320,7 @@ class Vec2(_Var):
     def sod(self, s0, f: float, z: float = 1, r: float = 0, t: Optional[Numeric] = None) -> Self:
         pass
 
-    def extend(self, v):
+    def extend(self, v: TYPE_VEC2 | TYPE_NUMERIC):
         pass
 
     def __add__(self, other: TYPE_VEC2 | TYPE_VEC3 | TYPE_VEC4) -> Self:
@@ -2059,7 +2059,7 @@ class Layer:
 
 
 class Arena:
-    def __init__(self, resource_loader: ResourceLoader, renderer: Optional[Renderer] = None, render_layers: dict[str, RenderLayer] = None, layers: dict[str, Layer] = None):
+    def __init__(self, resource_loader: ResourceLoader, discarded: Optional[Boolean] = None, renderer: Optional[Renderer] = None, render_layers: dict[str, RenderLayer] = None, layers: dict[str, Layer] = None):
         pass
 
     @property
@@ -2739,7 +2739,7 @@ class Text:
     def scale(self, scale: Optional[Vec2]):
         pass
 
-    def show(self, discarded: Optional[TYPE_BOOLEAN] = None):
+    def show(self, discarded: Optional[TYPE_BOOLEAN] = None, render_layer: Optional[RenderLayer] = None):
         pass
 
     def discard(self):

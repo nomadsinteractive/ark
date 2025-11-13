@@ -472,7 +472,7 @@ struct Text::Content {
     void createContent(const std::wstring& text)
     {
         _glyphs = _glyph_maker->makeGlyphs(text);
-        _layout_chars = toLayoutCharacters(_glyphs, _render_layer->modelLoader());
+        _layout_chars = toLayoutCharacters(_glyphs, _layer_context->modelLoader());
         createLayerContent();
     }
 
@@ -487,10 +487,7 @@ struct Text::Content {
 
     void updateLayoutContent()
     {
-        if(_layer_context)
-            _layer_context->clear();
-        else
-            _layer_context = _render_layer->makeLayerContext(nullptr, _position.toVar(), nullptr, nullptr);
+        _layer_context->clear();
 
         Layout::Hierarchy hierarchy = makeHierarchy();
         DASSERT(_render_objects.size() == hierarchy._child_nodes.size());
@@ -579,7 +576,7 @@ void Text::onWire(const WiringContext& context, const Box& self)
     else if(sp<Vec3> translation = context.getComponent<Translation>(); translation && !_content->_position)
         setPosition(std::move(translation));
 
-    show(context.getComponent<Discarded>());
+    show(context.getComponent<Discarded>(), context.getInterface<RenderLayer>());
 }
 
 const Vector<sp<RenderObject>>& Text::contents() const
@@ -628,13 +625,17 @@ void Text::setText(std::wstring text) const
     _content->setText(std::move(text));
 }
 
-void Text::show(sp<Boolean> discarded)
+void Text::show(sp<Boolean> discarded, const sp<RenderLayer>& renderLayer)
 {
     discard();
 
+    const sp<RenderLayer>& rl = renderLayer ? renderLayer : _content->_render_layer;
+    CHECK(rl, "Must specify text's RenderLayer");
+    _content->_layer_context = rl->makeLayerContext(nullptr, _content->_position.toVar(), nullptr, discarded);
+
     _content->update(Timestamp::now());
     _render_batch = sp<RenderBatch>::make<RenderBatchContent>(_content, discarded ? std::move(discarded) : sp<Boolean>::make<BooleanByWeakRef<Content>>(_content, 0));
-    _content->_render_layer->addRenderBatch(_render_batch);
+    rl->addRenderBatch(_render_batch);
 }
 
 void Text::discard()
@@ -645,7 +646,7 @@ void Text::discard()
 }
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _text(factory.getBuilder<StringVar>(manifest, constants::TEXT)), _font(factory.getBuilder<Font>(manifest, constants::FONT)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)),
+    : _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _text(factory.getBuilder<StringVar>(manifest, constants::TEXT)), _font(factory.getBuilder<Font>(manifest, constants::FONT)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)),
       _layout_param(factory.getBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)), _scale(factory.getBuilder<Vec2>(manifest, constants::SCALE)), _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
       _line_height(factory.getIBuilder<LayoutLength>(manifest, "line-height"), LayoutLength(100.0f, LayoutLength::LENGTH_TYPE_PERCENTAGE)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
@@ -655,7 +656,7 @@ sp<Text> Text::BUILDER::build(const Scope& args)
 {
     sp<GlyphMaker> glyphMaker = _glyph_maker.build(args);
     float letterSpacing = _letter_spacing ? _letter_spacing.build(args)->val() : 0.0f;
-    return sp<Text>::make(_render_layer->build(args), _text.build(args), _position.build(args), _layout_param.build(args), _scale.build(args), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerFont>(_font.build(args)), letterSpacing, _line_height.build(args), _line_indent);
+    return sp<Text>::make(_render_layer.build(args), _text.build(args), _position.build(args), _layout_param.build(args), _scale.build(args), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerFont>(_font.build(args)), letterSpacing, _line_height.build(args), _line_indent);
 }
 
 Text::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)

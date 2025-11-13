@@ -19,7 +19,7 @@ public:
 
 private:
     sp<ModelLoader> _delegate;
-    std::unordered_map<int32_t, sp<Model>> _cached_models;
+    HashMap<int32_t, sp<Model>> _cached_models;
 };
 
 }
