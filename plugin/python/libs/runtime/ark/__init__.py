@@ -1673,7 +1673,7 @@ class Node:
 
 
 class Boundaries:
-    def __init__(self, aabb_min: Optional[TYPE_VEC3], aabb_max: Optional[TYPE_VEC3], size: Optional["Size"]):
+    def __init__(self, aabb_min: Optional[TYPE_VEC3], aabb_max: Optional[TYPE_VEC3], center: Optional[TYPE_VEC3] = None, size: Optional[TYPE_VEC3] = None):
         pass
 
     @property
@@ -1691,6 +1691,9 @@ class Boundaries:
     @property
     def center(self) -> Vec3:
         return 0, 0, 0
+
+    def freeze(self) -> Self:
+        return self
 
 
 class Vertices:

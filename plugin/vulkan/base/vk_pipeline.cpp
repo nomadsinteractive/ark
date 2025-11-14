@@ -177,7 +177,7 @@ VkPipelineDepthStencilStateCreateInfo makeDepthStencilState(const PipelineDescri
 
     if(traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
     {
-        const PipelineDescriptor::TraitDepthTest& depthTest = traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)._depth_test;
+        const PipelineDescriptor::TraitDepthTest& depthTest = std::get<PipelineDescriptor::TraitDepthTest>(traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST));
         state.depthTestEnable = depthTest._enabled;
         state.depthWriteEnable = depthTest._write_enabled;
         state.depthCompareOp = VKUtil::toCompareOp(depthTest._func);
@@ -186,7 +186,7 @@ VkPipelineDepthStencilStateCreateInfo makeDepthStencilState(const PipelineDescri
     if(traits.has(PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST))
     {
         state.stencilTestEnable = true;
-        const PipelineDescriptor::TraitStencilTest& stencilTest = traits.at(PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)._stencil_test;
+        const PipelineDescriptor::TraitStencilTest& stencilTest = std::get<PipelineDescriptor::TraitStencilTest>(traits.at(PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST));
         if(stencilTest._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && stencilTest._front._type == stencilTest._back._type)
             state.front = state.back = makeStencilState(stencilTest._front);
         else
@@ -204,7 +204,7 @@ VkPipelineRasterizationStateCreateInfo makeRasterizationState(const PipelineDesc
 {
     if(traits.has(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST))
     {
-        const PipelineDescriptor::TraitCullFaceTest& cullFaceTest = traits.at(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)._cull_face_test;
+        const PipelineDescriptor::TraitCullFaceTest& cullFaceTest = std::get<PipelineDescriptor::TraitCullFaceTest>(traits.at(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST));
         return vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE,
                 VKUtil::toFrontFace(cullFaceTest._front_face), 0);
@@ -223,16 +223,16 @@ VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const Pipeline
     cbaState.colorBlendOp = VK_BLEND_OP_ADD;
     if(traits.has(PipelineDescriptor::TRAIT_TYPE_BLEND))
     {
-        const PipelineDescriptor::TraitConfigure& tm = traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND);
-        cbaState.blendEnable = tm._blend._enabled;
-        if(tm._blend._src_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.srcColorBlendFactor = toBlendFactor(tm._blend._src_rgb_factor);
-        if(tm._blend._dst_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.dstColorBlendFactor = toBlendFactor(tm._blend._dst_rgb_factor);
-        if(tm._blend._src_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.srcAlphaBlendFactor = toBlendFactor(tm._blend._src_alpha_factor);
-        if(tm._blend._dst_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.dstAlphaBlendFactor = toBlendFactor(tm._blend._dst_alpha_factor);
+        const PipelineDescriptor::TraitBlend& blend = std::get<PipelineDescriptor::TraitBlend>(traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND));
+        cbaState.blendEnable = blend._enabled;
+        if(blend._src_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.srcColorBlendFactor = toBlendFactor(blend._src_rgb_factor);
+        if(blend._dst_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.dstColorBlendFactor = toBlendFactor(blend._dst_rgb_factor);
+        if(blend._src_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.srcAlphaBlendFactor = toBlendFactor(blend._src_alpha_factor);
+        if(blend._dst_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.dstAlphaBlendFactor = toBlendFactor(blend._dst_alpha_factor);
     }
     return cbaState;
 }

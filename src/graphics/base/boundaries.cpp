@@ -54,12 +54,12 @@ Boundaries::Boundaries(sp<Vec3> position, sp<Vec3> extent)
 }
 
 Boundaries::Boundaries(const V3& aabbMin, const V3& aabbMax)
-    : Boundaries(sp<Vec3>::make<Vec3::Const>(aabbMin), sp<Vec3>::make<Vec3::Const>(aabbMax), sp<Vec3>::make<Vec3::Const>(aabbMax - aabbMin))
+    : Boundaries(sp<Vec3>::make<Vec3::Const>(aabbMin), sp<Vec3>::make<Vec3::Const>(aabbMax), sp<Vec3>::make<Vec3::Const>((aabbMin + aabbMax) * 0.5f), sp<Vec3>::make<Vec3::Const>(aabbMax - aabbMin))
 {
 }
 
-Boundaries::Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax, sp<Vec3> size)
-    : _aabb_min(std::move(aabbMin)), _aabb_max(std::move(aabbMax)), _center(Vec3Type::mul(Vec3Type::add(_aabb_min, _aabb_max), 0.5f)),
+Boundaries::Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax, sp<Vec3> center, sp<Vec3> size)
+    : _aabb_min(std::move(aabbMin)), _aabb_max(std::move(aabbMax)), _center(center ? std::move(center) : Vec3Type::mul(Vec3Type::add(_aabb_min, _aabb_max), 0.5f)),
       _size(size ? std::move(size) : Vec3Type::sub(_aabb_max, _aabb_min))
 {
 }
@@ -87,7 +87,12 @@ const sp<Vec3>& Boundaries::aabbMax() const
 sp<Boundaries> Boundaries::translate(sp<Vec3> xyz) const
 {
     sp<Vec3> aabbMin = Vec3Type::add(_aabb_min, xyz);
-    return sp<Boundaries>::make(std::move(aabbMin), Vec3Type::add(_aabb_max, std::move(xyz)), _size);
+    return sp<Boundaries>::make(std::move(aabbMin), Vec3Type::add(_aabb_max, std::move(xyz)), nullptr, _size);
+}
+
+sp<Boundaries> Boundaries::freeze() const
+{
+    return sp<Boundaries>::make(Vec3Type::freeze(_aabb_min), Vec3Type::freeze(_aabb_max), Vec3Type::freeze(_center), Vec3Type::freeze(_size));
 }
 
 V2 Boundaries::toPivotPosition(const V2& size) const

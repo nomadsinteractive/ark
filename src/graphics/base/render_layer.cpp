@@ -41,7 +41,7 @@ private:
 
 RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)
     : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _visible(std::move(visible), true),
-      _discarded(std::move(discarded), false), _varyings(std::move(varyings)), _scissor(std::move(scissor)), _drawing_context_composer(_model_loader->makeRenderCommandComposer(_shader)),
+      _discarded(std::move(discarded), false), _varyings(std::move(varyings)), _scissor(scissor ? std::move(scissor) : sp<Vec4>(_shader->pipelineDesciptor()->scissor())), _drawing_context_composer(_model_loader->makeRenderCommandComposer(_shader)),
       _pipeline_bindings(_drawing_context_composer->makePipelineBindings(_shader, _render_controller, _model_loader->renderMode())), _stride(_shader->layout()->getStreamLayout(0).stride())
 {
     _model_loader->bind(_pipeline_bindings);

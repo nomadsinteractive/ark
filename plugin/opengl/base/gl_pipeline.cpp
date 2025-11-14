@@ -23,6 +23,7 @@
 #include "opengl/util/gl_util.h"
 
 #include "platform/platform.h"
+#include "renderer/base/pipeline_descriptor.h"
 
 namespace ark::plugin::opengl {
 
@@ -753,27 +754,27 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, const uint32_t version, Map
     for(const auto& [k, v] : bindings.pipelineDescriptor()->configuration()._traits)
     {
         if(k == PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)
-            _draw_decorators.push_back(sp<DrawDecorator>::make<GLCullFaceTest>(v._cull_face_test));
+            _draw_decorators.push_back(sp<DrawDecorator>::make<GLCullFaceTest>(std::get<PipelineDescriptor::TraitCullFaceTest>(v)));
         else if(k == PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)
-            _draw_decorators.push_back(sp<DrawDecorator>::make<GLDepthTest>(v._depth_test));
+            _draw_decorators.push_back(sp<DrawDecorator>::make<GLDepthTest>(std::get<PipelineDescriptor::TraitDepthTest>(v)));
         else if(k == PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)
         {
             Vector<sp<DrawDecorator>> delegate;
-            const PipelineDescriptor::TraitStencilTest& test = v._stencil_test;
-            if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && test._front._type == test._back._type)
-                delegate.push_back(sp<DrawDecorator>::make<GLStencilTestSeparate>(test._front));
+            const PipelineDescriptor::TraitStencilTest& stencilTest = std::get<PipelineDescriptor::TraitStencilTest>(v);
+            if(stencilTest._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && stencilTest._front._type == stencilTest._back._type)
+                delegate.push_back(sp<DrawDecorator>::make<GLStencilTestSeparate>(stencilTest._front));
             else
             {
-                if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_FRONT)
-                    delegate.push_back(sp<DrawDecorator>::make<GLStencilTestSeparate>(test._front));
-                if(test._back._type == PipelineDescriptor::FRONT_FACE_TYPE_BACK)
-                    delegate.push_back(sp<DrawDecorator>::make<GLStencilTestSeparate>(test._back));
+                if(stencilTest._front._type == PipelineDescriptor::FRONT_FACE_TYPE_FRONT)
+                    delegate.push_back(sp<DrawDecorator>::make<GLStencilTestSeparate>(stencilTest._front));
+                if(stencilTest._back._type == PipelineDescriptor::FRONT_FACE_TYPE_BACK)
+                    delegate.push_back(sp<DrawDecorator>::make<GLStencilTestSeparate>(stencilTest._back));
             }
             DASSERT(delegate.size() > 0);
             _draw_decorators.push_back(sp<DrawDecorator>::make<GLStencilTest>(std::move(delegate)));
         }
         else if(k == PipelineDescriptor::TRAIT_TYPE_BLEND)
-            _draw_decorators.push_back(sp<DrawDecorator>::make<GLTraitBlend>(v._blend));
+            _draw_decorators.push_back(sp<DrawDecorator>::make<GLTraitBlend>(std::get<PipelineDescriptor::TraitBlend>(v)));
     }
 }
 

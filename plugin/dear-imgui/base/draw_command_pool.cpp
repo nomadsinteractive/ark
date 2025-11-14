@@ -11,19 +11,12 @@ namespace {
 const sp<PipelineDescriptor>& makePipelineBindingParameters(const sp<PipelineDescriptor>& pipelineDescriptor) {
     PipelineDescriptor::Configuration configuration = pipelineDescriptor->configuration();
     PipelineDescriptor::PipelineTraitTable& traits = configuration._traits;
+
     if(!traits.has(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST))
-    {
-        PipelineDescriptor::TraitConfigure configure;
-        configure._cull_face_test = PipelineDescriptor::TraitCullFaceTest{false, PipelineDescriptor::FRONT_FACE_DEFAULT};
-        traits.push_back(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, configure);
-    }
+        traits.push_back(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, {PipelineDescriptor::TraitCullFaceTest{false, PipelineDescriptor::FRONT_FACE_DEFAULT}});
     if(!traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
-    {
-        PipelineDescriptor::TraitConfigure configure;
-        configure._depth_test = PipelineDescriptor::TraitDepthTest{false, false, PipelineDescriptor::COMPARE_FUNC_DEFAULT};
-        traits.push_back(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST, configure);
-    }
-    traits.push_back(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST, {});
+        traits.push_back(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST, {PipelineDescriptor::TraitDepthTest{false, false, PipelineDescriptor::COMPARE_FUNC_DEFAULT}});
+    traits.push_back(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST, {PipelineDescriptor::TraitScissorTest{}});
     pipelineDescriptor->setConfiguration(std::move(configuration));
     return pipelineDescriptor;
 }

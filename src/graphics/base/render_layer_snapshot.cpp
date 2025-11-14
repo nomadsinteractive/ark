@@ -36,8 +36,11 @@ private:
 RenderLayerSnapshot::RenderLayerSnapshot(const RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub)
     : _stub(stub), _index_count(0), _vertices_dirty(false)
 {
-    if(_stub->_scissor && _stub->_scissor->update(renderRequest.tick()))
+    if(_stub->_scissor)
+    {
+        _stub->_scissor->update(renderRequest.tick());
         _scissor = Rect(_stub->_scissor->val());
+    }
 }
 
 sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator) const

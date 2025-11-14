@@ -14,7 +14,7 @@ public:
     Boundaries();
     Boundaries(sp<Vec3> position, sp<Vec3> extent);
 //  [[script::bindings::auto]]
-    Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax, sp<Vec3> size);
+    Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax, sp<Vec3> center = nullptr, sp<Vec3> size = nullptr);
     Boundaries(const V3& aabbMin, const V3& aabbMax);
 
 //  [[script::bindings::property]]
@@ -29,6 +29,8 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Boundaries> translate(sp<Vec3> xyz) const;
+//  [[script::bindings::auto]]
+    sp<Boundaries> freeze() const;
 
 //  [[script::bindings::auto]]
     V2 toPivotPosition(const V2& size) const;

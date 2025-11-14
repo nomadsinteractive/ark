@@ -115,15 +115,8 @@ public:
     struct TraitScissorTest {
     };
 
-    union TraitConfigure {
-        TraitDepthTest _depth_test;
-        TraitStencilTest _stencil_test;
-        TraitCullFaceTest _cull_face_test;
-        TraitScissorTest _scissor_test;
-        TraitBlend _blend;
-    };
-
-    typedef Table<TraitType, TraitConfigure> PipelineTraitTable;
+    typedef std::variant<TraitDepthTest, TraitStencilTest, TraitCullFaceTest, TraitScissorTest, TraitBlend> Trait;
+    typedef Table<TraitType, Trait> PipelineTraitTable;
 
     struct Configuration {
         PipelineTraitTable _traits;

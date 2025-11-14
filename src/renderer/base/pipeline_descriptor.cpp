@@ -32,18 +32,22 @@ PipelineDescriptor::TraitStencilTestSeparate loadStencilTestSeparate(const docum
     return face;
 }
 
-PipelineDescriptor::TraitConfigure toPipelineTraitMeta(const document& manifest)
+PipelineDescriptor::Trait toPipelineTrait(const document& manifest)
 {
-    PipelineDescriptor::TraitConfigure pipelineTrait;
     switch(Documents::ensureAttribute<PipelineDescriptor::TraitType>(manifest, constants::TYPE))
     {
         case PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST:
-            pipelineTrait._depth_test._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
-            pipelineTrait._depth_test._write_enabled = Documents::getAttribute<bool>(manifest, "write-enabled", pipelineTrait._depth_test._enabled);
-            pipelineTrait._depth_test._func = Documents::getAttribute<PipelineDescriptor::CompareFunc>(manifest, "func", PipelineDescriptor::COMPARE_FUNC_DEFAULT);
-            break;
+        {
+            const bool enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
+            const PipelineDescriptor::TraitDepthTest depthTest = {
+                enabled,
+            Documents::getAttribute<bool>(manifest, "write-enabled", enabled),
+            Documents::getAttribute<PipelineDescriptor::CompareFunc>(manifest, "func", PipelineDescriptor::COMPARE_FUNC_DEFAULT)
+            };
+            return {depthTest};
+        }
         case PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST: {
-            PipelineDescriptor::TraitStencilTest& stencilTest = pipelineTrait._stencil_test;
+            PipelineDescriptor::TraitStencilTest stencilTest;
             if(const Vector<document>& faces = manifest->children("face"); faces.empty())
                 stencilTest._front = stencilTest._back = loadStencilTestSeparate(manifest, true);
             else
@@ -56,23 +60,35 @@ PipelineDescriptor::TraitConfigure toPipelineTraitMeta(const document& manifest)
                     (face._type == PipelineDescriptor::FRONT_FACE_TYPE_FRONT ? stencilTest._front : stencilTest._back) = face;
                 }
             }
-            break;
+            return {stencilTest};
         }
         case PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST:
-            pipelineTrait._cull_face_test._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
-            pipelineTrait._cull_face_test._front_face = Documents::getAttribute<PipelineDescriptor::FrontFace>(manifest, "front-face", PipelineDescriptor::FRONT_FACE_DEFAULT);
-            break;
+        {
+            const PipelineDescriptor::TraitCullFaceTest cullFaceTest = {
+                Documents::getAttribute<bool>(manifest, "enabled", true),
+                Documents::getAttribute<PipelineDescriptor::FrontFace>(manifest, "front-face", PipelineDescriptor::FRONT_FACE_DEFAULT)
+            };
+            return {cullFaceTest};
+        }
         case PipelineDescriptor::TRAIT_TYPE_BLEND:
-            pipelineTrait._blend._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
-            pipelineTrait._blend._src_rgb_factor = Documents::getAttribute<PipelineDescriptor::BlendFactor>(manifest, "src-rgb", PipelineDescriptor::BLEND_FACTOR_DEFAULT);
-            pipelineTrait._blend._dst_rgb_factor = Documents::getAttribute<PipelineDescriptor::BlendFactor>(manifest, "dst-rgb", PipelineDescriptor::BLEND_FACTOR_DEFAULT);
-            pipelineTrait._blend._src_alpha_factor = Documents::getAttribute<PipelineDescriptor::BlendFactor>(manifest, "src-alpha", PipelineDescriptor::BLEND_FACTOR_DEFAULT);
-            pipelineTrait._blend._dst_alpha_factor = Documents::getAttribute<PipelineDescriptor::BlendFactor>(manifest, "dst-alpha", PipelineDescriptor::BLEND_FACTOR_DEFAULT);
-            break;
+        {
+            const PipelineDescriptor::TraitBlend blend = {
+                Documents::getAttribute<bool>(manifest, "enabled", true),
+                Documents::getAttribute<PipelineDescriptor::BlendFactor>(manifest, "src-rgb", PipelineDescriptor::BLEND_FACTOR_DEFAULT),
+                Documents::getAttribute<PipelineDescriptor::BlendFactor>(manifest, "dst-rgb", PipelineDescriptor::BLEND_FACTOR_DEFAULT),
+                Documents::getAttribute<PipelineDescriptor::BlendFactor>(manifest, "src-alpha", PipelineDescriptor::BLEND_FACTOR_DEFAULT),
+                Documents::getAttribute<PipelineDescriptor::BlendFactor>(manifest, "dst-alpha", PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            };
+            return {blend};
+        }
         case PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST:
-            break;
+        {
+            PipelineDescriptor::TraitScissorTest scissorTest = {
+            };
+            return {std::move(scissorTest)};
+        }
     }
-    return pipelineTrait;
+    return {};
 }
 
 String preprocess(const RenderEngineContext& renderEngineContext, const Map<String, String>& definitions, const String& source)
@@ -233,10 +249,15 @@ Vector<PipelineDescriptor::BindedTexture> PipelineDescriptor::makeBindingImages(
 }
 
 PipelineDescriptor::Configuration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _num_work_groups(factory.getBuilder<Vec3i>(manifest, "num-work-groups"))
+    : _num_work_groups(factory.getBuilder<Vec3i>(manifest, "num-work-groups"))
 {
     for(const document& i : manifest->children("trait"))
-        _traits.push_back(Documents::ensureAttribute<TraitType>(i, constants::TYPE), toPipelineTraitMeta(i));
+    {
+        const TraitType traitType = Documents::ensureAttribute<TraitType>(i, constants::TYPE);
+        _traits.push_back(traitType, toPipelineTrait(i));
+        if(traitType == TRAIT_TYPE_SCISSOR_TEST)
+            _scissor = factory.getBuilder<Vec4>(i, "scissor");
+    }
 }
 
 PipelineDescriptor::Configuration PipelineDescriptor::Configuration::BUILDER::build(const Scope& args) const
