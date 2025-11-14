@@ -12,11 +12,12 @@ const sp<PipelineDescriptor>& makePipelineBindingParameters(const sp<PipelineDes
     PipelineDescriptor::Configuration configuration = pipelineDescriptor->configuration();
     PipelineDescriptor::PipelineTraitTable& traits = configuration._traits;
 
-    if(!traits.has(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST))
-        traits.push_back(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, {PipelineDescriptor::TraitCullFaceTest{false, PipelineDescriptor::FRONT_FACE_DEFAULT}});
-    if(!traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
-        traits.push_back(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST, {PipelineDescriptor::TraitDepthTest{false, false, PipelineDescriptor::COMPARE_FUNC_DEFAULT}});
-    traits.push_back(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST, {PipelineDescriptor::TraitScissorTest{}});
+    if(!pipelineDescriptor->getTrait<PipelineDescriptor::TraitCullFaceTest>())
+        traits.emplace_back(PipelineDescriptor::TraitCullFaceTest{false, PipelineDescriptor::FRONT_FACE_DEFAULT});
+    if(!pipelineDescriptor->getTrait<PipelineDescriptor::TraitDepthTest>())
+        traits.emplace_back(PipelineDescriptor::TraitDepthTest{false, false, PipelineDescriptor::COMPARE_FUNC_DEFAULT});
+    traits.emplace_back(PipelineDescriptor::TraitScissorTest{true});
+
     pipelineDescriptor->setConfiguration(std::move(configuration));
     return pipelineDescriptor;
 }

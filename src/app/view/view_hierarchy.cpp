@@ -66,7 +66,7 @@ bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, const uint3
     bool hierarchyDirty = _timestamp.update(tick);
     if(const bool hierarchyChanged = updateHierarchy(); hierarchyChanged || hierarchyDirty)
     {
-        if(_layout && (hierarchyChanged || !_updatable_layout))
+        if(_layout)
         {
             _updatable_layout = _layout->inflate(toLayoutHierarchy(layoutNode));
             _timestamp.markClean();
@@ -81,9 +81,13 @@ bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, const uint3
 
 const Vector<sp<View>>& ViewHierarchy::updateChildren()
 {
-    for(sp<View>& i : _incremental)
-        _children.push_back(std::move(i));
-    _incremental.clear();
+    if(!_incremental.empty())
+    {
+        _timestamp.markDirty();
+        for(sp<View>& i : _incremental)
+            _children.push_back(std::move(i));
+        _incremental.clear();
+    }
     return _children;
 }
 

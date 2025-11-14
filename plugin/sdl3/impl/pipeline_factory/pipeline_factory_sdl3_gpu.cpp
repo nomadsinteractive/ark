@@ -305,8 +305,8 @@ public:
                 true,
                 false
             };
-            const auto& traits = _pipeline_descriptor->configuration()._traits;
-            const SDL_GPUColorTargetBlendState blendState = traits.has(PipelineDescriptor::TRAIT_TYPE_BLEND) ? toColorTargetBlendState(std::get<PipelineDescriptor::TraitBlend>(traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND))) : defaultBlendState;
+            const PipelineDescriptor::TraitBlend* blend = _pipeline_descriptor->getTrait<PipelineDescriptor::TraitBlend>();
+            const SDL_GPUColorTargetBlendState blendState = blend ? toColorTargetBlendState(*blend) : defaultBlendState;
 
             Uint32 numColorTargets = 0;
             SDL_GPUColorTargetDescription colorTargetDescriptions[8];

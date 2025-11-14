@@ -99,8 +99,8 @@ sp<Camera::Delegate> RendererFactoryVulkan::createCamera(const enums::Coordinate
 sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
     if(const sp<RenderLayer> renderLayer = renderer.asInstance<RenderLayer>())
-        if(const auto& traits = renderLayer->shader()->pipelineDesciptor()->configuration()._traits; traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
-            configure._depth_test_write_enabled = std::get<PipelineDescriptor::TraitDepthTest>(traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))._write_enabled;
+        if(const PipelineDescriptor::TraitDepthTest* depthTest = renderLayer->shader()->pipelineDesciptor()->getTrait<PipelineDescriptor::TraitDepthTest>())
+            configure._depth_test_write_enabled = depthTest->_write_enabled;
 
     sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, Ark::instance().renderController()->recycler(), std::move(configure));
     sp<Renderer> fboRenderer = sp<Renderer>::make<VKFramebufferRenderer>(renderer, fbo);

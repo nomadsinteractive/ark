@@ -32,9 +32,9 @@ PipelineDescriptor::TraitStencilTestSeparate loadStencilTestSeparate(const docum
     return face;
 }
 
-PipelineDescriptor::Trait toPipelineTrait(const document& manifest)
+PipelineDescriptor::Trait toPipelineTrait(const PipelineDescriptor::TraitType traitType, const document& manifest)
 {
-    switch(Documents::ensureAttribute<PipelineDescriptor::TraitType>(manifest, constants::TYPE))
+    switch(traitType)
     {
         case PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST:
         {
@@ -84,6 +84,7 @@ PipelineDescriptor::Trait toPipelineTrait(const document& manifest)
         case PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST:
         {
             PipelineDescriptor::TraitScissorTest scissorTest = {
+                Documents::getAttribute<bool>(manifest, "dynamic", true)
             };
             return {std::move(scissorTest)};
         }
@@ -193,11 +194,6 @@ bool PipelineDescriptor::hasDivisors() const
     return _layout->streamLayouts().size() > 1;
 }
 
-bool PipelineDescriptor::hasTrait(const TraitType traitType) const
-{
-    return _configuration._traits.has(traitType);
-}
-
 void PipelineDescriptor::preCompile(GraphicsContext& graphicsContext)
 {
     if(_building_context)
@@ -254,7 +250,7 @@ PipelineDescriptor::Configuration::BUILDER::BUILDER(BeanFactory& factory, const 
     for(const document& i : manifest->children("trait"))
     {
         const TraitType traitType = Documents::ensureAttribute<TraitType>(i, constants::TYPE);
-        _traits.push_back(traitType, toPipelineTrait(i));
+        _traits.push_back(toPipelineTrait(traitType, i));
         if(traitType == TRAIT_TYPE_SCISSOR_TEST)
             _scissor = factory.getBuilder<Vec4>(i, "scissor");
     }

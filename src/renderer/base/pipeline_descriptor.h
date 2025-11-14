@@ -113,10 +113,11 @@ public:
     };
 
     struct TraitScissorTest {
+        bool _dynamic;
     };
 
     typedef std::variant<TraitDepthTest, TraitStencilTest, TraitCullFaceTest, TraitScissorTest, TraitBlend> Trait;
-    typedef Table<TraitType, Trait> PipelineTraitTable;
+    typedef Vector<Trait> PipelineTraitTable;
 
     struct Configuration {
         PipelineTraitTable _traits;
@@ -168,7 +169,13 @@ public:
     Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
 
     bool hasDivisors() const;
-    bool hasTrait(TraitType traitType) const;
+
+    template<typename T> const T* getTrait() const {
+        for(const Trait& i : _configuration._traits)
+            if(const T* ptr = std::get_if<T>(&i))
+                return ptr;
+        return nullptr;
+    }
 
 private:
     Camera _camera;

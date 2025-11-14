@@ -167,7 +167,7 @@ VkBlendFactor toBlendFactor(PipelineDescriptor::BlendFactor blendFactor)
     return VK_BLEND_FACTOR_ZERO;
 }
 
-VkPipelineDepthStencilStateCreateInfo makeDepthStencilState(const PipelineDescriptor::PipelineTraitTable& traits)
+VkPipelineDepthStencilStateCreateInfo makeDepthStencilState(const PipelineDescriptor& pipelineDescriptor)
 {
     VkPipelineDepthStencilStateCreateInfo state = {VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO};
     state.depthTestEnable = VK_TRUE;
@@ -175,44 +175,39 @@ VkPipelineDepthStencilStateCreateInfo makeDepthStencilState(const PipelineDescri
     state.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     state.stencilTestEnable = false;
 
-    if(traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
+    if(const PipelineDescriptor::TraitDepthTest* depthTest = pipelineDescriptor.getTrait<PipelineDescriptor::TraitDepthTest>())
     {
-        const PipelineDescriptor::TraitDepthTest& depthTest = std::get<PipelineDescriptor::TraitDepthTest>(traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST));
-        state.depthTestEnable = depthTest._enabled;
-        state.depthWriteEnable = depthTest._write_enabled;
-        state.depthCompareOp = VKUtil::toCompareOp(depthTest._func);
+        state.depthTestEnable = depthTest->_enabled;
+        state.depthWriteEnable = depthTest->_write_enabled;
+        state.depthCompareOp = VKUtil::toCompareOp(depthTest->_func);
     }
 
-    if(traits.has(PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST))
+    if(const PipelineDescriptor::TraitStencilTest* stencilTest = pipelineDescriptor.getTrait<PipelineDescriptor::TraitStencilTest>())
     {
         state.stencilTestEnable = true;
-        const PipelineDescriptor::TraitStencilTest& stencilTest = std::get<PipelineDescriptor::TraitStencilTest>(traits.at(PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST));
-        if(stencilTest._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && stencilTest._front._type == stencilTest._back._type)
-            state.front = state.back = makeStencilState(stencilTest._front);
+        if(stencilTest->_front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && stencilTest->_front._type == stencilTest->_back._type)
+            state.front = state.back = makeStencilState(stencilTest->_front);
         else
         {
-            if(stencilTest._front._type == PipelineDescriptor::FRONT_FACE_TYPE_FRONT)
-                state.front = makeStencilState(stencilTest._front);
-            if(stencilTest._back._type == PipelineDescriptor::FRONT_FACE_TYPE_BACK)
-                state.back = makeStencilState(stencilTest._back);
+            if(stencilTest->_front._type == PipelineDescriptor::FRONT_FACE_TYPE_FRONT)
+                state.front = makeStencilState(stencilTest->_front);
+            if(stencilTest->_back._type == PipelineDescriptor::FRONT_FACE_TYPE_BACK)
+                state.back = makeStencilState(stencilTest->_back);
         }
     }
     return state;
 }
 
-VkPipelineRasterizationStateCreateInfo makeRasterizationState(const PipelineDescriptor::PipelineTraitTable& traits)
+VkPipelineRasterizationStateCreateInfo makeRasterizationState(const PipelineDescriptor& pipelineDescriptor)
 {
-    if(traits.has(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST))
-    {
-        const PipelineDescriptor::TraitCullFaceTest& cullFaceTest = std::get<PipelineDescriptor::TraitCullFaceTest>(traits.at(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST));
-        return vks::initializers::pipelineRasterizationStateCreateInfo(
-                VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE,
-                VKUtil::toFrontFace(cullFaceTest._front_face), 0);
-    }
+    if(const PipelineDescriptor::TraitCullFaceTest* cullFaceTest = pipelineDescriptor.getTrait<PipelineDescriptor::TraitCullFaceTest>())
+        return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, cullFaceTest->_enabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE,
+                                                                       VKUtil::toFrontFace(cullFaceTest->_front_face), 0);
+
     return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 }
 
-VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const PipelineDescriptor::PipelineTraitTable& traits)
+VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const PipelineDescriptor& pipelineDescriptor)
 {
     VkPipelineColorBlendAttachmentState cbaState = vks::initializers::pipelineColorBlendAttachmentState(0xf, true);
     cbaState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
@@ -221,18 +216,17 @@ VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const Pipeline
     cbaState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
     cbaState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     cbaState.colorBlendOp = VK_BLEND_OP_ADD;
-    if(traits.has(PipelineDescriptor::TRAIT_TYPE_BLEND))
+    if(const PipelineDescriptor::TraitBlend* blend = pipelineDescriptor.getTrait<PipelineDescriptor::TraitBlend>())
     {
-        const PipelineDescriptor::TraitBlend& blend = std::get<PipelineDescriptor::TraitBlend>(traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND));
-        cbaState.blendEnable = blend._enabled;
-        if(blend._src_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.srcColorBlendFactor = toBlendFactor(blend._src_rgb_factor);
-        if(blend._dst_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.dstColorBlendFactor = toBlendFactor(blend._dst_rgb_factor);
-        if(blend._src_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.srcAlphaBlendFactor = toBlendFactor(blend._src_alpha_factor);
-        if(blend._dst_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.dstAlphaBlendFactor = toBlendFactor(blend._dst_alpha_factor);
+        cbaState.blendEnable = blend->_enabled;
+        if(blend->_src_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.srcColorBlendFactor = toBlendFactor(blend->_src_rgb_factor);
+        if(blend->_dst_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.dstColorBlendFactor = toBlendFactor(blend->_dst_rgb_factor);
+        if(blend->_src_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.srcAlphaBlendFactor = toBlendFactor(blend->_src_alpha_factor);
+        if(blend->_dst_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.dstAlphaBlendFactor = toBlendFactor(blend->_dst_alpha_factor);
     }
     return cbaState;
 }
@@ -504,15 +498,13 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
 
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vks::initializers::pipelineInputAssemblyStateCreateInfo(VKUtil::toPrimitiveTopology(_draw_mode), 0, VK_FALSE);
 
-    const PipelineDescriptor::PipelineTraitTable& traits = pipelineDescriptor.configuration()._traits;
-    const VkPipelineRasterizationStateCreateInfo rasterizationState = makeRasterizationState(traits);
-    const VkPipelineDepthStencilStateCreateInfo depthStencilState = makeDepthStencilState(traits);
-    const VkPipelineColorBlendAttachmentState colorBlendAttachmentState = makeColorBlendAttachmentState(traits);
+    const VkPipelineRasterizationStateCreateInfo rasterizationState = makeRasterizationState(pipelineDescriptor);
+    const VkPipelineDepthStencilStateCreateInfo depthStencilState = makeDepthStencilState(pipelineDescriptor);
+    const VkPipelineColorBlendAttachmentState colorBlendAttachmentState = makeColorBlendAttachmentState(pipelineDescriptor);
     const VkPipelineMultisampleStateCreateInfo multisampleState = vks::initializers::pipelineMultisampleStateCreateInfo(VK_SAMPLE_COUNT_1_BIT, 0);
 
     Vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT };
-
-    if(pipelineDescriptor.hasTrait(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST))
+    if(const PipelineDescriptor::TraitScissorTest* scissorTest = pipelineDescriptor.getTrait<PipelineDescriptor::TraitScissorTest>(); scissorTest && scissorTest->_dynamic)
         dynamicStateEnables.push_back(VK_DYNAMIC_STATE_SCISSOR);
     const VkPipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables.data(), static_cast<uint32_t>(dynamicStateEnables.size()), 0);
 
@@ -575,7 +567,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, _descriptor_sets.size(), _descriptor_sets.data(), 0, nullptr);
 
-    VkDeviceSize offsets = 0;
+    const VkDeviceSize offsets = 0;
     VkBuffer vkVertexBuffer = (VkBuffer)(drawingContext._vertices.id());
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, &offsets);
     if(drawingContext._indices)
@@ -583,12 +575,16 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
 
     if(const Optional<Rect>& scissor = drawingContext._scissor)
     {
-        CHECK(drawingContext._bindings->pipelineDescriptor()->hasTrait(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST), "Pipeline has no scissor_test trait set");
+        const PipelineDescriptor::TraitScissorTest* scissorTest = drawingContext._bindings->pipelineDescriptor()->getTrait<PipelineDescriptor::TraitScissorTest>();
+        CHECK(scissorTest && scissorTest->_dynamic, "Pipeline has no scissor_test trait set");
         const VkRect2D vkScissor{{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}};
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
+        _baked_renderer->draw(graphicsContext, drawingContext, commandBuffer);
+        const VkRect2D vkPostScissor({{0, 0}, {state.renderPassPhrase()->resolution().width, state.renderPassPhrase()->resolution().height}});
+        vkCmdSetScissor(commandBuffer, 0, 1, &vkPostScissor);
     }
-
-    _baked_renderer->draw(graphicsContext, drawingContext, commandBuffer);
+    else
+        _baked_renderer->draw(graphicsContext, drawingContext, commandBuffer);
 }
 
 void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& computeContext)

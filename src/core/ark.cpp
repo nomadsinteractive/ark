@@ -109,7 +109,6 @@ sp<RendererFactory> chooseRenderFactory(const Vector<sp<RendererFactory>>& rende
     for(const sp<RendererFactory>& i : rendererFactories)
         if(i->features()._supported_backends.contains(renderingBackend))
             return i;
-    FATAL("Unable to find a suitable RendererFactory for: %d", renderingBackend);
     return nullptr;
 }
 
@@ -140,15 +139,16 @@ sp<RenderEngine> doCreateRenderEngine(BeanFactory& beanFactory, const Applicatio
         case enums::RENDERER_VERSION_OPENGL_44:
         case enums::RENDERER_VERSION_OPENGL_45:
         case enums::RENDERER_VERSION_OPENGL_46:
-            return sp<RenderEngine>::make(rendererInUse, chooseRenderFactory(rendererFactories, enums::RENDERING_BACKEND_BIT_OPENGL));
+            if(sp<RendererFactory> rendererFactory = chooseRenderFactory(rendererFactories, enums::RENDERING_BACKEND_BIT_OPENGL))
+                return sp<RenderEngine>::make(rendererInUse, std::move(rendererFactory));
         case enums::RENDERER_VERSION_VULKAN_11:
         case enums::RENDERER_VERSION_VULKAN_12:
         case enums::RENDERER_VERSION_VULKAN_13:
-            return sp<RenderEngine>::make(rendererInUse, chooseRenderFactory(rendererFactories, enums::RENDERING_BACKEND_BIT_VULKAN));
+            if(sp<RendererFactory> rendererFactory = chooseRenderFactory(rendererFactories, enums::RENDERING_BACKEND_BIT_VULKAN))
+                return sp<RenderEngine>::make(rendererInUse, std::move(rendererFactory));
         default:
             break;
     }
-    FATAL("Unknown engine type: %d", renderer._version);
     return nullptr;
 }
 

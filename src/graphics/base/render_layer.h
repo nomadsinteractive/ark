@@ -27,6 +27,7 @@ private:
         OptionalVar<Boolean> _discarded;
         sp<Varyings> _varyings;
         sp<Vec4> _scissor;
+        bool _is_dynamic_scissor;
 
         sp<DrawingContextComposer> _drawing_context_composer;
         sp<PipelineBindings> _pipeline_bindings;
