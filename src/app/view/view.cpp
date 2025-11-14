@@ -30,8 +30,8 @@ struct View::Stub {
 };
 
 struct View::Node final : Updatable {
-    Node(sp<LayoutParam> layoutParam, String name, sp<Vec3> position, sp<Boolean> discarded)
-        : _name(std::move(name)), _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : sp<ViewHierarchy>()), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _position(std::move(position)),
+    Node(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded)
+        : _name(std::move(name)), _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : sp<ViewHierarchy>()), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))),
           _discarded(std::move(discarded), false), _top_view(false)
     {
     }
@@ -39,11 +39,9 @@ struct View::Node final : Updatable {
     bool update(const uint32_t tick) override
     {
         if(_hierarchy)
-        {
-            const bool positionDirty = _position.update(tick);
-            return _hierarchy->updateLayout(_layout_node, tick) || positionDirty;
-        }
-        return UpdatableUtil::update(tick, _layout_node->_layout_param, _position, _discarded);
+            return _hierarchy->updateLayout(_layout_node, tick);
+
+        return UpdatableUtil::update(tick, _layout_node->_layout_param, _discarded);
     }
 
     void discard()
@@ -57,25 +55,13 @@ struct View::Node final : Updatable {
         return _discarded.val() || (parentStub ? parentStub->_node->isDiscarded() : !_top_view);
     }
 
-    V3 getTopViewOffsetPosition(const bool includePaddings) const
+    V3 getTopViewOffsetPosition() const
     {
         const Layout::Node& layoutNode = _layout_node;
         const V3 layoutOffset(layoutNode.offsetPosition(), 0);
         const sp<Stub> parentStub = _parent_stub.lock();
-        V3 offset = (parentStub ? parentStub->_node->getTopViewOffsetPosition(false) : getOffsetPosition()) + layoutOffset;
-        if(includePaddings)
-            offset += V3(layoutNode.paddings().w(), layoutNode.paddings().x(), 0);
+        const V3 offset = (parentStub ? parentStub->_node->getTopViewOffsetPosition() + layoutOffset : layoutOffset);
         return layoutNode._layout_param->offset().val() + offset;
-    }
-
-    V3 getOffsetPosition() const
-    {
-        if(!_position)
-            return V3();
-
-        const V3 position = _position.val();
-        const V2 layoutSize = _layout_node->size().val();
-        return {position.x() - layoutSize.x() / 2, position.y() - layoutSize.y() / 2, position.z()};
     }
 
     sp<Layout::Node> getTopViewLayoutNode() const
@@ -96,8 +82,6 @@ struct View::Node final : Updatable {
     String _name;
     sp<ViewHierarchy> _hierarchy;
     sp<Layout::Node> _layout_node;
-
-    OptionalVar<Vec3> _position;
     OptionalVar<Boolean> _discarded;
 
     WeakPtr<View::Stub> _parent_stub;
@@ -168,7 +152,7 @@ public:
 
         const Layout::Node& layoutNode = _hierarchy->_layout_node;
         const V2& size = layoutNode.size();
-        const V3 offsetPosition = _hierarchy->getTopViewOffsetPosition(false);
+        const V3 offsetPosition = _hierarchy->getTopViewOffsetPosition();
         const float x = offsetPosition.x() + size.x() / 2;
         const float y = offsetPosition.y() + size.y() / 2;
         return {toViewportPosition({x, y}), offsetPosition.z()};
@@ -198,8 +182,8 @@ private:
 
 }
 
-View::View(sp<LayoutParam> layoutParam, String name, sp<Vec3> position, sp<Boolean> discarded)
-    : _stub(sp<Stub>::make(Stub{sp<Node>::make(std::move(layoutParam), std::move(name), std::move(position), std::move(discarded))}))
+View::View(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded)
+    : _stub(sp<Stub>::make(Stub{sp<Node>::make(std::move(layoutParam), std::move(name), std::move(discarded))}))
 {
 }
 
@@ -221,9 +205,6 @@ void View::onPoll(WiringContext& context)
 
 void View::onWire(const WiringContext& context, const Box& self)
 {
-    if(sp<Vec3> translation = context.getComponent<Translation>())
-        _stub->_node->_position.reset(std::move(translation));
-
     if(sp<Boolean> discarded = context.getComponent<Discarded>())
         setDiscarded(std::move(discarded));
 }
@@ -276,7 +257,7 @@ void View::setLayoutParam(sp<LayoutParam> layoutParam) const
 const sp<Vec3>& View::layoutPosition()
 {
     if(!_stub->_layout_position)
-        _stub->_layout_position = sp<LayoutPosition>::make(_stub->_node, ensureUpdatableLayout());
+        _stub->_layout_position = sp<Vec3>::make<LayoutPosition>(_stub->_node, ensureUpdatableLayout());
     return _stub->_layout_position;
 }
 
@@ -351,14 +332,15 @@ void View::markAsTopView()
 }
 
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _name(Documents::getAttribute(manifest, constants::NAME)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
+    : _name(Documents::getAttribute(manifest, constants::NAME)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
       _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)), _children(factory.makeBuilderList<View>(manifest, constants::VIEW))
 {
+    CHECK(!factory.getBuilder<Vec3>(manifest, constants::POSITION), "Setting position of view is no longer supported, use offset as an alternative.");
 }
 
 sp<View> View::BUILDER::build(const Scope& args)
 {
-    sp<View> view = sp<View>::make(_layout_param.build(args), _name, _position.build(args), _discarded.build(args));
+    sp<View> view = sp<View>::make(_layout_param.build(args), _name, _discarded.build(args));
     for(const builder<View>& i : _children)
         view->addView(i->build(args));
     return view;

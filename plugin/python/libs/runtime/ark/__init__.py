@@ -3138,7 +3138,7 @@ class LayoutParam:
 
 
 class View:
-    def __init__(self, layout_param: LayoutParam, name: str = '', position: Optional[TYPE_VEC3] = None, discarded: Optional[Boolean] = None):
+    def __init__(self, layout_param: LayoutParam, name: str = '', discarded: Optional[Boolean] = None):
         pass
 
     @property

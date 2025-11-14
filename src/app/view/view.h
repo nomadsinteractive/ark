@@ -22,7 +22,7 @@ public:
     struct Stub;
 
 //  [[script::bindings::auto]]
-    View(sp<LayoutParam> layoutParam, String name = "", sp<Vec3> position = nullptr, sp<Boolean> discarded = nullptr);
+    View(sp<LayoutParam> layoutParam, String name = "", sp<Boolean> discarded = nullptr);
     View(sp<Stub> stub);
 
     ~View() override;
@@ -78,7 +78,6 @@ public:
 
     private:
         String _name;
-        SafeBuilder<Vec3> _position;
         SafeBuilder<Boolean> _discarded;
         SafeBuilder<LayoutParam> _layout_param;
         Vector<builder<View>> _children;

@@ -180,7 +180,6 @@ private:
     float _flex_grow;
     OptionalVar<Vec4> _margins;
     OptionalVar<Vec4> _paddings;
-
     OptionalVar<Vec3> _offset;
 
     Timestamp _timestamp;

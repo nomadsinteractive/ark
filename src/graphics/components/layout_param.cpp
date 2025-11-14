@@ -19,10 +19,10 @@ LayoutParam::LayoutParam(LayoutLength width, LayoutLength height, sp<Layout> lay
 {
 }
 
-bool LayoutParam::update(uint32_t tick)
+bool LayoutParam::update(const uint32_t tick)
 {
     const bool dirty = _timestamp.update(tick);
-    return UpdatableUtil::update(tick, _width, _height, _margins, _paddings, _flex_basis) || dirty;
+    return UpdatableUtil::update(tick, _width, _height, _margins, _paddings, _flex_basis, _offset) || dirty;
 }
 
 const sp<Layout>& LayoutParam::layout() const
@@ -46,7 +46,7 @@ float LayoutParam::calcLayoutWidth(const float available)
     return _width._value.val() + margins.w() + margins.y();
 }
 
-float LayoutParam::calcLayoutHeight(float available)
+float LayoutParam::calcLayoutHeight(const float available)
 {
     const V4 margins = _margins.val();
     if(_height.isMatchParent())
