@@ -315,7 +315,9 @@ sp<View> View::findView(const StringView name) const
 
 sp<Boundaries> View::makeBoundaries()
 {
-    return sp<Boundaries>::make(layoutPosition(), Vec3Type::mul(layoutSize(), 0.5f));
+    const sp<Vec3>& position = layoutPosition();
+    const sp<Vec3> extent = Vec3Type::mul(layoutSize(), 0.5f);
+    return sp<Boundaries>::make(Vec3Type::sub(position, extent), Vec3Type::add(position, extent), position, layoutSize());
 }
 
 const sp<ViewHierarchy>& View::hierarchy() const

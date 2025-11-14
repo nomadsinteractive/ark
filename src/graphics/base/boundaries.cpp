@@ -48,11 +48,6 @@ Boundaries::Boundaries()
 {
 }
 
-Boundaries::Boundaries(sp<Vec3> position, sp<Vec3> extent)
-    : _aabb_min(Vec3Type::sub(position, extent)), _aabb_max(Vec3Type::add(position, extent)), _center(std::move(position)), _size(Vec3Type::mul(std::move(extent), 2.0f))
-{
-}
-
 Boundaries::Boundaries(const V3& aabbMin, const V3& aabbMax)
     : Boundaries(sp<Vec3>::make<Vec3::Const>(aabbMin), sp<Vec3>::make<Vec3::Const>(aabbMax), sp<Vec3>::make<Vec3::Const>((aabbMin + aabbMax) * 0.5f), sp<Vec3>::make<Vec3::Const>(aabbMax - aabbMin))
 {

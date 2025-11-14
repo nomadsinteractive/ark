@@ -12,7 +12,6 @@ namespace ark {
 class ARK_API Boundaries {
 public:
     Boundaries();
-    Boundaries(sp<Vec3> position, sp<Vec3> extent);
 //  [[script::bindings::auto]]
     Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax, sp<Vec3> center = nullptr, sp<Vec3> size = nullptr);
     Boundaries(const V3& aabbMin, const V3& aabbMax);
