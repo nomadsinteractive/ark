@@ -133,7 +133,7 @@ template<typename T, typename U> Optional<T> updateVar(uint32_t timestamp, U& va
     return {};
 }
 
-bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, const uint32_t timestamp)
+bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, const uint32_t tick)
 {
     const LayoutParam& layoutParam = layoutNode._layout_param;
 
@@ -141,13 +141,13 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
     {
         if(layoutNode.autoWidth())
         {
-            if(const Optional<float> width = updateVar<float>(timestamp, *layoutNode.autoWidth()))
+            if(const Optional<float> width = updateVar<float>(tick, *layoutNode.autoWidth()))
                 YGNodeStyleSetWidth(node, width.value());
         }
         else
             YGNodeStyleSetWidthAuto(node);
     }
-    else if(const Optional<float> width = updateVar<float>(timestamp, layoutParam.width().value()))
+    else if(const Optional<float> width = updateVar<float>(tick, layoutParam.width().value()))
     {
         if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_PIXEL)
             YGNodeStyleSetWidth(node, width.value());
@@ -162,13 +162,13 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
     {
         if(layoutNode.autoHeight())
         {
-            if(const Optional<float> height = updateVar<float>(timestamp, *layoutNode.autoHeight()))
+            if(const Optional<float> height = updateVar<float>(tick, *layoutNode.autoHeight()))
                 YGNodeStyleSetHeight(node, height.value());
         }
         else
             YGNodeStyleSetHeightAuto(node);
     }
-    else if(const Optional<float> height = updateVar<float>(timestamp, layoutParam.height().value()))
+    else if(const Optional<float> height = updateVar<float>(tick, layoutParam.height().value()))
     {
         if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_PIXEL)
             YGNodeStyleSetHeight(node, height.value());
@@ -182,7 +182,7 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
     YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));
     YGNodeStyleSetFlexGrow(node, layoutParam.flexGrow());
 
-    if(const Optional<float> flexBasis = updateVar<float, const OptionalVar<Numeric>>(timestamp, layoutParam.flexBasis().value()))
+    if(const Optional<float> flexBasis = updateVar<float, const OptionalVar<Numeric>>(tick, layoutParam.flexBasis().value()))
     {
         if(layoutParam.flexBasis().type() == LayoutLength::LENGTH_TYPE_AUTO)
             YGNodeStyleSetFlexBasisAuto(node);
@@ -201,7 +201,7 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
     YGNodeStyleSetAlignSelf(node, toYGAlign(layoutParam.alignSelf()));
     YGNodeStyleSetAlignContent(node, toYGAlign(layoutParam.alignContent()));
 
-    if(layoutParam.margins() && layoutParam.margins().update(timestamp))
+    if(layoutParam.margins() && layoutParam.margins().update(tick))
     {
         const V4 margins = layoutParam.margins().val();
         YGNodeStyleSetMargin(node, YGEdgeTop, margins.x());
@@ -210,7 +210,7 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
         YGNodeStyleSetMargin(node, YGEdgeLeft, margins.w());
     }
 
-    if(layoutParam.paddings() && layoutParam.paddings().update(timestamp))
+    if(layoutParam.paddings() && layoutParam.paddings().update(tick))
     {
         const V4 paddings = layoutParam.paddings().val();
         YGNodeStyleSetPadding(node, YGEdgeTop, paddings.x());
@@ -219,7 +219,8 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
         YGNodeStyleSetPadding(node, YGEdgeLeft, paddings.w());
     }
 
-    return YGNodeIsDirty(node);
+    const bool offsetDirty = layoutParam.offset() && layoutParam.offset().update(tick);
+    return YGNodeIsDirty(node) || offsetDirty;
 }
 
 void updateLayoutResult(const Layout::Hierarchy& hierarchy)
@@ -234,17 +235,17 @@ void updateLayoutResult(const Layout::Hierarchy& hierarchy)
         updateLayoutResult(i);
 }
 
-bool doUpdate(const Layout::Hierarchy& hierarchy, const uint32_t timestamp)
+bool doUpdate(const Layout::Hierarchy& hierarchy, const uint32_t tick)
 {
     bool dirty = false;
     const Layout::Node& layoutNode = hierarchy._node;
     const YGNodeRef ygNode = static_cast<YGNodeRef>(layoutNode._tag);
 
     if(layoutNode._layout_param)
-        dirty = updateLayoutParam(layoutNode, ygNode, timestamp);
+        dirty = updateLayoutParam(layoutNode, ygNode, tick);
 
     for(const Layout::Hierarchy& i : hierarchy._child_nodes)
-        dirty = doUpdate(i, timestamp) | dirty;
+        dirty = doUpdate(i, tick) | dirty;
 
     return dirty;
 }
@@ -260,7 +261,7 @@ public:
         YGNodeFreeRecursive(_yg_node);
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         const LayoutParam& layoutParam = _hierarchy._node->_layout_param;
         ASSERT(layoutParam.width().type() != LayoutLength::LENGTH_TYPE_PERCENTAGE && layoutParam.height().type() != LayoutLength::LENGTH_TYPE_PERCENTAGE);

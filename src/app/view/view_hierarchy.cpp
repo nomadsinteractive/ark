@@ -8,6 +8,32 @@
 
 namespace ark {
 
+namespace {
+
+class UpdatableOncePerTick final : public Updatable {
+public:
+    UpdatableOncePerTick(sp<Updatable> delegate)
+        : _delegate(std::move(delegate)), _last_tick(Timestamp::now() - 1), _last_value(false) {
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        if(_last_tick != tick)
+        {
+            _last_tick = tick;
+            _last_value = _delegate->update(tick);
+        }
+        return _last_value;
+    }
+
+private:
+    sp<Updatable> _delegate;
+    uint32_t _last_tick;
+    bool _last_value;
+};
+
+}
+
 ViewHierarchy::ViewHierarchy(sp<Layout> layout)
     : _layout(std::move(layout))
 {
@@ -68,7 +94,7 @@ bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, const uint3
     {
         if(_layout)
         {
-            _updatable_layout = _layout->inflate(toLayoutHierarchy(layoutNode));
+            _updatable_layout = sp<Updatable>::make<UpdatableOncePerTick>(_layout->inflate(toLayoutHierarchy(layoutNode)));
             _timestamp.markClean();
         }
         hierarchyDirty = true;
