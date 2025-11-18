@@ -220,7 +220,7 @@ sp<StringVar> StringType::format(const String& format, const Scope& kwargs)
         const std::string m2 = matched[2].str();
         const Optional<Box> value = kwargs.getObject(name);
         CHECK(value, "Unable to get keyword name \"%s\"", name.c_str());
-        sp<StringVar> formatted = toStringVar<StringView>(value.value(), m2.c_str());
+        sp<StringVar> formatted = toStringVar<StringView, float, int32_t>(value.value(), m2.c_str());
         CHECK(formatted, "Unable to format key \"%s\"", name.c_str());
         strList.push_back(std::move(formatted));
         return true;
