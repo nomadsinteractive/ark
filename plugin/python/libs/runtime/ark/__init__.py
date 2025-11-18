@@ -3169,6 +3169,10 @@ class View:
     def parent(self, parent: Self | None):
         pass
 
+    @property
+    def children(self) -> list["View"]:
+        pass
+
     def add_view(self, view: Self):
         pass
 

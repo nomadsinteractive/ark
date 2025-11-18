@@ -318,6 +318,13 @@ void View::setParent(const View& view)
     _stub->_node->_parent_stub = view._stub;
 }
 
+Vector<sp<View>> View::children() const
+{
+    if(_stub->_node->_hierarchy)
+        return _stub->_node->_hierarchy->updateChildren();
+    return {};
+}
+
 sp<Updatable>& View::ensureUpdatableLayout()
 {
     if(!_stub->_updatable_layout)

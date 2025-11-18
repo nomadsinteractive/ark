@@ -69,6 +69,9 @@ public:
 //  [[script::bindings::property]]
     void setParent(const View& view);
 
+//  [[script::bindings::property]]
+    Vector<sp<View>> children() const;
+
 //  [[plugin::builder]]
     class BUILDER final : public Builder<View> {
     public:
