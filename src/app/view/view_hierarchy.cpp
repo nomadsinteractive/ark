@@ -32,6 +32,15 @@ private:
     bool _last_value;
 };
 
+sp<Layout> getTopViewLayout(const sp<View>& view)
+{
+    if(view->hierarchy() && view->hierarchy()->layout())
+        return view->hierarchy()->layout();
+    if(const sp<View> parent = view->parent())
+        return getTopViewLayout(parent);
+    return nullptr;
+}
+
 }
 
 ViewHierarchy::ViewHierarchy(sp<Layout> layout)
@@ -42,6 +51,11 @@ ViewHierarchy::ViewHierarchy(sp<Layout> layout)
 bool ViewHierarchy::isLayoutTopView() const
 {
     return static_cast<bool>(_layout);
+}
+
+const sp<Layout>& ViewHierarchy::layout() const
+{
+    return _layout;
 }
 
 bool ViewHierarchy::updateDescendantLayout(const uint32_t tick)
@@ -62,8 +76,9 @@ bool ViewHierarchy::updateHierarchy()
     {
         if(const sp<View>& i = *iter; i->discarded().val())
         {
+            const sp<Layout> layout = getTopViewLayout(i);
+            hierarchyChanged = layout ? !layout->removeNode(i->layoutNode()) : true;
             iter = _children.erase(iter);
-            hierarchyChanged = true;
         }
         else
         {

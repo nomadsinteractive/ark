@@ -22,7 +22,7 @@ public:
         : _value(std::move(value)) {
     }
 
-    bool update(uint32_t tick) override {
+    bool update(const uint32_t tick) override {
         return _timestamp.update(tick);
     }
 
@@ -46,7 +46,7 @@ public:
         : _delegate(std::move(delegate)), _value(Strings::toString(_delegate->val())) {
     }
 
-    bool update(uint32_t tick) override {
+    bool update(const uint32_t tick) override {
         if(_delegate->update(tick)) {
             _value = Strings::toString(_delegate->val());
             return true;
@@ -87,9 +87,9 @@ public:
 private:
     void doUpdate()
     {
-        if constexpr(std::is_same_v<T, String>)
+        if constexpr(std::is_same_v<T, StringView>)
         {
-            const char* arg1 = _value->val().c_str();
+            const char* arg1 = _value->val().data();
             _formatted = fmt::vformat(_format.c_str(), fmt::make_format_args(arg1));
         }
         else
@@ -113,7 +113,7 @@ public:
         doUpdate();
     }
 
-    bool update(uint32_t tick) override {
+    bool update(const uint32_t tick) override {
         bool dirty = false;
         for(const sp<StringVar>& i : _list)
             dirty = i->update(tick) | dirty;
@@ -140,12 +140,12 @@ private:
     String _value;
 };
 
-template<typename T, typename... ARGS> sp<StringVar> toStringVar(const Box& box, String format) {
+template<typename T, typename... ARGS> sp<StringVar> toStringVar(const Box& box, const String& format) {
     if(sp<Variable<T>> var = box.as<Variable<T>>())
-        return sp<StringVar>::make<StringVarFormatedOne<T>>(std::move(var), std::move(format));
+        return sp<StringVar>::make<StringVarFormatedOne<T>>(std::move(var), format);
 
     if constexpr(sizeof...(ARGS) > 0)
-        return toStringVar<ARGS...>(box, std::move(format));
+        return toStringVar<ARGS...>(box, format);
 
     return nullptr;
 }
@@ -220,7 +220,7 @@ sp<StringVar> StringType::format(const String& format, const Scope& kwargs)
         const std::string m2 = matched[2].str();
         const Optional<Box> value = kwargs.getObject(name);
         CHECK(value, "Unable to get keyword name \"%s\"", name.c_str());
-        sp<StringVar> formatted = toStringVar<int32_t, float, String>(value.value(), m2.c_str());
+        sp<StringVar> formatted = toStringVar<StringView>(value.value(), m2.c_str());
         CHECK(formatted, "Unable to format key \"%s\"", name.c_str());
         strList.push_back(std::move(formatted));
         return true;
@@ -229,7 +229,7 @@ sp<StringVar> StringType::format(const String& format, const Scope& kwargs)
         return true;
     });
 
-    return sp<StringVarList>::make(std::move(strList));
+    return sp<StringVar>::make<StringVarList>(std::move(strList));
 }
 
 sp<StringVar> StringType::dye(sp<StringVar> self, sp<Boolean> condition, String message)

@@ -1,5 +1,7 @@
 #include "python/impl/duck/py_object_duck_type.h"
 
+#include "core/util/string_type.h"
+
 #include "python/extension/py_cast.h"
 
 namespace ark::plugin::python {
@@ -7,6 +9,14 @@ namespace ark::plugin::python {
 PyObjectDuckType::PyObjectDuckType(PyInstance inst)
     : _instance(std::move(inst))
 {
+}
+
+void PyObjectDuckType::to(sp<StringVar>& inst)
+{
+    if(Optional<sp<StringVar>> opt = PyCast::toCppObject<sp<StringVar>>(_instance.pyObject()))
+        inst = std::move(opt.value());
+    else
+        inst = StringType::create(PyCast::toString(_instance.pyObject()));
 }
 
 void PyObjectDuckType::to(sp<String>& inst)

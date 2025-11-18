@@ -12,8 +12,9 @@ class YogaLayout final : public Layout {
 public:
 
     sp<Updatable> inflate(Hierarchy hierarchy) override;
+    bool removeNode(Node& node) override;
 
-//  [[plugin::builder::by-value("yoga")]]
+    //  [[plugin::builder::by-value("yoga")]]
     class BUILDER final : public Builder<Layout> {
     public:
         BUILDER() = default;

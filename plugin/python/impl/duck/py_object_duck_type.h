@@ -12,10 +12,11 @@
 
 namespace ark::plugin::python {
 
-class PyObjectDuckType final : public Duck<String>, public Duck<Integer>, public Duck<Numeric>, public Duck<Box>, Implements<PyObjectDuckType, Duck<String>, Duck<Integer>, Duck<Numeric>, Duck<Box>> {
+class PyObjectDuckType final : public Duck<StringVar>, public Duck<String>, public Duck<Integer>, public Duck<Numeric>, public Duck<Box>, Implements<PyObjectDuckType, Duck<StringVar>, Duck<String>, Duck<Integer>, Duck<Numeric>, Duck<Box>> {
 public:
     PyObjectDuckType(PyInstance inst);
 
+    void to(sp<StringVar>& inst) override;
     void to(sp<String>& inst) override;
     void to(sp<Integer>& inst) override;
     void to(sp<Numeric>& inst) override;

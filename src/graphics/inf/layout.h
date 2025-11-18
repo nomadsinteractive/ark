@@ -65,6 +65,7 @@ public:
     virtual ~Layout() = default;
 
     virtual sp<Updatable> inflate(Hierarchy hierarchy) = 0;
+    virtual bool removeNode(Node& node) { return false; };
 };
 
 }

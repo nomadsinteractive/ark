@@ -16,6 +16,7 @@ public:
     ViewHierarchy(sp<Layout> layout);
 
     bool isLayoutTopView() const;
+    const sp<Layout>& layout() const;
 
     bool updateDescendantLayout(uint32_t tick);
     bool updateLayout(const sp<Layout::Node>& layoutNode, uint32_t tick);
