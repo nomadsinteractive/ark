@@ -192,11 +192,6 @@ View::View(sp<Stub> stub)
 {
 }
 
-View::~View()
-{
-    _stub->_node->discard();
-}
-
 void View::onPoll(WiringContext& context)
 {
     context.setComponent(layoutSize());

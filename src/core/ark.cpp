@@ -141,11 +141,13 @@ sp<RenderEngine> doCreateRenderEngine(BeanFactory& beanFactory, const Applicatio
         case enums::RENDERER_VERSION_OPENGL_46:
             if(sp<RendererFactory> rendererFactory = chooseRenderFactory(rendererFactories, enums::RENDERING_BACKEND_BIT_OPENGL))
                 return sp<RenderEngine>::make(rendererInUse, std::move(rendererFactory));
+            break;
         case enums::RENDERER_VERSION_VULKAN_11:
         case enums::RENDERER_VERSION_VULKAN_12:
         case enums::RENDERER_VERSION_VULKAN_13:
             if(sp<RendererFactory> rendererFactory = chooseRenderFactory(rendererFactories, enums::RENDERING_BACKEND_BIT_VULKAN))
                 return sp<RenderEngine>::make(rendererInUse, std::move(rendererFactory));
+            break;
         default:
             break;
     }
