@@ -13,6 +13,7 @@ public:
 
     sp<Updatable> inflate(Hierarchy hierarchy) override;
     bool removeNode(Node& node) override;
+    bool appendNode(Node& parentNode, View& childView) override;
 
     //  [[plugin::builder::by-value("yoga")]]
     class BUILDER final : public Builder<Layout> {

@@ -8,6 +8,8 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/v4.h"
 
+#include "app/forwarding.h"
+
 namespace ark {
 
 class ARK_API Layout {
@@ -66,6 +68,7 @@ public:
 
     virtual sp<Updatable> inflate(Hierarchy hierarchy) = 0;
     virtual bool removeNode(Node& node) { return false; };
+    virtual bool appendNode(Node& parentNode, View& childView) { return false; };
 };
 
 }

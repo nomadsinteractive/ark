@@ -135,6 +135,8 @@ public:
 
     bool isWrapContent() const;
 
+    const Timestamp& timestamp() const;
+
 //  [[plugin::builder]]
     class BUILDER final : public Builder<LayoutParam> {
     public:

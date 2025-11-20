@@ -452,15 +452,15 @@ struct Text::Content {
     {
     }
 
-    bool update(const uint32_t timestamp)
+    bool update(const uint32_t tick)
     {
-        const bool contentDirty = _text->update(timestamp);
-        const bool layoutDirty = _timestamp.update(timestamp);
+        const bool contentDirty = _text->update(tick);
+        const bool layoutDirty = _timestamp.update(tick);
         if(contentDirty)
             createContent(Strings::fromUTF8(_text->val()));
         else if(layoutDirty)
             updateLayoutContent();
-        return contentDirty || layoutDirty || UpdatableUtil::update(timestamp, _updatable_layout);
+        return contentDirty || layoutDirty || UpdatableUtil::update(tick, _updatable_layout);
     }
 
     void setText(const std::wstring& text)

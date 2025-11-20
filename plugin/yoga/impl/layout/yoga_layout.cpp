@@ -136,6 +136,7 @@ template<typename T, typename U> Optional<T> updateVar(uint32_t tick, U& var, co
 bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, const uint32_t tick, const bool force)
 {
     const LayoutParam& layoutParam = layoutNode._layout_param;
+    const bool layoutParamDirty = layoutParam.timestamp().update(tick) || force;
 
     if(layoutParam.width().isAuto())
     {
@@ -144,7 +145,7 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
             if(const Optional<float> width = updateVar<float>(tick, *layoutNode.autoWidth(), force))
                 YGNodeStyleSetWidth(node, width.value());
         }
-        else
+        else if(layoutParamDirty)
             YGNodeStyleSetWidthAuto(node);
     }
     else if(const Optional<float> width = updateVar<float>(tick, layoutParam.width().value(), force))
@@ -165,7 +166,7 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
             if(const Optional<float> height = updateVar<float>(tick, *layoutNode.autoHeight(), force))
                 YGNodeStyleSetHeight(node, height.value());
         }
-        else
+        else if(layoutParamDirty)
             YGNodeStyleSetHeightAuto(node);
     }
     else if(const Optional<float> height = updateVar<float>(tick, layoutParam.height().value(), force))
@@ -179,8 +180,16 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
         }
     }
 
-    YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));
-    YGNodeStyleSetFlexGrow(node, layoutParam.flexGrow());
+    if(layoutParamDirty)
+    {
+        YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));
+        YGNodeStyleSetFlexGrow(node, layoutParam.flexGrow());
+        YGNodeStyleSetFlexWrap(node, toYGWrap(layoutParam.flexWrap()));
+        YGNodeStyleSetJustifyContent(node, toYGJustify(layoutParam.justifyContent()));
+        YGNodeStyleSetAlignItems(node, toYGAlign(layoutParam.alignItems()));
+        YGNodeStyleSetAlignSelf(node, toYGAlign(layoutParam.alignSelf()));
+        YGNodeStyleSetAlignContent(node, toYGAlign(layoutParam.alignContent()));
+    }
 
     if(const Optional<float> flexBasis = updateVar<float>(tick, layoutParam.flexBasis().value(), force))
     {
@@ -194,12 +203,6 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
             YGNodeStyleSetFlexBasisPercent(node, flexBasis.value());
         }
     }
-
-    YGNodeStyleSetFlexWrap(node, toYGWrap(layoutParam.flexWrap()));
-    YGNodeStyleSetJustifyContent(node, toYGJustify(layoutParam.justifyContent()));
-    YGNodeStyleSetAlignItems(node, toYGAlign(layoutParam.alignItems()));
-    YGNodeStyleSetAlignSelf(node, toYGAlign(layoutParam.alignSelf()));
-    YGNodeStyleSetAlignContent(node, toYGAlign(layoutParam.alignContent()));
 
     if(const Optional<V4> margins = updateVar<V4>(tick, layoutParam.margins(), force))
     {
@@ -306,6 +309,13 @@ bool YogaLayout::removeNode(Node& node)
         return true;
     }
     return false;
+}
+
+bool YogaLayout::appendNode(Node& parentNode, View& childView)
+{
+    const YGNodeRef ygParentNode = static_cast<YGNodeRef>(parentNode._tag);
+    childView.layoutNode()->_tag = doInflate(Global<YogaConfig>(), childView.hierarchy()->toLayoutHierarchy(), ygParentNode);
+    return true;
 }
 
 sp<Layout> YogaLayout::BUILDER::build(const Scope& args)

@@ -357,12 +357,7 @@ class _Var:
         pass
 
 
-class Boolean(_Var):
-    def __init__(self, value):
-        pass
-
-    def toggle(self):
-        pass
+class _Boolean(_Var):
 
     def negative(self) -> "Boolean":
         pass
@@ -378,6 +373,15 @@ class Boolean(_Var):
 
     def __bool__(self):
         return False
+
+
+class Boolean(_Boolean):
+    def __init__(self, value: TYPE_BOOLEAN):
+        pass
+
+    class InTick(_Boolean):
+        def __init__(self, tick_start: TYPE_BOOLEAN, tick_end: Optional[TYPE_BOOLEAN] = None):
+            pass
 
 
 class Behavior:
@@ -677,6 +681,10 @@ class ApplicationFacade:
 
     def __init__(self):
         self._activity = None
+
+    @property
+    def tick(self) -> "Integer":
+        return Integer(0)
 
     @property
     def clock(self) -> "Clock":
@@ -1515,7 +1523,7 @@ class Uploader:
     def mark_dirty(self):
         pass
 
-    def dye(self, message: str) -> Self:
+    def dye(self, condition: TYPE_BOOLEAN = True, message: str = '') -> Self:
         return self
 
     def __setitem__(self, offset: int, uploader: "Uploader"):

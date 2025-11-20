@@ -13,26 +13,27 @@ namespace ark {
 
 class ARK_API ViewHierarchy {
 public:
-    ViewHierarchy(sp<Layout> layout);
+    ViewHierarchy(sp<Layout> layout, sp<Layout::Node> layoutNode);
 
     bool isLayoutTopView() const;
     const sp<Layout>& layout() const;
 
     bool updateDescendantLayout(uint32_t tick);
-    bool updateLayout(const sp<Layout::Node>& layoutNode, uint32_t tick);
+    bool updateLayout(uint32_t tick);
 
     const Vector<sp<View>>& updateChildren();
     void markHierarchyDirty();
 
     void addView(sp<View> view);
 
+    Layout::Hierarchy toLayoutHierarchy() const;
+
 private:
     bool updateHierarchy();
 
-    Layout::Hierarchy toLayoutHierarchy(sp<Layout::Node> layoutNode) const;
-
 private:
     sp<Layout> _layout;
+    sp<Layout::Node> _layout_node;
     sp<Updatable> _updatable_layout;
 
     Vector<sp<View>> _children;

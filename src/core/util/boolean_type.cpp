@@ -41,6 +41,39 @@ private:
     sp<Builder<Boolean>> _a1;
 };
 
+class BooleanInTick final : public Boolean {
+public:
+    BooleanInTick(sp<Integer> tickStart, sp<Integer> tickEnd)
+        : _tick_start(std::move(tickStart)), _tick_end(std::move(tickEnd)), _value() {
+        ASSERT(_tick_start);
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        _tick_start->update(tick);
+        if(_tick_end)
+            _tick_end->update(tick);
+
+        bool value = tick >= static_cast<uint32_t>(_tick_start->val());
+        if(_tick_end && value)
+            value = tick < static_cast<uint32_t>(_tick_end->val());
+
+        const bool dirty = _value != value;
+        _value = value;
+        return dirty;
+    }
+
+    bool val() override
+    {
+        return _value;
+    }
+
+private:
+    sp<Integer> _tick_start;
+    sp<Integer> _tick_end;
+    bool _value;
+};
+
 class BooleanOperation {
 public:
     template <typename T> using OP2 = VariableOP2<sp<Numeric>, sp<Numeric>, T>;
@@ -97,14 +130,6 @@ Expression::Operator<bool> BooleanOperation::OPS[2] = {
 };
 
 String BooleanOperation::NEGATIVE_OPS[2] = {"!", "not "};
-
-
-String getDocumentValue(const document& manifest)
-{
-    DCHECK(!manifest->getAttribute(constants::CLASS), "Document \"%s\" has class named \"%s\", which cannot been built into a Boolean object",
-           Documents::toString(manifest).c_str(), manifest->getAttribute(constants::CLASS)->value().c_str());
-    return Documents::ensureAttribute(manifest, constants::VALUE).strip();
-}
 
 }
 
@@ -193,6 +218,11 @@ sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String mes
     return sp<Boolean>::make<VariableDyed<bool>>(std::move(self), std::move(condition), std::move(message));
 }
 
+sp<Boolean> BooleanType::InTick(sp<Integer> tickStart, sp<Integer> tickEnd)
+{
+    return sp<Boolean>::make<BooleanInTick>(std::move(tickStart), std::move(tickEnd));
+}
+
 BooleanType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
     : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, expr.strip()))
 {
@@ -200,15 +230,6 @@ BooleanType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
 }
 
 sp<Boolean> BooleanType::DICTIONARY::build(const Scope& args)
-{
-    return _value->build(args);
-}
-
-BooleanType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, getDocumentValue(manifest))) {
-}
-
-sp<Boolean> BooleanType::BUILDER::build(const Scope& args)
 {
     return _value->build(args);
 }

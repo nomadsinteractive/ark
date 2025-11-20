@@ -87,11 +87,38 @@ private:
     sp<Size> _resolution;
 };
 
+class IntegerCurrentTick final : public Integer {
+public:
+    IntegerCurrentTick(const uint32_t tick)
+        : _tick(tick)
+    {
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        _tick = tick;
+        return true;
+    }
+
+    int32_t val() override
+    {
+        return static_cast<int32_t>(_tick);
+    }
+
+private:
+    uint32_t _tick;
+};
+
 }
 
 ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface)
     : _context(app.context()), _controller(app.controller()), _surface_controller(surface.controller()), _surface_size(app.surfaceSize())
 {
+}
+
+sp<Integer> ApplicationFacade::tick() const
+{
+    return sp<Integer>::make<IntegerCurrentTick>(_context->tick());
 }
 
 const sp<Clock>& ApplicationFacade::clock() const

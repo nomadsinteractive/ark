@@ -38,7 +38,7 @@ private:
 }
 
 Surface::Surface(sp<RenderView> renderView, const sp<ApplicationContext>& applicationContext)
-    : _render_view(std::move(renderView)), _surface_controller(sp<SurfaceController>::make()), _updater(sp<SurfaceUpdateRequester>::make(_surface_controller, applicationContext))
+    : _render_view(std::move(renderView)), _surface_controller(sp<SurfaceController>::make()), _update_requester(sp<Runnable>::make<SurfaceUpdateRequester>(_surface_controller, applicationContext))
 {
 }
 
@@ -54,7 +54,7 @@ const sp<SurfaceController>& Surface::controller() const
 
 const sp<Runnable>& Surface::updateRequester() const
 {
-    return _updater;
+    return _update_requester;
 }
 
 void Surface::onSurfaceCreated() const

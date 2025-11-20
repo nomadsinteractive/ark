@@ -19,6 +19,8 @@ public:
     ApplicationFacade(Application& app, const Surface& surface);
 
 //  [[script::bindings::property]]
+    sp<Integer> tick() const;
+//  [[script::bindings::property]]
     const sp<Clock>& clock() const;
 //  [[script::bindings::property]]
     sp<Numeric> clockInterval() const;

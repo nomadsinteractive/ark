@@ -31,28 +31,17 @@ struct View::Stub {
 
 struct View::Node final : Updatable {
     Node(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded)
-        : _name(std::move(name)), _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : sp<ViewHierarchy>()), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))),
+        : _name(std::move(name)), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _hierarchy(sp<ViewHierarchy>::make(_layout_node->_layout_param->layout(), _layout_node)),
           _discarded(std::move(discarded), false), _top_view(false)
     {
     }
 
     bool update(const uint32_t tick) override
     {
-        if(_hierarchy)
-            return _hierarchy->updateLayout(_layout_node, tick);
+        if(_hierarchy->layout())
+            return _hierarchy->updateLayout(tick);
 
         return UpdatableUtil::update(tick, _layout_node->_layout_param, _discarded);
-    }
-
-    void discard()
-    {
-        _discarded.reset(sp<Boolean>::make<Boolean::Const>(true));
-    }
-
-    bool isDiscarded() const
-    {
-        const sp<Stub> parentStub = _parent_stub.lock();
-        return _discarded.val() || (parentStub ? parentStub->_node->isDiscarded() : !_top_view);
     }
 
     V3 getTopViewOffsetPosition() const
@@ -72,16 +61,9 @@ struct View::Node final : Updatable {
         return parentStub ? parentStub->_node->getTopViewLayoutNode() : nullptr;
     }
 
-    ViewHierarchy& ensureViewHierarchy()
-    {
-        if(!_hierarchy)
-            _hierarchy = sp<ViewHierarchy>::make(nullptr);
-        return _hierarchy;
-    }
-
     String _name;
-    sp<ViewHierarchy> _hierarchy;
     sp<Layout::Node> _layout_node;
+    sp<ViewHierarchy> _hierarchy;
     OptionalVar<Boolean> _discarded;
 
     WeakPtr<View::Stub> _parent_stub;
@@ -108,6 +90,28 @@ sp<View::Stub> findLayoutTopView(sp<View::Stub> stub)
     }
     return stub;
 }
+
+class UpdatableOncePerTick final : public Updatable {
+public:
+    UpdatableOncePerTick(sp<Updatable> delegate)
+        : _delegate(std::move(delegate)), _last_tick(Timestamp::now() - 1), _last_value(false) {
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        if(_last_tick != tick)
+        {
+            _last_tick = tick;
+            _last_value = _delegate->update(tick);
+        }
+        return _last_value;
+    }
+
+private:
+    sp<Updatable> _delegate;
+    uint32_t _last_tick;
+    bool _last_value;
+};
 
 template<size_t IDX> class LayoutSize final : public Numeric {
 public:
@@ -266,11 +270,10 @@ const sp<Size>& View::layoutSize()
 void View::addView(sp<View> view) const
 {
     view->setParent(*this);
-    _stub->_node->ensureViewHierarchy().addView(std::move(view));
+    _stub->_node->_hierarchy->addView(std::move(view));
 
     if(const sp<Stub> layoutTopView = findLayoutTopView(_stub))
-        if(layoutTopView->_node->_hierarchy)
-            layoutTopView->_node->_hierarchy->markHierarchyDirty();
+        layoutTopView->_node->_hierarchy->markHierarchyDirty();
 }
 
 sp<View> View::findView(const StringView name) const
@@ -323,7 +326,7 @@ Vector<sp<View>> View::children() const
 sp<Updatable>& View::ensureUpdatableLayout()
 {
     if(!_stub->_updatable_layout)
-        _stub->_updatable_layout = sp<Updatable>::make<UpdatableLayoutTopView>(_stub);
+        _stub->_updatable_layout = sp<Updatable>::make<UpdatableOncePerTick>(sp<Updatable>::make<UpdatableLayoutTopView>(_stub));
     return _stub->_updatable_layout;
 }
 

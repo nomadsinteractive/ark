@@ -107,6 +107,7 @@ const LayoutLength& LayoutParam::flexBasis() const
 void LayoutParam::setFlexBasis(LayoutLength flexBasis)
 {
     _flex_basis = std::move(flexBasis);
+    _timestamp.markDirty();
 }
 
 float LayoutParam::flexGrow() const
@@ -114,9 +115,10 @@ float LayoutParam::flexGrow() const
     return _flex_grow;
 }
 
-void LayoutParam::setFlexGrow(float weight)
+void LayoutParam::setFlexGrow(const float weight)
 {
     _flex_grow = weight;
+    _timestamp.markDirty();
 }
 
 bool LayoutParam::hasFlexGrow() const
@@ -209,6 +211,11 @@ void LayoutParam::setOffset(sp<Vec3> offset)
 bool LayoutParam::isWrapContent() const
 {
     return _flex_wrap == FLEX_WRAP_WRAP || _flex_wrap == FLEX_WRAP_WRAP_REVERSE;
+}
+
+const Timestamp& LayoutParam::timestamp() const
+{
+    return _timestamp;
 }
 
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

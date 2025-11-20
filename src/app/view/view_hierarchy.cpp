@@ -10,28 +10,6 @@ namespace ark {
 
 namespace {
 
-class UpdatableOncePerTick final : public Updatable {
-public:
-    UpdatableOncePerTick(sp<Updatable> delegate)
-        : _delegate(std::move(delegate)), _last_tick(Timestamp::now() - 1), _last_value(false) {
-    }
-
-    bool update(const uint32_t tick) override
-    {
-        if(_last_tick != tick)
-        {
-            _last_tick = tick;
-            _last_value = _delegate->update(tick);
-        }
-        return _last_value;
-    }
-
-private:
-    sp<Updatable> _delegate;
-    uint32_t _last_tick;
-    bool _last_value;
-};
-
 sp<Layout> getTopViewLayout(const sp<View>& view)
 {
     if(view->hierarchy() && view->hierarchy()->layout())
@@ -43,8 +21,8 @@ sp<Layout> getTopViewLayout(const sp<View>& view)
 
 }
 
-ViewHierarchy::ViewHierarchy(sp<Layout> layout)
-    : _layout(std::move(layout))
+ViewHierarchy::ViewHierarchy(sp<Layout> layout, sp<Layout::Node> layoutNode)
+    : _layout(std::move(layout)), _layout_node(std::move(layoutNode))
 {
 }
 
@@ -68,10 +46,8 @@ bool ViewHierarchy::updateDescendantLayout(const uint32_t tick)
 
 bool ViewHierarchy::updateHierarchy()
 {
-    bool hierarchyChanged = !_incremental.empty();
-    if(hierarchyChanged)
-        updateChildren();
-
+    bool hierarchyChanged = false;
+    updateChildren();
     for(auto iter = _children.begin(); iter != _children.end(); )
     {
         if(const sp<View>& i = *iter; i->discarded().val())
@@ -91,40 +67,50 @@ bool ViewHierarchy::updateHierarchy()
     return hierarchyChanged;
 }
 
-Layout::Hierarchy ViewHierarchy::toLayoutHierarchy(sp<Layout::Node> layoutNode) const
+Layout::Hierarchy ViewHierarchy::toLayoutHierarchy() const
 {
-    Layout::Hierarchy hierarchy{std::move(layoutNode)};
+    Layout::Hierarchy hierarchy{_layout_node};
     for(const sp<View>& i : _children)
     {
         const sp<ViewHierarchy>& viewHierarchy = i->hierarchy();
-        hierarchy._child_nodes.push_back(viewHierarchy && !viewHierarchy->_layout ? viewHierarchy->toLayoutHierarchy(i->layoutNode()) : Layout::Hierarchy{i->layoutNode()});
+        hierarchy._child_nodes.push_back(viewHierarchy && !viewHierarchy->_layout ? viewHierarchy->toLayoutHierarchy() : Layout::Hierarchy{i->layoutNode()});
     }
     return hierarchy;
 }
 
-bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, const uint32_t tick)
+bool ViewHierarchy::updateLayout(const uint32_t tick)
 {
-    bool hierarchyDirty = _timestamp.update(tick);
-    if(const bool hierarchyChanged = updateHierarchy(); hierarchyChanged || hierarchyDirty)
+    const bool hierarchyChanged = updateHierarchy();
+    const bool hierarchyDirty = _timestamp.update(tick);
+    if(hierarchyChanged || hierarchyDirty)
     {
         if(_layout)
         {
-            _updatable_layout = sp<Updatable>::make<UpdatableOncePerTick>(_layout->inflate(toLayoutHierarchy(layoutNode)));
+            _updatable_layout = _layout->inflate(toLayoutHierarchy());
             _timestamp.markClean();
         }
-        hierarchyDirty = true;
     }
     if(_updatable_layout)
         return _updatable_layout->update(tick) || hierarchyDirty;
 
-    return updateDescendantLayout(tick) || hierarchyDirty;
+    return updateDescendantLayout(tick) || hierarchyChanged || hierarchyDirty;
 }
 
 const Vector<sp<View>>& ViewHierarchy::updateChildren()
 {
     if(!_incremental.empty())
     {
-        _timestamp.markDirty();
+        if(const sp<Layout> layout = getTopViewLayout(_incremental.at(0)))
+        {
+            for(const sp<View>& i : _incremental)
+                if(!layout->appendNode(_layout_node, i))
+                {
+                    _timestamp.markDirty();
+                    break;
+                }
+        }
+        else
+            _timestamp.markDirty();
         for(sp<View>& i : _incremental)
             _children.push_back(std::move(i));
         _incremental.clear();
@@ -134,7 +120,8 @@ const Vector<sp<View>>& ViewHierarchy::updateChildren()
 
 void ViewHierarchy::markHierarchyDirty()
 {
-    _timestamp.markDirty();
+    if(_layout)
+        _timestamp.markDirty();
 }
 
 void ViewHierarchy::addView(sp<View> view)

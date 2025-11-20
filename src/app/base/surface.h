@@ -27,7 +27,7 @@ private:
     sp<RenderView> _render_view;
 
     sp<SurfaceController> _surface_controller;
-    sp<Runnable> _updater;
+    sp<Runnable> _update_requester;
 };
 
 }
