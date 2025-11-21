@@ -180,6 +180,17 @@ b2BodyId RigidbodyBox2D::body() const
     return _stub->body();
 }
 
+float RigidbodyBox2D::angle()
+{
+    FATAL("Unimplemented");
+    return 0;
+}
+
+void RigidbodyBox2D::setAngle(float rad)
+{
+    FATAL("Unimplemented");
+}
+
 V3 RigidbodyBox2D::centralForce() const
 {
     return V3(0);

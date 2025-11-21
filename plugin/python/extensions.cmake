@@ -90,4 +90,6 @@ if(WIN32)
         INCLUDEDIRS
             ${LOCAL_PYTHON_INCLUDE_DIRS}
     )
+
+    ark_link_libraries(Rpcrt4)
 endif()

@@ -17,15 +17,15 @@ Polygon::Polygon(const std::vector<V2>& vertices)
 
 void Polygon::apply(b2BodyId body, const V3& size, const BodyCreateInfo& createInfo)
 {
-    b2PolygonShape shape;
-    b2Vec2* vecs = new b2Vec2[_vertices.size()];
-    for(uint32_t i = 0; i < _vertices.size(); i ++)
-        vecs[i].Set(_vertices[i].x() * size.x() / 2.0f, _vertices[i].y() * size.y() / 2.0f);
-    shape.Set(vecs, static_cast<int32_t>(_vertices.size()));
-    delete[] vecs;
-
-    b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
-    body->CreateFixture(&fixtureDef);
+    // b2PolygonShape shape;
+    // b2Vec2* vecs = new b2Vec2[_vertices.size()];
+    // for(uint32_t i = 0; i < _vertices.size(); i ++)
+    //     vecs[i].Set(_vertices[i].x() * size.x() / 2.0f, _vertices[i].y() * size.y() / 2.0f);
+    // shape.Set(vecs, static_cast<int32_t>(_vertices.size()));
+    // delete[] vecs;
+    //
+    // b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
+    // body->CreateFixture(&fixtureDef);
 }
 
 Polygon::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& manifest)
