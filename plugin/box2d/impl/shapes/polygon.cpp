@@ -15,7 +15,7 @@ Polygon::Polygon(const std::vector<V2>& vertices)
 {
 }
 
-void Polygon::apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo)
+void Polygon::apply(b2BodyId body, const V3& size, const BodyCreateInfo& createInfo)
 {
     b2PolygonShape shape;
     b2Vec2* vecs = new b2Vec2[_vertices.size()];

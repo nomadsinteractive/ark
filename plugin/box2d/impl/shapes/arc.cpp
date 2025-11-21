@@ -13,7 +13,7 @@ Arc::Arc(uint32_t sampleCount, float a, float b)
 {
 }
 
-void Arc::apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo)
+void Arc::apply(b2BodyId body, const V3& size, const BodyCreateInfo& createInfo)
 {
     DCHECK_WARN(Math::almostEqual<float>(size.x(), size.y()), "RigidBody size: (%.2f, %.2f) is not a circle", size.x(), size.y());
 

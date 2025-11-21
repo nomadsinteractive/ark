@@ -55,8 +55,10 @@ SDL_GPUTextureUsageFlags toTextureUsageFlags(const Texture::Usage usage)
         flags |= SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
     if(usage.contains(Texture::USAGE_SAMPLER))
         flags |= SDL_GPU_TEXTUREUSAGE_SAMPLER;
-    if(usage.contains(Texture::USAGE_STORAGE))
-        flags |= SDL_GPU_TEXTUREUSAGE_GRAPHICS_STORAGE_READ | SDL_GPU_TEXTUREUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_TEXTUREUSAGE_COMPUTE_STORAGE_WRITE;
+    if(usage.has(Texture::USAGE_GRAPHICS_STORAGE))
+        flags |= SDL_GPU_TEXTUREUSAGE_GRAPHICS_STORAGE_READ;
+    if(usage.has(Texture::USAGE_COMPUTE_STORAGE))
+        flags |= SDL_GPU_TEXTUREUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_TEXTUREUSAGE_COMPUTE_STORAGE_WRITE;
     return flags;
 }
 
@@ -65,7 +67,7 @@ SDL_GPUFilter toFilter(const Texture::Filter filter)
     return filter == Texture::FILTER_NEAREST ? SDL_GPU_FILTER_NEAREST : SDL_GPU_FILTER_LINEAR;
 }
 
-SDL_GPUTexture* createTexture(GraphicsContext& graphicsContext, const Texture::Parameters& parameters, const SDL_GPUTextureFormat textureFormat, uint32_t width, uint32_t height)
+SDL_GPUTexture* createTexture(GraphicsContext& graphicsContext, const Texture::Parameters& parameters, const SDL_GPUTextureFormat textureFormat, const uint32_t width, const uint32_t height)
 {
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
     const SDL_GPUTextureCreateInfo textureCreateInfo{parameters._type == Texture::TYPE_2D ? SDL_GPU_TEXTURETYPE_2D : SDL_GPU_TEXTURETYPE_CUBE, textureFormat, toTextureUsageFlags(parameters._usage), width, height, 1, 1};
@@ -129,26 +131,29 @@ void TextureSDL3_GPU::uploadBitmap(GraphicsContext& graphicsContext, const Bitma
         _texture = createTexture(graphicsContext, _parameters, _texture_format, _width, _height);
     }
 
-    SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
-    SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
-    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
+    if(const sp<ByteArray>& bytes = imagedata.at(0))
+    {
+        SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
+        SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
+        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
 
-    const Uint32 bitmapSize = bitmap.rowBytes() * bitmap.height();
-    const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, bitmapSize};
-    SDL_GPUTransferBuffer* textureTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
-    
-    void* transferData = SDL_MapGPUTransferBuffer(gpuDevice, textureTransferBuffer, false);
-    DASSERT(imagedata.at(0)->size() <= bitmapSize);
-    memcpy(transferData, imagedata.at(0)->buf(), bitmapSize);
-    SDL_UnmapGPUTransferBuffer(gpuDevice, textureTransferBuffer);
+        const Uint32 bitmapSize = bitmap.rowBytes() * bitmap.height();
+        ASSERT(bytes->size() <= bitmapSize);
+        const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, bitmapSize};
+        SDL_GPUTransferBuffer* textureTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
 
-    const SDL_GPUTextureTransferInfo textureTransferInfo{textureTransferBuffer, 0, bitmap.width(), bitmap.height()};
-    const SDL_GPUTextureRegion textureRegion{_texture, 0, 0, 0, 0, 0, bitmap.width(), bitmap.height(), 1};
-    SDL_UploadToGPUTexture(copyPass, &textureTransferInfo, &textureRegion, false);
+        void* transferData = SDL_MapGPUTransferBuffer(gpuDevice, textureTransferBuffer, false);
+        memcpy(transferData, bytes->buf(), bitmapSize);
+        SDL_UnmapGPUTransferBuffer(gpuDevice, textureTransferBuffer);
 
-    SDL_EndGPUCopyPass(copyPass);
-    SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
-    SDL_ReleaseGPUTransferBuffer(gpuDevice, textureTransferBuffer);
+        const SDL_GPUTextureTransferInfo textureTransferInfo{textureTransferBuffer, 0, bitmap.width(), bitmap.height()};
+        const SDL_GPUTextureRegion textureRegion{_texture, 0, 0, 0, 0, 0, bitmap.width(), bitmap.height(), 1};
+        SDL_UploadToGPUTexture(copyPass, &textureTransferInfo, &textureRegion, false);
+
+        SDL_EndGPUCopyPass(copyPass);
+        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
+        SDL_ReleaseGPUTransferBuffer(gpuDevice, textureTransferBuffer);
+    }
 }
 
 SDL_GPUTexture* TextureSDL3_GPU::texture() const

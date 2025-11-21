@@ -209,7 +209,7 @@ public:
         _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
     }
 
-    void onRenderFrame(V4 backgroundColor, RenderCommand& renderCommand) override
+    void onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand) override
     {
         const ContextSDL3_GPU& context = ensureContext(_graphics_context);
         GraphicsContextSDL3_GPU& graphicsContext = ensureGraphicsContext(_graphics_context);
@@ -250,6 +250,28 @@ private:
     op<GraphicsContext> _graphics_context;
 };
 
+SDL_GPUShaderFormat toGPUShaderFormat(const enums::RenderingBackendBit rendererBackendBit)
+{
+    if(rendererBackendBit == enums::RENDERING_BACKEND_AUTO)
+        return SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXBC | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
+    if(rendererBackendBit == enums::RENDERING_BACKEND_BIT_DIRECT_X)
+        return SDL_GPU_SHADERFORMAT_DXBC | SDL_GPU_SHADERFORMAT_DXIL;
+    if(rendererBackendBit == enums::RENDERING_BACKEND_BIT_VULKAN)
+        return SDL_GPU_SHADERFORMAT_SPIRV;
+    CHECK(rendererBackendBit == enums::RENDERING_BACKEND_BIT_METAL, "Unsupported rendering backend: %d", rendererBackendBit);
+    return SDL_GPU_SHADERFORMAT_MSL | SDL_GPU_SHADERFORMAT_METALLIB;
+}
+
+enums::RendererVersion getRendererVersion(const enums::RenderingBackendBit rendererBackendBit)
+{
+    if(rendererBackendBit == enums::RENDERING_BACKEND_BIT_DIRECT_X)
+        return enums::RENDERER_VERSION_DIRECT_X_12;
+    if(rendererBackendBit == enums::RENDERING_BACKEND_BIT_VULKAN)
+        return enums::RENDERER_VERSION_VULKAN_13;
+    CHECK(rendererBackendBit == enums::RENDERING_BACKEND_BIT_METAL, "Unsupported rendering backend: %d", rendererBackendBit);
+    return enums::RENDERER_VERSION_METAL_40;
+}
+
 }
 
 RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
@@ -259,8 +281,9 @@ RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
 
 void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
 {
+    const SDL_GPUShaderFormat shaderFormat = toGPUShaderFormat(renderEngine.context()->renderer()._backend);
     _gpu_device = SDL_CreateGPUDevice(
-            SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
+            shaderFormat,
 #if ARK_FLAG_BUILD_TYPE
             true,
 #else
@@ -280,7 +303,7 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
 sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
     const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
-    setVersion(renderer._version == enums::RENDERER_VERSION_AUTO ? enums::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
+    setVersion(renderer._backend == enums::RENDERING_BACKEND_AUTO ? enums::RENDERER_VERSION_VULKAN_13 : getRendererVersion(renderer._backend), renderContext);
     return renderContext;
 }
 

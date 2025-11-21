@@ -18,7 +18,7 @@ public:
 
     void onSurfaceCreated() override;
     void onSurfaceChanged(uint32_t width, uint32_t height) override;
-    void onRenderFrame(V4 backgroundColor, RenderCommand& renderCommand) override;
+    void onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand) override;
 
 private:
     sp<VKRenderer> _renderer;

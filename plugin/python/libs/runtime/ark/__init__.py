@@ -2780,22 +2780,17 @@ class Varyings:
         pass
 
 
-class Visibility:
-    def __init__(self, visible):
-        self._visible = visible
-
-    @property
-    def visible(self):
-        return self._visible
-
-    @visible.setter
-    def visible(self, v):
-        self._visible = v
+class Visibility(Boolean):
+    def __init__(self, visible: TYPE_BOOLEAN = True):
+        super().__init__(visible)
 
     def show(self):
         pass
 
     def hide(self):
+        pass
+
+    def reset(self, visible: TYPE_BOOLEAN):
         pass
 
 

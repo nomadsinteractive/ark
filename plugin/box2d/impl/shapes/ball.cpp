@@ -1,7 +1,6 @@
 #include "box2d/impl/shapes/ball.h"
 
 #include "core/base/bean_factory.h"
-#include "core/inf/variable.h"
 
 #include "graphics/components/size.h"
 
@@ -9,7 +8,7 @@
 
 namespace ark::plugin::box2d {
 
-void Ball::apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo)
+void Ball::apply(b2BodyId body, const V3& size, const BodyCreateInfo& createInfo)
 {
     b2CircleShape shape;
 

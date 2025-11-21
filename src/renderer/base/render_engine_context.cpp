@@ -78,7 +78,7 @@ uint32_t RenderEngineContext::getGLSLVersion() const
     case enums::RENDERER_VERSION_OPENGL_44:
     case enums::RENDERER_VERSION_OPENGL_45:
     case enums::RENDERER_VERSION_OPENGL_46:
-        return static_cast<uint32_t>(_renderer._version) * 10;
+        return static_cast<uint32_t>(_renderer._version - enums::RENDERER_VERSION_OPENGL) * 10;
     default:
         break;
     }

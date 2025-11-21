@@ -24,7 +24,7 @@ void RenderViewVulkan::onSurfaceCreated()
 {
 }
 
-void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
+void RenderViewVulkan::onSurfaceChanged(const uint32_t width, const uint32_t height)
 {
     LOGD("Width: %d, Height: %d", width, height);
     _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
@@ -40,7 +40,7 @@ void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
     _graphics_context->onSurfaceReady();
 }
 
-void RenderViewVulkan::onRenderFrame(const V4 backgroundColor, RenderCommand& renderCommand)
+void RenderViewVulkan::onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand)
 {
     _graphics_context->onDrawFrame();
 

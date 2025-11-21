@@ -15,7 +15,7 @@ class Polygon : public Shape {
 public:
     Polygon(const std::vector<V2>& vertices);
 
-    virtual void apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo) override;
+    virtual void apply(b2BodyId body, const V3& size, const BodyCreateInfo& createInfo) override;
 
 //  [[plugin::builder("polygon")]]
     class BUILDER : public Builder<Shape> {

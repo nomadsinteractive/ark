@@ -11,9 +11,7 @@
 #include "box2d/forwarding.h"
 #include "box2d/impl/joint.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 class ARK_PLUGIN_BOX2D_API DistanceJoint : public Joint {
 public:
@@ -28,10 +26,7 @@ public:
 */
 
 private:
-    static b2Joint* makeJoint(b2World& b2World, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float length, bool collideConnected);
-
+    static b2JointId makeJoint(b2WorldId b2World, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float length, bool collideConnected);
 };
 
-}
-}
 }

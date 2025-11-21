@@ -59,7 +59,7 @@ void RenderViewOpenGL::onSurfaceChanged(uint32_t width, uint32_t height)
     initialize(width, height);
 }
 
-void RenderViewOpenGL::onRenderFrame(const V4 backgroundColor, RenderCommand& renderCommand)
+void RenderViewOpenGL::onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand)
 {
     glClearColor(backgroundColor.x(), backgroundColor.y(), backgroundColor.z(), backgroundColor.w());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

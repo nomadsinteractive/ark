@@ -65,7 +65,7 @@ void RendererFactoryOpenGL::onSurfaceCreated(RenderEngine& renderEngine)
         int glMajorVersion = 0, glMinorVersion = 0;
         glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
         glGetIntegerv(GL_MINOR_VERSION, &glMinorVersion);
-        setVersion(static_cast<enums::RendererVersion>(glMajorVersion * 10 + glMinorVersion), renderEngine.context());
+        setVersion(static_cast<enums::RendererVersion>(enums::RENDERER_VERSION_OPENGL + glMajorVersion * 10 + glMinorVersion), renderEngine.context());
     }
 }
 

@@ -35,18 +35,18 @@ public:
         }
     }
 
-    void apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo) override {
+    void apply(b2BodyId body, const V3& size, const BodyCreateInfo& createInfo) override {
         for(const Vector<V2>& i : _polygons) {
-            b2PolygonShape shape;
-
-            Vector<b2Vec2> vec2s;
-            for(const V2& j : i)
-                vec2s.push_back(b2Vec2(j.x() * size.x(), j.y() * size.y()));
-
-            shape.Set(vec2s.data(), static_cast<int32_t>(vec2s.size()));
-
-            b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
-            body->CreateFixture(&fixtureDef);
+            // b2PolygonShape shape;
+            //
+            // Vector<b2Vec2> vec2s;
+            // for(const V2& j : i)
+            //     vec2s.push_back(b2Vec2(j.x() * size.x(), j.y() * size.y()));
+            //
+            // shape.Set(vec2s.data(), static_cast<int32_t>(vec2s.size()));
+            //
+            // b2ShapeDef fixtureDef = createInfo.toFixtureDef(&shape);
+            // body->CreateFixture(&fixtureDef);
         }
     }
 

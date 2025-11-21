@@ -13,7 +13,7 @@ class Arc : public Shape {
 public:
     Arc(uint32_t sampleCount, float a, float b);
 
-    void apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo) override;
+    void apply(b2BodyId body, const V3& size, const BodyCreateInfo& createInfo) override;
 
 //  [[plugin::builder("arc")]]
     class BUILDER : public Builder<Shape> {

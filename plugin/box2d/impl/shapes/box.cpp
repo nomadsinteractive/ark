@@ -8,7 +8,7 @@
 
 namespace ark::plugin::box2d {
 
-void Box::apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo)
+void Box::apply(b2BodyId body, const V3& size, const BodyCreateInfo& createInfo)
 {
     b2PolygonShape shape;
     shape.SetAsBox(size.x() / 2.0f, size.y() / 2.0f);

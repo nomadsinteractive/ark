@@ -20,14 +20,14 @@ namespace ark::plugin::box2d {
 class ARK_PLUGIN_BOX2D_API RigidbodyBox2D final : public RigidbodyController {
 public:
     struct Stub {
-        Stub(const ColliderBox2D& world, b2Body* body);
+        Stub(const ColliderBox2D& world, b2BodyId body);
         ~Stub();
 
         void dispose();
-        b2Body* body();
+        b2BodyId body();
 
         ColliderBox2D _world;
-        b2Body* _body;
+        b2BodyId _body;
         OptionalVar<Boolean> _discarded;
         HashSet<RefId> _contacts;
     };
@@ -38,7 +38,7 @@ public:
     RigidbodyBox2D(const sp<Stub>& stub, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const OptionalVar<Numeric>& rotate, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded = nullptr);
 
     const sp<Rigidbody::Stub>& rigidbodyStub() const;
-    b2Body* body() const;
+    b2BodyId body() const;
 
     float angle();
     void setAngle(float rad);

@@ -36,10 +36,10 @@ public:
     sp<Constraint> createFixedConstraint(Rigidbody& rigidbodyA, Rigidbody& rigidbodyB) override;
     Vector<RayCastManifold> rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter) override;
 
-    b2World& world() const;
+    b2WorldId world() const;
 
-    b2Body* createBody(const b2BodyDef& bodyDef) const;
-    b2Body* createBody(Rigidbody::BodyType type, const V3& position, const V3& size, const BodyCreateInfo& createInfo) const;
+    b2BodyId createBody(const b2BodyDef& bodyDef) const;
+    b2BodyId createBody(Rigidbody::BodyType type, const V3& position, const V3& size, const BodyCreateInfo& createInfo) const;
 
     float toPixelX(float meterX) const;
     float toPixelY(float meterY) const;
@@ -87,25 +87,26 @@ public:
     void setBodyManifest(int32_t id, const BodyCreateInfo& bodyManifest);
 
 private:
-    class ContactListenerImpl : public b2ContactListener {
-    public:
-        virtual void BeginContact(b2Contact* contact);
-        virtual void EndContact(b2Contact* contact);
-    };
+    // class ContactListenerImpl {
+    // public:
+    //     virtual void BeginContact(const b2ContactData* contact);
+    //     virtual void EndContact(const b2ContactData* contact);
+    // };
+    //
+    // class DestructionListenerImpl : public b2DestructionListener {
+    // public:
+    //     virtual void SayGoodbye(b2JointId joint) override;
+    //     virtual void SayGoodbye(b2Fixture* fixture) override;
+    //
+    //     void track(const sp<Joint::Stub>& joint);
+    //
+    // private:
+    //     HashMap<b2JointId, WeakPtr<Joint::Stub>> _joints;
+    // };
 
-    class DestructionListenerImpl : public b2DestructionListener {
-    public:
-        virtual void SayGoodbye(b2Joint* joint) override;
-        virtual void SayGoodbye(b2Fixture* fixture) override;
-
-        void track(const sp<Joint::Stub>& joint);
-
-    private:
-        std::unordered_map<b2Joint*, WeakPtr<Joint::Stub>> _joints;
-    };
-
-    struct Stub : public Runnable {
+    struct Stub final : Runnable {
         Stub(const b2Vec2& gravity, const V2& pixelPerMeter);
+        ~Stub() override;
 
         void run() override;
 
@@ -113,18 +114,21 @@ private:
         float _ppm_y;
 
         float _time_step;
-        int32_t _velocity_iterations;
-        int32_t _position_iterations;
+        int32_t _sub_step_count;
 
-        b2World _world;
+        b2WorldDef _world_def;
+        b2WorldId _world_id;
         HashMap<HashId, BodyCreateInfo> _body_manifests;
 
-        ContactListenerImpl _contact_listener;
-        DestructionListenerImpl _destruction_listener;
+        // ContactListenerImpl _contact_listener;
+        // DestructionListenerImpl _destruction_listener;
     };
 
 private:
     sp<Stub> _stub;
+
+    static void onBeginContact(const b2ContactBeginTouchEvent& event);
+    static void onEndContact(const b2ContactEndTouchEvent& event);
 
     friend class BUILDER_IMPL1;
     friend class RigidbodyBox2D;

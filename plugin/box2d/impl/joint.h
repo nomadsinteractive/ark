@@ -16,9 +16,9 @@ class ARK_PLUGIN_BOX2D_API Joint {
 public:
     struct Stub {
         sp<ColliderBox2D> _world;
-        b2Joint* _joint;
+        b2JointId _joint;
 
-        Stub(const sp<ColliderBox2D>& world, b2Joint* joint);
+        Stub(const sp<ColliderBox2D>& world, b2JointId joint);
         ~Stub();
 
         void dispose();
@@ -26,7 +26,7 @@ public:
     };
 
 public:
-    Joint(const sp<ColliderBox2D>& world, b2Joint* joint);
+    Joint(const sp<ColliderBox2D>& world, b2JointId joint);
     ~Joint();
 
     void dispose();

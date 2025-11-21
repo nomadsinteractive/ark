@@ -20,7 +20,7 @@ bool Visibility::val()
     return _visible->val();
 }
 
-bool Visibility::update(uint32_t tick)
+bool Visibility::update(const uint32_t tick)
 {
     return _visible->update(tick);
 }
@@ -35,24 +35,14 @@ void Visibility::hide()
     _visible->set(false);
 }
 
-void Visibility::set(bool visible)
+void Visibility::reset(const bool visible)
 {
     _visible->set(visible);
 }
 
-void Visibility::set(const sp<Boolean>& visible)
+void Visibility::reset(sp<Boolean> visible)
 {
-    _visible->set(visible);
-}
-
-Visibility::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _visible(factory.ensureBuilder<Boolean>(value))
-{
-}
-
-sp<Visibility> Visibility::DICTIONARY::build(const Scope& args)
-{
-    return sp<Visibility>::make(_visible->build(args));
+    _visible->set(std::move(visible));
 }
 
 }

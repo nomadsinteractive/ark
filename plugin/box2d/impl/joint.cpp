@@ -11,7 +11,7 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-Joint::Joint(const sp<ColliderBox2D>& world, b2Joint* joint)
+Joint::Joint(const sp<ColliderBox2D>& world, b2JointId joint)
     : _stub(sp<Stub>::make(world, joint))
 {
     world->track(_stub);
@@ -19,8 +19,6 @@ Joint::Joint(const sp<ColliderBox2D>& world, b2Joint* joint)
 
 Joint::~Joint()
 {
-    if(_stub->_world && _stub->_world->world().IsLocked())
-        Ark::instance().applicationContext()->deferUnref(std::move(_stub));
 }
 
 void Joint::dispose()
@@ -33,31 +31,30 @@ void Joint::release()
     _stub->release();
 }
 
-Joint::Stub::Stub(const sp<ColliderBox2D>& world, b2Joint* joint)
+Joint::Stub::Stub(const sp<ColliderBox2D>& world, b2JointId joint)
     : _world(world), _joint(joint)
 {
 }
 
 Joint::Stub::~Stub()
 {
-    if(_joint)
+    if(b2Joint_IsValid(_joint))
         dispose();
 }
 
 void Joint::Stub::dispose()
 {
-    DCHECK(!_world || _joint, "Joint has already been destroyed");
-    if(_joint)
+    DCHECK(!_world || b2Joint_IsValid(_joint), "Joint has already been destroyed");
+    if(b2Joint_IsValid(_joint))
     {
-        DCHECK(!_world->world().IsLocked(), "Cannot destroy joint in the middle of a time step");
-        _world->world().DestroyJoint(_joint);
-        _joint = nullptr;
+        b2DestroyJoint(_joint);
+        _joint = b2_nullJointId;
     }
 }
 
 void Joint::Stub::release()
 {
-    _joint = nullptr;
+    _joint = b2_nullJointId;
     _world = nullptr;
 }
 

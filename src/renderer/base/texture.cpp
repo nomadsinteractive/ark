@@ -216,12 +216,14 @@ template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const St
 
 template<> ARK_API Texture::Usage StringConvert::eval<Texture::Usage>(const String& str)
 {
-    constexpr Texture::Usage::LookupTable<6> usages = {{
+    constexpr Texture::Usage::LookupTable<8> usages = {{
         {"general", Texture::USAGE_AUTO},
         {"depth", Texture::USAGE_DEPTH_ATTACHMENT},
         {"stencil", Texture::USAGE_DEPTH_STENCIL_ATTACHMENT},
         {"color_attachment", Texture::USAGE_COLOR_ATTACHMENT},
         {"sampler", Texture::USAGE_SAMPLER},
+        {"graphics_storage", Texture::USAGE_GRAPHICS_STORAGE},
+        {"compute_storage", Texture::USAGE_COMPUTE_STORAGE},
         {"storage", Texture::USAGE_STORAGE}
     }};
     if(str)

@@ -124,33 +124,8 @@ sp<RenderEngine> doCreateRenderEngine(BeanFactory& beanFactory, const Applicatio
     else if(rendererInUse._version == enums::RENDERER_VERSION_VULKAN)
         rendererInUse._version = enums::RENDERER_VERSION_VULKAN_13;
 
-    if(rendererInUse._backend != enums::RENDERING_BACKEND_AUTO)
-        return sp<RenderEngine>::make(rendererInUse, chooseRenderFactory(rendererFactories, rendererInUse._backend));
-
-    switch(rendererInUse._version) {
-        case enums::RENDERER_VERSION_OPENGL_30:
-        case enums::RENDERER_VERSION_OPENGL_31:
-        case enums::RENDERER_VERSION_OPENGL_32:
-        case enums::RENDERER_VERSION_OPENGL_33:
-        case enums::RENDERER_VERSION_OPENGL_40:
-        case enums::RENDERER_VERSION_OPENGL_41:
-        case enums::RENDERER_VERSION_OPENGL_42:
-        case enums::RENDERER_VERSION_OPENGL_43:
-        case enums::RENDERER_VERSION_OPENGL_44:
-        case enums::RENDERER_VERSION_OPENGL_45:
-        case enums::RENDERER_VERSION_OPENGL_46:
-            if(sp<RendererFactory> rendererFactory = chooseRenderFactory(rendererFactories, enums::RENDERING_BACKEND_BIT_OPENGL))
-                return sp<RenderEngine>::make(rendererInUse, std::move(rendererFactory));
-            break;
-        case enums::RENDERER_VERSION_VULKAN_11:
-        case enums::RENDERER_VERSION_VULKAN_12:
-        case enums::RENDERER_VERSION_VULKAN_13:
-            if(sp<RendererFactory> rendererFactory = chooseRenderFactory(rendererFactories, enums::RENDERING_BACKEND_BIT_VULKAN))
-                return sp<RenderEngine>::make(rendererInUse, std::move(rendererFactory));
-            break;
-        default:
-            break;
-    }
+    if(sp<RendererFactory> rendererFactory = chooseRenderFactory(rendererFactories, rendererInUse._backend))
+        return sp<RenderEngine>::make(rendererInUse, std::move(rendererFactory));
     return nullptr;
 }
 
@@ -171,9 +146,9 @@ sp<RenderEngine> createRenderEngine(BeanFactory& beanFactory, const ApplicationM
         return doCreateRenderEngine(beanFactory, renderer);
 
     ApplicationManifest::Renderer rendererInUse = renderer;
-    for(const enums::RendererVersion i : Platform::getRendererVersionPreferences())
+    for(const enums::RenderingBackendBit i : Platform::getPreferedRenderBackends())
     {
-        rendererInUse._version = i;
+        rendererInUse._backend = i;
         if(sp<RenderEngine> renderEngine = doCreateRenderEngine(beanFactory, rendererInUse))
             return renderEngine;
     }

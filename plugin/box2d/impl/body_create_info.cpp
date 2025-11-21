@@ -12,12 +12,12 @@ BodyCreateInfo::BodyCreateInfo(const sp<Shape>& shape, const float density, cons
 {
 }
 
-b2FixtureDef BodyCreateInfo::toFixtureDef(const b2Shape* shape) const
+b2ShapeDef BodyCreateInfo::toFixtureDef(const b2ShapeId shape) const
 {
-    b2FixtureDef fixture;
-    fixture.shape = shape;
+    b2ShapeDef fixture = b2DefaultShapeDef();
+    // fixture.shape = shape;
     fixture.density = density;
-    fixture.friction = friction;
+    // fixture.friction = friction;
     fixture.isSensor = is_sensor;
     return fixture;
 }

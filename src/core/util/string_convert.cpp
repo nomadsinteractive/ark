@@ -70,7 +70,7 @@ template<> enums::RenderingBackendBit StringConvert::eval<enums::RenderingBacken
     constexpr enums::LookupTable<enums::RenderingBackendBit, 4> table ={{
         {"opengl", enums::RENDERING_BACKEND_BIT_OPENGL},
         {"vulkan", enums::RENDERING_BACKEND_BIT_VULKAN},
-        {"direct_x", enums::RENDERING_BACKEND_BIT_DIRECT_X},
+        {"dx", enums::RENDERING_BACKEND_BIT_DIRECT_X},
         {"metal", enums::RENDERING_BACKEND_BIT_METAL},
     }};
     return enums::lookup(table, repr.toLower());
@@ -79,12 +79,8 @@ template<> enums::RenderingBackendBit StringConvert::eval<enums::RenderingBacken
 template<> enums::RendererVersion StringConvert::eval<enums::RendererVersion>(const String& repr)
 {
     const String version = repr.toLower();
-    if(version == "opengl")
-        return enums::RENDERER_VERSION_OPENGL;
-    if(version == "vulkan")
-        return enums::RENDERER_VERSION_VULKAN;
     if(version.startsWith("opengl_"))
-        return static_cast<enums::RendererVersion>(atoi(version.c_str() + 7));
+        return static_cast<enums::RendererVersion>(atoi(version.c_str() + 7) + enums::RENDERER_VERSION_OPENGL);
     if(version.startsWith("vulkan_"))
         return static_cast<enums::RendererVersion>(atoi(version.c_str() + 7) + enums::RENDERER_VERSION_VULKAN);
     CHECK(repr == "auto", "Unknow RendererVersion: \"%s, supported values are [\"opengl_31\", \"opengl_46\", \"vulkan_11\", ...]", repr.c_str());

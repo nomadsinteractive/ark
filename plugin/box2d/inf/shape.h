@@ -12,7 +12,7 @@ class Shape {
 public:
     virtual ~Shape() = default;
 
-    virtual void apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo) = 0;
+    virtual void apply(b2BodyId body, const V3& size, const BodyCreateInfo& createInfo) = 0;
 
 };
 

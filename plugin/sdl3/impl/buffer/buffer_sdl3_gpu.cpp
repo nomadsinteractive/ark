@@ -31,33 +31,36 @@ ResourceRecycleFunc BufferSDL3_GPU::recycle()
     };
 }
 
-void BufferSDL3_GPU::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
+void BufferSDL3_GPU::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader)
 {
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
 
-    const Uint32 inputSize = input.size();
-    if(!_buffer || inputSize > _buffer_size)
+    const Uint32 bufferSize = std::max<Uint32>(uploader.size(), 16);
+    if(!_buffer || bufferSize > _buffer_size)
     {
         if(_buffer)
             SDL_ReleaseGPUBuffer(gpuDevice, _buffer);
 
-        const SDL_GPUBufferCreateInfo bufferCreateInfo = {_usage_flags, inputSize};
+        const SDL_GPUBufferCreateInfo bufferCreateInfo = {_usage_flags, bufferSize};
         _buffer = SDL_CreateGPUBuffer(gpuDevice, &bufferCreateInfo);
-        _buffer_size = inputSize;
+        _buffer_size = bufferSize;
     }
 
-    const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, inputSize};
+    const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, bufferSize};
     SDL_GPUTransferBuffer* uploadTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
 
     void* transferData = SDL_MapGPUTransferBuffer(gpuDevice, uploadTransferBuffer, false);
-    UploaderType::writeTo(input, transferData);
+    if(uploader.size() < bufferSize)
+        memset(transferData, 0, bufferSize);
+    else
+        UploaderType::writeTo(uploader, transferData);
     SDL_UnmapGPUTransferBuffer(gpuDevice, uploadTransferBuffer);
 
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
     SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
 
     const SDL_GPUTransferBufferLocation transferBufferLocation{uploadTransferBuffer, 0};
-    const SDL_GPUBufferRegion bufferRegion{_buffer, 0, inputSize};
+    const SDL_GPUBufferRegion bufferRegion{_buffer, 0, bufferSize};
     SDL_UploadToGPUBuffer(copyPass, &transferBufferLocation, &bufferRegion, false);
 
     SDL_EndGPUCopyPass(copyPass);

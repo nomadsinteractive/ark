@@ -15,7 +15,7 @@ public:
     BodyCreateInfo(const sp<Shape>& shape, float density, float friction, bool isSensor = false);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(BodyCreateInfo);
 
-    b2FixtureDef toFixtureDef(const b2Shape* shape) const;
+    b2ShapeDef toFixtureDef(b2ShapeId shape) const;
 
     sp<Shape> shape;
     float density;

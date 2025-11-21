@@ -67,7 +67,17 @@ Vector<enums::RendererVersion> Platform::getRendererVersionPreferences()
     return {enums::RENDERER_VERSION_OPENGL_46, enums::RENDERER_VERSION_VULKAN_12};
 }
 
-String Platform::glShaderVersionDeclaration(uint32_t versionCode)
+Vector<enums::RenderingBackendBit> Platform::getPreferedRenderBackends()
+{
+#ifdef ARK_FLAG_PUBLISHING_BUILD
+    return {enums::RENDERING_BACKEND_BIT_DIRECT_X, enums::RENDERING_BACKEND_BIT_VULKAN, enums::RENDERING_BACKEND_BIT_OPENGL};
+#else
+    // We need a bit of variety while debugging
+    return {enums::RENDERING_BACKEND_BIT_OPENGL, enums::RENDERING_BACKEND_BIT_VULKAN, enums::RENDERING_BACKEND_BIT_DIRECT_X};
+#endif
+}
+
+String Platform::glShaderVersionDeclaration(const uint32_t versionCode)
 {
     return Strings::sprintf("#version %d\n", versionCode);
 }

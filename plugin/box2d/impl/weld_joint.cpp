@@ -4,27 +4,23 @@
 #include "box2d/impl/joint.h"
 #include "box2d/impl/collider_box2d.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 WeldJoint::WeldJoint(const sp<ColliderBox2D>& world, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
     : Joint(world, makeJoint(world->world(), b1, b2, anchorA, anchorB, referenceAngle, collideConnected))
 {
 }
 
-b2Joint* WeldJoint::makeJoint(b2World& b2World, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
+b2JointId WeldJoint::makeJoint(b2WorldId b2World, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
 {
     b2WeldJointDef jointDef;
-    jointDef.bodyA = b1.body();
-    jointDef.bodyB = b2.body();
+    jointDef.bodyIdA = b1.body();
+    jointDef.bodyIdB = b2.body();
     jointDef.localAnchorA = b2Vec2(anchorA.x(), anchorA.y());
     jointDef.localAnchorB = b2Vec2(anchorB.x(), anchorB.y());
     jointDef.referenceAngle = referenceAngle;
     jointDef.collideConnected = collideConnected;
-    return b2World.CreateJoint(&jointDef);
+    return b2CreateWeldJoint(b2World, &jointDef);
 }
 
-}
-}
 }

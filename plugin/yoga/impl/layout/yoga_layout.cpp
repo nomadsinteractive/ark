@@ -112,7 +112,7 @@ private:
     YGConfigRef _config;
 };
 
-YGNodeRef doInflate(const YogaConfig& config, const Layout::Hierarchy& hierarchy, YGNodeRef parentNode)
+YGNodeRef doInflate(const YogaConfig& config, const Layout::Hierarchy& hierarchy, const YGNodeRef parentNode)
 {
     const YGNodeRef ygNode = config.newNode();
     hierarchy._node->_tag = ygNode;
@@ -133,11 +133,14 @@ template<typename T, typename U> Optional<T> updateVar(uint32_t tick, U& var, co
     return {};
 }
 
-bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, const uint32_t tick, const bool force)
+bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, const uint32_t tick)
 {
+    const bool force = YGNodeGetContext(node) != layoutNode._layout_param.get();
+    if(force)
+        YGNodeSetContext(node, layoutNode._layout_param.get());
+
     const LayoutParam& layoutParam = layoutNode._layout_param;
     const bool layoutParamDirty = layoutParam.timestamp().update(tick) || force;
-
     if(layoutParam.width().isAuto())
     {
         if(layoutNode.autoWidth())
@@ -236,20 +239,19 @@ void updateLayoutResult(const Layout::Hierarchy& hierarchy)
         updateLayoutResult(i);
 }
 
-bool doUpdate(Layout::Hierarchy& hierarchy, const uint32_t tick, const bool force)
+bool doUpdate(Layout::Hierarchy& hierarchy, const uint32_t tick)
 {
-    bool dirty = false;
     const Layout::Node& layoutNode = hierarchy._node;
     const YGNodeRef ygNode = static_cast<YGNodeRef>(layoutNode._tag);
-
+    bool dirty = false;
     if(layoutNode._layout_param)
-        dirty = updateLayoutParam(layoutNode, ygNode, tick, force);
+        dirty = updateLayoutParam(layoutNode, ygNode, tick);
 
     for(auto iter = hierarchy._child_nodes.begin(); iter != hierarchy._child_nodes.end(); )
     {
         if(Layout::Hierarchy& i = *iter; i._node->_tag)
         {
-            dirty = doUpdate(i, tick, force) | dirty;
+            dirty = doUpdate(i, tick) | dirty;
             ++ iter;
         }
         else
@@ -264,7 +266,6 @@ public:
     UpdatableYogaLayout(Layout::Hierarchy hierarchy)
         : _hierarchy(std::move(hierarchy)), _yg_node(doInflate(Global<YogaConfig>(), _hierarchy, nullptr))
     {
-        doUpdate(_hierarchy, Timestamp::now(), true);
     }
     ~UpdatableYogaLayout() override
     {
@@ -276,7 +277,7 @@ public:
         const LayoutParam& layoutParam = _hierarchy._node->_layout_param;
         ASSERT(layoutParam.width().type() != LayoutLength::LENGTH_TYPE_PERCENTAGE && layoutParam.height().type() != LayoutLength::LENGTH_TYPE_PERCENTAGE);
 
-        if(!doUpdate(_hierarchy, tick, false))
+        if(!doUpdate(_hierarchy, tick))
             return false;
 
         const float availableWidth = layoutParam.width().isAuto() ? YGUndefined : layoutParam.contentWidth();
