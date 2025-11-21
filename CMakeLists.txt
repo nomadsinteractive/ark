@@ -176,7 +176,6 @@ ark_add_plugin_directory(vorbis plugin/vorbis)
 ark_add_plugin_directory(vulkan plugin/vulkan)
 ark_add_plugin_directory(yoga plugin/yoga)
 if(NOT (ANDROID OR IOS))
-    ark_add_plugin_directory(sdl2 plugin/sdl2)
     ark_add_plugin_directory(sdl3 plugin/sdl3)
 endif()
 

@@ -11,7 +11,7 @@ namespace ark {
 
 class ARK_API GraphicsContext {
 public:
-    GraphicsContext() = default;
+    GraphicsContext();
     GraphicsContext(sp<RenderEngineContext> renderContext, sp<RenderController> renderController);
 
     static GraphicsContext& mocked();

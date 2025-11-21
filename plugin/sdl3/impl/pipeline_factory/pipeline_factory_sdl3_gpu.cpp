@@ -153,7 +153,7 @@ SDL_GPUVertexElementFormat toVertexElementFormat(const Attribute& attribute)
                 return formats[length - 1];
             }
             case Attribute::TYPE_BYTE:
-                case Attribute::TYPE_UBYTE:
+            case Attribute::TYPE_UBYTE:
                 if(length == 2)
                     return attribute.normalized()?  SDL_GPU_VERTEXELEMENTFORMAT_BYTE2_NORM : SDL_GPU_VERTEXELEMENTFORMAT_BYTE2;
                 if(length == 4)
@@ -162,6 +162,11 @@ SDL_GPUVertexElementFormat toVertexElementFormat(const Attribute& attribute)
             case Attribute::TYPE_INT:
             {
                 constexpr SDL_GPUVertexElementFormat formats[4] = {SDL_GPU_VERTEXELEMENTFORMAT_INT, SDL_GPU_VERTEXELEMENTFORMAT_INT2, SDL_GPU_VERTEXELEMENTFORMAT_INT3, SDL_GPU_VERTEXELEMENTFORMAT_INT4};
+                return formats[length - 1];
+            }
+            case Attribute::TYPE_UINT:
+            {
+                constexpr SDL_GPUVertexElementFormat formats[4] = {SDL_GPU_VERTEXELEMENTFORMAT_UINT, SDL_GPU_VERTEXELEMENTFORMAT_UINT2, SDL_GPU_VERTEXELEMENTFORMAT_UINT3, SDL_GPU_VERTEXELEMENTFORMAT_UINT4};
                 return formats[length - 1];
             }
             case Attribute::TYPE_SHORT:
@@ -200,6 +205,50 @@ SDL_GPUPrimitiveType toPrimitiveType(const enums::DrawMode drawMode)
     }
     FATAL("Unsupported render mode: %d", drawMode);
     return SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
+}
+
+SDL_GPUCompareOp toCompareOp(const PipelineDescriptor::CompareFunc compareOp)
+{
+    constexpr SDL_GPUCompareOp sdlCompareOps[] = {SDL_GPU_COMPAREOP_LESS_OR_EQUAL, SDL_GPU_COMPAREOP_ALWAYS, SDL_GPU_COMPAREOP_NEVER, SDL_GPU_COMPAREOP_EQUAL, SDL_GPU_COMPAREOP_NOT_EQUAL, SDL_GPU_COMPAREOP_LESS,
+                                                  SDL_GPU_COMPAREOP_GREATER, SDL_GPU_COMPAREOP_LESS_OR_EQUAL, SDL_GPU_COMPAREOP_GREATER_OR_EQUAL};
+    DASSERT(compareOp < PipelineDescriptor::COMPARE_FUNC_LENGTH);
+    return sdlCompareOps[compareOp];
+}
+
+SDL_GPUStencilOp toStencilOp(const PipelineDescriptor::StencilFunc stencilOp)
+{
+    constexpr SDL_GPUStencilOp sdlStencilOps[] = {SDL_GPU_STENCILOP_KEEP, SDL_GPU_STENCILOP_ZERO, SDL_GPU_STENCILOP_REPLACE, SDL_GPU_STENCILOP_INCREMENT_AND_CLAMP, SDL_GPU_STENCILOP_INCREMENT_AND_WRAP,
+                                                  SDL_GPU_STENCILOP_DECREMENT_AND_CLAMP, SDL_GPU_STENCILOP_DECREMENT_AND_WRAP, SDL_GPU_STENCILOP_INVERT};
+    DASSERT(stencilOp < PipelineDescriptor::STENCIL_FUNC_LENGTH);
+    return sdlStencilOps[stencilOp];
+
+}
+
+SDL_GPUDepthStencilState toDepthStencilState(const PipelineDescriptor& pipelineDescriptor)
+{
+    SDL_GPUDepthStencilState depthStencilState = {SDL_GPU_COMPAREOP_LESS_OR_EQUAL};
+    depthStencilState.enable_depth_test = true;
+    depthStencilState.enable_depth_write = true;
+    if(const PipelineDescriptor::TraitDepthTest* depthTest = pipelineDescriptor.getTrait<PipelineDescriptor::TraitDepthTest>())
+    {
+        depthStencilState.enable_depth_test = depthTest->_enabled;
+        depthStencilState.enable_depth_write = depthTest->_write_enabled;
+        depthStencilState.compare_op = toCompareOp(depthTest->_func);
+    }
+    if(const PipelineDescriptor::TraitStencilTest* stencilTest = pipelineDescriptor.getTrait<PipelineDescriptor::TraitStencilTest>())
+    {
+        depthStencilState.enable_stencil_test = true;
+        depthStencilState.write_mask = 0xff;
+        depthStencilState.front_stencil_state.fail_op = toStencilOp(stencilTest->_front._op_dpass);
+        depthStencilState.front_stencil_state.pass_op = toStencilOp(stencilTest->_front._op);
+        depthStencilState.front_stencil_state.depth_fail_op = toStencilOp(stencilTest->_front._op_dfail);
+        depthStencilState.front_stencil_state.compare_op = toCompareOp(stencilTest->_front._func);
+        depthStencilState.back_stencil_state.fail_op = toStencilOp(stencilTest->_back._op_dpass);
+        depthStencilState.back_stencil_state.pass_op = toStencilOp(stencilTest->_back._op);
+        depthStencilState.back_stencil_state.depth_fail_op = toStencilOp(stencilTest->_back._op_dfail);
+        depthStencilState.back_stencil_state.compare_op = toCompareOp(stencilTest->_back._func);
+    }
+    return depthStencilState;
 }
 
 void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout, const enums::ShaderStageSet stages)
@@ -286,7 +335,7 @@ public:
                     numVertexBuffers,
                     v.stride(),
                     k == 0 ? SDL_GPU_VERTEXINPUTRATE_VERTEX : SDL_GPU_VERTEXINPUTRATE_INSTANCE,
-                    k
+                    0
                 };
                 ++ numVertexBuffers;
 
@@ -317,13 +366,20 @@ public:
             if(const RenderTargetContext& renderTarget = gc.renderTarget(); renderTarget._create_config)
             {
                 const RenderTarget::Configure& rtCreateConfig = *renderTarget._create_config;
+                CHECK(rtCreateConfig._color_attachments.size() <= 8, "Rendertarget now can only hold no more than 8 color attachments.");
                 for(const auto& [t, cv] : rtCreateConfig._color_attachments)
                 {
-                    colorTargetDescriptions[numColorTargets] = {
+                    const bool isIntegerTarget = t->parameters()->_format & Texture::FORMAT_INTEGER;
+                    colorTargetDescriptions[numColorTargets++] = {
                         t->delegate().cast<TextureSDL3_GPU>()->textureFormat(),
-                        numColorTargets == 0 ? blendState : SDL_GPUColorTargetBlendState{}
+                        isIntegerTarget ? SDL_GPUColorTargetBlendState{} : blendState
                     };
-                    ++ numColorTargets;
+                }
+                if(rtCreateConfig._depth_stencil_attachment)
+                {
+                    const auto delegate = rtCreateConfig._depth_stencil_attachment->delegate().cast<TextureSDL3_GPU>();
+                    depthStencilFormat = delegate->textureFormat();
+                    hasDepthStencilTarget = true;
                 }
             }
             else
@@ -349,9 +405,7 @@ public:
                     SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE
                 }, {
                     SDL_GPU_SAMPLECOUNT_1
-                }, {
-                    SDL_GPU_COMPAREOP_LESS_OR_EQUAL
-                }
+                }, toDepthStencilState(_pipeline_descriptor)
                 , {
                     colorTargetDescriptions,
                     numColorTargets,

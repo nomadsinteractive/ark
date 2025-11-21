@@ -222,7 +222,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         imageCreateInfo.flags = isCubemap ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 
         size_t imageDataSize = imagedata ? imagedata->size() : bitmap.rowBytes() * bitmap.height();
-        VkImageFormatProperties ifp;
+        VkImageFormatProperties ifp = {};
         VkResult r = vkGetPhysicalDeviceImageFormatProperties(_renderer->device()->vkPhysicalDevice(), imageCreateInfo.format, imageCreateInfo.imageType, imageCreateInfo.tiling,
                                                               imageCreateInfo.usage, imageCreateInfo.flags, &ifp);
         if(r == VK_ERROR_FORMAT_NOT_SUPPORTED)

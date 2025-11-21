@@ -68,7 +68,7 @@ void BufferSDL3_GPU::uploadBuffer(GraphicsContext& graphicsContext, Uploader& up
     SDL_ReleaseGPUTransferBuffer(gpuDevice, uploadTransferBuffer);
 }
 
-void BufferSDL3_GPU::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr)
+void BufferSDL3_GPU::downloadBuffer(GraphicsContext& graphicsContext, const size_t offset, const size_t size, void* ptr)
 {
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
 

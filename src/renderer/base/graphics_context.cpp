@@ -1,13 +1,17 @@
 #include "renderer/base/graphics_context.h"
 
-#include "render_engine_context.h"
+#include "render_engine.h"
 #include "core/types/global.h"
 
 #include "renderer/base/render_controller.h"
-
-#include "platform/platform.h"
+#include "renderer/base/render_engine_context.h"
 
 namespace ark {
+
+GraphicsContext::GraphicsContext()
+    : _render_context(Ark::instance().renderController()->renderEngine()->context()), _render_controller(Ark::instance().renderController())
+{
+}
 
 GraphicsContext::GraphicsContext(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
     : _render_context(std::move(renderContext)), _render_controller(std::move(renderController)), _tick(0)
