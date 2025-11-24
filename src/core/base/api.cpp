@@ -13,14 +13,8 @@ static std::thread::id _thread_ids[THREAD_NAME_ID_COUNT];
 void __fatal__(const char* func, const char* condition, const char* message)
 {
     const String str = Strings::sprintf("%s%s", condition ? Strings::sprintf("\"%s\" failed! ", condition).c_str() : "", message);
-#ifdef ARK_FLAG_PUBLISHING_BUILD
-    constexpr bool raise = true;
-#else
-    uint32_t raise = 1;
-#endif
     Log::e(func, str.c_str());
-    if(raise)
-        throw std::runtime_error(str.c_str());
+    throw std::runtime_error(str.c_str());
 }
 
 void __warning__(const char* func, const char* /*condition*/, const char* message)

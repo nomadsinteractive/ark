@@ -51,8 +51,8 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
             configure._color_attachments.emplace_back(std::move(tex), i._clear_value);
         else
         {
+            CHECK(usage.contains(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "RenderTarget textures must have either color attachment or depth stencil usage declared: %d", usage);
             CHECK(configure._depth_stencil_attachment == nullptr, "Only one depth-stencil attachment allowed");
-            CHECK(usage.contains(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Texture has no depth stencil usage: %d", usage);
             configure._depth_stencil_attachment = std::move(tex);
         }
     }

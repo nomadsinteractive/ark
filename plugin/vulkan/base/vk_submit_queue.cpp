@@ -36,12 +36,12 @@ void VKSubmitQueue::submitCommandBuffer(VkCommandBuffer commandBuffer)
     addSubmitInfo(1, &_submit_queue.back());
 }
 
-void VKSubmitQueue::submit(VkQueue queue)
+void VKSubmitQueue::submit(const VkQueue queue)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     if(!_submit_infos.empty())
     {
-        std::vector<VkSemaphore> signalSemaphores;
+        Vector<VkSemaphore> signalSemaphores;
         signalSemaphores.reserve(_signal_semaphores.size());
         for(auto iter = _signal_semaphores.begin(); iter != _signal_semaphores.end(); )
             if(iter->unique())
@@ -63,7 +63,7 @@ void VKSubmitQueue::submit(VkQueue queue)
     _wait_semaphores.clear();
 }
 
-void VKSubmitQueue::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers)
+void VKSubmitQueue::addSubmitInfo(const uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     VkSubmitInfo submitInfo = {VK_STRUCTURE_TYPE_SUBMIT_INFO};

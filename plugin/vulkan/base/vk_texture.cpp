@@ -173,17 +173,18 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
     VkDevice logicalDevice = _renderer->vkLogicalDevice();
     if(_parameters->_usage.contains(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
     {
+        CHECK_WARN(!_parameters->_usage.contains(Texture::USAGE_STORAGE), "Depth stencil texture can't be storage image");
         const VkFormat fbDepthFormat = VKUtil::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), _parameters->_format, _parameters->_usage);
-        VkImageCreateInfo image = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
-        image.format = fbDepthFormat;
-        image.usage = toTextureUsage(_parameters->_usage);
-        image.imageType = VK_IMAGE_TYPE_2D;
-        image.extent = {_width, _height , 1};
-        image.mipLevels = 1;
-        image.arrayLayers = _num_faces;
-        image.samples = VK_SAMPLE_COUNT_1_BIT;
-        image.tiling = VK_IMAGE_TILING_OPTIMAL;
-        VKUtil::createImage(_renderer->device(), image, &_image, &_memory);
+        VkImageCreateInfo imageCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
+        imageCreateInfo.format = fbDepthFormat;
+        imageCreateInfo.usage = toTextureUsage(_parameters->_usage);
+        imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+        imageCreateInfo.extent = {_width, _height , 1};
+        imageCreateInfo.mipLevels = 1;
+        imageCreateInfo.arrayLayers = _num_faces;
+        imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        VKUtil::createImage(_renderer->device(), imageCreateInfo, &_image, &_memory);
 
         VkImageViewCreateInfo depthStencilView = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
         depthStencilView.viewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -207,7 +208,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
 
     {
         // Create optimal tiled target image on the device
-        VkImageCreateInfo imageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+        VkImageCreateInfo imageCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
         imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
         imageCreateInfo.format = format;
         imageCreateInfo.mipLevels = _mip_levels;

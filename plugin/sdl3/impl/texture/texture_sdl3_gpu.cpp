@@ -50,7 +50,7 @@ SDL_GPUTextureUsageFlags toTextureUsageFlags(const Texture::Usage usage)
 
     SDL_GPUTextureUsageFlags flags = 0;
     if(usage.contains(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
-        return SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
+        flags |= SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
     if(usage.contains(Texture::USAGE_COLOR_ATTACHMENT))
         flags |= SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
     if(usage.contains(Texture::USAGE_SAMPLER))

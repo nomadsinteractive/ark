@@ -93,6 +93,9 @@ void VKUtil::createImage(const VKDevice& device, const VkImageCreateInfo& imageC
 
 VkImageLayout VKUtil::toImageLayout(const Texture::Usage usage)
 {
+    if(usage.contains(Texture::USAGE_STORAGE))
+        return VK_IMAGE_LAYOUT_GENERAL;
+
     if(usage.contains(Texture::USAGE_ATTACHMENT))
         return toAttachmentImageLayout(usage);
 
