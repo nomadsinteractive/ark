@@ -60,9 +60,9 @@ bool sanitizer(const std::smatch& match)
 }
 
 ShaderPreprocessor::ShaderPreprocessor(String source, document manifest, const enums::ShaderStageBit shaderStage, const enums::ShaderStageBit preShaderStage)
-    : _source(std::move(source)), _manifest(std::move(manifest)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == enums::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
-      _declaration_outs(_attribute_declaration_codes, shaderStage == enums::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
-      _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
+    : _source(std::move(source)), _manifest(std::move(manifest)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_source, shaderStage == enums::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
+      _declaration_outs(_attribute_declaration_source, shaderStage == enums::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
+      _declaration_uniforms(_uniform_declaration_source, "uniform"), _declaration_samplers(_uniform_declaration_source, "uniform"), _declaration_images(_uniform_declaration_source, "uniform"),
       _pre_main(sp<String>::make()), _post_main(sp<String>::make())
 {
     _predefined_macros.push_back(Strings::sprintf("#define ARK_Z_DIRECTION %.2f", Ark::instance().renderController()->renderEngine()->toLayoutDirection(1.0f)));
@@ -115,9 +115,9 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
         String body;
         const size_t prefixStart = parseFunctionBody(remaining, body);
         sp<String> fragment = sp<String>::make();
-        _main.push_back(sp<String>::make(prefix + "\n"));
-        _main.push_back(fragment);
-        _main.push_back(sp<String>::make("\n" + remaining.substr(prefixStart)));
+        _main_source.push_back(sp<String>::make(prefix + "\n"));
+        _main_source.push_back(fragment);
+        _main_source.push_back(sp<String>::make("\n" + remaining.substr(prefixStart)));
         _main_block = sp<Function>::make("main", m[2].str(), m[1].str(), body.strip(), std::move(fragment));
         return false;
     });
@@ -130,35 +130,36 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 void ShaderPreprocessor::parseDeclarations()
 {
     this->addInclude("shaders/defines.h");
-    _main.replace(REGEX_INCLUDE_PATTERN, [this](const std::smatch& m) {
+    _main_source.replace(REGEX_INCLUDE_PATTERN, [this](const std::smatch& m) {
         this->addInclude(m[1].str());
         return nullptr;
     });
 
     const auto structPatternReplacer = [this](const std::smatch& m) {
         const sp<String> declaration = sp<String>::make(m.str());
-        this->_struct_declaration_codes.push_back(declaration);
+        this->_struct_declaration_source.push_back(declaration);
         this->_struct_definitions.push_back(m[1].str(), m[2].str());
         return nullptr;
     };
-    _include_declaration_codes.replace(REGEX_STRUCT_PATTERN, structPatternReplacer);
-    _main.replace(REGEX_STRUCT_PATTERN, structPatternReplacer);
+    _include_declaration_source.replace(REGEX_STRUCT_PATTERN, structPatternReplacer);
+    _main_source.replace(REGEX_STRUCT_PATTERN, structPatternReplacer);
 
     const auto uniformPatternReplacer = [this](const std::smatch& m) {
         const uint32_t length = m[5].matched ? Strings::eval<uint32_t>(m[5].str()) : 1;
         return this->addUniform(m[3].str(), m[4].str(), length, m.str());
     };
-    _include_declaration_codes.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
-    _main.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
+    _include_declaration_source.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
+    _main_source.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
 
     auto ssboPattern = [this](const std::smatch& m) {
         const int32_t binding = m[1].matched ? Strings::eval<int32_t>(m[1].str()) : -1;
         const int32_t set = m[2].matched ? Strings::eval<int32_t>(m[2].str()) : -1;
         _ssbos[m[3].str()] = {binding, set};
-        return true;
+        String layoutDescriptor = m.str();
+        return sp<String>::make(std::move(layoutDescriptor));
     };
-    _include_declaration_codes.search(REGEX_SSBO_PATTERN, ssboPattern);
-    _main.search(REGEX_SSBO_PATTERN, ssboPattern);
+    _include_declaration_source.replace(REGEX_SSBO_PATTERN, ssboPattern);
+    _main_source.replace(REGEX_SSBO_PATTERN, ssboPattern);
 
     if(_shader_stage == enums::SHADER_STAGE_BIT_COMPUTE)
     {
@@ -175,7 +176,7 @@ void ShaderPreprocessor::parseDeclarations()
                 }
             return true;
         };
-        _main.search(REGEX_LOCAL_SIZE_PATTERN, localSizeTraveller);
+        _main_source.search(REGEX_LOCAL_SIZE_PATTERN, localSizeTraveller);
     }
 
     if(!_main_block)
@@ -185,28 +186,28 @@ void ShaderPreprocessor::parseDeclarations()
 
     {
         const String outVar = outputName();
-        _main.push_back(sp<String>::make("\n\nvoid main() {\n"));
-        _main.push_back(_pre_main);
+        _main_source.push_back(sp<String>::make("\n\nvoid main() {\n"));
+        _main_source.push_back(_pre_main);
         if(outVar && _main_block->hasReturnValue())
-            _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
+            _main_source.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
         const sp<String> preModifier = sp<String>::make();
-        _main.push_back(preModifier);
-        _main.push_back(sp<String>::make(_main_block->genOutCall(_pre_shader_stage, _shader_stage)));
+        _main_source.push_back(preModifier);
+        _main_source.push_back(sp<String>::make(_main_block->genOutCall(_pre_shader_stage, _shader_stage)));
         for(const auto& [pre, post] : _result_modifiers)
         {
             if(pre)
                 *preModifier = *preModifier + pre;
-            _main.push_back(sp<String>::make(post));
+            _main_source.push_back(sp<String>::make(post));
         }
-        _main.push_back(sp<String>::make(";"));
-        _main.push_back(_post_main);
-        _main.push_back(sp<String>::make("\n}\n\n"));
+        _main_source.push_back(sp<String>::make(";"));
+        _main_source.push_back(_post_main);
+        _main_source.push_back(sp<String>::make("\n}\n\n"));
     }
 }
 
 ShaderPreprocessor::Stage ShaderPreprocessor::preprocess() const
 {
-    return {_manifest, _shader_stage, genDeclarations(_main.str())};
+    return {_manifest, _shader_stage, genDeclarations(_main_source.str())};
 }
 
 void ShaderPreprocessor::setupUniforms(const Table<String, sp<Uniform>>& uniforms)
@@ -215,13 +216,13 @@ void ShaderPreprocessor::setupUniforms(const Table<String, sp<Uniform>>& uniform
     {
         const String::size_type pos = i->name().find('[');
         DCHECK(pos != 0, "Illegal uniform name: %s", i->name().c_str());
-        if(_main.contains(pos == String::npos ? i->name() : i->name().substr(0, pos)) && !_declaration_uniforms.has(i->name()))
+        if(_main_source.contains(pos == String::npos ? i->name() : i->name().substr(0, pos)) && !_declaration_uniforms.has(i->name()))
         {
             String type = i->declaredType();
             sp<String> declaration = sp<String>::make(i->declaration("uniform "));
             _declaration_uniforms.vars().push_back(i->name(), Declaration(i->name(), std::move(type), i->length(), declaration));
             if(pos == String::npos)
-                _uniform_declaration_codes.push_back(std::move(declaration));
+                _uniform_declaration_source.push_back(std::move(declaration));
         }
     }
 }
@@ -292,11 +293,11 @@ void ShaderPreprocessor::insertUBOStruct(const PipelineLayout::UBO& ubo, const i
         sb << "set = " << spaceSet << ", ";
     sb << "binding = " << ubo.binding() << ") uniform UBO" << ubo.binding() << " {\n";
     for(const auto& i : ubo.uniforms().values()) {
-        _main.replace(i->name(), Strings::sprintf("ubo%d.%s", ubo.binding(), i->name().c_str()));
+        _main_source.replace(i->name(), Strings::sprintf("ubo%d.%s", ubo.binding(), i->name().c_str()));
         sb << i->declaration("") << '\n';
     }
     sb << "} ubo" << ubo.binding() << ";\n\n";
-    _uniform_declaration_codes.push_back(sp<String>::make(sb.str()));
+    _uniform_declaration_source.push_back(sp<String>::make(sb.str()));
 }
 
 bool ShaderPreprocessor::hasUBO(const PipelineLayout::UBO& ubo) const
@@ -343,7 +344,7 @@ sp<String> ShaderPreprocessor::addUniform(const String& type, const String& name
     else
     {
         _declaration_uniforms.vars().push_back(name, std::move(uniform));
-        _uniform_declaration_codes.push_back(std::move(declarationVar));
+        _uniform_declaration_source.push_back(std::move(declarationVar));
         return nullptr;
     }
     return declarationVar;
@@ -386,7 +387,7 @@ const char* ShaderPreprocessor::getOutAttributePrefix(enums::ShaderStageBit preS
 String ShaderPreprocessor::genDeclarations(const String& mainFunc) const
 {
     StringBuffer sb;
-    if(_version && !_main.contains("#version "))
+    if(_version && !_main_source.contains("#version "))
         sb << "#version " << _version << '\n';
 
     sb << '\n';
@@ -397,10 +398,10 @@ String ShaderPreprocessor::genDeclarations(const String& mainFunc) const
         sb << '\n';
     }
 
-    sb << _struct_declaration_codes.str('\n');
-    sb << _include_declaration_codes.str('\n');
-    sb << _uniform_declaration_codes.str('\n');
-    sb << _attribute_declaration_codes.str('\n');
+    sb << _struct_declaration_source.str('\n');
+    sb << _include_declaration_source.str('\n');
+    sb << _uniform_declaration_source.str('\n');
+    sb << _attribute_declaration_source.str('\n');
     sb << mainFunc;
     return sb.str();
 }
@@ -415,7 +416,7 @@ void ShaderPreprocessor::addInclude(const String& filepath)
     else
         content = stringtable->getString(filepath.substr(0, pos), filepath.substr(pos + 1).lstrip('/'), false);
     CHECK(content, "Can't open include file \"%s\"", filepath.c_str());
-    _include_declaration_codes.push_back(content ? sp<String>::make(std::move(content.value())) : sp<String>());
+    _include_declaration_source.push_back(content ? sp<String>::make(std::move(content.value())) : sp<String>());
 }
 
 ShaderPreprocessor::Function::Function(String name, String params, String returnType, String body, sp<String> placeHolder)
@@ -606,11 +607,6 @@ String ShaderPreprocessor::Source::str(const char endl) const
                 sb << endl;
         }
     return sb.str();
-}
-
-void ShaderPreprocessor::Source::push_front(sp<String> fragment)
-{
-    _lines.push_front(std::move(fragment));
 }
 
 void ShaderPreprocessor::Source::push_back(sp<String> fragment)

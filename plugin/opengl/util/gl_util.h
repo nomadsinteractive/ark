@@ -31,7 +31,7 @@ public:
     static GLenum getTextureInternalFormat(Texture::Usage usage, Texture::Format format, const Bitmap& bitmap);
     static GLenum getTextureInternalFormat(Texture::Usage usage, Texture::Format format, uint32_t channelSize, uint32_t componentSize);
     static GLenum getTextureFormat(Texture::Usage usage, Texture::Format format, uint8_t channels);
-    static GLenum getPixelType(int32_t format, const Bitmap& bitmap);
+    static GLenum getPixelType(Texture::Format format, const Bitmap& bitmap);
 
     static void glTexImage2D(uint32_t index, int32_t n, const void* data);
 };

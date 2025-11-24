@@ -18,7 +18,7 @@ namespace ark::plugin::vulkan {
 
 namespace {
 
-void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize)
+void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, const size_t imageDataSize)
 {
     if(imagedata == nullptr)
         memset(buf, 0, imageDataSize);
@@ -92,7 +92,7 @@ void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
             uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * 4, 4, false), imagedata);
         else
         {
-            const uint8_t channels = format & Texture::FORMAT_RGBA;
+            const uint8_t channels = (format & Texture::FORMAT_RGBA).bits();
             const uint32_t componentSize = RenderUtil::getComponentSize(format);
             uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * channels * componentSize, channels, false), imagedata);
         }

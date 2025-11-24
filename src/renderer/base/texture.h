@@ -18,7 +18,7 @@ namespace ark {
 class ARK_API Texture final : public Resource {
 public:
 //  [[script::bindings::enumeration]]
-    enum Format {
+    enum FormatBits {
         FORMAT_AUTO = 0x8000,
         FORMAT_R = 0,
         FORMAT_RG = 1,
@@ -34,6 +34,7 @@ public:
         FORMAT_32_BIT = 512,
         FORMAT_BIT_MASK = FORMAT_24_BIT | FORMAT_32_BIT
     };
+    typedef BitSet<FormatBits> Format;
 
 //  [[script::bindings::enumeration]]
     enum UsageBits {

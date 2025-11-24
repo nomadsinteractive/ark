@@ -1,5 +1,7 @@
 #include "sdl3/impl/renderer_factory/renderer_factory_sdl3_gpu.h"
 
+#include <ranges>
+
 #include "core/util/uploader_type.h"
 #include "core/util/log.h"
 
@@ -65,14 +67,14 @@ public:
         }
 
         const ShaderPreprocessor* prestage = nullptr;
-        for(auto iter = context.renderStages().begin(); iter != context.renderStages().end(); ++iter)
+        for(const op<ShaderPreprocessor>& stage : context.renderStages() | std::views::values)
         {
             if(prestage)
             {
-                RenderUtil::setLayoutDescriptor(prestage->_declaration_outs, iter->second->_declaration_ins, sLocation, 0);
-                RenderUtil::setLayoutDescriptor(iter->second->_declaration_outs, sLocation, 0);
+                RenderUtil::setLayoutDescriptor(prestage->_declaration_outs, stage->_declaration_ins, sLocation, 0);
+                RenderUtil::setLayoutDescriptor(stage->_declaration_outs, sLocation, 0);
             }
-            prestage = iter->second.get();
+            prestage = stage.get();
         }
 
         {
@@ -85,13 +87,12 @@ public:
             }
         }
 
-        for(const auto& [k, v] : context.renderStages())
+        for(ShaderPreprocessor* preprocessor : context.stages())
         {
-            ShaderPreprocessor& preprocessor = v;
-            preprocessor._version = 450;
-            preprocessor.declareUBOStruct(pipelineLayout, k == enums::SHADER_STAGE_BIT_VERTEX ? 1 : 3);
-            preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
-            preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
+            preprocessor->_version = 450;
+            preprocessor->declareUBOStruct(pipelineLayout, preprocessor->_shader_stage == enums::SHADER_STAGE_BIT_VERTEX ? 1 : 3);
+            preprocessor->_predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
+            preprocessor->_predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
         }
     }
 };

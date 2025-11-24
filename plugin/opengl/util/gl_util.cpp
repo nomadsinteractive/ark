@@ -196,7 +196,7 @@ GLenum GLUtil::getTextureInternalFormat(const Texture::Usage usage, const Textur
     switch(usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
     case Texture::USAGE_AUTO: {
-        const bool isSigned = format & Texture::FORMAT_SIGNED;
+        const bool isSigned = format.contains(Texture::FORMAT_SIGNED);
         const uint32_t cs = channelSize - 1;
 
         CHECK(componentSize == 1 || componentSize == 2 || componentSize == 4, "Illegal color component size %d", componentSize);
@@ -255,12 +255,12 @@ GLenum GLUtil::getTextureFormat(const Texture::Usage usage, const Texture::Forma
     {
         case Texture::USAGE_AUTO:
         {
-            const bool isInteger = format & Texture::FORMAT_INTEGER;
+            const bool isInteger = format.contains(Texture::FORMAT_INTEGER);
             constexpr GLenum fChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
             constexpr GLenum iChannels[] = {GL_RED_INTEGER, GL_RG_INTEGER, GL_RGB_INTEGER, GL_RGBA_INTEGER};
             const GLenum* formatByChannels = isInteger ? iChannels : fChannels;
             DCHECK(channels < 5, "Unknown bitmap format: (channels = %d)", static_cast<uint32_t>(channels));
-            return format == Texture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & Texture::FORMAT_RGBA)];
+            return format == Texture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[(format & Texture::FORMAT_RGBA).bits()];
         }
         case Texture::USAGE_DEPTH_ATTACHMENT:
             return GL_DEPTH_COMPONENT;
@@ -271,7 +271,7 @@ GLenum GLUtil::getTextureFormat(const Texture::Usage usage, const Texture::Forma
     return GL_RGBA;
 }
 
-GLenum GLUtil::getPixelType(const int32_t format, const Bitmap& bitmap)
+GLenum GLUtil::getPixelType(const Texture::Format format, const Bitmap& bitmap)
 {
     const bool flagSigned = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED;
     const uint32_t componentSize = bitmap.rowBytes() / bitmap.width() / bitmap.channels();

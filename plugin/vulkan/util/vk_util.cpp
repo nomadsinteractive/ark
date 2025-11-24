@@ -191,7 +191,7 @@ VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, const Texture::Format for
 VkFormat VKUtil::toTextureFormat(const Texture::Format format)
 {
     DCHECK(format != Texture::FORMAT_AUTO, "Cannot determine texture format(auto) without a bitmap");
-    return toTextureFormat(RenderUtil::getComponentSize(format), (format & Texture::FORMAT_RGBA) + 1, format);
+    return toTextureFormat(RenderUtil::getComponentSize(format), (format & Texture::FORMAT_RGBA).bits() + 1, format);
 }
 
 VkFrontFace VKUtil::toFrontFace(const PipelineDescriptor::FrontFace frontFace)
@@ -264,7 +264,7 @@ VkFormat VKUtil::getSupportedDepthFormat(const VkPhysicalDevice physicalDevice, 
 {
     const bool hasStencil = usage.contains(Texture::USAGE_STENCIL_ATTACHMENT);
     VkFormat depthFormat = VK_FORMAT_UNDEFINED;
-    switch(format & Texture::FORMAT_BIT_MASK)
+    switch((format & Texture::FORMAT_BIT_MASK).bits())
     {
         case Texture::FORMAT_16_BIT:
             depthFormat = hasStencil ? VK_FORMAT_D16_UNORM_S8_UINT : VK_FORMAT_D16_UNORM;

@@ -49,7 +49,7 @@ public:
             RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", 0, 2);
 
         const ShaderPreprocessor* prestage = nullptr;
-        for(const auto& [_, stage] : context.renderStages())
+        for(const op<ShaderPreprocessor>& stage : context.renderStages() | std::views::values)
         {
             if(prestage)
             {
@@ -67,7 +67,6 @@ public:
             preprocessor->_predefined_macros.emplace_back("#extension GL_ARB_shading_language_420pack : enable");
         }
     }
-
 };
 
 }

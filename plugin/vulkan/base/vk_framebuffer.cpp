@@ -108,14 +108,15 @@ void VKFramebuffer::Stub::initialize()
     _command_buffer = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
 }
 
-Vector<VkPipelineColorBlendAttachmentState> VKFramebuffer::Stub::makeColorBlendAttachmentStates(const VkPipelineColorBlendAttachmentState& mainState, uint32_t colorAttachmentCount)
+Vector<VkPipelineColorBlendAttachmentState> VKFramebuffer::Stub::makeColorBlendAttachmentStates(const VkPipelineColorBlendAttachmentState& mainState, const uint32_t colorAttachmentCount)
 {
     Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
     const uint32_t stateCount = std::max<uint32_t>(colorAttachmentCount, _configure._color_attachments.size());
     for(uint32_t i = 0; i < stateCount; ++i)
     {
+        const Texture::Format textureFormat = _configure._color_attachments.at(i)._texture->parameters()->_format;
         VkPipelineColorBlendAttachmentState cbaState = mainState;
-        cbaState.blendEnable = i == 0 || (i < _configure._color_attachments.size() && !(_configure._color_attachments.at(i)._texture->parameters()->_format & Texture::FORMAT_INTEGER));
+        cbaState.blendEnable = i == 0 || (i < _configure._color_attachments.size() && textureFormat.has(Texture::FORMAT_RGBA) && !(textureFormat.contains(Texture::FORMAT_INTEGER)));
         blendAttachmentStates.push_back(cbaState);
     }
     return blendAttachmentStates;

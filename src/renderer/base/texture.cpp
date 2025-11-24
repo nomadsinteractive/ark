@@ -23,7 +23,7 @@ class UploaderClear final : public Texture::Uploader {
 public:
     UploaderClear(const Size& size, const Texture::Format format)
         : _bitmap(static_cast<uint32_t>(size.widthAsFloat()), static_cast<uint32_t>(size.heightAsFloat()), static_cast<uint32_t>(size.widthAsFloat()) * RenderUtil::getPixelSize(format),
-                  (format & Texture::FORMAT_RGBA) + 1, false) {
+                  (format & Texture::FORMAT_RGBA).bits() + 1, false) {
     }
 
     void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override
@@ -181,7 +181,7 @@ template<> ARK_API Texture::Type StringConvert::eval<Texture::Type>(const String
 
 template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const String& str)
 {
-    constexpr BitSet<Texture::Format>::LookupTable<11> formats = {{
+    constexpr BitSet<Texture::FormatBits>::LookupTable<11> formats = {{
             {"r", Texture::FORMAT_R},
             {"rg", Texture::FORMAT_RG},
             {"rgb", Texture::FORMAT_RGB},
@@ -198,7 +198,7 @@ template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const St
     {
         uint32_t format = 0;
         for(const String& i : str.split('|'))
-            if(const Texture::Format f = enums::lookup(formats, i, Texture::FORMAT_AUTO); f == Texture::FORMAT_AUTO)
+            if(const Texture::FormatBits f = enums::lookup(formats, i, Texture::FORMAT_AUTO); f == Texture::FORMAT_AUTO)
             {
                 if(i.startsWith("int"))
                     format |= Texture::FORMAT_INTEGER | Texture::FORMAT_SIGNED | toBitFormat(i, 3);

@@ -369,7 +369,7 @@ public:
                 CHECK(rtCreateConfig._color_attachments.size() <= 8, "Rendertarget now can only hold no more than 8 color attachments.");
                 for(const auto& [t, cv] : rtCreateConfig._color_attachments)
                 {
-                    const bool isIntegerTarget = t->parameters()->_format & Texture::FORMAT_INTEGER;
+                    const bool isIntegerTarget = t->parameters()->_format.contains(Texture::FORMAT_INTEGER);
                     colorTargetDescriptions[numColorTargets++] = {
                         t->delegate().cast<TextureSDL3_GPU>()->textureFormat(),
                         isIntegerTarget ? SDL_GPUColorTargetBlendState{} : blendState
@@ -496,7 +496,7 @@ private:
 class ComputePipelineSDL3_GPU final : public Pipeline {
 public:
     ComputePipelineSDL3_GPU(const PipelineDescriptor& pipelineDescriptor, String computeShader)
-        : _pipeline_descriptor(pipelineDescriptor), _compute_shader(std::move(computeShader)) {
+        : _pipeline_descriptor(pipelineDescriptor), _compute_shader(std::move(computeShader)), _pipeline(nullptr) {
     }
 
     uint64_t id() override
@@ -549,36 +549,7 @@ public:
                 nullptr
             };
 
-            const PipelineLayout& shaderLayout = _pipeline_descriptor.layout();
-            Uint32 samplerCount = 0;
-            for(const PipelineLayout::DescriptorSet& i : shaderLayout.samplers().values())
-                if(i._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE))
-                    ++ samplerCount;
-
-            Uint32 storageTextureCount = 0;
-            for(const PipelineLayout::DescriptorSet& i : shaderLayout.images().values())
-                if(i._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE))
-                    ++ storageTextureCount;
-
-            Uint32 uniformBufferCount = 0;
-            for(const PipelineLayout::UBO& i : shaderLayout.ubos())
-                if(i._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE))
-                    ++ uniformBufferCount;
-
-            Uint32 storageBufferCount = 0;
-            for(const PipelineLayout::SSBO& i : shaderLayout.ssbos())
-                if(i._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE))
-                    ++ storageBufferCount;
-
-            SDL_ShaderCross_ComputePipelineMetadata shaderMetadata = {
-                samplerCount,
-                storageTextureCount,
-                storageBufferCount,
-                0,
-                0,
-                uniformBufferCount
-            };
-
+            SDL_ShaderCross_ComputePipelineMetadata shaderMetadata = {};
             _pipeline = SDL_ShaderCross_CompileComputePipelineFromSPIRV(gpuDevice, &spirvInfo, &shaderMetadata);
             CHECK(_pipeline, "%s", SDL_GetError());
         }
@@ -593,10 +564,25 @@ public:
     {
         const GraphicsContextSDL3_GPU& sdl3GC = ensureGraphicsContext(graphicsContext);
 
-        SDL_GPUStorageTextureReadWriteBinding storageTextureBindings[8];
-        SDL_GPUStorageBufferReadWriteBinding storageBufferBindings[8];
+        uint32_t numStorageTextures = 0;
+        SDL_GPUStorageTextureReadWriteBinding storageTextureBindings[16];
+        for(const PipelineDescriptor::BindedTexture& i : computeContext._bindings->images())
+            if(i._descriptor_set._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE))
+            {
+                SDL_GPUStorageTextureReadWriteBinding& imageTextureBinding = storageTextureBindings[numStorageTextures++];
+                imageTextureBinding = {reinterpret_cast<SDL_GPUTexture*>(i._texture->id()), 0, 0};
+            }
 
-        SDL_GPUComputePass* computePass = SDL_BeginGPUComputePass(sdl3GC._command_buffer, storageTextureBindings, 1, storageBufferBindings, 0);
+        uint32_t numStorageBuffers = 0;
+        SDL_GPUStorageBufferReadWriteBinding storageBufferBindings[16];
+        for(const PipelineLayout::SSBO& i : computeContext._bindings->pipelineLayout()->ssbos())
+            if(i._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE))
+            {
+                SDL_GPUStorageBufferReadWriteBinding& bufferBinding = storageBufferBindings[numStorageBuffers++];
+                bufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(i._buffer.id())};
+            }
+
+        SDL_GPUComputePass* computePass = SDL_BeginGPUComputePass(sdl3GC._command_buffer, storageTextureBindings, numStorageTextures, storageBufferBindings, numStorageBuffers);
         SDL_BindGPUComputePipeline(computePass, _pipeline);
         SDL_DispatchGPUCompute(computePass, computeContext._num_work_groups[0], computeContext._num_work_groups[1], computeContext._num_work_groups[2]);
         SDL_EndGPUComputePass(computePass);
@@ -605,7 +591,6 @@ public:
 private:
     PipelineDescriptor _pipeline_descriptor;
     String _compute_shader;
-
     SDL_GPUComputePipeline* _pipeline;
 };
 

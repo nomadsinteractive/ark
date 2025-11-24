@@ -71,7 +71,6 @@ private:
 
         String str(char endl = 0) const;
 
-        void push_front(sp<String> fragment);
         void push_back(sp<String> fragment);
 
         bool search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller) const;
@@ -83,7 +82,7 @@ private:
         void insertBefore(const String& statement, const String& str);
 
     private:
-        std::list<sp<String>> _lines;
+        List<sp<String>> _lines;
     };
 
     struct Parameter {
@@ -197,12 +196,12 @@ public:
     enums::ShaderStageBit _shader_stage;
     enums::ShaderStageBit _pre_shader_stage;
 
-    Source _main;
+    Source _main_source;
 
-    Source _include_declaration_codes;
-    Source _struct_declaration_codes;
-    Source _uniform_declaration_codes;
-    Source _attribute_declaration_codes;
+    Source _include_declaration_source;
+    Source _struct_declaration_source;
+    Source _uniform_declaration_source;
+    Source _attribute_declaration_source;
 
     Table<String, String> _struct_definitions;
 

@@ -226,9 +226,22 @@ glslang::EShTargetLanguageVersion toTargetLanguageVersion(const uint32_t targetL
     return defaultVersion;
 }
 
+String addSourceLineNumbers(const String& source)
+{
+    StringBuffer sb;
+    uint32_t lineNumber = 0;
+    source.split('\n', true, [&sb, &lineNumber](const String& line) {
+        char buf[64];
+        std::snprintf(buf, sizeof(buf), "%-6u ", ++lineNumber);
+        sb << buf << line << std::endl;
+        return true;
+    });
+    return sb.str();
 }
 
-bytearray RenderUtil::makeUnitCubeVertices(bool flipWindingOrder)
+}
+
+bytearray RenderUtil::makeUnitCubeVertices(const bool flipWindingOrder)
 {
     static float vertices[] = {
         -1.0f,  1.0f, -1.0f,
@@ -266,7 +279,7 @@ bytearray RenderUtil::makeUnitCubeVertices(bool flipWindingOrder)
     {
         sp<ByteArray::Fixed<sizeof(vertices)>> flipped = sp<ByteArray::Fixed<sizeof(vertices)>>::make();
         memcpy(flipped->buf(), vertices, flipped->size());
-        V3* buf = reinterpret_cast<V3*>(flipped->buf());
+        auto* buf = reinterpret_cast<V3*>(flipped->buf());
         for(uint32_t i = 0; i < 6; ++i, buf += 4)
             std::swap(buf[1], buf[2]);
         return flipped;
@@ -379,7 +392,7 @@ String RenderUtil::outAttributeName(const String& name, enums::ShaderStageBit pr
 uint32_t RenderUtil::getChannelSize(Texture::Format format)
 {
     DASSERT(format != Texture::FORMAT_AUTO);
-    return (format & Texture::FORMAT_RGBA) + 1;
+    return (format & Texture::FORMAT_RGBA).bits() + 1;
 }
 
 uint32_t RenderUtil::getPixelSize(Texture::Format format)
@@ -387,12 +400,12 @@ uint32_t RenderUtil::getPixelSize(Texture::Format format)
     if(format == Texture::FORMAT_AUTO)
         return 4;
 
-    return (static_cast<uint32_t>(format & Texture::FORMAT_RGBA) + 1) * getComponentSize(format);
+    return ((format & Texture::FORMAT_RGBA).bits() + 1) * getComponentSize(format);
 }
 
 uint32_t RenderUtil::getComponentSize(const Texture::Format format)
 {
-    const uint32_t componentFormat = format & Texture::FORMAT_BIT_MASK;
+    const uint32_t componentFormat = (format & Texture::FORMAT_BIT_MASK).bits();
     if(componentFormat == Texture::FORMAT_8_BIT || componentFormat == 0)
         return 1;
     if(componentFormat == Texture::FORMAT_16_BIT)
@@ -410,12 +423,12 @@ std::pair<int32_t, int32_t> RenderUtil::getRenderTargetResolution(const RenderTa
     return {attachment->width(), attachment->height()};
 }
 
-Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, enums::ShaderStageBit stage, enums::RenderingBackendBit renderTarget, const uint32_t targetLanguageVersion)
+Vector<uint32_t> RenderUtil::compileSPIR(const String& source, enums::ShaderStageBit stage, enums::RenderingBackendBit renderTarget, const uint32_t targetLanguageVersion)
 {
     const Global<GLSLLangInitializer> initializer;
-    EShLanguage esStage = initializer->toShLanguage(stage);
+    const EShLanguage esStage = initializer->toShLanguage(stage);
     glslang::TShader shader(esStage);
-    const char* sources[] = {source.data()};
+    const char* sources[] = {source.c_str()};
     shader.setStrings(sources, 1);
 
     typedef Map<uint32_t, uint32_t> TPerSetBaseBinding;
@@ -464,12 +477,12 @@ Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, enums::ShaderS
 #endif
 
     if(!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))
-        FATAL("Compile error:\n%s\n\n%s", source.data(), shader.getInfoLog());
+        FATAL("Compile error:\n%s\n\n%s", addSourceLineNumbers(source).c_str(), shader.getInfoLog());
     {
         glslang::TProgram program;
         program.addShader(&shader);
         if(!program.link(EShMsgDefault))
-            FATAL("Link error: %s\n\n%s", source.data(), shader.getInfoLog());
+            FATAL("Link error: %s\n\n%s", addSourceLineNumbers(source).c_str(), shader.getInfoLog());
 
         if(const glslang::TIntermediate* intermedia = program.getIntermediate(esStage))
         {
