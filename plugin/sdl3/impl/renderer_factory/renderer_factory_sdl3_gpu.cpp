@@ -90,9 +90,28 @@ public:
         for(ShaderPreprocessor* preprocessor : context.stages())
         {
             preprocessor->_version = 450;
-            preprocessor->declareUBOStruct(pipelineLayout, preprocessor->_shader_stage == enums::SHADER_STAGE_BIT_VERTEX ? 1 : 3);
+            preprocessor->declareUBOStruct(pipelineLayout, preprocessor->_shader_stage == enums::SHADER_STAGE_BIT_VERTEX ? 1 : (preprocessor->_shader_stage == enums::SHADER_STAGE_BIT_COMPUTE ? 2 : 3));
             preprocessor->_predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
             preprocessor->_predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
+
+            for(auto& [k, v] : preprocessor->_ssbos)
+            {
+                if(v._usage.contains(Buffer::USAGE_BIT_READONLY) && !v._usage.contains(Buffer::USAGE_BIT_WRITEONLY))
+                {
+                    CHECK(v._binding._set == -1 || v._binding._set == 0, "Readonly buffer\"%s\" should be declared in set 0", k.c_str());
+                }
+                else if (v._usage.contains(Buffer::USAGE_BIT_WRITEONLY) || !v._usage)
+                {
+                    CHECK(v._binding._set == -1 || v._binding._set == 1, "Readwrite buffer\"%s\" should be declared in set 1", k.c_str());
+                    if(v._binding._set == -1)
+                    {
+                        const auto pos = v._declaration->find(')');
+                        ASSERT(pos != 0 && pos != String::npos);
+                        v._declaration->insert(pos, ", set = 1");
+                        v._binding._set = 1;
+                    }
+                }
+            }
         }
     }
 };

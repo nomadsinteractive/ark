@@ -334,11 +334,6 @@ void PipelineLayout::UBO::addUniform(const sp<Uniform>& uniform)
     _uniforms.push_back(uniform->name(), uniform);
 }
 
-PipelineLayout::SSBO::SSBO(Buffer buffer, const Binding binding)
-    : _buffer(std::move(buffer)), _binding(binding)
-{
-}
-
 uint32_t PipelineLayout::DescriptorSet::addStage(enums::ShaderStageBit stage, uint32_t binding)
 {
     _stages.set(stage);

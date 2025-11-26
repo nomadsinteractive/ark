@@ -89,7 +89,7 @@ const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
     return _delegate;
 }
 
-Buffer::Buffer(const UsageBit usageBits, sp<Uploader> uploader)
+Buffer::Buffer(const UsageBits usageBits, sp<Uploader> uploader)
     : _delegate(Ark::instance().renderController()->makeBuffer(Usage(usageBits), std::move(uploader))._delegate)
 {
 }
@@ -189,14 +189,16 @@ sp<Buffer> Buffer::BUILDER::build(const Scope& args)
 
 template<> ARK_API Buffer::Usage StringConvert::eval<Buffer::Usage>(const String& expr)
 {
-    constexpr Buffer::Usage::LookupTable<7> bits = {{
+    constexpr Buffer::Usage::LookupTable<9> bits = {{
         {"vertex", Buffer::USAGE_BIT_VERTEX},
         {"index", Buffer::USAGE_BIT_INDEX},
         {"indirect", Buffer::USAGE_BIT_DRAW_INDIRECT},
         {"storage", Buffer::USAGE_BIT_STORAGE},
         {"dynamic", Buffer::USAGE_BIT_DYNAMIC},
         {"transfer_src", Buffer::USAGE_BIT_TRANSFER_SRC},
-        {"host_visible", Buffer::USAGE_BIT_HOST_VISIBLE}
+        {"host_visible", Buffer::USAGE_BIT_HOST_VISIBLE},
+        {"readonly", Buffer::USAGE_BIT_READONLY},
+        {"writeonly", Buffer::USAGE_BIT_WRITEONLY}
     }};
     return Buffer::Usage::toBitSet(expr, bits);
 }

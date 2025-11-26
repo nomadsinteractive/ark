@@ -63,6 +63,12 @@ public:
         Table<String, Declaration> _vars;
     };
 
+    struct SSBODeclaration {
+        PipelineLayout::Binding _binding;
+        sp<String> _declaration;
+        Buffer::Usage _usage;
+    };
+
 private:
     class Source {
     public:
@@ -177,7 +183,6 @@ private:
     void insertUBOStruct(const PipelineLayout::UBO& ubo, int32_t spaceSet);
 
     static void linkParameters(const Vector<Parameter>& parameters, const ShaderPreprocessor& preStage, Set<String>& passThroughVars);
-    static const char* getOutAttributePrefix(enums::ShaderStageBit preStage);
 
 private:
     String _source;
@@ -211,7 +216,7 @@ public:
     Vector<Parameter> _predefined_parameters;
     Vector<ResultModifer> _result_modifiers;
 
-    Map<String, PipelineLayout::Binding> _ssbos;
+    Map<String, SSBODeclaration> _ssbos;
 
     Optional<V3i> _compute_local_sizes;
 

@@ -18,16 +18,18 @@ namespace ark {
 class ARK_API Buffer {
 public:
 //  [[script::bindings::enumeration]]
-    enum UsageBit {
+    enum UsageBits {
         USAGE_BIT_VERTEX,
         USAGE_BIT_INDEX,
         USAGE_BIT_DRAW_INDIRECT,
         USAGE_BIT_STORAGE,
         USAGE_BIT_DYNAMIC,
         USAGE_BIT_TRANSFER_SRC,
-        USAGE_BIT_HOST_VISIBLE
+        USAGE_BIT_HOST_VISIBLE,
+        USAGE_BIT_READONLY,
+        USAGE_BIT_WRITEONLY
     };
-    typedef BitSet<UsageBit, true> Usage;
+    typedef BitSet<UsageBits, true> Usage;
 
     class ARK_API Delegate : public Resource {
     public:
@@ -88,7 +90,7 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Buffer(Buffer::UsageBit usageBits, sp<Uploader> uploader);
+    Buffer(Buffer::UsageBits usageBits, sp<Uploader> uploader);
     Buffer(sp<Delegate> delegate) noexcept;
     Buffer() noexcept = default;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Buffer);

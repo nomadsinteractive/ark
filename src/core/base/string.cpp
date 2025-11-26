@@ -204,22 +204,19 @@ std::pair<Optional<String>, String> String::rcut(const char sep) const
     return {{}, *this};
 }
 
-void String::insert(size_type pos, const String& str)
+void String::insert(const size_type pos, const String& str)
 {
     _str.insert(pos, str._str);
 }
 
-Vector<String> String::split(char delim, bool allowEmpty) const
+Vector<String> String::split(const char delim, const bool allowEmpty) const
 {
     Vector<String> elems;
     std::stringstream ss(_str);
     std::string item;
     while(std::getline(ss, item, delim))
-    {
-        String s = String(item).strip();
-        if(allowEmpty || !s.empty())
+        if(String s = String(item).strip(); allowEmpty || !s.empty())
             elems.push_back(std::move(s));
-    }
     return elems;
 }
 

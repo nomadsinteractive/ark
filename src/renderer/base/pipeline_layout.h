@@ -85,13 +85,9 @@ public:
     };
 
     struct SSBO {
-        SSBO() = default;
-        SSBO(Buffer buffer, Binding binding);
-        DEFAULT_COPY_AND_ASSIGN(SSBO);
-
         Buffer _buffer;
         Binding _binding;
-
+        Buffer::Usage _usage;
         enums::ShaderStageSet _stages;
     };
 

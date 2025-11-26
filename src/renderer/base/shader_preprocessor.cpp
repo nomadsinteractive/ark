@@ -57,6 +57,11 @@ bool sanitizer(const std::smatch& match)
     return false;
 }
 
+const char* getOutAttributePrefix(const enums::ShaderStageBit preStage)
+{
+    return STAGE_ATTR_PREFIX[preStage + 1];
+}
+
 }
 
 ShaderPreprocessor::ShaderPreprocessor(String source, document manifest, const enums::ShaderStageBit shaderStage, const enums::ShaderStageBit preShaderStage)
@@ -154,9 +159,14 @@ void ShaderPreprocessor::parseDeclarations()
     auto ssboPattern = [this](const std::smatch& m) {
         const int32_t binding = m[1].matched ? Strings::eval<int32_t>(m[1].str()) : -1;
         const int32_t set = m[2].matched ? Strings::eval<int32_t>(m[2].str()) : -1;
-        _ssbos[m[3].str()] = {binding, set};
-        String layoutDescriptor = m.str();
-        return sp<String>::make(std::move(layoutDescriptor));
+        sp<String> declaration = sp<String>::make(m.str());
+        Buffer::Usage usage;
+        if(declaration->find(" readonly ") != String::npos)
+            usage.set(Buffer::USAGE_BIT_READONLY, true);
+        if(declaration->find(" writeonly ") != String::npos)
+            usage.set(Buffer::USAGE_BIT_WRITEONLY, true);
+        _ssbos[m[3].str()] = {{binding, set}, declaration, usage};
+        return declaration;
     };
     _include_declaration_source.replace(REGEX_SSBO_PATTERN, ssboPattern);
     _main_source.replace(REGEX_SSBO_PATTERN, ssboPattern);
@@ -350,7 +360,7 @@ sp<String> ShaderPreprocessor::addUniform(const String& type, const String& name
     return declarationVar;
 }
 
-uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& declaredType) const
+uint32_t ShaderPreprocessor::getUniformSize(const Uniform::Type type, const String& declaredType) const
 {
     if(type != Uniform::TYPE_STRUCT)
         return Uniform::getComponentSize(type);
@@ -377,11 +387,6 @@ void ShaderPreprocessor::linkParameters(const Vector<Parameter>& parameters, con
         if(i._annotation & Parameter::PARAMETER_ANNOTATION_IN)
             if(!preStage._main_block->hasOutAttribute(i._name))
                 passThroughVars.insert(Strings::capitalizeFirst(i._name));
-}
-
-const char* ShaderPreprocessor::getOutAttributePrefix(enums::ShaderStageBit preStage)
-{
-    return STAGE_ATTR_PREFIX[preStage + 1];
 }
 
 String ShaderPreprocessor::genDeclarations(const String& mainFunc) const

@@ -78,7 +78,7 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(const Buffer::Usage usa
     VkBufferUsageFlags usageFlags = 0;
     constexpr VkBufferUsageFlags usageFlagsFromType[] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT};
     for(uint32_t i = Buffer::USAGE_BIT_VERTEX; i <= Buffer::USAGE_BIT_STORAGE; ++i)
-        if(usage.contains(static_cast<Buffer::UsageBit>(i)))
+        if(usage.contains(static_cast<Buffer::UsageBits>(i)))
             usageFlags |= usageFlagsFromType[i];
 
     VkMemoryPropertyFlags flags = 0;

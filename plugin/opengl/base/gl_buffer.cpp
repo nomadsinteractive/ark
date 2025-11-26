@@ -34,7 +34,7 @@ GLenum toBufferGLTarget(const Buffer::Usage usage)
 {
     constexpr GLenum types[] = {GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER, GL_DRAW_INDIRECT_BUFFER, GL_SHADER_STORAGE_BUFFER};
     for(uint32_t i = Buffer::USAGE_BIT_VERTEX; i <= Buffer::USAGE_BIT_STORAGE; ++i)
-        if(usage.contains(static_cast<Buffer::UsageBit>(i)))
+        if(usage.contains(static_cast<Buffer::UsageBits>(i)))
             return types[i];
 
     FATAL("Unknown buffer type: %d", usage.bits());

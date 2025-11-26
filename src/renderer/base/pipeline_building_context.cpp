@@ -161,12 +161,12 @@ void PipelineBuildingContext::initializeSSBO() const
 {
     Table<String, PipelineLayout::SSBO> sobs;
     for(const ShaderPreprocessor* preprocessor : _stages)
-        for(const auto& [name, bindings] : preprocessor->_ssbos)
+        for(const auto& [name, declaration] : preprocessor->_ssbos)
         {
             if(!sobs.has(name))
             {
                 CHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
-                sobs[name] = PipelineLayout::SSBO(_ssbos.at(name), bindings);
+                sobs[name] = {_ssbos.at(name), declaration._binding, declaration._usage};
             }
             sobs[name]._stages.set(preprocessor->_shader_stage);
         }
