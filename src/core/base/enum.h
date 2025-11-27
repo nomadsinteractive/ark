@@ -2,6 +2,7 @@
 
 #include <array>
 
+#include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
@@ -115,6 +116,11 @@ enum ShaderStageBit {
     SHADER_STAGE_BIT_FRAGMENT,
     SHADER_STAGE_BIT_COMPUTE,
     SHADER_STAGE_BIT_COUNT
+};
+
+enum ShaderTypeQualifier {
+    SHADER_TYPE_QUALIFIER_READONLY,
+    SHADER_TYPE_QUALIFIER_WRITEONLY
 };
 
 template<typename V, size_t N> using LookupTable = std::array<std::pair<StringView, V>, N>;

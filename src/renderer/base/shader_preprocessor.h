@@ -33,7 +33,7 @@ public:
 
         bool operator <(const Declaration& other) const;
 
-        const String& source() const;
+        const sp<String>& source() const;
         void setSource(String source) const;
 
     private:
@@ -216,7 +216,7 @@ public:
     Vector<Parameter> _predefined_parameters;
     Vector<ResultModifer> _result_modifiers;
 
-    Map<String, SSBODeclaration> _ssbos;
+    Table<String, SSBODeclaration> _ssbos;
 
     Optional<V3i> _compute_local_sizes;
 

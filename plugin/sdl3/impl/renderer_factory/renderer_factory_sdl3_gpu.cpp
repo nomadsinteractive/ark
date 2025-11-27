@@ -29,6 +29,32 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
+void overrideLayoutAnnotations(const String& ssboName, ShaderPreprocessor::SSBODeclaration& ssboDeclaration, const int32_t location, const int32_t set, const char* bufferType, const char* shaderType)
+{
+    if(location >= 0)
+    {
+        CHECK(ssboDeclaration._binding._location == -1 || ssboDeclaration._binding._location == location, "%s \"%s\" must be declared in binding %d in %s", bufferType, ssboName.c_str(), location, shaderType);
+        if(ssboDeclaration._binding._location == -1)
+        {
+            const auto pos = ssboDeclaration._declaration->find(')');
+            ASSERT(pos != 0 && pos != String::npos);
+            ssboDeclaration._declaration->insert(pos, Strings::sprintf(", binding = %d", location));
+            ssboDeclaration._binding._location = location;
+        }
+    }
+    if(set >= 0)
+    {
+        CHECK(ssboDeclaration._binding._set == -1 || ssboDeclaration._binding._set == set, "%s \"%s\" must be declared in set %d in %s", bufferType, ssboName.c_str(), set, shaderType);
+        if(ssboDeclaration._binding._set == -1 && set != 0)
+        {
+            const auto pos = ssboDeclaration._declaration->find(')');
+            ASSERT(pos != 0 && pos != String::npos);
+            ssboDeclaration._declaration->insert(pos, Strings::sprintf(", set = %d", set));
+            ssboDeclaration._binding._set = set;
+        }
+    }
+}
+
 class SnippetSDL3_GPU final : public Snippet {
 public:
     void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineDescriptor& pipelineDescriptor) override {
@@ -62,8 +88,8 @@ public:
 
         if(const ShaderPreprocessor* compute = context.computingStage().get())
         {
-            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineLayout.ubos().size() + pipelineLayout.ssbos().size());
-            RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);
+            //TODO: Declare readonly and readwrite images separately
+            RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", 0);
         }
 
         const ShaderPreprocessor* prestage = nullptr;
@@ -94,21 +120,28 @@ public:
             preprocessor->_predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
             preprocessor->_predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
 
-            for(auto& [k, v] : preprocessor->_ssbos)
+            if(!preprocessor->_ssbos.empty())
             {
-                if(v._usage.contains(Buffer::USAGE_BIT_READONLY) && !v._usage.contains(Buffer::USAGE_BIT_WRITEONLY))
+                CHECK(preprocessor->_shader_stage != enums::SHADER_STAGE_BIT_VERTEX, "SSBO should not be declared in vertex shaders");
+                if(preprocessor->_shader_stage == enums::SHADER_STAGE_BIT_FRAGMENT)
                 {
-                    CHECK(v._binding._set == -1 || v._binding._set == 0, "Readonly buffer\"%s\" should be declared in set 0", k.c_str());
+                    // We declare both sampler and texture in _declaration_samplers so the actual number of samplers should be half of the size.
+                    const int32_t samplerCount = preprocessor->_declaration_samplers.vars().size() / 2;
+                    int32_t ssboBindingLocation = samplerCount + preprocessor->_declaration_images.vars().size();
+                    for(auto& [k, v] : preprocessor->_ssbos)
+                        overrideLayoutAnnotations(k, v, ssboBindingLocation++, 2, "Readonly buffer", "fragment shaders");
                 }
-                else if (v._usage.contains(Buffer::USAGE_BIT_WRITEONLY) || !v._usage)
+                else
                 {
-                    CHECK(v._binding._set == -1 || v._binding._set == 1, "Readwrite buffer\"%s\" should be declared in set 1", k.c_str());
-                    if(v._binding._set == -1)
+                    //TODO: Readwrite buffer should be after storage images offset;
+                    int32_t ssboBindingLocation = 0;
+                    int32_t readonlySSBOBindingLocation = preprocessor->_declaration_images.vars().size();
+                    for(auto& [k, v] : preprocessor->_ssbos)
                     {
-                        const auto pos = v._declaration->find(')');
-                        ASSERT(pos != 0 && pos != String::npos);
-                        v._declaration->insert(pos, ", set = 1");
-                        v._binding._set = 1;
+                        if(v._usage.contains(Buffer::USAGE_BIT_READONLY) && !v._usage.contains(Buffer::USAGE_BIT_WRITEONLY))
+                            overrideLayoutAnnotations(k, v, readonlySSBOBindingLocation++, 0, "Readonly buffer", "compute shaders");
+                        else if (v._usage.contains(Buffer::USAGE_BIT_WRITEONLY) || !v._usage)
+                            overrideLayoutAnnotations(k, v, ssboBindingLocation++, 1, "Readwrite buffer", "compute shaders");
                     }
                 }
             }

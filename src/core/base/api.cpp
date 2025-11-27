@@ -13,7 +13,6 @@ static std::thread::id _thread_ids[THREAD_NAME_ID_COUNT];
 void __fatal__(const char* func, const char* condition, const char* message)
 {
     const String str = Strings::sprintf("%s%s", condition ? Strings::sprintf("\"%s\" failed! ", condition).c_str() : "", message);
-    Log::e(func, str.c_str());
     throw std::runtime_error(str.c_str());
 }
 

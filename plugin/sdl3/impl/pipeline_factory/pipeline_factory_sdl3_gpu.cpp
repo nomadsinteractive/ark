@@ -21,7 +21,7 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
-SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineLayout& shaderLayout, const StringView source, const enums::ShaderStageBit stageBit)
+SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const StringView sourceView, const enums::ShaderStageBit stageBit)
 {
 	const SDL_GPUShaderFormat backendFormats = SDL_ShaderCross_GetSPIRVShaderFormats();
 	const char* entrypoint = nullptr;
@@ -37,29 +37,9 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineLayout&
         return nullptr;
     }
 
-    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stageBit, enums::RENDERING_BACKEND_BIT_VULKAN, 10);
+    const String sourceStr = sourceView;
+    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(sourceStr, stageBit, enums::RENDERING_BACKEND_BIT_VULKAN, 10);
     const void* bytecode = binaries.data();
-
-    Uint32 samplerCount = 0;
-    for(const PipelineLayout::DescriptorSet& i : shaderLayout.samplers().values())
-        if(i._stages.contains(stageBit))
-            ++ samplerCount;
-
-    Uint32 storageTextureCount = 0;
-    for(const PipelineLayout::DescriptorSet& i : shaderLayout.images().values())
-        if(i._stages.contains(stageBit))
-            ++ storageTextureCount;
-
-    Uint32 uniformBufferCount = 0;
-    for(const PipelineLayout::UBO& i : shaderLayout.ubos())
-        if(i._stages.contains(stageBit))
-            ++ uniformBufferCount;
-
-    Uint32 storageBufferCount = 0;
-    for(const PipelineLayout::SSBO& i : shaderLayout.ssbos())
-        if(i._stages.contains(stageBit))
-            ++ storageBufferCount;
-
     const SDL_ShaderCross_SPIRV_Info spirvInfo = {
         static_cast<const Uint8*>(bytecode),
         binaries.size() * sizeof(uint32_t),
@@ -73,20 +53,14 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineLayout&
         nullptr
     };
 
-    SDL_ShaderCross_GraphicsShaderMetadata shaderMetadata = {
-        samplerCount,
-        storageTextureCount,
-        storageBufferCount,
-        uniformBufferCount
-    };
-
+    SDL_ShaderCross_GraphicsShaderMetadata shaderMetadata = {};
+    SDL_ClearError();
     SDL_GPUShader* shader = SDL_ShaderCross_CompileGraphicsShaderFromSPIRV(device, &spirvInfo, &shaderMetadata);
-	if(!shader)
+	if(const char* lastError = SDL_GetError(); !shader || lastError[0])
 	{
-		SDL_Log("Failed to create shader!");
+        FATAL("%s\n\nFailed to create shader, SDL Error: %s", sourceStr.c_str(), lastError);
 		return nullptr;
 	}
-
 	return shader;
 }
 
@@ -319,8 +293,8 @@ public:
             SDL_GPUDevice* gpuDevice = context._gpu_gevice;
 
             const PipelineLayout& pipelineLayout = _pipeline_descriptor->layout();
-            SDL_GPUShader* vertexShader = createGraphicsShader(gpuDevice, pipelineLayout, _vertex_shader, enums::SHADER_STAGE_BIT_VERTEX);
-            SDL_GPUShader* fragmentShader = createGraphicsShader(gpuDevice, pipelineLayout, _fragment_shader, enums::SHADER_STAGE_BIT_FRAGMENT);
+            SDL_GPUShader* vertexShader = createGraphicsShader(gpuDevice, _vertex_shader, enums::SHADER_STAGE_BIT_VERTEX);
+            SDL_GPUShader* fragmentShader = createGraphicsShader(gpuDevice, _fragment_shader, enums::SHADER_STAGE_BIT_FRAGMENT);
 
             SDL_GPUVertexBufferDescription vertexBufferDescription[8];
             Uint32 numVertexBuffers = 0;
@@ -550,6 +524,7 @@ public:
             };
 
             SDL_ShaderCross_ComputePipelineMetadata shaderMetadata = {};
+            SDL_ClearError();
             _pipeline = SDL_ShaderCross_CompileComputePipelineFromSPIRV(gpuDevice, &spirvInfo, &shaderMetadata);
             CHECK(_pipeline, "%s", SDL_GetError());
         }

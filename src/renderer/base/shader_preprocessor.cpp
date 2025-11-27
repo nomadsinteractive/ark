@@ -713,9 +713,9 @@ bool ShaderPreprocessor::Declaration::operator<(const Declaration& other) const
     return v1 < v2;
 }
 
-const String& ShaderPreprocessor::Declaration::source() const
+const sp<String>& ShaderPreprocessor::Declaration::source() const
 {
-    return *_source;
+    return _source;
 }
 
 void ShaderPreprocessor::Declaration::setSource(String source) const

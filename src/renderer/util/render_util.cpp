@@ -168,11 +168,17 @@ private:
 void setLayoutQualifierBinding(const ShaderPreprocessor::Declaration& declaration, const String& qualifierName, const uint32_t binding, const int32_t set = -1)
 {
     StringBuffer sb;
-    sb << "layout (";
     if(set >= 0)
         sb << "set = " << set << ", ";
-    sb << qualifierName << " = " << binding << ") " << declaration.source();
-    declaration.setSource(sb.str());
+    sb << qualifierName << " = " << binding;
+    if(declaration.source()->find("layout") != String::npos)
+    {
+        const auto pos = declaration.source()->find(')');
+        ASSERT(pos != 0 && pos != String::npos);
+        declaration.source()->insert(pos, Strings::sprintf(", %s", sb.str().c_str()));
+    }
+    else
+        declaration.setSource(Strings::sprintf("layout(%s) %s", sb.str().c_str(), declaration.source()->c_str()));
 }
 
 uint32_t getNextLayoutLocation(const ShaderPreprocessor::Declaration& declar, uint32_t& counter)
