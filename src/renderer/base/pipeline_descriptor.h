@@ -146,7 +146,7 @@ public:
     };
 
 public:
-    PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, Configuration configuration);
+    PipelineDescriptor(Camera camera, PipelineBuildingContext& buildingContext, Configuration configuration);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineDescriptor);
 
     const Configuration& configuration() const;
@@ -181,7 +181,6 @@ private:
     Camera _camera;
     Configuration _configuration;
 
-    sp<PipelineBuildingContext> _building_context;
     sp<PipelineLayout> _layout;
 
     Table<String, sp<Texture>> _predefined_samplers;

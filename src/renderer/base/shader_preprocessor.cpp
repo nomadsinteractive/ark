@@ -2,6 +2,8 @@
 
 #include <regex>
 
+#include "core/base/bit_set.h"
+#include "core/base/enum.h"
 #include "core/types/global.h"
 
 #include "core/base/string_buffer.h"
@@ -38,10 +40,6 @@ constexpr char STAGE_ATTR_PREFIX[enums::SHADER_STAGE_BIT_COUNT + 1][4] = {"a_", 
 char STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
 #endif
 
-constexpr char ANNOTATION_VERT_IN[] = "in";
-constexpr char ANNOTATION_VERT_OUT[] = "out";
-constexpr char ANNOTATION_FRAG_IN[] = "in";
-constexpr char ANNOTATION_FRAG_OUT[] = "out";
 constexpr char ANNOTATION_FRAG_COLOR[] = "f_FragColor";
 
 size_t parseFunctionBody(const String& s, String& body)
@@ -65,9 +63,8 @@ const char* getOutAttributePrefix(const enums::ShaderStageBit preStage)
 }
 
 ShaderPreprocessor::ShaderPreprocessor(String source, document manifest, const enums::ShaderStageBit shaderStage, const enums::ShaderStageBit preShaderStage)
-    : _source(std::move(source)), _manifest(std::move(manifest)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_source, shaderStage == enums::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
-      _declaration_outs(_attribute_declaration_source, shaderStage == enums::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
-      _declaration_uniforms(_uniform_declaration_source, "uniform"), _declaration_samplers(_uniform_declaration_source, "uniform"), _declaration_images(_uniform_declaration_source, "uniform"),
+    : _source(std::move(source)), _manifest(std::move(manifest)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_source, {enums::SHADER_TYPE_QUALIFIER_IN}), _declaration_outs(_attribute_declaration_source, {enums::SHADER_TYPE_QUALIFIER_OUT}),
+      _declaration_uniforms(_uniform_declaration_source, {enums::SHADER_TYPE_QUALIFIER_UNIFORM}), _declaration_samplers(_uniform_declaration_source, {enums::SHADER_TYPE_QUALIFIER_UNIFORM}), _declaration_images(_uniform_declaration_source, {enums::SHADER_TYPE_QUALIFIER_UNIFORM}),
       _pre_main(sp<String>::make()), _post_main(sp<String>::make())
 {
     _predefined_macros.push_back(Strings::sprintf("#define ARK_Z_DIRECTION %.2f", Ark::instance().renderController()->renderEngine()->toLayoutDirection(1.0f)));
@@ -151,7 +148,9 @@ void ShaderPreprocessor::parseDeclarations()
 
     const auto uniformPatternReplacer = [this](const std::smatch& m) {
         const uint32_t length = m[5].matched ? Strings::eval<uint32_t>(m[5].str()) : 1;
-        return this->addUniform(m[3].str(), m[4].str(), length, m.str());
+        const int32_t binding = m[1].matched ? Strings::eval<int32_t>(m[1].str()) : -1;
+        const int32_t set = m[2].matched ? Strings::eval<int32_t>(m[2].str()) : -1;
+        return this->addUniform(m[3].str(), m[4].str(), length, {binding, set}, m.str());
     };
     _include_declaration_source.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
     _main_source.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
@@ -160,12 +159,12 @@ void ShaderPreprocessor::parseDeclarations()
         const int32_t binding = m[1].matched ? Strings::eval<int32_t>(m[1].str()) : -1;
         const int32_t set = m[2].matched ? Strings::eval<int32_t>(m[2].str()) : -1;
         sp<String> declaration = sp<String>::make(m.str());
-        Buffer::Usage usage;
+        enums::ShaderTypeQualifier qualifier;
         if(declaration->find(" readonly ") != String::npos)
-            usage.set(Buffer::USAGE_BIT_READONLY, true);
+            qualifier.set(enums::SHADER_TYPE_QUALIFIER_READONLY, true);
         if(declaration->find(" writeonly ") != String::npos)
-            usage.set(Buffer::USAGE_BIT_WRITEONLY, true);
-        _ssbos[m[3].str()] = {{binding, set}, declaration, usage};
+            qualifier.set(enums::SHADER_TYPE_QUALIFIER_WRITEONLY, true);
+        _ssbos[m[3].str()] = {{binding, set, qualifier}, declaration};
         return declaration;
     };
     _include_declaration_source.replace(REGEX_SSBO_PATTERN, ssboPattern);
@@ -230,7 +229,7 @@ void ShaderPreprocessor::setupUniforms(const Table<String, sp<Uniform>>& uniform
         {
             String type = i->declaredType();
             sp<String> declaration = sp<String>::make(i->declaration("uniform "));
-            _declaration_uniforms.vars().push_back(i->name(), Declaration(i->name(), std::move(type), i->length(), declaration));
+            _declaration_uniforms.vars().push_back(i->name(), Declaration(i->name(), std::move(type), i->length(), {}, declaration));
             if(pos == String::npos)
                 _uniform_declaration_source.push_back(std::move(declaration));
         }
@@ -291,7 +290,7 @@ sp<Uniform> ShaderPreprocessor::makeUniform(String name, Uniform::Type type) con
         return nullptr;
 
     const Declaration& declaration = _declaration_uniforms.vars().at(name);
-    DCHECK(Uniform::toType(declaration.type()) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), declaration.type().c_str(), type);
+    DCHECK(Uniform::toType(declaration._type) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), declaration._type.c_str(), type);
     return sp<Uniform>::make(std::move(name), type, 1, nullptr);
 }
 
@@ -342,10 +341,10 @@ String ShaderPreprocessor::outputName() const
     return {sOutputNames[_shader_stage].data()};
 }
 
-sp<String> ShaderPreprocessor::addUniform(const String& type, const String& name, const uint32_t length, String declaration)
+sp<String> ShaderPreprocessor::addUniform(const String& type, const String& name, const uint32_t length, const PipelineLayout::Binding& binding, String declaration)
 {
     sp<String> declarationVar = sp<String>::make(std::move(declaration));
-    Declaration uniform(name, type, length, declarationVar);
+    Declaration uniform(name, type, length, binding, declarationVar);
     const auto imageTypePos = type.find("image");
     if(type.startsWith("sampler"))
         _declaration_samplers.vars().push_back(name, std::move(uniform));
@@ -553,8 +552,8 @@ size_t ShaderPreprocessor::Function::outArgumentCount() const
     return count;
 }
 
-ShaderPreprocessor::DeclarationList::DeclarationList(Source& source, const String& descriptor)
-    : _source(source), _descriptor(descriptor)
+ShaderPreprocessor::DeclarationList::DeclarationList(Source& source, const enums::ShaderTypeQualifier qualifier)
+    : _source(source), _qualifier(qualifier)
 {
 }
 
@@ -562,16 +561,16 @@ void ShaderPreprocessor::DeclarationList::declare(const String& type, const char
 {
     if(!_vars.has(name))
     {
-        sp<String> declared = sp<String>::make(Strings::sprintf("%s%s %s %s%s;", isFlat ? "flat " : "", qualifier ? qualifier : _descriptor.c_str(), type.c_str(), prefix, name.c_str()));
+        sp<String> declared = sp<String>::make(Strings::sprintf("%s%s %s %s%s;", isFlat ? "flat " : "", qualifier ? qualifier : RenderUtil::toQualifierString(_qualifier).c_str(), type.c_str(), prefix, name.c_str()));
         if(layout)
             _source.push_back(sp<String>::make(Strings::sprintf("layout (%s) %s", layout.c_str(), declared->c_str())));
         else
             _source.push_back(declared);
 
-        _vars.push_back(name, Declaration(name, type, 1, std::move(declared)));
+        _vars.push_back(name, Declaration(name, type, 1, {}, std::move(declared)));
     }
     else
-        CHECK(_vars.at(name).type() == type, "Declared type \"\" and variable type \"\" mismatch", _vars.at(name).type().c_str(), type.c_str());
+        CHECK(_vars.at(name)._type == type, "Declared type \"\" and variable type \"\" mismatch", _vars.at(name)._type.c_str(), type.c_str());
 }
 
 void ShaderPreprocessor::DeclarationList::clear()
@@ -686,24 +685,9 @@ void ShaderPreprocessor::Source::insertBefore(const String& statement, const Str
     }
 }
 
-ShaderPreprocessor::Declaration::Declaration(String name, String type, const uint32_t length, sp<String> source)
-    : _name(std::move(name)), _type(std::move(type)), _length(length), _usage(RenderUtil::toAttributeLayoutType(_name, _type)), _source(std::move(source))
+ShaderPreprocessor::Declaration::Declaration(String name, String type, const uint32_t length, const PipelineLayout::Binding& binding, sp<String> source)
+    : _name(std::move(name)), _type(std::move(type)), _length(length), _binding{binding._location, binding._set, RenderUtil::getTypeQualifier(*source)}, _usage(RenderUtil::toAttributeLayoutType(_name, _type)), _source(std::move(source))
 {
-}
-
-const String& ShaderPreprocessor::Declaration::name() const
-{
-    return _name;
-}
-
-const String& ShaderPreprocessor::Declaration::type() const
-{
-    return _type;
-}
-
-uint32_t ShaderPreprocessor::Declaration::length() const
-{
-    return _length;
 }
 
 bool ShaderPreprocessor::Declaration::operator<(const Declaration& other) const
@@ -711,11 +695,6 @@ bool ShaderPreprocessor::Declaration::operator<(const Declaration& other) const
     const int32_t v1 = _usage == Attribute::USAGE_CUSTOM ? 1 : 0;
     const int32_t v2 = other._usage == Attribute::USAGE_CUSTOM ? 1 : 0;
     return v1 < v2;
-}
-
-const sp<String>& ShaderPreprocessor::Declaration::source() const
-{
-    return _source;
 }
 
 void ShaderPreprocessor::Declaration::setSource(String source) const

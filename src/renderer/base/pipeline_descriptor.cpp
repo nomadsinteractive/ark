@@ -124,16 +124,17 @@ PipelineDescriptor::Configuration initConfiguration(PipelineDescriptor::Configur
     configuration._snippet = createCoreSnippet(std::move(configuration._snippet));
     configuration._snippet->preInitialize(buildingContext);
     buildingContext.initialize(camera);
+    configuration._snippet->preCompile(buildingContext);
     return configuration;
 }
 
 }
 
-PipelineDescriptor::PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, Configuration configuration)
-    : _camera(std::move(camera)), _configuration(initConfiguration(std::move(configuration), buildingContext, _camera)), _building_context(std::move(buildingContext)), _layout(_building_context->_pipeline_layout),
-      _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _definitions(_building_context->toDefinitions())
+PipelineDescriptor::PipelineDescriptor(Camera camera, PipelineBuildingContext& buildingContext, Configuration configuration)
+    : _camera(std::move(camera)), _configuration(initConfiguration(std::move(configuration), buildingContext, _camera)), _layout(buildingContext._pipeline_layout),
+      _predefined_samplers(std::move(buildingContext._samplers)), _predefined_images(std::move(buildingContext._images)), _definitions(buildingContext.toDefinitions())
 {
-    if(const op<ShaderPreprocessor>& computeStage = _building_context->computingStage())
+    if(const op<ShaderPreprocessor>& computeStage = buildingContext.computingStage())
     {
         V3i numWorkGroupsArray;
         if(_configuration._num_work_groups)
@@ -147,6 +148,11 @@ PipelineDescriptor::PipelineDescriptor(Camera camera, sp<PipelineBuildingContext
         }
         _configuration._draw_decorator_factory = DrawDecoratorFactoryComposite::compose(std::move(_configuration._draw_decorator_factory), sp<DrawDecoratorFactory>::make<DrawDecoratorFactoryCompute>(_layout, numWorkGroupsArray, computeStage->_pre_shader_stage != enums::SHADER_STAGE_BIT_NONE));
     }
+
+    for(const ShaderPreprocessor* preprocessor : buildingContext.stages())
+        _stages.push_back(preprocessor->preprocess());
+
+    _layout->initializeSSBO(buildingContext);
 }
 
 const sp<Vec4>& PipelineDescriptor::scissor() const
@@ -196,15 +202,13 @@ bool PipelineDescriptor::hasDivisors() const
 
 void PipelineDescriptor::preCompile(GraphicsContext& graphicsContext)
 {
-    if(_building_context)
-    {
-        _configuration._snippet->preCompile(graphicsContext, _building_context, *this);
+    // if(_building_context)
+    // {
+        // for(const ShaderPreprocessor* preprocessor : _building_context->stages())
+        //     _stages.push_back(preprocessor->preprocess());
 
-        for(const ShaderPreprocessor* preprocessor : _building_context->stages())
-            _stages.push_back(preprocessor->preprocess());
-
-        _building_context = nullptr;
-    }
+    //     _building_context = nullptr;
+    // }
 }
 
 Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const

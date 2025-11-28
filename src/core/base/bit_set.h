@@ -5,7 +5,7 @@
 
 namespace ark {
 
-template<typename T, bool SHIFT = false> class BitSet {
+template<typename T, bool DO_SHIFT> class BitSet {
 public:
     typedef uint32_t convertable_type;
 
@@ -17,6 +17,10 @@ public:
     }
     template<typename... Args> constexpr BitSet(Args... bits)
         : _bits(toConvertableType(bits...)) {
+        if constexpr (sizeof...(bits) != 0) {
+            typedef std::tuple_element_t<0, std::tuple<Args...>> FirstArgType;
+            static_assert(std::is_same_v<FirstArgType, BitSet> || std::is_enum_v<FirstArgType> || std::is_integral_v<FirstArgType>, "Must be an enum type or integer");
+        }
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(BitSet);
 
@@ -82,7 +86,7 @@ public:
     template<typename U> U toFlags(const std::function<U(T)>& converter, const size_t count) const {
         U flags = static_cast<U>(0);
         for(size_t i = 0; i < count; ++i)
-            if(const T bits = static_cast<T>(SHIFT ? i : 1 << i); contains(bits))
+            if(const T bits = static_cast<T>(DO_SHIFT ? i : 1 << i); contains(bits))
                 flags = static_cast<U>(flags | converter(bits));
         return flags;
     }
@@ -101,11 +105,11 @@ private:
     }
     template<typename... Args> constexpr static convertable_type toConvertableType(const T value, Args... args) {
         if constexpr(sizeof...(args) != 0) {
-            if constexpr(SHIFT)
+            if constexpr(DO_SHIFT)
                 return 1 << value | toConvertableType(args...);
             return value | toConvertableType(args...);
         }
-        if constexpr(SHIFT)
+        if constexpr(DO_SHIFT)
             return 1 << value;
         return value;
     }

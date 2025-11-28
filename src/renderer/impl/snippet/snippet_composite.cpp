@@ -21,10 +21,10 @@ void SnippetComposite::preInitialize(PipelineBuildingContext& context)
     _next->preInitialize(context);
 }
 
-void SnippetComposite::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineDescriptor& pipelineDescriptor)
+void SnippetComposite::preCompile(PipelineBuildingContext& context)
 {
-    _delegate->preCompile(graphicsContext, context, pipelineDescriptor);
-    _next->preCompile(graphicsContext, context, pipelineDescriptor);
+    _delegate->preCompile(context);
+    _next->preCompile(context);
 }
 
 sp<Snippet> SnippetComposite::compose(sp<Snippet> self, sp<Snippet> next)

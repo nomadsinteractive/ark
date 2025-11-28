@@ -1,5 +1,6 @@
 #include "core/base/enum.h"
 
+#include "core/base/bit_set.h"
 #include "core/base/string.h"
 #include "core/types/box.h"
 #include "core/util/string_convert.h"
@@ -29,6 +30,18 @@ template<> enums::DrawProcedure StringConvert::eval<enums::DrawProcedure>(const 
         {"draw_instanced", enums::DRAW_PROCEDURE_DRAW_INSTANCED}
     }};
     return enums::lookup(table, str);
+}
+
+template<> ARK_API enums::UploadStrategy StringConvert::eval<enums::UploadStrategy>(const String& str)
+{
+    constexpr enums::UploadStrategy::LookupTable<5> table = {{
+        {"reload", enums::UPLOAD_STRATEGY_RELOAD},
+        {"once", enums::UPLOAD_STRATEGY_ONCE},
+        {"on_surface_ready", enums::UPLOAD_STRATEGY_ON_SURFACE_READY},
+        {"on_change", enums::UPLOAD_STRATEGY_ON_CHANGE},
+        {"on_every_frame", enums::UPLOAD_STRATEGY_ON_EVERY_FRAME}
+    }};
+    return enums::UploadStrategy::toBitSet(str, table);
 }
 
 uint32_t Enum::__index__(const Box& self)

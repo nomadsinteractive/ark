@@ -25,9 +25,7 @@ public:
         USAGE_BIT_STORAGE,
         USAGE_BIT_DYNAMIC,
         USAGE_BIT_TRANSFER_SRC,
-        USAGE_BIT_HOST_VISIBLE,
-        USAGE_BIT_READONLY,
-        USAGE_BIT_WRITEONLY
+        USAGE_BIT_HOST_VISIBLE
     };
     typedef BitSet<UsageBits, true> Usage;
 

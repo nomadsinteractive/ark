@@ -16,6 +16,7 @@ namespace ark {
 class ARK_API PipelineBuildingContext {
 public:
     PipelineBuildingContext(BeanFactory factory, const Scope& args);
+    PipelineBuildingContext(PipelineBuildingContext&& other) = default;
 
     DISALLOW_COPY_AND_ASSIGN(PipelineBuildingContext);
 

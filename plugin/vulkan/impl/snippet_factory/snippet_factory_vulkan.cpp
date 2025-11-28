@@ -18,7 +18,8 @@ namespace {
 
 class CoreSnippetVulkan final : public Snippet {
 public:
-    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineDescriptor& pipelineDescriptor) override {
+    void preCompile(PipelineBuildingContext& context) override
+    {
         const String sLocation = "location";
 
         if(!context.renderStages().empty())
@@ -27,7 +28,7 @@ public:
             RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
         }
 
-        const PipelineLayout& pipelineLayout = pipelineDescriptor.layout();
+        const PipelineLayout& pipelineLayout = context._pipeline_layout;
         for(const auto& renderStage : context.renderStages() | std::views::values)
             renderStage->_predefined_macros.emplace_back("#define ARK_USE_VULKAN");
         if(const auto& computeStage = context.computingStage())

@@ -50,4 +50,9 @@ StringBuffer& StringBuffer::operator <<(StringBuffer::TypeEndl)
     return *this;
 }
 
+bool StringBuffer::empty()
+{
+    return _ss.tellp() == 0;
+}
+
 }

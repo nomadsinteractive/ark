@@ -171,14 +171,14 @@ void setLayoutQualifierBinding(const ShaderPreprocessor::Declaration& declaratio
     if(set >= 0)
         sb << "set = " << set << ", ";
     sb << qualifierName << " = " << binding;
-    if(declaration.source()->find("layout") != String::npos)
+    if(declaration._source->find("layout") != String::npos)
     {
-        const auto pos = declaration.source()->find(')');
+        const auto pos = declaration._source->find(')');
         ASSERT(pos != 0 && pos != String::npos);
-        declaration.source()->insert(pos, Strings::sprintf(", %s", sb.str().c_str()));
+        declaration._source->insert(pos, Strings::sprintf(", %s", sb.str().c_str()));
     }
     else
-        declaration.setSource(Strings::sprintf("layout(%s) %s", sb.str().c_str(), declaration.source()->c_str()));
+        declaration.setSource(Strings::sprintf("layout(%s) %s", sb.str().c_str(), declaration._source->c_str()));
 }
 
 uint32_t getNextLayoutLocation(const ShaderPreprocessor::Declaration& declar, uint32_t& counter)
@@ -186,21 +186,21 @@ uint32_t getNextLayoutLocation(const ShaderPreprocessor::Declaration& declar, ui
     const uint32_t location = counter;
     //TODO: Consider merge uniform type and attribute type into one, something like ShaderDataType.
     Uniform::Type type;
-    if(declar.type() == "vec4b")
+    if(declar._type == "vec4b")
         type = Uniform::TYPE_I4;
-    else if(declar.type() == "vec3b")
+    else if(declar._type == "vec3b")
         type = Uniform::TYPE_I3;
     else
-        type = Uniform::toType(declar.type());
+        type = Uniform::toType(declar._type);
     switch(type)
     {
         case Uniform::TYPE_MAT3:
         case Uniform::TYPE_MAT3V:
-            counter += 3 * declar.length();
+            counter += 3 * declar._length;
         break;
         case Uniform::TYPE_MAT4:
         case Uniform::TYPE_MAT4V:
-            counter += 4 * declar.length();
+            counter += 4 * declar._length;
         break;
         default:
             counter ++;
@@ -387,7 +387,7 @@ Attribute::Usage RenderUtil::toAttributeLayoutType(const String& name, const Str
     return Attribute::USAGE_CUSTOM;
 }
 
-String RenderUtil::outAttributeName(const String& name, enums::ShaderStageBit preStage)
+String RenderUtil::outAttributeName(const String& name, const enums::ShaderStageBit preStage)
 {
     DCHECK(preStage == enums::SHADER_STAGE_BIT_NONE || preStage == enums::SHADER_STAGE_BIT_VERTEX, "Only none and vertex stage's out attribute name supported");
     constexpr char sPrefix[][8] = {"a_", "v_"};
@@ -395,13 +395,53 @@ String RenderUtil::outAttributeName(const String& name, enums::ShaderStageBit pr
     return name.startsWith(prefix) ? name : prefix + Strings::capitalizeFirst(name);
 }
 
-uint32_t RenderUtil::getChannelSize(Texture::Format format)
+String RenderUtil::toQualifierString(const enums::ShaderTypeQualifier qualifier)
+{
+    constexpr std::array<std::pair<enums::ShaderTypeQualifierBits, StringView>, 6> qualifierStrs = {{
+        {enums::SHADER_TYPE_QUALIFIER_IN, "in"},
+        {enums::SHADER_TYPE_QUALIFIER_OUT, "out"},
+        {enums::SHADER_TYPE_QUALIFIER_FLAT, "flat"},
+        {enums::SHADER_TYPE_QUALIFIER_UNIFORM, "uniform"},
+        {enums::SHADER_TYPE_QUALIFIER_READONLY, "readonly"},
+        {enums::SHADER_TYPE_QUALIFIER_WRITEONLY, "writeonly"},
+    }};
+
+    StringBuffer sb;
+    for(const auto [k, v] : qualifierStrs)
+    {
+        if(qualifier.contains(k))
+        {
+            if(!sb.empty())
+                sb << ' ';
+            sb << v;
+        }
+    }
+    return sb.str();
+}
+
+enums::ShaderTypeQualifier RenderUtil::getTypeQualifier(const StringView declaration)
+{
+    enums::ShaderTypeQualifier qualifier;
+    constexpr std::array<std::pair<enums::ShaderTypeQualifierBits, StringView>, 6> qualifierStrs = {{
+        {enums::SHADER_TYPE_QUALIFIER_IN, "in "},
+        {enums::SHADER_TYPE_QUALIFIER_OUT, "out "},
+        {enums::SHADER_TYPE_QUALIFIER_FLAT, "flat "},
+        {enums::SHADER_TYPE_QUALIFIER_UNIFORM, "uniform "},
+        {enums::SHADER_TYPE_QUALIFIER_READONLY, "readonly "},
+        {enums::SHADER_TYPE_QUALIFIER_WRITEONLY, "writeonly "},
+    }};
+    for(const auto [k, v] : qualifierStrs)
+        qualifier.set(k, declaration.find(v) != StringView::npos);
+    return qualifier;
+}
+
+uint32_t RenderUtil::getChannelSize(const Texture::Format format)
 {
     DASSERT(format != Texture::FORMAT_AUTO);
     return (format & Texture::FORMAT_RGBA).bits() + 1;
 }
 
-uint32_t RenderUtil::getPixelSize(Texture::Format format)
+uint32_t RenderUtil::getPixelSize(const Texture::Format format)
 {
     if(format == Texture::FORMAT_AUTO)
         return 4;
@@ -516,9 +556,10 @@ Vector<ShaderPreprocessor::Declaration> RenderUtil::setupLayoutLocation(const Pi
     Vector<ShaderPreprocessor::Declaration> declares = declarations.vars().values();
     std::stable_sort(declares.begin(), declares.end());
 
-    for(const ShaderPreprocessor::Declaration& i : declares) {
-        const auto iter = context._attributes.find(i.name());
-        DCHECK(iter != context._attributes.end(), "Cannot find attribute %s", i.name().c_str());
+    for(const ShaderPreprocessor::Declaration& i : declares)
+    {
+        const auto iter = context._attributes.find(i._name);
+        DCHECK(iter != context._attributes.end(), "Cannot find attribute %s", i._name.c_str());
         const Attribute& attribute = iter->second;
         divisors[attribute.divisor()].push_back(&i);
     }
@@ -551,7 +592,7 @@ uint32_t RenderUtil::setLayoutDescriptor(const ShaderPreprocessor::DeclarationLi
     for(const ShaderPreprocessor::Declaration& i : ins.vars().values()) {
         const uint32_t binding = getNextLayoutLocation(i, counter);
         setLayoutQualifierBinding(i, qualifierName, binding);
-        const String outName = Strings::capitalizeFirst(i.name().startsWith("v_") ? i.name().substr(2) : i.name());
+        const String outName = Strings::capitalizeFirst(i._name.startsWith("v_") ? i._name.substr(2) : i._name);
         const bool hasOutName = outs.vars().has(outName);
         DCHECK_WARN(hasOutName, "Output/Input mismatch, \"%s\" exists in input but not found in next stage of shader", outName.c_str());
         if(hasOutName)

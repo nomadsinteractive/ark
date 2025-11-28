@@ -22,6 +22,8 @@ public:
     typedef decltype(std::endl<char, std::char_traits<char>>) TypeEndl;
     StringBuffer& operator <<(TypeEndl endl);
 
+    bool empty();
+
 private:
     std::ostringstream _ss;
 };

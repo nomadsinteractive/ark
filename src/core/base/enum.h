@@ -118,10 +118,21 @@ enum ShaderStageBit {
     SHADER_STAGE_BIT_COUNT
 };
 
-enum ShaderTypeQualifier {
+enum ShaderTypeQualifierBits {
+    SHADER_TYPE_QUALIFIER_IN,
+    SHADER_TYPE_QUALIFIER_OUT,
+    SHADER_TYPE_QUALIFIER_FLAT,
+    SHADER_TYPE_QUALIFIER_UNIFORM,
     SHADER_TYPE_QUALIFIER_READONLY,
     SHADER_TYPE_QUALIFIER_WRITEONLY
 };
+
+
+typedef BitSet<RenderingBackendBit> RenderingBackendSet;
+typedef BitSet<ShaderStageBit, true> ShaderStageSet;
+typedef BitSet<UploadStrategyBit> UploadStrategy;
+typedef BitSet<ShaderTypeQualifierBits, true> ShaderTypeQualifier;
+
 
 template<typename V, size_t N> using LookupTable = std::array<std::pair<StringView, V>, N>;
 template<typename T> constexpr static auto lookup(const T& table, const StringView key, const decltype(std::declval<T>().front().second) defaultValue) -> decltype(std::declval<T>().front().second){

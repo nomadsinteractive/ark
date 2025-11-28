@@ -16,7 +16,7 @@ namespace {
 
 class SnippetGLES30 final : public Snippet {
 public:
-    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineDescriptor& /*pipelineDescriptor*/) override
+    void preCompile(PipelineBuildingContext& context) override
     {
         for(const auto& renderStage : context.renderStages() | std::views::values)
             renderStage->_predefined_macros.emplace_back("#define ARK_USE_OPENGL");

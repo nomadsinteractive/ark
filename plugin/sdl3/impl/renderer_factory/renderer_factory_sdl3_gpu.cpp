@@ -29,50 +29,50 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
-void overrideLayoutAnnotations(const String& ssboName, ShaderPreprocessor::SSBODeclaration& ssboDeclaration, const int32_t location, const int32_t set, const char* bufferType, const char* shaderType)
+void overrideLayoutAnnotations(const String& varName, String& declaration, PipelineLayout::Binding& binding, const int32_t location, const int32_t set, const char* bufferType, const char* shaderType)
 {
     if(location >= 0)
     {
-        CHECK(ssboDeclaration._binding._location == -1 || ssboDeclaration._binding._location == location, "%s \"%s\" must be declared in binding %d in %s", bufferType, ssboName.c_str(), location, shaderType);
-        if(ssboDeclaration._binding._location == -1)
+        CHECK(binding._location == -1 || binding._location == location, "%s \"%s\" must be declared in binding %d in %s", bufferType, varName.c_str(), location, shaderType);
+        if(binding._location == -1)
         {
-            const auto pos = ssboDeclaration._declaration->find(')');
+            const auto pos = declaration.find(')');
             ASSERT(pos != 0 && pos != String::npos);
-            ssboDeclaration._declaration->insert(pos, Strings::sprintf(", binding = %d", location));
-            ssboDeclaration._binding._location = location;
+            declaration.insert(pos, Strings::sprintf(", binding = %d", location));
+            binding._location = location;
         }
     }
     if(set >= 0)
     {
-        CHECK(ssboDeclaration._binding._set == -1 || ssboDeclaration._binding._set == set, "%s \"%s\" must be declared in set %d in %s", bufferType, ssboName.c_str(), set, shaderType);
-        if(ssboDeclaration._binding._set == -1 && set != 0)
+        CHECK(binding._set == -1 || binding._set == set, "%s \"%s\" must be declared in set %d in %s", bufferType, varName.c_str(), set, shaderType);
+        if(binding._set == -1 && set != 0)
         {
-            const auto pos = ssboDeclaration._declaration->find(')');
+            const auto pos = declaration.find(')');
             ASSERT(pos != 0 && pos != String::npos);
-            ssboDeclaration._declaration->insert(pos, Strings::sprintf(", set = %d", set));
-            ssboDeclaration._binding._set = set;
+            declaration.insert(pos, Strings::sprintf(", set = %d", set));
         }
+        binding._set = set;
     }
 }
 
 class SnippetSDL3_GPU final : public Snippet {
 public:
-    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineDescriptor& pipelineDescriptor) override {
+    void preCompile(PipelineBuildingContext& context) override
+    {
         const String sLocation = "location";
         const ShaderPreprocessor& firstStage = context.renderStages().begin()->second;
 
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
-        const PipelineLayout& pipelineLayout = pipelineDescriptor.layout();
+        const PipelineLayout& pipelineLayout = context._pipeline_layout;
         if(ShaderPreprocessor* vertex = context.tryGetRenderStage(enums::SHADER_STAGE_BIT_VERTEX))
         {
-            RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineLayout.ubos().size() + pipelineLayout.ssbos().size() + pipelineLayout.samplers().size()));
+            CHECK(vertex->_declaration_images.vars().empty(), "Vertex shader must not contain storage images");
             vertex->_predefined_macros.emplace_back("#define gl_InstanceID gl_InstanceIndex");
         }
         if(ShaderPreprocessor* fragment = context.tryGetRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
-            RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
 
             uint32_t binding = 0;
             const Vector<String> samplerNames = fragment->_declaration_samplers.vars().keys();
@@ -84,12 +84,6 @@ public:
                 fragment->_declaration_samplers.declare("texture2D", "", k + "_T", Strings::sprintf("set = %d, binding = %d", samplerSet, binding++));
                 fragment->_predefined_macros.emplace_back(Strings::sprintf("#define %s sampler2D(%s_T, %s_S)", k.c_str(), k.c_str(), k.c_str()));
             }
-        }
-
-        if(const ShaderPreprocessor* compute = context.computingStage().get())
-        {
-            //TODO: Declare readonly and readwrite images separately
-            RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", 0);
         }
 
         const ShaderPreprocessor* prestage = nullptr;
@@ -129,7 +123,7 @@ public:
                     const int32_t samplerCount = preprocessor->_declaration_samplers.vars().size() / 2;
                     int32_t ssboBindingLocation = samplerCount + preprocessor->_declaration_images.vars().size();
                     for(auto& [k, v] : preprocessor->_ssbos)
-                        overrideLayoutAnnotations(k, v, ssboBindingLocation++, 2, "Readonly buffer", "fragment shaders");
+                        overrideLayoutAnnotations(k, v._declaration, v._binding, ssboBindingLocation++, 2, "Readonly buffer", "fragment shaders");
                 }
                 else
                 {
@@ -138,11 +132,22 @@ public:
                     int32_t readonlySSBOBindingLocation = preprocessor->_declaration_images.vars().size();
                     for(auto& [k, v] : preprocessor->_ssbos)
                     {
-                        if(v._usage.contains(Buffer::USAGE_BIT_READONLY) && !v._usage.contains(Buffer::USAGE_BIT_WRITEONLY))
-                            overrideLayoutAnnotations(k, v, readonlySSBOBindingLocation++, 0, "Readonly buffer", "compute shaders");
-                        else if (v._usage.contains(Buffer::USAGE_BIT_WRITEONLY) || !v._usage)
-                            overrideLayoutAnnotations(k, v, ssboBindingLocation++, 1, "Readwrite buffer", "compute shaders");
+                        if(v._binding._qualifier.contains(enums::SHADER_TYPE_QUALIFIER_READONLY))
+                            overrideLayoutAnnotations(k, v._declaration, v._binding, readonlySSBOBindingLocation++, 0, "Readonly buffer", "compute shaders");
+                        else
+                            overrideLayoutAnnotations(k, v._declaration, v._binding, ssboBindingLocation++, 1, "Readwrite buffer", "compute shaders");
                     }
+                }
+            }
+            {
+                int32_t imageBindingLocation = 0;
+                int32_t readonlyImageBindingLocation = preprocessor->_declaration_samplers.vars().size();
+                for(const auto& [k, v] : preprocessor->_declaration_images.vars())
+                {
+                    if(v._binding._qualifier.contains(enums::SHADER_TYPE_QUALIFIER_READONLY))
+                        overrideLayoutAnnotations(k, v._source, v._binding, readonlyImageBindingLocation++, 0, "Readonly image", "shaders");
+                    else
+                        overrideLayoutAnnotations(k, v._source, v._binding, imageBindingLocation++, 1, "Readwrite image", "shaders");
                 }
             }
         }

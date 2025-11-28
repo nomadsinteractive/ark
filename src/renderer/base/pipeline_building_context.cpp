@@ -107,8 +107,8 @@ void PipelineBuildingContext::initializeAttributes()
     {
         for(auto iter = std::next(_rendering_stages.begin()); iter != _rendering_stages.end(); ++iter)
             for(const auto& i : iter->second->_declaration_ins.vars().values())
-                if(!attributes.has(i.name()))
-                    attributes.push_back(i.name(), i.type());
+                if(!attributes.has(i._name))
+                    attributes.push_back(i._name, i._type);
     }
 
     for(const auto& [k, v] : _attributes)
@@ -159,19 +159,7 @@ void PipelineBuildingContext::initializeAttributes()
 
 void PipelineBuildingContext::initializeSSBO() const
 {
-    Table<String, PipelineLayout::SSBO> sobs;
-    for(const ShaderPreprocessor* preprocessor : _stages)
-        for(const auto& [name, declaration] : preprocessor->_ssbos)
-        {
-            if(!sobs.has(name))
-            {
-                CHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
-                sobs[name] = {_ssbos.at(name), declaration._binding, declaration._usage};
-            }
-            sobs[name]._stages.set(preprocessor->_shader_stage);
-        }
-
-    _pipeline_layout->_ssbos = std::move(sobs.values());
+    _pipeline_layout->initializeSSBO(*this);
 }
 
 void PipelineBuildingContext::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera)
@@ -193,7 +181,6 @@ void PipelineBuildingContext::tryBindUniformMatrix(const ShaderPreprocessor& sha
 void PipelineBuildingContext::initialize(const Camera& camera)
 {
     initializeStages(camera);
-    initializeSSBO();
     initializeAttributes();
     initializeUniforms();
 
@@ -206,7 +193,7 @@ void PipelineBuildingContext::initializeUniforms()
     {
         for(const auto& [k, v] : i->_declaration_uniforms.vars())
             if(!_uniforms.has(k))
-                addUniform(loadUniform(_factory, _args, k, v.type(), "$" + k));
+                addUniform(loadUniform(_factory, _args, k, v._type, "$" + k));
 
         for(const auto& [k, v] : i->_declaration_samplers.vars())
             if(!_samplers.has(k))
@@ -406,25 +393,25 @@ void PipelineBuildingContext::initializeStages(const Camera& camera)
     {
         if(const ShaderPreprocessor* vertex = tryGetRenderStage(enums::SHADER_STAGE_BIT_VERTEX))
         {
-            for(const String& i : vertex->_declaration_images.vars().keys())
-                binding = images[i].addStage(enums::SHADER_STAGE_BIT_VERTEX, binding);
+            for(const auto& [k, v] : vertex->_declaration_images.vars())
+                binding = images[k].addStage(enums::SHADER_STAGE_BIT_VERTEX, binding, v._binding._qualifier);
         }
         if(const ShaderPreprocessor* fragment = tryGetRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT))
         {
-            for(const String& i : fragment->_declaration_samplers.vars().keys())
-                binding = samplers[i].addStage(enums::SHADER_STAGE_BIT_FRAGMENT, binding);
-            for(const String& i : fragment->_declaration_images.vars().keys())
-                binding = images[i].addStage(enums::SHADER_STAGE_BIT_FRAGMENT, binding);
+            for(const auto& [k, v] : fragment->_declaration_samplers.vars())
+                binding = samplers[k].addStage(enums::SHADER_STAGE_BIT_FRAGMENT, binding, v._binding._qualifier);
+            for(const auto& [k, v] : fragment->_declaration_images.vars())
+                binding = images[k].addStage(enums::SHADER_STAGE_BIT_FRAGMENT, binding, v._binding._qualifier);
         }
     }
 
     if(const ShaderPreprocessor* compute = _computing_stage.get())
     {
         tryBindCamera(*compute, camera);
-        for(const String& i : compute->_declaration_samplers.vars().keys())
-            binding = samplers[i].addStage(enums::SHADER_STAGE_BIT_COMPUTE, binding);
-        for(const String& i : compute->_declaration_images.vars().keys())
-            binding = images[i].addStage(enums::SHADER_STAGE_BIT_COMPUTE, binding);
+        for(const auto& [k, v] : compute->_declaration_samplers.vars())
+            binding = samplers[k].addStage(enums::SHADER_STAGE_BIT_COMPUTE, binding, v._binding._qualifier);
+        for(const auto& [k, v] : compute->_declaration_images.vars())
+            binding = images[k].addStage(enums::SHADER_STAGE_BIT_COMPUTE, binding, v._binding._qualifier);
     }
 }
 

@@ -187,6 +187,22 @@ const PipelineLayout::StreamLayout& PipelineLayout::getStreamLayout(const uint32
     return findStreamLayout(_stream_layouts, divisor);
 }
 
+void PipelineLayout::initializeSSBO(const PipelineBuildingContext& buildingContext)
+{
+    Table<String, SSBO> sobs;
+    for(const ShaderPreprocessor* preprocessor : buildingContext.stages())
+        for(const auto& [name, declaration] : preprocessor->_ssbos)
+        {
+            if(!sobs.has(name))
+            {
+                CHECK(buildingContext._ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
+                sobs[name] = {buildingContext._ssbos.at(name), declaration._binding};
+            }
+            sobs[name]._stages.set(preprocessor->_shader_stage);
+        }
+    _ssbos = std::move(sobs.values());
+}
+
 Optional<const Attribute&> PipelineLayout::getAttribute(const String& name) const
 {
     for(const auto& v : std::views::values(_stream_layouts))
@@ -334,12 +350,13 @@ void PipelineLayout::UBO::addUniform(const sp<Uniform>& uniform)
     _uniforms.push_back(uniform->name(), uniform);
 }
 
-uint32_t PipelineLayout::DescriptorSet::addStage(enums::ShaderStageBit stage, uint32_t binding)
+uint32_t PipelineLayout::DescriptorSet::addStage(const enums::ShaderStageBit stage, const uint32_t binding, const enums::ShaderTypeQualifier qualifier)
 {
+    CHECK(!_stages || _stages == stage, "Overwriting pipeline descriptor set for stage: %d", stage);
     _stages.set(stage);
     if(_binding._location != -1)
         return binding;
-    _binding = {static_cast<int32_t>(binding)};
+    _binding = {static_cast<int32_t>(binding), -1, qualifier};
     return binding + 1;
 }
 

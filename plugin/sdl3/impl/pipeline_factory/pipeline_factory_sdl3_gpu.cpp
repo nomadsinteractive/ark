@@ -539,25 +539,47 @@ public:
     {
         const GraphicsContextSDL3_GPU& sdl3GC = ensureGraphicsContext(graphicsContext);
 
-        uint32_t numStorageTextures = 0;
+        uint32_t numReadWriteStorageTextures = 0;
+        uint32_t numReadOnlyStorageTextures = 0;
+        uint32_t readonlyStorageTextureFirstSlot = std::numeric_limits<uint32_t>::max();
         SDL_GPUStorageTextureReadWriteBinding storageTextureBindings[16];
+        SDL_GPUTexture* readonlyStorageTextures[16];
         for(const PipelineDescriptor::BindedTexture& i : computeContext._bindings->images())
             if(i._descriptor_set._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE))
             {
-                SDL_GPUStorageTextureReadWriteBinding& imageTextureBinding = storageTextureBindings[numStorageTextures++];
-                imageTextureBinding = {reinterpret_cast<SDL_GPUTexture*>(i._texture->id()), 0, 0};
+                if(i._descriptor_set._binding._qualifier.contains(enums::SHADER_TYPE_QUALIFIER_READONLY))
+                {
+                    readonlyStorageTextures[numReadOnlyStorageTextures++] = reinterpret_cast<SDL_GPUTexture*>(i._texture->id());
+                    if(i._descriptor_set._binding._location >= 0)
+                        readonlyStorageTextureFirstSlot = std::min<uint32_t>(readonlyStorageTextureFirstSlot, i._descriptor_set._binding._location);
+                }
+                else
+                    storageTextureBindings[numReadWriteStorageTextures++] = {reinterpret_cast<SDL_GPUTexture*>(i._texture->id()), 0, 0};
             }
 
-        uint32_t numStorageBuffers = 0;
+        uint32_t numReadWriteStorageBuffers = 0;
+        uint32_t numReadOnlyStorageBuffers = 0;
+        uint32_t readonlyStorageBufferFirstSlot = std::numeric_limits<uint32_t>::max();
         SDL_GPUStorageBufferReadWriteBinding storageBufferBindings[16];
+        SDL_GPUBuffer* readonlyStorageBuffers[16];
         for(const PipelineLayout::SSBO& i : computeContext._bindings->pipelineLayout()->ssbos())
             if(i._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE))
             {
-                SDL_GPUStorageBufferReadWriteBinding& bufferBinding = storageBufferBindings[numStorageBuffers++];
-                bufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(i._buffer.id())};
+                if(i._binding._qualifier.contains(enums::SHADER_TYPE_QUALIFIER_READONLY))
+                {
+                    readonlyStorageBuffers[numReadOnlyStorageBuffers++] = reinterpret_cast<SDL_GPUBuffer*>(i._buffer.id());
+                    if(i._binding._location >= 0)
+                        readonlyStorageBufferFirstSlot = std::min<uint32_t>(readonlyStorageBufferFirstSlot, i._binding._location);
+                }
+                else
+                    storageBufferBindings[numReadWriteStorageBuffers++] = {reinterpret_cast<SDL_GPUBuffer*>(i._buffer.id())};
             }
 
-        SDL_GPUComputePass* computePass = SDL_BeginGPUComputePass(sdl3GC._command_buffer, storageTextureBindings, numStorageTextures, storageBufferBindings, numStorageBuffers);
+        SDL_GPUComputePass* computePass = SDL_BeginGPUComputePass(sdl3GC._command_buffer, storageTextureBindings, numReadWriteStorageTextures, storageBufferBindings, numReadWriteStorageBuffers);
+        if(numReadOnlyStorageTextures > 0)
+            SDL_BindGPUComputeStorageTextures(computePass, readonlyStorageTextureFirstSlot, readonlyStorageTextures, numReadOnlyStorageTextures);
+        if(numReadOnlyStorageBuffers > 0)
+            SDL_BindGPUComputeStorageBuffers(computePass, readonlyStorageBufferFirstSlot, readonlyStorageBuffers, numReadOnlyStorageBuffers);
         SDL_BindGPUComputePipeline(computePass, _pipeline);
         SDL_DispatchGPUCompute(computePass, computeContext._num_work_groups[0], computeContext._num_work_groups[1], computeContext._num_work_groups[2]);
         SDL_EndGPUComputePass(computePass);

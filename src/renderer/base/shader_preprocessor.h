@@ -24,30 +24,24 @@ public:
 
     class Declaration {
     public:
-        Declaration(String name, String type, uint32_t length, sp<String> source);
+        Declaration(String name, String type, uint32_t length, const PipelineLayout::Binding& binding, sp<String> source);
         DEFAULT_COPY_AND_ASSIGN(Declaration);
-
-        const String& name() const;
-        const String& type() const;
-        uint32_t length() const;
 
         bool operator <(const Declaration& other) const;
 
-        const sp<String>& source() const;
         void setSource(String source) const;
 
-    private:
         String _name;
         String _type;
         uint32_t _length;
+        PipelineLayout::Binding _binding;
         Attribute::Usage _usage;
-
         sp<String> _source;
     };
 
     class ARK_API DeclarationList {
     public:
-        DeclarationList(Source& source, const String& descriptor);
+        DeclarationList(Source& source, enums::ShaderTypeQualifier qualifier);
 
         bool has(const String& name) const;
         const Table<String, Declaration>& vars() const;
@@ -58,7 +52,7 @@ public:
 
     private:
         Source& _source;
-        String _descriptor;
+        enums::ShaderTypeQualifier _qualifier;
 
         Table<String, Declaration> _vars;
     };
@@ -66,7 +60,6 @@ public:
     struct SSBODeclaration {
         PipelineLayout::Binding _binding;
         sp<String> _declaration;
-        Buffer::Usage _usage;
     };
 
 private:
@@ -176,7 +169,7 @@ private:
 
     void addInclude(const String& filepath);
 
-    sp<String> addUniform(const String& type, const String& name, uint32_t length, String declaration);
+    sp<String> addUniform(const String& type, const String& name, uint32_t length, const PipelineLayout::Binding& binding, String declaration);
     uint32_t getUniformSize(Uniform::Type type, const String& declaredType) const;
     uint32_t getUniformStructSize(const String& declaredType) const;
 

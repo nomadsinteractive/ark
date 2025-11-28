@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/base/bit_set_types.h"
+#include "core/base/enum.h"
 #include "core/collection/table.h"
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
@@ -53,6 +53,7 @@ public:
     struct Binding {
         int32_t _location = -1;
         int32_t _set = -1;
+        enums::ShaderTypeQualifier _qualifier;
     };
 
     struct ARK_API UBO {
@@ -87,7 +88,6 @@ public:
     struct SSBO {
         Buffer _buffer;
         Binding _binding;
-        Buffer::Usage _usage;
         enums::ShaderStageSet _stages;
     };
 
@@ -95,7 +95,7 @@ public:
         enums::ShaderStageSet _stages;
         Binding _binding;
 
-        uint32_t addStage(enums::ShaderStageBit stage, uint32_t binding);
+        uint32_t addStage(enums::ShaderStageBit stage, uint32_t binding, enums::ShaderTypeQualifier qualifier);
     };
 
 public:
@@ -123,6 +123,8 @@ public:
     sp<Uniform> getUniform(const String& name) const;
 
     const StreamLayout& getStreamLayout(uint32_t divisor) const;
+
+    void initializeSSBO(const PipelineBuildingContext& buildingContext);
 
 private:
     Vector<sp<UBO>> _ubos;

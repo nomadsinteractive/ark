@@ -22,6 +22,8 @@ public:
     static Attribute::Usage toAttributeLayoutType(const String& name, const String& type);
 
     static String outAttributeName(const String& name, enums::ShaderStageBit preStage);
+    static String toQualifierString(enums::ShaderTypeQualifier qualifier);
+    static enums::ShaderTypeQualifier getTypeQualifier(StringView declaration);
 
     static bool isScissorEnabled(const Rect& scissor);
 

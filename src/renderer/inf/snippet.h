@@ -13,7 +13,7 @@ public:
     virtual ~Snippet() = default;
 
     virtual void preInitialize(PipelineBuildingContext& context) {}
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineDescriptor& pipelineDescriptor) {}
+    virtual void preCompile(PipelineBuildingContext& context) {}
 };
 
 }
