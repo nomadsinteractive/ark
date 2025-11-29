@@ -62,11 +62,6 @@ String Platform::getRealPath(const String& path)
     return realpath;
 }
 
-Vector<enums::RendererVersion> Platform::getRendererVersionPreferences()
-{
-    return {enums::RENDERER_VERSION_OPENGL_46, enums::RENDERER_VERSION_VULKAN_12};
-}
-
 Vector<enums::RenderingBackendBit> Platform::getPreferedRenderBackends()
 {
 #ifdef ARK_FLAG_PUBLISHING_BUILD

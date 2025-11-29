@@ -84,9 +84,14 @@ String Platform::getRealPath(const String& path)
     return path;
 }
 
-Vector<enums::RendererVersion> Platform::getRendererVersionPreferences()
+Vector<enums::RenderingBackendBit> Platform::getPreferedRenderBackends()
 {
-    return {enums::RENDERER_VERSION_VULKAN_12, enums::RENDERER_VERSION_OPENGL_41};
+#ifdef ARK_FLAG_PUBLISHING_BUILD
+    return {enums::RENDERING_BACKEND_BIT_METAL, enums::RENDERING_BACKEND_BIT_VULKAN, enums::RENDERING_BACKEND_BIT_OPENGL};
+#else
+    // We need a bit of variety while debugging
+    return {enums::RENDERING_BACKEND_BIT_VULKAN, enums::RENDERING_BACKEND_BIT_METAL};
+#endif
 }
 
 String Platform::getUserStoragePath(const String& path)
