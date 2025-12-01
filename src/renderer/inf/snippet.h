@@ -13,7 +13,7 @@ public:
     virtual ~Snippet() = default;
 
     virtual void preInitialize(PipelineBuildingContext& context) {}
-    virtual void preCompile(PipelineBuildingContext& context) {}
+    virtual void postInitialize(PipelineBuildingContext& context) {}
 };
 
 }

@@ -56,12 +56,12 @@ struct VKDrawElementsInstanced final : VKPipeline::BakedRenderer {
     {
         VkDeviceSize offsets = 0;
         const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
-        for(const auto& i : param._instance_buffer_snapshots)
+        for(const auto& [k, v] : param._instance_buffer_snapshots)
         {
-            i.second.upload(graphicsContext);
-            DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
-            VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
-            vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
+            v.upload(graphicsContext);
+            DCHECK(v.id(), "Invaild Instanced Array Buffer: %d", k);
+            VkBuffer vkInstanceVertexBuffer = (VkBuffer) (v.id());
+            vkCmdBindVertexBuffers(commandBuffer, k, 1, &vkInstanceVertexBuffer, &offsets);
         }
         vkCmdDrawIndexed(commandBuffer, param._count, drawingContext._draw_count, 0, 0, param._start);
     }
@@ -372,34 +372,37 @@ void VKPipeline::setupDescriptorSetLayout(GraphicsContext& graphicsContext)
     const PipelineDescriptor& pipelineDescriptor = _pipeline_bindings.pipelineDescriptor();
 
     const PipelineLayout& shaderLayout = pipelineDescriptor.layout();
-    Vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
-    Vector<VkDescriptorSetLayoutBinding> setLayoutBindingsUBO;
+
+    Vector<VkDescriptorSetLayoutBinding> setLayoutBindingUBOs;
     for(const sp<PipelineLayout::UBO>& i : shaderLayout.ubos())
         if(shouldStageNeedBinding(i->_stages))
         {
             const VkShaderStageFlags stages = i->_stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, enums::SHADER_STAGE_BIT_COUNT);
-            setLayoutBindingsUBO.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
+            setLayoutBindingUBOs.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
         }
 
+    Vector<VkDescriptorSetLayoutBinding> setLayoutBindingSSBO;
     for(const PipelineLayout::SSBO& i : shaderLayout.ssbos())
         if(shouldStageNeedBinding(i._stages))
         {
             const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, enums::SHADER_STAGE_BIT_COUNT);
-            setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding._location));
+            setLayoutBindingSSBO.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding._location));
         }
 
-    Vector<VkDescriptorSetLayoutBinding> setLayoutBindingsTexture;
+    Vector<VkDescriptorSetLayoutBinding> setLayoutBindingSamplers;
     for(const auto& [_stages, _binding] : pipelineDescriptor.layout()->samplers().values())
         if(shouldStageNeedBinding(_stages))
-            setLayoutBindingsTexture.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, enums::SHADER_STAGE_BIT_COUNT), _binding._location));
+            setLayoutBindingSamplers.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, enums::SHADER_STAGE_BIT_COUNT), _binding._location));
 
+    Vector<VkDescriptorSetLayoutBinding> setLayoutBindingImages;
     for(const auto& [_stages, _binding] : pipelineDescriptor.layout()->images().values())
         if(shouldStageNeedBinding(_stages))
-            setLayoutBindingsTexture.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, enums::SHADER_STAGE_BIT_COUNT), _binding._location));
+            setLayoutBindingImages.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, enums::SHADER_STAGE_BIT_COUNT), _binding._location));
 
-    addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindings);
-    addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindingsUBO);
-    addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindingsTexture);
+    addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindingSamplers);
+    addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindingUBOs);
+    addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindingSSBO);
+    addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindingImages);
 
     const VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = vks::initializers::pipelineLayoutCreateInfo(_descriptor_set_layouts.data(), _descriptor_set_layouts.size());
     VKUtil::checkResult(vkCreatePipelineLayout(device->vkLogicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
@@ -421,7 +424,6 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
 
     _ubos.clear();
     for(const sp<PipelineLayout::UBO>& i : pipelineDescriptor.layout()->ubos())
-    {
         if(shouldStageNeedBinding(i->_stages))
         {
             sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -434,22 +436,19 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
                                               &ubo->vkDescriptor()));
             _ubos.push_back(std::move(ubo));
         }
-    }
 
     _rebind_signals.clear();
     for(const PipelineLayout::SSBO& i : pipelineDescriptor.layout()->ssbos())
-    {
         if(shouldStageNeedBinding(i._stages))
         {
             const sp<VKBuffer> sbo = i._buffer.delegate();
             _rebind_signals.push_back(sbo->observer().addBooleanSignal());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                              _descriptor_sets.at(0),
+                                              _descriptor_sets.at(2),
                                               VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                               i._binding._location,
                                               &sbo->vkDescriptor()));
         }
-    }
 
     for(const auto& [name, i, bindingSet] : _pipeline_bindings.samplers())
         if(shouldStageNeedBinding(bindingSet._stages))
@@ -463,7 +462,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
                 {
                     CHECK(texture->vkDescriptor().sampler, "Binding sampler \"%s\" with a texture which declared without usage \"sampler\"", name.c_str());
                     writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                                  _descriptor_sets.at(2),
+                                                  _descriptor_sets.at(0),
                                                   VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                                   bindingSet._binding._location,
                                                   &texture->vkDescriptor()));
@@ -481,7 +480,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
                 _rebind_signals.push_back(texture->observer().addBooleanSignal());
                 if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
                     writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                                  _descriptor_sets.at(2),
+                                                  _descriptor_sets.at(3),
                                                   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                                   bindingSet._binding._location,
                                                   &texture->vkDescriptor()));

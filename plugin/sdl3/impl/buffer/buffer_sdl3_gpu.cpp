@@ -46,7 +46,7 @@ void BufferSDL3_GPU::uploadBuffer(GraphicsContext& graphicsContext, Uploader& up
         _buffer_size = bufferSize;
     }
 
-    const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, bufferSize};
+    const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo = {SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, bufferSize};
     SDL_GPUTransferBuffer* uploadTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
 
     void* transferData = SDL_MapGPUTransferBuffer(gpuDevice, uploadTransferBuffer, false);
@@ -59,8 +59,8 @@ void BufferSDL3_GPU::uploadBuffer(GraphicsContext& graphicsContext, Uploader& up
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
     SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
 
-    const SDL_GPUTransferBufferLocation transferBufferLocation{uploadTransferBuffer, 0};
-    const SDL_GPUBufferRegion bufferRegion{_buffer, 0, bufferSize};
+    const SDL_GPUTransferBufferLocation transferBufferLocation = {uploadTransferBuffer, 0};
+    const SDL_GPUBufferRegion bufferRegion = {_buffer, 0, bufferSize};
     SDL_UploadToGPUBuffer(copyPass, &transferBufferLocation, &bufferRegion, false);
 
     SDL_EndGPUCopyPass(copyPass);

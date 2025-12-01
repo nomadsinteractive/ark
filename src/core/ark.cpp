@@ -41,7 +41,6 @@ limitations under the License.
 #include "app/base/application_bundle.h"
 #include "app/base/application_context.h"
 #include "app/base/application_manifest.h"
-#include "plugin/sdl2/impl/application/sdl_application.h"
 
 #include "platform/platform.h"
 

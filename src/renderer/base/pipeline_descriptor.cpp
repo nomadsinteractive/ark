@@ -124,7 +124,7 @@ PipelineDescriptor::Configuration initConfiguration(PipelineDescriptor::Configur
     configuration._snippet = createCoreSnippet(std::move(configuration._snippet));
     configuration._snippet->preInitialize(buildingContext);
     buildingContext.initialize(camera);
-    configuration._snippet->preCompile(buildingContext);
+    configuration._snippet->postInitialize(buildingContext);
     return configuration;
 }
 

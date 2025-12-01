@@ -435,6 +435,32 @@ enums::ShaderTypeQualifier RenderUtil::getTypeQualifier(const StringView declara
     return qualifier;
 }
 
+void RenderUtil::overrideLayoutDescriptor(const String& varName, String& declaration, PipelineLayout::Binding& binding, const int32_t location, const int32_t set, const char* bufferType, const char* shaderType)
+{
+    if(location >= 0)
+    {
+        CHECK(binding._location == -1 || binding._location == location, "%s \"%s\" must be declared in binding %d in %s, or you could omit the binding point and we can fill up the appropriate value for you.", bufferType, varName.c_str(), location, shaderType);
+        if(binding._location == -1)
+        {
+            const auto pos = declaration.find(')');
+            ASSERT(pos != 0 && pos != String::npos);
+            declaration.insert(pos, Strings::sprintf(", binding = %d", location));
+            binding._location = location;
+        }
+    }
+    if(set >= 0)
+    {
+        CHECK(binding._set == -1 || binding._set == set, "%s \"%s\" must be declared in set %d in %s, or you could omit the binding point and we can fill up the appropriate value for you.", bufferType, varName.c_str(), set, shaderType);
+        if(binding._set == -1 && set != 0)
+        {
+            const auto pos = declaration.find(')');
+            ASSERT(pos != 0 && pos != String::npos);
+            declaration.insert(pos, Strings::sprintf(", set = %d", set));
+        }
+        binding._set = set;
+    }
+}
+
 uint32_t RenderUtil::getChannelSize(const Texture::Format format)
 {
     DASSERT(format != Texture::FORMAT_AUTO);

@@ -4,9 +4,9 @@
 
 namespace ark::plugin::opengl {
 
-class SnippetFactoryGLES30 : public SnippetFactory {
+class SnippetFactoryGLES30 final : public SnippetFactory {
 public:
-    virtual sp<Snippet> createCoreSnippet() override;
+    sp<Snippet> createCoreSnippet() override;
 };
 
 }

@@ -24,6 +24,7 @@ public:
     static String outAttributeName(const String& name, enums::ShaderStageBit preStage);
     static String toQualifierString(enums::ShaderTypeQualifier qualifier);
     static enums::ShaderTypeQualifier getTypeQualifier(StringView declaration);
+    static void overrideLayoutDescriptor(const String& varName, String& declaration, PipelineLayout::Binding& binding, const int32_t location, const int32_t set, const char* bufferType, const char* shaderType);
 
     static bool isScissorEnabled(const Rect& scissor);
 

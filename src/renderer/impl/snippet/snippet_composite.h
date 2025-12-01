@@ -13,7 +13,7 @@ public:
     SnippetComposite(sp<Snippet> delegate, sp<Snippet> next);
 
     void preInitialize(PipelineBuildingContext& context) override;
-    void preCompile(PipelineBuildingContext& context) override;
+    void postInitialize(PipelineBuildingContext& context) override;
 
     static sp<Snippet> compose(sp<Snippet> self, sp<Snippet> next);
 

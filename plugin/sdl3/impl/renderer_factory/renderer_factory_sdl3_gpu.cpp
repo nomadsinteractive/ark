@@ -29,40 +29,17 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
-void overrideLayoutAnnotations(const String& varName, String& declaration, PipelineLayout::Binding& binding, const int32_t location, const int32_t set, const char* bufferType, const char* shaderType)
-{
-    if(location >= 0)
-    {
-        CHECK(binding._location == -1 || binding._location == location, "%s \"%s\" must be declared in binding %d in %s", bufferType, varName.c_str(), location, shaderType);
-        if(binding._location == -1)
-        {
-            const auto pos = declaration.find(')');
-            ASSERT(pos != 0 && pos != String::npos);
-            declaration.insert(pos, Strings::sprintf(", binding = %d", location));
-            binding._location = location;
-        }
-    }
-    if(set >= 0)
-    {
-        CHECK(binding._set == -1 || binding._set == set, "%s \"%s\" must be declared in set %d in %s", bufferType, varName.c_str(), set, shaderType);
-        if(binding._set == -1 && set != 0)
-        {
-            const auto pos = declaration.find(')');
-            ASSERT(pos != 0 && pos != String::npos);
-            declaration.insert(pos, Strings::sprintf(", set = %d", set));
-        }
-        binding._set = set;
-    }
-}
-
 class SnippetSDL3_GPU final : public Snippet {
 public:
-    void preCompile(PipelineBuildingContext& context) override
+    void postInitialize(PipelineBuildingContext& context) override
     {
         const String sLocation = "location";
-        const ShaderPreprocessor& firstStage = context.renderStages().begin()->second;
 
-        RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
+        if(!context.renderStages().empty())
+        {
+            const ShaderPreprocessor& firstStage = context.renderStages().begin()->second;
+            RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
+        }
 
         const PipelineLayout& pipelineLayout = context._pipeline_layout;
         if(ShaderPreprocessor* vertex = context.tryGetRenderStage(enums::SHADER_STAGE_BIT_VERTEX))
@@ -114,16 +91,16 @@ public:
             preprocessor->_predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
             preprocessor->_predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
 
+            // We declare both sampler and texture in _declaration_samplers so the actual number of samplers should be half of the size.
+            const int32_t samplerCount = preprocessor->_declaration_samplers.vars().size() / 2;
             if(!preprocessor->_ssbos.empty())
             {
                 CHECK(preprocessor->_shader_stage != enums::SHADER_STAGE_BIT_VERTEX, "SSBO should not be declared in vertex shaders");
                 if(preprocessor->_shader_stage == enums::SHADER_STAGE_BIT_FRAGMENT)
                 {
-                    // We declare both sampler and texture in _declaration_samplers so the actual number of samplers should be half of the size.
-                    const int32_t samplerCount = preprocessor->_declaration_samplers.vars().size() / 2;
                     int32_t ssboBindingLocation = samplerCount + preprocessor->_declaration_images.vars().size();
                     for(auto& [k, v] : preprocessor->_ssbos)
-                        overrideLayoutAnnotations(k, v._declaration, v._binding, ssboBindingLocation++, 2, "Readonly buffer", "fragment shaders");
+                        RenderUtil::overrideLayoutDescriptor(k, v._declaration, v._binding, ssboBindingLocation++, 2, "Readonly buffer", "pixel shaders");
                 }
                 else
                 {
@@ -133,21 +110,28 @@ public:
                     for(auto& [k, v] : preprocessor->_ssbos)
                     {
                         if(v._binding._qualifier.contains(enums::SHADER_TYPE_QUALIFIER_READONLY))
-                            overrideLayoutAnnotations(k, v._declaration, v._binding, readonlySSBOBindingLocation++, 0, "Readonly buffer", "compute shaders");
+                            RenderUtil::overrideLayoutDescriptor(k, v._declaration, v._binding, readonlySSBOBindingLocation++, 0, "Readonly buffer", "compute shaders");
                         else
-                            overrideLayoutAnnotations(k, v._declaration, v._binding, ssboBindingLocation++, 1, "Readwrite buffer", "compute shaders");
+                            RenderUtil::overrideLayoutDescriptor(k, v._declaration, v._binding, ssboBindingLocation++, 1, "Readwrite buffer", "compute shaders");
                     }
                 }
             }
+            if(preprocessor->_shader_stage == enums::SHADER_STAGE_BIT_FRAGMENT)
+            {
+                int32_t imageBindingLocation = samplerCount;
+                for(const auto& [k, v] : preprocessor->_declaration_images.vars())
+                    RenderUtil::overrideLayoutDescriptor(k, v._source, v._binding, imageBindingLocation++, 2, "Image", "pixel shaders");
+            }
+            else
             {
                 int32_t imageBindingLocation = 0;
-                int32_t readonlyImageBindingLocation = preprocessor->_declaration_samplers.vars().size();
+                int32_t readonlyImageBindingLocation = samplerCount;
                 for(const auto& [k, v] : preprocessor->_declaration_images.vars())
                 {
                     if(v._binding._qualifier.contains(enums::SHADER_TYPE_QUALIFIER_READONLY))
-                        overrideLayoutAnnotations(k, v._source, v._binding, readonlyImageBindingLocation++, 0, "Readonly image", "shaders");
+                        RenderUtil::overrideLayoutDescriptor(k, v._source, v._binding, readonlyImageBindingLocation++, 0, "Readonly image", "shaders");
                     else
-                        overrideLayoutAnnotations(k, v._source, v._binding, imageBindingLocation++, 1, "Readwrite image", "shaders");
+                        RenderUtil::overrideLayoutDescriptor(k, v._source, v._binding, imageBindingLocation++, 1, "Readwrite image", "shaders");
                 }
             }
         }

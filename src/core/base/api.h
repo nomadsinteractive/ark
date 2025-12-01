@@ -69,7 +69,20 @@
 #   define DPROFILER_LOG(...)
 #endif
 
-#if !defined(ARK_FLAG_PUBLISHING_BUILD) || !defined(ARK_FLAG_BUILD_TYPE) || ARK_FLAG_BUILD_TYPE < 100
+#ifndef ARK_FLAG_BUILD_TYPE
+#    ifdef ARK_FLAG_PUBLISHING_BUILD
+#        define ARK_FLAG_BUILD_TYPE      100
+#    else
+#        define ARK_FLAG_BUILD_TYPE      0
+#    endif
+#else
+#    ifdef ARK_FLAG_PUBLISHING_BUILD
+#        undef  ARK_FLAG_BUILD_TYPE
+#        define ARK_FLAG_BUILD_TYPE      100
+#    endif
+#endif
+
+#if !defined(ARK_FLAG_PUBLISHING_BUILD) || ARK_FLAG_BUILD_TYPE < 100
 #   define DFATAL(...) FATAL(__VA_ARGS__)
 #   define DCHECK(cond, ...) CHECK(cond, __VA_ARGS__)
 #   define DCHECK_WARN(cond, ...) CHECK_WARN(cond, __VA_ARGS__)

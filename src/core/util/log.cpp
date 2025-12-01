@@ -49,7 +49,6 @@ void Log::log(const LogLevel logLevel, const char* tag, const char* content)
             spdlog::error("{} {}", tag, content);
             break;
     }
-//    Platform::log(logLevel, tag, content);
 }
 
 String Log::func(const String& f)

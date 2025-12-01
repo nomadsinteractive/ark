@@ -400,7 +400,6 @@ public:
         DASSERT(drawingContext._vertices);
         DASSERT(drawingContext._indices);
 
-        const PipelineBindings& pipelineBindings = drawingContext._bindings;
         const GraphicsContextSDL3_GPU& sdl3GC = ensureGraphicsContext(graphicsContext);
 
         const RenderTargetContext& renderTargets = sdl3GC.renderTarget();
@@ -418,21 +417,48 @@ public:
         const SDL_GPUBufferBinding indexBufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(drawingContext._indices.id()), 0};
         SDL_BindGPUIndexBuffer(renderPass, &indexBufferBinding, sizeof(element_index_t) == 2 ? SDL_GPU_INDEXELEMENTSIZE_16BIT : SDL_GPU_INDEXELEMENTSIZE_32BIT);
 
-        SDL_GPUTextureSamplerBinding textureSamplerBinding[8];
-        Uint32 samplerCount = 0;
-        ASSERT(pipelineBindings.samplers().size() < 8);
-        for(const auto& [_, k, v] : pipelineBindings.samplers())
+        const PipelineBindings& pipelineBindings = drawingContext._bindings;
+        const PipelineLayout& pipelineLayout = pipelineBindings.pipelineLayout();
+        if(!pipelineBindings.samplers().empty())
         {
-            TextureSDL3_GPU& texture = k->delegate().cast<TextureSDL3_GPU>();
-            if(!texture.texture())
-                return SDL_EndGPURenderPass(renderPass);
+            Uint32 samplerCount = 0;
+            SDL_GPUTextureSamplerBinding textureSamplerBinding[8];
+            ASSERT(pipelineBindings.samplers().size() < 8);
+            for(const auto& [_, k, v] : pipelineBindings.samplers())
+            {
+                TextureSDL3_GPU& texture = k->delegate().cast<TextureSDL3_GPU>();
+                if(!texture.texture())
+                    return SDL_EndGPURenderPass(renderPass);
 
-            textureSamplerBinding[samplerCount ++] = {
-                texture.texture(),
-                texture.ensureSampler(ensureGPUDevice(graphicsContext))
-            };
+                textureSamplerBinding[samplerCount ++] = {
+                    texture.texture(),
+                    texture.ensureSampler(ensureGPUDevice(graphicsContext))
+                };
+            }
+            SDL_BindGPUFragmentSamplers(renderPass, 0, textureSamplerBinding, samplerCount);
         }
-        SDL_BindGPUFragmentSamplers(renderPass, 0, textureSamplerBinding, samplerCount);
+
+        if(!pipelineLayout.ssbos().empty())
+        {
+            SDL_GPUBuffer* storageBuffers[8] = {};
+            uint32_t storageBufferCount = 0;
+            ASSERT(pipelineLayout.ssbos().size() < 8);
+            for(const PipelineLayout::SSBO& i : pipelineLayout.ssbos())
+                if(i._stages.contains(enums::SHADER_STAGE_BIT_FRAGMENT))
+                    storageBuffers[storageBufferCount ++] = reinterpret_cast<SDL_GPUBuffer*>(i._buffer.id());
+            SDL_BindGPUFragmentStorageBuffers(renderPass, 0, storageBuffers, storageBufferCount);
+        }
+
+        if(!pipelineBindings.images().empty())
+        {
+            SDL_GPUTexture* storageTextures[8] = {};
+            uint32_t storageTextureCount = 0;
+            ASSERT(pipelineBindings.images().size() < 8);
+            for(const PipelineDescriptor::BindedTexture& i : pipelineBindings.images())
+                if(i._descriptor_set._stages.contains(enums::SHADER_STAGE_BIT_FRAGMENT))
+                    storageTextures[storageTextureCount ++] = reinterpret_cast<SDL_GPUTexture*>(i._texture->id());
+            SDL_BindGPUFragmentStorageTextures(renderPass, 0, storageTextures, storageTextureCount);
+        }
 
         switch(_draw_procedure)
         {
@@ -441,6 +467,17 @@ public:
                 break;
             case enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT: {
                 const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
+                SDL_GPUBufferBinding instanceBuffers[8] = {};
+                uint32_t numInstanceBuffers = 0;
+                for(const auto& [i, j] : param._instance_buffer_snapshots)
+                {
+                    j.upload(graphicsContext);
+                    const auto buffer = reinterpret_cast<SDL_GPUBuffer*>(j.id());
+                    CHECK(buffer, "Invaild Instanced Array Buffer: %d", i);
+                    instanceBuffers[numInstanceBuffers ++] = {buffer, 0};
+                }
+                param._indirect_cmds.upload(graphicsContext);
+                SDL_BindGPUVertexBuffers(renderPass, 1, instanceBuffers, numInstanceBuffers);
                 SDL_DrawGPUIndexedPrimitivesIndirect(renderPass, reinterpret_cast<SDL_GPUBuffer*>(param._indirect_cmds.id()), 0, param._indirect_cmd_count);
                 break;
             }
@@ -541,45 +578,35 @@ public:
 
         uint32_t numReadWriteStorageTextures = 0;
         uint32_t numReadOnlyStorageTextures = 0;
-        uint32_t readonlyStorageTextureFirstSlot = std::numeric_limits<uint32_t>::max();
         SDL_GPUStorageTextureReadWriteBinding storageTextureBindings[16];
         SDL_GPUTexture* readonlyStorageTextures[16];
         for(const PipelineDescriptor::BindedTexture& i : computeContext._bindings->images())
             if(i._descriptor_set._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE))
             {
                 if(i._descriptor_set._binding._qualifier.contains(enums::SHADER_TYPE_QUALIFIER_READONLY))
-                {
                     readonlyStorageTextures[numReadOnlyStorageTextures++] = reinterpret_cast<SDL_GPUTexture*>(i._texture->id());
-                    if(i._descriptor_set._binding._location >= 0)
-                        readonlyStorageTextureFirstSlot = std::min<uint32_t>(readonlyStorageTextureFirstSlot, i._descriptor_set._binding._location);
-                }
                 else
                     storageTextureBindings[numReadWriteStorageTextures++] = {reinterpret_cast<SDL_GPUTexture*>(i._texture->id()), 0, 0};
             }
 
         uint32_t numReadWriteStorageBuffers = 0;
         uint32_t numReadOnlyStorageBuffers = 0;
-        uint32_t readonlyStorageBufferFirstSlot = std::numeric_limits<uint32_t>::max();
         SDL_GPUStorageBufferReadWriteBinding storageBufferBindings[16];
         SDL_GPUBuffer* readonlyStorageBuffers[16];
         for(const PipelineLayout::SSBO& i : computeContext._bindings->pipelineLayout()->ssbos())
             if(i._stages.contains(enums::SHADER_STAGE_BIT_COMPUTE))
             {
                 if(i._binding._qualifier.contains(enums::SHADER_TYPE_QUALIFIER_READONLY))
-                {
                     readonlyStorageBuffers[numReadOnlyStorageBuffers++] = reinterpret_cast<SDL_GPUBuffer*>(i._buffer.id());
-                    if(i._binding._location >= 0)
-                        readonlyStorageBufferFirstSlot = std::min<uint32_t>(readonlyStorageBufferFirstSlot, i._binding._location);
-                }
                 else
                     storageBufferBindings[numReadWriteStorageBuffers++] = {reinterpret_cast<SDL_GPUBuffer*>(i._buffer.id())};
             }
 
         SDL_GPUComputePass* computePass = SDL_BeginGPUComputePass(sdl3GC._command_buffer, storageTextureBindings, numReadWriteStorageTextures, storageBufferBindings, numReadWriteStorageBuffers);
         if(numReadOnlyStorageTextures > 0)
-            SDL_BindGPUComputeStorageTextures(computePass, readonlyStorageTextureFirstSlot, readonlyStorageTextures, numReadOnlyStorageTextures);
+            SDL_BindGPUComputeStorageTextures(computePass, 0, readonlyStorageTextures, numReadOnlyStorageTextures);
         if(numReadOnlyStorageBuffers > 0)
-            SDL_BindGPUComputeStorageBuffers(computePass, readonlyStorageBufferFirstSlot, readonlyStorageBuffers, numReadOnlyStorageBuffers);
+            SDL_BindGPUComputeStorageBuffers(computePass, 0, readonlyStorageBuffers, numReadOnlyStorageBuffers);
         SDL_BindGPUComputePipeline(computePass, _pipeline);
         SDL_DispatchGPUCompute(computePass, computeContext._num_work_groups[0], computeContext._num_work_groups[1], computeContext._num_work_groups[2]);
         SDL_EndGPUComputePass(computePass);

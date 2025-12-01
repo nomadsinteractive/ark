@@ -3,6 +3,7 @@
 #include <cstdarg>
 #include <system_error>
 
+#include "core/base/enum.h"
 #include "core/util/strings.h"
 #include "core/util/log.h"
 
@@ -13,6 +14,8 @@ static std::thread::id _thread_ids[THREAD_NAME_ID_COUNT];
 void __fatal__(const char* func, const char* condition, const char* message)
 {
     const String str = Strings::sprintf("%s%s", condition ? Strings::sprintf("\"%s\" failed! ", condition).c_str() : "", message);
+    if constexpr (ARK_FLAG_BUILD_TYPE == enums::BUILD_TYPE_DEBUG)
+        Log::e(func, str.c_str());
     throw std::runtime_error(str.c_str());
 }
 
