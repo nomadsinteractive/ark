@@ -344,7 +344,9 @@ const char** Ark::argv() const
 
 sp<Application> Ark::makeApplication() const
 {
-    return _application_context->resourceLoader()->beanFactory().build<Application>(Global<Constants>()->DOCUMENT_NONE, {});
+    sp<Application> application = _application_context->resourceLoader()->beanFactory().build<Application>(Global<Constants>()->DOCUMENT_NONE, {});
+    CHECK(application, "Failed to create application. It's likely certain plugins are not loaded, such as SDL.");
+    return application;
 }
 
 const sp<ApplicationManifest>& Ark::manifest() const

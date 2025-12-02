@@ -89,7 +89,7 @@ public:
 public:
 //  [[script::bindings::auto]]
     Buffer(Buffer::UsageBits usageBits, sp<Uploader> uploader);
-    Buffer(sp<Delegate> delegate) noexcept;
+    Buffer(Usage usage, sp<Delegate> delegate) noexcept;
     Buffer() noexcept = default;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Buffer);
 
@@ -104,6 +104,8 @@ public:
 
 //  [[script::bindings::property]]
     uint64_t id() const;
+
+    Usage usage() const;
 
 //  [[script::bindings::auto]]
     sp<ByteArray> synchronize(size_t offset, size_t size, sp<Boolean> canceled);
@@ -125,6 +127,7 @@ public:
     };
 
 private:
+    Usage _usage;
     sp<Delegate> _delegate;
 };
 

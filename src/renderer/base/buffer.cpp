@@ -90,12 +90,12 @@ const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
 }
 
 Buffer::Buffer(const UsageBits usageBits, sp<Uploader> uploader)
-    : _delegate(Ark::instance().renderController()->makeBuffer(Usage(usageBits), std::move(uploader))._delegate)
+    : _usage(usageBits), _delegate(Ark::instance().renderController()->makeBuffer(_usage, std::move(uploader))._delegate)
 {
 }
 
-Buffer::Buffer(sp<Buffer::Delegate> delegate) noexcept
-    : _delegate(std::move(delegate))
+Buffer::Buffer(const Usage usage, sp<Delegate> delegate) noexcept
+    : _usage(usage), _delegate(std::move(delegate))
 {
 }
 
@@ -127,6 +127,11 @@ Buffer::Snapshot Buffer::snapshot(sp<Uploader> uploader, size_t size) const
 uint64_t Buffer::id() const
 {
     return _delegate->id();
+}
+
+Buffer::Usage Buffer::usage() const
+{
+    return _usage;
 }
 
 sp<ByteArray> Buffer::synchronize(const size_t offset, const size_t size, sp<Boolean> canceled)

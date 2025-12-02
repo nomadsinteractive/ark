@@ -75,14 +75,17 @@ void BufferSDL3_GPU::downloadBuffer(GraphicsContext& graphicsContext, const size
     const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD, static_cast<Uint32>(size)};
     SDL_GPUTransferBuffer* downloadTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
 
-    SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
-    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
+    SDL_GPUCommandBuffer* downloadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
+    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(downloadCmdBuf);
 
-    const SDL_GPUBufferRegion bufferRegion{_buffer, static_cast<Uint32>(offset), static_cast<Uint32>(size)};
-    const SDL_GPUTransferBufferLocation transferBufferLocation{downloadTransferBuffer, 0};
+    const SDL_GPUBufferRegion bufferRegion = {_buffer, static_cast<Uint32>(offset), static_cast<Uint32>(size)};
+    const SDL_GPUTransferBufferLocation transferBufferLocation = {downloadTransferBuffer, 0};
     SDL_DownloadFromGPUBuffer(copyPass, &bufferRegion, &transferBufferLocation);
     SDL_EndGPUCopyPass(copyPass);
-    SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
+
+    SDL_GPUFence* fence = SDL_SubmitGPUCommandBufferAndAcquireFence(downloadCmdBuf);
+    SDL_WaitForGPUFences(gpuDevice, true, &fence, 1);
+    SDL_ReleaseGPUFence(gpuDevice, fence);
 
     const Uint8* downloadedData = static_cast<const Uint8*>(SDL_MapGPUTransferBuffer(gpuDevice, downloadTransferBuffer, false));
     memcpy(ptr, downloadedData, size);

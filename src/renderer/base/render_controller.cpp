@@ -292,7 +292,7 @@ sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, sp<Texture::Par
 Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uploader, const enums::UploadStrategy us, sp<Future> future)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_CORE);
-    Buffer buffer(_render_engine->rendererFactory()->createBuffer(usage));
+    Buffer buffer(usage, _render_engine->rendererFactory()->createBuffer(usage));
     if(uploader)
         uploadBuffer(buffer, std::move(uploader), us, std::move(future));
     return buffer;

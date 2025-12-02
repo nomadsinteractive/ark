@@ -196,7 +196,9 @@ void PipelineLayout::initializeSSBO(const PipelineBuildingContext& buildingConte
             if(!sobs.has(name))
             {
                 CHECK(buildingContext._ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
-                sobs[name] = {buildingContext._ssbos.at(name), declaration._binding};
+                const Buffer& buffer = buildingContext._ssbos.at(name);
+                CHECK(buffer.usage().contains(Buffer::USAGE_BIT_STORAGE), "Buffer \"%s\" declared as a storage buffer but its usage is not saying so.", name.c_str());
+                sobs[name] = {buffer, declaration._binding};
             }
             sobs[name]._stages.set(preprocessor->_shader_stage);
         }
