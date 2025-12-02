@@ -20,6 +20,7 @@
 
 #include "app/base/application_context.h"
 
+#include "sdl3/base/sdl3_context.h"
 #include "sdl3/base/context_sdl3_gpu.h"
 #include "sdl3/impl/buffer/buffer_sdl3_gpu.h"
 #include "sdl3/impl/pipeline_factory/pipeline_factory_sdl3_gpu.h"
@@ -253,10 +254,11 @@ public:
 
     void onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand) override
     {
-        const ContextSDL3_GPU& context = ensureContext(_graphics_context);
+        const sdl3::SDL3_Context& context = _graphics_context->traits().ensure<sdl3::SDL3_Context>();
+        const SDL3_GPU_Context& gpuContext = ensureGPUContext(_graphics_context);
         GraphicsContextSDL3_GPU& graphicsContext = ensureGraphicsContext(_graphics_context);
 
-        SDL_GPUCommandBuffer* cmdbuf = SDL_AcquireGPUCommandBuffer(context._gpu_gevice);
+        SDL_GPUCommandBuffer* cmdbuf = SDL_AcquireGPUCommandBuffer(gpuContext._gpu_gevice);
         if(!cmdbuf)
         {
             SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
@@ -332,13 +334,14 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
             false,
 #endif
             nullptr);
-    CHECK(_gpu_device, "GPUCreateDevice failed");
+    CHECK(_gpu_device, "GPUCreateDevice failed: %s", SDL_GetError());
 
-    ContextSDL3_GPU& sdl3GPUContext = renderEngine.context()->traits().ensure<ContextSDL3_GPU>();
-    ASSERT(sdl3GPUContext._main_window);
-    sdl3GPUContext._gpu_gevice = _gpu_device;
+    const sdl3::SDL3_Context& context = renderEngine.context()->traits().ensure<sdl3::SDL3_Context>();
+    SDL3_GPU_Context& gpuContext = renderEngine.context()->traits().ensure<SDL3_GPU_Context>();
+    ASSERT(context._main_window);
+    gpuContext._gpu_gevice = _gpu_device;
 
-    const bool success = SDL_ClaimWindowForGPUDevice(_gpu_device, sdl3GPUContext._main_window);
+    const bool success = SDL_ClaimWindowForGPUDevice(_gpu_device, context._main_window);
     CHECK(success, "SDL_ClaimWindowForGPUDevice failed: %s", SDL_GetError());
 }
 
@@ -389,11 +392,6 @@ sp<Texture::Delegate> RendererFactorySDL3_GPU::createTexture(sp<Size> size, sp<T
     if(parameters->_type == Texture::TYPE_2D || parameters->_type == Texture::TYPE_CUBEMAP)
         return sp<Texture::Delegate>::make<TextureSDL3_GPU>(static_cast<uint32_t>(size->widthAsFloat()), static_cast<uint32_t>(size->heightAsFloat()), std::move(parameters));
     return nullptr;
-}
-
-sp<RendererFactory> RendererFactorySDL3_GPU::BUILDER::build(const Scope& args)
-{
-    return sp<RendererFactory>::make<RendererFactorySDL3_GPU>();
 }
 
 }

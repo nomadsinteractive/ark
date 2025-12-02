@@ -14,6 +14,7 @@
 #include "renderer/inf/pipeline.h"
 #include "renderer/util/render_util.h"
 
+#include "sdl3/base/sdl3_context.h"
 #include "sdl3/base/context_sdl3_gpu.h"
 #include "sdl3/impl/texture/texture_sdl3_gpu.h"
 
@@ -44,18 +45,12 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const StringView sour
         static_cast<const Uint8*>(bytecode),
         binaries.size() * sizeof(uint32_t),
         entrypoint,
-        stageBit == enums::SHADER_STAGE_BIT_VERTEX ? SDL_SHADERCROSS_SHADERSTAGE_VERTEX : SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT,
-#ifdef ARK_FLAG_BUILD_TYPE
-        true,
-#else
-        false,
-#endif
-        nullptr
+        stageBit == enums::SHADER_STAGE_BIT_VERTEX ? SDL_SHADERCROSS_SHADERSTAGE_VERTEX : SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT
     };
 
-    SDL_ShaderCross_GraphicsShaderMetadata shaderMetadata = {};
+    const SDL_ShaderCross_GraphicsShaderResourceInfo shaderResourceInfo = {};
     SDL_ClearError();
-    SDL_GPUShader* shader = SDL_ShaderCross_CompileGraphicsShaderFromSPIRV(device, &spirvInfo, &shaderMetadata);
+    SDL_GPUShader* shader = SDL_ShaderCross_CompileGraphicsShaderFromSPIRV(device, &spirvInfo, &shaderResourceInfo, 0);
 	if(const char* lastError = SDL_GetError(); !shader || lastError[0])
 	{
         FATAL("%s\n\nFailed to create shader, SDL Error: %s", sourceStr.c_str(), lastError);
@@ -289,7 +284,8 @@ public:
     {
         if(!_pipeline)
         {
-            const ContextSDL3_GPU& context = ensureContext(graphicsContext);
+            const sdl3::SDL3_Context& sdl3Context = graphicsContext.traits().ensure<sdl3::SDL3_Context>();
+            const SDL3_GPU_Context& context = ensureGPUContext(graphicsContext);
             SDL_GPUDevice* gpuDevice = context._gpu_gevice;
 
             const PipelineLayout& pipelineLayout = _pipeline_descriptor->layout();
@@ -359,7 +355,7 @@ public:
             else
             {
                 colorTargetDescriptions[0] = {
-                    SDL_GetGPUSwapchainTextureFormat(gpuDevice, context._main_window),
+                    SDL_GetGPUSwapchainTextureFormat(gpuDevice, sdl3Context._main_window),
                     blendState
                 };
                 numColorTargets = 1;
@@ -551,18 +547,12 @@ public:
                 static_cast<const Uint8*>(bytecode),
                 binaries.size() * sizeof(uint32_t),
                 entrypoint,
-                SDL_SHADERCROSS_SHADERSTAGE_COMPUTE,
-        #ifdef ARK_FLAG_BUILD_TYPE
-                true,
-        #else
-                false,
-        #endif
-                nullptr
+                SDL_SHADERCROSS_SHADERSTAGE_COMPUTE
             };
 
             SDL_ShaderCross_ComputePipelineMetadata shaderMetadata = {};
             SDL_ClearError();
-            _pipeline = SDL_ShaderCross_CompileComputePipelineFromSPIRV(gpuDevice, &spirvInfo, &shaderMetadata);
+            _pipeline = SDL_ShaderCross_CompileComputePipelineFromSPIRV(gpuDevice, &spirvInfo, &shaderMetadata, 0);
             CHECK(_pipeline, "%s", SDL_GetError());
         }
     }

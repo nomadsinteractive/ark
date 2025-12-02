@@ -26,7 +26,7 @@
 
 #include "renderer/inf/renderer_factory.h"
 
-#include "sdl3/base/context_sdl3_gpu.h"
+#include "sdl3/base/sdl3_context.h"
 
 #ifdef ARK_PLATFORM_DARWIN
 struct SDL_VideoDevice;
@@ -414,7 +414,7 @@ void ApplicationSDL3::initialize()
         FATAL(SDL_GetError());
     }
 
-    ContextSDL3_GPU& sdl3GPUContext = renderEngine.context()->traits().ensure<ContextSDL3_GPU>();
+    SDL3_Context& sdl3GPUContext = renderEngine.context()->traits().ensure<SDL3_Context>();
     sdl3GPUContext._main_window = _main_window;
 
     RenderEngine::PlatformInfo& info = renderEngine.info();

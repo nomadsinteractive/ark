@@ -2,18 +2,15 @@
 
 #include <SDL3/SDL.h>
 
-#include "core/types/optional.h"
-
 #include "renderer/forwarding.h"
 #include "renderer/base/render_target.h"
 
 namespace ark::plugin::sdl3 {
 
-struct ContextSDL3_GPU {
-    ContextSDL3_GPU();
-    ~ContextSDL3_GPU();
+struct SDL3_GPU_Context {
+    SDL3_GPU_Context();
+    ~SDL3_GPU_Context();
 
-    SDL_Window* _main_window;
     SDL_GPUDevice* _gpu_gevice;
 };
 
@@ -33,7 +30,7 @@ struct GraphicsContextSDL3_GPU {
     void popRenderTargets();
 };
 
-const ContextSDL3_GPU& ensureContext(GraphicsContext& graphicsContext);
+const SDL3_GPU_Context& ensureGPUContext(GraphicsContext& graphicsContext);
 GraphicsContextSDL3_GPU& ensureGraphicsContext(GraphicsContext& graphicsContext);
 
 SDL_GPUDevice* ensureGPUDevice(GraphicsContext& graphicsContext);

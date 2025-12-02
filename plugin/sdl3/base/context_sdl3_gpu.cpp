@@ -1,4 +1,4 @@
-#include "sdl3/base/context_sdl3_gpu.h"
+#include "context_sdl3_gpu.h"
 
 #include <SDL3_shadercross/SDL_shadercross.h>
 
@@ -8,12 +8,12 @@
 
 namespace ark::plugin::sdl3 {
 
-ContextSDL3_GPU::ContextSDL3_GPU()
+SDL3_GPU_Context::SDL3_GPU_Context()
 {
     SDL_ShaderCross_Init();
 }
 
-ContextSDL3_GPU::~ContextSDL3_GPU()
+SDL3_GPU_Context::~SDL3_GPU_Context()
 {
     SDL_ShaderCross_Quit();
 }
@@ -34,9 +34,9 @@ const RenderTargetContext& GraphicsContextSDL3_GPU::renderTarget() const
     return _render_targets.back();
 }
 
-const ContextSDL3_GPU& ensureContext(GraphicsContext& graphicsContext)
+const SDL3_GPU_Context& ensureGPUContext(GraphicsContext& graphicsContext)
 {
-    const sp<ContextSDL3_GPU> context = graphicsContext.traits().ensure<ContextSDL3_GPU>();
+    const sp<SDL3_GPU_Context> context = graphicsContext.traits().ensure<SDL3_GPU_Context>();
     ASSERT(context);
     return *context;
 }
@@ -50,7 +50,7 @@ GraphicsContextSDL3_GPU& ensureGraphicsContext(GraphicsContext& graphicsContext)
 
 SDL_GPUDevice* ensureGPUDevice(GraphicsContext& graphicsContext)
 {
-    SDL_GPUDevice* gpuDevice = graphicsContext.traits().ensure<ContextSDL3_GPU>()->_gpu_gevice;
+    SDL_GPUDevice* gpuDevice = graphicsContext.traits().ensure<SDL3_GPU_Context>()->_gpu_gevice;
     ASSERT(gpuDevice);
     return gpuDevice;
 }

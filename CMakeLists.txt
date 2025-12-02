@@ -177,6 +177,7 @@ ark_add_plugin_directory(vulkan plugin/vulkan)
 ark_add_plugin_directory(yoga plugin/yoga)
 if(NOT (ANDROID OR IOS))
     ark_add_plugin_directory(sdl3 plugin/sdl3)
+    ark_add_plugin_directory(sdl3_gpu plugin/sdl3-gpu)
 endif()
 
 ark_setup_tools(ark_gen_string_table)

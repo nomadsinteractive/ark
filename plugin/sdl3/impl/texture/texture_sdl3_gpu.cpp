@@ -1,7 +1,10 @@
 #include "sdl3/impl/texture/texture_sdl3_gpu.h"
 
 #include "core/inf/array.h"
+
 #include "graphics/base/bitmap.h"
+
+#include "sdl3/base/context_sdl3_gpu.h"
 
 namespace ark::plugin::sdl3 {
 

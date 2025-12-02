@@ -20,14 +20,6 @@ public:
     sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
     sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
 
-//  [[plugin::builder::by-value("sdl3-gpu")]]
-    class BUILDER final : public Builder<RendererFactory> {
-    public:
-        BUILDER() = default;
-
-        sp<RendererFactory> build(const Scope& args) override;
-    };
-
 private:
     SDL_GPUDevice* _gpu_device;
 };

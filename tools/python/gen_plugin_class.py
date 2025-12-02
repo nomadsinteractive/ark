@@ -5,6 +5,8 @@ import getopt
 import os
 import sys
 import re
+from collections.abc import Sequence
+
 import acg
 from acg import HeaderPattern
 
@@ -30,8 +32,9 @@ RES_BUILDER_TEMPLATE = '''BeanFactory::Factory ${plugin_name}::createResourceLoa
 _class_members = {}
 
 
-def declare_namespaces(namespaces, source):
-    return '\n'.join(['namespace %s {' % i for i in namespaces]) + '\n\n' + source + '\n' +'\n'.join(['}'] * len(namespaces))
+def declare_namespaces(namespaces: Sequence[str], source: str) -> str:
+    return f'namespace {"::".join(namespaces)} {{\n\n{source}\n\n}}'
+    # return '\n'.join(['namespace %s {' % i for i in namespaces]) + '\n\n' + source + '\n' +'\n'.join(['}'] * len(namespaces))
 
 
 def to_member_name(name):
