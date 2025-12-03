@@ -18,20 +18,26 @@ SDL3_GPU_Context::~SDL3_GPU_Context()
     SDL_ShaderCross_Quit();
 }
 
-void GraphicsContextSDL3_GPU::pushRenderTargets(const RenderTarget::Configure* createConfig, const Vector<SDL_GPUColorTargetInfo>& colorTargets, const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget)
+void SDL3_GPU_GraphicsContext::pushRenderTargets(const RenderTarget::Configure* createConfig, const Vector<SDL_GPUColorTargetInfo>& colorTargets, const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget)
 {
     ASSERT(!depthStencilTarget || depthStencilTarget->texture);
-    _render_targets.push_back({createConfig, colorTargets, depthStencilTarget});
+    ASSERT(_active_render_target_index < static_cast<int32_t>(array_size(_render_targets) - 1));
+    _render_targets[++_active_render_target_index] = {createConfig, &colorTargets, &depthStencilTarget};
 }
 
-void GraphicsContextSDL3_GPU::popRenderTargets()
+void SDL3_GPU_GraphicsContext::popRenderTargets()
 {
-    _render_targets.pop_back();
+    ASSERT(_active_render_target_index >= 0);
+    _active_render_target_index --;
 }
 
-const RenderTargetContext& GraphicsContextSDL3_GPU::renderTarget() const
+const RenderTargetContext& SDL3_GPU_GraphicsContext::getCurrentRenderTarget()
 {
-    return _render_targets.back();
+    ASSERT(_active_render_target_index >= 0);
+    const RenderTargetContext& rt = _render_targets[_active_render_target_index];
+    if(_active_render_target_index == 0)
+        _render_targets[++_active_render_target_index] = _rt_swapchain_blend;
+    return rt;
 }
 
 const SDL3_GPU_Context& ensureGPUContext(GraphicsContext& graphicsContext)
@@ -41,9 +47,9 @@ const SDL3_GPU_Context& ensureGPUContext(GraphicsContext& graphicsContext)
     return *context;
 }
 
-GraphicsContextSDL3_GPU& ensureGraphicsContext(GraphicsContext& graphicsContext)
+SDL3_GPU_GraphicsContext& ensureGraphicsContext(GraphicsContext& graphicsContext)
 {
-    const sp<GraphicsContextSDL3_GPU> context = graphicsContext.traits().ensure<GraphicsContextSDL3_GPU>();
+    const sp<SDL3_GPU_GraphicsContext> context = graphicsContext.traits().ensure<SDL3_GPU_GraphicsContext>();
     ASSERT(context);
     return *context;
 }

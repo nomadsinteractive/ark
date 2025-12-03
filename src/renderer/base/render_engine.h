@@ -63,7 +63,7 @@ public:
     RenderEngine(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory);
 
     enums::RendererVersion version() const;
-    enums::CoordinateSystem coordinateSystem() const;
+    enums::CoordinateSystem viewportCoordinateSystem() const;
 
     const sp<RendererFactory>& rendererFactory() const;
     const sp<RenderEngineContext>& context() const;
@@ -73,7 +73,6 @@ public:
     float toLayoutDirection(float direction) const;
     bool isLHS() const;
     bool isBackendLHS() const;
-    bool isYUp() const;
     bool isViewportFlipped() const;
 
     V2 toNDC(float viewportX, float viewportY) const;
@@ -90,12 +89,11 @@ public:
     PlatformInfo& info();
 
 private:
-    PlatformInfo _info;
-    enums::CoordinateSystem _coordinate_system;
-
+    sp<RenderEngineContext> _render_context;
     sp<RendererFactory> _renderer_factory;
     sp<PipelineFactory> _pipeline_factory;
-    sp<RenderEngineContext> _render_context;
+    enums::CoordinateSystem _coordinate_system;
+    PlatformInfo _info;
 };
 
 }

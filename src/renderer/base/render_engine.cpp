@@ -11,8 +11,7 @@
 namespace ark {
 
 RenderEngine::RenderEngine(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory)
-    : _coordinate_system(renderer._coordinate_system == enums::COORDINATE_SYSTEM_DEFAULT ? rendererFactory->features()._default_coordinate_system : renderer._coordinate_system), _renderer_factory(std::move(rendererFactory)),
-      _render_context(_renderer_factory->createRenderEngineContext(renderer))
+    : _render_context(rendererFactory->createRenderEngineContext(renderer)), _renderer_factory(std::move(rendererFactory)), _coordinate_system(renderer._coordinate_system == enums::COORDINATE_SYSTEM_DEFAULT ? _render_context->viewportCoordinateSystem() : renderer._coordinate_system)
 {
 }
 
@@ -21,9 +20,9 @@ enums::RendererVersion RenderEngine::version() const
     return _render_context->version();
 }
 
-enums::CoordinateSystem RenderEngine::coordinateSystem() const
+enums::CoordinateSystem RenderEngine::viewportCoordinateSystem() const
 {
-    return _renderer_factory->features()._default_coordinate_system;
+    return _render_context->viewportCoordinateSystem();
 }
 
 const sp<RendererFactory>& RenderEngine::rendererFactory() const
@@ -53,17 +52,12 @@ bool RenderEngine::isLHS() const
 
 bool RenderEngine::isBackendLHS() const
 {
-    return _renderer_factory->features()._default_coordinate_system == enums::COORDINATE_SYSTEM_LHS;
-}
-
-bool RenderEngine::isYUp() const
-{
-    return coordinateSystem() == enums::COORDINATE_SYSTEM_RHS;
+    return _render_context->viewportCoordinateSystem() == enums::COORDINATE_SYSTEM_LHS;
 }
 
 bool RenderEngine::isViewportFlipped() const
 {
-    return _coordinate_system != _renderer_factory->features()._default_coordinate_system;
+    return _coordinate_system != _render_context->viewportCoordinateSystem();
 }
 
 V2 RenderEngine::toLHSPosition(const V2& position) const
@@ -77,7 +71,7 @@ Rect RenderEngine::toRendererRect(const Rect& scissor, const enums::CoordinateSy
 {
     Rect s(scissor);
     s.scale(_render_context->displayUnit());
-    if(coordinateSystem() != (cs == enums::COORDINATE_SYSTEM_DEFAULT ? _coordinate_system : cs))
+    if(viewportCoordinateSystem() != (cs == enums::COORDINATE_SYSTEM_DEFAULT ? _coordinate_system : cs))
         s.vflip(static_cast<float>(_render_context->displayResolution().height));
     return s;
 }

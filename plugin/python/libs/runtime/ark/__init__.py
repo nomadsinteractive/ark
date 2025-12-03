@@ -84,10 +84,6 @@ def build_type() -> int:
     return 0
 
 
-def is_ndc_y_up() -> bool:
-    return True
-
-
 def is_ark_type(cls: type) -> bool:
     return False
 

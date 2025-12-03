@@ -101,7 +101,10 @@ public:
                 {
                     int32_t ssboBindingLocation = samplerCount + preprocessor->_declaration_images.vars().size();
                     for(auto& [k, v] : preprocessor->_ssbos)
+                    {
+                        CHECK(v._binding._qualifier.contains(enums::SHADER_TYPE_QUALIFIER_READONLY), "Pixel shader buffer \"%s\" should be declared as readonly", k.c_str());
                         RenderUtil::overrideLayoutDescriptor(k, v._declaration, v._binding, ssboBindingLocation++, 2, "Readonly buffer", "pixel shaders");
+                    }
                 }
                 else
                 {
@@ -121,7 +124,10 @@ public:
             {
                 int32_t imageBindingLocation = samplerCount;
                 for(const auto& [k, v] : preprocessor->_declaration_images.vars())
+                {
+                    CHECK(v._binding._qualifier.contains(enums::SHADER_TYPE_QUALIFIER_READONLY), "Pixel shader images \"%s\" should be declared as readonly", k.c_str());
                     RenderUtil::overrideLayoutDescriptor(k, v._source, v._binding, imageBindingLocation++, 2, "Image", "pixel shaders");
+                }
             }
             else
             {
@@ -197,7 +203,7 @@ public:
         if(_configure._depth_stencil_attachment)
             _depth_stencil_target->texture = reinterpret_cast<SDL_GPUTexture*>(_configure._depth_stencil_attachment->id());
 
-        GraphicsContextSDL3_GPU& gc = ensureGraphicsContext(graphicsContext);
+        SDL3_GPU_GraphicsContext& gc = ensureGraphicsContext(graphicsContext);
         gc.pushRenderTargets(&_configure, _render_targets, _depth_stencil_target);
     }
 
@@ -211,7 +217,7 @@ class RenderCommandOffscreenPostdraw final : public RenderCommand {
 public:
     void draw(GraphicsContext& graphicsContext) override
     {
-        GraphicsContextSDL3_GPU& gc = ensureGraphicsContext(graphicsContext);
+        SDL3_GPU_GraphicsContext& gc = ensureGraphicsContext(graphicsContext);
         gc.popRenderTargets();
     }
 };
@@ -254,9 +260,7 @@ public:
 
     void onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand) override
     {
-        const sdl3::SDL3_Context& context = _graphics_context->traits().ensure<sdl3::SDL3_Context>();
         const SDL3_GPU_Context& gpuContext = ensureGPUContext(_graphics_context);
-        GraphicsContextSDL3_GPU& graphicsContext = ensureGraphicsContext(_graphics_context);
 
         SDL_GPUCommandBuffer* cmdbuf = SDL_AcquireGPUCommandBuffer(gpuContext._gpu_gevice);
         if(!cmdbuf)
@@ -265,12 +269,12 @@ public:
             return;
         }
 
-        graphicsContext._command_buffer = cmdbuf;
+        const SDL3_Context& context = _graphics_context->traits().ensure<SDL3_Context>();
         SDL_GPUTexture* swapchainTexture = nullptr;
         if(SDL_WaitAndAcquireGPUSwapchainTexture(cmdbuf, context._main_window, &swapchainTexture, nullptr, nullptr))
         {
             DASSERT(swapchainTexture);
-            const Vector<SDL_GPUColorTargetInfo> colorTargets = {{
+            const Vector<SDL_GPUColorTargetInfo> swapchainRTIInitial = {{
                 swapchainTexture,
                 0,
                 0,
@@ -278,8 +282,18 @@ public:
                 SDL_GPU_LOADOP_CLEAR,
                 SDL_GPU_STOREOP_STORE
             }};
+            const Vector<SDL_GPUColorTargetInfo> swapchainRTIBlend = {{
+                swapchainTexture,
+                0,
+                0,
+                {},
+                SDL_GPU_LOADOP_LOAD,
+                SDL_GPU_STOREOP_STORE
+            }};
             constexpr Optional<SDL_GPUDepthStencilTargetInfo> depthStencilTarget = {};
-            graphicsContext.pushRenderTargets(nullptr, colorTargets, depthStencilTarget);
+            SDL3_GPU_GraphicsContext& graphicsContext = ensureGraphicsContext(_graphics_context);
+            graphicsContext = {cmdbuf, {nullptr, &swapchainRTIBlend, &depthStencilTarget}};
+            graphicsContext.pushRenderTargets(nullptr, swapchainRTIInitial, depthStencilTarget);
             _graphics_context->onDrawFrame();
             renderCommand.draw(_graphics_context);
             graphicsContext.popRenderTargets();
@@ -319,7 +333,7 @@ enums::RendererVersion getRendererVersion(const enums::RenderingBackendBit rende
 }
 
 RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
-    : RendererFactory({{enums::RENDERING_BACKEND_BIT_DIRECT_X, enums::RENDERING_BACKEND_BIT_METAL}, enums::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_DIRECT_X, enums::RENDERING_BACKEND_BIT_METAL}, true, 16}), _gpu_device(nullptr)
 {
 }
 
@@ -336,7 +350,7 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
             nullptr);
     CHECK(_gpu_device, "GPUCreateDevice failed: %s", SDL_GetError());
 
-    const sdl3::SDL3_Context& context = renderEngine.context()->traits().ensure<sdl3::SDL3_Context>();
+    const SDL3_Context& context = renderEngine.context()->traits().ensure<SDL3_Context>();
     SDL3_GPU_Context& gpuContext = renderEngine.context()->traits().ensure<SDL3_GPU_Context>();
     ASSERT(context._main_window);
     gpuContext._gpu_gevice = _gpu_device;
@@ -347,7 +361,7 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
 
 sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
+    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_LHS);
     setVersion(renderer._backend == enums::RENDERING_BACKEND_AUTO ? enums::RENDERER_VERSION_VULKAN_13 : getRendererVersion(renderer._backend), renderContext);
     return renderContext;
 }
@@ -368,7 +382,7 @@ sp<Buffer::Delegate> RendererFactorySDL3_GPU::createBuffer(const Buffer::Usage u
 
 sp<Camera::Delegate> RendererFactorySDL3_GPU::createCamera(const enums::CoordinateSystem rcs)
 {
-    return rcs == enums::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
+    return rcs == enums::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>();
 }
 
 sp<RenderTarget> RendererFactorySDL3_GPU::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)

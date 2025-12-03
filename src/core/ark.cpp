@@ -409,17 +409,11 @@ const Constants& Ark::constants()
 
 Camera Ark::createCamera(enums::CoordinateSystem cs) const
 {
-    const RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
     if(cs == enums::COORDINATE_SYSTEM_DEFAULT)
         cs = _manifest->renderer()._coordinate_system;
     if(cs == enums::COORDINATE_SYSTEM_DEFAULT)
-        cs = rendererFactory.features()._default_coordinate_system;
+        cs = _application_context->renderController()->renderEngine()->viewportCoordinateSystem();
     return createCamera(cs, false, false);
-}
-
-Camera Ark::createCamera(const enums::CoordinateSystem cs, const bool flip) const
-{
-    return createCamera(cs, flip, flip);
 }
 
 Camera Ark::createCamera(enums::CoordinateSystem cs, bool flipx, bool flipy) const

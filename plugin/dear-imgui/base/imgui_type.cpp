@@ -43,7 +43,7 @@ void Imgui::show(sp<Boolean> discarded) const
 }
 
 Imgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _manifest(manifest), _camera(sp<Camera>::make(Ark::instance().createCamera(enums::COORDINATE_SYSTEM_LHS, Ark::instance().renderController()->renderEngine()->isBackendLHS()))),
+    : _manifest(manifest), _camera(sp<Camera>::make(Ark::instance().createCamera(enums::COORDINATE_SYSTEM_LHS, Ark::instance().renderController()->renderEngine()->isBackendLHS(), Ark::instance().renderController()->renderEngine()->isBackendLHS()))),
       _shader(Shader::fromDocument(factory, manifest, "shaders/imgui.vert", "shaders/imgui.frag"))
 {
 }

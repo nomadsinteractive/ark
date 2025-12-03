@@ -47,13 +47,13 @@ void setVersion(const enums::RendererVersion version, RenderEngineContext& vkCon
 }
 
 RendererFactoryVulkan::RendererFactoryVulkan()
-    : RendererFactory({{enums::RENDERING_BACKEND_BIT_VULKAN}, enums::COORDINATE_SYSTEM_LHS, true, sizeof(float)}), _renderer(sp<VKRenderer>::make())
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_VULKAN}, true, sizeof(float)}), _renderer(sp<VKRenderer>::make())
 {
 }
 
 sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
+    sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_RHS);
     if(renderer._version != enums::RENDERER_VERSION_AUTO)
         setVersion(renderer._version, vkContext);
     return vkContext;

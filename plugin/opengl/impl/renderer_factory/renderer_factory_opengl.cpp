@@ -43,13 +43,13 @@ void setVersion(const enums::RendererVersion version, RenderEngineContext& glCon
 }
 
 RendererFactoryOpenGL::RendererFactoryOpenGL()
-    : RendererFactory({{enums::RENDERING_BACKEND_BIT_OPENGL}, enums::COORDINATE_SYSTEM_RHS, true, sizeof(float)})
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_OPENGL}, true, sizeof(float)})
 {
 }
 
 sp<RenderEngineContext> RendererFactoryOpenGL::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
+    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f), enums::COORDINATE_SYSTEM_RHS, enums::COORDINATE_SYSTEM_LHS);
     if(renderer._version != enums::RENDERER_VERSION_AUTO)
         setVersion(renderer._version, renderContext);
     return renderContext;

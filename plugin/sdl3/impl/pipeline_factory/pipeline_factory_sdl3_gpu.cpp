@@ -48,9 +48,9 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const StringView sour
         stageBit == enums::SHADER_STAGE_BIT_VERTEX ? SDL_SHADERCROSS_SHADERSTAGE_VERTEX : SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT
     };
 
-    const SDL_ShaderCross_GraphicsShaderResourceInfo shaderResourceInfo = {};
+    const SDL_ShaderCross_GraphicsShaderMetadata* shaderMetadata = SDL_ShaderCross_ReflectGraphicsSPIRV(spirvInfo.bytecode, spirvInfo.bytecode_size, 0);
     SDL_ClearError();
-    SDL_GPUShader* shader = SDL_ShaderCross_CompileGraphicsShaderFromSPIRV(device, &spirvInfo, &shaderResourceInfo, 0);
+    SDL_GPUShader* shader = SDL_ShaderCross_CompileGraphicsShaderFromSPIRV(device, &spirvInfo, &shaderMetadata->resource_info, 0);
 	if(const char* lastError = SDL_GetError(); !shader || lastError[0])
 	{
         FATAL("%s\n\nFailed to create shader, SDL Error: %s", sourceStr.c_str(), lastError);
@@ -284,7 +284,7 @@ public:
     {
         if(!_pipeline)
         {
-            const sdl3::SDL3_Context& sdl3Context = graphicsContext.traits().ensure<sdl3::SDL3_Context>();
+            const SDL3_Context& sdl3Context = graphicsContext.traits().ensure<SDL3_Context>();
             const SDL3_GPU_Context& context = ensureGPUContext(graphicsContext);
             SDL_GPUDevice* gpuDevice = context._gpu_gevice;
 
@@ -332,8 +332,8 @@ public:
 
             bool hasDepthStencilTarget = false;
             SDL_GPUTextureFormat depthStencilFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
-            const GraphicsContextSDL3_GPU& gc = ensureGraphicsContext(graphicsContext);
-            if(const RenderTargetContext& renderTarget = gc.renderTarget(); renderTarget._create_config)
+            SDL3_GPU_GraphicsContext& gc = ensureGraphicsContext(graphicsContext);
+            if(const RenderTargetContext& renderTarget = gc.getCurrentRenderTarget(); renderTarget._create_config)
             {
                 const RenderTarget::Configure& rtCreateConfig = *renderTarget._create_config;
                 CHECK(rtCreateConfig._color_attachments.size() <= 8, "Rendertarget now can only hold no more than 8 color attachments.");
@@ -396,11 +396,11 @@ public:
         DASSERT(drawingContext._vertices);
         DASSERT(drawingContext._indices);
 
-        const GraphicsContextSDL3_GPU& sdl3GC = ensureGraphicsContext(graphicsContext);
+        SDL3_GPU_GraphicsContext& sdl3GC = ensureGraphicsContext(graphicsContext);
 
-        const RenderTargetContext& renderTargets = sdl3GC.renderTarget();
-        const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget = renderTargets._depth_stencil_target;
-        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(sdl3GC._command_buffer, renderTargets._color_targets.data(), renderTargets._color_targets.size(), depthStencilTarget ? depthStencilTarget.get() : nullptr);
+        const RenderTargetContext& renderTargets = sdl3GC.getCurrentRenderTarget();
+        const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget = *renderTargets._depth_stencil_target;
+        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(sdl3GC._command_buffer, renderTargets._color_targets->data(), renderTargets._color_targets->size(), depthStencilTarget ? depthStencilTarget.get() : nullptr);
 
         SDL_BindGPUGraphicsPipeline(renderPass, _pipeline);
 
@@ -550,9 +550,9 @@ public:
                 SDL_SHADERCROSS_SHADERSTAGE_COMPUTE
             };
 
-            SDL_ShaderCross_ComputePipelineMetadata shaderMetadata = {};
+            const SDL_ShaderCross_ComputePipelineMetadata* computeMetadata = SDL_ShaderCross_ReflectComputeSPIRV(spirvInfo.bytecode, spirvInfo.bytecode_size, 0);
             SDL_ClearError();
-            _pipeline = SDL_ShaderCross_CompileComputePipelineFromSPIRV(gpuDevice, &spirvInfo, &shaderMetadata, 0);
+            _pipeline = SDL_ShaderCross_CompileComputePipelineFromSPIRV(gpuDevice, &spirvInfo, computeMetadata, 0);
             CHECK(_pipeline, "%s", SDL_GetError());
         }
     }
@@ -564,7 +564,7 @@ public:
 
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override
     {
-        const GraphicsContextSDL3_GPU& sdl3GC = ensureGraphicsContext(graphicsContext);
+        const SDL3_GPU_GraphicsContext& sdl3GC = ensureGraphicsContext(graphicsContext);
 
         uint32_t numReadWriteStorageTextures = 0;
         uint32_t numReadOnlyStorageTextures = 0;

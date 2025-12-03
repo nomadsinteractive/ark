@@ -4,8 +4,8 @@
 
 namespace ark {
 
-RenderEngineContext::RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport)
-    : _renderer(renderer), _viewport(viewport), _definitions{{"camera.uVP", "u_VP"}, {"camera.uView", "u_View"}, {"camera.uProjection", "u_Projection"}}
+RenderEngineContext::RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport, const enums::CoordinateSystem viewportCoordinateSystem, const enums::CoordinateSystem ndcCoordinateSystem)
+    : _renderer(renderer), _viewport(viewport), _viewport_coordinate_system(viewportCoordinateSystem), _ndc_coordinate_system(ndcCoordinateSystem), _definitions{{"camera.uVP", "u_VP"}, {"camera.uView", "u_View"}, {"camera.uProjection", "u_Projection"}}
 {
 }
 
@@ -45,14 +45,24 @@ void RenderEngineContext::setViewport(const Viewport& viewport)
     _display_unit = V2(_display_resolution.width / _viewport.width(), _display_resolution.height / _viewport.height());
 }
 
+enums::CoordinateSystem RenderEngineContext::viewportCoordinateSystem() const
+{
+    return _viewport_coordinate_system;
+}
+
+enums::CoordinateSystem RenderEngineContext::ndcCoordinateSystem() const
+{
+    return _ndc_coordinate_system;
+}
+
 const RenderEngineContext::Resolution& RenderEngineContext::displayResolution() const
 {
     return _display_resolution;
 }
 
-void RenderEngineContext::setDisplayResolution(const Resolution& resolution)
+void RenderEngineContext::setDisplayResolution(const Resolution& displayResolution)
 {
-    _display_resolution = resolution;
+    _display_resolution = displayResolution;
     _display_unit = V2(_display_resolution.width / _viewport.width(), _display_resolution.height / _viewport.height());
 }
 

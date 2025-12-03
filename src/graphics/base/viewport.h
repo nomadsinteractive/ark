@@ -18,7 +18,6 @@ public:
 private:
     float _clip_near;
     float _clip_far;
-
 };
 
 }

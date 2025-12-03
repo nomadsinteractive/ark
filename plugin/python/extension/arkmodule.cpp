@@ -138,13 +138,6 @@ PyObject* ark_dirSeparator(PyObject* /*self*/, PyObject* /*args*/)
     return PyCast::toPyObject_impl<String>(ds);
 }
 
-PyObject* ark_is_NDC_Y_Up(PyObject* /*self*/, PyObject* /*args*/)
-{
-    if(Ark::instance().renderController()->renderEngine()->isYUp())
-        Py_RETURN_TRUE;
-    Py_RETURN_FALSE;
-}
-
 PyObject* ark_getRefManager(PyObject* /*self*/, PyObject* /*args*/)
 {
     return PyCast::toPyObject(PythonExtension::instance().referenceManager());
@@ -186,7 +179,6 @@ PyMethodDef ARK_METHODS[] = {
     {"is_ark_type",  ark_isArkType, METH_VARARGS, "is_ark_type"},
     {"load_file",  ark_loadFile, METH_VARARGS, "loadFile"},
     {"dir_separator",  ark_dirSeparator, METH_VARARGS, "dir_separator"},
-    {"is_ndc_y_up",  ark_is_NDC_Y_Up, METH_VARARGS, "is_ndc_y_up"},
     {"get_ref_manager",  ark_getRefManager, METH_VARARGS, "get_ref_manager"},
     {"facade",  ark_getApplicationFacade, METH_VARARGS, "get ApplicationFacade interface"},
     {"hash_id",  ark_hashId, METH_VARARGS, "hash function"},

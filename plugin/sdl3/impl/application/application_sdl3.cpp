@@ -436,7 +436,7 @@ void ApplicationSDL3::pollEvents(uint32_t timestamp)
     else if(!textInputEnabled && SDL_TextInputActive(_main_window))
         SDL_StopTextInput(_main_window);
 
-    const enums::CoordinateSystem rcs = _application_context->renderController()->renderEngine()->rendererFactory()->features()._default_coordinate_system;
+    const enums::CoordinateSystem rcs = _application_context->renderController()->renderEngine()->viewportCoordinateSystem();
 
     SDL_Event event;
     while(SDL_PollEvent(&event))

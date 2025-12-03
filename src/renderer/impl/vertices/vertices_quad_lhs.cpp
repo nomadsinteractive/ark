@@ -9,7 +9,7 @@ VerticesQuadLHS::VerticesQuadLHS(const Atlas::Item& quad)
 {
 }
 
-VerticesQuadLHS::VerticesQuadLHS(const Rect& bounds, uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy)
+VerticesQuadLHS::VerticesQuadLHS(const Rect& bounds, const uint16_t ux, const uint16_t uy, const uint16_t vx, const uint16_t vy)
     : Vertices(4), _bounds(bounds), _ux(ux), _uy(uy), _vx(vx), _vy(vy)
 {
 }

@@ -14,6 +14,7 @@
 #include "renderer/impl/vertices/vertices_quad_rhs.h"
 
 #include "app/base/application_context.h"
+#include "renderer/base/render_engine_context.h"
 
 namespace ark {
 
