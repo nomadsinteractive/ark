@@ -64,6 +64,7 @@ public:
 
     enums::RendererVersion version() const;
     enums::CoordinateSystem viewportCoordinateSystem() const;
+    enums::CoordinateSystem ndcCoordinateSystem() const;
 
     const sp<RendererFactory>& rendererFactory() const;
     const sp<RenderEngineContext>& context() const;

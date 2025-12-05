@@ -425,12 +425,12 @@ Camera Ark::createCamera(enums::CoordinateSystem cs, bool flipx, bool flipy) con
     return {cs, std::move(cameraDelegate)};
 }
 
-op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category) const
+op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const char* filename, const int32_t lineno, const char* name, const ApplicationProfiler::Category category) const
 {
     return _application_profiler ? _application_profiler->makeTracer(func, filename, lineno, name, category) : op<ApplicationProfiler::Tracer>();
 }
 
-op<ApplicationProfiler::Logger> Ark::makeProfilerLogger(const char* func, const char* filename, int32_t lineno, const char* name) const
+op<ApplicationProfiler::Logger> Ark::makeProfilerLogger(const char* func, const char* filename, const int32_t lineno, const char* name) const
 {
     return _application_profiler ? _application_profiler->makeLogger(func, filename, lineno, name) : op<ApplicationProfiler::Logger>();
 }

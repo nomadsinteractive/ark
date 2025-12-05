@@ -17,11 +17,11 @@ namespace ark {
 class ARK_API Shader {
 public:
     struct StageManifest {
-        StageManifest(enums::ShaderStageBit type, builder<String> source);
+        StageManifest(enums::ShaderStageBit type, sp<IBuilder<String>> source);
         StageManifest(BeanFactory& factory, const document& manifest);
 
         enums::ShaderStageBit _type;
-        builder<String> _source;
+        sp<IBuilder<String>> _source;
         document _manifest;
     };
 
@@ -29,8 +29,6 @@ public:
 
 public:
     Shader(sp<PipelineDescriptor> pipelineDescriptor);
-
-    static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
 
     sp<RenderBufferSnapshot> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
 
@@ -42,35 +40,31 @@ public:
 
     sp<PipelineBindings> makeBindings(Buffer vertexBuffer, enums::DrawMode drawMode, enums::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers = {}) const;
 
-    class BUILDER_IMPL final : public Builder<Shader> {
+//  [[plugin::builder]]
+    class BUILDER final : public Builder<Shader> {
     public:
-        BUILDER_IMPL(BeanFactory& factory, const document& manifest, sp<Builder<Camera>> camera = nullptr, Optional<Vector<StageManifest>> stages = {}, Optional<SnippetManifest> snippets = {});
+        BUILDER(BeanFactory& factory, const document& manifest, Vector<StageManifest> defaultStages = {});
 
         sp<Shader> build(const Scope& args) override;
+        sp<Shader> build(const Scope& args, const Vector<StageManifest>& defaultStages, sp<Camera> defaultCamera);
 
     private:
-        PipelineBuildingContext makePipelineBuildingContext(const Scope& args) const;
+        PipelineBuildingContext makePipelineBuildingContext(const Scope& args, const Vector<StageManifest>& defaultStages) const;
 
     private:
         BeanFactory _factory;
         document _manifest;
 
         Vector<StageManifest> _stages;
+        Vector<StageManifest> _default_stages;
         SnippetManifest _snippets;
         SafeBuilder<Camera> _camera;
         PipelineDescriptor::Configuration::BUILDER _configuration;
+
+        friend class Shader;
     };
 
-//  [[plugin::builder]]
-    class BUILDER final : public Builder<Shader> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        sp<Shader> build(const Scope& args) override;
-
-    private:
-        BUILDER_IMPL _impl;
-    };
+    static sp<Builder<Shader>> makeBuilder(BeanFactory& factory, const document& manifest, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag");
 
 private:
     sp<PipelineDescriptor> _pipeline_desciptor;

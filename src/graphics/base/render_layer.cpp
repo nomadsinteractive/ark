@@ -131,12 +131,12 @@ sp<RenderCommand> RenderLayer::compose(const RenderRequest& renderRequest, sp<Dr
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : BUILDER(factory, manifest, nullptr)
+    : BUILDER(factory, manifest, nullptr, nullptr)
 {
 }
 
-RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, sp<Builder<ModelLoader>> modelLoader)
-    : _model_loader(modelLoader ? std::move(modelLoader) : factory.ensureBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)), _shader(factory.ensureBuilder<Shader>(manifest, constants::SHADER)),
+RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader)
+    : _model_loader(modelLoader ? std::move(modelLoader) : factory.ensureBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)), _shader(shader ? std::move(shader) : factory.ensureBuilder<Shader>(manifest, constants::SHADER)),
       _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
       _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
@@ -158,7 +158,7 @@ sp<Renderer> RenderLayer::RENDERER_BUILDER::build(const Scope& args)
 }
 
 RenderLayer::RENDERER_POST_PROCESS::RENDERER_POST_PROCESS(BeanFactory& factory, const document& manifest)
-    : _impl(factory, manifest, sp<Builder<ModelLoader>>::make<Builder<ModelLoader>::Prebuilt>(sp<ModelLoader>::make<ModelLoaderNDC>()))
+    : _impl(factory, manifest, sp<Builder<ModelLoader>>::make<Builder<ModelLoader>::Prebuilt>(sp<ModelLoader>::make<ModelLoaderNDC>()), Shader::makeBuilder(factory, manifest, "shaders/ndc.vert", ""))
 {
 }
 

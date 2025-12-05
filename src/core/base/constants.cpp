@@ -14,6 +14,7 @@
 #include "renderer/impl/vertices/vertices_quad_rhs.h"
 
 #include "app/base/application_context.h"
+
 #include "renderer/base/render_engine_context.h"
 
 namespace ark {
@@ -30,11 +31,12 @@ sp<Model> makeUnitQuadModel(const sp<Boundaries>& content, const bool isLHS)
 
 sp<Model> makeNDCModel(const sp<Boundaries>& content)
 {
-    const Rect bounds(-0.5f, -0.5f, 0.5f, 0.5f);
+    // RHS ndc bounds
+    const Rect bounds(-1.0f, -1.0f, 1.0f, 1.0f);
     uint16_t uy = 0, vy = std::numeric_limits<uint16_t>::max();
     if(Ark::instance().renderController()->renderEngine()->isBackendLHS())
         std::swap(uy, vy);
-    sp<Vertices> vertices = Ark::instance().renderController()->renderEngine()->isLHS() ? sp<Vertices>::make<VerticesQuadLHS>(bounds, 0, uy, std::numeric_limits<uint16_t>::max(), vy)
+    sp<Vertices> vertices = Ark::instance().renderController()->renderEngine()->ndcCoordinateSystem() == enums::COORDINATE_SYSTEM_RHS ? sp<Vertices>::make<VerticesQuadLHS>(bounds, 0, uy, std::numeric_limits<uint16_t>::max(), vy)
                                                                                         : sp<Vertices>::make<VerticesQuadRHS>(bounds, 0, uy, std::numeric_limits<uint16_t>::max(), vy);
     return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), std::move(vertices), content);
 }

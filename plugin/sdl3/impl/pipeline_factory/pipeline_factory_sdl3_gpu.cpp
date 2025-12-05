@@ -220,6 +220,29 @@ SDL_GPUDepthStencilState toDepthStencilState(const PipelineDescriptor& pipelineD
     return depthStencilState;
 }
 
+SDL_GPUFrontFace toSDL_GPUFrontFace(const PipelineDescriptor::FrontFace frontFace)
+{
+    constexpr SDL_GPUFrontFace sdlFrontFaces[PipelineDescriptor::FRONT_FACE_LENGTH] = {SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE, SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE, SDL_GPU_FRONTFACE_CLOCKWISE};
+    return sdlFrontFaces[frontFace];
+}
+
+SDL_GPURasterizerState toRasterizerState(const PipelineDescriptor& pipelineDescriptor)
+{
+    SDL_GPURasterizerState rasterizerState = {
+        SDL_GPU_FILLMODE_FILL,
+        SDL_GPU_CULLMODE_BACK,
+        SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE
+    };
+    if(const PipelineDescriptor::TraitCullFaceTest* cullFaceTest = pipelineDescriptor.getTrait<PipelineDescriptor::TraitCullFaceTest>())
+    {
+        if(cullFaceTest->_enabled)
+            rasterizerState.front_face = toSDL_GPUFrontFace(cullFaceTest->_front_face);
+        else
+            rasterizerState.cull_mode = SDL_GPU_CULLMODE_NONE;
+    }
+    return rasterizerState;
+}
+
 void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout, const enums::ShaderStageSet stages)
 {
     size_t binding = 0;
@@ -369,11 +392,9 @@ public:
                     vertexAttributes,
                     numVertexAttributes
                 },
-                toPrimitiveType(_draw_mode), {
-                    SDL_GPU_FILLMODE_FILL,
-                    SDL_GPU_CULLMODE_BACK,
-                    SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE
-                }, {
+                toPrimitiveType(_draw_mode),
+                toRasterizerState(_pipeline_descriptor),
+                {
                     SDL_GPU_SAMPLECOUNT_1
                 }, toDepthStencilState(_pipeline_descriptor)
                 , {

@@ -333,20 +333,25 @@ public:
         CHECK(builder, "Cannot find builder \"%s\"", id.c_str());
         return builder;
     }
-    template<typename T> sp<Builder<T>> ensureBuilder(const String& id, const Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
-        return ensureIBuilder<sp<T>>(id, idType);
+    template<typename T> sp<IBuilder<T>> ensureIBuilder(const document& manifest, const String& attr) {
+        sp<IBuilder<T>> builder = getIBuilder<T>(manifest, attr);
+        CHECK(builder, "Cannot not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(manifest).c_str());
+        return builder;
     }
-
-    template<typename T> sp<Builder<T>> ensureBuilder(const document& manifest) {
-        sp<Builder<T>> builder = findBuilderByDocument<sp<T>>(manifest, true);
+    template<typename T> sp<IBuilder<T>> ensureIBuilder(const document& manifest) {
+        sp<IBuilder<T>> builder = findBuilderByDocument<T>(manifest, true);
         CHECK(builder, "Cannot not build from \"%s\"", Documents::toString(manifest).c_str());
         return builder;
     }
 
+    template<typename T> sp<Builder<T>> ensureBuilder(const String& id, const Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
+        return ensureIBuilder<sp<T>>(id, idType);
+    }
+    template<typename T> sp<Builder<T>> ensureBuilder(const document& manifest) {
+        return ensureIBuilder<sp<T>>(manifest);;
+    }
     template<typename T> sp<Builder<T>> ensureBuilder(const document& manifest, const String& attr) {
-        sp<Builder<T>> builder = getBuilder<T>(manifest, attr);
-        CHECK(builder, "Cannot not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(manifest).c_str());
-        return builder;
+        return ensureIBuilder<sp<T>>(manifest, attr);
     }
 
     template<typename T> sp<Builder<T>> ensureConcreteClassBuilder(const document& doc, const String& attr) {

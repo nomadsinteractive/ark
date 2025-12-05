@@ -25,7 +25,7 @@ sp<DrawingContextComposer> ModelLoaderQuad::makeRenderCommandComposer(const Shad
     return Ark::instance().renderController()->makeDrawElementsIncremental(_unit_model);
 }
 
-sp<Model> ModelLoaderQuad::loadModel(int32_t type)
+sp<Model> ModelLoaderQuad::loadModel(const int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     const V2& size = texCoord._size;

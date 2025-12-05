@@ -25,6 +25,11 @@ enums::CoordinateSystem RenderEngine::viewportCoordinateSystem() const
     return _render_context->viewportCoordinateSystem();
 }
 
+enums::CoordinateSystem RenderEngine::ndcCoordinateSystem() const
+{
+    return _render_context->ndcCoordinateSystem();
+}
+
 const sp<RendererFactory>& RenderEngine::rendererFactory() const
 {
     return _renderer_factory;

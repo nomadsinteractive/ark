@@ -35,15 +35,27 @@ template<typename T, typename U> auto findInKeywordPairs(const T& kws, U key) ->
     return {};
 }
 
+String buildShaderSource(const enums::ShaderStageBit shaderStage, const Optional<const Shader::StageManifest&>& stageManifest, const Vector<Shader::StageManifest>& defaultStages, const String& defaultShaderSource, const Scope& args)
+{
+    if(stageManifest)
+        return stageManifest->_source->build(args);
+
+    if(const auto [stageManifestOpt, _] = findStageManifest(shaderStage, defaultStages); stageManifestOpt)
+        return stageManifestOpt->_source->build(args);
+
+    const Global<StringTable> globalStringTable;
+    return std::move(globalStringTable->getString("shaders", defaultShaderSource, true).value());
 }
 
-Shader::StageManifest::StageManifest(enums::ShaderStageBit type, builder<String> source)
+}
+
+Shader::StageManifest::StageManifest(const enums::ShaderStageBit type, sp<IBuilder<String>> source)
     : _type(type), _source(std::move(source)), _manifest(Global<Constants>()->DOCUMENT_NONE)
 {
 }
 
 Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manifest)
-    : _type(Documents::ensureAttribute<enums::ShaderStageBit>(manifest, constants::TYPE)), _source(factory.ensureBuilder<String>(manifest, constants::SRC)), _manifest(manifest)
+    : _type(Documents::ensureAttribute<enums::ShaderStageBit>(manifest, constants::TYPE)), _source(factory.ensureIBuilder<String>(manifest, constants::SRC)), _manifest(manifest)
 {
 }
 
@@ -52,15 +64,23 @@ Shader::Shader(sp<PipelineDescriptor> pipelineDescriptor)
 {
 }
 
-sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& manifest, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
+sp<Builder<Shader>> Shader::makeBuilder(BeanFactory& factory, const document& manifest, const String& defVertex, const String& defFragment)
 {
-    if(builder<Shader> shader = factory.getBuilder<Shader>(manifest, constants::SHADER))
-        return shader;
     const Global<StringTable> stringTable;
-    Vector<StageManifest> stageManifests;
-    stageManifests.emplace_back(enums::SHADER_STAGE_BIT_VERTEX, builder<String>::make<Builder<String>::Prebuilt>(sp<String>::make(std::move(stringTable->getString(defVertex, true).value()))));
-    stageManifests.emplace_back(enums::SHADER_STAGE_BIT_FRAGMENT, builder<String>::make<Builder<String>::Prebuilt>(sp<String>::make(std::move(stringTable->getString(defFragment, true).value()))));
-    return builder<Shader>::make<BUILDER_IMPL>(factory, manifest, defaultCamera ? builder<Camera>::make<Builder<Camera>::Prebuilt>(defaultCamera) : nullptr, std::move(stageManifests));
+    Vector<StageManifest> defaultManifests;
+    if(defVertex)
+        defaultManifests.emplace_back(enums::SHADER_STAGE_BIT_VERTEX, sp<IBuilder<String>>::make<IBuilder<String>::Prebuilt>(std::move(stringTable->getString(defVertex, true).value())));
+    if(defFragment)
+        defaultManifests.emplace_back(enums::SHADER_STAGE_BIT_FRAGMENT, sp<IBuilder<String>>::make<IBuilder<String>::Prebuilt>(std::move(stringTable->getString(defFragment, true).value())));
+
+    if(const sp<Builder<Shader>> shader = factory.getBuilder<Shader>(manifest, constants::SHADER))
+    {
+        sp<BUILDER> shaderBuilder = shader.cast<BUILDER>();
+        shaderBuilder->_default_stages = std::move(defaultManifests);
+        return shaderBuilder;
+    }
+
+    return sp<Builder<Shader>>::make<BUILDER>(factory, manifest, std::move(defaultManifests));
 }
 
 sp<RenderBufferSnapshot> Shader::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
@@ -97,27 +117,32 @@ sp<PipelineBindings> Shader::makeBindings(Buffer vertexBuffer, enums::DrawMode d
     return sp<PipelineBindings>::make(drawMode, drawProcedure, std::move(vertexBuffer), _pipeline_desciptor, std::move(instanceBuffers));
 }
 
-Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, sp<Builder<Camera>> camera, Optional<Vector<StageManifest>> stages, Optional<SnippetManifest> snippets)
-    : _factory(factory), _manifest(manifest), _stages(stages ? std::move(stages.value()) : factory.makeBuilderListObject<StageManifest>(manifest, "stage")),
-      _snippets(snippets ? std::move(snippets.value()) : factory.makeBuilderList<Snippet>(manifest, "snippet")), _camera(camera ? std::move(camera) : factory.getBuilder<Camera>(manifest, constants::CAMERA)),
+Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, Vector<StageManifest> defaultStages)
+    : _factory(factory), _manifest(manifest), _stages(factory.makeBuilderListObject<StageManifest>(manifest, "stage")), _default_stages(std::move(defaultStages)),
+      _snippets(factory.makeBuilderList<Snippet>(manifest, "snippet")), _camera(factory.getBuilder<Camera>(manifest, constants::CAMERA)),
       _configuration(factory, manifest)
 {
 }
 
-sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
+sp<Shader> Shader::BUILDER::build(const Scope& args)
+{
+    return build(args, _default_stages, _camera.build(args));
+}
+
+sp<Shader> Shader::BUILDER::build(const Scope& args, const Vector<StageManifest>& defaultStages, sp<Camera> defaultCamera)
 {
     sp<Snippet> snippet;
     for(const sp<Builder<Snippet>>& i : _snippets)
         snippet = SnippetComposite::compose(std::move(snippet), i->build(args));
 
-    PipelineBuildingContext buildingContext = makePipelineBuildingContext(args);
-    const sp<Camera> camera = _camera.build(args);
+    PipelineBuildingContext buildingContext = makePipelineBuildingContext(args, defaultStages);
+    const sp<Camera> camera = defaultCamera ? std::move(defaultCamera) : _camera.build(args);
     PipelineDescriptor::Configuration configuration = _configuration.build(args);
     configuration._snippet = std::move(snippet);
     return sp<Shader>::make(sp<PipelineDescriptor>::make(camera ? *camera : Camera::createDefaultCamera(), buildingContext, std::move(configuration)));
 }
 
-PipelineBuildingContext Shader::BUILDER_IMPL::makePipelineBuildingContext(const Scope& args) const
+PipelineBuildingContext Shader::BUILDER::makePipelineBuildingContext(const Scope& args, const Vector<StageManifest>& defaultStages) const
 {
     PipelineBuildingContext context(_factory, args);
     const auto [vertexOpt, vertexIndex] = findStageManifest(enums::SHADER_STAGE_BIT_VERTEX, _stages);
@@ -125,15 +150,18 @@ PipelineBuildingContext Shader::BUILDER_IMPL::makePipelineBuildingContext(const 
     const auto [computeOpt, computeIndex] = findStageManifest(enums::SHADER_STAGE_BIT_COMPUTE, _stages);
     if(vertexOpt || fragmentOpt || !computeOpt)
     {
-        const Global<StringTable> globalStringTable;
         document documentNone = Global<Constants>()->DOCUMENT_NONE;
-        context.addStage(vertexOpt ? std::move(*vertexOpt->_source->build(args)) : std::move(globalStringTable->getString("shaders", "default.vert", true).value()), documentNone, enums::SHADER_STAGE_BIT_VERTEX, enums::SHADER_STAGE_BIT_NONE);
-        context.addStage(fragmentOpt ? std::move(*fragmentOpt->_source->build(args)) : std::move(globalStringTable->getString("shaders", "texture.frag", true).value()), std::move(documentNone), enums::SHADER_STAGE_BIT_FRAGMENT, enums::SHADER_STAGE_BIT_VERTEX);
+        context.addStage(buildShaderSource(enums::SHADER_STAGE_BIT_VERTEX, vertexOpt, defaultStages, "default.vert", args), documentNone, enums::SHADER_STAGE_BIT_VERTEX, enums::SHADER_STAGE_BIT_NONE);
+        context.addStage(buildShaderSource(enums::SHADER_STAGE_BIT_FRAGMENT, fragmentOpt, defaultStages, "texture.frag", args), std::move(documentNone), enums::SHADER_STAGE_BIT_FRAGMENT, enums::SHADER_STAGE_BIT_VERTEX);
     }
     else
         CHECK(computeOpt, "Shader must have at least one stage defined");
+
     if(computeOpt)
-        context.addStage(std::move(*computeOpt->_source->build(args)), computeOpt->_manifest, enums::SHADER_STAGE_BIT_COMPUTE, fragmentOpt && fragmentIndex < computeIndex ? enums::SHADER_STAGE_BIT_FRAGMENT : enums::SHADER_STAGE_BIT_NONE);
+    {
+        const bool computeAfterGraphics = (vertexOpt && vertexIndex < computeIndex) || (fragmentOpt && fragmentIndex < computeIndex);
+        context.addStage(computeOpt->_source->build(args), computeOpt->_manifest, enums::SHADER_STAGE_BIT_COMPUTE, computeAfterGraphics ? enums::SHADER_STAGE_BIT_FRAGMENT : enums::SHADER_STAGE_BIT_NONE);
+    }
 
     context.loadManifest(_manifest);
     return context;
@@ -147,16 +175,6 @@ template<> ARK_API enums::ShaderStageBit StringConvert::eval<enums::ShaderStageB
         {"compute", enums::SHADER_STAGE_BIT_COMPUTE}
     }};
     return enums::lookup(table, expr);
-}
-
-Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _impl(factory, manifest)
-{
-}
-
-sp<Shader> Shader::BUILDER::build(const Scope& args)
-{
-    return _impl.build(args);
 }
 
 }
