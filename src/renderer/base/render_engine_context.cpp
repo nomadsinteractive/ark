@@ -4,8 +4,9 @@
 
 namespace ark {
 
-RenderEngineContext::RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport, const enums::CoordinateSystem viewportCoordinateSystem, const enums::CoordinateSystem ndcCoordinateSystem)
-    : _renderer(renderer), _viewport(viewport), _viewport_coordinate_system(viewportCoordinateSystem), _ndc_coordinate_system(ndcCoordinateSystem), _definitions{{"camera.uVP", "u_VP"}, {"camera.uView", "u_View"}, {"camera.uProjection", "u_Projection"}}
+RenderEngineContext::RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport, const enums::CoordinateSystem viewportCoordinateSystem, const enums::CoordinateSystem ndcCoordinateSystem, const enums::NDCDepthRange ndcDepthRange)
+    : _renderer(renderer), _viewport(viewport), _viewport_coordinate_system(viewportCoordinateSystem), _ndc_coordinate_system(ndcCoordinateSystem), _ndc_depth_range(ndcDepthRange),
+      _definitions{{"camera.uVP", "u_VP"}, {"camera.uView", "u_View"}, {"camera.uProjection", "u_Projection"}}
 {
 }
 
@@ -53,6 +54,11 @@ enums::CoordinateSystem RenderEngineContext::viewportCoordinateSystem() const
 enums::CoordinateSystem RenderEngineContext::ndcCoordinateSystem() const
 {
     return _ndc_coordinate_system;
+}
+
+enums::NDCDepthRange RenderEngineContext::ndcDepthRange() const
+{
+    return _ndc_depth_range;
 }
 
 const RenderEngineContext::Resolution& RenderEngineContext::displayResolution() const

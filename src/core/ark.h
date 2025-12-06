@@ -59,7 +59,7 @@ public:
 
     const Constants& constants();
 
-    Camera createCamera(enums::CoordinateSystem cs = enums::COORDINATE_SYSTEM_DEFAULT) const;
+    Camera createCamera(enums::CoordinateSystem appCoordinateSystem = enums::COORDINATE_SYSTEM_DEFAULT) const;
     Camera createCamera(enums::CoordinateSystem cs, bool flipx, bool flipy) const;
 
     op<ApplicationProfiler::Tracer> makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category = ApplicationProfiler::CATEGORY_DEFAULT) const;

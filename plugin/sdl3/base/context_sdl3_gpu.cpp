@@ -21,22 +21,22 @@ SDL3_GPU_Context::~SDL3_GPU_Context()
 void SDL3_GPU_GraphicsContext::pushRenderTargets(const RenderTarget::Configure* createConfig, const Vector<SDL_GPUColorTargetInfo>& colorTargets, const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget)
 {
     ASSERT(!depthStencilTarget || depthStencilTarget->texture);
-    ASSERT(_active_render_target_index < static_cast<int32_t>(array_size(_render_targets) - 1));
-    _render_targets[++_active_render_target_index] = {createConfig, &colorTargets, &depthStencilTarget};
+    ASSERT(_active_render_target_index < array_size(_render_targets) - 1);
+    _render_targets[_active_render_target_index ++] = {createConfig, &colorTargets, &depthStencilTarget};
 }
 
 void SDL3_GPU_GraphicsContext::popRenderTargets()
 {
-    ASSERT(_active_render_target_index >= 0);
+    ASSERT(_active_render_target_index > 0);
     _active_render_target_index --;
 }
 
 const RenderTargetContext& SDL3_GPU_GraphicsContext::getCurrentRenderTarget()
 {
-    ASSERT(_active_render_target_index >= 0);
-    const RenderTargetContext& rt = _render_targets[_active_render_target_index];
-    if(_active_render_target_index == 0)
-        _render_targets[++_active_render_target_index] = _rt_swapchain_blend;
+    if(_active_render_target_index > 0)
+        return _render_targets[_active_render_target_index - 1];
+    const RenderTargetContext& rt = _is_initial_draw ? _rt_swapchain_initial : _rt_swapchain_blend;
+    _is_initial_draw = false;
     return rt;
 }
 

@@ -1,5 +1,6 @@
 #include "sdl3/impl/buffer/buffer_sdl3_gpu.h"
 
+#include "core/inf/writable.h"
 #include "core/util/uploader_type.h"
 
 #include "sdl3/base/context_sdl3_gpu.h"
@@ -31,6 +32,46 @@ ResourceRecycleFunc BufferSDL3_GPU::recycle()
     };
 }
 
+class WritableSDL3_GPU_Buffer final : public Writable {
+public:
+    WritableSDL3_GPU_Buffer(SDL_GPUDevice* gpuDevice, SDL_GPUBuffer* buffer)
+        : _gpu_device(gpuDevice), _buffer(buffer), _upload_command_buffer(SDL_AcquireGPUCommandBuffer(_gpu_device)), _copy_pass(SDL_BeginGPUCopyPass(_upload_command_buffer))
+    {
+    }
+
+    ~WritableSDL3_GPU_Buffer() override
+    {
+        SDL_EndGPUCopyPass(_copy_pass);
+        SDL_SubmitGPUCommandBuffer(_upload_command_buffer);
+
+        for(SDL_GPUTransferBuffer* i : _transfer_buffers)
+            SDL_ReleaseGPUTransferBuffer(_gpu_device, i);
+    }
+
+    uint32_t write(const void* buffer, const uint32_t size, const uint32_t offset) override
+    {
+        const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo = {SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, size};
+        SDL_GPUTransferBuffer* uploadTransferBuffer = SDL_CreateGPUTransferBuffer(_gpu_device, &transferBufferCreateInfo);
+        void* transferData = SDL_MapGPUTransferBuffer(_gpu_device, uploadTransferBuffer, false);
+        memcpy(transferData, buffer, size);
+        SDL_UnmapGPUTransferBuffer(_gpu_device, uploadTransferBuffer);
+
+        const SDL_GPUTransferBufferLocation transferBufferLocation = {uploadTransferBuffer, 0};
+        const SDL_GPUBufferRegion bufferRegion = {_buffer, offset, size};
+        SDL_UploadToGPUBuffer(_copy_pass, &transferBufferLocation, &bufferRegion, false);
+        _transfer_buffers.push_back(uploadTransferBuffer);
+        return size;
+    }
+
+private:
+    SDL_GPUDevice* _gpu_device;
+    SDL_GPUBuffer* _buffer;
+    SDL_GPUCommandBuffer* _upload_command_buffer;
+    SDL_GPUCopyPass* _copy_pass;
+
+    Vector<SDL_GPUTransferBuffer*> _transfer_buffers;
+};
+
 void BufferSDL3_GPU::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader)
 {
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
@@ -46,26 +87,9 @@ void BufferSDL3_GPU::uploadBuffer(GraphicsContext& graphicsContext, Uploader& up
         _buffer_size = bufferSize;
     }
 
-    const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo = {SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, bufferSize};
-    SDL_GPUTransferBuffer* uploadTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
-
-    void* transferData = SDL_MapGPUTransferBuffer(gpuDevice, uploadTransferBuffer, false);
-    if(uploader.size() < bufferSize)
-        memset(transferData, 0, bufferSize);
-    else
-        UploaderType::writeTo(uploader, transferData);
-    SDL_UnmapGPUTransferBuffer(gpuDevice, uploadTransferBuffer);
-
-    SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
-    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
-
-    const SDL_GPUTransferBufferLocation transferBufferLocation = {uploadTransferBuffer, 0};
-    const SDL_GPUBufferRegion bufferRegion = {_buffer, 0, bufferSize};
-    SDL_UploadToGPUBuffer(copyPass, &transferBufferLocation, &bufferRegion, false);
-
-    SDL_EndGPUCopyPass(copyPass);
-    SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
-    SDL_ReleaseGPUTransferBuffer(gpuDevice, uploadTransferBuffer);
+    WritableSDL3_GPU_Buffer writable(gpuDevice, _buffer);
+    for(const auto& [k, v] : UploaderType::record(uploader))
+        writable.write(v.data(), v.size(), k);
 }
 
 void BufferSDL3_GPU::downloadBuffer(GraphicsContext& graphicsContext, const size_t offset, const size_t size, void* ptr)

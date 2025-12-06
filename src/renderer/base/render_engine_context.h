@@ -24,7 +24,7 @@ public:
     };
 
 public:
-    RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport, enums::CoordinateSystem viewportCoordinateSystem, enums::CoordinateSystem ndcCoordinateSystem);
+    RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport, enums::CoordinateSystem viewportCoordinateSystem, enums::CoordinateSystem ndcCoordinateSystem, enums::NDCDepthRange ndcDepthRange);
 
     const ApplicationManifest::Renderer& renderer() const;
 
@@ -39,6 +39,7 @@ public:
 
     enums::CoordinateSystem viewportCoordinateSystem() const;
     enums::CoordinateSystem ndcCoordinateSystem() const;
+    enums::NDCDepthRange ndcDepthRange() const;
 
     const Resolution& displayResolution() const;
     void setDisplayResolution(const Resolution& displayResolution);
@@ -58,6 +59,7 @@ private:
     Viewport _viewport;
     enums::CoordinateSystem _viewport_coordinate_system;
     enums::CoordinateSystem _ndc_coordinate_system;
+    enums::NDCDepthRange _ndc_depth_range;
 
     Map<String, String> _definitions;
     sp<SnippetFactory> _snippet_factory;

@@ -85,7 +85,7 @@ private:
 
 class UploaderConcat final : public Uploader {
 public:
-    UploaderConcat(size_t primitiveCount, size_t vertexCount, Vector<element_index_t> indices)
+    UploaderConcat(const size_t primitiveCount, const size_t vertexCount, Vector<element_index_t> indices)
         : Uploader(primitiveCount * indices.size() * sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices)) {
     }
 
@@ -205,9 +205,7 @@ void RenderController::onSurfaceReady(GraphicsContext& graphicsContext)
 void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<UploadingRenderResource>& items)
 {
     while(Optional<UploadingRenderResource> optFront = items.pop())
-    {
-        UploadingRenderResource front = std::move(optFront.value());
-        if(!front._resource.isCancelled())
+        if(const UploadingRenderResource front = std::move(optFront.value()); !front._resource.isCancelled())
         {
             if(front._strategy == enums::UPLOAD_STRATEGY_RELOAD && front._resource.id() != 0)
                 front._resource.recycle(graphicsContext);
@@ -220,7 +218,6 @@ void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<Uploadi
             else if(front._strategy.contains(enums::UPLOAD_STRATEGY_ON_SURFACE_READY))
                 _on_surface_ready.append(front._priority, std::move(front._resource));
         }
-    }
 }
 
 void RenderController::onDrawFrame(GraphicsContext& graphicsContext)

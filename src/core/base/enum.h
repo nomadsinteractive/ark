@@ -70,6 +70,11 @@ enum CoordinateSystem {
     COORDINATE_SYSTEM_RHS = 2
 };
 
+enum NDCDepthRange {
+    NDC_DEPTH_RANGE_ZERO_TO_ONE = 0,
+    NDC_DEPTH_RANGE_NEGATIVE_ONE_TO_ONE = 1
+};
+
 enum RenderingBackendBit {
     RENDERING_BACKEND_AUTO = 0,
     RENDERING_BACKEND_BIT_OPENGL = 1 << 0,

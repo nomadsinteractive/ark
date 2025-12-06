@@ -23,10 +23,12 @@ struct RenderTargetContext {
 struct SDL3_GPU_GraphicsContext {
     SDL_GPUCommandBuffer* _command_buffer;
 
+    RenderTargetContext _rt_swapchain_initial;
     RenderTargetContext _rt_swapchain_blend;
 
     RenderTargetContext _render_targets[32] = {};
-    int32_t _active_render_target_index = -1;
+    uint32_t _active_render_target_index = 0;
+    bool _is_initial_draw = true;
 
     const RenderTargetContext& getCurrentRenderTarget();
 

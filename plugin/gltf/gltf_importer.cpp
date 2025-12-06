@@ -88,7 +88,7 @@ template<typename T, typename TReadElementType> void readBufferData(SBufferReadD
 
 	size_t SrcOffset = 0;
 	size_t DstOffset = 0;
-	size_t dstSize = bufferReadData._shader_data_type.size();
+	const size_t dstSize = bufferReadData._shader_data_type.size();
 	uint8_t* dstDataPtr = reinterpret_cast<uint8_t*>(bufferReadData.DstData.data());
 
 	for (size_t i = 0; i < bufferReadData.NumElements; ++i)
@@ -113,12 +113,12 @@ template<typename T> SBufferReadData<T> getBufferReadData(const tinygltf::Access
     ///////////////////////////////////////////////////////////////////////
     // clang-format on
 
-    uint32_t ElementSize = shaderDataType.size();
+    const uint32_t ElementSize = shaderDataType.size();
 
     // BufferView
-    size_t BufferViewOffset = BufferView.byteOffset;
-    size_t BufferViewLength = BufferView.byteLength;
-    size_t BufferViewStride = BufferView.byteStride; // 0 for tightly packed
+    const size_t BufferViewOffset = BufferView.byteOffset;
+    const size_t BufferViewLength = BufferView.byteLength;
+    const size_t BufferViewStride = BufferView.byteStride; // 0 for tightly packed
 
     // Accessor
     size_t AccessorOffset = 0;
@@ -345,7 +345,7 @@ tinygltf::Model loadGltfModel(const String& src)
 	for(const tinygltf::Node& i : gltfModel.nodes)
 	{
 		HashId nameHash = string_hash(i.name.c_str());
-		CHECK(nameHashes.find(nameHash) == nameHashes.end(), "Duplicated node \"%s\" found in \"%s\"", i.name.c_str(), src.c_str());
+		CHECK(!nameHashes.contains(nameHash), "Duplicated node \"%s\" found in \"%s\"", i.name.c_str(), src.c_str());
 		nameHashes.insert(nameHash);
 	}
 
@@ -354,7 +354,7 @@ tinygltf::Model loadGltfModel(const String& src)
 
 Animation loadAnimation(const tinygltf::Model& model, const tinygltf::Animation& anim, uint32_t animationId)
 {
-    Animation animation{anim.name.empty() ? Strings::sprintf("anim_%ud", animationId) : anim.name};
+    Animation animation = {anim.name.empty() ? Strings::sprintf("anim_%ud", animationId) : anim.name};
 
 	for (const auto& i : anim.samplers)
 	{

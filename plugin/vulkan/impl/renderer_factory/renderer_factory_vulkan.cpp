@@ -53,7 +53,7 @@ RendererFactoryVulkan::RendererFactoryVulkan()
 
 sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_RHS);
+    sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_RHS, enums::NDC_DEPTH_RANGE_ZERO_TO_ONE);
     if(renderer._version != enums::RENDERER_VERSION_AUTO)
         setVersion(renderer._version, vkContext);
     return vkContext;
@@ -89,11 +89,6 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(const Buffer::Usage usa
     else
         flags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     return sp<VKBuffer>::make(_renderer, Ark::instance().renderController()->recycler(), usageFlags, flags);
-}
-
-sp<Camera::Delegate> RendererFactoryVulkan::createCamera(const enums::CoordinateSystem rcs)
-{
-    return rcs == enums::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>();
 }
 
 sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)

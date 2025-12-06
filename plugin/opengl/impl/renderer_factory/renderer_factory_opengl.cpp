@@ -49,7 +49,7 @@ RendererFactoryOpenGL::RendererFactoryOpenGL()
 
 sp<RenderEngineContext> RendererFactoryOpenGL::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f), enums::COORDINATE_SYSTEM_RHS, enums::COORDINATE_SYSTEM_LHS);
+    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f), enums::COORDINATE_SYSTEM_RHS, enums::COORDINATE_SYSTEM_LHS, enums::NDC_DEPTH_RANGE_NEGATIVE_ONE_TO_ONE);
     if(renderer._version != enums::RENDERER_VERSION_AUTO)
         setVersion(renderer._version, renderContext);
     return renderContext;
@@ -77,11 +77,6 @@ sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderEngineCont
 sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(const Buffer::Usage usage)
 {
     return sp<Buffer::Delegate>::make<GLBuffer>(usage, Ark::instance().renderController()->recycler());
-}
-
-sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(enums::CoordinateSystem rcs)
-{
-    return rcs == enums::COORDINATE_SYSTEM_LHS ?  sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
 sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)

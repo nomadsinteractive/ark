@@ -46,6 +46,7 @@ limitations under the License.
 
 #include "generated/ark_bootstrap.h"
 #include "generated/base_plugin.h"
+#include "renderer/base/render_engine_context.h"
 
 namespace ark {
 
@@ -66,17 +67,16 @@ M4 changeProjectionHandSide(const M4& projection, const bool flipx, const bool f
     return MatrixUtil::mul(flip, projection);
 }
 
-struct CameraDelegateCHS final : Camera::Delegate {
-
-    CameraDelegateCHS(const enums::CoordinateSystem rcs, sp<Delegate> delegate, const bool flipx, const bool flipy)
-        : _rcs(rcs), _delegate(std::move(delegate)), _flipx(flipx), _flipy(flipy)
+class CameraDelegateCHS final : public Camera::Delegate {
+public:
+    CameraDelegateCHS(sp<Delegate> delegate, const bool flipx, const bool flipy, const bool flipz = false)
+        : _delegate(std::move(delegate)), _flipx(flipx), _flipy(flipy), _flipz(flipz)
     {
-        ASSERT(_rcs == enums::COORDINATE_SYSTEM_LHS || _rcs == enums::COORDINATE_SYSTEM_RHS);
     }
 
     M4 frustum(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar) override
     {
-        return changeProjectionHandSide(_delegate->frustum(left, right, bottom, top, clipNear, clipFar), _flipx, _flipy, false);
+        return changeProjectionHandSide(_delegate->frustum(left, right, bottom, top, clipNear, clipFar), _flipx, _flipy, _flipz);
     }
 
     M4 lookAt(const V3& position, const V3& target, const V3& up) override
@@ -86,21 +86,20 @@ struct CameraDelegateCHS final : Camera::Delegate {
 
     M4 ortho(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar) override
     {
-        const bool needFlipY = (_rcs == enums::COORDINATE_SYSTEM_LHS ? bottom < top : bottom > top) != _flipy;
-        const bool needFlipZ = (_rcs == enums::COORDINATE_SYSTEM_LHS ? clipNear < clipFar : clipNear > clipFar) != needFlipY;
         const M4 m = _delegate->ortho(left, right, bottom, top, clipNear, clipFar);
-        return changeProjectionHandSide(m, false, needFlipY, needFlipZ);
+        return changeProjectionHandSide(m, _flipx, _flipy, _flipz);
     }
 
     M4 perspective(const float fov, const float aspect, const float clipNear, const float clipFar) override
     {
-        return changeProjectionHandSide(_delegate->perspective(fov, aspect, clipNear, clipFar), _flipx, _flipy, false);
+        return changeProjectionHandSide(_delegate->perspective(fov, aspect, clipNear, clipFar), _flipx, _flipy, _flipz);
     }
 
-    enums::CoordinateSystem _rcs;
+private:
     sp<Delegate> _delegate;
     bool _flipx;
     bool _flipy;
+    bool _flipz;
 };
 
 sp<RendererFactory> chooseRenderFactory(const Vector<sp<RendererFactory>>& rendererFactories, const enums::RenderingBackendBit renderingBackend)
@@ -170,6 +169,14 @@ sp<AssetBundle> createAssetBundle(const ApplicationManifest::Asset& asset)
     sp<AssetBundle> assetBundle = Platform::getAssetBundle(filepath);
     CHECK_WARN(assetBundle, "Unable to load AssetBundle, src: %s", asset._src.toString().c_str());
     return assetBundle;
+}
+
+sp<Camera::Delegate> makeCameraDelegate(const enums::CoordinateSystem coordinateSystem, const enums::NDCDepthRange ndcDepthRange)
+{
+    if(coordinateSystem == enums::COORDINATE_SYSTEM_LHS)
+        return ndcDepthRange == enums::NDC_DEPTH_RANGE_ZERO_TO_ONE ? sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_NO>();
+    ASSERT(coordinateSystem == enums::COORDINATE_SYSTEM_RHS);
+    return ndcDepthRange == enums::NDC_DEPTH_RANGE_ZERO_TO_ONE ? sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
 }
@@ -407,21 +414,26 @@ const Constants& Ark::constants()
     return ensure<Constants>();
 }
 
-Camera Ark::createCamera(enums::CoordinateSystem cs) const
+Camera Ark::createCamera(enums::CoordinateSystem appCoordinateSystem) const
 {
-    if(cs == enums::COORDINATE_SYSTEM_DEFAULT)
-        cs = _manifest->renderer()._coordinate_system;
-    if(cs == enums::COORDINATE_SYSTEM_DEFAULT)
-        cs = _application_context->renderController()->renderEngine()->viewportCoordinateSystem();
-    return createCamera(cs, false, false);
+    if(appCoordinateSystem == enums::COORDINATE_SYSTEM_DEFAULT)
+        appCoordinateSystem = _manifest->renderer()._coordinate_system;
+
+    const RenderEngineContext& renderEngineContext = _application_context->renderController()->renderEngine()->context();
+    if(appCoordinateSystem == enums::COORDINATE_SYSTEM_DEFAULT)
+        appCoordinateSystem = renderEngineContext.viewportCoordinateSystem();
+
+    const enums::CoordinateSystem viewportCoordinateSystem = renderEngineContext.viewportCoordinateSystem();
+    const enums::CoordinateSystem ndcCoordinateSystem = renderEngineContext.ndcCoordinateSystem();
+    const bool shouldFlipY = viewportCoordinateSystem == ndcCoordinateSystem;
+    return createCamera(appCoordinateSystem, false, shouldFlipY);
 }
 
-Camera Ark::createCamera(enums::CoordinateSystem cs, bool flipx, bool flipy) const
+Camera Ark::createCamera(enums::CoordinateSystem cs, const bool flipx, const bool flipy) const
 {
-    RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
-    sp<Camera::Delegate> cameraDelegate = rendererFactory.createCamera(cs);
+    sp<Camera::Delegate> cameraDelegate = makeCameraDelegate(cs, _application_context->renderController()->renderEngine()->context()->ndcDepthRange());
     if(flipx || flipy)
-        return {cs, sp<Camera::Delegate>::make<CameraDelegateCHS>(cs, std::move(cameraDelegate), flipx, flipy)};
+        return {cs, sp<Camera::Delegate>::make<CameraDelegateCHS>(std::move(cameraDelegate), flipx, flipy)};
     return {cs, std::move(cameraDelegate)};
 }
 

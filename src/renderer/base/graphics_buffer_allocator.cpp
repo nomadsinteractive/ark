@@ -11,7 +11,7 @@ namespace {
 
 class PageUploader final : public Uploader {
 public:
-    PageUploader(size_t size)
+    PageUploader(const size_t size)
         : Uploader(size) {
     }
 
@@ -30,7 +30,7 @@ GraphicsBufferAllocator::GraphicsBufferAllocator(RenderController& renderControl
 {
 }
 
-std::pair<sp<GraphicsBufferAllocator::Page>, uint32_t> GraphicsBufferAllocator::ensurePage(uint32_t size)
+std::pair<sp<GraphicsBufferAllocator::Page>, uint32_t> GraphicsBufferAllocator::ensurePage(const uint32_t size)
 {
     for(const sp<Page>& page : _pages)
         if(const Optional<uint32_t> optPtr = page->_heap.allocate(size))
@@ -106,7 +106,7 @@ const Buffer& GraphicsBufferAllocator::Strips::buffer() const
     return _page->_buffer;
 }
 
-element_index_t GraphicsBufferAllocator::Strips::allocate(uint32_t unitVertexCount)
+element_index_t GraphicsBufferAllocator::Strips::allocate(const uint32_t unitVertexCount)
 {
     const uint32_t sizeNeedAllocate = unitVertexCount * _heap_strategy_fix_size;
     if(Optional<uint32_t> ptr = _page->_heap.allocate(sizeNeedAllocate, _heap_strategy_fix_size))
@@ -120,7 +120,7 @@ element_index_t GraphicsBufferAllocator::Strips::allocate(uint32_t unitVertexCou
     return 0;
 }
 
-void GraphicsBufferAllocator::Strips::free(element_index_t idx)
+void GraphicsBufferAllocator::Strips::free(const element_index_t idx)
 {
     const auto iter = _allocations.find(idx);
     DCHECK(iter != _allocations.end(), "Unallocated index %d is being freed", idx);
@@ -139,7 +139,7 @@ void GraphicsBufferAllocator::Strips::dispose()
 const sp<GraphicsBufferAllocator::Page>& GraphicsBufferAllocator::newPage()
 {
     constexpr uint32_t pageSize = 65536 * 32;
-    _pages.push_front(sp<Page>::make(*this, _render_controller.makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC, sp<PageUploader>::make(pageSize)), pageSize));
+    _pages.push_front(sp<Page>::make(*this, _render_controller.makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC, sp<Uploader>::make<PageUploader>(pageSize)), pageSize));
     return _pages.front();
 }
 

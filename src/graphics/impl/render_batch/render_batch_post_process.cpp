@@ -15,7 +15,7 @@ namespace ark {
 RenderBatchPostProcess::RenderBatchPostProcess()
     : RenderBatch(Global<Constants>()->BOOLEAN_FALSE), _layer_context(sp<LayerContext>::make(nullptr, sp<ModelLoader>::make<ModelLoaderNDC>(), nullptr, nullptr, Global<Constants>()->BOOLEAN_FALSE))
 {
-    sp<Renderable> renderable = RenderableType::create(sp<Renderable>::make<RenderObject>(NamedHash(1)), Global<Constants>()->BOOLEAN_FALSE);
+    sp<Renderable> renderable = RenderableType::create(sp<Renderable>::make<RenderObject>(NamedHash(1), sp<Vec3>::make<Vec3::Const>(V3(0, 0, 1.0f))), Global<Constants>()->BOOLEAN_FALSE);
     _layer_context->pushBack(std::move(renderable));
     _contexts.push_back(_layer_context);
 }

@@ -292,11 +292,9 @@ public:
             }};
             constexpr Optional<SDL_GPUDepthStencilTargetInfo> depthStencilTarget = {};
             SDL3_GPU_GraphicsContext& graphicsContext = ensureGraphicsContext(_graphics_context);
-            graphicsContext = {cmdbuf, {nullptr, &swapchainRTIBlend, &depthStencilTarget}};
-            graphicsContext.pushRenderTargets(nullptr, swapchainRTIInitial, depthStencilTarget);
+            graphicsContext = {cmdbuf, {nullptr, &swapchainRTIInitial, &depthStencilTarget}, {nullptr, &swapchainRTIBlend, &depthStencilTarget}};
             _graphics_context->onDrawFrame();
             renderCommand.draw(_graphics_context);
-            graphicsContext.popRenderTargets();
         }
         else
             SDL_Log("WaitAndAcquireGPUSwapchainTexture failed: %s", SDL_GetError());
@@ -361,7 +359,7 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
 
 sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_LHS);
+    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_LHS, enums::NDC_DEPTH_RANGE_ZERO_TO_ONE);
     setVersion(renderer._backend == enums::RENDERING_BACKEND_AUTO ? enums::RENDERER_VERSION_VULKAN_13 : getRendererVersion(renderer._backend), renderContext);
     return renderContext;
 }
@@ -378,11 +376,6 @@ sp<Buffer::Delegate> RendererFactorySDL3_GPU::createBuffer(const Buffer::Usage u
         return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDIRECT);
     FATAL("Unknow buffer type: %d", usage.bits());
     return nullptr;
-}
-
-sp<Camera::Delegate> RendererFactorySDL3_GPU::createCamera(const enums::CoordinateSystem rcs)
-{
-    return rcs == enums::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>();
 }
 
 sp<RenderTarget> RendererFactorySDL3_GPU::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
