@@ -545,7 +545,7 @@ namespace vks
 		*
 		* @return True if the extension is supported (present in the list read at device creation time)
 		*/
-		bool extensionSupported(std::string extension)
+		bool extensionSupported(const std::string_view extension)
 		{
 			return (std::find(supportedExtensions.begin(), supportedExtensions.end(), extension) != supportedExtensions.end());
 		}

@@ -147,6 +147,7 @@ function(ark_add_python_extension name)
         endif()
     endforeach(source)
 
+    list(APPEND ARK_ADD_PYTHON_EXTENSION_DEFINITIONS "$<IF:$<CONFIG:Debug>,Py_DEBUG,>")
     if(ARK_PYTHON_EXTENSION_BUILTIN_${upper_name})
         # This will be compiled into libpython instead of as a separate library
         add_library(${target_name} STATIC ${absolute_sources})
@@ -156,7 +157,7 @@ function(ark_add_python_extension name)
         target_compile_definitions(${target_name} PRIVATE -DPy_BUILD_CORE -DPy_BUILD_CORE_BUILTIN ${ARK_ADD_PYTHON_EXTENSION_DEFINITIONS})
     elseif(WIN32 AND NOT BUILD_SHARED)
         # Extensions cannot be built against a static libpython on windows
-    else(ARK_PYTHON_EXTENSION_BUILTIN_${upper_name})
+    else()
         add_library(${target_name} SHARED ${absolute_sources})
         target_include_directories(${target_name} PRIVATE ${ARK_ADD_PYTHON_EXTENSION_INCLUDEDIRS})
         target_link_libraries(${target_name} PRIVATE ${ARK_ADD_PYTHON_EXTENSION_LIBRARIES})
