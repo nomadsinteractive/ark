@@ -43,4 +43,9 @@ int32_t BytearrayReadable::remaining()
     return _bytearray->length() - _position;
 }
 
+uint32_t BytearrayReadable::position()
+{
+    return _position;
+}
+
 }

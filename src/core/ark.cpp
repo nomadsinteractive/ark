@@ -243,7 +243,7 @@ private:
 
                 const String filename = relPath->rstrip('/');
                 if(const sp<Asset> fp = _asset_bundle->getAsset(filename))
-                    return sp<AssetBundle>::make<AssetBundleZipFile>(fp->open(), Platform::getRealPath(filename));
+                    return sp<AssetBundle>::make<AssetBundleZipFile>(fp->open(), Platform::getRealPath(filename), fp->size());
             }
             return nullptr;
         }

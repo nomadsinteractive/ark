@@ -26,8 +26,8 @@ String toZipFilePath(const String& filepath)
 
 class AssetBundleZipFile::Stub {
 public:
-    Stub(sp<Readable> zipReadable, const String& zipLocation)
-        : _zip_readable(std::move(zipReadable)), _zip_location(Platform::getRealPath(zipLocation)), _size(_zip_readable ? _zip_readable->remaining() : 0)
+    Stub(sp<Readable> zipReadable, const String& zipLocation, const size_t size)
+        : _zip_readable(std::move(zipReadable)), _zip_location(Platform::getRealPath(zipLocation)), _size(size)
     {
         CHECK(_zip_readable, "Cannot open file %s", _zip_location.c_str());
         zip_error_t error = {0};
@@ -43,12 +43,12 @@ public:
 
     int32_t position() const
     {
-        return _size - _zip_readable->remaining();
+        return _zip_readable->position();
     }
 
     sp<Readable> _zip_readable;
     String _zip_location;
-    int32_t _size;
+    size_t _size;
 
     zip_t* _zip_archive;
     zip_source_t* _zip_source;
@@ -120,6 +120,11 @@ public:
     {
         DFATAL("Unimplemented");
         return 0;
+    }
+
+    uint32_t position() override
+    {
+        return zip_ftell(_zip_file);
     }
 
 private:
@@ -200,12 +205,12 @@ zip_int64_t AssetBundleZipFile::_local_zip_source_callback(void* userdata, void*
 }
 
 AssetBundleZipFile::AssetBundleZipFile(Asset& asset)
-    : AssetBundleZipFile(asset.open(), asset.location())
+    : AssetBundleZipFile(asset.open(), asset.location(), asset.size())
 {
 }
 
-AssetBundleZipFile::AssetBundleZipFile(sp<Readable> zipReadable, const String& zipLocation)
-    : _stub(sp<Stub>::make(std::move(zipReadable), zipLocation))
+AssetBundleZipFile::AssetBundleZipFile(sp<Readable> zipReadable, const String& zipLocation, const size_t size)
+    : _stub(sp<Stub>::make(std::move(zipReadable), zipLocation, size))
 {
 }
 

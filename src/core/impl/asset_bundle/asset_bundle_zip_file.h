@@ -13,7 +13,7 @@ namespace ark {
 class AssetBundleZipFile final : public AssetBundle {
 public:
     AssetBundleZipFile(Asset& asset);
-    AssetBundleZipFile(sp<Readable> zipReadable, const String& zipLocation);
+    AssetBundleZipFile(sp<Readable> zipReadable, const String& zipLocation, size_t size);
 
     sp<Asset> getAsset(const String& name) override;
     sp<AssetBundle> getBundle(const String& path) override;

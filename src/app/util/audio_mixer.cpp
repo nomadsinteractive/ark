@@ -36,12 +36,18 @@ public:
         return sizeRead;
     }
 
-    virtual int32_t seek(int32_t position, int32_t whence) override {
+    int32_t seek(int32_t position, int32_t whence) override {
         return _delegate->seek(position, whence);
     }
 
-    virtual int32_t remaining() override {
+    int32_t remaining() override
+    {
         return _delegate->remaining();
+    }
+
+    uint32_t position() override
+    {
+        return _delegate->position();
     }
 
 private:
@@ -104,6 +110,12 @@ int32_t AudioMixer::seek(int32_t /*position*/, int32_t /*whence*/)
 }
 
 int32_t AudioMixer::remaining()
+{
+    DFATAL("Unimplemented");
+    return 0;
+}
+
+uint32_t AudioMixer::position()
 {
     DFATAL("Unimplemented");
     return 0;

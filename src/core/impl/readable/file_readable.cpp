@@ -40,6 +40,11 @@ int32_t FileReadable::remaining()
     return _size - ftell(_fp);
 }
 
+uint32_t FileReadable::position()
+{
+    return ftell(_fp);
+}
+
 void FileReadable::init()
 {
     fseek(_fp, 0, SEEK_END);

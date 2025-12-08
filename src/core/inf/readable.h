@@ -14,6 +14,7 @@ public:
     virtual int32_t seek(int32_t position, int32_t whence) = 0;
     [[deprecated]]
     virtual int32_t remaining() = 0;
+    virtual uint32_t position() = 0;
 };
 
 }

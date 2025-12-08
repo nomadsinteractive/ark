@@ -1,5 +1,7 @@
 #include "core/util/asset_bundle_type.h"
 
+#include <filesystem>
+
 #include "core/impl/asset_bundle/asset_bundle_compound.h"
 #include "core/impl/asset_bundle/asset_bundle_directory.h"
 #include "core/impl/asset_bundle/asset_bundle_with_prefix.h"
@@ -71,14 +73,6 @@ public:
             LOGD("filepath(%s) ==> asset<%p>", filepath.c_str(), asset.get());
             return asset;
         }
-
-        const auto [dirname, filename] = filepath.rcut('/');
-        const sp<AssetBundle> dir = getBundle(dirname ? dirname.value() : "");
-        if(sp<Asset> asset = dir ? dir->getAsset(filename) : nullptr)
-        {
-            LOGD("filepath(%s) dirname(%s) ==> dir<%p> asset<%p>", filepath.c_str(), dirname ? dirname.value().c_str() : "", dir.get(), asset.get());
-            return asset;
-        }
         return nullptr;
     }
 
@@ -86,12 +80,12 @@ public:
     {
         String assetDir = (path.empty() || path == "/") ? "." : path;
 
+        if(const sp<Asset> asset = getAsset(assetDir))
+            if(sp<Readable> readable = asset->open())
+                return sp<AssetBundle>::make<AssetBundleZipFile>(std::move(readable), path, asset->size());
+
         if(sp<AssetBundle> assetBundle = _root->getBundle(assetDir))
             return assetBundle;
-
-        if(const sp<Asset> asset = getAsset(path))
-            if(sp<Readable> readable = asset->open())
-                return sp<AssetBundle>::make<AssetBundleZipFile>(std::move(readable), path);
 
         String filename;
         do {
@@ -101,7 +95,7 @@ public:
             const sp<Asset> asset = getAsset(dirname);
             if(sp<Readable> readable = asset ? asset->open() : nullptr)
             {
-                sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirname);
+                sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirname, asset->size());
                 String entryName = filename + "/";
                 return zip->hasEntry(entryName) ? sp<AssetBundle>::make<AssetBundleWithPrefix>(std::move(zip), std::move(entryName)) : nullptr;
             }
@@ -191,7 +185,7 @@ sp<AssetBundle> AssetBundleType::createAssetBundle(const String& filepath)
     if(Platform::isDirectory(filepath))
         return sp<AssetBundle>::make<AssetBundleDirectory>(filepath);
     if(Platform::isFile(filepath))
-        return sp<AssetBundle>::make<AssetBundleZipFile>(sp<Readable>::make<FileReadable>(filepath, "rb"), filepath);
+        return sp<AssetBundle>::make<AssetBundleZipFile>(sp<Readable>::make<FileReadable>(filepath, "rb"), filepath, std::filesystem::file_size(filepath.c_str()));
     return nullptr;
 }
 

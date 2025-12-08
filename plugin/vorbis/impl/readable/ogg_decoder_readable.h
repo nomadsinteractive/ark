@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_VORBIS_IMPL_READABLE_OGG_DECODER_READABLE_H_
-#define ARK_PLUGIN_VORBIS_IMPL_READABLE_OGG_DECODER_READABLE_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/inf/readable.h"
@@ -7,32 +6,30 @@
 
 #include <vorbis/vorbisfile.h>
 
-namespace ark {
-namespace plugin {
-namespace vorbis {
+namespace ark::plugin::vorbis {
 
 class OggDecoderReadable : public Readable {
 public:
     OggDecoderReadable(const sp<Readable>& delegate);
     ~OggDecoderReadable() override;
 
-    virtual uint32_t read(void* buffer, uint32_t length) override;
-    virtual int32_t seek(int32_t position, int32_t whence) override;
-    virtual int32_t remaining() override;
+    uint32_t read(void* buffer, uint32_t length) override;
+    int32_t seek(int32_t position, int32_t whence) override;
+    int32_t remaining() override;
+    uint32_t position() override;
 
     const sp<Readable>& delegate() const;
     uint32_t rawSize() const;
 
 //[[plugin::builder::by-value("ogg")]]
-    class BUILDER : public Builder<Readable> {
+    class BUILDER final : public Builder<Readable> {
     public:
         BUILDER(BeanFactory& factory, const String& src);
 
-        virtual sp<Readable> build(const Scope& args) override;
+        sp<Readable> build(const Scope& args) override;
 
     private:
         sp<Builder<String>> _src;
-
     };
 
 private:
@@ -48,7 +45,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

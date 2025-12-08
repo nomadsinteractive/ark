@@ -13,6 +13,7 @@ public:
     uint32_t read(void* buffer, uint32_t size) override;
     int32_t seek(int32_t position, int32_t whence) override;
     int32_t remaining() override;
+    uint32_t position() override;
 
 private:
     bytearray _bytearray;
