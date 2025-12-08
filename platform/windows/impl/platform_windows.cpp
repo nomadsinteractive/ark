@@ -40,17 +40,10 @@ void Platform::sysCall(int32_t id, const String& value)
 {
 }
 
-String Platform::getDefaultFontDirectory()
-{
-    TCHAR nWindowsDirectory[MAX_PATH];
-    GetWindowsDirectory(nWindowsDirectory, MAX_PATH);
-    return Strings::sprintf("%s\\%s", nWindowsDirectory, "fonts");
-}
-
 String Platform::getExecutablePath()
 {
     TCHAR pathbuf[MAX_PATH];
-    int32_t bytes = GetModuleFileName(NULL, pathbuf, sizeof(pathbuf));
+    const int32_t bytes = GetModuleFileName(nullptr, pathbuf, sizeof(pathbuf));
     DCHECK(bytes > 0, "GetModuleFileName() failed");
     return pathbuf;
 }

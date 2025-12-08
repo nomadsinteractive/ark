@@ -20,9 +20,13 @@ public:
 
 unsigned long ftStreamIOFunc(const FT_Stream stream, const unsigned long offset, unsigned char* buffer, const unsigned long count)
 {
-    const FTReadableStream* readableStream = static_cast<FTReadableStream*>(stream->descriptor.pointer);
-    readableStream->_readable->seek(offset, SEEK_SET);
-    return count ? readableStream->_readable->read(buffer, count) : 0;
+    if(count > 0)
+    {
+        const FTReadableStream* readableStream = static_cast<FTReadableStream*>(stream->descriptor.pointer);
+        readableStream->_readable->seek(offset, SEEK_SET);
+        return readableStream->_readable->read(buffer, count);
+    }
+    return 0;
 }
 
 void ftStreamCloseFunc(const FT_Stream stream)
@@ -44,7 +48,7 @@ FreeTypes::~FreeTypes()
     FT_Done_FreeType(_library);
 }
 
-int FreeTypes::ftNewFace(const char *filename, const FT_Long face_index, FT_Face *aface)
+int FreeTypes::ftNewFace(const char* filename, const FT_Long face_index, FT_Face* aface)
 {
     return FT_New_Face(_library, filename, face_index, aface);
 }

@@ -11,6 +11,7 @@
 
 #include "core/ark.h"
 #include "core/base/constants.h"
+#include "core/inf/asset.h"
 #include "core/inf/readable.h"
 #include "core/util/math.h"
 #include "core/util/strings.h"
@@ -327,10 +328,10 @@ tinygltf::Model loadGltfModel(const String& src)
 	tinygltf::TinyGLTF loader;
 	tinygltf::Model gltfModel;
 	std::string errString, warnString;
-	const sp<Readable> readable = Ark::instance().openAsset(src);
+	const sp<Asset> asset = Ark::instance().getAsset(src);
 
-	Vector<uint8_t> buf(readable->remaining());
-	readable->read(buf.data(), static_cast<uint32_t>(buf.size()));
+	Vector<uint8_t> buf(asset->size());
+	asset->open()->read(buf.data(), static_cast<uint32_t>(buf.size()));
 	if(src.endsWith(".gltf"))
 		loader.LoadASCIIFromString(&gltfModel, &errString, &warnString, reinterpret_cast<const char*>(buf.data()), buf.size(), "");
 	else

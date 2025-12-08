@@ -72,9 +72,9 @@ public:
 
 public:
     ApplicationManifest() = default;
-    ApplicationManifest(const String& src);
+    ApplicationManifest(ark::Asset& asset);
 
-    void load(const String& src);
+    void load(ark::Asset& asset);
 
 // [[script::bindings::property]]
     const String& name() const;

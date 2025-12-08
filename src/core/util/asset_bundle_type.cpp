@@ -1,5 +1,6 @@
 #include "core/util/asset_bundle_type.h"
 
+#include "core/impl/asset_bundle/asset_bundle_compound.h"
 #include "core/impl/asset_bundle/asset_bundle_directory.h"
 #include "core/impl/asset_bundle/asset_bundle_with_prefix.h"
 #include "core/impl/asset_bundle/asset_bundle_zip_file.h"
@@ -16,23 +17,76 @@ namespace ark {
 
 namespace {
 
+class AssetBundleComposite final : public AssetBundle {
+public:
+    AssetBundleComposite(Vector<sp<AssetBundle>> assetBundles)
+        : _asset_bundles(std::move(assetBundles)) {
+    }
+
+    sp<Asset> getAsset(const String& path) override
+    {
+        for(const sp<AssetBundle>& i : _asset_bundles)
+            if(sp<Asset> asset = i->getAsset(path))
+                return asset;
+        return nullptr;
+    }
+
+    sp<AssetBundle> getBundle(const String& path) override
+    {
+        sp<AssetBundle> assetBundle = nullptr;
+        for(const sp<AssetBundle>& i : _asset_bundles)
+            if(sp<AssetBundle> b = i->getBundle(path))
+                assetBundle = assetBundle ? sp<AssetBundle>::make<AssetBundleCompound>(std::move(assetBundle), std::move(b)) : std::move(b);
+
+        return assetBundle;
+    }
+
+    Vector<String> listAssets(const StringView dirname) override
+    {
+        Set<String> assetNameSet;
+        for(const sp<AssetBundle>& i : _asset_bundles)
+            for(String& j : i->listAssets(dirname))
+                assetNameSet.insert(std::move(j));
+
+        Vector<String> assetNames;
+        for(const String& i : assetNameSet)
+            assetNames.push_back(std::move(i));
+        return assetNames;
+    }
+
+private:
+    Vector<sp<AssetBundle>> _asset_bundles;
+};
+
 class AssetBundleDefault final : public AssetBundle {
 public:
+    AssetBundleDefault(sp<AssetBundle> root)
+        : _root(std::move(root)) {
+    }
 
     sp<Asset> getAsset(const String& filepath) override
     {
+        if(sp<Asset> asset = _root->getAsset(filepath))
+        {
+            LOGD("filepath(%s) ==> asset<%p>", filepath.c_str(), asset.get());
+            return asset;
+        }
+
         const auto [dirname, filename] = filepath.rcut('/');
         const sp<AssetBundle> dir = getBundle(dirname ? dirname.value() : "");
-        const sp<Asset> asset = dir ? dir->getAsset(filename) : nullptr;
-        LOGD("filepath(%s) dirname(%s) ==> dir<%p> asset<%p>", filepath.c_str(), dirname ? dirname.value().c_str() : "", dir.get(), asset.get());
-        return asset;
+        if(sp<Asset> asset = dir ? dir->getAsset(filename) : nullptr)
+        {
+            LOGD("filepath(%s) dirname(%s) ==> dir<%p> asset<%p>", filepath.c_str(), dirname ? dirname.value().c_str() : "", dir.get(), asset.get());
+            return asset;
+        }
+        return nullptr;
     }
 
     sp<AssetBundle> getBundle(const String& path) override
     {
         String assetDir = (path.empty() || path == "/") ? "." : path;
 
-        if(sp<AssetBundle> assetBundle = Platform::getAssetBundle(assetDir))
+        if(sp<AssetBundle> assetBundle = _root->getBundle(assetDir))
             return assetBundle;
 
         if(const sp<Asset> asset = getAsset(path))
@@ -57,10 +111,12 @@ public:
         return nullptr;
     }
 
-    Vector<String> listAssets(StringView dirname) override {
-        DFATAL("Unimplemented");
-        return {};
+    Vector<String> listAssets(const StringView dirname) override {
+        return _root->listAssets(dirname);
     }
+
+private:
+    sp<AssetBundle> _root;
 };
 
 class ByteArrayString final : public ByteArray {
@@ -122,7 +178,12 @@ String AssetBundleType::getRealPath(const sp<AssetBundle>& self, const String& f
 
 sp<AssetBundle> AssetBundleType::createBuiltInAssetBundle()
 {
-    return sp<AssetBundle>::make<AssetBundleDefault>();
+    const sp<AssetBundle> currentDir = Platform::getAssetBundle(".");
+    Vector<sp<AssetBundle>> assetBundles = {sp<AssetBundle>::make<AssetBundleDefault>(Platform::getAssetBundle("."))};
+    for(const String& i : currentDir->listAssets("."))
+        if(i.endsWith(".ark"))
+            assetBundles.push_back(sp<AssetBundle>::make<AssetBundleDefault>(sp<AssetBundle>::make<AssetBundleZipFile>(currentDir->getAsset(i))));
+    return sp<AssetBundle>::make<AssetBundleComposite>(std::move(assetBundles));
 }
 
 sp<AssetBundle> AssetBundleType::createAssetBundle(const String& filepath)

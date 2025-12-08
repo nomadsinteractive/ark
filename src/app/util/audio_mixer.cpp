@@ -16,8 +16,9 @@ public:
         : _delegate(delegate) {
     }
 
-    virtual uint32_t read(void* buffer, uint32_t size) override {
-        uint8_t* buf = reinterpret_cast<uint8_t*>(buffer);
+    uint32_t read(void* buffer, const uint32_t size) override
+    {
+        uint8_t* buf = static_cast<uint8_t*>(buffer);
         uint32_t sizeRead = 0;
         bool rewinded = false;
         while(sizeRead < size) {

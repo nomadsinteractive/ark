@@ -20,7 +20,6 @@ public:
     static void sysCall(int32_t id, const String& value);
 
     static sp<AssetBundle> getAssetBundle(const String& path);
-    static String getDefaultFontDirectory();
     static String getExecutablePath();
     static String getRealPath(const String& path);
     static Vector<enums::RenderingBackendBit> getPreferedRenderBackends();

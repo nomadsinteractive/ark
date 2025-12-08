@@ -11,6 +11,7 @@ public:
 
     sp<Readable> open() override;
     String location() override;
+    size_t size() override;
 
 private:
     String _filepath;

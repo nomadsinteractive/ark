@@ -39,7 +39,7 @@ public:
     int32_t argc() const;
     const char** argv() const;
 
-    void initialize(sp<ApplicationManifest> manifest);
+    void initialize(sp<ApplicationManifest> manifest = nullptr);
     sp<Application> makeApplication() const;
 
     const sp<ApplicationManifest>& manifest() const;

@@ -6,11 +6,11 @@
 
 using namespace ark;
 
-int main(int argc, const char* argv[])
+int main(const int32_t argc, const char* argv[])
 {
     Ark ark(argc, argv);
     try {
-        ark.initialize(sp<ApplicationManifest>::make("manifest.xml"));
+        ark.initialize();
         const sp<Application> app = ark.makeApplication();
         return app->run();
     }

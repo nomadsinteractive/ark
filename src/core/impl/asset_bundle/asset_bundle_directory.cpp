@@ -17,17 +17,15 @@ AssetBundleDirectory::AssetBundleDirectory(String directory)
 
 sp<Asset> AssetBundleDirectory::getAsset(const String& name)
 {
-    const String filepath = Platform::isAbsolutePath(name) ? name : Platform::pathJoin(_directory, name);
-    if(Platform::isFile(filepath))
+    if(const String filepath = Platform::isAbsolutePath(name) ? name : Platform::pathJoin(_directory, name); Platform::isFile(filepath))
         return sp<Asset>::make<AssetFile>(filepath);
     return nullptr;
 }
 
 sp<AssetBundle> AssetBundleDirectory::getBundle(const String& path)
 {
-    const String dirname = Platform::pathJoin(_directory, path);
-    if(Platform::isDirectory(dirname))
-        return sp<AssetBundleDirectory>::make(dirname);
+    if(const String dirname = Platform::pathJoin(_directory, path); Platform::isDirectory(dirname))
+        return sp<AssetBundle>::make<AssetBundleDirectory>(dirname);
     return nullptr;
 }
 
@@ -38,7 +36,7 @@ Vector<String> AssetBundleDirectory::listAssets(const StringView dirname)
     if(Platform::isDirectory(dname))
     {
         for(const std::filesystem::path& i : std::filesystem::directory_iterator(dname.c_str()))
-            assets.emplace_back(i.filename().string());
+            assets.emplace_back(i.relative_path().filename().string());
     }
     return assets;
 }

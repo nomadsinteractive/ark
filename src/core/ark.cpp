@@ -195,10 +195,8 @@ public:
     {
         const URL url(name);
         for(const Mounted& i : _mounts)
-        {
             if(sp<Asset> asset = i.getAsset(url))
                 return asset;
-        }
         return _default_asset_bundle->getAsset(name);
     }
 
@@ -313,12 +311,20 @@ void Ark::push()
 
 void Ark::initialize(sp<ApplicationManifest> manifest)
 {
-    _manifest = std::move(manifest);
+    sp<AssetBundle> builtinAssetBundle = AssetBundleType::createBuiltInAssetBundle();
 
+    if(manifest)
+        _manifest = std::move(manifest);
+    else
+    {
+        const sp<Asset> asset = builtinAssetBundle->getAsset("manifest.xml");
+        CHECK(asset, "Cannot load application manifest(manifest.xml)");
+        _manifest = sp<ApplicationManifest>::make(asset);
+    }
     loadPlugins(_manifest);
 
-    _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(), _manifest->assets());
-    sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
+    _asset_bundle = sp<ArkAssetBundle>::make(std::move(builtinAssetBundle), _manifest->assets());
+    sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("."));
 
     const sp<BeanFactory> factory = createBeanFactory(sp<Dictionary<document>>::make<DictionaryImpl<document>>());
     sp<RenderEngine> renderEngine = createRenderEngine(factory, _manifest->renderer());

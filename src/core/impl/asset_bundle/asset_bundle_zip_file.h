@@ -12,6 +12,7 @@ namespace ark {
 
 class AssetBundleZipFile final : public AssetBundle {
 public:
+    AssetBundleZipFile(Asset& asset);
     AssetBundleZipFile(sp<Readable> zipReadable, const String& zipLocation);
 
     sp<Asset> getAsset(const String& name) override;

@@ -49,6 +49,12 @@ bool PlatformIndependent::isDirectory(const String& filepath)
     return std::filesystem::is_directory(filepath.c_str());
 }
 
+
+String PlatformIndependent::getRelativePath(const StringView path)
+{
+    return std::filesystem::path(path).relative_path().string();
+}
+
 char PlatformIndependent::dirSeparator()
 {
     return _DIR_SEPARATOR;

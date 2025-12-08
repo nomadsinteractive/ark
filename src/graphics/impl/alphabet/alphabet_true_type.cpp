@@ -12,7 +12,7 @@
 namespace ark {
 
 AlphabetTrueType::AlphabetTrueType(const String& src)
-    : _free_types(Global<FreeTypes>()), _font(Font::TextSize())
+    : _free_types(Global<FreeTypes>()), _font(Font::TextSize()), _ft_font_face(nullptr)
 {
     _free_types->ftNewFaceFromReadable(Ark::instance().openAsset(src), 0, &_ft_font_face);
 }
@@ -38,7 +38,7 @@ void AlphabetTrueType::setFont(const Font& font)
     _base_line_position = _line_height_in_pixel + FreeTypes::ftCalculateBaseLinePosition(_ft_font_face);
 }
 
-Optional<Alphabet::Metrics> AlphabetTrueType::measure(int32_t c)
+Optional<Alphabet::Metrics> AlphabetTrueType::measure(const int32_t c)
 {
     const FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(!glyphIndex)
@@ -58,16 +58,16 @@ Optional<Alphabet::Metrics> AlphabetTrueType::measure(int32_t c)
     return metrics;
 }
 
-bool AlphabetTrueType::draw(uint32_t c, Bitmap& image, const int32_t x, const int32_t y)
+bool AlphabetTrueType::draw(const uint32_t c, Bitmap& image, const int32_t x, const int32_t y)
 {
-    FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
+    const FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(!glyphIndex)
         return false;
 
     const bool isMonochrome = _font.style() & Font::FONT_STYLE_MONOCHROME;
     if(FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_RENDER | (isMonochrome ? FT_LOAD_TARGET_MONO : FT_LOAD_TARGET_NORMAL)) != 0)
         DFATAL("Error loading glyph, character: %d", c);
-    FT_GlyphSlot slot = _ft_font_face->glyph;
+    const FT_GlyphSlot slot = _ft_font_face->glyph;
     DCHECK(slot, "Glyph not loaded");
 
     if(isMonochrome)

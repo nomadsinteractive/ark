@@ -12,6 +12,8 @@ public:
     static bool isDirectory(const String& filepath);
     static bool isFile(const String& filepath);
 
+    static String getRelativePath(StringView path);
+
     static char dirSeparator();
     static char pathSeparator();
     static String pathJoin(const String& p1, const String& p2);

@@ -12,6 +12,7 @@ public:
 
     virtual uint32_t read(void* buffer, uint32_t size) = 0;
     virtual int32_t seek(int32_t position, int32_t whence) = 0;
+    [[deprecated]]
     virtual int32_t remaining() = 0;
 };
 

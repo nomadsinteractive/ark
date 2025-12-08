@@ -16,7 +16,7 @@ public:
     FreeTypes();
     ~FreeTypes();
 
-    int ftNewFace(const char* filepathname, FT_Long face_index, FT_Face* aface);
+    int ftNewFace(const char* filename, FT_Long face_index, FT_Face* aface);
     int ftNewFaceFromReadable(sp<Readable> readable, FT_Long face_index, FT_Face* aface);
 
     static FT_F26Dot6 ftF26Dot6(uint32_t integer, uint32_t fractional);

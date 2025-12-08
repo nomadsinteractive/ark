@@ -4,16 +4,14 @@
 
 using namespace Assimp;
 
-namespace ark {
-namespace plugin {
-namespace assimp {
+namespace ark::plugin::assimp {
 
 ArkIOStream::ArkIOStream(sp<Readable> readable)
     : _readable(std::move(readable)), _file_size(_readable->remaining())
 {
 }
 
-size_t ArkIOStream::Read(void* pvBuffer, size_t pSize, size_t pCount)
+size_t ArkIOStream::Read(void* pvBuffer, const size_t pSize, const size_t pCount)
 {
     return _readable->read(pvBuffer, pSize * pCount);
 }
@@ -24,7 +22,7 @@ size_t ArkIOStream::Write(const void* pvBuffer, size_t pSize, size_t pCount)
     return 0;
 }
 
-aiReturn ArkIOStream::Seek(size_t pOffset, aiOrigin pOrigin)
+aiReturn ArkIOStream::Seek(const size_t pOffset, const aiOrigin pOrigin)
 {
     _readable->seek(pOffset, static_cast<int32_t>(pOrigin));
     return aiReturn_SUCCESS;
@@ -44,6 +42,4 @@ void ArkIOStream::Flush()
 {
 }
 
-}
-}
 }

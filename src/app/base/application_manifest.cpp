@@ -25,12 +25,12 @@ uint32_t toSize(const String& sizestr)
 
 }
 
-ApplicationManifest::ApplicationManifest(const String& src)
+ApplicationManifest::ApplicationManifest(ark::Asset& asset)
 {
-    load(src);
+    load(asset);
 }
 
-void ApplicationManifest::load(const String& src)
+void ApplicationManifest::load(ark::Asset& asset)
 {
     auto [appDirOpt, appFileName] = Platform::getExecutablePath().rcut(Platform::dirSeparator());
     if(appDirOpt)
@@ -39,10 +39,8 @@ void ApplicationManifest::load(const String& src)
 
     const sp<AssetBundle> appAsset = Platform::getAssetBundle(".");
     ASSERT(appAsset);
-    const sp<ark::Asset> asset = appAsset->getAsset(src);
-    CHECK(asset, "Cannot load application manifest \"%s\"", src.c_str());
 
-    _content = asset ? Documents::loadFromReadable(asset->open()) : document::make("");
+    _content = Documents::loadFromReadable(asset.open());
     for(const document& i : _content->children("asset"))
         _assets.emplace_back(i);
 
