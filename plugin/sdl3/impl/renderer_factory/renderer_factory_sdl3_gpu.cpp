@@ -91,6 +91,7 @@ public:
             preprocessor->declareUBOStruct(pipelineLayout, preprocessor->_shader_stage == enums::SHADER_STAGE_BIT_VERTEX ? 1 : (preprocessor->_shader_stage == enums::SHADER_STAGE_BIT_COMPUTE ? 2 : 3));
             preprocessor->_predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
             preprocessor->_predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
+            preprocessor->_predefined_macros.emplace_back("#define ARK_USE_DX");
 
             // We declare both sampler and texture in _declaration_samplers so the actual number of samplers should be half of the size.
             const int32_t samplerCount = preprocessor->_declaration_samplers.vars().size() / 2;

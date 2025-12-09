@@ -281,6 +281,20 @@ void setupVertexAttributes(const Attribute& attribute, SDL_GPUVertexAttribute* a
         };
 }
 
+void bindInstanceBuffers(GraphicsContext& graphicsContext, SDL_GPURenderPass* renderPass, const Vector<std::pair<uint32_t, Buffer::Snapshot>>& instanceBufferSnapshots)
+{
+    SDL_GPUBufferBinding instanceBuffers[8] = {};
+    uint32_t numInstanceBuffers = 0;
+    for(const auto& [i, j] : instanceBufferSnapshots)
+    {
+        j.upload(graphicsContext);
+        const auto buffer = reinterpret_cast<SDL_GPUBuffer*>(j.id());
+        CHECK(buffer, "Invaild Instanced Array Buffer: %d", i);
+        instanceBuffers[numInstanceBuffers ++] = {buffer, 0};
+    }
+    SDL_BindGPUVertexBuffers(renderPass, 1, instanceBuffers, numInstanceBuffers);
+}
+
 class DrawPipelineSDL3_GPU final : public Pipeline {
 public:
     DrawPipelineSDL3_GPU(const PipelineBindings& pipelineBindings, String vertexShader, String fragmentShader)
@@ -363,9 +377,10 @@ public:
                 for(const auto& [t, cv] : rtCreateConfig._color_attachments)
                 {
                     const bool isIntegerTarget = t->parameters()->_format.contains(Texture::FORMAT_INTEGER);
+                    const bool noAlphaChannel = !t->parameters()->_format.has(Texture::FORMAT_RGBA);
                     colorTargetDescriptions[numColorTargets++] = {
                         t->delegate().cast<TextureSDL3_GPU>()->textureFormat(),
-                        isIntegerTarget ? SDL_GPUColorTargetBlendState{} : blendState
+                        isIntegerTarget || noAlphaChannel ? SDL_GPUColorTargetBlendState{} : blendState
                     };
                 }
                 if(rtCreateConfig._depth_stencil_attachment)
@@ -482,19 +497,16 @@ public:
             case enums::DRAW_PROCEDURE_DRAW_ELEMENTS:
                 SDL_DrawGPUIndexedPrimitives(renderPass, drawingContext._draw_count, 1, 0, 0, 0);
                 break;
+            case enums::DRAW_PROCEDURE_DRAW_INSTANCED: {
+                const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
+                bindInstanceBuffers(graphicsContext, renderPass, param._instance_buffer_snapshots);
+                SDL_DrawGPUIndexedPrimitives(renderPass, param._count, drawingContext._draw_count, 0, 0, param._start);
+                break;
+            }
             case enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT: {
                 const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
-                SDL_GPUBufferBinding instanceBuffers[8] = {};
-                uint32_t numInstanceBuffers = 0;
-                for(const auto& [i, j] : param._instance_buffer_snapshots)
-                {
-                    j.upload(graphicsContext);
-                    const auto buffer = reinterpret_cast<SDL_GPUBuffer*>(j.id());
-                    CHECK(buffer, "Invaild Instanced Array Buffer: %d", i);
-                    instanceBuffers[numInstanceBuffers ++] = {buffer, 0};
-                }
                 param._indirect_cmds.upload(graphicsContext);
-                SDL_BindGPUVertexBuffers(renderPass, 1, instanceBuffers, numInstanceBuffers);
+                bindInstanceBuffers(graphicsContext, renderPass, param._instance_buffer_snapshots);
                 SDL_DrawGPUIndexedPrimitivesIndirect(renderPass, reinterpret_cast<SDL_GPUBuffer*>(param._indirect_cmds.id()), 0, param._indirect_cmd_count);
                 break;
             }

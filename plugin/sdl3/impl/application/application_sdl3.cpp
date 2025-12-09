@@ -452,7 +452,7 @@ void ApplicationSDL3::pollEvents(uint32_t timestamp)
                 const V2 rawPosition(event.button.x, event.button.y);
                 const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
                 Event::ButtonInfo bi = {toViewportPosition(rawPosition), toFragCoordXY(rawPosition, rcs, _surface_size->heightAsFloat()), which};
-                Event e(event.type == SDL_EVENT_MOUSE_BUTTON_DOWN ? Event::ACTION_DOWN : Event::ACTION_UP, timestamp, bi);
+                const Event e(event.type == SDL_EVENT_MOUSE_BUTTON_DOWN ? Event::ACTION_DOWN : Event::ACTION_UP, timestamp, bi);
                 onEvent(e);
                 break;
             }
@@ -461,7 +461,7 @@ void ApplicationSDL3::pollEvents(uint32_t timestamp)
                 const V2 rawPosition(event.motion.x, event.motion.y);
                 const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
                 Event::MotionInfo mi = {toViewportPosition(rawPosition), toFragCoordXY(rawPosition, rcs, _surface_size->heightAsFloat()), which, event.motion.state};
-                Event e(Event::ACTION_MOVE, timestamp, mi);
+                const Event e(Event::ACTION_MOVE, timestamp, mi);
                 onEvent(e);
                 break;
             }
@@ -470,7 +470,7 @@ void ApplicationSDL3::pollEvents(uint32_t timestamp)
                 const V2 rawPosition(event.motion.x, event.motion.y);
                 const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
                 Event::MotionInfo mi = {rawPosition, rawPosition, which, event.motion.state};
-                Event e(Event::ACTION_WHEEL, timestamp, mi);
+                const Event e(Event::ACTION_WHEEL, timestamp, mi);
                 onEvent(e);
                 break;
             }

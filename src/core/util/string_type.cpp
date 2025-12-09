@@ -212,7 +212,7 @@ sp<StringVar> StringType::format(const String& format, const Scope& kwargs)
     Vector<sp<StringVar>> strList;
     format.search(VAR_PATTERN, [&strList, &kwargs] (const std::smatch& matched) {
         const String name = matched[1].str();
-        if(name.at(1) == '{') {
+        if(name.size() > 1 && name.at(1) == '{') {
             strList.push_back(sp<StringVar>::make<StringVarImpl>(name));
             return true;
         }

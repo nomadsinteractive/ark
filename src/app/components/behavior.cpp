@@ -2,6 +2,7 @@
 
 #include "core/ark.h"
 #include "core/inf/interpreter.h"
+#include "core/util/log.h"
 
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
