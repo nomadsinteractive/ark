@@ -211,13 +211,13 @@ sp<StringVar> StringType::format(const String& format, const Scope& kwargs)
     static std::regex VAR_PATTERN("\\{(\\w+)(\\:[^}]+)?\\}");
     Vector<sp<StringVar>> strList;
     format.search(VAR_PATTERN, [&strList, &kwargs] (const std::smatch& matched) {
-        const std::string name = matched[1].str();
+        const String name = matched[1].str();
         if(name.at(1) == '{') {
             strList.push_back(sp<StringVar>::make<StringVarImpl>(name));
             return true;
         }
 
-        const std::string m2 = matched[2].str();
+        const String m2 = matched[2].str();
         const Optional<Box> value = kwargs.getObject(name);
         CHECK(value, "Unable to get keyword name \"%s\"", name.c_str());
         sp<StringVar> formatted = toStringVar<StringView, float, int32_t>(value.value(), m2.c_str());

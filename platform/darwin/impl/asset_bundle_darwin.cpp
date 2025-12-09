@@ -1,5 +1,7 @@
 #include "platform/darwin/impl/asset_bundle_darwin.h"
 
+#include <filesystem>
+
 #include <CoreFoundation/CFBundle.h>
 #include <CoreFoundation/CFStream.h>
 
@@ -17,7 +19,7 @@ namespace {
 
 class BundleAsset final : public Asset {
 public:
-    BundleAsset(String location, CFURLRef url)
+    BundleAsset(String location, const CFURLRef url)
         : _location(std::move(location)), _url(url) {
     }
     ~BundleAsset() override {
@@ -25,7 +27,7 @@ public:
     }
 
     sp<Readable> open() override {
-        CFReadStreamRef stream = CFReadStreamCreateWithFile(nullptr, _url);
+        const CFReadStreamRef stream = CFReadStreamCreateWithFile(nullptr, _url);
         Vector<uint8_t> bytes;
         if(stream)
         {
@@ -39,13 +41,19 @@ public:
         }
 
         if(stream)
-            return sp<BytearrayReadable>::make(sp<ByteArray::Vector>::make(std::move(bytes)));
+            return sp<Readable>::make<BytearrayReadable>(sp<ByteArray>::make<ByteArray::Vector>(std::move(bytes)));
 
         return nullptr;
     }
 
-    String location() override {
+    String location() override
+    {
         return _location;
+    }
+
+    size_t size() override
+    {
+        return std::filesystem::file_size(_location.c_str());
     }
 
 private:
@@ -62,13 +70,13 @@ AssetBundleDarwin::AssetBundleDarwin(String directory)
 
 sp<Asset> AssetBundleDarwin::getAsset(const String& name)
 {
-    CFBundleRef bundle = CFBundleGetMainBundle();
-    CFStringRef cfDirectory = CFStringCreateWithCString(nullptr, _directory.c_str(), kCFStringEncodingUTF8);
-    CFStringRef cfName = CFStringCreateWithCString(nullptr, name.c_str(), kCFStringEncodingUTF8);
+    const CFBundleRef bundle = CFBundleGetMainBundle();
+    const CFStringRef cfDirectory = CFStringCreateWithCString(nullptr, _directory.c_str(), kCFStringEncodingUTF8);
+    const CFStringRef cfName = CFStringCreateWithCString(nullptr, name.c_str(), kCFStringEncodingUTF8);
     CFURLRef url = CFBundleCopyResourceURL(bundle, cfName, nullptr, cfDirectory);
     CFRelease(cfDirectory);
     CFRelease(cfName);
-    return url ? sp<Asset>::make<BundleAsset>(Platform::pathJoin(_directory, name), url) : nullptr;
+    return url ? sp<Asset>::make<BundleAsset>(Platform::pathJoin(_directory, name), url) : sp<Asset>();
 }
 
 sp<AssetBundle> AssetBundleDarwin::getBundle(const String& path)

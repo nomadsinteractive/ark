@@ -56,17 +56,12 @@ sp<AssetBundle> Platform::getAssetBundle(const String& path)
     return bundle;
 }
 
-String Platform::getDefaultFontDirectory()
-{
-    return "/Library/Fonts";
-}
-
 String Platform::getExecutablePath()
 {
     char pathbuf[PATH_MAX] = {0};
 #ifndef ARK_PLATFORM_IOS
     const pid_t pid = getpid();
-    int r = proc_pidpath (pid, pathbuf, sizeof(pathbuf));
+    const int32_t r = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
     DCHECK(r > 0, "proc_pidpath() failed. PID %d: %s", pid, strerror(errno));
 #endif
     return pathbuf;
@@ -77,7 +72,7 @@ String Platform::getRealPath(const String& path)
     if(isFile(path) || isDirectory(path))
     {
         char buf[PATH_MAX] = {0};
-        char* rp = realpath(path.c_str(), buf);
+        const char* rp = realpath(path.c_str(), buf);
         DCHECK(rp, "realpath failed for \"%s\", errno: %d", path.c_str(), errno);
         return rp;
     }
