@@ -614,6 +614,7 @@ public:
             }
 
         SDL_GPUComputePass* computePass = SDL_BeginGPUComputePass(sdl3GC._command_buffer, storageTextureBindings, numReadWriteStorageTextures, storageBufferBindings, numReadWriteStorageBuffers);
+        bindUBOSnapshots(sdl3GC._command_buffer, computeContext._buffer_snapshot->_ubos, computeContext._bindings->pipelineLayout(), {enums::SHADER_STAGE_BIT_COMPUTE});
         if(numReadOnlyStorageTextures > 0)
             SDL_BindGPUComputeStorageTextures(computePass, 0, readonlyStorageTextures, numReadOnlyStorageTextures);
         if(numReadOnlyStorageBuffers > 0)

@@ -8,9 +8,10 @@ def main():
     opts, paths = getopt.getopt(sys.argv[1:], 'o:')
     params = dict((i.lstrip('-'), j) for i, j in opts)
 
-    output_zip = params.get('o', 's01.ark')
+    output_zip = params.get('o', '')
     for i in paths:
-        with zipfile.ZipFile(output_zip, 'w', compression=zipfile.ZIP_DEFLATED) as zfp:
+        _, filename = os.path.split(i)
+        with zipfile.ZipFile(output_zip or f'{filename}.ark', 'w', compression=zipfile.ZIP_DEFLATED) as zfp:
             for root, _, files in os.walk(i, followlinks=True):
                 for j in files:
                     file_path = os.path.join(root, j)
