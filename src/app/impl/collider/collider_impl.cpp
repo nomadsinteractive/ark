@@ -99,6 +99,16 @@ public:
     {
     }
 
+    V3 position() const override
+    {
+        return _rigidbody_stub->_position.val();
+    }
+
+    void setPosition(const V3& position) override
+    {
+        _rigidbody_stub->_position.reset(position);
+    }
+
     V3 centralForce() const override
     {
         FATAL("Unimplemented");

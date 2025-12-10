@@ -65,8 +65,8 @@ sp<Imgui> Imgui::BUILDER::build(const Scope& args)
             const sp<Asset> asset = Ark::instance().getAsset(src);
             DCHECK(asset, "Font \"%s\" not found", src.c_str());
             const sp<Readable> readable = asset->open();
-            const int32_t datasize = readable->remaining();
-            void* data = malloc(static_cast<size_t>(datasize));
+            const size_t datasize = asset->size();
+            void* data = malloc(datasize);
             readable->read(data, static_cast<uint32_t>(datasize));
             strncpy(fontConfig.Name, src.c_str(), sizeof(fontConfig.Name));
             io.Fonts->AddFontFromMemoryTTF(data, datasize, fontConfig.SizePixels, &fontConfig);

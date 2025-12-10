@@ -43,6 +43,9 @@ public:
     float angle();
     void setAngle(float rad);
 
+    V3 position() const override;
+    void setPosition(const V3& position) override;
+
     V3 centralForce() const override;
     void setCentralForce(const V3& force) override;
 

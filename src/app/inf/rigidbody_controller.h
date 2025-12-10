@@ -17,6 +17,11 @@ public:
     virtual void setActive(bool active) = 0;
 
 //  [[script::bindings::property]]
+    virtual V3 position() const = 0;
+//  [[script::bindings::property]]
+    virtual void setPosition(const V3& position) = 0;
+
+//  [[script::bindings::property]]
     virtual V3 centralForce() const = 0;
 //  [[script::bindings::property]]
     virtual void setCentralForce(const V3& force) = 0;

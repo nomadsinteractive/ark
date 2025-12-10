@@ -25,6 +25,9 @@ public:
     bool active() const override;
     void setActive(bool active) override;
 
+    V3 position() const override;
+    void setPosition(const V3& position) override;
+
     V3 centralForce() const override;
     void setCentralForce(const V3& force) override;
 

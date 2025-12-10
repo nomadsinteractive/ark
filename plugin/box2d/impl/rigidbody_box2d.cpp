@@ -191,6 +191,16 @@ void RigidbodyBox2D::setAngle(float rad)
     FATAL("Unimplemented");
 }
 
+V3 RigidbodyBox2D::position() const
+{
+    return _rigidbody_stub->_position.val();
+}
+
+void RigidbodyBox2D::setPosition(const V3& position)
+{
+    FATAL("Unimplemented");
+}
+
 V3 RigidbodyBox2D::centralForce() const
 {
     return V3(0);

@@ -92,6 +92,19 @@ void RigidbodyBullet::setActive(const bool active)
         _stub->_collision_object_ref->rigidBody()->setActivationState(WANTS_DEACTIVATION);
 }
 
+V3 RigidbodyBullet::position() const
+{
+    const btTransform& transform = _stub->_collision_object_ref->rigidBody()->getWorldTransform();
+    const btVector3& origin = transform.getOrigin();
+    return {origin.x(), origin.y(), origin.z()};
+}
+
+void RigidbodyBullet::setPosition(const V3& position)
+{
+    btTransform& transform = _stub->_collision_object_ref->rigidBody()->getWorldTransform();
+    transform.setOrigin(btVector3(position.x(), position.y(), position.z()));
+}
+
 V3 RigidbodyBullet::centralForce() const
 {
     const btVector3& force = _stub->_collision_object_ref->rigidBody()->getTotalForce();

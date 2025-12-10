@@ -1,4 +1,4 @@
-#include "app/impl/renderer/fps_counter.h"
+#include "app/impl/string_var/fps_counter.h"
 
 #include "core/ark.h"
 #include "core/inf/variable.h"

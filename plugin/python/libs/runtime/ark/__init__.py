@@ -2835,6 +2835,14 @@ class RigidbodyController:
         pass
 
     @property
+    def position(self) -> TYPE_FLOAT3:
+        return 0, 0, 0
+
+    @position.setter
+    def position(self, position: TYPE_FLOAT3):
+        pass
+
+    @property
     def linear_velocity(self) -> TYPE_FLOAT3:
         return 0, 0, 0
 
