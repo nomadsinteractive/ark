@@ -76,7 +76,7 @@ public:
     void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 
 //  [[script::bindings::auto]]
-    void exit();
+    void quit() const;
 
 //  [[script::bindings::auto]]
     sp<Future> post(sp<Runnable> task, float delay, sp<Boolean> canceled = nullptr) const;

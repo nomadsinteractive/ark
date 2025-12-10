@@ -52,6 +52,7 @@ public:
     uint32_t onTick();
 
     const sp<Vec2Impl>& cursorPosition() const;
+    sp<Boolean> quitting() const;
 
     bool onEvent(const Event& event);
 
@@ -120,6 +121,7 @@ private:
     sp<Variable<uint64_t>> _steady_clock;
     sp<Vec2Impl> _cursor_position;
     sp<Vec2Impl> _cursor_frag_coord;
+    sp<Boolean::Impl> _quitting;
 
     sp<ApplicationBundle> _application_bundle;
     sp<ApplicationFacade> _application_facade;
@@ -150,6 +152,7 @@ private:
     friend class Ark;
     friend class Application;
     friend class ApplicationDelegate;
+    friend class ApplicationFacade;
 };
 
 }

@@ -19,7 +19,7 @@ class AudioPlayerFMOD : public AudioPlayer {
 public:
     AudioPlayerFMOD(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<Future> play(const sp<Readable>& source, AudioFormat format, PlayOption options) override;
+    virtual sp<Future> play(const sp<Readable>& source, AudioFormat format, PlayOptionBits options) override;
     virtual bool isAudioFormatSupported(AudioFormat format) override;
 
 //  [[plugin::resource-loader("fmod")]]

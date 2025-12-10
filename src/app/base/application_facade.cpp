@@ -262,9 +262,9 @@ void ApplicationFacade::pushEventListener(sp<EventListener> eventListener, sp<Bo
     _context->pushEventListener(std::move(eventListener), std::move(discarded));
 }
 
-void ApplicationFacade::exit()
+void ApplicationFacade::quit() const
 {
-    _controller->exit();
+    _context->_quitting->set(true);
 }
 
 sp<Future> ApplicationFacade::post(sp<Runnable> task, const float delay, sp<Boolean> canceled) const

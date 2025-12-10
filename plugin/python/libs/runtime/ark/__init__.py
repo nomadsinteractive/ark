@@ -785,7 +785,7 @@ class ApplicationFacade:
     def get_string_array(self, resid: str) -> list[str]:
         pass
 
-    def exit(self):
+    def quit(self):
         pass
 
     def post(self, task: Optional[Callable], delay: float | list[float], canceled: Optional["Boolean"] = None) -> Future:
@@ -828,9 +828,6 @@ class ApplicationController:
     def set_mouse_capture(self, enabled: bool):
         pass
 
-    def exit(self):
-        pass
-
 
 class AtlasImporter:
     pass
@@ -866,11 +863,10 @@ class BroadPhrase:
 
 
 class AudioPlayer:
-    PLAY_OPTION_DEFAULT = -1
-    PLAY_OPTION_LOOP_OFF = 0
-    PLAY_OPTION_LOOP_ON = 1
+    PLAY_OPTION_NONE = 0
+    PLAY_OPTION_LOOP = 1
 
-    def play(self, source: Union[str, Readable], options: int = PLAY_OPTION_DEFAULT):
+    def play(self, source: Union[str, Readable], options: int = PLAY_OPTION_NONE) -> Future:
         pass
 
 

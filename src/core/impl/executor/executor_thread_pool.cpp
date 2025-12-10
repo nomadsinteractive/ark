@@ -125,7 +125,7 @@ sp<ExecutorWorkerThread> ExecutorThreadPool::createWorkerThread()
     return workerThread;
 }
 
-ExecutorThreadPool::Stub::Stub(sp<Executor> exceptionExecutor, uint32_t capacity)
+ExecutorThreadPool::Stub::Stub(sp<Executor> exceptionExecutor, const uint32_t capacity)
     : _exception_executor(std::move(exceptionExecutor)), _capacity(capacity), _worker_count(0)
 {
 }

@@ -10,7 +10,7 @@ namespace ark {
 
 namespace  {
 
-class LoopReadable : public Readable {
+class LoopReadable final : public Readable {
 public:
     LoopReadable(const sp<Readable>& delegate)
         : _delegate(delegate) {
@@ -63,11 +63,11 @@ AudioMixer::AudioMixer(uint32_t bufferLength)
     ensureToneMapRange(TONE_MAP_WEIGHT_ONE);
 }
 
-uint32_t AudioMixer::read(void* buffer, uint32_t size)
+uint32_t AudioMixer::read(void* buffer, const uint32_t size)
 {
     bool eof = false;
-    size_t readSize = 0;
-    int16_t* out = reinterpret_cast<int16_t*>(buffer);
+    size_t sizeRead = 0;
+    int16_t* out = static_cast<int16_t*>(buffer);
     int16_t* buf = _buffer->buf();
     int32_t* bufHdr = _buffer_hdr->buf();
     memset(bufHdr, 0, _buffer_hdr->size());
@@ -75,22 +75,21 @@ uint32_t AudioMixer::read(void* buffer, uint32_t size)
     DCHECK(_buffer->length() >= (size / 2), "Out of buffer, length: %d, available: %d", size / 2, _buffer->length());
     for(const sp<Track>& i : _tracks)
     {
-        size_t s = i->read(buf, bufHdr, size);
-        if(s > readSize)
-            readSize = s;
-        eof = eof || i->future()->isDone();
+        if(const size_t s = i->read(buf, bufHdr, size); s > sizeRead)
+            sizeRead = s;
+        eof = eof || i->future()->isDone()->val();
     }
 
     uint32_t maxValue = 0;
-    for(size_t i = 0; i < readSize / 2; ++i)
+    for(size_t i = 0; i < sizeRead / 2; ++i)
     {
-        uint32_t absValue = static_cast<uint32_t>(std::abs(bufHdr[i]));
+        const uint32_t absValue = static_cast<uint32_t>(std::abs(bufHdr[i]));
         if(absValue > maxValue)
         {
             maxValue = absValue;
             ensureToneMapRange(maxValue);
         }
-        int16_t ldrValue = _tone_map.at(absValue);
+        const int16_t ldrValue = _tone_map.at(absValue);
         out[i] = bufHdr[i] > 0 ? ldrValue : -ldrValue;
     }
 
@@ -100,30 +99,31 @@ uint32_t AudioMixer::read(void* buffer, uint32_t size)
             if(!i->future()->isDone())
                 _tracks.push(i);
     }
-    return readSize;
+
+    if(sizeRead < size)
+        memset(static_cast<int8_t*>(buffer) + sizeRead, 0, size - sizeRead);
+
+    return size;
 }
 
-int32_t AudioMixer::seek(int32_t /*position*/, int32_t /*whence*/)
+int32_t AudioMixer::seek(const int32_t position, const int32_t whence)
 {
-    DFATAL("Unimplemented");
     return 0;
 }
 
 int32_t AudioMixer::remaining()
 {
-    DFATAL("Unimplemented");
     return 0;
 }
 
 uint32_t AudioMixer::position()
 {
-    DFATAL("Unimplemented");
     return 0;
 }
 
-sp<Future> AudioMixer::addTrack(const sp<Readable>& readable, AudioPlayer::PlayOption option)
+sp<Future> AudioMixer::addTrack(const sp<Readable>& readable, const AudioPlayer::PlayOption option)
 {
-    const sp<Track> source = sp<Track>::make(option == AudioPlayer::PLAY_OPTION_LOOP_ON ? sp<LoopReadable>::make(readable).cast<Readable>() : readable);
+    const sp<Track> source = sp<Track>::make(option.has(AudioPlayer::PLAY_OPTION_LOOP) ? sp<Readable>::make<LoopReadable>(readable) : readable);
     _tracks.push(source);
     return source->future();
 }
@@ -133,14 +133,13 @@ bool AudioMixer::empty() const
     return _tracks.empty();
 }
 
-void AudioMixer::ensureToneMapRange(uint32_t value)
+void AudioMixer::ensureToneMapRange(const uint32_t value)
 {
-    size_t size = _tone_map.size();
-    if(value >= size)
+    if(const size_t size = _tone_map.size(); value >= size)
     {
         uint32_t remainder;
-        uint32_t divmod = Math::divmod(value, TONE_MAP_WEIGHT_ONE, remainder);
-        uint32_t newSize = (divmod + 1) * TONE_MAP_WEIGHT_ONE /*+ (remainder ? TONE_MAP_WEIGHT_ONE : 0)*/;
+        const uint32_t divmod = Math::divmod(value, TONE_MAP_WEIGHT_ONE, remainder);
+        const uint32_t newSize = (divmod + 1) * TONE_MAP_WEIGHT_ONE /*+ (remainder ? TONE_MAP_WEIGHT_ONE : 0)*/;
         _tone_map.resize(newSize);
 
         for(size_t i = size; i < _tone_map.size(); ++i)
@@ -153,12 +152,12 @@ AudioMixer::Track::Track(const sp<Readable>& readable)
 {
 }
 
-size_t AudioMixer::Track::read(int16_t* in, int32_t* out, size_t size) const
+size_t AudioMixer::Track::read(int16_t* in, int32_t* out, const size_t size) const
 {
-    size_t readSize = _readable->read(in, size);
-    if(readSize > 0 && !_future->isCanceled())
+    const size_t readSize = _readable->read(in, size);
+    if(readSize > 0 && !_future->isCanceled()->val())
     {
-        size_t len = readSize / 2;
+        const size_t len = readSize / 2;
         for(size_t i = 0; i < len; i++)
             out[i] += in[i];
     }

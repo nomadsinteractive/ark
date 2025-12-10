@@ -1,18 +1,18 @@
 #pragma once
 
-#include "core/base/api.h"
 #include "core/forwarding.h"
+#include "core/base/api.h"
+#include "core/base/bit_set.h"
 
 namespace ark {
 
 class ARK_API AudioPlayer {
 public:
 //  [[script::bindings::enumeration]]
-    enum PlayOption {
-        PLAY_OPTION_DEFAULT = -1,
-        PLAY_OPTION_LOOP_OFF = 0,
-        PLAY_OPTION_LOOP_ON = 1
+    enum PlayOptionBits {
+        PLAY_OPTION_LOOP = 1
     };
+    typedef BitSet<PlayOptionBits, true> PlayOption;
 
     enum AudioFormat {
         AUDIO_FORMAT_AUTO,
@@ -26,12 +26,8 @@ public:
     virtual sp<Future> play(const sp<Readable>& source, AudioFormat format, PlayOption options) = 0;
     virtual bool isAudioFormatSupported(AudioFormat format) = 0;
 
-public:
 //  [[script::bindings::classmethod]]
-    static sp<Future> play(const sp<AudioPlayer>& self, const String& src, AudioPlayer::PlayOption options = AudioPlayer::PLAY_OPTION_DEFAULT);
-
-private:
-
+    static sp<Future> play(const sp<AudioPlayer>& self, const String& src, AudioPlayer::PlayOption options = {});
 };
 
 }

@@ -39,9 +39,6 @@ public:
 
 //  [[script::bindings::auto]]
     virtual void setMouseCapture(bool enabled) = 0;
-
-//  [[script::bindings::auto]]
-    virtual void exit() = 0;
 };
 
 }

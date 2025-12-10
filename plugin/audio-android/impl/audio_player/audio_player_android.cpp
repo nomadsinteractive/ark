@@ -12,9 +12,7 @@
 
 constexpr int32_t kBufferSizeAutomatic = 0;
 
-namespace ark {
-namespace plugin {
-namespace audio_android {
+namespace ark::plugin::audio_android {
 
 namespace {
 
@@ -24,7 +22,7 @@ public:
         : _future(future), _stream(stream), _play_option(playOption) {
     }
 
-    virtual void run() override {
+    void run() override {
         oboe::AudioStream* audioStream = createPlaybackStream();
         if(audioStream) {
             oboe::StreamState inputState = audioStream->getState();
@@ -46,7 +44,7 @@ public:
         }
     }
 
-    virtual oboe::DataCallbackResult onAudioReady(oboe::AudioStream* audioStream, void* audioData, int32_t numFrames) override {
+    oboe::DataCallbackResult onAudioReady(oboe::AudioStream* audioStream, void* audioData, const int32_t numFrames) override {
         int32_t bufferSize = audioStream->getBufferSizeInFrames();
 
         if (_buffer_size_selection == kBufferSizeAutomatic) {
@@ -59,11 +57,11 @@ public:
         DASSERT(audioStream->getChannelCount() == _sample_channels);
         DASSERT(audioStream->getFormat() == oboe::AudioFormat::I16);
 
-        uint32_t sizeToRead = static_cast<uint32_t>(sizeof(int16_t) * _sample_channels * numFrames);
+        const uint32_t sizeToRead = static_cast<uint32_t>(sizeof(int16_t) * _sample_channels * numFrames);
         if (!_future->isCancelled()) {
             uint32_t readlen = _stream->read(audioData, sizeToRead);
             if(readlen == 0) {
-                if(_play_option == AudioPlayer::PLAY_OPTION_LOOP_ON) {
+                if(_play_option.has(AudioPlayer::PLAY_OPTION_LOOP)) {
                     _stream->seek(SEEK_SET, 0);
                     readlen = _stream->read(audioData, sizeToRead);
                 }
@@ -78,7 +76,7 @@ public:
         return shouldContinue() ? oboe::DataCallbackResult::Continue : oboe::DataCallbackResult::Stop;
     }
 
-    virtual void onErrorAfterClose(oboe::AudioStream* audioStream, oboe::Result error) override {
+    void onErrorAfterClose(oboe::AudioStream* audioStream, oboe::Result error) override {
         LOGE(oboe::convertToText(error));
     }
 

@@ -38,8 +38,6 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
-bool gQuit = false;
-
 Event::Code sdlScanCodeToEventCode(const SDL_Scancode sc)
 {
     if(Math::between<SDL_Scancode>(SDL_SCANCODE_A, SDL_SCANCODE_Z, sc))
@@ -266,10 +264,6 @@ public:
 #endif
     }
 
-    void exit() override {
-        gQuit = true;
-    }
-
 private:
     sp<ApplicationContext> _application_context;
 };
@@ -303,6 +297,7 @@ int ApplicationSDL3::run()
 {
     /* Create our opengl context and attach it to our window */
     const SDL_GLContext maincontext = _use_open_gl ? SDL_GL_CreateContext(_main_window) : nullptr;
+    Boolean& quitting = _application_context->quitting();
 
     /* This makes our buffer swap syncronized with the monitor's vertical refresh */
     if(_use_open_gl)
@@ -312,7 +307,7 @@ int ApplicationSDL3::run()
     onSurfaceCreated();
     _application_context->updateState();
 
-    while(!gQuit)
+    while(!quitting.val())
     {
         if(_application_context->isPaused())
         {
@@ -444,7 +439,7 @@ void ApplicationSDL3::pollEvents(uint32_t timestamp)
         switch(event.type)
         {
         case SDL_EVENT_QUIT:
-            gQuit = true;
+            _application_context->applicationFacade()->quit();
             break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
         case SDL_EVENT_MOUSE_BUTTON_UP:

@@ -30,9 +30,7 @@ private:
 
         const sp<Future>& future() const;
 
-    private:
         sp<Readable> _readable;
-
         sp<Future> _future;
     };
 
@@ -45,7 +43,7 @@ private:
     array<int16_t> _buffer;
     array<int32_t> _buffer_hdr;
 
-    static const uint32_t TONE_MAP_WEIGHT_ONE = 32768;
+    static constexpr uint32_t TONE_MAP_WEIGHT_ONE = 32768;
     std::vector<int16_t> _tone_map;
 };
 

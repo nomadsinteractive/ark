@@ -8,7 +8,7 @@
 
 namespace ark {
 
-sp<Future> AudioPlayer::play(const sp<AudioPlayer>& self, const String& src, PlayOption options)
+sp<Future> AudioPlayer::play(const sp<AudioPlayer>& self, const String& src, const PlayOption options)
 {
     BeanFactory& beanFactory = Ark::instance().applicationContext()->resourceLoader()->beanFactory();
     if(self->isAudioFormatSupported(AUDIO_FORMAT_AUTO))
