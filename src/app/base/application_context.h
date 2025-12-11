@@ -74,7 +74,7 @@ public:
     Optional<String> getString(const String& resid, bool alert);
     Vector<String> getStringArray(const String& resid);
 
-    sp<Runnable> defer(const sp<Runnable>& task) const;
+    sp<Runnable> toCoreRunnable(const sp<Runnable>& task) const;
 
     V4 backgroundColor() const;
     void setBackgroundColor(V4 backgroundColor);

@@ -70,7 +70,7 @@ public:
     {
         if(sp<Asset> asset = _root->getAsset(filepath))
         {
-            LOGD("filepath(%s) ==> asset<%p>", filepath.c_str(), asset.get());
+            LOGD("asset(%s) ==> location<%s>", filepath.c_str(), asset->location().c_str());
             return asset;
         }
         return nullptr;

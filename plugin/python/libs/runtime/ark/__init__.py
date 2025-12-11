@@ -541,6 +541,14 @@ class Future(Runnable):
     def is_done_or_canceled(self) -> Boolean:
         pass
 
+    @property
+    def observer(self) -> Optional[Runnable]:
+        pass
+
+    @observer.setter
+    def observer(self, observer: TYPE_RUNNABLE):
+        pass
+
     def cancel(self):
         pass
 
@@ -753,6 +761,9 @@ class ApplicationFacade:
         pass
 
     def to_frag_coord(self, xy: "Vec2", resolution: Optional["Size"] = None) -> "Vec2":
+        pass
+
+    def to_core_runnable(self, runnable: TYPE_RUNNABLE) -> Runnable:
         pass
 
     def add_string_bundle(self, name: str, string_bundle: 'StringBundle'):

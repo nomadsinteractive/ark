@@ -93,7 +93,7 @@ public:
     Vector<String> getStringArray(const String& resid) const;
 
 //  [[script::bindings::auto]]
-    sp<Runnable> defer(const sp<Runnable>& task) const;
+    sp<Runnable> toCoreRunnable(const sp<Runnable>& task) const;
 
 //  [[script::bindings::property]]
     V4 backgroundColor() const;

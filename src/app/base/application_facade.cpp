@@ -303,9 +303,9 @@ Vector<String> ApplicationFacade::getStringArray(const String& resid) const
     return _context->getStringArray(resid);
 }
 
-sp<Runnable> ApplicationFacade::defer(const sp<Runnable>& task) const
+sp<Runnable> ApplicationFacade::toCoreRunnable(const sp<Runnable>& task) const
 {
-    return _context->defer(task);
+    return _context->toCoreRunnable(task);
 }
 
 V4 ApplicationFacade::backgroundColor() const

@@ -35,9 +35,9 @@ namespace ark {
 
 namespace {
 
-class DeferedRunnable final : public Runnable {
+class RunnableRedirect final : public Runnable {
 public:
-    DeferedRunnable(const sp<Executor>& messageLoop, sp<Runnable> runnable)
+    RunnableRedirect(const sp<Executor>& messageLoop, sp<Runnable> runnable)
         : _executor(messageLoop), _runnable(std::move(runnable)) {
     }
 
@@ -401,9 +401,9 @@ Vector<String> ApplicationContext::getStringArray(const String& resid)
     return _string_table->getStringArray(id.package(), id.ref(), true);
 }
 
-sp<Runnable> ApplicationContext::defer(const sp<Runnable>& task) const
+sp<Runnable> ApplicationContext::toCoreRunnable(const sp<Runnable>& task) const
 {
-    return sp<Runnable>::make<DeferedRunnable>(_core_executor, task);
+    return sp<Runnable>::make<RunnableRedirect>(_core_executor, task);
 }
 
 V4 ApplicationContext::backgroundColor() const

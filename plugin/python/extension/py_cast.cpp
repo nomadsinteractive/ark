@@ -131,10 +131,13 @@ String unicodeToUTF8String(PyObject* object, const char* encoding, const char* e
 
 Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object)
 {
+    if(Optional<sp<Runnable>> optRunnable = toSharedPtrDefault<Runnable>(object))
+        return std::move(optRunnable.value());
+
     if(PyCallable_Check(object))
         return sp<Runnable>::make<RunnablePython>(PyInstance::own(object));
 
-    return toSharedPtrDefault<Runnable>(object);
+    return {};
 }
 
 Optional<String> PyCast::toStringExact(PyObject* object, const char* encoding, const char* error)
