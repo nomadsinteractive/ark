@@ -265,7 +265,7 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
                 Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(ib);
                 DrawingContext drawingContext(drawCommandPool->_pipeline_bindings, bo, std::move(vertexBuffer), std::move(indexBuffer), pcmd->ElemCount, DrawingParams::DrawElements{offset}, drawCommand->_attachments);
                 drawingContext._scissor = _render_engine->toRendererRect(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), enums::COORDINATE_SYSTEM_LHS);
-                renderRequest.addRenderCommand(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(renderRequest), std::move(recycler)));
+                renderRequest.addRenderCommand(sp<RenderCommand>::make<ImguiRenderCommand>(drawingContext.toRenderCommand(renderRequest), std::move(recycler)));
             }
             offset += pcmd->ElemCount;
         }

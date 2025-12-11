@@ -390,6 +390,10 @@ def get_mark_studio() -> Optional[MarkStudio]:
     return _mark_studio
 
 
+def make_widget_builder() -> dear_imgui.WidgetBuilder:
+    return dear_imgui.WidgetBuilder(_mark_studio.imgui)
+
+
 def close_mark_studio():
     if _mark_studio and not _mark_studio.discarded:
         _mark_studio.close()

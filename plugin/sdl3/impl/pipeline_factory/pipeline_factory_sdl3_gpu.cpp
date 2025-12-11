@@ -122,11 +122,16 @@ SDL_GPUVertexElementFormat toVertexElementFormat(const Attribute& attribute)
                 return formats[length - 1];
             }
             case Attribute::TYPE_BYTE:
+                if(length == 2)
+                    return attribute.normalized() ? SDL_GPU_VERTEXELEMENTFORMAT_BYTE2_NORM : SDL_GPU_VERTEXELEMENTFORMAT_BYTE2;
+                if(length == 4)
+                    return attribute.normalized() ? SDL_GPU_VERTEXELEMENTFORMAT_BYTE4_NORM : SDL_GPU_VERTEXELEMENTFORMAT_BYTE4;
+                break;
             case Attribute::TYPE_UBYTE:
                 if(length == 2)
-                    return attribute.normalized()?  SDL_GPU_VERTEXELEMENTFORMAT_BYTE2_NORM : SDL_GPU_VERTEXELEMENTFORMAT_BYTE2;
+                    return attribute.normalized() ? SDL_GPU_VERTEXELEMENTFORMAT_UBYTE2_NORM : SDL_GPU_VERTEXELEMENTFORMAT_UBYTE2;
                 if(length == 4)
-                    return attribute.normalized()?  SDL_GPU_VERTEXELEMENTFORMAT_BYTE4_NORM : SDL_GPU_VERTEXELEMENTFORMAT_BYTE4;
+                    return attribute.normalized() ? SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM : SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4;
                 break;
             case Attribute::TYPE_INT:
             {
@@ -494,9 +499,11 @@ public:
 
         switch(_draw_procedure)
         {
-            case enums::DRAW_PROCEDURE_DRAW_ELEMENTS:
-                SDL_DrawGPUIndexedPrimitives(renderPass, drawingContext._draw_count, 1, 0, 0, 0);
+            case enums::DRAW_PROCEDURE_DRAW_ELEMENTS: {
+                const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
+                SDL_DrawGPUIndexedPrimitives(renderPass, drawingContext._draw_count, 1, param._start, 0, 0);
                 break;
+            }
             case enums::DRAW_PROCEDURE_DRAW_INSTANCED: {
                 const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
                 bindInstanceBuffers(graphicsContext, renderPass, param._instance_buffer_snapshots);
