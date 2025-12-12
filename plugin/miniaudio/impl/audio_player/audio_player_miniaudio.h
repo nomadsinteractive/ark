@@ -15,7 +15,7 @@ class AudioPlayerMiniAudio final : public AudioPlayer {
 public:
     AudioPlayerMiniAudio();
 
-    sp<Future> play(const sp<Readable>& source, AudioFormat format, PlayOption options) override;
+    sp<Future> play(sp<Readable> source, sp<Future> future, AudioFormat format, PlayOption options) override;
     bool isAudioFormatSupported(AudioFormat format) override;
 
 //  [[plugin::builder("miniaudio")]]

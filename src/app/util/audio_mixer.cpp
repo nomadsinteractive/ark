@@ -10,6 +10,8 @@ namespace ark {
 
 namespace  {
 
+constexpr uint32_t TONE_MAP_WEIGHT_ONE = 32768;
+
 class LoopReadable final : public Readable {
 public:
     LoopReadable(const sp<Readable>& delegate)
@@ -121,9 +123,9 @@ uint32_t AudioMixer::position()
     return 0;
 }
 
-sp<Future> AudioMixer::addTrack(const sp<Readable>& readable, const AudioPlayer::PlayOption option)
+sp<Future> AudioMixer::addTrack(sp<Readable> readable, sp<Future> future, const AudioPlayer::PlayOption option)
 {
-    const sp<Track> source = sp<Track>::make(option.has(AudioPlayer::PLAY_OPTION_LOOP) ? sp<Readable>::make<LoopReadable>(readable) : readable);
+    const sp<Track> source = sp<Track>::make(option.has(AudioPlayer::PLAY_OPTION_LOOP) ? sp<Readable>::make<LoopReadable>(readable) : readable, std::move(future));
     _tracks.push(source);
     return source->future();
 }
@@ -147,8 +149,8 @@ void AudioMixer::ensureToneMapRange(const uint32_t value)
     }
 }
 
-AudioMixer::Track::Track(const sp<Readable>& readable)
-    : _readable(readable), _future(sp<Future>::make())
+AudioMixer::Track::Track(sp<Readable> readable, sp<Future> future)
+    : _readable(std::move(readable)), _future(future ? std::move(future) : sp<Future>::make())
 {
 }
 

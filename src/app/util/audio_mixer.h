@@ -18,13 +18,13 @@ public:
     int32_t remaining() override;
     uint32_t position() override;
 
-    sp<Future> addTrack(const sp<Readable>& readable, AudioPlayer::PlayOption option);
+    sp<Future> addTrack(sp<Readable> readable, sp<Future> future, AudioPlayer::PlayOption option);
     bool empty() const;
 
 private:
     class Track {
     public:
-        Track(const sp<Readable>& readable);
+        Track(sp<Readable> readable, sp<Future> future);
 
         size_t read(int16_t* in, int32_t *out, size_t size) const;
 
@@ -43,8 +43,7 @@ private:
     array<int16_t> _buffer;
     array<int32_t> _buffer_hdr;
 
-    static constexpr uint32_t TONE_MAP_WEIGHT_ONE = 32768;
-    std::vector<int16_t> _tone_map;
+    Vector<int16_t> _tone_map;
 };
 
 }

@@ -119,8 +119,8 @@ public:
     U_FList<sp<MessageLoop>> _message_loops;
 };
 
-ApplicationContext::AppClock::AppClock(sp<Numeric> timeScale)
-    : _steady(Platform::getSteadyClock()), _time_scale(std::move(timeScale), 1.0f), _time_ns(sp<Variable<uint64_t>::Impl>::make(0)), _interval(sp<Numeric::Impl>::make(0)), _clock(sp<Clock>::make(_time_ns)), _timestamp(_steady->val()), _tick(0)
+ApplicationContext::AppClock::AppClock()
+    : _steady(Platform::getSteadyClock()), _time_scale(nullptr, 1.0f), _time_ns(sp<Variable<uint64_t>::Impl>::make(0)), _interval(sp<Numeric::Impl>::make(0)), _clock(sp<Clock>::make(_time_ns)), _timestamp(_steady->val()), _tick(0)
 {
 }
 
@@ -284,7 +284,9 @@ const sp<Clock>& ApplicationContext::appClock() const
 
 void ApplicationContext::pushAppClock(sp<Numeric> timeScale)
 {
-    _app_clocks.emplace_back(std::move(timeScale));
+    if(!_app_clocks.empty())
+        _app_clocks.back()._time_scale.reset(std::move(timeScale));
+    _app_clocks.emplace_back();
     _message_loops.push_back(makeMessageLoop(_app_clocks.back()._clock));
 }
 

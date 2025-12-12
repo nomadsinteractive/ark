@@ -877,7 +877,7 @@ class AudioPlayer:
     PLAY_OPTION_NONE = 0
     PLAY_OPTION_LOOP = 1
 
-    def play(self, source: Union[str, Readable], options: int = PLAY_OPTION_NONE) -> Future:
+    def play(self, source: Union[str, Readable], future: Optional[Future] = None, options: int = PLAY_OPTION_NONE) -> Future:
         pass
 
 

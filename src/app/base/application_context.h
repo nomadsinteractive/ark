@@ -98,7 +98,7 @@ private:
     document createResourceLoaderManifest(const document& manifest) const;
 
     struct AppClock {
-        AppClock(sp<Numeric> timeScale);
+        AppClock();
 
         sp<Variable<uint64_t>> _steady;
         OptionalVar<Numeric> _time_scale;

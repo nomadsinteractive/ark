@@ -3,6 +3,7 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bit_set.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 
@@ -23,11 +24,11 @@ public:
 
     virtual ~AudioPlayer() = default;
 
-    virtual sp<Future> play(const sp<Readable>& source, AudioFormat format, PlayOption options) = 0;
+    virtual sp<Future> play(sp<Readable> source, sp<Future> future, AudioFormat format, PlayOption options) = 0;
     virtual bool isAudioFormatSupported(AudioFormat format) = 0;
 
 //  [[script::bindings::classmethod]]
-    static sp<Future> play(const sp<AudioPlayer>& self, const String& src, AudioPlayer::PlayOption options = {});
+    static sp<Future> play(const sp<AudioPlayer>& self, const String& src, sp<Future> future = nullptr, AudioPlayer::PlayOption options = {});
 };
 
 }

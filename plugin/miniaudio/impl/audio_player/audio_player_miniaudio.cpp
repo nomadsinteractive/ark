@@ -72,7 +72,7 @@ AudioPlayerMiniAudio::AudioPlayerMiniAudio()
 {
 }
 
-sp<Future> AudioPlayerMiniAudio::play(const sp<Readable>& source, const AudioFormat format, const PlayOption options)
+sp<Future> AudioPlayerMiniAudio::play(sp<Readable> source, sp<Future> future, const AudioFormat format, const PlayOption options)
 {
     ASSERT(format == AudioPlayer::AUDIO_FORMAT_PCM);
 
@@ -84,15 +84,15 @@ sp<Future> AudioPlayerMiniAudio::play(const sp<Readable>& source, const AudioFor
         _device = device;
     }
 
-    const sp<Future> future = device->_audio_mixer->addTrack(source, options);
+    sp<Future> ret = device->_audio_mixer->addTrack(std::move(source), std::move(future), options);
 
     if(newRequest)
         _executor->execute(device);
 
-    return future;
+    return ret;
 }
 
-bool AudioPlayerMiniAudio::isAudioFormatSupported(AudioPlayer::AudioFormat format)
+bool AudioPlayerMiniAudio::isAudioFormatSupported(const AudioPlayer::AudioFormat format)
 {
     return format == AUDIO_FORMAT_PCM;
 }
