@@ -30,7 +30,7 @@ const OptionalVar<Vec3>& Transform::scale() const
 
 const OptionalVar<Vec3>& Transform::translation() const
 {
-    return _stub->_translation;
+    return _stub->_pivot;
 }
 
 void Transform::onPoll(WiringContext& context)
@@ -51,7 +51,7 @@ void Transform::onWire(const WiringContext& context, const Box& self)
 
 bool Transform::Stub::update(const uint32_t timestamp) const
 {
-    return UpdatableUtil::update(timestamp, _translation, _rotation, _scale, _timestamp);
+    return UpdatableUtil::update(timestamp, _pivot, _rotation, _scale, _timestamp);
 }
 
 }

@@ -19,7 +19,7 @@ bool TransformTRS3D::update(uint32_t tick)
 Transform::Snapshot TransformTRS3D::snapshot()
 {
     const V4 quat = _stub->_rotation.val();
-    return {MatrixUtil::translate(MatrixUtil::scale(MatrixUtil::rotate({}, quat), _stub->_scale.val()), _stub->_translation.val())};
+    return {MatrixUtil::translate(MatrixUtil::scale(MatrixUtil::rotate({}, quat), _stub->_scale.val()), _stub->_pivot.val())};
 }
 
 V4 TransformTRS3D::transform(const Snapshot& snapshot, const V4& xyzw)

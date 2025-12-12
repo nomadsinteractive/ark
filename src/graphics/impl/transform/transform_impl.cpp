@@ -130,7 +130,7 @@ void TransformImpl::setScale(sp<Vec3> scale)
 
 void TransformImpl::setTranslation(sp<Vec3> translation)
 {
-    _stub->_translation.reset(std::move(translation));
+    _stub->_pivot.reset(std::move(translation));
     doUpdateDelegate();
 }
 
@@ -152,7 +152,7 @@ sp<Transform> TransformImpl::makeDelegate() const
 {
     CHECK(_type != TransformType::TYPE_DELEGATED, "Delegated Transform may not be updated");
 
-    if(_type == TransformType::TYPE_NONE || (!_stub->_rotation && !_stub->_scale && !_stub->_translation))
+    if(_type == TransformType::TYPE_NONE || (!_stub->_rotation && !_stub->_scale && !_stub->_pivot))
         return Global<TransformNone>().cast<Transform>();
 
     return _stub->_rotation ? makeTransformTRS() : makeTransformTS();

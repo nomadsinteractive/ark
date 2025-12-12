@@ -30,7 +30,7 @@ TYPE_FLOAT3 = tuple[float, float, float]
 TYPE_FLOAT4 = tuple[float, float, float, float]
 TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
 TYPE_MAT4 = Union["Mat4", TYPE_M4]
-TYPE_NAMED_HASH = Union[int, str, "NamedHash"]
+TYPE_NAMED_HASH = Union[TYPE_INTEGER, str, "NamedHash"]
 TYPE_RUNNABLE = Union["Runnable", Callable[[], None]]
 TYPE_STRING = Union[str, "String"]
 TYPE_TYPE_ID = Union[int, str, type]
@@ -1218,7 +1218,8 @@ class Integer(_Scalar):
     def to_repeat(repeat: str) -> int:
         pass
 
-    def animate(self, interval: Union[Numeric, float] = None, duration: Union[Numeric, float] = None) -> "Integer":
+    @staticmethod
+    def animate(frames: Sequence[int], frame_index: TYPE_INTEGER, future: Future) -> "Integer":
         pass
 
     def __len__(self):
@@ -2322,7 +2323,7 @@ class Transform(Mat4):
 
 
 class Transform2D(Transform):
-    def __init__(self, rotation: Optional[TYPE_NUMERIC] = None, scale: Optional[TYPE_VEC2] = None, translation: Optional[TYPE_VEC2] = None):
+    def __init__(self, rotation: Optional[TYPE_NUMERIC] = None, scale: Optional[TYPE_VEC2] = None, pivot: Optional[TYPE_VEC2] = None):
         pass
 
 

@@ -36,7 +36,7 @@ public:
     };
 
     struct Stub {
-        OptionalVar<Vec3> _translation;
+        OptionalVar<Vec3> _pivot;
         OptionalVar<Vec4> _rotation;
         OptionalVar<Vec3> _scale;
 

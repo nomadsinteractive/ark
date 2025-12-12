@@ -4,6 +4,7 @@
 #include "core/base/clock.h"
 #include "core/base/constants.h"
 #include "core/base/expression.h"
+#include "core/base/future.h"
 #include "core/base/named_hash.h"
 #include "core/impl/variable/at_least.h"
 #include "core/impl/variable/at_most.h"
@@ -16,6 +17,7 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/inf/array.h"
+#include "core/types/global.h"
 #include "core/util/operators.h"
 
 namespace ark {
@@ -30,7 +32,7 @@ public:
         updateSubscription();
     }
 
-    bool update(uint32_t tick) override {
+    bool update(const uint32_t tick) override {
         const bool indexDirty = _index->update(tick);
         if(indexDirty)
             updateSubscription();
@@ -54,6 +56,41 @@ private:
     sp<Integer> _subscribed;
 };
 
+class IntegerAnimate final : public Integer {
+public:
+    IntegerAnimate(Vector<HashId> frames, sp<Integer> frameIndex, sp<Future> future)
+        : _frames(std::move(frames)), _frame_index(std::move(frameIndex)), _future(std::move(future)), _current_frame_index(0), _last_updated_tick(-1) {
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        const bool dirty = _frame_index->update(tick);
+        if(_last_updated_tick != tick)
+        {
+            _last_updated_tick = tick;
+            if(!_future->isDone()->val())
+            {
+                _current_frame_index = static_cast<uint32_t>(_frame_index->val()) % _frames.size();
+                if(_current_frame_index == _frames.size() - 1)
+                    _future->notify();
+            }
+        }
+        return dirty;
+    }
+
+    int32_t val() override
+    {
+        return _frames.at(_current_frame_index);
+    }
+
+private:
+    Vector<HashId> _frames;
+    sp<Integer> _frame_index;
+    sp<Future> _future;
+    uint32_t _current_frame_index;
+    uint32_t _last_updated_tick;
+};
+
 }
 
 sp<Integer> IntegerType::create(int32_t value)
@@ -75,6 +112,12 @@ sp<Integer> IntegerType::create(sp<Numeric> value)
 {
     sp<Integer> casted = sp<VariableOP1<int32_t, float>>::make(Operators::Cast<float, int32_t>(), std::move(value));
     return sp<Integer>::make<IntegerWrapper>(std::move(casted));
+}
+
+sp<Integer> IntegerType::animate(Vector<HashId> values, sp<Integer> frameIndex, sp<Future> future)
+{
+    ASSERT(frameIndex && future);
+    return sp<Integer>::make<IntegerAnimate>(std::move(values), std::move(frameIndex), std::move(future));
 }
 
 sp<Integer> IntegerType::add(sp<Integer> lhs, sp<Integer> rhs)

@@ -23,6 +23,9 @@ public:
 //  [[script::bindings::constructor]]
     static sp<Integer> create(sp<Numeric> value);
 
+//  [[script::bindings::auto]]
+    static sp<Integer> animate(Vector<HashId> values, sp<Integer> frameIndex, sp<Future> future);
+
 //  [[script::bindings::operator(+)]]
     static sp<Integer> add(sp<Integer> lhs, sp<Integer> rhs);
 //  [[script::bindings::operator(-)]]

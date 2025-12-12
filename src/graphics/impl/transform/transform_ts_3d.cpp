@@ -27,7 +27,7 @@ bool TransformTS3D::update(uint32_t tick)
 
 Transform::Snapshot TransformTS3D::snapshot()
 {
-    return {SnapshotTS3D{_stub->_translation.val(), _stub->_scale.val()}};
+    return {SnapshotTS3D{_stub->_pivot.val(), _stub->_scale.val()}};
 }
 
 V4 TransformTS3D::transform(const Snapshot& snapshot, const V4& xyzw)

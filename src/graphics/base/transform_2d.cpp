@@ -7,10 +7,10 @@
 
 namespace ark {
 
-Transform2D::Transform2D(sp<Numeric> rotation, sp<Vec2> scale, sp<Vec2> translation)
+Transform2D::Transform2D(sp<Numeric> rotation, sp<Vec2> scale, sp<Vec2> pivot)
     : TransformImpl(TransformType::TYPE_LINEAR_2D, rotation ? sp<Vec4>::make<RotationAxisTheta>(sp<Vec3>::make<Vec3::Const>(constants::AXIS_Z), std::move(rotation)) : nullptr,
                     scale ? Vec2Type::extend(std::move(scale), Global<Constants>()->NUMERIC_ONE) : nullptr,
-                    translation ? Vec2Type::extend(std::move(translation), Global<Constants>()->NUMERIC_ZERO) : nullptr)
+                    pivot ? Vec2Type::extend(std::move(pivot), Global<Constants>()->NUMERIC_ZERO) : nullptr)
 {
 }
 

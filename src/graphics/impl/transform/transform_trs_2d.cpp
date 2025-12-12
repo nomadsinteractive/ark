@@ -11,7 +11,7 @@ TransformTRS2D::TransformTRS2D(const Transform& transform)
 {
 }
 
-bool TransformTRS2D::update(uint32_t tick)
+bool TransformTRS2D::update(const uint32_t tick)
 {
     return _stub->update(tick);
 }
@@ -22,7 +22,7 @@ Transform::Snapshot TransformTRS2D::snapshot()
     CHECK(quaternion.x() == 0 && quaternion.y() == 0, "2D rotation should be always in the XY plane");
     const float s = 2 * quaternion.z() * quaternion.w();
     const float c = 2 * quaternion.w() * quaternion.w() - 1.0f;
-    return {MatrixUtil::translate(MatrixUtil::scale(MatrixUtil::rotate(M3(), s, c), V2(_stub->_scale.val())), V2(_stub->_translation.val()))};
+    return {MatrixUtil::translate(MatrixUtil::scale(MatrixUtil::rotate(M3(), s, c), V2(_stub->_scale.val())), -V2(_stub->_pivot.val()))};
 }
 
 V4 TransformTRS2D::transform(const Snapshot& snapshot, const V4& xyzw)

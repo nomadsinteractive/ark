@@ -11,7 +11,7 @@ namespace ark {
 namespace {
 
 struct SnapshotTS2D {
-    V2 _translation;
+    V2 _pivot;
     V2 _scale;
 };
 
@@ -22,27 +22,27 @@ TransformTS2D::TransformTS2D(const Transform& transform)
 {
 }
 
-bool TransformTS2D::update(uint32_t tick)
+bool TransformTS2D::update(const uint32_t tick)
 {
     return _stub->update(tick);
 }
 
 Transform::Snapshot TransformTS2D::snapshot()
 {
-    return {SnapshotTS2D{V2(_stub->_translation.val()), V2(_stub->_scale.val())}};
+    return {SnapshotTS2D{V2(_stub->_pivot.val()), V2(_stub->_scale.val())}};
 }
 
 V4 TransformTS2D::transform(const Snapshot& snapshot, const V4& xyzw)
 {
     const V2 xy(xyzw.x(), xyzw.y());
     const SnapshotTS2D& data = snapshot.data<SnapshotTS2D>();
-    return {(xy + data._translation * xyzw.w()) * data._scale, xyzw.z(), xyzw.w()};
+    return {(xy - data._pivot * xyzw.w()) * data._scale, xyzw.z(), xyzw.w()};
 }
 
 M4 TransformTS2D::toMatrix(const Snapshot& snapshot)
 {
     const SnapshotTS2D& data = snapshot.data<SnapshotTS2D>();
-    return MatrixUtil::translate(MatrixUtil::scale({}, V3(data._scale.x(), data._scale.y(), 1.0f)), V3(data._translation, 0));
+    return MatrixUtil::translate(MatrixUtil::scale({}, V3(data._scale.x(), data._scale.y(), 1.0f)), -V3(data._pivot, 0));
 }
 
 }
