@@ -296,6 +296,10 @@ sp<Clock> ApplicationContext::popAppClock()
     sp<Clock> clock = std::move(_app_clocks.back()._clock);
     _app_clocks.pop_back();
     _message_loops.pop_back();
+
+    if(!_app_clocks.empty())
+        _app_clocks.back()._time_scale.reset(nullptr);
+
     return clock;
 }
 

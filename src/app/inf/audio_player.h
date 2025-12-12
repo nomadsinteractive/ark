@@ -13,7 +13,7 @@ public:
     enum PlayOptionBits {
         PLAY_OPTION_LOOP = 1
     };
-    typedef BitSet<PlayOptionBits, true> PlayOption;
+    typedef BitSet<PlayOptionBits> PlayOption;
 
     enum AudioFormat {
         AUDIO_FORMAT_AUTO,

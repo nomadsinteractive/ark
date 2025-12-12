@@ -16,7 +16,7 @@ public:
         : _rigidbody_controller(std::move(rigidbodyController)), _linear_velocity(std::move(linearVelocity)) {
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         if(_linear_velocity->update(tick))
         {
@@ -37,7 +37,7 @@ public:
         : _rigidbody_controller(std::move(rigidbodyController)), _central_force(std::move(centralForce)) {
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         if(_central_force->update(tick))
         {
