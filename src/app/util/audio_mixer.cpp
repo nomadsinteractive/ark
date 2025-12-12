@@ -79,7 +79,7 @@ uint32_t AudioMixer::read(void* buffer, const uint32_t size)
     {
         if(const size_t s = i->read(buf, bufHdr, size); s > sizeRead)
             sizeRead = s;
-        eof = eof || i->future()->isDone()->val();
+        eof = eof || i->future()->isDoneOrCanceled()->val();
     }
 
     uint32_t maxValue = 0;
@@ -98,7 +98,7 @@ uint32_t AudioMixer::read(void* buffer, const uint32_t size)
     if(eof)
     {
         for(const sp<Track>& i : _tracks.clear())
-            if(!i->future()->isDone())
+            if(!i->future()->isDoneOrCanceled()->val())
                 _tracks.push(i);
     }
 
