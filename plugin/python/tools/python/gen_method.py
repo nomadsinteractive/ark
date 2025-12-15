@@ -309,7 +309,7 @@ class GenMethod(object):
         rs = repl[0].split()[:-1]
         return_type = ' '.join(i for i in rs if i not in('static', 'ARK_API'))
         # args = [i.strip() for i in repl[1].split(',') if i]
-        args = [i.strip() for i in GenMethod._bracket_match_split(repl[1], '<(', '>)', ',') if i]
+        args = [i.strip() for i in GenMethod._bracket_match_split(repl[1], '<({', '>)}', ',') if i]
         return name, args, return_type, 'static' in rs
 
     @staticmethod

@@ -297,7 +297,7 @@ Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uplo
 
 Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uploader)
 {
-    enums::UploadStrategy us = uploader ? enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY : enums::UPLOAD_STRATEGY_ON_SURFACE_READY;
+    enums::UploadStrategy us = uploader ? enums::UploadStrategy{enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY} : enums::UPLOAD_STRATEGY_ON_SURFACE_READY;
     if(usage.contains(Buffer::USAGE_BIT_DYNAMIC) && uploader)
         us = us | enums::UPLOAD_STRATEGY_ON_CHANGE;
     return makeBuffer(usage, std::move(uploader), us);
@@ -336,7 +336,7 @@ sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, Rende
 {
     sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(configure));
     if(renderTarget->fbo())
-        upload(renderTarget->fbo(), enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, enums::UPLOAD_PRIORITY_LOW);
+        upload(renderTarget->fbo(), {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}, nullptr, nullptr, enums::UPLOAD_PRIORITY_LOW);
     return renderTarget;
 }
 

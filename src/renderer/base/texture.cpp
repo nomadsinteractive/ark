@@ -294,7 +294,7 @@ Texture::Type Texture::Delegate::type() const
 
 Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, constants::SRC)), _bitmap(factory.getBuilder<Bitmap>(manifest, constants::BITMAP)),
-      _uploader(factory.getBuilder<Texture::Uploader>(manifest, constants::UPLOADER)), _upload_strategy(Documents::getAttribute<enums::UploadStrategy>(manifest, "upload-strategy", {enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY}).bits())
+      _uploader(factory.getBuilder<Texture::Uploader>(manifest, constants::UPLOADER)), _upload_strategy(Documents::getAttribute<enums::UploadStrategy>(manifest, "upload-strategy", {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}).bits())
 {
 }
 

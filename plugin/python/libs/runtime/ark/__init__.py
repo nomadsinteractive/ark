@@ -111,7 +111,6 @@ class Enum:
     UPLOAD_STRATEGY_ONCE = 0
     UPLOAD_STRATEGY_RELOAD = 1
     UPLOAD_STRATEGY_ON_SURFACE_READY = 2
-    UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY = 3
     UPLOAD_STRATEGY_ON_CHANGE = 4
     UPLOAD_STRATEGY_ON_EVERY_FRAME = 8
 
@@ -638,7 +637,7 @@ class Texture:
     USAGE_SAMPLER = 8
     USAGE_STORAGE = 16
 
-    def __init__(self, bitmap: "Bitmap", format: int = FORMAT_AUTO, usages: int = USAGE_AUTO, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, future: Optional[Future] = None):
+    def __init__(self, bitmap: "Bitmap", format: int = FORMAT_AUTO, usages: int = USAGE_AUTO, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE | Enum.UPLOAD_STRATEGY_ON_SURFACE_READY, future: Optional[Future] = None):
         pass
 
     @property
@@ -676,7 +675,7 @@ class RenderController:
     def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_BIT_DYNAMIC, uploader: Optional["Uploader"] = None) -> Buffer:
         pass
 
-    def create_texture2d(self, bitmap: 'Bitmap', texture_format: int = Texture.FORMAT_AUTO, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY,
+    def create_texture2d(self, bitmap: 'Bitmap', texture_format: int = Texture.FORMAT_AUTO, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE | Enum.UPLOAD_STRATEGY_ON_SURFACE_READY,
                          future: Optional[Future] = None) -> Texture:
         pass
 

@@ -2,6 +2,7 @@ import getopt
 import importlib
 import re
 import sys
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Optional
 
@@ -52,7 +53,7 @@ def import_acg():
 get_param_and_paths()
 
 
-def parse_method_arguments(arguments):
+def parse_method_arguments(arguments: Sequence[str]):
     args = []
     for i, j in enumerate(arguments):
         argstr = acg.remove_crv(j)

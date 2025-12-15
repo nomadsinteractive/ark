@@ -395,7 +395,7 @@ sp<RenderView> RendererFactorySDL3_GPU::createRenderView(const sp<RenderEngineCo
     return sp<RenderView>::make<RenderViewSDL3_GPU>(renderContext, renderController);
 }
 
-sp<Texture::Delegate> RendererFactorySDL3_GPU::createTexture(sp<Size> size, sp<Texture::Parameters> parameters)
+sp<Texture::Delegate> RendererFactorySDL3_GPU::createTexture(const sp<Size> size, sp<Texture::Parameters> parameters)
 {
     if(parameters->_type == Texture::TYPE_2D || parameters->_type == Texture::TYPE_CUBEMAP)
         return sp<Texture::Delegate>::make<TextureSDL3_GPU>(static_cast<uint32_t>(size->widthAsFloat()), static_cast<uint32_t>(size->heightAsFloat()), std::move(parameters));

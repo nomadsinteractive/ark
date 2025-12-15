@@ -133,7 +133,7 @@ public:
     };
 
 //  [[script::bindings::auto]]
-    Texture(sp<Bitmap> bitmap, Texture::Format format = Texture::FORMAT_AUTO, Texture::Usage usages = Texture::USAGE_AUTO, enums::UploadStrategy uploadStrategy = enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
+    Texture(sp<Bitmap> bitmap, Texture::Format format = Texture::FORMAT_AUTO, Texture::Usage usages = Texture::USAGE_AUTO, enums::UploadStrategy uploadStrategy = {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}, sp<Future> future = nullptr);
 
     Texture(sp<Delegate> delegate, sp<Size> size, sp<Uploader> uploader, sp<Parameters> parameters);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Texture);

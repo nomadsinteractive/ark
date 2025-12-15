@@ -84,8 +84,8 @@ public:
 
     const sp<RenderEngine>& renderEngine() const;
 
-    sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, enums::UploadStrategy us = enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
-    sp<Texture> createTexture2d(sp<Bitmap> bitmap, sp<Texture::Parameters> parameters = nullptr, enums::UploadStrategy us = enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
+    sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, enums::UploadStrategy us = {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}, sp<Future> future = nullptr);
+    sp<Texture> createTexture2d(sp<Bitmap> bitmap, sp<Texture::Parameters> parameters = nullptr, enums::UploadStrategy us = {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}, sp<Future> future = nullptr);
 
 //  [[script::bindings::auto]]
     Buffer makeBuffer(Buffer::Usage usage, sp<Uploader> uploader, enums::UploadStrategy us, sp<Future> future = nullptr);
