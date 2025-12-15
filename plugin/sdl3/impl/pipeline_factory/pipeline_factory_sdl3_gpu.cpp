@@ -440,8 +440,7 @@ public:
         SDL3_GPU_GraphicsContext& sdl3GC = ensureGraphicsContext(graphicsContext);
 
         const RenderTargetContext& renderTargets = sdl3GC.getCurrentRenderTarget();
-        const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget = *renderTargets._depth_stencil_target;
-        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(sdl3GC._command_buffer, renderTargets._color_targets->data(), renderTargets._color_targets->size(), depthStencilTarget ? depthStencilTarget.get() : nullptr);
+        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(sdl3GC._command_buffer, renderTargets._color_targets->data(), renderTargets._color_targets->size(), renderTargets._depth_stencil_target);
 
         SDL_BindGPUGraphicsPipeline(renderPass, _pipeline);
 

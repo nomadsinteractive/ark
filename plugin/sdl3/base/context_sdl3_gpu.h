@@ -17,7 +17,7 @@ struct SDL3_GPU_Context {
 struct RenderTargetContext {
     const RenderTarget::Configure* _create_config;
     const Vector<SDL_GPUColorTargetInfo>* _color_targets;
-    const Optional<SDL_GPUDepthStencilTargetInfo>* _depth_stencil_target;
+    const SDL_GPUDepthStencilTargetInfo* _depth_stencil_target;
 };
 
 struct SDL3_GPU_GraphicsContext {
@@ -32,7 +32,7 @@ struct SDL3_GPU_GraphicsContext {
 
     const RenderTargetContext& getCurrentRenderTarget();
 
-    void pushRenderTargets(const RenderTarget::Configure* createConfig, const Vector<SDL_GPUColorTargetInfo>& colorTargets, const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget);
+    void pushRenderTargets(const RenderTarget::Configure* createConfig, const Vector<SDL_GPUColorTargetInfo>& colorTargets, const SDL_GPUDepthStencilTargetInfo* depthStencilTarget);
     void popRenderTargets();
 };
 

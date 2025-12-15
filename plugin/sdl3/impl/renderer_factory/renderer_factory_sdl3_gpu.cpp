@@ -205,7 +205,7 @@ public:
             _depth_stencil_target->texture = reinterpret_cast<SDL_GPUTexture*>(_configure._depth_stencil_attachment->id());
 
         SDL3_GPU_GraphicsContext& gc = ensureGraphicsContext(graphicsContext);
-        gc.pushRenderTargets(&_configure, _render_targets, _depth_stencil_target);
+        gc.pushRenderTargets(&_configure, _render_targets, _depth_stencil_target ? &_depth_stencil_target.value() : nullptr);
     }
 
 private:
@@ -246,7 +246,8 @@ private:
 class RenderViewSDL3_GPU final : public RenderView {
 public:
     RenderViewSDL3_GPU(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
-        : _graphics_context(new GraphicsContext(std::move(renderContext), std::move(renderController)))
+        : _graphics_context(new GraphicsContext(std::move(renderContext), std::move(renderController))), _swapchain_depth_stencil_rt_initial{nullptr, 1.0f, SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE},
+          _swapchain_depth_stencil_rt_blend{nullptr, 0.0f, SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_STORE}
     {
     }
 
@@ -254,9 +255,19 @@ public:
     {
     }
 
-    void onSurfaceChanged(uint32_t width, uint32_t height) override
+    void onSurfaceChanged(const uint32_t width, const uint32_t height) override
     {
         _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
+
+        const SDL3_GPU_Context& gpuContext = ensureGPUContext(_graphics_context);
+        if(_swapchain_depth_stencil_rt_initial.texture)
+            SDL_ReleaseGPUTexture(gpuContext._gpu_gevice, _swapchain_depth_stencil_rt_initial.texture);
+
+        const RenderEngineContext::Resolution& resolution = _graphics_context->renderContext()->displayResolution();
+        const SDL_GPUTextureCreateInfo textureCreateInfo = {SDL_GPU_TEXTURETYPE_2D, SDL_GPU_TEXTUREFORMAT_D32_FLOAT, SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET, resolution.width, resolution.height, 1, 1};
+        SDL_GPUTexture* texture = SDL_CreateGPUTexture(gpuContext._gpu_gevice, &textureCreateInfo);
+        _swapchain_depth_stencil_rt_initial.texture = texture;
+        _swapchain_depth_stencil_rt_blend.texture = texture;
     }
 
     void onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand) override
@@ -291,9 +302,8 @@ public:
                 SDL_GPU_LOADOP_LOAD,
                 SDL_GPU_STOREOP_STORE
             }};
-            constexpr Optional<SDL_GPUDepthStencilTargetInfo> depthStencilTarget = {};
             SDL3_GPU_GraphicsContext& graphicsContext = ensureGraphicsContext(_graphics_context);
-            graphicsContext = {cmdbuf, {nullptr, &swapchainRTIInitial, &depthStencilTarget}, {nullptr, &swapchainRTIBlend, &depthStencilTarget}};
+            graphicsContext = {cmdbuf, {nullptr, &swapchainRTIInitial, &_swapchain_depth_stencil_rt_initial}, {nullptr, &swapchainRTIBlend, &_swapchain_depth_stencil_rt_blend}};
             _graphics_context->onDrawFrame();
             renderCommand.draw(_graphics_context);
         }
@@ -305,6 +315,8 @@ public:
 
 private:
     op<GraphicsContext> _graphics_context;
+    SDL_GPUDepthStencilTargetInfo _swapchain_depth_stencil_rt_initial;
+    SDL_GPUDepthStencilTargetInfo _swapchain_depth_stencil_rt_blend;
 };
 
 SDL_GPUShaderFormat toGPUShaderFormat(const enums::RenderingBackendBit rendererBackendBit)

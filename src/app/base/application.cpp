@@ -187,7 +187,7 @@ void Application::onSurfaceCreated()
     _application_delegate->onSurfaceCreated(_surface);
 }
 
-void Application::onSurfaceChanged(uint32_t width, uint32_t height)
+void Application::onSurfaceChanged(const uint32_t width, const uint32_t height)
 {
     LOGD("width = %d, height = %d", width, height);
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
@@ -199,9 +199,9 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
         _application_context->renderController()->reset();
     });
 
+    _application_context->renderEngine()->context()->setDisplayResolution({width, height});
     _surface->onSurfaceChanged(width, height);
     _application_delegate->onSurfaceChanged(width, height);
-    _application_context->renderEngine()->context()->setDisplayResolution({width, height});
 }
 
 void Application::onSurfaceUpdate()

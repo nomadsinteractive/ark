@@ -6,10 +6,13 @@
 
 namespace ark {
 
-Tags::Tags(Box tag)
+Tags::Tags(Box tag, Vector<Box> tags)
 {
     if(tag)
         setTag(0, std::move(tag));
+
+    for(Box& i : tags)
+        setTag(i.typeId(), std::move(i));
 }
 
 Box Tags::tag() const

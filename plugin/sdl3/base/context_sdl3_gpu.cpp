@@ -18,11 +18,11 @@ SDL3_GPU_Context::~SDL3_GPU_Context()
     SDL_ShaderCross_Quit();
 }
 
-void SDL3_GPU_GraphicsContext::pushRenderTargets(const RenderTarget::Configure* createConfig, const Vector<SDL_GPUColorTargetInfo>& colorTargets, const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget)
+void SDL3_GPU_GraphicsContext::pushRenderTargets(const RenderTarget::Configure* createConfig, const Vector<SDL_GPUColorTargetInfo>& colorTargets, const SDL_GPUDepthStencilTargetInfo* depthStencilTarget)
 {
     ASSERT(!depthStencilTarget || depthStencilTarget->texture);
     ASSERT(_active_render_target_index < array_size(_render_targets) - 1);
-    _render_targets[_active_render_target_index ++] = {createConfig, &colorTargets, &depthStencilTarget};
+    _render_targets[_active_render_target_index ++] = {createConfig, &colorTargets, depthStencilTarget};
 }
 
 void SDL3_GPU_GraphicsContext::popRenderTargets()

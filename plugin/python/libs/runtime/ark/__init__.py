@@ -403,7 +403,7 @@ class Behavior:
 
 
 class Tags:
-    def __init__(self, tag: Any = None):
+    def __init__(self, tag: Any = None, tags: Sequence[Any] = tuple()):
         pass
 
     @property

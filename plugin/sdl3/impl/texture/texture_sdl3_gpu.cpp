@@ -73,7 +73,7 @@ SDL_GPUFilter toFilter(const Texture::Filter filter)
 SDL_GPUTexture* createTexture(GraphicsContext& graphicsContext, const Texture::Parameters& parameters, const SDL_GPUTextureFormat textureFormat, const uint32_t width, const uint32_t height)
 {
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
-    const SDL_GPUTextureCreateInfo textureCreateInfo{parameters._type == Texture::TYPE_2D ? SDL_GPU_TEXTURETYPE_2D : SDL_GPU_TEXTURETYPE_CUBE, textureFormat, toTextureUsageFlags(parameters._usage), width, height, 1, 1};
+    const SDL_GPUTextureCreateInfo textureCreateInfo = {parameters._type == Texture::TYPE_2D ? SDL_GPU_TEXTURETYPE_2D : SDL_GPU_TEXTURETYPE_CUBE, textureFormat, toTextureUsageFlags(parameters._usage), width, height, 1, 1};
     return SDL_CreateGPUTexture(gpuDevice, &textureCreateInfo);
 }
 

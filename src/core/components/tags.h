@@ -10,7 +10,7 @@ namespace ark {
 class ARK_API Tags final : public Debris {
 public:
 //  [[script::bindings::auto]]
-    Tags(Box tag = {});
+    Tags(Box tag = {}, Vector<Box> tags = {});
 
 //  [[script::bindings::property]]
     Box tag() const;
