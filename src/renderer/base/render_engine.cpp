@@ -65,6 +65,11 @@ bool RenderEngine::isViewportFlipped() const
     return _coordinate_system != _render_context->viewportCoordinateSystem();
 }
 
+bool RenderEngine::shouldFlipY() const
+{
+    return isBackendLHS() && ndcCoordinateSystem() != viewportCoordinateSystem();
+}
+
 V2 RenderEngine::toLHSPosition(const V2& position) const
 {
     if(_coordinate_system == enums::COORDINATE_SYSTEM_RHS)

@@ -1,5 +1,7 @@
 #include "renderer/impl/model_loader/model_loader_text.h"
 
+#include <ranges>
+
 #include "core/ark.h"
 #include "core/base/clock.h"
 #include "core/base/future.h"
@@ -33,7 +35,7 @@ ModelLoaderText::ModelLoaderText(sp<Alphabet> alphabet, sp<Atlas> atlas, const F
 sp<DrawingContextComposer> ModelLoaderText::makeRenderCommandComposer(const Shader& shader)
 {
     _default_glyph_bundle = _glyph_attachment->ensureGlyphBundle(_alphabet, _default_font, shader.camera().isLHS());
-    return Ark::instance().renderController()->makeDrawElementsIncremental(Global<Constants>()->MODEL_UNIT_QUAD_RHS);
+    return sp<DrawingContextComposer>::make<RCCDrawElementsIncremental>();
 }
 
 sp<Model> ModelLoaderText::loadModel(const int32_t type)
@@ -142,7 +144,7 @@ ModelLoaderText::AtlasGlyphAttachment::AtlasGlyphAttachment(Atlas& atlas)
 
 const sp<ModelLoaderText::GlyphBundle>& ModelLoaderText::AtlasGlyphAttachment::ensureGlyphBundle(sp<Alphabet> alphabet, const Font& font, bool isLHS)
 {
-    sp<GlyphBundle>& glyphBundle = _glyph_bundles[font];
+    sp<GlyphBundle>& glyphBundle = _glyph_bundles[{font, isLHS}];
     if(!glyphBundle)
         glyphBundle = sp<GlyphBundle>::make(*this, std::move(alphabet), font, isLHS);
     return glyphBundle;
@@ -161,7 +163,7 @@ bool ModelLoaderText::AtlasGlyphAttachment::resize(const uint32_t textureWidth, 
 
     initialize(textureWidth, textureHeight);
 
-    for(const auto& [k, v] : _glyph_bundles)
+    for(const sp<GlyphBundle>& v : _glyph_bundles | std::views::values)
         v->reload(timestamp);
 
     reloadTexture();

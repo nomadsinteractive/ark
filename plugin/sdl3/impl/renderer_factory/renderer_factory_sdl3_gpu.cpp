@@ -344,7 +344,7 @@ enums::RendererVersion getRendererVersion(const enums::RenderingBackendBit rende
 }
 
 RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
-    : RendererFactory({{enums::RENDERING_BACKEND_BIT_DIRECT_X, enums::RENDERING_BACKEND_BIT_METAL}, true, 16}), _gpu_device(nullptr)
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_DIRECT_X, enums::RENDERING_BACKEND_BIT_METAL}, 16}), _gpu_device(nullptr)
 {
 }
 

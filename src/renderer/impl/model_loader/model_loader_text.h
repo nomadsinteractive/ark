@@ -78,7 +78,7 @@ private:
         bitmap _glyph_bitmap;
 
         MaxRectsBinPack _bin_pack;
-        Map<Font, sp<GlyphBundle>> _glyph_bundles;
+        Map<std::pair<Font, bool>, sp<GlyphBundle>> _glyph_bundles;
 
         sp<Future> _texture_reload_future;
     };

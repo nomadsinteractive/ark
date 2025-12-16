@@ -47,7 +47,7 @@ void setVersion(const enums::RendererVersion version, RenderEngineContext& vkCon
 }
 
 RendererFactoryVulkan::RendererFactoryVulkan()
-    : RendererFactory({{enums::RENDERING_BACKEND_BIT_VULKAN}, true, sizeof(float)}), _renderer(sp<VKRenderer>::make())
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_VULKAN}, sizeof(float)}), _renderer(sp<VKRenderer>::make())
 {
 }
 

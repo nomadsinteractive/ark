@@ -43,7 +43,7 @@ void setVersion(const enums::RendererVersion version, RenderEngineContext& glCon
 }
 
 RendererFactoryOpenGL::RendererFactoryOpenGL()
-    : RendererFactory({{enums::RENDERING_BACKEND_BIT_OPENGL}, true, sizeof(float)})
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_OPENGL}, sizeof(float)})
 {
 }
 

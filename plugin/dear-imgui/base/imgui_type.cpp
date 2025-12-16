@@ -20,15 +20,6 @@
 
 namespace ark::plugin::dear_imgui {
 
-namespace {
-
-bool shouldFlipY(const RenderEngine& renderEngine)
-{
-    return renderEngine.isBackendLHS() && renderEngine.ndcCoordinateSystem() != renderEngine.viewportCoordinateSystem();
-}
-
-}
-
 Imgui::Imgui(sp<RendererImgui> renderer)
     : _renderer(std::move(renderer))
 {
@@ -52,7 +43,7 @@ void Imgui::show(sp<Boolean> discarded) const
 }
 
 Imgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _manifest(manifest), _camera(sp<Camera>::make(Ark::instance().createCamera(enums::COORDINATE_SYSTEM_LHS, false, shouldFlipY(Ark::instance().renderController()->renderEngine())))),
+    : _manifest(manifest), _camera(sp<Camera>::make(Ark::instance().createCamera(enums::COORDINATE_SYSTEM_LHS, false, Ark::instance().renderController()->renderEngine()->shouldFlipY()))),
       _shader(Shader::makeBuilder(factory, manifest, "shaders/imgui.vert", "shaders/imgui.frag"))
 {
 }

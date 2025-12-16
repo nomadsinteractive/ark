@@ -22,7 +22,7 @@ ModelLoaderQuad::ModelLoaderQuad(sp<Atlas> atlas)
 sp<DrawingContextComposer> ModelLoaderQuad::makeRenderCommandComposer(const Shader& shader)
 {
     _is_lhs = shader.camera().isLHS();
-    return Ark::instance().renderController()->makeDrawElementsIncremental(_unit_model);
+    return sp<DrawingContextComposer>::make<RCCDrawElementsIncremental>();
 }
 
 sp<Model> ModelLoaderQuad::loadModel(const int32_t type)

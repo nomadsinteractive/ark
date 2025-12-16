@@ -75,6 +75,7 @@ public:
     bool isLHS() const;
     bool isBackendLHS() const;
     bool isViewportFlipped() const;
+    bool shouldFlipY() const;
 
     V2 toNDC(float viewportX, float viewportY) const;
     V2 toLHSPosition(const V2& position) const;

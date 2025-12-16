@@ -99,8 +99,6 @@ public:
 
     sp<RenderTarget> makeRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure);
 
-    sp<DrawingContextComposer> makeDrawElementsIncremental(sp<Model> model) const;
-
     template<typename T> sp<Variable<T>> synchronize(sp<Variable<T>> delegate, sp<Boolean> canceled) {
         const sp<UpdatableSynchronized<T>> s = sp<UpdatableSynchronized<T>>::make(std::move(delegate));
         const sp<Variable<T>>& var = s->synchronized();

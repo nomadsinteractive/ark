@@ -93,8 +93,7 @@ void Level::doLoad(const String& src)
                 const V3 front = MatrixUtil::mul(matrix, V3(0, -1.0f, 0));
                 const V3 up = MatrixUtil::mul(matrix, V3(0, 0, -1.0f));
                 const RenderEngine& renderEngine = Ark::instance().renderController()->renderEngine();
-                const bool shouldFlipY = renderEngine.isBackendLHS() && renderEngine.ndcCoordinateSystem() != renderEngine.viewportCoordinateSystem();
-                Camera c = Ark::instance().createCamera(enums::COORDINATE_SYSTEM_RHS, false, shouldFlipY);
+                Camera c = Ark::instance().createCamera(enums::COORDINATE_SYSTEM_RHS, false, renderEngine.shouldFlipY());
                 c.perspective(fovy, 16.0f / 9, clipNear, clipFar);
                 c.lookAt(obj._position, obj._position + front, up);
                 _stub->_cameras[obj._name] = sp<Camera>::make(std::move(c));
