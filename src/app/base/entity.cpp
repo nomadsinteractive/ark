@@ -22,7 +22,7 @@ public:
     {
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         return _ref->discarded().update(tick);
     }

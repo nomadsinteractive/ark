@@ -329,7 +329,7 @@ tinygltf::Model loadGltfModel(const String& src)
 	tinygltf::Model gltfModel;
 	std::string errString, warnString;
 	const sp<Asset> asset = Ark::instance().getAsset(src);
-
+	CHECK(asset, "Asset \"%s\" not found", src.c_str());
 	Vector<uint8_t> buf(asset->size());
 	asset->open()->read(buf.data(), static_cast<uint32_t>(buf.size()));
 	if(src.endsWith(".gltf"))
