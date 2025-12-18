@@ -83,6 +83,7 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
 
     if(auto shape = context.getComponent<Shape>())
     {
+        FATAL("Using Shape as a component has been deprecated.");
         const sp<Collider> collider = _impl._collider;
         ASSERT(shape->type().hash() != Shape::TYPE_NONE);
         ASSERT(collider);

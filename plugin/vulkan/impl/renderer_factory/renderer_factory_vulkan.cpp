@@ -1,10 +1,8 @@
 #include "vulkan/impl/renderer_factory/renderer_factory_vulkan.h"
 
 #include "core/base/plugin_manager.h"
-#include "core/types/global.h"
 #include "core/util/log.h"
 
-#include "graphics/base/camera.h"
 #include "graphics/components/size.h"
 #include "graphics/base/viewport.h"
 
@@ -88,7 +86,7 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(const Buffer::Usage usa
         flags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
     else
         flags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-    return sp<VKBuffer>::make(_renderer, Ark::instance().renderController()->recycler(), usageFlags, flags);
+    return sp<Buffer::Delegate>::make<VKBuffer>(_renderer, Ark::instance().renderController()->recycler(), usageFlags, flags);
 }
 
 sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
@@ -115,7 +113,7 @@ sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
 sp<Texture::Delegate> RendererFactoryVulkan::createTexture(sp<Size> size, sp<Texture::Parameters> parameters)
 {
     if(parameters->_type == Texture::TYPE_2D || parameters->_type == Texture::TYPE_CUBEMAP)
-        return sp<VKTexture>::make(Ark::instance().renderController()->recycler(), _renderer, static_cast<uint32_t>(size->widthAsFloat()), static_cast<uint32_t>(size->heightAsFloat()), std::move(parameters));
+        return sp<Texture::Delegate>::make<VKTexture>(Ark::instance().renderController()->recycler(), _renderer, static_cast<uint32_t>(size->widthAsFloat()), static_cast<uint32_t>(size->heightAsFloat()), std::move(parameters));
     return nullptr;
 }
 

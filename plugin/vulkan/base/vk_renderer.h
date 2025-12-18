@@ -15,6 +15,7 @@ public:
     ~VKRenderer();
 
     const sp<VKCommandPool>& commandPool() const;
+    const sp<VKInstance>& instance() const;
     const sp<VKDevice>& device() const;
     const sp<VKHeap>& heap() const;
     const sp<VKSwapChain>& renderTarget() const;
@@ -30,6 +31,5 @@ private:
 
     friend class RendererFactoryVulkan;
 };
-
 
 }

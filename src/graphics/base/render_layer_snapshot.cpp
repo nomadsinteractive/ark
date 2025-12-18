@@ -134,7 +134,6 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
         s = {newState, static_cast<Renderable::StateBits>(s.bits() & (Renderable::RENDERABLE_STATE_NEW | Renderable::RENDERABLE_STATE_DISCARDED))};
         if(Renderable::State state = s; state.contains(Renderable::RENDERABLE_STATE_DISCARDED))
         {
-            LOGD("delete: %p", &renderable);
             verticesDirty = true;
             addDiscardedState(layerContext, &renderable);
             iter = layerContext._renderables.erase(iter);

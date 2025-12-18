@@ -1,5 +1,6 @@
 #include "vulkan/base/vk_pipeline.h"
 
+#include "vk_instance.h"
 #include "core/base/observer.h"
 #include "core/impl/uploader/uploader_array.h"
 
@@ -572,6 +573,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
     if(drawingContext._indices)
         vkCmdBindIndexBuffer(commandBuffer, (VkBuffer)(drawingContext._indices.id()), 0, kVKIndexType);
 
+    _renderer->instance()->setCurrentPipelineDescriptor(_pipeline_bindings.pipelineDescriptor().get());
     if(const Optional<Rect>& scissor = drawingContext._scissor)
     {
         const PipelineDescriptor::TraitScissorTest* scissorTest = drawingContext._bindings->pipelineDescriptor()->getTrait<PipelineDescriptor::TraitScissorTest>();
@@ -584,6 +586,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
     }
     else
         _baked_renderer->draw(graphicsContext, drawingContext, commandBuffer);
+    _renderer->instance()->setCurrentPipelineDescriptor(nullptr);
 }
 
 void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& computeContext)

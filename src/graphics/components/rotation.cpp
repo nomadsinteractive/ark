@@ -135,7 +135,7 @@ private:
 
 }
 
-Rotation::Rotation(const V4 quaternion)
+Rotation::Rotation(const V4& quaternion)
     : Rotation(sp<Vec4>::make<Vec4::Const>(quaternion))
 {
 }

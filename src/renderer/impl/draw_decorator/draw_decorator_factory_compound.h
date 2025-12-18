@@ -6,13 +6,13 @@
 
 namespace ark {
 
-class DrawDecoratorFactoryComposite final : public DrawDecoratorFactory {
+class DrawDecoratorFactoryCompound final : public DrawDecoratorFactory {
 public:
-    DrawDecoratorFactoryComposite(sp<DrawDecoratorFactory> delegate, sp<DrawDecoratorFactory> next);
+    DrawDecoratorFactoryCompound(sp<DrawDecoratorFactory> delegate, sp<DrawDecoratorFactory> next);
 
     sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override;
 
-    static sp<DrawDecoratorFactory> compose(sp<DrawDecoratorFactory> self, sp<DrawDecoratorFactory> next);
+    static sp<DrawDecoratorFactory> compound(sp<DrawDecoratorFactory> self, sp<DrawDecoratorFactory> next);
 
 private:
     sp<DrawDecoratorFactory> _delegate;

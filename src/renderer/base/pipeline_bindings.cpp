@@ -163,8 +163,6 @@ const sp<Pipeline>& PipelineBindings::ensurePipeline(GraphicsContext& graphicsCo
 
 void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
 {
-    _stub->_pipeline_descriptor->preCompile(graphicsContext);
-
     Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> stages = _stub->_pipeline_descriptor->getPreprocessedStages(graphicsContext.renderContext());
     ASSERT(!stages.empty());
 

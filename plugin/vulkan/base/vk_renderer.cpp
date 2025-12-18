@@ -37,6 +37,11 @@ const sp<VKCommandPool>& VKRenderer::commandPool() const
     return _render_target->commandPool();
 }
 
+const sp<VKInstance>& VKRenderer::instance() const
+{
+    return _instance;
+}
+
 const sp<VKDevice>& VKRenderer::device() const
 {
     DCHECK(_device, "VKRenderer uninitialized");

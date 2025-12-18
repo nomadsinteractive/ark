@@ -9,7 +9,7 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/impl/draw_decorator/draw_decorator_factory_compute.h"
-#include "renderer/impl/draw_decorator/draw_decorator_factory_composite.h"
+#include "renderer/impl/draw_decorator/draw_decorator_factory_compound.h"
 #include "renderer/inf/snippet_factory.h"
 
 namespace ark {
@@ -146,7 +146,7 @@ PipelineDescriptor::PipelineDescriptor(Camera camera, PipelineBuildingContext& b
             CHECK(computeStage->_compute_local_sizes, "Compute stage local size layout undefined");
             numWorkGroupsArray = computeStage->_compute_local_sizes.value();
         }
-        _configuration._draw_decorator_factory = DrawDecoratorFactoryComposite::compose(std::move(_configuration._draw_decorator_factory), sp<DrawDecoratorFactory>::make<DrawDecoratorFactoryCompute>(_layout, numWorkGroupsArray, computeStage->_pre_shader_stage != enums::SHADER_STAGE_BIT_NONE));
+        _configuration._draw_decorator_factory = DrawDecoratorFactoryCompound::compound(std::move(_configuration._draw_decorator_factory), sp<DrawDecoratorFactory>::make<DrawDecoratorFactoryCompute>(_layout, numWorkGroupsArray, computeStage->_pre_shader_stage != enums::SHADER_STAGE_BIT_NONE));
     }
 
     for(const ShaderPreprocessor* preprocessor : buildingContext.stages())
@@ -200,15 +200,22 @@ bool PipelineDescriptor::hasDivisors() const
     return _layout->streamLayouts().size() > 1;
 }
 
-void PipelineDescriptor::preCompile(GraphicsContext& graphicsContext)
+String PipelineDescriptor::generateSignature() const
 {
-    // if(_building_context)
-    // {
-        // for(const ShaderPreprocessor* preprocessor : _building_context->stages())
-        //     _stages.push_back(preprocessor->preprocess());
-
-    //     _building_context = nullptr;
-    // }
+    StringBuffer sb;
+    for(const ShaderPreprocessor::Stage& i : _stages)
+    {
+        if(!sb.empty())
+            sb << ", ";
+        if(i._type == enums::SHADER_STAGE_BIT_VERTEX)
+            sb << "vertex";
+        else if(i._type == enums::SHADER_STAGE_BIT_FRAGMENT)
+            sb << "fragment";
+        else if(i._type == enums::SHADER_STAGE_BIT_COMPUTE)
+            sb << "compute";
+        sb << '(' << Documents::toString(i._manifest) << ')';
+    }
+    return sb.str();
 }
 
 Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const

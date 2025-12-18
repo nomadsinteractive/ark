@@ -17,6 +17,9 @@ public:
 
     const Vector<VkPhysicalDevice>& physicalDevices() const;
 
+    PipelineDescriptor* currentPipelineDescriptor() const;
+    void setCurrentPipelineDescriptor(PipelineDescriptor* pipelineDescriptor);
+
 private:
     void setupDebugMessageCallback();
 
@@ -26,9 +29,9 @@ private:
     Vector<VkPhysicalDevice> _physical_devices;
 
     VkDebugUtilsMessengerEXT _callback1;
-    VkDebugUtilsMessengerEXT _callback2;
-    VkDebugUtilsMessengerEXT _callback3;
     VkInstance _instance;
+
+    PipelineDescriptor* _current_pipeline_descriptor;
 };
 
 }

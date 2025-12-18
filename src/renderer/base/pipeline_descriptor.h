@@ -165,7 +165,6 @@ public:
     Vector<BindedTexture> makeBindingSamplers() const;
     Vector<BindedTexture> makeBindingImages() const;
 
-    void preCompile(GraphicsContext& graphicsContext);
     Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
 
     bool hasDivisors() const;
@@ -176,6 +175,8 @@ public:
                 return ptr;
         return nullptr;
     }
+
+    String generateSignature() const;
 
 private:
     Camera _camera;

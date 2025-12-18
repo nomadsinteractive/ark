@@ -292,7 +292,7 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
         return {std::move(stub), nullptr, impl};
     }
 
-    CHECK(position, "Dynamic/Kinematic/Static rigidbody must have a position");
+    CHECK(position, "Dynamic/Static rigidbody must have a position");
     btTransform btTrans;
     const V3 origin = shape->origin();
     const V3 pos = position->val() + origin;

@@ -29,7 +29,7 @@ public:
         return _value;
     }
 
-    bool update(uint32_t tick) override {
+    bool update(const uint32_t tick) override {
         return _timestamp.update(tick);
     }
 

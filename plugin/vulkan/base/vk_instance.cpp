@@ -26,7 +26,11 @@ VkBool32 vkDebugUtilsMessengerCallbackEXT(
     VkDebugUtilsMessageSeverityFlagBitsEXT           messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT                  messageTypes,
     const VkDebugUtilsMessengerCallbackDataEXT*      pCallbackData,
-    void*                                            pUserData) {
+    void*                                            pUserData)
+{
+    const VKInstance* instance = static_cast<VKInstance*>(pUserData);
+    if(const PipelineDescriptor* currentPipelineDescriptor = instance->currentPipelineDescriptor())
+        LOGE(currentPipelineDescriptor->generateSignature().c_str());
     if(messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
         LOGE("[%s] %s", pCallbackData->pMessageIdName, pCallbackData->pMessage);
     else if(messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
@@ -65,7 +69,7 @@ Vector<VkLayerProperties> getInstanceLayerProperties() {
 }
 
 VKInstance::VKInstance()
-    : _extensions({VK_KHR_SURFACE_EXTENSION_NAME}), _callback1(VK_NULL_HANDLE), _callback2(VK_NULL_HANDLE), _callback3(VK_NULL_HANDLE)
+    : _extensions({VK_KHR_SURFACE_EXTENSION_NAME}), _callback1(VK_NULL_HANDLE)
 {
 }
 
@@ -75,10 +79,6 @@ VKInstance::~VKInstance()
     PFN_vkDestroyDebugUtilsMessengerEXT pfnDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT");
     if(_callback1)
         pfnDestroyDebugUtilsMessengerEXT(_instance, _callback1, nullptr);
-    if(_callback2)
-        pfnDestroyDebugUtilsMessengerEXT(_instance, _callback2, nullptr);
-    if(_callback3)
-        pfnDestroyDebugUtilsMessengerEXT(_instance, _callback3, nullptr);
 #endif
     vkDestroyInstance(_instance, nullptr);
 }
@@ -169,12 +169,21 @@ const Vector<VkPhysicalDevice>& VKInstance::physicalDevices() const
     return _physical_devices;
 }
 
+PipelineDescriptor* VKInstance::currentPipelineDescriptor() const
+{
+    return _current_pipeline_descriptor;
+}
+
+void VKInstance::setCurrentPipelineDescriptor(PipelineDescriptor* pipelineDescriptor)
+{
+    _current_pipeline_descriptor = pipelineDescriptor;
+}
+
 void VKInstance::setupDebugMessageCallback()
 {
     // Must call extension functions through a function pointer:
-    PFN_vkCreateDebugUtilsMessengerEXT pfnCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT"));
-
-    VkDebugUtilsMessengerCreateInfoEXT callback1 = {
+    const PFN_vkCreateDebugUtilsMessengerEXT pfnCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT"));
+    const VkDebugUtilsMessengerCreateInfoEXT callback1 = {
         VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,  // sType
         nullptr,                                                  // pNext
         0,                                                        // flags
@@ -183,27 +192,9 @@ void VKInstance::setupDebugMessageCallback()
         VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |             // messageType
         VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT,
         vkDebugUtilsMessengerCallbackEXT,                         // pfnUserCallback
-        nullptr                                                   // pUserData
+        this                                                      // pUserData
     };
     VKUtil::checkResult(pfnCreateDebugUtilsMessengerEXT(_instance, &callback1, nullptr, &_callback1));
-
-//    callback1.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-//    callback1.pfnUserCallback = myDebugBreak;
-//    callback1.pUserData = NULL;
-//    VKUtil::checkResult(pfnCreateDebugUtilsMessengerEXT(instance, &callback1, NULL, &_callback2));
-
-//    VkDebugUtilsMessengerCreateInfoEXT callback3 = {
-//        VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,  // sType
-//        nullptr,                                                  // pNext
-//        0,                                                        // flags
-//        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT,          // messageSeverity
-//        VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |             // messageType
-//        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT,
-//        mystdOutLogger,                                           // pfnUserCallback
-//        nullptr                                                   // pUserData
-//    };
-
-//    VKUtil::checkResult(pfnCreateDebugUtilsMessengerEXT(instance, &callback3, NULL, &_callback3));
 }
 
 }
