@@ -35,16 +35,17 @@ template<typename T, typename U> auto findInKeywordPairs(const T& kws, U key) ->
     return {};
 }
 
-String buildShaderSource(const enums::ShaderStageBit shaderStage, const Optional<const Shader::StageManifest&>& stageManifest, const Vector<Shader::StageManifest>& defaultStages, const String& defaultShaderSource, const Scope& args)
+std::pair<String, document> findStageSourceAndManifest(const enums::ShaderStageBit shaderStage, const Optional<const Shader::StageManifest&>& stageManifest, const Vector<Shader::StageManifest>& defaultStages, const String& defaultShaderSource, const Scope& args)
 {
     if(stageManifest)
-        return stageManifest->_source->build(args);
+        return {stageManifest->_source->build(args), stageManifest->_manifest};
 
     if(const auto [stageManifestOpt, _] = findStageManifest(shaderStage, defaultStages); stageManifestOpt)
-        return stageManifestOpt->_source->build(args);
+        return {stageManifestOpt->_source->build(args), stageManifestOpt->_manifest};
 
     const Global<StringTable> globalStringTable;
-    return std::move(globalStringTable->getString("shaders", defaultShaderSource, true).value());
+    document manifest = document::make("stage", "", Vector{attribute::make("src", defaultShaderSource)});
+    return {std::move(globalStringTable->getString("shaders", defaultShaderSource, true).value()), std::move(manifest)};
 }
 
 }
@@ -150,9 +151,10 @@ PipelineBuildingContext Shader::BUILDER::makePipelineBuildingContext(const Scope
     const auto [computeOpt, computeIndex] = findStageManifest(enums::SHADER_STAGE_BIT_COMPUTE, _stages);
     if(vertexOpt || fragmentOpt || !computeOpt)
     {
-        document documentNone = Global<Constants>()->DOCUMENT_NONE;
-        context.addStage(buildShaderSource(enums::SHADER_STAGE_BIT_VERTEX, vertexOpt, defaultStages, "default.vert", args), documentNone, enums::SHADER_STAGE_BIT_VERTEX, enums::SHADER_STAGE_BIT_NONE);
-        context.addStage(buildShaderSource(enums::SHADER_STAGE_BIT_FRAGMENT, fragmentOpt, defaultStages, "texture.frag", args), std::move(documentNone), enums::SHADER_STAGE_BIT_FRAGMENT, enums::SHADER_STAGE_BIT_VERTEX);
+        auto [vertexSource, vertexManifest] = findStageSourceAndManifest(enums::SHADER_STAGE_BIT_VERTEX, vertexOpt, defaultStages, "default.vert", args);
+        auto [fragmentSource, fragmentManifest] = findStageSourceAndManifest(enums::SHADER_STAGE_BIT_FRAGMENT, fragmentOpt, defaultStages, "texture.frag", args);
+        context.addStage(std::move(vertexSource), std::move(vertexManifest), enums::SHADER_STAGE_BIT_VERTEX, enums::SHADER_STAGE_BIT_NONE);
+        context.addStage(std::move(fragmentSource), std::move(fragmentManifest), enums::SHADER_STAGE_BIT_FRAGMENT, enums::SHADER_STAGE_BIT_VERTEX);
     }
     else
         CHECK(computeOpt, "Shader must have at least one stage defined");

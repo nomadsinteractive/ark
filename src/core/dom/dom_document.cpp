@@ -10,6 +10,11 @@ DOMDocument::DOMDocument(const String& name, const String& value, Table<String, 
 {
 }
 
+DOMDocument::DOMDocument(const String& name, const String& value, Vector<attribute> attributes)
+    : DOMElement(name, value, std::move(attributes))
+{
+}
+
 document DOMDocument::getChild(const String& name) const
 {
     if(const auto iter = _children_by_name.find(name); iter != _children_by_name.end())

@@ -9,7 +9,7 @@
 #include "core/types/ref.h"
 #include "core/util/log.h"
 
-#include "graphics/components/shape.h"
+#include "../../../graphics/base/shape.h"
 #include "graphics/components/size.h"
 #include "graphics/base/v2.h"
 

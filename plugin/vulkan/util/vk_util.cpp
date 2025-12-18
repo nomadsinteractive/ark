@@ -23,7 +23,7 @@ namespace ark::plugin::vulkan {
 
 namespace {
 
-bool isDepthFormatSupported(VkPhysicalDevice physicalDevice, VkFormat format)
+bool isDepthFormatSupported(const VkPhysicalDevice physicalDevice, const VkFormat format)
 {
     VkFormatProperties formatProps;
     vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProps);

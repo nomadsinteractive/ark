@@ -12,7 +12,7 @@
 #include "graphics/base/v3.h"
 
 #include "app/base/application_context.h"
-#include "graphics/components/shape.h"
+#include "graphics/base/shape.h"
 
 #include "box2d/impl/collider_box2d.h"
 #include "graphics/base/rotation_axis_theta.h"

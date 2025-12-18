@@ -3,7 +3,7 @@
 #include "core/base/ref_manager.h"
 #include "core/types/global.h"
 
-#include "graphics/components/shape.h"
+#include "graphics/base/shape.h"
 
 #include "bullet/base/collision_shape_ref.h"
 #include "bullet/base/collision_object_ref.h"

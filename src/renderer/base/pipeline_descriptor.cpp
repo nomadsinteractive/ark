@@ -207,13 +207,7 @@ String PipelineDescriptor::generateSignature() const
     {
         if(!sb.empty())
             sb << ", ";
-        if(i._type == enums::SHADER_STAGE_BIT_VERTEX)
-            sb << "vertex";
-        else if(i._type == enums::SHADER_STAGE_BIT_FRAGMENT)
-            sb << "fragment";
-        else if(i._type == enums::SHADER_STAGE_BIT_COMPUTE)
-            sb << "compute";
-        sb << '(' << Documents::toString(i._manifest) << ')';
+        sb << Documents::toString(i._manifest);
     }
     return sb.str();
 }

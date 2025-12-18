@@ -6,7 +6,7 @@
 #include "graphics/base/rect.h"
 #include "graphics/components/size.h"
 
-#include "graphics/components/shape.h"
+#include "../../../graphics/base/shape.h"
 
 #include "renderer/base/resource_loader_context.h"
 

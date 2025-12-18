@@ -21,6 +21,12 @@ public:
 //  [[script::bindings::property]]
     const sp<BoxBundle>& renderLayers() const;
 
+//  [[script::bindings::auto]]
+    void addLayer(String name, sp<Layer> layer) const;
+
+//  [[script::bindings::auto]]
+    void addRenderLayer(String name, sp<RenderLayer> renderLayer) const;
+
     void onPoll(Wirable::WiringContext& context, const document& component) override;
 
 private:

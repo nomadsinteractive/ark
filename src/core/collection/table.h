@@ -172,6 +172,12 @@ protected:
 
 template<typename T, typename U> class Table : public _TableBase<T, U, true> {
 public:
+    Table() = default;
+    Table(std::initializer_list<std::pair<T, U>> items)
+    {
+        for(auto& [k, v] : items)
+            push_back(std::move(k), std::move(v));
+    }
 
     void push_back(T key, U value) {
         this->threadCheck();

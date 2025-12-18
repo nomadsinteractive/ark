@@ -108,6 +108,16 @@ const sp<BoxBundle>& Arena::renderLayers() const
     return _render_layers;
 }
 
+void Arena::addLayer(String name, sp<Layer> layer) const
+{
+    _stub->_layers.insert({std::move(name), std::move(layer)});
+}
+
+void Arena::addRenderLayer(String name, sp<RenderLayer> renderLayer) const
+{
+    _stub->_render_layers.insert({std::move(name), std::move(renderLayer)});
+}
+
 void Arena::onPoll(Wirable::WiringContext& context, const document& component)
 {
     if(const String layerName = Documents::getAttribute(component, "layer-name"))

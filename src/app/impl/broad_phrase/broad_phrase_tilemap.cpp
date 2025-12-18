@@ -7,7 +7,7 @@
 #include "core/util/math.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/components/shape.h"
+#include "../../../graphics/base/shape.h"
 #include "graphics/base/tilemap.h"
 #include "graphics/base/tilemap_layer.h"
 #include "graphics/base/tileset.h"

@@ -1,4 +1,4 @@
-#include "graphics/components/shape.h"
+#include "graphics/base/shape.h"
 
 #include "core/impl/variable/variable_dirty_mark.h"
 

@@ -10,6 +10,7 @@ namespace ark {
 class ARK_API DOMDocument : public DOMElement, public Implements<DOMDocument, DOMElement, DOMAttribute> {
 public:
     DOMDocument(const String& name, const String& value = "", Table<String, attribute> attributes = {});
+    DOMDocument(const String& name, const String& value, Vector<attribute> attributes);
 
 //  [[script::bindings::auto]]
     document getChild(const String& name) const;

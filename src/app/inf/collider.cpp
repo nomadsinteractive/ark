@@ -2,7 +2,7 @@
 
 #include "core/types/ref.h"
 
-#include "graphics/components/shape.h"
+#include "../../graphics/base/shape.h"
 
 namespace ark {
 

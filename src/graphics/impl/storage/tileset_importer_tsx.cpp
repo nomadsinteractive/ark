@@ -5,7 +5,7 @@
 #include "core/util/strings.h"
 
 #include "graphics/components/render_object.h"
-#include "graphics/components/shape.h"
+#include "../../base/shape.h"
 #include "graphics/base/tile.h"
 #include "graphics/base/tileset.h"
 

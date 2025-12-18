@@ -8,7 +8,7 @@
 #include "core/util/boolean_type.h"
 
 #include "graphics/base/v3.h"
-#include "graphics/components/shape.h"
+#include "graphics/base/shape.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/mesh.h"

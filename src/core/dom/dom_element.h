@@ -4,6 +4,7 @@
 #include "core/dom/dom_attribute.h"
 #include "core/collection/table.h"
 #include "core/types/implements.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 
@@ -11,6 +12,7 @@ namespace ark {
 class ARK_API DOMElement : public DOMAttribute, public Implements<DOMElement, DOMAttribute> {
 public:
     DOMElement(String name, String value, Table<String, attribute> attributes = {});
+    DOMElement(String name, String value, Vector<attribute> attributes);
 
 //  [[script::bindings::property]]
     const Vector<sp<DOMAttribute>>& attributes() const;

@@ -2086,6 +2086,12 @@ class Arena:
     def render_layers(self):
         pass
 
+    def add_layer(self, name: str, layer: Layer):
+        pass
+
+    def add_render_layer(self, name: str, render_layer: RenderLayer):
+        pass
+
 
 class Activity(Renderer):
     def __init__(self):
