@@ -23,6 +23,28 @@ namespace ark::plugin::vulkan {
 
 namespace {
 
+struct VKTextureComponentFormat {
+    VkFormat _normalized_uint8;
+    VkFormat _normalized_sint8;
+    VkFormat _integer_uint8;
+    VkFormat _integer_sint8;
+    VkFormat _normalized_uint16;
+    VkFormat _normalized_sint16;
+    VkFormat _integer_uint16;
+    VkFormat _integer_sint16;
+    VkFormat _float16;
+    VkFormat _float32;
+    VkFormat _integer_uint32;
+    VkFormat _integer_sint32;
+};
+
+constexpr VKTextureComponentFormat vkTextureComponentFormats[] = {
+    {VK_FORMAT_R8_UNORM, VK_FORMAT_R8_SNORM, VK_FORMAT_R8_UINT, VK_FORMAT_R8_SINT, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16_UINT, VK_FORMAT_R16_SINT, VK_FORMAT_R16_SFLOAT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT},
+    {VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8_SNORM, VK_FORMAT_R8G8_UINT, VK_FORMAT_R8G8_SINT, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16_UINT, VK_FORMAT_R16G16_SINT, VK_FORMAT_R16G16_SFLOAT, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32_SINT},
+    {VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R8G8B8_UINT, VK_FORMAT_R8G8B8_SINT, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16_UINT, VK_FORMAT_R16G16B16_SINT, VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT},
+    {VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R8G8B8A8_UINT, VK_FORMAT_R8G8B8A8_SINT, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R16G16B16A16_UINT, VK_FORMAT_R16G16B16A16_SINT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT}
+};
+
 bool isDepthFormatSupported(const VkPhysicalDevice physicalDevice, const VkFormat format)
 {
     VkFormatProperties formatProps;
@@ -30,23 +52,29 @@ bool isDepthFormatSupported(const VkPhysicalDevice physicalDevice, const VkForma
     return formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
 }
 
-VkFormat toVkChannelFormat(const VkFormat* channelFormat, const uint32_t depths, const Texture::Format format)
+VkFormat toVkChannelFormat(const uint32_t channels, const uint32_t componentSize, const Texture::Format format)
 {
-    if(depths == 1)
+    ASSERT(channels > 0 && channels < 5);
+    const VKTextureComponentFormat& channelFormat = vkTextureComponentFormats[channels - 1];
+    if(componentSize == 1)
     {
-        CHECK(!(format & Texture::FORMAT_FLOAT), "Component size one doesn't support float format");
-        return channelFormat[0];
+        CHECK(!format.contains(Texture::FORMAT_FLOAT), "Component size one doesn't support float format");
+        if(format.contains(Texture::FORMAT_INTEGER))
+            return format.contains(Texture::FORMAT_SIGNED) ? channelFormat._integer_sint8 : channelFormat._integer_uint8;
+        return format.contains(Texture::FORMAT_SIGNED) ? channelFormat._normalized_sint8 : channelFormat._normalized_uint8;
     }
-    if(depths == 2)
+    if(componentSize == 2)
     {
-        if(format & Texture::FORMAT_FLOAT)
-            return channelFormat[4];
-        return format & Texture::FORMAT_SIGNED ? channelFormat[3] : channelFormat[2];
+        if(format.contains(Texture::FORMAT_FLOAT))
+            return channelFormat._float16;
+        if(format.contains(Texture::FORMAT_INTEGER))
+            return format.contains(Texture::FORMAT_SIGNED) ? channelFormat._integer_sint16 : channelFormat._integer_uint16;
+        return format.contains(Texture::FORMAT_SIGNED) ? channelFormat._normalized_sint16 : channelFormat._normalized_uint16;
     }
-    DCHECK(depths == 4, "Unsupported color-depth: %d", depths * 8);
-    if(format & Texture::FORMAT_FLOAT)
-        return channelFormat[5];
-    return format & Texture::FORMAT_SIGNED ? channelFormat[7] : channelFormat[6];
+    CHECK(componentSize == 4, "Unsupported color component depth: %d", componentSize);
+    if(format.contains(Texture::FORMAT_INTEGER))
+        return format.contains(Texture::FORMAT_SIGNED) ? channelFormat._integer_sint32 : channelFormat._integer_uint32;
+    return channelFormat._float32;
 }
 
 }
@@ -169,23 +197,17 @@ VkFormat VKUtil::toAttributeFormat(const Attribute::Type type, const uint32_t le
     return VK_FORMAT_R32G32B32A32_SFLOAT;
 }
 
-VkFormat VKUtil::toTextureFormat(const uint32_t depths, const uint8_t channels, const Texture::Format format)
+VkFormat VKUtil::toTextureFormat(const uint32_t componentSize, const uint8_t channels, const Texture::Format format)
 {
-    constexpr VkFormat vkFormats[] = {
-        VK_FORMAT_R8_UNORM, VK_FORMAT_R8_SNORM, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16_SFLOAT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT,
-        VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8_SNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16_SFLOAT, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32_SINT,
-        VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT,
-        VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT
-    };
-    CHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_FLOAT), "FORMAT_SIGNED format can not combined with FORMAT_FLOAT");
-    const uint32_t channel8 = (channels - 1) * 8;
+    CHECK(!(format.contains(Texture::FORMAT_INTEGER) && format.contains(Texture::FORMAT_FLOAT)), "FORMAT_INTEGER format can not combined with FORMAT_FLOAT");
+    CHECK(!(format.contains(Texture::FORMAT_SIGNED) && format.contains(Texture::FORMAT_FLOAT)), "FORMAT_SIGNED format can not combined with FORMAT_FLOAT");
     CHECK_WARN(channels != 3, "RGB texture format may not be supported by all the graphics drivers");
-    return toVkChannelFormat(vkFormats + channel8, depths, format);
+    return toVkChannelFormat(channels, componentSize, format);
 }
 
 VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, const Texture::Format format)
 {
-    return toTextureFormat(bitmap.depth(), bitmap.channels(), format);
+    return toTextureFormat(bitmap.componentSize(), bitmap.channels(), format);
 }
 
 VkFormat VKUtil::toTextureFormat(const Texture::Format format)
@@ -234,7 +256,7 @@ VkImageAspectFlags VKUtil::toTextureAspect(const Texture::Usage usage)
     return vkFlags;
 }
 
-VkShaderStageFlagBits VKUtil::toStage(enums::ShaderStageBit stage)
+VkShaderStageFlagBits VKUtil::toStage(const enums::ShaderStageBit stage)
 {
 #ifndef ANDROID
     constexpr VkShaderStageFlagBits vkStages[enums::SHADER_STAGE_BIT_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
@@ -246,7 +268,7 @@ VkShaderStageFlagBits VKUtil::toStage(enums::ShaderStageBit stage)
     return vkStages[stage];
 }
 
-VkPrimitiveTopology VKUtil::toPrimitiveTopology(enums::DrawMode mode)
+VkPrimitiveTopology VKUtil::toPrimitiveTopology(const enums::DrawMode mode)
 {
     constexpr VkPrimitiveTopology topologies[enums::DRAW_MODE_COUNT] = {VK_PRIMITIVE_TOPOLOGY_LINE_LIST, VK_PRIMITIVE_TOPOLOGY_POINT_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP};
     CHECK(mode >= 0 && mode < enums::DRAW_MODE_COUNT, "Unsupported render-mode: %d", mode);

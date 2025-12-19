@@ -43,7 +43,7 @@ SDL_GPUTextureFormat toTextureFormat(const Bitmap& bitmap, const Texture::Format
     CHECK(bitmap.channels() != 3, "3 channels textures are not supported");
     CHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_FLOAT), "FORMAT_SIGNED format can not combined with FORMAT_FLOAT");
     const uint32_t channel8 = (bitmap.channels() - 1) * 8;
-    return toChannelFormat(sdlFormats + channel8, bitmap.depth(), format);
+    return toChannelFormat(sdlFormats + channel8, bitmap.componentSize(), format);
 }
 
 SDL_GPUTextureUsageFlags toTextureUsageFlags(const Texture::Usage usage)

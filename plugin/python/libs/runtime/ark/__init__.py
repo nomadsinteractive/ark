@@ -910,7 +910,11 @@ class Bitmap:
         return 0
 
     @property
-    def depth(self) -> int:
+    def pixel_size(self) -> int:
+        return 0
+
+    @property
+    def component_size(self) -> int:
         return 0
 
     @property

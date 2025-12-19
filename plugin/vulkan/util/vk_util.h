@@ -26,7 +26,7 @@ public:
     static VkImageLayout toAttachmentImageLayout(Texture::Usage usage);
 
     static VkFormat toAttributeFormat(Attribute::Type type, uint32_t length);
-    static VkFormat toTextureFormat(uint32_t depths, uint8_t channels, Texture::Format format);
+    static VkFormat toTextureFormat(uint32_t componentSize, uint8_t channels, Texture::Format format);
     static VkFormat toTextureFormat(const Bitmap& bitmap, Texture::Format format);
     static VkFormat toTextureFormat(Texture::Format format);
     static VkFrontFace toFrontFace(PipelineDescriptor::FrontFace frontFace);

@@ -28,9 +28,9 @@ public:
 //  [[script::bindings::property]]
     uint8_t channels() const;
 //  [[script::bindings::property]]
-    uint32_t componentSize() const;
+    uint32_t pixelSize() const;
 //  [[script::bindings::property]]
-    uint32_t depth() const;
+    uint32_t componentSize() const;
 
 //  [[script::bindings::property]]
     uint32_t rowBytes() const;

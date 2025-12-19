@@ -31,7 +31,7 @@ sp<Bitmap> BitmapBundle::getBitmap(const NamedHash& resid) const
     const uint32_t h = static_cast<uint32_t>(bounds.height() * size.y());
     const uint32_t uvLeft = static_cast<uint32_t>(position.left());
     const uint32_t uvTop = static_cast<uint32_t>(position.top());
-    const uint32_t stride = _atlas_bitmap->componentSize() * w;
+    const uint32_t stride = _atlas_bitmap->pixelSize() * w;
     for(uint32_t i = 0; i < h; ++i)
         b.draw(ox, static_cast<int32_t>(i) + oy, _atlas_bitmap->at(uvLeft, uvTop + i), w, 1, stride);
 

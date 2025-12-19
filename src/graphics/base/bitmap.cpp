@@ -46,14 +46,14 @@ uint8_t Bitmap::channels() const
     return _channels;
 }
 
-uint32_t Bitmap::componentSize() const
+uint32_t Bitmap::pixelSize() const
 {
     return _row_bytes / _width;
 }
 
-uint32_t Bitmap::depth() const
+uint32_t Bitmap::componentSize() const
 {
-    return componentSize() / _channels;
+    return pixelSize() / _channels;
 }
 
 uint32_t Bitmap::rowBytes() const
@@ -78,7 +78,7 @@ uint8_t* Bitmap::at(const uint32_t x, const uint32_t y) const
 
 Bitmap Bitmap::resize(const uint32_t width, const uint32_t height) const
 {
-    const uint32_t d = depth();
+    const uint32_t d = componentSize();
     CHECK(d == 1 || d == 4, "Unsupported bitmap depth: %d", d);
     Bitmap s(width, height, width * _channels * d, _channels, true);
     if(d == 1)
@@ -91,7 +91,7 @@ Bitmap Bitmap::resize(const uint32_t width, const uint32_t height) const
 Bitmap Bitmap::crop(const uint32_t x, const uint32_t y, const uint32_t w, const uint32_t h) const
 {
     CHECK(x + w <= width() && y + h <= height(), "Cropped image out of bounds. cropped bitmap(%d, %d, %d, %d), image size(%d, %d)", x, y, w, h, width(), height());
-    const uint32_t d = depth();
+    const uint32_t d = componentSize();
     Bitmap s(w, h, w * _channels * d, _channels, true);
     for(uint32_t i = 0; i < h; ++i)
         memcpy(s.at(0, i), at(x, i), s.rowBytes());
@@ -131,7 +131,6 @@ void Bitmap::draw(const int32_t x, const int32_t y, void* buf, const uint32_t wi
 void Bitmap::dump(const StringView filepath) const
 {
     const int32_t pixel_size = _channels;
-    const int32_t depth = 8;
 
     FILE* fp = fopen(filepath.data(), "wb");
     if(!fp)
@@ -154,7 +153,7 @@ void Bitmap::dump(const StringView filepath) const
                          info_ptr,
                          _width,
                          _height,
-                         depth,
+                         8,
                          colorType,
                          PNG_INTERLACE_NONE,
                          PNG_COMPRESSION_TYPE_DEFAULT,
