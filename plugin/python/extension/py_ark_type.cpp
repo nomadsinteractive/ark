@@ -39,7 +39,7 @@ PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, const int32_t o
     Py_RETURN_RICHCOMPARE(hash1, hash2, op);
 }
 
-Py_hash_t __hash__(PyArkType::Instance* self)
+Py_hash_t __hash__(const PyArkType::Instance* self)
 {
     return static_cast<Py_hash_t>(self->box->id());
 }
@@ -48,7 +48,7 @@ struct BreakException {
     int32_t _retcode;
 };
 
-int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
+int __traverse__(const PyArkType::Instance* self, visitproc visitor, void* args)
 {
     if(const sp<Debris> debris = self->box->as<Debris>())
         try {
@@ -65,7 +65,7 @@ int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
     return 0;
 }
 
-int __clear__(PyArkType::Instance* self)
+int __clear__(const PyArkType::Instance* self)
 {
     if(const sp<Debris> debris = self->box->as<Debris>())
         debris->traverse([](const Box& packed) {
@@ -163,7 +163,7 @@ PyTypeObject* PyArkType::basetype()
     static PyTypeObject ark_basetype = {
         PyVarObject_HEAD_INIT(nullptr, 0)
         "ark.Type",
-        sizeof(PyArkType::Instance),
+        sizeof(Instance),
         0,
         reinterpret_cast<destructor>(__dealloc__),          /* tp_dealloc */
         0,                                                  /* tp_vectorcall_offset */

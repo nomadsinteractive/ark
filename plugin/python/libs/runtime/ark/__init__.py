@@ -2718,7 +2718,7 @@ class GlyphMaker:
 
 class Text:
     def __init__(self, render_layer: RenderLayer, text: String | str | None = None, position: Optional[TYPE_VEC3] = None, layout_param: Optional["LayoutParam"] = None, scale: Optional[TYPE_VEC2] = None, glyph_maker: Any = None,
-                 letter_spacing: float = 0, line_height: float = 0, line_indent: float = 0):
+                 letter_spacing: float = 0, line_height: "LayoutLength" = 0, line_indent: float = 0):
         pass
 
     @property

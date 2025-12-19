@@ -5,7 +5,7 @@
 
 namespace ark {
 
-Box::Box(TypeId typeId, const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor) noexcept
+Box::Box(const TypeId typeId, const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor) noexcept
     : _type_id(typeId), _class(clazz), _stub(std::make_shared<_StubVariant>(PtrStub(sharedPtr, instancePtr, std::move(destructor))))
 {
 }
