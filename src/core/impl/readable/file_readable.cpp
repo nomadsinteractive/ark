@@ -35,11 +35,6 @@ int32_t FileReadable::seek(int32_t position, int32_t whence)
     return fseek(_fp, position, whence);
 }
 
-int32_t FileReadable::remaining()
-{
-    return _size - ftell(_fp);
-}
-
 uint32_t FileReadable::position()
 {
     return ftell(_fp);

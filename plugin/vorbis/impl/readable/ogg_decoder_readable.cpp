@@ -66,14 +66,6 @@ int32_t OggDecoderReadable::seek(const int32_t position, const int32_t whence)
     return ov_pcm_seek(&_ogg_file, position);
 }
 
-int32_t OggDecoderReadable::remaining()
-{
-    const ogg_int64_t total = ov_pcm_total(&_ogg_file, -1);
-    const ogg_int64_t tell = ov_pcm_tell(&_ogg_file);
-    DCHECK(total != OV_EINVAL && tell != OV_EINVAL, "ov_pcm_total ov_pcm_tell failed.");
-    return static_cast<int32_t>(total - tell);
-}
-
 uint32_t OggDecoderReadable::position()
 {
     return ov_pcm_tell(&_ogg_file);

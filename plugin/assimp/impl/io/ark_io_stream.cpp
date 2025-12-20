@@ -6,8 +6,8 @@ using namespace Assimp;
 
 namespace ark::plugin::assimp {
 
-ArkIOStream::ArkIOStream(sp<Readable> readable)
-    : _readable(std::move(readable)), _file_size(_readable->remaining())
+ArkIOStream::ArkIOStream(sp<Readable> readable, const size_t fileSize)
+    : _readable(std::move(readable)), _file_size(fileSize)
 {
 }
 
@@ -30,7 +30,7 @@ aiReturn ArkIOStream::Seek(const size_t pOffset, const aiOrigin pOrigin)
 
 size_t ArkIOStream::Tell() const
 {
-    return _file_size - _readable->remaining();
+    return _readable->position();
 }
 
 size_t ArkIOStream::FileSize() const

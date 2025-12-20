@@ -42,11 +42,6 @@ public:
         return _delegate->seek(position, whence);
     }
 
-    int32_t remaining() override
-    {
-        return _delegate->remaining();
-    }
-
     uint32_t position() override
     {
         return _delegate->position();
@@ -109,11 +104,6 @@ uint32_t AudioMixer::read(void* buffer, const uint32_t size)
 }
 
 int32_t AudioMixer::seek(const int32_t position, const int32_t whence)
-{
-    return 0;
-}
-
-int32_t AudioMixer::remaining()
 {
     return 0;
 }

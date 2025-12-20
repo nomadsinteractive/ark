@@ -116,12 +116,6 @@ public:
         return 0;
     }
 
-    int32_t remaining() override
-    {
-        DFATAL("Unimplemented");
-        return 0;
-    }
-
     uint32_t position() override
     {
         return zip_ftell(_zip_file);

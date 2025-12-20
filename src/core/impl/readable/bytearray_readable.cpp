@@ -12,15 +12,16 @@ BytearrayReadable::BytearrayReadable(bytearray array)
 {
 }
 
-uint32_t BytearrayReadable::read(void* buffer, uint32_t size)
+uint32_t BytearrayReadable::read(void* buffer, const uint32_t size)
 {
-    const uint32_t s = std::min<uint32_t>(size, remaining());
+    const size_t remaining = _bytearray->length() - _position;
+    const uint32_t s = std::min<uint32_t>(size, remaining);
     memcpy(buffer, _bytearray->buf() + _position, s);
     _position += s;
     return s;
 }
 
-int32_t BytearrayReadable::seek(int32_t position, int32_t whence)
+int32_t BytearrayReadable::seek(const int32_t position, const int32_t whence)
 {
     switch(whence)
     {
@@ -36,11 +37,6 @@ int32_t BytearrayReadable::seek(int32_t position, int32_t whence)
     }
     DCHECK(_position >= 0 && static_cast<size_t>(_position) <= _bytearray->length(), "Cursor out of bounds: %d, position: %d, whence: %d", _position, position, whence);
     return _position;
-}
-
-int32_t BytearrayReadable::remaining()
-{
-    return _bytearray->length() - _position;
 }
 
 uint32_t BytearrayReadable::position()

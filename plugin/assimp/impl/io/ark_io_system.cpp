@@ -3,6 +3,7 @@
 #include "core/ark.h"
 
 #include "assimp/impl/io/ark_io_stream.h"
+#include "core/inf/asset.h"
 
 using namespace Assimp;
 
@@ -24,7 +25,11 @@ IOStream* ArkIOSystem::Open(const char* pFile, const char* pMode)
 {
     const String mode = pMode;
     if(mode == "r" || mode == "rb")
-        return new ArkIOStream(Ark::instance().tryOpenAsset(pFile));
+    {
+        const sp<Asset> asset = Ark::instance().getAsset(pFile);
+        if(asset)
+            return new ArkIOStream(asset->open(), asset->size());
+    }
     return nullptr;
 }
 

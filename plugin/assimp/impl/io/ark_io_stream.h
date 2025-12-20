@@ -1,25 +1,22 @@
-#ifndef ARK_PLUGIN_ASSIMP_IMPL_IO_ARK_IO_STREAM_H_
-#define ARK_PLUGIN_ASSIMP_IMPL_IO_ARK_IO_STREAM_H_
+#pragma once
 
 #include <assimp/IOStream.hpp>
 
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
-namespace ark {
-namespace plugin {
-namespace assimp {
+namespace ark::plugin::assimp {
 
 class ArkIOStream : public Assimp::IOStream {
 public:
-    ArkIOStream(sp<Readable> readable);
+    ArkIOStream(sp<Readable> readable, size_t fileSize);
 
-    virtual size_t Read(void* pvBuffer, size_t pSize, size_t pCount);
-    virtual size_t Write(const void* pvBuffer, size_t pSize, size_t pCount);
-    virtual aiReturn Seek(size_t pOffset, aiOrigin pOrigin);
-    virtual size_t Tell() const;
-    virtual size_t FileSize() const;
-    virtual void Flush();
+    size_t Read(void* pvBuffer, size_t pSize, size_t pCount) override;
+    size_t Write(const void* pvBuffer, size_t pSize, size_t pCount) override;
+    aiReturn Seek(size_t pOffset, aiOrigin pOrigin) override;
+    size_t Tell() const override;
+    size_t FileSize() const override;
+    void Flush() override;
 
 private:
     sp<Readable> _readable;
@@ -27,7 +24,3 @@ private:
 };
 
 }
-}
-}
-
-#endif
