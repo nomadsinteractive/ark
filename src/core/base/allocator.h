@@ -9,18 +9,9 @@ namespace ark {
 
 class ARK_API Allocator {
 private:
-    struct Block {
-        Block(size_t blockSize);
-
-        uint8_t* allocate(size_t size);
-        void reset();
-
-        Vector<uint8_t> _memory;
-        uint8_t* _allocated_ptr;
-    };
+    struct Block;
 
 public:
-
     struct Pool {
         Pool(size_t blockSize = 128 * 1024);
 

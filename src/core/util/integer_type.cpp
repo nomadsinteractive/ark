@@ -3,7 +3,6 @@
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
 #include "core/base/constants.h"
-#include "core/base/expression.h"
 #include "core/base/future.h"
 #include "core/base/named_hash.h"
 #include "core/impl/variable/at_least.h"
@@ -18,6 +17,7 @@
 #include "core/impl/variable/variable_ternary.h"
 #include "core/inf/array.h"
 #include "core/types/global.h"
+#include "core/util/expression.h"
 #include "core/util/operators.h"
 
 namespace ark {

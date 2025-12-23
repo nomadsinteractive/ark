@@ -2,6 +2,33 @@
 
 namespace ark {
 
+struct Allocator::Block {
+
+    Block(const size_t blockSize)
+        : _memory(blockSize), _allocated_ptr(&_memory.front())
+    {
+    }
+
+    uint8_t* allocate(const size_t size)
+    {
+        const uint8_t* const end = &_memory.back() + 1;
+        if(_allocated_ptr + size > end)
+            return nullptr;
+
+        uint8_t* ptr = _allocated_ptr;
+        _allocated_ptr += size;
+        return ptr;
+    }
+
+    void reset()
+    {
+        _allocated_ptr = &_memory.front();
+    }
+
+    Vector<uint8_t> _memory;
+    uint8_t* _allocated_ptr;
+};
+
 Allocator::Allocator(sp<Pool> pool)
     : _pool(std::move(pool)), _block_size(_pool ? _pool->_block_size : 128 * 1024)
 {
@@ -18,14 +45,13 @@ Allocator::~Allocator()
     }
 }
 
-uint8_t* Allocator::sbrk(size_t size, size_t alignment)
+uint8_t* Allocator::sbrk(const size_t size, const size_t alignment)
 {
-    size_t m = size % alignment;
-    size_t sizeNeeded = size + (m ? alignment - m : 0);
+    const size_t m = size % alignment;
+    const size_t sizeNeeded = size + (m ? alignment - m : 0);
 
     uint8_t* ptr = _sbrk(sizeNeeded);
-    size_t mod = reinterpret_cast<size_t>(ptr) % alignment;
-    if(mod != 0)
+    if(const size_t mod = reinterpret_cast<size_t>(ptr) % alignment)
         ptr += (alignment - mod);
 
     return ptr;
@@ -51,27 +77,6 @@ uint8_t* Allocator::_sbrk(const size_t size)
 ByteArray::Borrowed Allocator::sbrkSpan(size_t size, size_t alignment)
 {
     return {sbrk(size, alignment), size};
-}
-
-Allocator::Block::Block(size_t blockSize)
-    : _memory(blockSize), _allocated_ptr(&_memory.front())
-{
-}
-
-uint8_t* Allocator::Block::allocate(size_t size)
-{
-    const uint8_t* const end = &_memory.back() + 1;
-    if(_allocated_ptr + size > end)
-        return nullptr;
-
-    uint8_t* ptr = _allocated_ptr;
-    _allocated_ptr += size;
-    return ptr;
-}
-
-void Allocator::Block::reset()
-{
-    _allocated_ptr = &_memory.front();
 }
 
 Allocator::Pool::Pool(size_t blockSize)

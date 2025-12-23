@@ -131,8 +131,7 @@ public:
                 if(isspace(expr.at(i)))
                     continue;
                 for(const Operator<T>& iter : OP::OPS) {
-                    size_t c = iter.isMatch(expr, i);
-                    if(c) {
+                    if(size_t c = iter.isMatch(expr, i)) {
                         op = iter;
                         rvalue = expr.substr(c).strip();
                         return;

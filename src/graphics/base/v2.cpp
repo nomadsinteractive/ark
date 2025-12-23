@@ -1,6 +1,5 @@
 #include "graphics/base/v2.h"
 
-#include "core/base/range.h"
 #include "core/base/slice.h"
 #include "core/util/math.h"
 #include "core/util/strings.h"
@@ -101,7 +100,7 @@ V2 operator /(const V2& lvalue, const V2& rvalue)
     return {lvalue._x / rvalue._x, lvalue._y / rvalue._y};
 }
 
-V2 operator /(const V2& lvalue, float rvalue)
+V2 operator /(const V2& lvalue, const float rvalue)
 {
     return {lvalue._x / rvalue, lvalue._y / rvalue};
 }
@@ -144,12 +143,6 @@ float* V2::value()
 const float& V2::operator[](const size_t idx) const
 {
     return reinterpret_cast<const float*>(this)[idx];
-}
-
-Range<float> V2::subscribe(const Slice& slice, const size_t length)
-{
-    const Slice adjusted = slice.adjustIndices(length);
-    return {&_x + adjusted.begin(), &_x + adjusted.end(), slice.step()};
 }
 
 float& V2::operator[](const size_t idx)

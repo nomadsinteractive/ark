@@ -199,7 +199,6 @@ View::View(sp<Stub> stub)
 void View::onPoll(WiringContext& context)
 {
     context.setComponent(layoutSize());
-    context.setComponent(sp<Shape>::make(Shape::TYPE_AABB, layoutSize()->val()));
 }
 
 void View::onWire(const WiringContext& context, const Box& self)

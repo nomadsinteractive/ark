@@ -50,8 +50,6 @@ public:
     const float& operator[](size_t idx) const;
     float& operator[](size_t idx);
 
-    Range<float> subscribe(const Slice& slice, size_t length);
-
 protected:
     static constexpr float MIN_NORMALIZE_LENGTH = 0.000000001f;
 

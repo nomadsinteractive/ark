@@ -4,7 +4,6 @@
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
 #include "core/base/wrapper.h"
-#include "core/base/expression.h"
 #include "core/impl/variable/at_least.h"
 #include "core/impl/variable/at_most.h"
 #include "core/impl/variable/clamp.h"
@@ -19,6 +18,7 @@
 #include "core/impl/variable/variable_ternary.h"
 #include "core/impl/variable/variable_tracking.h"
 #include "core/util/boolean_type.h"
+#include "core/util/expression.h"
 #include "core/util/operators.h"
 
 #include "app/base/application_context.h"
