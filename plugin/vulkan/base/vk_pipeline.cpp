@@ -360,11 +360,10 @@ void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
 
 void VKPipeline::addDescriptorSetLayout(const VkDevice device, const Vector<VkDescriptorSetLayoutBinding>& setLayoutBindings)
 {
-    const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
+    const VkDescriptorSetLayoutCreateInfo descriptorLayout = {VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO, nullptr, VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT, static_cast<uint32_t>(setLayoutBindings.size()), setLayoutBindings.data()};
     VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
     VKUtil::checkResult(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &setLayout));
     _descriptor_set_layouts.push_back(setLayout);
-    _descriptor_sets.push_back(VK_NULL_HANDLE);
 }
 
 void VKPipeline::setupDescriptorSetLayout(GraphicsContext& graphicsContext)
@@ -417,10 +416,14 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext)
     const sp<VKDevice>& device = _renderer->device();
     const PipelineDescriptor& pipelineDescriptor = _pipeline_bindings.pipelineDescriptor();
 
-    const VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(_descriptor_pool->vkDescriptorPool(), _descriptor_set_layouts.data(), _descriptor_set_layouts.size());
-    VKUtil::checkResult(vkResetDescriptorPool(device->vkLogicalDevice(), _descriptor_pool->vkDescriptorPool(), 0));
-    VKUtil::checkResult(vkAllocateDescriptorSets(device->vkLogicalDevice(), &allocInfo, _descriptor_sets.data()));
-
+    if(_descriptor_sets.empty())
+    {
+        DASSERT(_descriptor_set_layouts.size() == 4);
+        const VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(_descriptor_pool->vkDescriptorPool(), _descriptor_set_layouts.data(), _descriptor_set_layouts.size());
+        VKUtil::checkResult(vkResetDescriptorPool(device->vkLogicalDevice(), _descriptor_pool->vkDescriptorPool(), 0));
+        _descriptor_sets.resize(_descriptor_set_layouts.size());
+        VKUtil::checkResult(vkAllocateDescriptorSets(device->vkLogicalDevice(), &allocInfo, _descriptor_sets.data()));
+    }
     Vector<VkWriteDescriptorSet> writeDescriptorSets;
 
     _ubos.clear();
@@ -514,9 +517,9 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
 
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.traits().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->currentState();
-    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.acquireRenderPass(), 0);
+    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.ensureRenderPass(), 0);
 
-    Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = state.renderPassPhrase()->makeColorBlendAttachmentStates(colorBlendAttachmentState, pipelineDescriptor.layout()->colorAttachmentCount());
+    Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = state._render_pass_phrase->makeColorBlendAttachmentStates(colorBlendAttachmentState, pipelineDescriptor.layout()->colorAttachmentCount());
     CHECK_WARN(!blendAttachmentStates.empty(), "Graphics pipeline has no color attachment");
     VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(static_cast<uint32_t>(blendAttachmentStates.size()), blendAttachmentStates.data());
 
@@ -529,7 +532,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
         vkScissors = VkRect2D({{static_cast<int32_t>(scissorRect.left()), static_cast<int32_t>(scissorRect.top())}, {static_cast<uint32_t>(scissorRect.width()), static_cast<uint32_t>(scissorRect.height())}});
     }
     else
-        vkScissors = VkRect2D({{0, 0}, {state.renderPassPhrase()->resolution().width, state.renderPassPhrase()->resolution().height}});
+        vkScissors = VkRect2D({{0, 0}, {state._render_pass_phrase->resolution().width, state._render_pass_phrase->resolution().height}});
 
     const VertexLayout vertexLayout = setupVertexLayout(pipelineDescriptor.layout());
     pipelineCreateInfo.pVertexInputState = &vertexLayout.inputState;
@@ -563,17 +566,18 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
 {
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.traits().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->currentState();
-    const VkCommandBuffer commandBuffer = state.ensureRenderPass();
+    _renderer->instance()->setCurrentPipelineDescriptor(_pipeline_bindings.pipelineDescriptor().get());
+
+    const VkCommandBuffer commandBuffer = state.ensureRenderPassCommandBuffer();
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, _descriptor_sets.size(), _descriptor_sets.data(), 0, nullptr);
 
     const VkDeviceSize offsets = 0;
-    VkBuffer vkVertexBuffer = (VkBuffer)(drawingContext._vertices.id());
+    const VkBuffer vkVertexBuffer = reinterpret_cast<VkBuffer>(drawingContext._vertices.id());
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, &offsets);
     if(drawingContext._indices)
-        vkCmdBindIndexBuffer(commandBuffer, (VkBuffer)(drawingContext._indices.id()), 0, kVKIndexType);
+        vkCmdBindIndexBuffer(commandBuffer, reinterpret_cast<VkBuffer>(drawingContext._indices.id()), 0, kVKIndexType);
 
-    _renderer->instance()->setCurrentPipelineDescriptor(_pipeline_bindings.pipelineDescriptor().get());
     if(const Optional<Rect>& scissor = drawingContext._scissor)
     {
         const PipelineDescriptor::TraitScissorTest* scissorTest = drawingContext._bindings->pipelineDescriptor()->getTrait<PipelineDescriptor::TraitScissorTest>();
@@ -581,7 +585,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
         const VkRect2D vkScissor{{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}};
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
         _baked_renderer->draw(graphicsContext, drawingContext, commandBuffer);
-        const VkRect2D vkPostScissor({{0, 0}, {state.renderPassPhrase()->resolution().width, state.renderPassPhrase()->resolution().height}});
+        const VkRect2D vkPostScissor({{0, 0}, {state._render_pass_phrase->resolution().width, state._render_pass_phrase->resolution().height}});
         vkCmdSetScissor(commandBuffer, 0, 1, &vkPostScissor);
     }
     else
@@ -592,7 +596,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
 void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.traits().ensure<VKGraphicsContext>();
-    const VkCommandBuffer commandBuffer = vkGraphicsContext->currentState().commandBuffer();
+    const VkCommandBuffer commandBuffer = vkGraphicsContext->currentState()._command_buffer;
     // const sp<VKComputeContext>& vkComputeContext = graphicsContext.traits().ensure<VKComputeContext>();
     // const VkCommandBuffer commandBuffer = vkComputeContext->buildCommandBuffer(graphicsContext);
 

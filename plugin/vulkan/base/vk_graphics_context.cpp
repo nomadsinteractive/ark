@@ -14,14 +14,14 @@ namespace ark::plugin::vulkan {
 
 namespace {
 
-VkClearColorValue toVkClearColorValue(const V4 rgba)
+VkClearColorValue toVkClearColorValue(const V4& rgba)
 {
     return {{rgba.x(), rgba.y(), rgba.z(), rgba.w()}};
 }
 
 class MainRenderPassPhrase final : public VKGraphicsContext::RenderPassPhrase {
 public:
-    MainRenderPassPhrase(const RenderEngineContext::Resolution& resolution, const sp<VKRenderer>& renderer, const VkCommandBuffer commandBuffer, const VkFramebuffer framebuffer, const V4 backgroundColor)
+    MainRenderPassPhrase(const RenderEngineContext::Resolution& resolution, const sp<VKRenderer>& renderer, const VkCommandBuffer commandBuffer, const VkFramebuffer framebuffer, const V4& backgroundColor)
         : RenderPassPhrase(resolution, 1, commandBuffer), _renderer(renderer), _framebuffer(framebuffer), _clear_color_value(toVkClearColorValue(backgroundColor)) {
     }
 
@@ -81,15 +81,16 @@ VKGraphicsContext::~VKGraphicsContext()
     vkDestroySemaphore(_renderer->vkLogicalDevice(), _semaphore_present_complete, nullptr);
 }
 
-void VKGraphicsContext::begin(const uint32_t imageId, const V4 backgroundColor)
+void VKGraphicsContext::begin(const uint32_t imageId, const V4& backgroundColor)
 {
     const VKSwapChain& renderTarget = _renderer->renderTarget();
     const Vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
 
     VkCommandBuffer commandBuffer = commandBuffers.at(imageId);
-    _state_stack.push(State(sp<RenderPassPhrase>::make<MainRenderPassPhrase>(RenderEngineContext::Resolution{_render_target->width(), _render_target->height()}, _renderer, commandBuffer, renderTarget.frameBuffers().at(imageId), backgroundColor), commandBuffer, false));
+    const RenderEngineContext::Resolution resolution = {_render_target->width(), _render_target->height()};
+    _state_stack.emplace(sp<RenderPassPhrase>::make<MainRenderPassPhrase>(resolution, _renderer, commandBuffer, renderTarget.frameBuffers().at(imageId), backgroundColor), commandBuffer, true);
 
-    constexpr VkCommandBufferBeginInfo cmdBufInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+    constexpr VkCommandBufferBeginInfo cmdBufInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     VKUtil::checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
 
     _submit_queue.begin(_semaphore_present_complete);
@@ -132,12 +133,12 @@ VKGraphicsContext::State& VKGraphicsContext::currentState()
     return _state_stack.top();
 }
 
-void VKGraphicsContext::pushState(sp<RenderPassPhrase> starter)
+void VKGraphicsContext::pushState(sp<RenderPassPhrase> renderPassPhrase)
 {
     DCHECK(!_state_stack.empty(), "First state must be push by VKGraphicsContext::begin");
-    const bool beginCommandBuffer = _state_stack.top()._render_pass != VK_NULL_HANDLE;
-    const VkCommandBuffer commandBuffer = beginCommandBuffer ? starter->vkCommandBuffer() : _state_stack.top()._command_buffer;
-    _state_stack.push(State(std::move(starter), commandBuffer, beginCommandBuffer));
+    const bool commandBufferBegan = _state_stack.top()._render_pass == VK_NULL_HANDLE;
+    const VkCommandBuffer commandBuffer = commandBufferBegan ? _state_stack.top()._command_buffer : renderPassPhrase->vkCommandBuffer();
+    _state_stack.push(State(std::move(renderPassPhrase), commandBuffer, commandBufferBegan));
 }
 
 VkCommandBuffer VKGraphicsContext::popState()
@@ -159,7 +160,7 @@ VkCommandBuffer VKGraphicsContext::popState()
     return commandBuffer;
 }
 
-void VKGraphicsContext::submit(VkQueue queue)
+void VKGraphicsContext::submit(const VkQueue queue)
 {
     _submit_queue.submit(queue);
 }
@@ -174,36 +175,27 @@ VkSemaphore VKGraphicsContext::semaphorePresentComplete() const
     return _semaphore_present_complete;
 }
 
-VKGraphicsContext::State::State(sp<RenderPassPhrase> renderPassPhrase, const VkCommandBuffer commandBuffer, const bool beginCommandBuffer)
-    : _render_pass_phrase(std::move(renderPassPhrase)), _command_buffer(commandBuffer), _begin_command_buffer(beginCommandBuffer), _render_pass(VK_NULL_HANDLE)
+VKGraphicsContext::State::State(sp<RenderPassPhrase> renderPassPhrase, const VkCommandBuffer commandBuffer, const bool commandBufferBegan)
+    : _render_pass_phrase(std::move(renderPassPhrase)), _command_buffer(commandBuffer), _command_buffer_began(commandBufferBegan), _render_pass(VK_NULL_HANDLE)
 {
 }
 
-const sp<VKGraphicsContext::RenderPassPhrase>& VKGraphicsContext::State::renderPassPhrase() const
-{
-    return _render_pass_phrase;
-}
-
-VkCommandBuffer VKGraphicsContext::State::commandBuffer() const
-{
-    return _command_buffer;
-}
-
-VkRenderPass VKGraphicsContext::State::acquireRenderPass()
+VkRenderPass VKGraphicsContext::State::ensureRenderPass()
 {
     const VkRenderPass renderPass = _render_pass_phrase->acquire();
-    ensureRenderPass();
+    ensureRenderPassCommandBuffer();
     return renderPass;
 }
 
-VkCommandBuffer VKGraphicsContext::State::ensureRenderPass()
+VkCommandBuffer VKGraphicsContext::State::ensureRenderPassCommandBuffer()
 {
     if(_render_pass == VK_NULL_HANDLE)
     {
-        if(_begin_command_buffer)
+        if(!_command_buffer_began)
         {
             constexpr VkCommandBufferBeginInfo cmdBufInfo = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
             VKUtil::checkResult(vkBeginCommandBuffer(_command_buffer, &cmdBufInfo));
+            _command_buffer_began = true;
         }
         _render_pass = _render_pass_phrase->begin(_command_buffer);
     }

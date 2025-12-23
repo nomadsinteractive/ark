@@ -381,11 +381,9 @@ public:
                 CHECK(rtCreateConfig._color_attachments.size() <= 8, "Rendertarget now can only hold no more than 8 color attachments.");
                 for(const auto& [t, cv] : rtCreateConfig._color_attachments)
                 {
-                    const bool isIntegerTarget = t->parameters()->_format.contains(Texture::FORMAT_INTEGER);
-                    const bool noAlphaChannel = !t->parameters()->_format.has(Texture::FORMAT_RGBA);
                     colorTargetDescriptions[numColorTargets++] = {
                         t->delegate().cast<TextureSDL3_GPU>()->textureFormat(),
-                        isIntegerTarget || noAlphaChannel ? SDL_GPUColorTargetBlendState{} : blendState
+                        RenderUtil::shouldSupportAlphaBlending(t->parameters()->_format) ? blendState : SDL_GPUColorTargetBlendState{}
                     };
                 }
                 if(rtCreateConfig._depth_stencil_attachment)

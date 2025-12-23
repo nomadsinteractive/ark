@@ -488,6 +488,11 @@ uint32_t RenderUtil::getComponentSize(const Texture::Format format)
     return 4;
 }
 
+bool RenderUtil::shouldSupportAlphaBlending(const Texture::Format format)
+{
+    return format.has(Texture::FORMAT_RGBA) && !format.contains(Texture::FORMAT_INTEGER);
+}
+
 std::pair<int32_t, int32_t> RenderUtil::getRenderTargetResolution(const RenderTarget::Configure& configure)
 {
     CHECK(!configure._color_attachments.empty() || configure._depth_stencil_attachment, "RenderTarget should have at least one attachment");

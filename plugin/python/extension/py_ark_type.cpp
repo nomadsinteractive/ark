@@ -13,6 +13,11 @@ namespace ark::plugin::python {
 
 namespace {
 
+Py_hash_t __hash__(const PyArkType::Instance* self)
+{
+    return self->box ? static_cast<Py_hash_t>(std::hash<uintptr_t>()(self->box->id())) : 0;
+}
+
 PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, const int32_t op)
 {
     if(PyIndex_Check(reinterpret_cast<PyObject*>(obj1)) && PyIndex_Check(obj2))
@@ -26,22 +31,11 @@ PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, const int32_t o
         Py_RETURN_RICHCOMPARE(value1, value2, op);
     }
 
-    const bool obj2IsNone = obj2 == Py_None;
-    if(!(obj2IsNone || PythonExtension::instance().isPyArkTypeObject(Py_TYPE(obj2))))
-    {
-        LOGW("Comparing Ark-Type object \"%s\" with non-Ark-Type object \"%s\"", Py_TYPE(obj1)->tp_name, Py_TYPE(obj2)->tp_name);
-        Py_RETURN_NOTIMPLEMENTED;
-    }
-
-    Py_hash_t hash1 = static_cast<Py_hash_t>(obj1->box->id());
-    Py_hash_t hash2 = obj2IsNone ? PyObject_Hash(obj2) : static_cast<Py_hash_t>(reinterpret_cast<PyArkType::Instance*>(obj2)->box->id());
+    const bool isObj2ArkType = PythonExtension::instance().isPyArkTypeObject(Py_TYPE(obj2));
+    const Py_hash_t hash1 = __hash__(obj1);
+    const Py_hash_t hash2 = isObj2ArkType ? __hash__(reinterpret_cast<PyArkType::Instance*>(obj2)) : PyObject_Hash(obj2);
 
     Py_RETURN_RICHCOMPARE(hash1, hash2, op);
-}
-
-Py_hash_t __hash__(const PyArkType::Instance* self)
-{
-    return static_cast<Py_hash_t>(self->box->id());
 }
 
 struct BreakException {

@@ -7,6 +7,7 @@
 #include <map>
 #include <span>
 #include <set>
+#include <stack>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -44,6 +45,7 @@ template <typename T, typename H = std::hash<T>> using HashSet = std::unordered_
 
 template <typename T, typename U> using HashMap = std::unordered_map<T, U>;
 template <typename T, typename U> using Map = std::map<T, U>;
+template <typename T> using Stack = std::stack<T>;
 
 template <typename T> using sp = SharedPtr<T>;
 template <typename T> using op = OwnedPtr<T>;

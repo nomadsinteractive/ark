@@ -28,7 +28,7 @@ void VKDescriptorPool::upload(GraphicsContext& /*graphicsContext*/)
     for(const auto& [k, v] : _pool_sizes)
         poolSizes.push_back(vks::initializers::descriptorPoolSize(k, v));
 
-    const VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, max_sets);
+    const VkDescriptorPoolCreateInfo descriptorPoolInfo = {VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, nullptr, VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT, max_sets, static_cast<uint32_t>(poolSizes.size()), poolSizes.data()};
     VKUtil::checkResult(vkCreateDescriptorPool(_device->vkLogicalDevice(), &descriptorPoolInfo, nullptr, &_descriptor_pool));
 }
 

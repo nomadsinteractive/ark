@@ -17,7 +17,10 @@ public:
 
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 
+    struct Stub;
+
 private:
+    sp<Stub> _stub;
     sp<Renderer> _renderer;
     sp<RenderCommand> _pre_draw;
     sp<RenderCommand> _post_draw;

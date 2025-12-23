@@ -116,7 +116,7 @@ Vector<VkPipelineColorBlendAttachmentState> VKFramebuffer::Stub::makeColorBlendA
     {
         const Texture::Format textureFormat = _configure._color_attachments.at(i)._texture->parameters()->_format;
         VkPipelineColorBlendAttachmentState cbaState = mainState;
-        cbaState.blendEnable = i == 0 || (i < _configure._color_attachments.size() && textureFormat.has(Texture::FORMAT_RGBA) && !(textureFormat.contains(Texture::FORMAT_INTEGER)));
+        cbaState.blendEnable = i == 0 || (i < _configure._color_attachments.size() && RenderUtil::shouldSupportAlphaBlending(textureFormat));
         blendAttachmentStates.push_back(cbaState);
     }
     return blendAttachmentStates;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stack>
-
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -20,7 +18,7 @@ public:
     VKGraphicsContext(const GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer);
     ~VKGraphicsContext();
 
-    void begin(uint32_t imageId, V4 backgroundColor);
+    void begin(uint32_t imageId, const V4& backgroundColor);
     void end();
 
     VKSubmitQueue& submitQueue();
@@ -47,27 +45,24 @@ public:
 
     class State {
     public:
-        State(sp<RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool beginCommandBuffer);
+        State(sp<RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool commandBufferBegan);
 
-        VkRenderPass acquireRenderPass();
-        VkCommandBuffer ensureRenderPass();
-
-        const sp<RenderPassPhrase>& renderPassPhrase() const;
-        VkCommandBuffer commandBuffer() const;
+        VkRenderPass ensureRenderPass();
+        VkCommandBuffer ensureRenderPassCommandBuffer();
 
     private:
         sp<RenderPassPhrase> _render_pass_phrase;
-
         VkCommandBuffer _command_buffer;
-        bool _begin_command_buffer;
+        bool _command_buffer_began;
         VkRenderPass _render_pass;
 
         friend class VKGraphicsContext;
+        friend class VKPipeline;
     };
 
     State& currentState();
 
-    void pushState(sp<RenderPassPhrase> starter);
+    void pushState(sp<RenderPassPhrase> renderPassPhrase);
     VkCommandBuffer popState();
 
     void submit(VkQueue queue);
@@ -85,7 +80,7 @@ private:
     sp<VKSemaphore> _semaphore_render_complete;
     VkSemaphore _semaphore_present_complete;
 
-    std::stack<State> _state_stack;
+    Stack<State> _state_stack;
 };
 
 }
