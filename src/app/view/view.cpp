@@ -4,19 +4,16 @@
 #include "core/components/discarded.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/types/global.h"
-#include "core/util/math.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/components/layer.h"
 #include "graphics/components/layout_param.h"
-#include "graphics/components/translation.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
 #include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
-#include "../../graphics/base/shape.h"
 #include "app/view/view_hierarchy.h"
 
 namespace ark {
