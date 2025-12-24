@@ -11,8 +11,7 @@ struct Allocator::Block {
 
     uint8_t* allocate(const size_t size)
     {
-        const uint8_t* const end = &_memory.back() + 1;
-        if(_allocated_ptr + size > end)
+        if(const uint8_t* const end = &_memory.back() + 1; _allocated_ptr + size > end)
             return nullptr;
 
         uint8_t* ptr = _allocated_ptr;

@@ -219,12 +219,12 @@ class GenArgument:
             return f'{varname} && {ARK_PY_ARGUMENT_TYPE_CHECKERS[self._accept_type].check(varname, is_overloaded_func)}'
         return None
 
-    def gen_declare(self, gen_method, objname, argname, extract_cast: bool = False, optional_check: bool = False):
+    def gen_declare(self, gen_method, objname: str, argname: str, extract_cast: bool = False, optional_check: bool = False):
         typename = self._meta.cast_signature
         if self._meta.is_base_type:
-            return '%s %s = %s;' % (typename, objname, gen_cast_call(typename, argname))
+            return f'{typename} {objname} = {gen_cast_call(typename, argname)};'
         if self.typename == self._meta.cast_signature:
-            return '%s %s = %s;' % (typename, objname, argname)
+            return f'{typename} {objname} = {argname};'
         m = acg.get_shared_ptr_type(self._accept_type)
         if m == 'Scope':
             return f'const Scope {objname} = PyCast::toScope(kws);'
@@ -233,7 +233,7 @@ class GenArgument:
 
         is_optional_type = 'Optional<' in m
         optional_cast_prefix = 'to' if optional_check or is_optional_type else 'ensure'
-        to_cpp_object = '%sCppObject' % optional_cast_prefix
+        to_cpp_object = f'{optional_cast_prefix}CppObject'
         if m == 'char*':
             return self._gen_var_declare('String', objname, to_cpp_object, 'String', argname, False, optional_check)
         if m in TYPE_DEFINED_OBJ:

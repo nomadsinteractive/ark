@@ -83,7 +83,6 @@ template<typename T, typename... Args> void setVaryingProperties(Varyings& varyi
 
 }
 
-
 Varyings::Varyings(const Scope& kwargs)
 {
     for(const auto& [k, v] : kwargs.variables())

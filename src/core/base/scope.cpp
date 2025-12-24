@@ -2,7 +2,7 @@
 
 namespace ark {
 
-Scope::Scope(Map<String, Box> variables)
+Scope::Scope(Table<String, Box> variables)
     : _variables(std::move(variables))
 {
 }
@@ -18,7 +18,7 @@ void Scope::put(const String& name, Box value)
     _variables[name] = std::move(value);
 }
 
-const Map<String, Box>& Scope::variables() const
+const Table<String, Box>& Scope::variables() const
 {
     return _variables;
 }

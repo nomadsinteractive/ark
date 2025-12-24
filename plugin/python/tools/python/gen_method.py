@@ -264,12 +264,11 @@ class GenMethod(object):
         if self.need_unpack_statement():
             class_name = genclass.binding_classname
             lines.append(f'sp<{class_name}> unpacked = self->as<{class_name}>();')
-        self.gen_definition_body(genclass, lines, self._arguments, [None] * len(self._arguments), not self.check_argument_type,
-                                 not self.check_argument_type)
 
+        self.gen_definition_body(genclass, lines, self._arguments, [None] * len(self._arguments), not self.check_argument_type, not self.check_argument_type)
         return '\n    '.join(lines)
 
-    def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args, exact_cast, check_args=False, optional_check=False):
+    def gen_definition_body(self, genclass, lines: list[str], not_overloaded_args: list[GenArgument], gen_type_check_args, exact_cast, check_args=False, optional_check=False):
         bodylines = []
         args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
         args_set = {i for i, j in args}
@@ -420,7 +419,7 @@ class GenOperatorMethod(GenMethod):
             assert not self._is_static
             return f'Instance* self, PyObject* args, PyObject* kws'
         arglen = len(self._arguments)
-        args = ['PyObject* arg%d' % i for i in range(arglen)]
+        args = [f'PyObject* oparg{i}' for i in range(arglen)]
         if self._is_static:
             return ', '.join(args)
         return ', '.join(['Instance* self'] + args)
@@ -438,9 +437,17 @@ class GenOperatorMethod(GenMethod):
             return ['Py_INCREF(self);', 'return reinterpret_cast<PyObject*>(self);']
         return super().gen_return_statement(return_type, py_return)
 
-    def _gen_parse_tuple_code(self, lines, declares, args):
+    def _gen_parse_tuple_code(self, lines: list[str], declares: list[str], args: list[GenArgument]):
         if self._operator == 'call':
             super()._gen_parse_tuple_code(lines, declares, args)
+        else:
+            for i, j in enumerate(args):
+                if j.typename == 'PyObject*':
+                    lines.append(f'PyObject* arg{i} = oparg{i};')
+                else:
+                    meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
+                    ga = GenArgument(i, j.accept_type, j.default_value, meta, str(j))
+                    lines.append(ga.gen_declare(self, f'arg{i}', f'oparg{i}'))
 
     @property
     def err_return_value(self):

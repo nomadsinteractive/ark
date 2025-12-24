@@ -12,8 +12,8 @@ template<typename T, typename S = T> class UploaderOfVariable final : public Upl
 public:
     typedef Variable<S> VarType;
 
-    UploaderOfVariable(const sp<VarType>& var)
-        : Uploader(sizeof(T)), _var(var) {
+    UploaderOfVariable(sp<VarType> var)
+        : Uploader(sizeof(T)), _var(std::move(var)) {
     }
 
     void upload(Writable& buf) override {

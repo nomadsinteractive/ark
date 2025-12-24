@@ -2,7 +2,7 @@
 
 namespace ark {
 
-WritableWithOffset::WritableWithOffset(Writable& writable, const size_t offset)
+WritableWithOffset::WritableWithOffset(Writable& writable, const uint32_t offset)
     : _writable(writable), _offset(offset)
 {
 }

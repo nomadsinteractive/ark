@@ -2,6 +2,7 @@
 
 #include "core/base/api.h"
 #include "core/base/string.h"
+#include "core/collection/table.h"
 #include "core/inf/dictionary.h"
 #include "core/types/box.h"
 #include "core/types/optional.h"
@@ -20,13 +21,13 @@ class BoxBundle {
 class ARK_API Scope final : public BoxBundle {
 public:
     Scope() = default;
-    Scope(Map<String, Box> variables);
+    Scope(Table<String, Box> variables);
     DEFAULT_COPY_AND_ASSIGN(Scope);
 
     Box get(const String& name) override;
     void put(const String& name, Box value);
 
-    const Map<String, Box>& variables() const;
+    const Table<String, Box>& variables() const;
 
     Optional<Box> getObject(const String& name) const;
 
@@ -64,7 +65,7 @@ private:
     }
 
 private:
-    Map<String, Box> _variables;
+    Table<String, Box> _variables;
 };
 
 }
