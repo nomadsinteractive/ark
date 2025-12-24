@@ -7,6 +7,7 @@
 
 namespace ark {
 
+//[[script::bindings::extends(Uploader)]]
 class ARK_API Artifact final : public Uploader {
 public:
 //  [[script::bindings::auto]]

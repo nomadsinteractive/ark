@@ -2078,6 +2078,12 @@ class Layer:
         pass
 
 
+class Artifact(Uploader):
+    def __init__(self, **kwargs):
+        super().__init__()
+        pass
+
+
 class Arena:
     def __init__(self, resource_loader: ResourceLoader, discarded: Optional[Boolean] = None, renderer: Optional[Renderer] = None, render_layers: dict[str, RenderLayer] = None, layers: dict[str, Layer] = None):
         pass

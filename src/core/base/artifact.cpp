@@ -69,8 +69,9 @@ public:
 };
 
 Artifact::Artifact(const Scope& kwargs)
-    : Uploader(loadProperties(kwargs)), _index(sp<Index>::make())
+    : Uploader(0), _index(sp<Index>::make())
 {
+    _size = loadProperties(kwargs);
 }
 
 bool Artifact::update(const uint32_t tick)
