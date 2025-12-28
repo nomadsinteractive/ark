@@ -2083,6 +2083,9 @@ class Artifact(Uploader):
         super().__init__()
         pass
 
+    def make_uploader(self, repeat_count: int, index: Optional[Integer] = None) -> Uploader:
+        pass
+
 
 class Arena:
     def __init__(self, resource_loader: ResourceLoader, discarded: Optional[Boolean] = None, renderer: Optional[Renderer] = None, render_layers: dict[str, RenderLayer] = None, layers: dict[str, Layer] = None):

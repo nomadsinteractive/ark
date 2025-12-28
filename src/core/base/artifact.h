@@ -16,23 +16,19 @@ public:
     bool update(uint32_t tick) override;
     void upload(Writable& buf) override;
 
-//  [[script::bindings::property]]
-    sp<Integer> index() const;
-//  [[script::bindings::operator(*)]]
-    static sp<Uploader> mul(sp<Artifact> lhs, uint32_t rhs);
+//  [[script::bindings::classmethod]]
+    static sp<Uploader> makeUploader(sp<Artifact> artifact, uint32_t repeatCount = 1, sp<IntegerWrapper> index = nullptr);
 
-    bool updateRepeat(uint32_t tick, uint32_t repeatCount, Vector<int8_t>& buffer);
+    bool updateRepeat(uint32_t tick, uint32_t repeatCount, Vector<int8_t>& buffer, const sp<IntegerWrapper>& index, int32_t baseIndex);
 
 private:
     struct Property {
         uint32_t _offset;
         sp<Uploader> _uploader;
     };
-    class Index;
 
     size_t loadProperties(const Scope& kwargs);
     Table<String, Property> _properties;
-    sp<Index> _index;
 };
 
 }

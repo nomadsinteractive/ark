@@ -1,6 +1,7 @@
 #include "core/base/artifact.h"
 
 #include "core/impl/uploader/uploader_of_variable.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/writable/writable_memory.h"
 #include "core/impl/writable/writable_with_offset.h"
 
@@ -27,13 +28,13 @@ template<typename T, typename... Args> sp<Uploader> makeProperty(const String& n
 
 class UploaderArtifactRepeat final : public Uploader {
 public:
-    UploaderArtifactRepeat(sp<Artifact> artifact, const uint32_t repeat)
-        : Uploader(artifact->size() * repeat), _artifact(std::move(artifact)), _repeat_count(repeat), _buffer(_size) {
+    UploaderArtifactRepeat(sp<Artifact> artifact, const uint32_t repeatCount, sp<IntegerWrapper> index)
+        : Uploader(artifact->size() * repeatCount), _artifact(std::move(artifact)), _repeat_count(repeatCount), _index(std::move(index)), _base_index(_index ? _index->val() : 0), _buffer(_size) {
     }
 
     bool update(const uint32_t tick) override
     {
-        return _artifact->updateRepeat(tick, _repeat_count, _buffer);
+        return _artifact->updateRepeat(tick, _repeat_count, _buffer, _index, _base_index);
     }
 
     void upload(Writable& buf) override
@@ -44,32 +45,15 @@ public:
 private:
     sp<Artifact> _artifact;
     uint32_t _repeat_count;
+    sp<IntegerWrapper> _index;
+    int32_t _base_index;
     Vector<int8_t> _buffer;
 };
 
 }
 
-class Artifact::Index final : public Integer {
-public:
-    Index()
-        : _value(0) {
-    }
-
-    bool update(uint32_t tick) override
-    {
-        return true;
-    }
-
-    int32_t val() override
-    {
-        return _value;
-    }
-
-    int32_t _value;
-};
-
 Artifact::Artifact(const Scope& kwargs)
-    : Uploader(0), _index(sp<Index>::make())
+    : Uploader(0)
 {
     _size = loadProperties(kwargs);
 }
@@ -91,24 +75,20 @@ void Artifact::upload(Writable& buf)
     }
 }
 
-sp<Integer> Artifact::index() const
+sp<Uploader> Artifact::makeUploader(sp<Artifact> artifact, uint32_t repeatCount, sp<IntegerWrapper> index)
 {
-    return _index;
+    return sp<Uploader>::make<UploaderArtifactRepeat>(std::move(artifact), repeatCount, std::move(index));
 }
 
-sp<Uploader> Artifact::mul(sp<Artifact> lhs, const uint32_t rhs)
-{
-    return sp<Uploader>::make<UploaderArtifactRepeat>(std::move(lhs), rhs);
-}
-
-bool Artifact::updateRepeat(const uint32_t tick, const uint32_t repeatCount, Vector<int8_t>& buffer)
+bool Artifact::updateRepeat(const uint32_t tick, const uint32_t repeatCount, Vector<int8_t>& buffer, const sp<IntegerWrapper>& index, const int32_t baseIndex)
 {
     bool dirty = false;
     int8_t* ptr = buffer.data();
-    for(uint32_t i = 0; i < repeatCount; ++i)
+    for(int32_t i = 0; i < repeatCount; ++i)
     {
         WritableMemory writable(ptr + _size * i);
-        _index->_value = i;
+        if(index)
+            index->set(i + baseIndex);
         for(const auto& [_, i] : _properties.values())
         {
             dirty = i->update(tick) || dirty;
