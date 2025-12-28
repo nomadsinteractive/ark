@@ -35,7 +35,7 @@ V3 Vec3Impl::val()
     return {_x->val(), _y->val(), _z->val()};
 }
 
-bool Vec3Impl::update(uint32_t tick)
+bool Vec3Impl::update(const uint32_t tick)
 {
     return UpdatableUtil::update(tick, _x, _y, _z);
 }

@@ -49,6 +49,8 @@ public:
     static sp<Uploader> reserve(sp<Uploader> self, size_t size);
 //  [[script::bindings::classmethod]]
     static sp<Uploader> repeat(sp<Uploader> self, size_t length, size_t stride = 0);
+//  [[script::bindings::classmethod]]
+    static sp<Uploader> once(sp<Uploader> self);
 
 //  [[script::bindings::map(set)]]
     static void put(const sp<Uploader>& self, size_t offset, sp<Uploader> uploader);

@@ -86,14 +86,15 @@ bool Artifact::updateRepeat(const uint32_t tick, const uint32_t repeatCount, Vec
     int8_t* ptr = buffer.data();
     for(int32_t i = 0; i < repeatCount; ++i)
     {
-        WritableMemory writable(ptr + _size * i);
         if(index)
             index->set(i + baseIndex);
-        for(const auto& [_, i] : _properties.values())
+        for(const auto& [offset, i] : _properties.values())
         {
+            WritableMemory writable(ptr + offset);
             dirty = i->update(tick) || dirty;
             i->upload(writable);
         }
+        ptr += _size;
     }
     return dirty;
 }

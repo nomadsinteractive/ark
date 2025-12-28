@@ -130,6 +130,27 @@ public:
     Map<size_t, size_t> _records;
 };
 
+class UploaderOnce final : public Uploader {
+public:
+    UploaderOnce(sp<Uploader> delegate)
+        : Uploader(delegate->size()), _delegate(std::move(delegate)) {
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        return _timestamp.update(tick) && _delegate->update(tick);
+    }
+
+    void upload(Writable& buf) override
+    {
+        _delegate->upload(buf);
+    }
+
+private:
+    sp<Uploader> _delegate;
+    Timestamp _timestamp;
+};
+
 class UploaderDyed final : public Uploader, public Wrapper<Uploader> {
 public:
     UploaderDyed(sp<Uploader> delegate, String message)
@@ -285,6 +306,11 @@ sp<Uploader> UploaderType::reserve(sp<Uploader> self, size_t size)
 sp<Uploader> UploaderType::repeat(sp<Uploader> self, const size_t length, const size_t stride)
 {
     return sp<Uploader>::make<UploaderRepeat>(std::move(self), length, stride);
+}
+
+sp<Uploader> UploaderType::once(sp<Uploader> self)
+{
+    return sp<Uploader>::make<UploaderOnce>(std::move(self));
 }
 
 void UploaderType::put(const sp<Uploader>& self, const size_t offset, sp<Uploader> uploader)

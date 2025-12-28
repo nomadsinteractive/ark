@@ -1142,25 +1142,25 @@ class _Scalar(_Var):
     def dirty(self) -> Boolean:
         pass
 
-    def __add__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+    def __add__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Union["Numeric", "Integer"]:
         return 0
 
     def __radd__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
         return 0
 
-    def __sub__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+    def __sub__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Union["Numeric", "Integer"]:
         pass
 
     def __rsub__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
         pass
 
-    def __mul__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+    def __mul__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Union["Numeric", "Integer"]:
         pass
 
     def __rmul__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
         pass
 
-    def __truediv__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
+    def __truediv__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> "Numeric":
         pass
 
     def __rtruediv__(self, other: TYPE_NUMERIC | TYPE_INTEGER) -> Self:
@@ -1521,6 +1521,9 @@ class Uploader:
         pass
 
     def repeat(self, length: int, stride: int = 0) -> Self:
+        pass
+
+    def once(self) -> Self:
         pass
 
     def wrap(self) -> "Uploader":
