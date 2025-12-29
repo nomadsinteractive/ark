@@ -78,6 +78,28 @@ private:
     T _value;
 };
 
+template<typename T> class VariableChoices final : public Variable<T> {
+public:
+    VariableChoices(const Random& random, Vector<T> choices)
+        : _choices(std::move(choices)), _index(random.randInteger(0, _choices.size() - 1))
+    {
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        return _index->update(tick);
+    }
+
+    T val() override
+    {
+        return _choices.at(_index->val());
+    }
+
+private:
+    Vector<T> _choices;
+    sp<Integer> _index;
+};
+
 template<typename T> sp<Variable<T>> toNonvolatile(sp<Variable<T>> generator)
 {
     return sp<Variable<T>>::template make<Nonvolatile<T>>(std::move(generator));
@@ -170,6 +192,18 @@ sp<Numeric> Random::normal(sp<Numeric> mean, sp<Numeric> sigma)
     if(_nonvolatile)
         return toNonvolatile<float>(std::move(g));
     return g;
+}
+
+sp<Numeric> Random::choice(Vector<float> choices)
+{
+    ASSERT(!choices.empty());
+    return sp<Numeric>::make<VariableChoices<float>>(*this, std::move(choices));
+}
+
+sp<Integer> Random::choice(Vector<int32_t> choices)
+{
+    ASSERT(!choices.empty());
+    return sp<Integer>::make<VariableChoices<int32_t>>(*this, std::move(choices));
 }
 
 }

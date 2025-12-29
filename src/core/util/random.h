@@ -42,6 +42,11 @@ public:
 //  [[script::bindings::auto]]
     sp<Numeric> normal(sp<Numeric> mean, sp<Numeric> sigma);
 
+//  [[script::bindings::auto]]
+    sp<Numeric> choice(Vector<float> choices);
+//  [[script::bindings::auto]]
+    sp<Integer> choice(Vector<int32_t> choices);
+
 private:
     uint32_t _seed;
     bool _nonvolatile;

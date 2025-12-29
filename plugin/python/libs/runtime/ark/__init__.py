@@ -2385,6 +2385,9 @@ class Random:
     def normal(self, mean: TYPE_NUMERIC, sigma: TYPE_NUMERIC) -> Numeric:
         return Numeric(0)
 
+    def choice(self, choices: Sequence[int | float]) -> Integer | Numeric:
+        pass
+
 
 class Math:
 
