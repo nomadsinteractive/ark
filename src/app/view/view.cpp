@@ -21,9 +21,11 @@ namespace ark {
 struct View::Stub {
     sp<Node> _node;
 
-    sp<Updatable> _updatable_layout;
     sp<Vec3> _layout_position;
     sp<Size> _layout_size;
+
+    uint32_t _last_update_tick;
+    bool _last_update_value;
 };
 
 struct View::Node final : Updatable {
@@ -88,28 +90,6 @@ sp<View::Stub> findLayoutTopView(sp<View::Stub> stub)
     return stub;
 }
 
-class UpdatableOncePerTick final : public Updatable {
-public:
-    UpdatableOncePerTick(sp<Updatable> delegate)
-        : _delegate(std::move(delegate)), _last_tick(Timestamp::now() - 1), _last_value(false) {
-    }
-
-    bool update(const uint32_t tick) override
-    {
-        if(_last_tick != tick)
-        {
-            _last_tick = tick;
-            _last_value = _delegate->update(tick);
-        }
-        return _last_value;
-    }
-
-private:
-    sp<Updatable> _delegate;
-    uint32_t _last_tick;
-    bool _last_value;
-};
-
 template<size_t IDX> class LayoutSize final : public Numeric {
 public:
     LayoutSize(sp<View::Node> stub, sp<Updatable> updatable)
@@ -137,7 +117,7 @@ private:
 class LayoutPosition final : public Vec3 {
 public:
     LayoutPosition(sp<View::Node> stub, sp<Updatable> updatable)
-        : _hierarchy(std::move(stub)), _updatable(std::move(updatable))
+        : _view_node(std::move(stub)), _updatable(std::move(updatable))
     {
     }
 
@@ -148,19 +128,19 @@ public:
 
     V3 val() override
     {
-        if(!_hierarchy->_layout_node)
+        if(!_view_node->_layout_node)
             return V3();
 
-        const Layout::Node& layoutNode = _hierarchy->_layout_node;
+        const Layout::Node& layoutNode = _view_node->_layout_node;
         const V2& size = layoutNode.size();
-        const V3 offsetPosition = _hierarchy->getTopViewOffsetPosition();
+        const V3 offsetPosition = _view_node->getTopViewOffsetPosition();
         const float x = offsetPosition.x() + size.x() / 2;
         const float y = offsetPosition.y() + size.y() / 2;
         return {toViewportPosition({x, y}), offsetPosition.z()};
     }
 
 private:
-    sp<View::Node> _hierarchy;
+    sp<View::Node> _view_node;
     sp<Updatable> _updatable;
 };
 
@@ -174,7 +154,15 @@ public:
     bool update(const uint32_t tick) override
     {
         const sp<View::Stub> stub = findLayoutTopView(_stub);
-        return stub ? stub->_node->update(tick) : false;
+        if(!stub)
+            return false;
+
+        if(stub->_last_update_tick != tick)
+        {
+            stub->_last_update_tick = tick;
+            stub->_last_update_value = stub->_node->update(tick);
+        }
+        return stub->_last_update_value;
     }
 
 private:
@@ -252,14 +240,19 @@ void View::setLayoutParam(sp<LayoutParam> layoutParam) const
 const sp<Vec3>& View::layoutPosition()
 {
     if(!_stub->_layout_position)
-        _stub->_layout_position = sp<Vec3>::make<LayoutPosition>(_stub->_node, ensureUpdatableLayout());
+        _stub->_layout_position = sp<Vec3>::make<LayoutPosition>(_stub->_node, makeTopViewUpdatable());
     return _stub->_layout_position;
 }
 
 const sp<Size>& View::layoutSize()
 {
     if(!_stub->_layout_size)
-        _stub->_layout_size = sp<Size>::make(sp<LayoutSize<0>>::make(_stub->_node, ensureUpdatableLayout()), sp<LayoutSize<1>>::make(_stub->_node, ensureUpdatableLayout()), Global<Constants>()->NUMERIC_ZERO);
+    {
+        sp<Updatable> updatable = makeTopViewUpdatable();
+        sp<Numeric> width = sp<Numeric>::make<LayoutSize<0>>(_stub->_node, updatable);
+        sp<Numeric> height = sp<Numeric>::make<LayoutSize<1>>(_stub->_node, std::move(updatable));
+        _stub->_layout_size = sp<Size>::make(std::move(width), std::move(height));
+    }
     return _stub->_layout_size;
 }
 
@@ -319,17 +312,9 @@ Vector<sp<View>> View::children() const
     return {};
 }
 
-sp<Updatable>& View::ensureUpdatableLayout()
+sp<Updatable> View::makeTopViewUpdatable()
 {
-    if(!_stub->_updatable_layout)
-        _stub->_updatable_layout = sp<Updatable>::make<UpdatableOncePerTick>(sp<Updatable>::make<UpdatableLayoutTopView>(_stub));
-    return _stub->_updatable_layout;
-}
-
-void View::markAsTopView()
-{
-    _stub->_node->_top_view = true;
-    _stub->_node->_parent_stub.reset(nullptr);
+    return sp<Updatable>::make<UpdatableLayoutTopView>(_stub);
 }
 
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

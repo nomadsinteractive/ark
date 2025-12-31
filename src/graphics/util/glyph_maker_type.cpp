@@ -77,6 +77,26 @@ private:
     sp<Varyings> _varyings;
 };
 
+class GlyphMakerWithFont final : public GlyphMaker {
+public:
+    GlyphMakerWithFont(sp<GlyphMaker> delegate, sp<Font> font)
+        : _delegate(std::move(delegate)), _font(std::move(font))
+    {
+    }
+
+    Vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override
+    {
+        Vector<sp<Glyph>> glyphs = _delegate->makeGlyphs(text);
+        for(const sp<Glyph>& i : glyphs)
+            i->setFont(_font);
+        return glyphs;
+    }
+
+private:
+    sp<GlyphMaker> _delegate;
+    sp<Font> _font;
+};
+
 }
 
 sp<GlyphMaker> GlyphMakerType::create(sp<Font> font)
@@ -102,6 +122,11 @@ sp<GlyphMaker> GlyphMakerType::withTransform(sp<GlyphMaker> self, sp<Mat4> trans
 sp<GlyphMaker> GlyphMakerType::withVaryings(sp<GlyphMaker> self, sp<Varyings> varyings)
 {
     return sp<GlyphMaker>::make<GlyphMakerWithVaryings>(std::move(self), std::move(varyings));
+}
+
+sp<GlyphMaker> GlyphMakerType::withFont(sp<GlyphMaker> self, sp<Font> font)
+{
+    return sp<GlyphMaker>::make<GlyphMakerWithFont>(std::move(self), std::move(font));
 }
 
 }

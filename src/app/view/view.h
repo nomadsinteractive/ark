@@ -96,8 +96,7 @@ public:
     };
 
 private:
-    sp<Updatable>& ensureUpdatableLayout();
-    void markAsTopView();
+    sp<Updatable> makeTopViewUpdatable();
 
 private:
     sp<Stub> _stub;

@@ -2734,6 +2734,9 @@ class GlyphMaker:
     def with_varyings(self, varyings: "Varyings") -> Self:
         pass
 
+    def with_font(self, font: Font) -> Self:
+        pass
+
 
 class Text:
     def __init__(self, render_layer: RenderLayer, text: String | str | None = None, position: Optional[TYPE_VEC3] = None, layout_param: Optional["LayoutParam"] = None, scale: Optional[TYPE_VEC2] = None, glyph_maker: Any = None,

@@ -18,6 +18,8 @@ public:
 //  [[script::bindings::property]]
     const sp<Font>& font() const;
 //  [[script::bindings::property]]
+    void setFont(sp<Font> font);
+//  [[script::bindings::property]]
     const sp<Vec3>& position() const;
 //  [[script::bindings::property]]
     const sp<Mat4>& transform() const;

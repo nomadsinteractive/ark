@@ -17,7 +17,7 @@ public:
     {
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         return _type->update(tick);
     }
@@ -47,6 +47,11 @@ const sp<Integer>& Glyph::type() const
 const sp<Font>& Glyph::font() const
 {
     return _font;
+}
+
+void Glyph::setFont(sp<Font> font)
+{
+    _font = std::move(font);
 }
 
 const sp<Vec3>& Glyph::position() const
