@@ -56,8 +56,8 @@ public:
 //  [[script::bindings::auto]]
     LayoutParam(LayoutLength width = {}, LayoutLength height = {}, sp<Layout> layout = nullptr, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
                 LayoutParam::JustifyContent justifyContent = LayoutParam::JUSTIFY_CONTENT_FLEX_START, LayoutParam::Align alignItems = LayoutParam::ALIGN_STRETCH,
-                LayoutParam::Align alignSelf = LayoutParam::ALIGN_AUTO, LayoutParam::Align alignContent = LayoutParam::ALIGN_STRETCH,
-                float flexGrow = 0, LayoutLength flexBasis = {}, sp<Vec4> margins = nullptr, sp<Vec4> paddings = nullptr, sp<Vec3> offset = nullptr);
+                LayoutParam::Align alignSelf = LayoutParam::ALIGN_AUTO, LayoutParam::Align alignContent = LayoutParam::ALIGN_STRETCH, float flexGrow = 0, LayoutLength flexBasis = {}, sp<Vec4> margins = nullptr,
+                sp<Vec4> paddings = nullptr, sp<Vec3> offset = nullptr, LayoutLength minWidth = {}, LayoutLength minHeight = {}, LayoutLength maxWidth = {}, LayoutLength maxHeight = {});
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutParam);
 
     bool update(uint32_t tick) override;
@@ -133,6 +133,23 @@ public:
 //  [[script::bindings::property]]
     void setOffset(sp<Vec3> offset);
 
+//  [[script::bindings::property]]
+    const LayoutLength& minWidth() const;
+//  [[script::bindings::property]]
+    void setMinWidth(LayoutLength minWidth);
+//  [[script::bindings::property]]
+    const LayoutLength& minHeight() const;
+//  [[script::bindings::property]]
+    void setMinHeight(LayoutLength minHeight);
+//  [[script::bindings::property]]
+    const LayoutLength& maxWidth() const;
+//  [[script::bindings::property]]
+    void setMaxWidth(LayoutLength maxWidth);
+//  [[script::bindings::property]]
+    const LayoutLength& maxHeight() const;
+//  [[script::bindings::property]]
+    void setMaxHeight(LayoutLength maxHeight);
+
     bool isWrapContent() const;
 
     const Timestamp& timestamp() const;
@@ -161,6 +178,11 @@ public:
         SafeBuilder<Vec4> _margins;
         SafeBuilder<Vec4> _paddings;
         SafeBuilder<Vec3> _offset;
+
+        sp<IBuilder<LayoutLength>> _min_width;
+        sp<IBuilder<LayoutLength>> _min_height;
+        sp<IBuilder<LayoutLength>> _max_width;
+        sp<IBuilder<LayoutLength>> _max_height;
     };
 
 private:
@@ -183,6 +205,11 @@ private:
     OptionalVar<Vec4> _margins;
     OptionalVar<Vec4> _paddings;
     OptionalVar<Vec3> _offset;
+
+    LayoutLength _min_width;
+    LayoutLength _min_height;
+    LayoutLength _max_width;
+    LayoutLength _max_height;
 
     Timestamp _timestamp;
 };

@@ -183,6 +183,51 @@ bool updateLayoutParam(const Layout::Node& layoutNode, const YGNodeRef node, con
         }
     }
 
+    if(!layoutParam.minWidth().isAuto())
+        if(const Optional<float> minWidth = updateVar<float>(tick, layoutParam.minWidth().value(), force))
+        {
+            if(layoutParam.minWidth().type() == LayoutLength::LENGTH_TYPE_PIXEL)
+                YGNodeStyleSetMinWidth(node, minWidth.value());
+            else
+            {
+                ASSERT(layoutParam.minWidth().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE);
+                YGNodeStyleSetMinWidthPercent(node, minWidth.value());
+            }
+        }
+    if(!layoutParam.minHeight().isAuto())
+        if(const Optional<float> minHeight = updateVar<float>(tick, layoutParam.minHeight().value(), force))
+        {
+            if(layoutParam.minHeight().type() == LayoutLength::LENGTH_TYPE_PIXEL)
+                YGNodeStyleSetMinHeight(node, minHeight.value());
+            else
+            {
+                ASSERT(layoutParam.minHeight().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE);
+                YGNodeStyleSetMinHeightPercent(node, minHeight.value());
+            }
+        }
+    if(!layoutParam.maxWidth().isAuto())
+        if(const Optional<float> maxWidth = updateVar<float>(tick, layoutParam.maxWidth().value(), force))
+        {
+            if(layoutParam.maxWidth().type() == LayoutLength::LENGTH_TYPE_PIXEL)
+                YGNodeStyleSetMaxWidth(node, maxWidth.value());
+            else
+            {
+                ASSERT(layoutParam.maxWidth().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE);
+                YGNodeStyleSetMaxWidthPercent(node, maxWidth.value());
+            }
+        }
+    if(!layoutParam.maxHeight().isAuto())
+        if(const Optional<float> maxHeight = updateVar<float>(tick, layoutParam.maxHeight().value(), force))
+        {
+            if(layoutParam.maxHeight().type() == LayoutLength::LENGTH_TYPE_PIXEL)
+                YGNodeStyleSetMaxHeight(node, maxHeight.value());
+            else
+            {
+                ASSERT(layoutParam.maxHeight().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE);
+                YGNodeStyleSetMaxHeightPercent(node, maxHeight.value());
+            }
+        }
+
     if(layoutParamDirty)
     {
         YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));

@@ -12,10 +12,11 @@
 
 namespace ark {
 
-LayoutParam::LayoutParam(LayoutLength width, LayoutLength height, sp<Layout> layout, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
-                         Align alignContent, float flexGrow, LayoutLength flexBasis, sp<Vec4> margins, sp<Vec4> paddings, sp<Vec3> offset)
+LayoutParam::LayoutParam(LayoutLength width, LayoutLength height, sp<Layout> layout, const FlexDirection flexDirection, const FlexWrap flexWrap, const JustifyContent justifyContent, const Align alignItems, const Align alignSelf,
+                         const Align alignContent, const float flexGrow, LayoutLength flexBasis, sp<Vec4> margins, sp<Vec4> paddings, sp<Vec3> offset, LayoutLength minWidth, LayoutLength minHeight, LayoutLength maxWidth, LayoutLength maxHeight)
     : _width(std::move(width)), _height(std::move(height)), _layout(std::move(layout)), _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
-      _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins)), _paddings(std::move(paddings)), _offset(std::move(offset))
+      _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins)), _paddings(std::move(paddings)), _offset(std::move(offset)), _min_width(std::move(minWidth)), _min_height(std::move(minHeight)),
+      _max_width(std::move(maxWidth)), _max_height(std::move(maxHeight))
 {
 }
 
@@ -208,6 +209,50 @@ void LayoutParam::setOffset(sp<Vec3> offset)
     _offset.reset(std::move(offset));
 }
 
+const LayoutLength& LayoutParam::minWidth() const
+{
+    return _min_width;
+}
+
+void LayoutParam::setMinWidth(LayoutLength minWidth)
+{
+    _min_width = std::move(minWidth);
+    _timestamp.markDirty();
+}
+
+const LayoutLength& LayoutParam::minHeight() const
+{
+    return _min_height;
+}
+
+void LayoutParam::setMinHeight(LayoutLength minHeight)
+{
+    _min_height = std::move(minHeight);
+    _timestamp.markDirty();
+}
+
+const LayoutLength& LayoutParam::maxWidth() const
+{
+    return _max_width;
+}
+
+void LayoutParam::setMaxWidth(LayoutLength maxWidth)
+{
+    _max_width = std::move(maxWidth);
+    _timestamp.markDirty();
+}
+
+const LayoutLength& LayoutParam::maxHeight() const
+{
+    return _max_height;
+}
+
+void LayoutParam::setMaxHeight(LayoutLength maxHeight)
+{
+    _max_height = std::move(maxHeight);
+    _timestamp.markDirty();
+}
+
 bool LayoutParam::isWrapContent() const
 {
     return _flex_wrap == FLEX_WRAP_WRAP || _flex_wrap == FLEX_WRAP_WRAP_REVERSE;
@@ -224,7 +269,8 @@ LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
       _justify_content(Documents::getAttribute<JustifyContent>(manifest, "justify-content", JUSTIFY_CONTENT_FLEX_START)), _align_items(Documents::getAttribute<Align>(manifest, "align-items", ALIGN_STRETCH)),
       _align_self(Documents::getAttribute<Align>(manifest, "align-self", ALIGN_AUTO)), _align_content(Documents::getAttribute<Align>(manifest, "align-content", ALIGN_FLEX_START)),
       _size(factory.getBuilder<Size>(manifest, constants::SIZE)), _flex_grow(Documents::getAttribute<float>(manifest, "flex-grow", 0.0)), _margins(factory.getBuilder<Vec4>(manifest, "margins")),
-      _paddings(factory.getBuilder<Vec4>(manifest, "paddings")), _offset(factory.getBuilder<Vec3>(manifest, "offset"))
+      _paddings(factory.getBuilder<Vec4>(manifest, "paddings")), _offset(factory.getBuilder<Vec3>(manifest, "offset")), _min_width(factory.getIBuilder<LayoutLength>(manifest, "min-width")), _min_height(factory.getIBuilder<LayoutLength>(manifest, "min-height")),
+      _max_width(factory.getIBuilder<LayoutLength>(manifest, "max-width")), _max_height(factory.getIBuilder<LayoutLength>(manifest, "max-height"))
 {
 }
 
@@ -236,8 +282,12 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
     sp<Vec3> offset = _offset.build(args);
     LayoutLength width = size ? LayoutLength(size->width(), LayoutLength::LENGTH_TYPE_PIXEL) : _width ? _width->build(args) : LayoutLength();
     LayoutLength height = size ? LayoutLength(size->height(), LayoutLength::LENGTH_TYPE_PIXEL) : _height ? _height->build(args) : LayoutLength();
+    LayoutLength minWidth = _min_width ? _min_width->build(args) : LayoutLength();
+    LayoutLength minHeight = _min_height ? _min_height->build(args) : LayoutLength();
+    LayoutLength maxWidth = _max_width ? _max_width->build(args) : LayoutLength();
+    LayoutLength maxHeight = _max_height ? _max_height->build(args) : LayoutLength();
     return sp<LayoutParam>::make(std::move(width), std::move(height), _layout.build(args), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self, _align_content, _flex_grow,
-                                 LayoutLength(), std::move(margins), std::move(paddings), std::move(offset));
+                                 LayoutLength(), std::move(margins), std::move(paddings), std::move(offset), std::move(minWidth), std::move(minHeight), std::move(maxWidth), std::move(maxHeight));
 }
 
 template<> ARK_API LayoutParam::FlexDirection StringConvert::eval<LayoutParam::FlexDirection>(const String& expr)
