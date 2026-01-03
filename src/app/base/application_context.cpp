@@ -144,8 +144,7 @@ uint32_t ApplicationContext::AppClock::onTick()
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
     : _steady_clock(sp<Variable<uint64_t>>::make<SteadyClock>()), _cursor_position(sp<Vec2Impl>::make()), _cursor_frag_coord(sp<Vec2Impl>::make()), _quitting(sp<Boolean::Impl>::make(false)), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
       _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_steady_clock)),
-      _worker_strategy(sp<ExecutorWorkerStrategy>::make()), _main_executor(sp<ExecutorScheduled>::make()), _core_executor(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")),
-      _thread_pool_executor(sp<Executor>::make<ExecutorThreadPool>(_core_executor)), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
+      _worker_strategy(sp<ExecutorWorkerStrategy>::make()), _main_executor(sp<ExecutorScheduled>::make()), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
 {
     const Ark& ark = Ark::instance();
 
@@ -156,9 +155,10 @@ ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, 
 void ApplicationContext::initialize(const document& manifest)
 {
     const Ark& ark = Ark::instance();
-    const document doc = createResourceLoaderManifest(manifest);
+    const document resourceLoaderManifest = createResourceLoaderManifest(manifest);
     _resource_loader = createResourceLoaderImpl(manifest, nullptr);
-    _resource_loader->import(doc, _resource_loader->beanFactory());
+    _resource_loader->importManifest(resourceLoaderManifest, _resource_loader->beanFactory());
+    _application_profiler = _resource_loader->beanFactory().build<ApplicationProfiler>(document::make("root"), {});
 
     pushAppClock();
 
@@ -166,6 +166,9 @@ void ApplicationContext::initialize(const document& manifest)
         _interpreter = _resource_loader->beanFactory().build<Interpreter>(interpreter, {});
     else
         _interpreter = sp<Interpreter>::make<NoneInterpreter>();
+
+    _core_executor = (sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor"));
+    _thread_pool_executor = (sp<Executor>::make<ExecutorThreadPool>(_core_executor));
 }
 
 void ApplicationContext::finalize() const
@@ -191,7 +194,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const document& mani
     DCHECK(_resource_loader, "Application ResourceLoader has not been initialized");
     const sp<ResourceLoader> resourceLoader = createResourceLoaderImpl(manifest, resourceLoaderContext);
     resourceLoader->beanFactory().extend(_resource_loader->beanFactory());
-    resourceLoader->import(manifest, _resource_loader->beanFactory());
+    resourceLoader->importManifest(manifest, _resource_loader->beanFactory());
     return resourceLoader;
 }
 
@@ -434,7 +437,7 @@ void ApplicationContext::resume()
     _sys_clock->resume();
 }
 
-void ApplicationContext::updateState()
+void ApplicationContext::updateState() const
 {
     _steady_clock->update(0);
     _main_executor->run();

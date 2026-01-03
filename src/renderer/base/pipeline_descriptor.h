@@ -168,6 +168,7 @@ public:
     Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
 
     bool hasDivisors() const;
+    const String& signature() const;
 
     template<typename T> const T* getTrait() const {
         for(const Trait& i : _configuration._traits)
@@ -176,9 +177,9 @@ public:
         return nullptr;
     }
 
+private:
     String generateSignature() const;
 
-private:
     Camera _camera;
     Configuration _configuration;
 
@@ -190,6 +191,7 @@ private:
     Map<String, String> _definitions;
 
     Vector<ShaderPreprocessor::Stage> _stages;
+    String _signature;
 };
 
 }

@@ -52,7 +52,7 @@ public:
     }
 
     void draw(GraphicsContext& graphicsContext) override {
-        DPROFILER_TRACE("DrawCommand");
+        DPROFILER_TRACE(_context._bindings->pipelineDescriptor()->signature().c_str());
 
         _draw_decorator->preDraw(graphicsContext, _context);
         _context.upload(graphicsContext);
@@ -74,7 +74,7 @@ public:
     }
 
     void draw(GraphicsContext& graphicsContext) override {
-        DPROFILER_TRACE("DrawCommand");
+        DPROFILER_TRACE(_context._bindings->pipelineDescriptor()->signature().c_str());
 
         _context.upload(graphicsContext);
 

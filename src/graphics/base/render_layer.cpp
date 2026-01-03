@@ -84,6 +84,7 @@ RenderLayerSnapshot RenderLayer::snapshot(const RenderRequest& renderRequest)
 
     renderLayerSnapshot.snapshot(renderRequest);
 
+    DPROFILER_LOG("Signature", _stub->_pipeline_bindings->pipelineDescriptor()->signature());
     DPROFILER_LOG("NeedsReload", renderLayerSnapshot.needsReload());
     return renderLayerSnapshot;
 }

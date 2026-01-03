@@ -55,7 +55,6 @@ public:
 
     const sp<RenderController>& renderController() const;
     const sp<ApplicationContext>& applicationContext() const;
-    const sp<ApplicationProfiler>& applicationProfiler() const;
 
     const Constants& constants();
 
@@ -70,8 +69,6 @@ public:
 private:
     void push();
 
-    sp<ApplicationContext> createApplicationContext(const ApplicationManifest& manifest, sp<ApplicationBundle> resource, sp<RenderEngine> renderEngine);
-
 private:
     class ArkAssetBundle;
 
@@ -80,7 +77,6 @@ private:
 
     ClassManager _class_manager;
     sp<ApplicationContext> _application_context;
-    sp<ApplicationProfiler> _application_profiler;
     sp<ArkAssetBundle> _asset_bundle;
     sp<ApplicationManifest> _manifest;
     Traits _interfaces;

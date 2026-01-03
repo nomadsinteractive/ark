@@ -41,8 +41,12 @@ public:
 
     void run() override
     {
+        DPROFILER_TRACE("DownloadBuffer");
         if(_buffer.id())
+        {
+            DPROFILER_LOG("BufferSize", _memory->size());
             _buffer.delegate()->downloadBuffer(GraphicsContext::mocked(), _offset, _memory->size(), _memory->buf());
+        }
     }
 
 private:

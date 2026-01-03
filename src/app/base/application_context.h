@@ -82,7 +82,7 @@ public:
     void pause();
     void resume();
 
-    void updateState();
+    void updateState() const;
 
     bool isPaused() const;
 
@@ -90,8 +90,9 @@ public:
         _render_controller->deferUnref(Box(std::move(inst)));
     }
 
-private:
     void initialize(const document& manifest);
+
+private:
     void finalize() const;
 
     sp<ResourceLoader> createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -148,6 +149,8 @@ private:
     EventListenerList _event_listeners;
     V4 _background_color;
     bool _paused;
+
+    sp<ApplicationProfiler> _application_profiler;
 
     friend class Ark;
     friend class Application;

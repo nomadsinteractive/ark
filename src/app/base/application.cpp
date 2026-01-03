@@ -57,7 +57,8 @@ public:
         : _surface_update_requester(std::move(surfaceUpdateRequester)), _application_context(std::move(applicationContext)), _application_delegate(std::move(applicationDelegate)) {
     }
 
-    void run() override {
+    void run() override
+    {
         DPROFILER_TRACE("MainFrame", ApplicationProfiler::CATEGORY_RENDER_FRAME);
         _application_context->runOnCoreThread(_surface_update_requester);
         _application_context->updateState();

@@ -1,7 +1,5 @@
 #include "optick/impl/application_profiler/application_profiler_optick.h"
 
-#include <unordered_map>
-
 #include <optick.h>
 
 #include "core/base/string.h"
@@ -12,7 +10,7 @@ namespace ark {
 
 namespace {
 
-class EventScopeOptick : public ApplicationProfiler::EventScope {
+class EventScopeOptick final : public ApplicationProfiler::EventScope {
 public:
     EventScopeOptick(const ::Optick::EventDescription& description)
         : _event(description) {
@@ -22,37 +20,38 @@ private:
     ::Optick::Event _event;
 };
 
-class LoggerOptick : public ApplicationProfiler::Logger {
+class LoggerOptick final : public ApplicationProfiler::Logger {
 public:
-    LoggerOptick(const char* func, const char* filename, int32_t lineno, const char* name)
+    LoggerOptick(const char* func, const char* filename, const int32_t lineno, const char* name)
         : _event_description(::Optick::CreateDescription(func, filename, lineno, name)) {
     }
 
-    virtual void log(const void* data, ApplicationProfiler::DataType dataType) override {
+    void log(const void* data, const ApplicationProfiler::DataType dataType) override
+    {
         switch(dataType) {
         case ApplicationProfiler::DATA_TYPE_INT32:
-            ::Optick::Tag::Attach(*_event_description, *reinterpret_cast<const int32_t*>(data));
+            ::Optick::Tag::Attach(*_event_description, *static_cast<const int32_t*>(data));
             break;
         case ApplicationProfiler::DATA_TYPE_UINT32:
-            ::Optick::Tag::Attach(*_event_description, *reinterpret_cast<const uint32_t*>(data));
+            ::Optick::Tag::Attach(*_event_description, *static_cast<const uint32_t*>(data));
             break;
         case ApplicationProfiler::DATA_TYPE_UINT64:
-            ::Optick::Tag::Attach(*_event_description, *reinterpret_cast<const uint64_t*>(data));
+            ::Optick::Tag::Attach(*_event_description, *static_cast<const uint64_t*>(data));
             break;
         case ApplicationProfiler::DATA_TYPE_FLOAT:
-            ::Optick::Tag::Attach(*_event_description, *reinterpret_cast<const float*>(data));
+            ::Optick::Tag::Attach(*_event_description, *static_cast<const float*>(data));
             break;
         case ApplicationProfiler::DATA_TYPE_STRING:
-            ::Optick::Tag::Attach(*_event_description, reinterpret_cast<const char*>(data));
+            ::Optick::Tag::Attach(*_event_description, static_cast<const char*>(data));
             break;
         case ApplicationProfiler::DATA_TYPE_VEC2: {
-            const V2* v = reinterpret_cast<const V2*>(data);
+            const V2* v = static_cast<const V2*>(data);
             ::Optick::Tag::Attach(*_event_description, v->x(), v->y(), 0);
             break;
         }
         case ApplicationProfiler::DATA_TYPE_VEC3:
         case ApplicationProfiler::DATA_TYPE_VEC4: {
-            const V3* v = reinterpret_cast<const V3*>(data);
+            const V3* v = static_cast<const V3*>(data);
             ::Optick::Tag::Attach(*_event_description, v->x(), v->y(), v->z());
             break;
         }
@@ -65,13 +64,14 @@ private:
     ::Optick::EventDescription* _event_description;
 };
 
-class OptickEventTracer : public ApplicationProfiler::Tracer {
+class OptickEventTracer final : public ApplicationProfiler::Tracer {
 public:
-    OptickEventTracer(const char* func, const char* filename, int32_t lineno, const char* name, ::Optick::Category::Type category = ::Optick::Category::None)
+    OptickEventTracer(const char* func, const char* filename, const int32_t lineno, const char* name, const ::Optick::Category::Type category = ::Optick::Category::None)
         : _event_description(::Optick::CreateDescription(func, filename, lineno, name, category)) {
     }
 
-    virtual op<ApplicationProfiler::EventScope> trace() override {
+    op<ApplicationProfiler::EventScope> trace() override
+    {
         return op<ApplicationProfiler::EventScope>(new EventScopeOptick(*_event_description));
     }
 
@@ -79,7 +79,7 @@ private:
     ::Optick::EventDescription* _event_description;
 };
 
-class OptickThreadEventLogger : public ApplicationProfiler::EventScope {
+class OptickThreadEventLogger final : public ApplicationProfiler::EventScope {
 public:
     OptickThreadEventLogger(const char* name)
         : _thread_scope(name) {
@@ -89,13 +89,13 @@ private:
     ::Optick::ThreadScope _thread_scope;
 };
 
-class OptickThreadEventTracer : public ApplicationProfiler::Tracer {
+class OptickThreadEventTracer final : public ApplicationProfiler::Tracer {
 public:
     OptickThreadEventTracer(const char* name)
         : _name(name) {
     }
 
-    virtual op<ApplicationProfiler::EventScope> trace() override {
+    op<ApplicationProfiler::EventScope> trace() override {
         return op<ApplicationProfiler::EventScope>(new OptickThreadEventLogger(_name.c_str()));
     }
 
@@ -103,13 +103,13 @@ private:
     String _name;
 };
 
-class OptickFrameEventTracer : public ApplicationProfiler::Tracer {
+class OptickFrameEventTracer final : public ApplicationProfiler::Tracer {
 public:
-    OptickFrameEventTracer(const char* filename, int32_t lineno, const char* name)
+    OptickFrameEventTracer(const char* filename, const int32_t lineno, const char* name)
         : _frame_thread_scope(name), _frame_tag_event_description(::Optick::EventDescription::Create("Frame", filename, static_cast<uint32_t>(lineno))) {
     }
 
-    virtual op<ApplicationProfiler::EventScope> trace() override {
+    op<ApplicationProfiler::EventScope> trace() override {
         ::Optick::EndFrame();
         ::Optick::Update();
         ::Optick::Tag::Attach(*_frame_tag_event_description, ::Optick::BeginFrame());
@@ -121,22 +121,26 @@ private:
     ::Optick::EventDescription* _frame_tag_event_description;
 };
 
-}
-
-static Optick::Category::Type toOptickCategory(ApplicationProfiler::Category category)
+Optick::Category::Type toOptickCategory(const ApplicationProfiler::Category category)
 {
     switch(category) {
         case ApplicationProfiler::CATEGORY_PHYSICS:
             return Optick::Category::Physics;
         case ApplicationProfiler::CATEGORY_SCRIPT:
             return Optick::Category::Script;
+        case ApplicationProfiler::CATEGORY_RENDERING:
+            return Optick::Category::Rendering;
+        case ApplicationProfiler::CATEGORY_WAIT:
+            return Optick::Category::Wait;
         default:
             break;
     }
     return Optick::Category::None;
 }
 
-op<ApplicationProfiler::Tracer> ApplicationProfilerOptick::makeTracer(const char* func, const char* filename, int32_t lineno, const char* name, Category category)
+}
+
+op<ApplicationProfiler::Tracer> ApplicationProfilerOptick::makeTracer(const char* func, const char* filename, const int32_t lineno, const char* name, const Category category)
 {
     if(category == ApplicationProfiler::CATEGORY_RENDER_FRAME)
         return op<Tracer>(new OptickFrameEventTracer(filename, lineno, name));
@@ -145,14 +149,14 @@ op<ApplicationProfiler::Tracer> ApplicationProfilerOptick::makeTracer(const char
     return op<Tracer>(new OptickEventTracer(func, filename, lineno, name, toOptickCategory(category)));
 }
 
-op<ApplicationProfiler::Logger> ApplicationProfilerOptick::makeLogger(const char* func, const char* filename, int32_t lineno, const char* name)
+op<ApplicationProfiler::Logger> ApplicationProfilerOptick::makeLogger(const char* func, const char* filename, const int32_t lineno, const char* name)
 {
     return op<Logger>(new LoggerOptick(func, filename, lineno, name));
 }
 
 sp<ApplicationProfiler> ApplicationProfilerOptick::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<ApplicationProfilerOptick>::make();
+    return sp<ApplicationProfiler>::make<ApplicationProfilerOptick>();
 }
 
 }

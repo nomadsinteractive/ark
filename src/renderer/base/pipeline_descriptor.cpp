@@ -153,6 +153,7 @@ PipelineDescriptor::PipelineDescriptor(Camera camera, PipelineBuildingContext& b
         _stages.push_back(preprocessor->preprocess());
 
     _layout->initializeSSBO(buildingContext);
+    _signature = generateSignature();
 }
 
 const sp<Vec4>& PipelineDescriptor::scissor() const
@@ -200,6 +201,11 @@ bool PipelineDescriptor::hasDivisors() const
     return _layout->streamLayouts().size() > 1;
 }
 
+const String& PipelineDescriptor::signature() const
+{
+    return _signature;
+}
+
 String PipelineDescriptor::generateSignature() const
 {
     StringBuffer sb;
@@ -207,7 +213,10 @@ String PipelineDescriptor::generateSignature() const
     {
         if(!sb.empty())
             sb << ", ";
-        sb << Documents::toString(i._manifest);
+        if(const String src = Documents::getAttribute(i._manifest, constants::SRC))
+            sb << src;
+        else
+            sb << Documents::toString(i._manifest);
     }
     return sb.str();
 }

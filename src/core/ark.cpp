@@ -179,6 +179,16 @@ sp<Camera::Delegate> makeCameraDelegate(const enums::CoordinateSystem coordinate
     return ndcDepthRange == enums::NDC_DEPTH_RANGE_ZERO_TO_ONE ? sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
+
+sp<ApplicationContext> createApplicationContext(const ApplicationManifest& manifest, sp<ApplicationBundle> appResource, sp<RenderEngine> renderEngine)
+{
+    const Global<PluginManager> pluginManager;
+    const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(std::move(appResource), std::move(renderEngine));
+    pluginManager->addPlugin(sp<BasePlugin>::make(applicationContext));
+    applicationContext->initialize(manifest.resourceLoader());
+    return applicationContext;
+}
+
 }
 
 class Ark::ArkAssetBundle {
@@ -410,11 +420,6 @@ const sp<ApplicationContext>& Ark::applicationContext() const
     return _application_context;
 }
 
-const sp<ApplicationProfiler>& Ark::applicationProfiler() const
-{
-    return _application_profiler;
-}
-
 const Constants& Ark::constants()
 {
     return ensure<Constants>();
@@ -445,27 +450,17 @@ Camera Ark::createCamera(enums::CoordinateSystem cs, const bool flipx, const boo
 
 op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const char* filename, const int32_t lineno, const char* name, const ApplicationProfiler::Category category) const
 {
-    return _application_profiler ? _application_profiler->makeTracer(func, filename, lineno, name, category) : op<ApplicationProfiler::Tracer>();
+    return _application_context->_application_profiler ? _application_context->_application_profiler->makeTracer(func, filename, lineno, name, category) : op<ApplicationProfiler::Tracer>();
 }
 
 op<ApplicationProfiler::Logger> Ark::makeProfilerLogger(const char* func, const char* filename, const int32_t lineno, const char* name) const
 {
-    return _application_profiler ? _application_profiler->makeLogger(func, filename, lineno, name) : op<ApplicationProfiler::Logger>();
+    return _application_context->_application_profiler ? _application_context->_application_profiler->makeLogger(func, filename, lineno, name) : op<ApplicationProfiler::Logger>();
 }
 
 void Ark::deferUnref(Box box) const
 {
     _application_context->renderController()->deferUnref(std::move(box));
-}
-
-sp<ApplicationContext> Ark::createApplicationContext(const ApplicationManifest& manifest, sp<ApplicationBundle> appResource, sp<RenderEngine> renderEngine)
-{
-    const Global<PluginManager> pluginManager;
-    const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(std::move(appResource), std::move(renderEngine));
-    pluginManager->addPlugin(sp<BasePlugin>::make(applicationContext));
-    applicationContext->initialize(manifest.resourceLoader());
-    _application_profiler = applicationContext->resourceLoader()->beanFactory().build<ApplicationProfiler>(document::make("root"), Scope());
-    return applicationContext;
 }
 
 }

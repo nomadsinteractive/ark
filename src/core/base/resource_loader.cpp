@@ -21,7 +21,7 @@ ResourceLoader::~ResourceLoader()
     LOGD("");
 }
 
-void ResourceLoader::import(const document& manifest, BeanFactory& beanFactory)
+void ResourceLoader::importManifest(const document& manifest, BeanFactory& beanFactory)
 {
     for(const document& i : manifest->children("import"))
     {

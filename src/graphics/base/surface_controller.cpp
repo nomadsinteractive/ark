@@ -2,6 +2,7 @@
 
 #include <thread>
 
+#include "core/ark.h"
 #include "core/base/clock.h"
 
 #include "graphics/base/render_request.h"
@@ -30,14 +31,18 @@ void SurfaceController::requestUpdate(const uint32_t tick)
 void SurfaceController::onRenderFrame(const V4 backgroundColor, RenderView& renderView)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
+    const RenderRequest renderRequest = obtainRenderRequest();
+    DPROFILER_TRACE("onRenderFrame", ApplicationProfiler::CATEGORY_RENDERING);
+    renderRequest.onRenderFrame(backgroundColor, renderView);
+}
+
+RenderRequest SurfaceController::obtainRenderRequest()
+{
+    DPROFILER_TRACE("obtainRenderRequest", ApplicationProfiler::CATEGORY_WAIT);
     while(true)
     {
         if(Optional<RenderRequest> optRequest = _render_requests.pop())
-        {
-            const RenderRequest renderRequest = std::move(optRequest.value());
-            renderRequest.onRenderFrame(backgroundColor, renderView);
-            break;
-        }
+            return std::move(optRequest.value());
         std::this_thread::yield();
     }
 }

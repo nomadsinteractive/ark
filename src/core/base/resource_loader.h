@@ -59,7 +59,7 @@ public:
         return _builder_refs.ensure<BuilderRefs<T>>(_bean_factory)->getBuilder(id).build(args);
     }
 
-    void import(const document& manifest, BeanFactory& beanFactory);
+    void importManifest(const document& manifest, BeanFactory& beanFactory);
 
     const BeanFactory& beanFactory() const;
     BeanFactory& beanFactory();

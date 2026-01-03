@@ -30,7 +30,7 @@ VkBool32 vkDebugUtilsMessengerCallbackEXT(
 {
     const VKInstance* instance = static_cast<VKInstance*>(pUserData);
     if(const PipelineDescriptor* currentPipelineDescriptor = instance->currentPipelineDescriptor())
-        LOGE(currentPipelineDescriptor->generateSignature().c_str());
+        LOGE(currentPipelineDescriptor->signature().c_str());
     if(messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
         LOGE("[%s] %s", pCallbackData->pMessageIdName, pCallbackData->pMessage);
     else if(messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)

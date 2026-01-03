@@ -17,6 +17,8 @@ public:
         CATEGORY_START_THREAD,
         CATEGORY_PHYSICS,
         CATEGORY_SCRIPT,
+        CATEGORY_RENDERING,
+        CATEGORY_WAIT
     };
 
     enum DataType {

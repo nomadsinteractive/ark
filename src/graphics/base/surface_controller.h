@@ -22,6 +22,9 @@ public:
     void onRenderFrame(V4 backgroundColor, RenderView& renderView);
 
 private:
+    RenderRequest obtainRenderRequest();
+
+private:
     sp<Allocator::Pool> _allocator_pool;
     LFQueue<RenderRequest> _render_requests;
     RenderGroup _renderer_phrase;

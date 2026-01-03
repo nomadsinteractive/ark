@@ -222,6 +222,8 @@ void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<Uploadi
 
 void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
 {
+    DPROFILER_TRACE("PreFrameUpdate");
+
     prepare(graphicsContext, _uploading_resources);
     _on_every_frame.foreach(graphicsContext, false, true);
 
@@ -246,7 +248,7 @@ void RenderController::upload(sp<Resource> resource, const enums::UploadStrategy
         _uploading_resources.push(UploadingRenderResource(RenderResource(std::move(resource), std::move(future)), strategy, priority));
 }
 
-void RenderController::uploadBuffer(const Buffer& buffer, sp<Uploader> uploader, const enums::UploadStrategy strategy, sp<Future> future, enums::UploadPriority priority)
+void RenderController::uploadBuffer(const Buffer& buffer, sp<Uploader> uploader, const enums::UploadStrategy strategy, sp<Future> future, const enums::UploadPriority priority)
 {
     ASSERT(uploader);
     if(!future)
@@ -313,7 +315,7 @@ Buffer RenderController::makeIndexBuffer(const Buffer::Usage usage, sp<Uploader>
     return makeBuffer(usage | Buffer::USAGE_BIT_INDEX, std::move(uploader));
 }
 
-sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveIndexBuffer(const Model& model, bool degenerate)
+sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveIndexBuffer(const Model& model, const bool degenerate)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_CORE);
     const sp<Uploader>& indicesUploader = model.indices();
