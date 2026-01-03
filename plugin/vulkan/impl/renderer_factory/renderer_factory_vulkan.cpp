@@ -52,7 +52,9 @@ RendererFactoryVulkan::RendererFactoryVulkan()
 sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
     sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_RHS, enums::NDC_DEPTH_RANGE_ZERO_TO_ONE);
-    if(renderer._version != enums::RENDERER_VERSION_AUTO)
+    if(renderer._version == enums::RENDERER_VERSION_AUTO)
+        setVersion(enums::RENDERER_VERSION_VULKAN_12, vkContext);
+    else
         setVersion(renderer._version, vkContext);
     return vkContext;
 }
@@ -60,8 +62,6 @@ sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(const A
 void RendererFactoryVulkan::onSurfaceCreated(RenderEngine& renderEngine)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
-
-    setVersion(enums::RENDERER_VERSION_VULKAN_12, renderEngine.context());
 
     _renderer->_instance = sp<VKInstance>::make();
     _renderer->_instance->initialize(renderEngine);

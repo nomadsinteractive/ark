@@ -74,6 +74,7 @@ private:
     uint32_t _height = 0;
 
     uint32_t _aquired_image_id;
+    bool _vsync;
 
     friend class VKGraphicsContext;
 };

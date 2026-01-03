@@ -41,8 +41,7 @@ public:
         sp<Activity> build(const Scope& args) override;
 
     private:
-        builder<View> _root_view;
-        builder<RenderGroup> _render_group;
+        sp<Builder<RenderGroup>> _render_group;
     };
 
 private:

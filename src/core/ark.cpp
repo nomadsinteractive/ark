@@ -180,12 +180,11 @@ sp<Camera::Delegate> makeCameraDelegate(const enums::CoordinateSystem coordinate
 }
 
 
-sp<ApplicationContext> createApplicationContext(const ApplicationManifest& manifest, sp<ApplicationBundle> appResource, sp<RenderEngine> renderEngine)
+sp<ApplicationContext> createApplicationContext(sp<ApplicationBundle> appResource, sp<RenderEngine> renderEngine)
 {
     const Global<PluginManager> pluginManager;
     const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(std::move(appResource), std::move(renderEngine));
-    pluginManager->addPlugin(sp<BasePlugin>::make(applicationContext));
-    applicationContext->initialize(manifest.resourceLoader());
+    pluginManager->addPlugin(sp<Plugin>::make<BasePlugin>(applicationContext));
     return applicationContext;
 }
 
@@ -338,7 +337,8 @@ void Ark::initialize(sp<ApplicationManifest> manifest)
 
     const sp<BeanFactory> factory = createBeanFactory(sp<Dictionary<document>>::make<DictionaryImpl<document>>());
     sp<RenderEngine> renderEngine = createRenderEngine(factory, _manifest->renderer());
-    _application_context = createApplicationContext(_manifest, std::move(applicationBundle), std::move(renderEngine));
+    _application_context = createApplicationContext(std::move(applicationBundle), std::move(renderEngine));
+    _application_context->initialize(_manifest->resourceLoader());
 }
 
 sp<BeanFactory> Ark::createBeanFactory(const String& src) const

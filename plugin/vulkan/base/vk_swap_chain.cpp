@@ -17,7 +17,7 @@ struct NSView;
 namespace ark::plugin::vulkan {
 
 VKSwapChain::VKSwapChain(const RenderEngine& renderEngine, sp<VKDevice> device)
-    : _device(std::move(device)), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0)
+    : _device(std::move(device)), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0), _vsync(renderEngine.context()->renderer()._vsync)
 {
     _swap_chain.connect(_device->vkInstance(), _device->vkPhysicalDevice(), _device->vkLogicalDevice());
 
@@ -85,12 +85,12 @@ const sp<VKCommandPool>& VKSwapChain::commandPool() const
     return _command_pool;
 }
 
-const std::vector<VkFramebuffer>& VKSwapChain::frameBuffers() const
+const Vector<VkFramebuffer>& VKSwapChain::frameBuffers() const
 {
     return _frame_buffers;
 }
 
-std::vector<VkCommandBuffer> VKSwapChain::makeCommandBuffers() const
+Vector<VkCommandBuffer> VKSwapChain::makeCommandBuffers() const
 {
     return _command_pool->makeCommandBuffers(_swap_chain.imageCount);
 }
@@ -129,7 +129,7 @@ void VKSwapChain::onSurfaceChanged(const uint32_t width, const uint32_t height)
 {
     _width = width;
     _height = height;
-    _swap_chain.create(&_width, &_height, true);
+    _swap_chain.create(&_width, &_height, _vsync);
     setupDepthStencil();
     setupRenderPass();
     setupFrameBuffer();
