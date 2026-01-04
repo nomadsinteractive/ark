@@ -45,7 +45,7 @@ Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shap
     const BodyCreateInfo& manifest = iter->second;
     const sp<Rotation> rot = rotation.asInstance<Rotation>();
     const sp<RotationAxisTheta> axisTheta = rot ? rot.asInstance<RotationAxisTheta>() : sp<RotationAxisTheta>();
-    const sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->scale().value(), axisTheta ? axisTheta->theta() : nullptr, std::move(collisionFilter), manifest);
+    const sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->optionalScale().value(), axisTheta ? axisTheta->theta() : nullptr, std::move(collisionFilter), manifest);
     if(axisTheta)
         body->setAngle(axisTheta->theta()->val());
     CHECK(!discarded, "Unimplemented");

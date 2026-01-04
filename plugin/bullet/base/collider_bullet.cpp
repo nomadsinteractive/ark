@@ -163,7 +163,7 @@ RigidbodyBullet getRigidBodyFromCollisionObject(const btCollisionObject* collisi
 sp<CollisionShapeRef> createCollisionShape(const NamedHash& type, const Optional<V3>& scale, ModelLoader& modelLoader)
 {
     const V3 s = scale ? scale.value() : V3(1.0f);;
-    switch(type.hash())
+    switch(static_cast<Shape::Type>(type.hash()))
     {
         case Shape::TYPE_AABB:
         case Shape::TYPE_BOX:
@@ -278,7 +278,7 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
     sp<CollisionShapeRef> cs = shape->asImplementation<CollisionShapeRef>();
     if(!cs)
     {
-        cs = ensureCollisionShapeRef(shape->type(), shape->scale());
+        cs = ensureCollisionShapeRef(shape->type(), shape->optionalScale());
         shape->setImplementation(Box(cs));
     }
 
@@ -487,7 +487,7 @@ void ColliderBullet::addTickContactInfo(const sp<CollisionObjectRef>& rigidBody,
 
 sp<CollisionShapeRef> ColliderBullet::ensureCollisionShapeRef(const NamedHash& type, const Optional<V3>& scale) const
 {
-    switch(type.hash())
+    switch(static_cast<Shape::Type>(type.hash()))
     {
         case Shape::TYPE_AABB:
         case Shape::TYPE_BOX:

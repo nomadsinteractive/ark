@@ -30,7 +30,9 @@ public:
 //  [[script::bindings::property]]
     V3 origin() const;
 //  [[script::bindings::property]]
-    const Optional<V3>& scale() const;
+    V3 scale() const;
+
+    const Optional<V3>& optionalScale() const;
 
     const Box& implementation() const;
     void setImplementation(Box implementation);

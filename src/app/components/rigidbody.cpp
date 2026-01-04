@@ -10,16 +10,14 @@
 #include "core/types/ref.h"
 #include "core/util/string_convert.h"
 
-#include "graphics/base/boundaries.h"
+#include "graphics/base/shape.h"
 #include "graphics/components/rotation.h"
+#include "graphics/components/render_object.h"
 #include "graphics/components/translation.h"
 
 #include "app/base/application_context.h"
-#include "../../graphics/base/shape.h"
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
-#include "graphics/base/transform_3d.h"
-#include "graphics/components/render_object.h"
 
 namespace ark {
 

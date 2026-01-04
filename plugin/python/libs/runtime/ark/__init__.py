@@ -2857,12 +2857,12 @@ class Shape:
         pass
 
     @property
-    def scale(self) -> Optional[tuple[float, float, float]]:
-        return None
+    def scale(self) -> tuple[float, float, float]:
+        return 1, 1, 1
 
     @property
-    def origin(self) -> Optional[Vec3]:
-        return None
+    def origin(self) -> tuple[float, float, float]:
+        return 0, 0, 0
 
 
 class RigidbodyController:

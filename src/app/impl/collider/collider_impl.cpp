@@ -35,7 +35,7 @@ bool collisionFilterTest(const sp<CollisionFilter>& cf1, const sp<CollisionFilte
 
 float calcOccupyRadius(const Shape& shape)
 {
-    const V3 size = shape.scale().value();
+    const V3 size = shape.optionalScale().value();
     const V3 pivot = shape.origin();
     const V3 pm(std::max(std::abs(pivot.x()), std::abs(1.0f - pivot.x())), std::max(std::abs(pivot.y()), std::abs(1.0f - pivot.y())), std::max(std::abs(pivot.z()), std::abs(1.0f - pivot.z())));
     const V3 sm = pm * size;
@@ -304,7 +304,7 @@ Rigidbody::Impl ColliderImpl::createBody(const Rigidbody::BodyType type, sp<Shap
 {
     CHECK(type == Rigidbody::BODY_TYPE_KINEMATIC || type == Rigidbody::BODY_TYPE_DYNAMIC || type == Rigidbody::BODY_TYPE_STATIC || type == Rigidbody::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
     if(!shape->implementation())
-        shape = createShape(shape->type(), shape->scale(), shape->origin());
+        shape = createShape(shape->type(), shape->optionalScale(), shape->origin());
     const sp<RigidbodyImpl> rigidbodyImpl = _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
     sp<Rigidbody::Stub> stub = rigidbodyImpl->_rigidbody_stub;
     return Rigidbody::Impl{std::move(stub), nullptr, rigidbodyImpl};

@@ -24,7 +24,12 @@ V3 Shape::origin() const
     return _origin;
 }
 
-const Optional<V3>& Shape::scale() const
+V3 Shape::scale() const
+{
+    return _scale ? _scale.value() : V3(1.0f);
+}
+
+const Optional<V3>& Shape::optionalScale() const
 {
     return _scale;
 }
