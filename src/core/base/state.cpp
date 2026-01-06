@@ -84,7 +84,7 @@ void State::activate()
             }
         }
 
-    if(shouldActive)
+    if(shouldActive || numOfSupportStates == 0)
     {
         for(const sp<Link>& i : _in_links)
             if(i->_link_type == LINK_TYPE_TRANSIT)
@@ -93,11 +93,9 @@ void State::activate()
         for(const sp<Link>& i : _out_links)
             if(i->_link_type == LINK_TYPE_PROPAGATE)
                 i->_end.propagateActive(*this);
-    }
 
-    if(shouldActive || numOfSupportStates == 0)
         onActivate();
-
+    }
 }
 
 void State::deactivate()
