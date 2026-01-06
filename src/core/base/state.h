@@ -19,9 +19,11 @@ public:
     State(sp<Runnable> onActivate = nullptr, sp<Runnable> onDeactivate = nullptr);
 
 //  [[script::bindings::property]]
-    bool active() const;
+    sp<Boolean> active() const;
 //  [[script::bindings::property]]
     void setActive(bool active);
+
+    bool isActive() const;
 
 //  [[script::bindings::auto]]
     void activate();
@@ -33,25 +35,26 @@ public:
     void createLink(State::LinkType linkType, State& nextState);
 
 private:
-    void suppress();
-    void unsuppress();
+    void propagateSuppress(const State& from);
+    void propagateUnsuppress(const State& from);
 
-    void propagate(const State& activated);
-    void backPropagate(const State& deactivated);
+    void propagateActive(const State& from);
+    void propagateDeactive(const State& from);
 
-    void doActivate();
-    void doDeactivate();
+    void onActivate() const;
+    void onDeactivate() const;
 
     struct Link;
+    class Stub;
 
 private:
     sp<Runnable> _on_activate;
     sp<Runnable> _on_deactivate;
-    bool _active;
-    bool _suppressed;
 
     Vector<sp<Link>> _in_links;
     Vector<sp<Link>> _out_links;
+
+    sp<Stub> _stub;
 };
 
 }

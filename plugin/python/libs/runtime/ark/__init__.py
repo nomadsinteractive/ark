@@ -3117,8 +3117,8 @@ class State:
         pass
 
     @property
-    def active(self) -> bool:
-        return False
+    def active(self) -> Boolean:
+        return Boolean(False)
 
     def activate(self):
         pass
