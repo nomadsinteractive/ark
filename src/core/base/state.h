@@ -36,6 +36,9 @@ private:
     void propagateSuppress(const State& from);
     void propagateUnsuppress(const State& from);
 
+    void propagateSupporting(const State& from);
+    void propagateUnsupporting(const State& from);
+
     void propagateActive(const State& from);
     void propagateDeactive(const State& from);
 
