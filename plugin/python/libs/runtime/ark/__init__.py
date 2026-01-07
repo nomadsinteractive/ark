@@ -3120,6 +3120,10 @@ class State:
     def active(self) -> Boolean:
         return Boolean(False)
 
+    @property
+    def suppressed(self) -> Boolean:
+        return Boolean(False)
+
     def activate(self):
         pass
 

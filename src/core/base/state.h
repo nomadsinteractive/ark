@@ -21,16 +21,14 @@ public:
 //  [[script::bindings::property]]
     sp<Boolean> active() const;
 //  [[script::bindings::property]]
-    void setActive(bool active);
+    sp<Boolean> suppressed() const;
 
     bool isActive() const;
 
 //  [[script::bindings::auto]]
     void activate();
-
 //  [[script::bindings::auto]]
     void deactivate();
-
 //  [[script::bindings::auto]]
     void createLink(State::LinkType linkType, State& nextState);
 
@@ -46,6 +44,7 @@ private:
 
     struct Link;
     class Stub;
+    class BooleanStateSuppressed;
 
 private:
     sp<Runnable> _on_activate;

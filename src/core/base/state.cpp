@@ -46,7 +46,28 @@ public:
 
     Timestamp _timestamp;
 };
-    
+
+class State::BooleanStateSuppressed : public Boolean {
+public:
+    BooleanStateSuppressed(const sp<Stub>& stub)
+        : _stub(stub)
+    {
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        return _stub->update(tick);
+    }
+
+    bool val() override
+    {
+        return _stub->_suppressed;
+    }
+
+private:
+    sp<Stub> _stub;
+};
+
 State::State(sp<Runnable> onActivate, sp<Runnable> onDeactivate)
     : _on_activate(std::move(onActivate)), _on_deactivate(std::move(onDeactivate)), _stub(sp<Stub>::make())
 {
@@ -57,12 +78,9 @@ sp<Boolean> State::active() const
     return _stub;
 }
 
-void State::setActive(const bool active)
+sp<Boolean> State::suppressed() const
 {
-    if(active)
-        activate();
-    else
-        deactivate();
+    return sp<Boolean>::make<BooleanStateSuppressed>(_stub);
 }
 
 bool State::isActive() const
@@ -103,9 +121,9 @@ void State::activate()
 
 void State::deactivate()
 {
-    CHECK_WARN(_stub->_activated, "State is not active");
+    CHECK_WARN(_stub->_activated, "State is not activated");
     _stub->_activated = false;
-    _stub->_active = false;
+    _stub->_suppressed = false;
     onDeactivate();
 
     for(const sp<Link>& i : _in_links)
@@ -113,7 +131,7 @@ void State::deactivate()
             i->_start.propagateUnsuppress(*this);
 
     for(const sp<Link>& i : _out_links)
-        if(i->_link_type == LINK_TYPE_PROPAGATE)
+        if(i->_link_type == LINK_TYPE_PROPAGATE || i->_link_type == LINK_TYPE_SUPPORT)
             i->_end.propagateDeactive(*this);
 }
 
