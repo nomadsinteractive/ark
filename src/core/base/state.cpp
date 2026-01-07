@@ -25,7 +25,7 @@ public:
         return (_active || _activated) && !_suppressed;
     }
 
-    void requestActive(const bool active)
+    void requestActivate(const bool active)
     {
         _activated = active;
         _timestamp.markDirty();
@@ -33,8 +33,11 @@ public:
 
     void requestSuppress(const bool suppress)
     {
-        _suppressed = suppress;
-        _timestamp.markDirty();
+        if(_active)
+        {
+            _suppressed = suppress;
+            _timestamp.markDirty();
+        }
     }
 
     bool _suppressed = false;
@@ -123,7 +126,7 @@ void State::createLink(const LinkType linkType, State& nextState)
 
 void State::propagateSuppress(const State& from)
 {
-    if(!_stub->_suppressed)
+    if(!_stub->_suppressed && _stub->_active)
     {
         _stub->_suppressed = true;
         onDeactivate();
@@ -136,9 +139,11 @@ void State::propagateSuppress(const State& from)
 
 void State::propagateUnsuppress(const State& from)
 {
-    _stub->_suppressed = false;
-    if(_stub->_activated)
+    if(_stub->_suppressed)
+    {
+        _stub->_suppressed = false;
         onActivate();
+    }
 
     for(const sp<Link>& i : _out_links)
         if((i->_link_type == LINK_TYPE_SUPPORT || i->_link_type == LINK_TYPE_PROPAGATE) && &i->_end != &from)
