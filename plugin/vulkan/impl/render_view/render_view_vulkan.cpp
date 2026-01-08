@@ -56,6 +56,7 @@ void RenderViewVulkan::onRenderFrame(const V4& backgroundColor, RenderCommand& r
     if(_vk_compute_context->vkCommandBuffer() != VK_NULL_HANDLE)
         _vk_compute_context->end();
 
+    DPROFILER_TRACE("Wait idle", ApplicationProfiler::CATEGORY_WAIT);
     swapChain->waitIdle();
 }
 

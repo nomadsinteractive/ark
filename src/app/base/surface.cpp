@@ -27,7 +27,7 @@ public:
         DTHREAD_CHECK(THREAD_NAME_ID_CORE);
         const uint32_t tick = _application_context->onTick();
         _application_context->renderController()->onPreCompose(tick);
-        _surface_controller->requestUpdate(tick);
+        _surface_controller->requestRender(tick);
     }
 
 private:
@@ -38,8 +38,9 @@ private:
 }
 
 Surface::Surface(sp<RenderView> renderView, const sp<ApplicationContext>& applicationContext)
-    : _render_view(std::move(renderView)), _surface_controller(sp<SurfaceController>::make()), _update_requester(sp<Runnable>::make<SurfaceUpdateRequester>(_surface_controller, applicationContext))
+    : _render_view(std::move(renderView)), _application_context(applicationContext), _surface_controller(sp<SurfaceController>::make()), _update_requester(sp<Runnable>::make<SurfaceUpdateRequester>(_surface_controller, _application_context))
 {
+    requestUpdate();
 }
 
 const sp<RenderView>& Surface::renderView() const
@@ -52,9 +53,9 @@ const sp<SurfaceController>& Surface::controller() const
     return _surface_controller;
 }
 
-const sp<Runnable>& Surface::updateRequester() const
+void Surface::requestUpdate() const
 {
-    return _update_requester;
+    _application_context->runOnCoreThread(_update_requester);
 }
 
 void Surface::onSurfaceCreated() const
@@ -69,7 +70,11 @@ void Surface::onSurfaceChanged(const uint32_t width, const uint32_t height) cons
 
 void Surface::onRenderFrame(const V4 backgroundColor) const
 {
-    _surface_controller->onRenderFrame(backgroundColor, _render_view);
+    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
+    const RenderRequest renderRequest = _surface_controller->obtainRenderRequest();
+    requestUpdate();
+    DPROFILER_TRACE("onRenderFrame", ApplicationProfiler::CATEGORY_RENDERING);
+    renderRequest.onRenderFrame(backgroundColor, _render_view);
 }
 
 }

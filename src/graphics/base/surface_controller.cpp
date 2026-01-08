@@ -20,20 +20,12 @@ void SurfaceController::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded
     _renderer_phrase.add(priority, std::move(renderer), std::move(discarded), std::move(visible));
 }
 
-void SurfaceController::requestUpdate(const uint32_t tick)
+void SurfaceController::requestRender(const uint32_t tick)
 {
     const V3 position(0);
     RenderRequest renderRequest(tick, _allocator_pool);
     _renderer_phrase.render(renderRequest, position, nullptr);
     _render_requests.push(std::move(renderRequest));
-}
-
-void SurfaceController::onRenderFrame(const V4 backgroundColor, RenderView& renderView)
-{
-    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
-    const RenderRequest renderRequest = obtainRenderRequest();
-    DPROFILER_TRACE("onRenderFrame", ApplicationProfiler::CATEGORY_RENDERING);
-    renderRequest.onRenderFrame(backgroundColor, renderView);
 }
 
 RenderRequest SurfaceController::obtainRenderRequest()

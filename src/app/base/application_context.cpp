@@ -169,6 +169,10 @@ void ApplicationContext::initialize(const document& manifest)
 
     _core_executor = (sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor"));
     _thread_pool_executor = (sp<Executor>::make<ExecutorThreadPool>(_core_executor));
+
+    runOnCoreThread([]() {
+        __thread_init__(THREAD_NAME_ID_CORE);
+    });
 }
 
 void ApplicationContext::finalize() const

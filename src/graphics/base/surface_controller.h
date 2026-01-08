@@ -18,8 +18,7 @@ public:
 // [[script::bindings::auto]]
     void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr, RendererType::Priority priority = RendererType::PRIORITY_DEFAULT);
 
-    void requestUpdate(uint32_t tick);
-    void onRenderFrame(V4 backgroundColor, RenderView& renderView);
+    void requestRender(uint32_t tick);
 
 private:
     RenderRequest obtainRenderRequest();
@@ -28,6 +27,8 @@ private:
     sp<Allocator::Pool> _allocator_pool;
     LFQueue<RenderRequest> _render_requests;
     RenderGroup _renderer_phrase;
+
+    friend class Surface;
 };
 
 }

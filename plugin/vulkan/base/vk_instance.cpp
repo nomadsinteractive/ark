@@ -69,14 +69,14 @@ Vector<VkLayerProperties> getInstanceLayerProperties() {
 }
 
 VKInstance::VKInstance()
-    : _extensions({VK_KHR_SURFACE_EXTENSION_NAME}), _callback1(VK_NULL_HANDLE)
+    : _extensions({VK_KHR_SURFACE_EXTENSION_NAME}), _callback1(VK_NULL_HANDLE), _current_pipeline_descriptor(nullptr)
 {
 }
 
 VKInstance::~VKInstance()
 {
 #ifdef ARK_FLAG_BUILD_TYPE
-    PFN_vkDestroyDebugUtilsMessengerEXT pfnDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT");
+    const auto pfnDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT"));
     if(_callback1)
         pfnDestroyDebugUtilsMessengerEXT(_instance, _callback1, nullptr);
 #endif

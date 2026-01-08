@@ -53,20 +53,19 @@ private:
 
 class OnSurfaceUpdatePostCreated final : public Runnable {
 public:
-    OnSurfaceUpdatePostCreated(sp<Runnable> surfaceUpdateRequester, sp<ApplicationContext> applicationContext, sp<ApplicationDelegate> applicationDelegate)
-        : _surface_update_requester(std::move(surfaceUpdateRequester)), _application_context(std::move(applicationContext)), _application_delegate(std::move(applicationDelegate)) {
+    OnSurfaceUpdatePostCreated(sp<Surface> surface, sp<ApplicationContext> applicationContext, sp<ApplicationDelegate> applicationDelegate)
+        : _surface(std::move(surface)), _application_context(std::move(applicationContext)), _application_delegate(std::move(applicationDelegate)) {
     }
 
     void run() override
     {
         DPROFILER_TRACE("MainFrame", ApplicationProfiler::CATEGORY_RENDER_FRAME);
-        _application_context->runOnCoreThread(_surface_update_requester);
         _application_context->updateState();
         _application_delegate->onSurfaceDraw();
     }
 
 private:
-    sp<Runnable> _surface_update_requester;
+    sp<Surface> _surface;
     sp<ApplicationContext> _application_context;
     sp<ApplicationDelegate> _application_delegate;
 };
@@ -107,7 +106,6 @@ const sp<Size>& Application::surfaceSize() const
 
 void Application::onCreateTask()
 {
-    __thread_init__(THREAD_NAME_ID_CORE);
     _application_delegate->onCreate(*this, _surface);
     setSurfaceUpdater(true);
 }
@@ -140,7 +138,7 @@ void Application::onCreate()
     stringTable->addStringBundle("asset", sp<StringBundle>::make<StringBundleInAsset>());
     sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
     _surface = sp<Surface>::make(std::move(renderView), _application_context);
-    _surface_updater_created = sp<Runnable>::make<OnSurfaceUpdatePostCreated>(_surface->updateRequester(), _application_context, _application_delegate);
+    _surface_updater_created = sp<Runnable>::make<OnSurfaceUpdatePostCreated>(_surface, _application_context, _application_delegate);
     _application_context->runOnCoreThread([this] () {
         onCreateTask();
     });
