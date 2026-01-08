@@ -133,6 +133,8 @@ void State::deactivate()
         for(const sp<Link>& i : _in_links)
             if(i->_link_type == LINK_TYPE_TRANSIT && !i->_start.isActive())
                 i->_start.propagateUnsuppress(*this);
+            else if(i->_link_type == LINK_TYPE_SUPPORT)
+                i->_start.propagateUnsupporting(*this);
 
         for(const sp<Link>& i : _out_links)
             if(i->_link_type == LINK_TYPE_PROPAGATE || i->_link_type == LINK_TYPE_SUPPORT)
@@ -162,11 +164,11 @@ void State::propagateSuppress(const State& from)
 
 void State::propagateUnsuppress(const State& from)
 {
-    if(_stub->_suppressed)
-    {
-        _stub->_suppressed = false;
+    if(_stub->_activated)
+        activate();
+    else if(_stub->_suppressed)
         onActivate();
-    }
+    _stub->_suppressed = false;
 
     for(const sp<Link>& i : _out_links)
         if((i->_link_type == LINK_TYPE_SUPPORT || i->_link_type == LINK_TYPE_PROPAGATE) && &i->_end != &from)
@@ -177,7 +179,7 @@ void State::propagateSupporting(const State& from)
 {
     _stub->_supporting_states.insert(&from);
     for(const sp<Link>& i : _in_links)
-        if(i->_link_type == LINK_TYPE_SUPPORT && &i->_end != &from)
+        if(i->_link_type == LINK_TYPE_SUPPORT)
             i->_end.propagateSupporting(*this);
 }
 
@@ -190,7 +192,7 @@ void State::propagateUnsupporting(const State& from)
         deactivate();
 
     for(const sp<Link>& i : _in_links)
-        if(i->_link_type == LINK_TYPE_SUPPORT && &i->_end != &from)
+        if(i->_link_type == LINK_TYPE_SUPPORT)
             i->_end.propagateUnsupporting(*this);
 }
 
@@ -214,7 +216,10 @@ void State::propagateDeactive(const State& from)
             active |= i->_start.isActive();
         }
     if(!active)
+    {
         onDeactivate();
+        _stub->_suppressed = false;
+    }
 }
 
 void State::onActivate() const
