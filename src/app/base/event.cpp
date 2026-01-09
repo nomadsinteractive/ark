@@ -38,11 +38,6 @@ V2 Event::xy() const
     return _info._button._xy;
 }
 
-V2 Event::xyFragCoord() const
-{
-    return _info._button._xy_frag_coord;
-}
-
 uint64_t Event::timestamp() const
 {
     return _timestamp;

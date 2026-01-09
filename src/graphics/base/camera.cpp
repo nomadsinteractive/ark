@@ -191,7 +191,7 @@ public:
     {
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         return UpdatableUtil::update(tick, _view_projecttion_inverse, _screen_position);
     }

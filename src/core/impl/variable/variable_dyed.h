@@ -17,6 +17,7 @@ public:
 
     bool update(uint32_t tick) override {
         _condition.update(tick);
+        TRACE(_condition.val(), _message.c_str());
         return this->_wrapped->update(tick);
     }
 

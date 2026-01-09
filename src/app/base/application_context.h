@@ -51,7 +51,7 @@ public:
     uint32_t tick() const;
     uint32_t onTick();
 
-    const sp<Vec2Impl>& cursorPosition() const;
+    sp<Vec2> cursorPosition() const;
     sp<Boolean> quitting() const;
 
     bool onEvent(const Event& event);
@@ -121,7 +121,6 @@ private:
     Vector<String> _argv;
     sp<Variable<uint64_t>> _steady_clock;
     sp<Vec2Impl> _cursor_position;
-    sp<Vec2Impl> _cursor_frag_coord;
     sp<Boolean::Impl> _quitting;
 
     sp<ApplicationBundle> _application_bundle;

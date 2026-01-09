@@ -4,6 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/updatable_util.h"
+
 #include "graphics/util/vec2_type.h"
 
 namespace ark {
@@ -33,7 +34,7 @@ V2 Vec2Impl::val()
     return {_x->val(), _y->val()};
 }
 
-bool Vec2Impl::update(uint32_t tick)
+bool Vec2Impl::update(const uint32_t tick)
 {
     return UpdatableUtil::update(tick, _x, _y);
 }

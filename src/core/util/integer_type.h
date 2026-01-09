@@ -35,6 +35,8 @@ public:
 //  [[script::bindings::operator(*)]]
     static sp<Numeric> mul(sp<Integer> lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(*)]]
+    static sp<Numeric> mul(sp<Numeric> lhs, sp<Integer> rhs);
+//  [[script::bindings::operator(*)]]
     static sp<Vec2> mul(sp<Integer> lhs, sp<Vec2> rhs);
 //  [[script::bindings::operator(*)]]
     static sp<Vec3> mul(sp<Integer> lhs, sp<Vec3> rhs);

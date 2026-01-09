@@ -87,6 +87,27 @@ private:
     uint64_t _val;
 };
 
+class Vec2CursorPosition final : public Vec2 {
+public:
+    Vec2CursorPosition(sp<Vec2> delegate)
+        : _delegate(std::move(delegate))
+    {
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        return _delegate->update(tick) || true;
+    }
+
+    V2 val() override
+    {
+        return _delegate->val();
+    }
+
+private:
+    sp<Vec2> _delegate;
+};
+
 }
 
 class ApplicationContext::ExecutorWorkerStrategy final : public ExecutorWorkerThread::Strategy {
@@ -142,7 +163,7 @@ uint32_t ApplicationContext::AppClock::onTick()
 }
 
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
-    : _steady_clock(sp<Variable<uint64_t>>::make<SteadyClock>()), _cursor_position(sp<Vec2Impl>::make()), _cursor_frag_coord(sp<Vec2Impl>::make()), _quitting(sp<Boolean::Impl>::make(false)), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
+    : _steady_clock(sp<Variable<uint64_t>>::make<SteadyClock>()), _cursor_position(sp<Vec2Impl>::make()), _quitting(sp<Boolean::Impl>::make(false)), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
       _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_steady_clock)),
       _worker_strategy(sp<ExecutorWorkerStrategy>::make()), _main_executor(sp<ExecutorScheduled>::make()), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
 {
@@ -328,9 +349,9 @@ uint32_t ApplicationContext::onTick()
     return tick;
 }
 
-const sp<Vec2Impl>& ApplicationContext::cursorPosition() const
+sp<Vec2> ApplicationContext::cursorPosition() const
 {
-    return _cursor_position;
+    return sp<Vec2>::make<Vec2CursorPosition>(_cursor_position);
 }
 
 sp<Boolean> ApplicationContext::quitting() const
@@ -341,10 +362,7 @@ sp<Boolean> ApplicationContext::quitting() const
 bool ApplicationContext::onEvent(const Event& event)
 {
     if(event.action() == Event::ACTION_UP || event.action() == Event::ACTION_DOWN || event.action() == Event::ACTION_MOVE)
-    {
         _cursor_position->set(event.xy());
-        _cursor_frag_coord->set(event.xyFragCoord());
-    }
     return _event_listeners.onEvent(event) || (_application_event_listener && _application_event_listener->onUnhandledEvent(event));
 }
 
