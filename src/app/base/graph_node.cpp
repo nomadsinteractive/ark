@@ -112,4 +112,9 @@ void GraphNode::onVisitAdjacentNodes(const V3& /*position*/, const std::function
         visitor(SearchingNode(i.exit().toSharedPtr()), i.weight());
 }
 
+bool GraphNode::testGoalReached(const V3& position)
+{
+    return false;
+}
+
 }

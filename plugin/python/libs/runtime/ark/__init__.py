@@ -195,7 +195,9 @@ class AssetBundle:
 
 
 class SearchingNodeProvider:
-    pass
+
+    def on_visit_adjacent_nodes(self, position: TYPE_VEC3, visitor: Callable[[TYPE_FLOAT3], None]):
+        pass
 
 
 class _Array:
@@ -3360,7 +3362,7 @@ class PathFinder:
     def __init__(self, searching_node_provider: SearchingNodeProvider):
         pass
 
-    def find_path(self, start: tuple[float, float, float], end: tuple[float, float, float]) -> list[tuple[float, float, float]]:
+    def find_path(self, start: TYPE_FLOAT3, end: TYPE_FLOAT3) -> list[TYPE_FLOAT3]:
         pass
 
 

@@ -43,6 +43,7 @@ public:
     Vector<GraphRoute>& outRoutes();
 
     void onVisitAdjacentNodes(const V3& position, const std::function<void(SearchingNode, float)>& visitor) override;
+    bool testGoalReached(const V3& position) override;
 
 private:
     Graph& _graph;

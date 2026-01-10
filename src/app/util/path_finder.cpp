@@ -5,7 +5,6 @@
 #include "graphics/base/v3.h"
 
 #include "app/base/searching_node.h"
-#include "app/components/behavior.h"
 #include "app/inf/searching_node_provider.h"
 #include "app/util/a_star.h"
 

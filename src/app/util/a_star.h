@@ -46,7 +46,7 @@ private:
         float nextScore;
         float bestScore = std::numeric_limits<float>::max();
         const auto visitor = [this, &nextNode, &nextWeight, &nextScore, &bestScore] (T node, float weight) {
-            if(_close_set.find(node) == _close_set.end()) {
+            if(!_close_set.contains(node)) {
                 const SearchingPath& next = *_paths.begin();
                 nextWeight = next._weight + weight;
                 nextScore = nextWeight + getHeuristicValue(node);
@@ -59,12 +59,13 @@ private:
 
         T(_paths.begin()->_nodes.back()).visitAdjacentNodes(visitor);
         if(nextNode) {
-            SearchingPath bestRoute{nextScore, nextWeight, _paths.begin()->_nodes};
+            SearchingPath bestRoute = {nextScore, nextWeight, _paths.begin()->_nodes};
             _close_set.insert(*nextNode);
             bestRoute._nodes.push_back(std::move(*nextNode));
             return bestRoute;
         }
-        return Optional<SearchingPath>();
+
+        return {};
     }
 
     float getHeuristicValue(T& from) const {

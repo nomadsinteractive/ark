@@ -90,7 +90,7 @@ private:
 class SearchingNodeProviderImpl final : public SearchingNodeProvider {
 public:
     SearchingNodeProviderImpl(sp<Behavior::Method> method)
-        : _method(std::move(method)) {
+        : _on_visit_adjacent_nodes(std::move(method)) {
     }
 
     void onVisitAdjacentNodes(const V3& position, const std::function<void(SearchingNode, float)>& visitor) override
@@ -100,14 +100,19 @@ public:
             visitor(SearchingNode(*this, pos), weight);
         };
 
-        _method->call({
+        _on_visit_adjacent_nodes->call({
             Box(sp<Vec3>::make<Vec3::Const>(position)),
             Box(sp<std::function<void(const V3&)>>::make(std::move(v)))
         });
     }
 
+    bool testGoalReached(const V3& position) override
+    {
+        return false;
+    }
+
 private:
-    sp<Behavior::Method> _method;
+    sp<Behavior::Method> _on_visit_adjacent_nodes;
 };
 
 class ApplicationEventListenerImpl final : public ApplicationEventListener {
