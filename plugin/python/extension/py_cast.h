@@ -49,7 +49,7 @@ public:
     template<typename T> static T ensureCppObject(PyObject* obj) {
         Optional<T> opt = toCppObject_sfinae<T>(obj, nullptr);
         CHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(obj)->tp_name, Class::ensureClass<T>()->name());
-        return opt.value();
+        return std::move(opt.value());
     }
 
     static PyObject* toPyObject_SharedPtr(const sp<PyInstanceRef>& inst);

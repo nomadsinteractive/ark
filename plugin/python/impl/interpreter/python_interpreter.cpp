@@ -181,7 +181,7 @@ Box PythonInterpreter::call(const Box& func, const Interpreter::Arguments& args)
     {
         if(PyErr_Occurred())
             PythonExtension::instance().logErr();
-        Box r = std::move(PyCast::toCppObject<Box>(ret).value());
+        Box r = PyCast::ensureCppObject<Box>(ret);
         Py_DECREF(ret);
         return r;
     }

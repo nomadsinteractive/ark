@@ -361,6 +361,8 @@ template<> ARK_PLUGIN_PYTHON_API Optional<Box> PyCast::toCppObject_impl<Box>(PyO
 {
     if(PythonExtension::instance().isPyArkTypeObject(Py_TYPE(object)))
         return {*reinterpret_cast<PyArkType::Instance*>(object)->box};
+    if(PyBool_Check(object))
+        return Py_IsTrue(object) ? Box(sp<Boolean>::make<Boolean::Const>(true)) : Box();
     return object != Py_None ? Box(PyInstance::track(object).ref()) : Box();
 }
 

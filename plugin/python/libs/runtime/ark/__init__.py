@@ -199,6 +199,9 @@ class SearchingNodeProvider:
     def on_visit_adjacent_nodes(self, position: TYPE_VEC3, visitor: Callable[[TYPE_FLOAT3], None]):
         pass
 
+    def test_goal_reached(self, position: TYPE_VEC3) -> bool:
+        pass
+
 
 class _Array:
     @property
