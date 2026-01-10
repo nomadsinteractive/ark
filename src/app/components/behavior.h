@@ -33,7 +33,7 @@ public:
 //  [[script::bindings::auto]]
     sp<EventListener> createEventListener(StringView onEvent = "on_event");
 //  [[script::bindings::auto]]
-    sp<SearchingNodeProvider> createSearchingNodeProvider(StringView onVisitAdjacentNodes = "on_visit_adjacent_nodes", StringView testGoalReached = "test_goal_reached");
+    sp<SearchingNodeProvider> createSearchingNodeProvider(StringView onVisitAdjacentNodes = "on_visit_adjacent_nodes");
 //  [[script::bindings::auto]]
     sp<ApplicationEventListener> createApplicationEventListener(StringView onPause = "on_pause", StringView onResume = "on_resume", StringView onUnhandledEvent = "on_unhandled_event");
 

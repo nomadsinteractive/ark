@@ -89,8 +89,8 @@ private:
 
 class SearchingNodeProviderImpl final : public SearchingNodeProvider {
 public:
-    SearchingNodeProviderImpl(sp<Behavior::Method> onVisitAdjacentNodes, sp<Behavior::Method> testGoalReached)
-        : _on_visit_adjacent_nodes(std::move(onVisitAdjacentNodes)), _test_goal_reached(std::move(testGoalReached)) {
+    SearchingNodeProviderImpl(sp<Behavior::Method> onVisitAdjacentNodes)
+        : _on_visit_adjacent_nodes(std::move(onVisitAdjacentNodes)) {
     }
 
     void onVisitAdjacentNodes(const V3& position, const std::function<void(SearchingNode, float)>& visitor) override
@@ -106,15 +106,8 @@ public:
         });
     }
 
-    bool testGoalReached(const V3& position) override
-    {
-        const sp<Boolean> ret = _test_goal_reached->call({Box(sp<Vec3>::make<Vec3::Const>(position))}).as<Boolean>();
-        return ret ? ret->val() : false;
-    }
-
 private:
     sp<Behavior::Method> _on_visit_adjacent_nodes;
-    sp<Behavior::Method> _test_goal_reached;
 };
 
 class ApplicationEventListenerImpl final : public ApplicationEventListener {
@@ -191,9 +184,9 @@ sp<EventListener> Behavior::createEventListener(const StringView onEvent)
     return sp<EventListener>::make<EventListenerImpl>(getMethod(onEvent));
 }
 
-sp<SearchingNodeProvider> Behavior::createSearchingNodeProvider(const StringView onVisitAdjacentNodes, const StringView testGoalReached)
+sp<SearchingNodeProvider> Behavior::createSearchingNodeProvider(const StringView onVisitAdjacentNodes)
 {
-    return sp<SearchingNodeProvider>::make<SearchingNodeProviderImpl>(getMethod(onVisitAdjacentNodes), getMethod(testGoalReached));
+    return sp<SearchingNodeProvider>::make<SearchingNodeProviderImpl>(getMethod(onVisitAdjacentNodes));
 }
 
 sp<ApplicationEventListener> Behavior::createApplicationEventListener(const StringView onPause, const StringView onResume, const StringView onUnhandledEvent)

@@ -14,8 +14,6 @@ public:
 
 //  [[script::bindings::interface]]
     virtual void onVisitAdjacentNodes(const V3& position, const std::function<void(SearchingNode, float)>& visitor) = 0;
-//  [[script::bindings::interface]]
-    virtual bool testGoalReached(const V3& position) = 0;
 };
 
 }

@@ -24,9 +24,10 @@ public:
         : _func(std::move(func)) {
     }
 
-    void call(const PyInstance& pyobj) override
+    void call(const Traits& args) override
     {
-        const T a1 = PyCast::ensureCppObject<T>(pyobj.pyObject());
+        ASSERT(args.table().size() == 1);
+        const T a1 = PyCast::ensureCppObject<T>(args.table().values().at(0).as<PyInstanceRef>()->instance());
         _func(a1);
     }
 

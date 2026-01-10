@@ -36,8 +36,6 @@ bool SearchingNode::operator<(const SearchingNode& other) const
 
 bool SearchingNode::operator==(const SearchingNode& other) const
 {
-    if(_searching_node_provider.testGoalReached(other._position))
-        return true;
     return Math::almostEqual(_position.x(), other._position.x()) && Math::almostEqual(_position.y(), other._position.y()) && Math::almostEqual(_position.z(), other._position.z());
 }
 
