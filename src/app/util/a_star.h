@@ -28,7 +28,7 @@ public:
 
     Vector<T> findPath() {
         while(_paths.size() > 0) {
-            if(_paths.begin()->_nodes.back() == _goal)
+            if(_paths.begin()->_nodes.back().testGoalReached(_goal))
                 return _paths.begin()->_nodes;
 
             if(Optional<SearchingPath> inflated = inflate())

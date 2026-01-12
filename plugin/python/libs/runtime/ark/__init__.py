@@ -196,7 +196,7 @@ class AssetBundle:
 
 class SearchingNodeProvider:
 
-    def on_visit_adjacent_nodes(self, position: TYPE_VEC3, visitor: Callable[[TYPE_FLOAT3], None]):
+    def on_visit_adjacent_nodes(self, position: TYPE_VEC3, visitor: Callable[[TYPE_FLOAT3, bool], None]):
         pass
 
 

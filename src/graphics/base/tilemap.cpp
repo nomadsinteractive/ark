@@ -84,18 +84,14 @@ struct SearchingTilemapNode {
                     visitor(SearchingTilemapNode(_searching_tilemap, _col + i, _row + j), std::abs(i) + std::abs(j));
     }
 
+    bool testGoalReached(const SearchingTilemapNode& goal) const {
+        return _col == goal._col && _row == goal._row;
+    }
+
     bool operator < (const SearchingTilemapNode& other) const {
         if(_col != other._col)
             return _col < other._col;
         return _row < other._row;
-    }
-
-    bool operator == (const SearchingTilemapNode& other) const {
-        return _col == other._col && _row == other._row;
-    }
-
-    bool operator != (const SearchingTilemapNode& other) const {
-        return _col != other._col || _row != other._row;
     }
 
     SearchingTilemap& _searching_tilemap;
