@@ -232,19 +232,6 @@ glslang::EShTargetLanguageVersion toTargetLanguageVersion(const uint32_t targetL
     return defaultVersion;
 }
 
-String addSourceLineNumbers(const String& source)
-{
-    StringBuffer sb;
-    uint32_t lineNumber = 0;
-    source.split('\n', true, [&sb, &lineNumber](const String& line) {
-        char buf[64];
-        std::snprintf(buf, sizeof(buf), "%-6u ", ++lineNumber);
-        sb << buf << line << std::endl;
-        return true;
-    });
-    return sb.str();
-}
-
 }
 
 bytearray RenderUtil::makeUnitCubeVertices(const bool flipWindingOrder)
@@ -577,6 +564,21 @@ Vector<uint32_t> RenderUtil::compileSPIR(const String& source, enums::ShaderStag
         }
     }
     return {};
+}
+
+String RenderUtil::addSourceLineNumbers(const String& source, uint32_t* baseLineNumber)
+{
+    StringBuffer sb;
+    uint32_t lineNumber = baseLineNumber ? *baseLineNumber : 0;
+    source.split('\n', true, [&sb, &lineNumber](const String& line) {
+        char buf[64];
+        std::snprintf(buf, sizeof(buf), "%-6u ", ++lineNumber);
+        sb << buf << line << std::endl;
+        return true;
+    });
+    if(baseLineNumber)
+        *baseLineNumber = lineNumber;
+    return sb.str();
 }
 
 Vector<ShaderPreprocessor::Declaration> RenderUtil::setupLayoutLocation(const PipelineBuildingContext& context, const ShaderPreprocessor::DeclarationList& declarations)

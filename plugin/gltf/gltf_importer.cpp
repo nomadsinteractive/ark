@@ -353,13 +353,13 @@ tinygltf::Model loadGltfModel(const String& src)
 	return gltfModel;
 }
 
-Animation loadAnimation(const tinygltf::Model& model, const tinygltf::Animation& anim, uint32_t animationId)
+Animation loadAnimation(const tinygltf::Model& model, const tinygltf::Animation& anim, const uint32_t animationId)
 {
     Animation animation = {anim.name.empty() ? Strings::sprintf("anim_%ud", animationId) : anim.name};
 
 	for (const auto& i : anim.samplers)
 	{
-		AnimationSampler sampler{};
+		AnimationSampler sampler = {};
 
 		if(i.interpolation == "LINEAR")
 			sampler.interpolation = AnimationSampler::InterpolationType::LINEAR;

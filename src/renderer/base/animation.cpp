@@ -41,7 +41,7 @@ public:
         : _session(std::move(session)), _node_index(nodeIndex) {
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         return _session->update(tick);
     }
@@ -62,7 +62,7 @@ public:
         : _session(std::move(session)), _transform_path(std::move(transformPath)) {
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         return _session->update(tick);
     }
@@ -82,7 +82,7 @@ private:
 
 }
 
-Animation::Animation(String name, uint32_t durationInTicks, Table<String, uint32_t> nodes, Vector<AnimationFrame> animationFrames)
+Animation::Animation(String name, const uint32_t durationInTicks, Table<String, uint32_t> nodes, Vector<AnimationFrame> animationFrames)
     : _name(std::move(name)), _tps(24.0f), _duration(static_cast<float>(durationInTicks) / _tps), _duration_in_ticks(durationInTicks), _nodes(sp<Table<String, uint32_t>>::make(std::move(nodes))), _animation_frames(sp<Vector<AnimationFrame>>::make(std::move(animationFrames)))
 {
 }
@@ -113,7 +113,7 @@ Vector<std::pair<String, sp<Mat4>>> Animation::getLocalTransforms(sp<Integer> ti
 
     sp<AnimationSession> session = sp<AnimationSession>::make(std::move(tick), _duration_in_ticks, _animation_frames);
     for(const auto& [name, nodeIdx] : *_nodes)
-        nodeTransforms.emplace_back(name, sp<LocalMatrix>::make(session, nodeIdx));
+        nodeTransforms.emplace_back(name, sp<Mat4>::make<LocalMatrix>(session, nodeIdx));
 
     return nodeTransforms;
 }

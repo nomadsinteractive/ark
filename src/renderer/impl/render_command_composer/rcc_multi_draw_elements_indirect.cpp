@@ -133,7 +133,7 @@ ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const Rende
     return cmds;
 }
 
-void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayerSnapshot& renderLayerSnapshot, bool reload)
+void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayerSnapshot& renderLayerSnapshot, const bool reload)
 {
     const auto& renderLayerItems = renderLayerSnapshot._elements;
     for(size_t i = 0; i < renderLayerItems.size(); ++i)
@@ -150,7 +150,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                     iter->second.toDynamicLayout();
 
                 for(const auto& [j, k] : snapshot._varyings_snapshot._sub_properties)
-                    if(Varyings::Divided subProperty = k.getDivided(1); subProperty._content.length() > sizeof(M4))
+                    if(Varyings::Divided subProperty = k.getDivided(1); subProperty._content.length() >= sizeof(M4))
                         iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
             }
     }

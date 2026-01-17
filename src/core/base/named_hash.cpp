@@ -34,6 +34,11 @@ NamedHash::NamedHash(const HashId value)
 {
 }
 
+NamedHash::NamedHash()
+    : _hash(0)
+{
+}
+
 NamedHash::operator bool() const
 {
     return static_cast<bool>(_hash);
@@ -57,6 +62,16 @@ bool NamedHash::update(uint32_t /*tick*/)
 int32_t NamedHash::val()
 {
     return _hash;
+}
+
+bool NamedHash::operator==(const NamedHash& other) const
+{
+    return _hash == other._hash;
+}
+
+bool NamedHash::operator<(const NamedHash& other) const
+{
+    return _hash < other._hash;
 }
 
 const String& NamedHash::reverse(const HashId hash)

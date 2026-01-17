@@ -62,8 +62,12 @@ GLuint compileShader(const uint32_t version, const GLenum type, const String& so
         glGetShaderInfoLog(id, length, &length, logs.data());
         logs.back() = 0;
         StringBuffer sb;
+        uint32_t baseLineNumber = 0;
         for(uint32_t i = 0; i <= slen; i++)
-            sb << src[i] << '\n';
+        {
+            sb << RenderUtil::addSourceLineNumbers(src[i], &baseLineNumber) << '\n';
+            baseLineNumber += 2;
+        }
         FATAL("%s\n\n%s", logs.data(), sb.str().c_str());
         return 0;
     }

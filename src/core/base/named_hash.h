@@ -13,6 +13,7 @@ public:
     NamedHash(String value);
 //  [[script::bindings::auto]]
     NamedHash(HashId value);
+    NamedHash();
 
     explicit operator bool() const;
 
@@ -24,6 +25,9 @@ public:
 
     bool update(uint32_t tick) override;
     int32_t val() override;
+
+    bool operator ==(const NamedHash& other) const;
+    bool operator <(const NamedHash& other) const;
 
 //  [[script::bindings::auto]]
     static const String& reverse(HashId hash);

@@ -35,6 +35,7 @@ public:
     static std::pair<int32_t, int32_t> getRenderTargetResolution(const RenderTarget::Configure& configure);
 
     static Vector<uint32_t> compileSPIR(const String& source, enums::ShaderStageBit stage, enums::RenderingBackendBit renderTarget, uint32_t targetLanguageVersion = 0);
+    static String addSourceLineNumbers(const String& source, uint32_t* baseLineNumber = nullptr);
 
     static Vector<ShaderPreprocessor::Declaration> setupLayoutLocation(const PipelineBuildingContext& context, const ShaderPreprocessor::DeclarationList& declarations);
     static uint32_t setLayoutDescriptor(const Vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, uint32_t start, int32_t set = -1);

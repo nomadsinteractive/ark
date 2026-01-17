@@ -285,8 +285,8 @@ Varyings::Divided::Divided()
 {
 }
 
-Varyings::Divided::Divided(uint32_t divisor, ByteArray::Borrowed content)
-    : _divisor(divisor), _content(content), _slot_snapshot(nullptr)
+Varyings::Divided::Divided(const uint32_t divisor, ByteArray::Borrowed content)
+    : _divisor(divisor), _content(std::move(content)), _slot_snapshot(nullptr)
 {
 }
 

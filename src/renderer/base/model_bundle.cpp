@@ -119,7 +119,8 @@ public:
 
     void run() override
     {
-        _executor->execute(sp<Runnable>::make<AddModuleRunnable>(_type, std::move(_stub), _stub->importModel(_manifest, _importer), std::move(_future)));
+        sp<Model> model = _stub->importModel(_manifest, _importer);
+        _executor->execute(sp<Runnable>::make<AddModuleRunnable>(_type, std::move(_stub), std::move(model), std::move(_future)));
     }
 
 private:
@@ -169,16 +170,23 @@ sp<Model> ModelBundle::loadModel(const int32_t type)
     return ensureModelLayout(type)._model;
 }
 
-void ModelBundle::importModel(const NamedHash& type, String manifest, sp<Future> future)
+sp<Model> ModelBundle::importModel(const NamedHash& type, String manifest, sp<Future> future)
 {
-    importModel(type.hash(), Manifest(std::move(manifest)), std::move(future));
+    return importModel(type.hash(), Manifest(std::move(manifest)), std::move(future));
 }
 
-void ModelBundle::importModel(const NamedHash& type, const Manifest& manifest, sp<Future> future)
+sp<Model> ModelBundle::importModel(const NamedHash& type, const Manifest& manifest, sp<Future> future)
 {
-    const ApplicationContext& applicationContext = Ark::instance().applicationContext();
-    sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(type.hash(), manifest, _stub, nullptr, applicationContext.coreExecutor(), std::move(future));
-    applicationContext.threadPoolExecutor()->execute(std::move(task));
+    if(future)
+    {
+        const ApplicationContext& applicationContext = Ark::instance().applicationContext();
+        sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(type.hash(), manifest, _stub, nullptr, applicationContext.coreExecutor(), std::move(future));
+        applicationContext.threadPoolExecutor()->execute(std::move(task));
+        return nullptr;
+    }
+    sp<Model> model = _stub->importModel(manifest, nullptr);
+    _stub->addModel(type.hash(), model);
+    return model;
 }
 
 void ModelBundle::importMaterials(String manifest) const

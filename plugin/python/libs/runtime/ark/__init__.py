@@ -1808,7 +1808,7 @@ class ModelBundle:
     def update_materials(self):
         pass
 
-    def import_model(self, t: TYPE_NAMED_HASH, manifest: str | Manifest, future: Optional[Future] = None):
+    def import_model(self, t: TYPE_NAMED_HASH, manifest: str | Manifest, future: Optional[Future] = None) -> Optional[Model]:
         pass
 
 
