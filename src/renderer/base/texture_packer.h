@@ -9,7 +9,6 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
 
-#include "app/forwarding.h"
 
 namespace ark {
 
@@ -27,8 +26,8 @@ public:
     int32_t width() const;
     int32_t height() const;
 
-    RectI addBitmap(sp<Bitmap> bitmap, String name = "");
-    RectI addBitmap(sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider, String name = "");
+    void addBitmap(sp<Bitmap> bitmap, String name = "");
+    void addBitmap(sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider, String name = "");
 
     const Vector<PackedBitmap>& packedBitmaps() const;
 

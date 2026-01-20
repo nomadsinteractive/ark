@@ -63,6 +63,9 @@ void AtlasImporterImpl::import(Atlas& atlas, const sp<Readable>& /*readable*/)
                 texturePacker.addBitmap(std::move(bounds), sp<Variable<bitmap>>::make<BitmapProvider>(bitmapLoader, std::move(src)), std::move(name.value()));
             }
     }
+
+    texturePacker.updateTexture(atlas.texture());
+
     const Rect bounds = Rect(0, 0, 1.0f, 1.0f).vflip(1.0f);
     for(const auto& [name, _, __, uv] : texturePacker.packedBitmaps())
         atlas.add(string_hash(name.c_str()), uv.left(), uv.top(), uv.right(), uv.bottom(), bounds, V2(static_cast<float>(uv.width()), static_cast<float>(uv.height())), V2(0.5f, 0.5f));
@@ -97,8 +100,6 @@ void AtlasImporterImpl::import(Atlas& atlas, const sp<Readable>& /*readable*/)
             }
         }
     }
-
-    texturePacker.updateTexture(atlas.texture());
 }
 
 AtlasImporterImpl::BUILDER::BUILDER(const document& manifest)

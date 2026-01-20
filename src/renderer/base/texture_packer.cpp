@@ -1,12 +1,13 @@
 #include "renderer/base/texture_packer.h"
 
 #include "core/ark.h"
+#include "core/inf/array.h"
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/rect.h"
 #include "graphics/components/size.h"
 
-#include "renderer/base/resource_loader_context.h"
+#include "renderer/base/render_controller.h"
 
 namespace ark {
 
@@ -69,13 +70,13 @@ int32_t TexturePacker::height() const
     return _bin_pack.height();
 }
 
-RectI TexturePacker::addBitmap(sp<Bitmap> bitmap, String name)
+void TexturePacker::addBitmap(sp<Bitmap> bitmap, String name)
 {
     sp<Variable<sp<Bitmap>>> bitmapProvider = sp<Variable<sp<Bitmap>>::Const>::make(bitmap);
-    return addBitmap(std::move(bitmap), std::move(bitmapProvider), std::move(name));
+    addBitmap(std::move(bitmap), std::move(bitmapProvider), std::move(name));
 }
 
-RectI TexturePacker::addBitmap(sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider, String name)
+void TexturePacker::addBitmap(sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapProvider, String name)
 {
     const MaxRectsBinPack::Rect rect = _bin_pack.Insert(static_cast<int32_t>(bounds->width()), static_cast<int32_t>(bounds->height()), MaxRectsBinPack::RectBestShortSideFit);
     if(rect.width == 0 || rect.height == 0)
@@ -85,7 +86,6 @@ RectI TexturePacker::addBitmap(sp<Bitmap> bounds, sp<Variable<bitmap>> bitmapPro
     }
     const RectI uv(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     addPackedBitmap(uv, std::move(bounds), std::move(bitmapProvider), std::move(name));
-    return uv;
 }
 
 const Vector<TexturePacker::PackedBitmap>& TexturePacker::packedBitmaps() const
