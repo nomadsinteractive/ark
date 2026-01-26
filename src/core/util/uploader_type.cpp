@@ -53,7 +53,7 @@ public:
         }
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         bool dirty = false;
         _size = 0;
@@ -177,6 +177,11 @@ private:
 sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 {
     return self.ensureInstance<UploaderImpl>("This object is not a UploaderImpl instance. Use \"reserve\" method to create an UploaderImpl instance.");
+}
+
+sp<UploaderWrapper> ensureWrapper(const sp<Uploader>& self)
+{
+    return self.ensureInstance<UploaderWrapper>("This Uploader object is not a UploaderWrapper instance");
 }
 
 }
@@ -326,11 +331,6 @@ void UploaderType::remove(const sp<Uploader>& self, const size_t offset)
 void UploaderType::markDirty(const sp<Uploader>& self)
 {
     ensureImpl(self)->markDirty();
-}
-
-sp<UploaderWrapper> UploaderType::ensureWrapper(const sp<Uploader>& self)
-{
-    return self.ensureInstance<UploaderWrapper>("This Uploader object is not a UploaderWrapper instance");
 }
 
 }

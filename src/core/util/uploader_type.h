@@ -69,9 +69,6 @@ public:
 
 //  [[script::bindings::auto]]
     static sp<Uploader> makeElementIndexInput(Vector<element_index_t> value);
-
-private:
-    static sp<UploaderWrapper> ensureWrapper(const sp<Uploader>& self);
 };
 
 }
