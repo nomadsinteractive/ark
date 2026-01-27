@@ -10,7 +10,7 @@ from mathutils import Euler, Quaternion, Vector
 bl_info = {
     "name": "Ark Level Manifest",
     "author": "Nomads Interactive",
-    "version": (1, 0, 5),
+    "version": (1, 0, 6),
     "blender": (2, 81, 6),
     "location": "File > Export > Ark Level Manifest",
     "category": "Import-Export",
@@ -54,7 +54,7 @@ def to_y_up_quaternion(quaternion):
 
 
 class XmlWriter:
-    def __init__(self, indent=0):
+    def __init__(self, indent: int = 0):
         self._body_lines = []
         self._element_lines = []
         self._element_name = None
@@ -148,7 +148,7 @@ class ArkObject:
         self._class = obj.type if obj.type != 'EMPTY' else None
         self._position = obj.location
         self._scale = obj.scale
-        self._args = obj.get('args', None)
+        self._custom_properties = dict((k, v) for k, v in obj.items())
         if obj.rotation_mode == 'QUATERNION':
             self._rotation = obj.rotation_quaternion
         elif obj.rotation_mode == 'AXIS_ANGLE':
@@ -164,9 +164,6 @@ class ArkObject:
             to_json_field_value('scale', list(self._scale), indent + 1),
             to_json_field_value('rotation', list(self._rotation), indent + 1)
         ])
-        if self._args is not None:
-            args = self._args.replace('"', r'\"')
-            lines.append(to_json_field_value('args', f'"{args}"', indent + 1))
         if self._instance_of:
             lines.append(to_json_field_value('instance-of', self._instance_of.id, indent + 1))
         return '{\n%s\n}' % ',\n'.join(lines)
@@ -192,8 +189,9 @@ class ArkObject:
         writer.write_property('visible', self._object.visible_get() and 'true' or 'false')
         if self._instance_of:
             writer.write_property('instance-of', self._instance_of.id)
-        if self._args is not None:
-            writer.write_property('args', self._args.replace('"', r'&quot;'))
+
+        for k, v in self._custom_properties.items():
+            writer.write_property(f'cp_{k}', str(v).replace('"', r'&quot;'))
 
         writer.end_element()
         return writer.to_str()
