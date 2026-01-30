@@ -10,6 +10,7 @@
     "fmt",
     "freetype",
     "glbinding",
+    "gli",
     "glm",
     "glslang",
     "imgui",

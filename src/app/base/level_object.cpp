@@ -58,7 +58,7 @@ sp<Rigidbody> makeRigidBody(LevelLibrary& library, const sp<Collider>& collider,
 LevelObject::LevelObject(const sp<Level::Stub>& level, const document& manifest)
     : _level(level), _name(Documents::getAttribute(manifest, constants::NAME)), _type(TYPE_INSTANCE), _visible(Documents::getAttribute<bool>(manifest, constants::VISIBLE, true)),
       _position(Documents::getAttribute<V3>(manifest, constants::POSITION, V3())), _scale(Documents::getAttributeOptional<V3>(manifest, constants::SCALE)),
-      _rotation(Documents::getAttributeOptional<V4>(manifest, constants::ROTATION)), _args(Documents::getAttribute(manifest, "args")), _instance_of(Documents::getAttribute<int32_t>(manifest, "instance-of", -1))
+      _rotation(Documents::getAttributeOptional<V4>(manifest, constants::ROTATION)), _instance_of(Documents::getAttribute<int32_t>(manifest, "instance-of", -1))
 {
     if(const String clazz = Documents::getAttribute(manifest, constants::CLASS); clazz == "MESH")
         _type = TYPE_ELEMENT;
@@ -66,6 +66,10 @@ LevelObject::LevelObject(const sp<Level::Stub>& level, const document& manifest)
         _type = TYPE_CAMERA;
     else if(clazz == "LIGHT")
         _type = TYPE_LIGHT;
+
+    for(const sp<DOMAttribute>& i : manifest->attributes())
+        if(i->name().startsWith("cp_"))
+            _custom_properties[i->name().substr(3)] = i->value();
 }
 
 const String& LevelObject::name() const
@@ -98,15 +102,16 @@ const Optional<V4>& LevelObject::rotation() const
     return _rotation;
 }
 
-const String& LevelObject::args() const
-{
-    return _args;
-}
-
 sp<LevelLibrary> LevelObject::library() const
 {
     const auto iter = _level->_libraries.find(_instance_of);
     return iter != _level->_libraries.end() ? iter->second : nullptr;
+}
+
+Optional<String> LevelObject::subscribe(const NamedHash& name)
+{
+    const auto iter = _custom_properties.find(name);
+    return iter != _custom_properties.end() ? Optional<String>(iter->second) : Optional<String>();
 }
 
 sp<RenderObject> LevelObject::createRenderObject()

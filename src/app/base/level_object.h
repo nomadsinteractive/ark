@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/base/named_hash.h"
 #include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
@@ -37,9 +38,10 @@ public:
 //  [[script::bindings::property]]
     const Optional<V4>& rotation() const;
 //  [[script::bindings::property]]
-    const String& args() const;
-//  [[script::bindings::property]]
     sp<LevelLibrary> library() const;
+
+//  [[script::bindings::map(get)]]
+    Optional<String> subscribe(const NamedHash& name);
 
 //  [[script::bindings::property]]
     const sp<RenderObject>& renderObject() const;
@@ -63,8 +65,8 @@ private:
     V3 _position;
     Optional<V3> _scale;
     Optional<V4> _rotation;
-    String _args;
     int32_t _instance_of;
+    Map<NamedHash, String> _custom_properties;
 
     sp<RenderObject> _render_object;
     sp<Rigidbody> _rigidbody;

@@ -1870,10 +1870,6 @@ class LevelObject:
         pass
 
     @property
-    def args(self) -> str:
-        pass
-
-    @property
     def library(self) -> Optional[LevelLibrary]:
         pass
 
@@ -1883,6 +1879,9 @@ class LevelObject:
 
     @property
     def rigidbody(self) -> "Rigidbody":
+        pass
+
+    def __getitem__(self, key: str) -> Optional[str]:
         pass
 
     def create_render_object(self) -> "RenderObject":

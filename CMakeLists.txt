@@ -180,6 +180,8 @@ if(NOT (ANDROID OR IOS))
     ark_add_plugin_directory(sdl3_gpu plugin/sdl3-gpu)
 endif()
 
+ark_add_plugin_directory(kanim plugin/kanim)
+
 ark_setup_tools(ark_gen_string_table)
 ark_setup_tools(ark_gen_plugin_class)
 ark_setup_tools(ark_gen_bootstrap)
