@@ -20,7 +20,7 @@ bool Discarded::val()
     return _discarded->val();
 }
 
-bool Discarded::update(uint32_t tick)
+bool Discarded::update(const uint32_t tick)
 {
     return _discarded->update(tick);
 }

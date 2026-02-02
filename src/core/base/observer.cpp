@@ -22,7 +22,7 @@ public:
         return _value.val();
     }
 
-    bool update(uint32_t tick) override {
+    bool update(const uint32_t tick) override {
         return _value.update(tick);
     }
 

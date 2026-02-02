@@ -416,20 +416,25 @@ private:
 
 template<typename T> class Input final : public Widget {
 public:
-    Input(std::function<bool(const char*, T*)> func, String label, const sp<Variable<T>>& value)
-        : _func(std::move(func)), _label(std::move(label)), _value(value.template ensureInstance<VariableWrapper<T>>("Value should be a Wrapper class")) {
+    Input(std::function<bool(const char*, T*)> func, String label, const sp<Variable<T>>& value, sp<Runnable> onChange = nullptr)
+        : _func(std::move(func)), _label(std::move(label)), _value(value.template ensureInstance<VariableWrapper<T>>("Value should be a Wrapper class")), _on_change(std::move(onChange)) {
     }
 
     void render() override {
         T v = _value->val();
         if(_func(_label.c_str(), &v))
+        {
             _value->set(v);
+            if(_on_change)
+                _on_change->run();
+        }
     }
 
 private:
     std::function<bool(const char*, T*)> _func;
     String _label;
     sp<VariableWrapper<T>> _value;
+    sp<Runnable> _on_change;
 };
 
 template<typename T, typename U> class InputWithType final : public Widget {
@@ -664,7 +669,7 @@ void WidgetBuilder::radioButton(const String& label, const sp<Integer>& option, 
     addWidget(sp<Widget>::make<Input<int32_t>>([group](const char* l, int32_t* v) { return ImGui::RadioButton(l, v, group); }, label, option));
 }
 
-void WidgetBuilder::combo(const String& label, const sp<Integer>& option, const Vector<String>& items)
+sp<Observer> WidgetBuilder::combo(const String& label, const sp<Integer>& option, const Vector<String>& items)
 {
     StringBuffer sb;
     for(const String& i : items)
@@ -674,8 +679,10 @@ void WidgetBuilder::combo(const String& label, const sp<Integer>& option, const 
     }
     sb << '\0';
 
+    sp<Observer> observer = sp<Observer>::make();
     const String s = sb.str();
-    addWidget(sp<Widget>::make<Input<int32_t>>([s](const char* l, int32_t* v) { return ImGui::Combo(l, v, s.c_str()); }, label, option));
+    addWidget(sp<Widget>::make<Input<int32_t>>([s](const char* l, int32_t* v) { return ImGui::Combo(l, v, s.c_str()); }, label, option, observer));
+    return observer;
 }
 
 void WidgetBuilder::listBox(const String& label, const sp<Integer>& option, const Vector<String>& items)

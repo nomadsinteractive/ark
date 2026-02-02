@@ -1,15 +1,46 @@
 import inspect
-from collections.abc import Sequence
-from typing import Callable, Any, Optional
+from collections.abc import Sequence, Callable
+from typing import Any, Optional
 
-from ark import Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, TYPE_BOOLEAN, Discarded, Random
+from ark import Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, TYPE_BOOLEAN, Discarded, Random, Behavior
 from ark import dear_imgui
 
 
 class ToolbarItem:
+
+    def on_create(self, builder: dear_imgui.WidgetBuilder):
+        pass
+
+
+class ToolbarButton(ToolbarItem):
     def __init__(self, text: str, on_click: Callable[[], None]):
-        self.text = text
-        self.on_click = on_click
+        self._text = text
+        self._on_click = on_click
+
+    def on_create(self, builder: dear_imgui.WidgetBuilder):
+
+        def onclick():
+            _mark_studio.close()
+            self._on_click()
+
+        builder.small_button(self._text).add_callback(onclick)
+
+
+class ToolbatComboBox(ToolbarItem):
+    def __init__(self, label: str, options: Sequence[str], on_change: Callable[[int], None] = None):
+        self._label = label
+        self._options = options
+        self._on_change = on_change
+        self._option_index = Integer(0)
+        self._behavior = Behavior(self)
+
+    def on_create(self, builder: dear_imgui.WidgetBuilder):
+        observer = builder.combo(self._label, self._option_index, self._options)
+        if self._on_change:
+            observer.add_callback(self._behavior['_on_change_callback'])
+
+    def _on_change_callback(self):
+        self._on_change(self._option_index.val)
 
 
 class InputField:
@@ -105,7 +136,7 @@ class Window:
 
 
 class ToolbarWindow(Window):
-    def __init__(self, mark_studio: "MarkStudio", is_open: Optional[TYPE_BOOLEAN] = None, toolbar_items: Sequence[ToolbarItem] = tuple()):
+    def __init__(self, mark_studio: "MarkStudio", is_open: Optional[TYPE_BOOLEAN] = None, toolbar_items: Sequence[ToolbarItem] = ()):
         self._mark_studio = mark_studio
         self._toolbar_items = toolbar_items
         self._toolbar_widget = dear_imgui.Widget()
@@ -131,11 +162,11 @@ class ToolbarWindow(Window):
         for i, j in enumerate(self._toolbar_items):
             if i != 0:
                 toolbar_builder.same_line()
-            toolbar_builder.small_button(j.text).add_callback(self._make_quickbar_onclick(j))
+            j.on_create(toolbar_builder)
 
         self._toolbar_widget.reset(toolbar_builder.make_widget())
 
-    def _make_quickbar_onclick(self, toolbar_item: ToolbarItem):
+    def _make_quickbar_onclick(self, toolbar_item: ToolbarButton):
 
         def onclick():
             self._mark_studio.close()
@@ -292,7 +323,7 @@ class NoiseGeneratorWindow(Window):
 
 
 class MarkStudio:
-    def __init__(self, application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, toolbar_items: Sequence[ToolbarItem] = tuple(), console_cmds: Sequence[ConsoleCommand] = tuple()):
+    def __init__(self, application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, toolbar_items: Sequence[ToolbarButton] = tuple(), console_cmds: Sequence[ConsoleCommand] = tuple()):
         global _mark_studio
         _mark_studio = self
 
@@ -399,7 +430,7 @@ def close_mark_studio():
         _mark_studio.close()
 
 
-def show_mark_studio(application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, toolbar_items: Sequence[ToolbarItem] = tuple(), console_cmds: Sequence[ConsoleCommand] = tuple()):
+def show_mark_studio(application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, toolbar_items: Sequence[ToolbarButton] = tuple(), console_cmds: Sequence[ConsoleCommand] = tuple()):
     if not _mark_studio or _mark_studio.discarded:
         mark_studio = MarkStudio(application_facade, imgui, resolution, toolbar_items, console_cmds)
         mark_studio.show()

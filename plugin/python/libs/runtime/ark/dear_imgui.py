@@ -331,7 +331,7 @@ class WidgetBuilder:
     def radio_button(self, label: str, option: Integer, group: int):
         pass
 
-    def combo(self, label: str, option: Integer, items: list[str]):
+    def combo(self, label: str, option: Integer, items: Sequence[str]) -> Observer:
         pass
 
     def list_box(self, label: str, option: Integer, items: list[str]):
