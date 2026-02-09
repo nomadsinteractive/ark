@@ -44,10 +44,10 @@ public:
 
     void markForDestroy(sp<CollisionObjectRef> collisionBody) const;
 
-//  [[plugin::resource-loader]]
+//  [[plugin::builder]]
     class BUILDER_IMPL1 final : public Builder<ColliderBullet> {
     public:
-        BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER_IMPL1(BeanFactory& factory, const document& manifest);
 
         sp<ColliderBullet> build(const Scope& args) override;
 
@@ -55,14 +55,12 @@ public:
         V3 _gravity;
         SafeBuilder<ModelLoader> _model_loader;
         Vector<std::pair<sp<Builder<RigidbodyImporter>>, document>> _importers;
-
-        sp<ResourceLoaderContext> _resource_loader_context;
     };
 
-//  [[plugin::resource-loader("PyBullet")]]
+//  [[plugin::builder("PyBullet")]]
     class BUILDER_IMPL2 final : public Builder<Collider> {
     public:
-        BUILDER_IMPL2(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER_IMPL2(BeanFactory& factory, const document& manifest);
 
         sp<Collider> build(const Scope& args) override;
 
@@ -87,6 +85,7 @@ private:
 private:
     sp<Stub> _stub;
     Map<sp<CollisionObjectRef>, ContactInfo> _contact_infos;
+    float _time_elapsed;
 };
 
 }

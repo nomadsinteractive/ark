@@ -2046,6 +2046,18 @@ class RenderLayer(Renderer):
     def context(self) -> LayerContext:
         return LayerContext()
 
+    @property
+    def shader(self) -> Shader:
+        pass
+
+    @property
+    def visible(self) -> Boolean:
+        pass
+
+    @visible.setter
+    def visible(self, visible: Optional[Boolean]):
+        pass
+
     def make_layer(self, model_loader: Optional[ModelLoader] = None, position: Optional[Vec3] = None, visible: Optional[Boolean] = None,
                    discarded: Optional[Boolean] = None) -> "Layer":
         pass

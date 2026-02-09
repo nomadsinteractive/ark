@@ -51,7 +51,12 @@ Rigidbody::Rigidbody(Impl impl, const bool isShadow)
 Rigidbody::~Rigidbody()
 {
     if(!_is_shadow)
-        _impl._stub->_ref->discard();
+    {
+        if(_impl._stub->_ref->discarded())
+            _impl._collider->_orphan_impls.push_back(std::move(_impl));
+        else
+            _impl._stub->_ref->discard();
+    }
 }
 
 void Rigidbody::discard()

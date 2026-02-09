@@ -44,6 +44,13 @@ public:
 
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
+
+//  [[script::bindings::property]]
+    sp<Boolean> visible() const;
+//  [[script::bindings::property]]
+    void setVisible(sp<Boolean> visible) const;
+
+//  [[script::bindings::property]]
     const sp<Shader>& shader() const;
 
 //  [[script::bindings::auto]]

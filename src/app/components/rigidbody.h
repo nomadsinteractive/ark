@@ -123,7 +123,7 @@ public:
         sp<Wirable> build(const Scope& args) override;
 
     private:
-        builder<Rigidbody> _rigidbody;
+        sp<Builder<Rigidbody>> _rigidbody;
     };
 
 protected:

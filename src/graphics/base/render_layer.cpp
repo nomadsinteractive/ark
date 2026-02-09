@@ -1,15 +1,12 @@
 #include "graphics/base/render_layer.h"
 
 #include "core/ark.h"
-#include "core/base/observer.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_request.h"
 #include "graphics/impl/render_batch/render_batch_post_process.h"
 
-#include "renderer/base/drawing_context.h"
-#include "renderer/base/model.h"
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/resource_loader_context.h"
@@ -92,6 +89,16 @@ RenderLayerSnapshot RenderLayer::snapshot(const RenderRequest& renderRequest)
 const sp<ModelLoader>& RenderLayer::modelLoader() const
 {
     return _stub->_model_loader;
+}
+
+sp<Boolean> RenderLayer::visible() const
+{
+    return _stub->_visible.toVar();
+}
+
+void RenderLayer::setVisible(sp<Boolean> visible) const
+{
+    _stub->_visible.reset(std::move(visible));
 }
 
 const sp<Shader>& RenderLayer::shader() const

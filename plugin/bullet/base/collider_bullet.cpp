@@ -24,6 +24,7 @@
 #include "bullet/base/collision_object_ref.h"
 #include "bullet/base/collision_shape_ref.h"
 #include "bullet/base/rigidbody_bullet.h"
+#include "core/types/ref.h"
 
 
 namespace ark::plugin::bullet {
@@ -226,7 +227,7 @@ struct ColliderBullet::Stub final : Updatable {
         discard();
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         _timestamp = tick;
         _dynamics_world->stepSimulation(_app_clock_interval->val());
@@ -267,7 +268,7 @@ struct ColliderBullet::Stub final : Updatable {
 };
 
 ColliderBullet::ColliderBullet(const V3 gravity, sp<ModelLoader> modelLoader)
-    : _stub(sp<Stub>::make(gravity, std::move(modelLoader)))
+    : _stub(sp<Stub>::make(gravity, std::move(modelLoader))), _time_elapsed(0)
 {
     _stub->_dynamics_world->setInternalTickCallback(myInternalPreTickCallback, this, true);
     _stub->_dynamics_world->setInternalTickCallback(myInternalTickCallback, this);
@@ -419,7 +420,7 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
             ++ iter;
 }
 
-void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
+void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, const btScalar timeStep)
 {
     btDispatcher* dispatcher = dynamicsWorld->getDispatcher();
     const int32_t numManifolds = dispatcher->getNumManifolds();
@@ -474,6 +475,17 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
         else
             ++iter;
     }
+
+    self->_time_elapsed += timeStep;
+    if(self->_time_elapsed > 1.0f)
+    {
+        for(auto iter = self->_orphan_impls.begin(); iter != self->_orphan_impls.end(); )
+            if(iter->_stub->_ref->isDiscarded())
+                iter = self->_orphan_impls.erase(iter);
+            else
+                ++iter;
+        self->_time_elapsed = 0.0f;
+    }
 }
 
 void ColliderBullet::addTickContactInfo(const sp<CollisionObjectRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<CollisionObjectRef>& contact, const V3& cp, const V3& normal)
@@ -516,9 +528,8 @@ sp<CollisionShapeRef> ColliderBullet::ensureCollisionShapeRef(const NamedHash& t
     return sp<CollisionShapeRef>::make(uniformShape, cs->size() * s);
 }
 
-ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _gravity(Documents::getAttribute<V3>(manifest, "gravity", {0, -9.8f, 0})), _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)),
-      _resource_loader_context(resourceLoaderContext)
+ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest)
+    : _gravity(Documents::getAttribute<V3>(manifest, "gravity", {0, -9.8f, 0})), _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL_LOADER))
 {
     for(const auto& i : manifest->children("import"))
         _importers.emplace_back(factory.ensureBuilder<RigidbodyImporter>(i), i);
@@ -529,12 +540,12 @@ sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)
     const sp<ColliderBullet> collider = sp<ColliderBullet>::make(_gravity, _model_loader.build(args));
     for(const auto& [k, v] : _importers)
         k->build(args)->import(collider, v);
-    _resource_loader_context->renderController()->addPreComposeUpdatable(collider->_stub, BooleanType::__or__(_resource_loader_context->discarded(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 0)));
+    Ark::instance().renderController()->addPreComposeUpdatable(collider->_stub, sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 0));
     return collider;
 }
 
-ColliderBullet::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(factory, manifest, resourceLoaderContext)
+ColliderBullet::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const document& manifest)
+    : _impl(factory, manifest)
 {
 }
 
