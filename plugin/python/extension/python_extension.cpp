@@ -18,22 +18,21 @@ namespace ark::plugin::python {
 
 namespace {
 
-template<typename T, typename U> class CallableA2Trivial final : public CallableV1 {
+template<typename T> class CallableA1Trivial final : public CallableV1 {
 public:
-    CallableA2Trivial(std::function<void(T, U)> func)
+    CallableA1Trivial(std::function<void(T)> func)
         : _func(std::move(func)) {
     }
 
     void call(const Traits& args) override
     {
-        ASSERT(args.table().size() == 2);
-        T a1 = PyCast::ensureCppObject<std::decay_t<T>>(args.table().values().at(0).as<PyInstanceRef>()->instance());
-        U a2 = PyCast::ensureCppObject<std::decay_t<U>>(args.table().values().at(1).as<PyInstanceRef>()->instance());
-        _func(a1, a2);
+        ASSERT(args.table().size() == 1);
+        auto a1 = PyCast::ensureCppObject<std::decay_t<T>>(args.table().values().at(0).as<PyInstanceRef>()->instance());
+        _func(std::move(a1));
     }
 
 private:
-    std::function<void(T, U)> _func;
+    std::function<void(T)> _func;
 };
 
 }
@@ -86,11 +85,11 @@ PyObject* PythonExtension::toPyObject(const Box& box)
         return object;
     }
 
-    typedef std::function<void(const V3&, bool)> FuncType;
+    typedef std::function<void(const V3&)> FuncType;
     if(box.typeId() == Type<FuncType>::id())
     {
         FuncType func = *box.as<FuncType>();
-        return pyNewObject(sp<CallableV1>::make<CallableA2Trivial<const V3&, bool>>(std::move(func)));
+        return pyNewObject(sp<CallableV1>::make<CallableA1Trivial<const V3&>>(std::move(func)));
     }
 
     const auto iter = _type_by_id.find(box.typeId());

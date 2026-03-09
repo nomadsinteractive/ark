@@ -271,11 +271,11 @@ public:
     static float hypot(V4 v4);
 
     static float hypot2(float v1);
-    static float hypot2(V2 v2);
-    static float hypot2(V3 v3);
-    static float hypot2(V4 v4);
+    static float hypot2(const V2& v2);
+    static float hypot2(const V3& v3);
+    static float hypot2(const V4& v4);
 
-    static V4 slerp(V4 x, V4 y, float t);
+    static V4 slerp(const V4& x, const V4& y, float t);
 
     static constexpr float PI = 3.14159265358979323846f;
     static constexpr float PI_HALF = PI / 2.0f;

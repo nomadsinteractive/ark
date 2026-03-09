@@ -136,11 +136,11 @@ public:
         : Storage::Composite<Tilemap>(tilemap, std::move(importer), std::move(outputer)) {
     }
 
-    virtual void jsonLoad(const Json& json) override {
+    void jsonLoad(const Json& json) override {
         _obj.jsonLoad(json);
     }
 
-    virtual Json jsonDump() override {
+    Json jsonDump() override {
         return _obj.jsonDump();
     }
 
@@ -292,16 +292,6 @@ Json Tilemap::jsonDump() const
     Json jTilemap;
     jTilemap.set("layers", jLayers);
     return jTilemap;
-}
-
-Vector<V2i> Tilemap::findRoute(const V2i& start, const V2i& goal)
-{
-    Vector<V2i> result;
-    SearchingTilemap searchingTilemap(*this);
-    AStar<SearchingTilemapNode> pathFinder(SearchingTilemapNode(searchingTilemap, start[0], start[1]), SearchingTilemapNode(searchingTilemap, goal[0], goal[1]));
-    for(const SearchingTilemapNode& i : pathFinder.findPath())
-        result.push_back({i._col, i._row});
-    return result;
 }
 
 const Vector<sp<TilemapLayer>>& Tilemap::layers() const

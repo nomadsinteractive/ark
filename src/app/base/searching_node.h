@@ -12,10 +12,9 @@ namespace ark {
 class SearchingNode {
 public:
     SearchingNode(const sp<GraphNode>& graphNode);
-    SearchingNode(SearchingNodeProvider& searchingNodeProvider, const V3& position, bool isGoal);
+    SearchingNode(SearchingNodeProvider& searchingNodeProvider, const V3& position);
 
     const V3& position() const;
-    bool testGoalReached(const SearchingNode& goal) const;
 
     void visitAdjacentNodes(const std::function<void(SearchingNode, float)>& visitor) const;
 
@@ -25,7 +24,6 @@ public:
 private:
     SearchingNodeProvider& _searching_node_provider;
     V3 _position;
-    bool _is_goal;
 };
 
 }

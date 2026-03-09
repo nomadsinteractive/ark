@@ -7,23 +7,18 @@
 namespace ark {
 
 SearchingNode::SearchingNode(const sp<GraphNode>& graphNode)
-    : _searching_node_provider(graphNode), _position(graphNode->position())
+    : _searching_node_provider(*graphNode), _position(graphNode->position())
 {
 }
 
-SearchingNode::SearchingNode(SearchingNodeProvider& searchingNodeProvider, const V3& position, const bool isGoal)
-    : _searching_node_provider(searchingNodeProvider), _position(position), _is_goal(isGoal)
+SearchingNode::SearchingNode(SearchingNodeProvider& searchingNodeProvider, const V3& position)
+    : _searching_node_provider(searchingNodeProvider), _position(position)
 {
 }
 
 const V3& SearchingNode::position() const
 {
     return _position;
-}
-
-bool SearchingNode::testGoalReached(const SearchingNode& goal) const
-{
-    return _is_goal || (Math::almostEqual(_position.x(), goal._position.x()) && Math::almostEqual(_position.y(), goal._position.y()) && Math::almostEqual(_position.z(), goal._position.z()));
 }
 
 void SearchingNode::visitAdjacentNodes(const std::function<void(SearchingNode, float)>& visitor) const

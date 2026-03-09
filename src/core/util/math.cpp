@@ -398,22 +398,22 @@ float Math::hypot2(const float v1)
     return v1 * v1;
 }
 
-float Math::hypot2(const V2 v2)
+float Math::hypot2(const V2& v2)
 {
     return v2.x() * v2.x() + v2.y() * v2.y();
 }
 
-float Math::hypot2(const V3 v3)
+float Math::hypot2(const V3& v3)
 {
     return v3.x() * v3.x() + v3.y() * v3.y() + v3.z() * v3.z();
 }
 
-float Math::hypot2(const V4 v4)
+float Math::hypot2(const V4& v4)
 {
     return v4.x() * v4.x() + v4.y() * v4.y() + v4.z() * v4.z() + v4.w() * v4.w();
 }
 
-V4 Math::slerp(const V4 x, const V4 y, const float t)
+V4 Math::slerp(const V4& x, const V4& y, const float t)
 {
     const glm::quat n = glm::slerp(glm::quat(x.w(), x.x(), x.y(), x.z()), glm::quat(y.w(), y.x(), y.y(), y.z()), t);
     return {n.x, n.y, n.z, n.w};

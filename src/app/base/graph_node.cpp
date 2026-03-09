@@ -61,15 +61,6 @@ void GraphNode::setTag(Box tag)
     _tag = std::move(tag);
 }
 
-Vector<V3> GraphNode::findPath(GraphNode& goal)
-{
-    Vector<V3> result;
-    AStar<SearchingNode> pathFinder(this->toSharedPtr(), goal.toSharedPtr());
-    for(const SearchingNode& i : pathFinder.findPath())
-        result.push_back(i.position());
-    return result;
-}
-
 sp<GraphNode> GraphNode::toSharedPtr() const
 {
     return _graph.toSharedPtr(*this);

@@ -15,11 +15,11 @@ PathFinder::PathFinder(sp<SearchingNodeProvider> searchingNodeProvider)
 {
 }
 
-Vector<V3> PathFinder::findPath(const V3& start, const V3& end) const
+Vector<V3> PathFinder::findPath(const V3& start, const V3& end, const float distanceTolerance) const
 {
     Vector<V3> result;
-    AStar<SearchingNode> pathFinder({*_searching_node_provider, start, false}, {*_searching_node_provider, end, true});
-    for(const SearchingNode& i : pathFinder.findPath())
+    AStar<SearchingNode> pathFinder({*_searching_node_provider, start}, {*_searching_node_provider, end});
+    for(const SearchingNode& i : pathFinder.findPath(distanceTolerance))
         result.push_back(i.position());
     return result;
 }

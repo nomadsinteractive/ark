@@ -23,12 +23,13 @@ private:
 
 public:
     AStar(T start, T goal)
-        : _start(std::move(start)), _goal(std::move(goal)), _paths{ SearchingPath{getHeuristicValue(_start), 0, {_start}} } {
+        : _start(std::move(start)), _goal(std::move(goal)), _paths{ SearchingPath{std::sqrt(getHeuristicValue2(_start)), 0, {_start}} } {
     }
 
-    Vector<T> findPath() {
+    Vector<T> findPath(const float distanceTolerance) {
+        const float dt2 = distanceTolerance * distanceTolerance;
         while(_paths.size() > 0) {
-            if(_paths.begin()->_nodes.back().testGoalReached(_goal))
+            if(getHeuristicValue2(_paths.begin()->_nodes.back()) <= dt2)
                 return _paths.begin()->_nodes;
 
             if(Optional<SearchingPath> inflated = inflate())
@@ -49,7 +50,7 @@ private:
             if(!_close_set.contains(node)) {
                 const SearchingPath& next = *_paths.begin();
                 nextWeight = next._weight + weight;
-                nextScore = nextWeight + getHeuristicValue(node);
+                nextScore = nextWeight + std::sqrt(getHeuristicValue2(node));
                 if(bestScore > nextScore) {
                     bestScore = nextScore;
                     nextNode = std::make_unique<T>(std::move(node));
@@ -68,9 +69,9 @@ private:
         return {};
     }
 
-    float getHeuristicValue(T& from) const {
+    float getHeuristicValue2(const T& from) const {
         const V3 d = from.position() - _goal.position();
-        return Math::hypot(d);
+        return Math::hypot2(d);
     }
 
 private:

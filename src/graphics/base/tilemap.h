@@ -44,9 +44,6 @@ public:
     void jsonLoad(const Json& json);
     Json jsonDump() const;
 
-//  [[script::bindings::auto]]
-    Vector<V2i> findRoute(const V2i& start, const V2i& goal);
-
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Tilemap> {
     public:

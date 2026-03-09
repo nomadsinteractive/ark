@@ -3285,9 +3285,6 @@ class GraphNode:
     def add_route(self, to_node: 'GraphNode', length: float):
         pass
 
-    def find_route(self, goal: 'GraphNode') -> list['GraphNode']:
-        pass
-
 
 class ConvexHullResolver:
     def __init__(self, check_error: bool = True):
@@ -3385,7 +3382,7 @@ class PathFinder:
     def __init__(self, searching_node_provider: SearchingNodeProvider):
         pass
 
-    def find_path(self, start: TYPE_FLOAT3, end: TYPE_FLOAT3) -> list[TYPE_FLOAT3]:
+    def find_path(self, start: TYPE_FLOAT3, end: TYPE_FLOAT3, distance_tolerance: float) -> list[TYPE_FLOAT3]:
         pass
 
 

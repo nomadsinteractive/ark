@@ -27,9 +27,6 @@ public:
 //  [[script::bindings::auto]]
     void setTag(Box tag);
 
-//  [[script::bindings::auto]]
-    Vector<V3> findPath(GraphNode& goal);
-
     sp<GraphNode> toSharedPtr() const;
 
     const Graph& graph() const;
