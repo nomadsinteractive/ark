@@ -95,7 +95,7 @@ Vector<GraphRoute>& GraphNode::outRoutes()
 void GraphNode::onVisitAdjacentNodes(const V3& /*position*/, const std::function<void(SearchingNode)>& visitor)
 {
     for(GraphRoute& i : _out_routes)
-        visitor({i.exit().position(), i.weight()});
+        visitor({i.exit().position(), {}, i.weight()});
 }
 
 }

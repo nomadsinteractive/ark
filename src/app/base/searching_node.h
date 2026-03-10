@@ -12,14 +12,15 @@ namespace ark {
 struct SearchingNode {
 
     const V3& position() const;
+    const Optional<bool>& isGoal() const;
     const Optional<float>& weight() const;
 
     bool operator < (const SearchingNode& other) const;
     bool operator == (const SearchingNode& other) const;
 
     V3 _position;
-    Optional<float> _weight;
     Optional<bool> _is_goal;
+    Optional<float> _weight;
 };
 
 }

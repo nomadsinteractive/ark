@@ -95,14 +95,9 @@ public:
 
     void onVisitAdjacentNodes(const V3& position, const std::function<void(SearchingNode)>& visitor) override
     {
-        auto v = [this, &position, &visitor](const SearchingNode& searchingNode) {
-            const float weight = Math::distance(position, searchingNode.position());
-            visitor(SearchingNode(searchingNode.position(), weight));
-        };
-
         _on_visit_adjacent_nodes->call({
             Box(sp<Vec3>::make<Vec3::Const>(position)),
-            Box(sp<std::function<void(const SearchingNode&)>>::make(std::move(v)))
+            Box(sp<std::function<void(const SearchingNode&)>>::make(visitor))
         });
     }
 

@@ -9,6 +9,11 @@ const V3& SearchingNode::position() const
     return _position;
 }
 
+const Optional<bool>& SearchingNode::isGoal() const
+{
+    return _is_goal;
+}
+
 const Optional<float>& SearchingNode::weight() const
 {
     return _weight;

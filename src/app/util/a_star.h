@@ -31,7 +31,10 @@ public:
     Vector<T> findPath(SearchingNodeProvider& searchingNodeProvider, const float distanceTolerance) {
         const float dt2 = distanceTolerance * distanceTolerance;
         while(_paths.size() > 0) {
-            if(getHeuristicValue2(_paths.begin()->_nodes.back()) <= dt2)
+            if(const T& backNode = _paths.begin()->_nodes.back(); backNode.isGoal()) {
+                if(backNode.isGoal().value())
+                    return _paths.begin()->_nodes;
+            } else if(getHeuristicValue2(backNode) <= dt2)
                 return _paths.begin()->_nodes;
 
             if(Optional<SearchingPath> inflated = inflate(searchingNodeProvider))
@@ -51,9 +54,8 @@ private:
         const auto visitor = [this, &nextNode, &nextWeight, &nextScore, &bestScore] (T node) {
             if(!_close_set.contains(node)) {
                 const SearchingPath& next = *_paths.begin();
-                //TODO: calculate default weight
-                ASSERT(node.weight());
-                nextWeight = next._weight + node.weight().value();
+                const float nodeWeight = node.weight() ? node.weight().value() : Math::distance(node.position(), next._nodes.back().position());
+                nextWeight = next._weight + nodeWeight;
                 nextScore = nextWeight + std::sqrt(getHeuristicValue2(node));
                 if(bestScore > nextScore) {
                     bestScore = nextScore;
