@@ -61,11 +61,6 @@ void GraphNode::setTag(Box tag)
     _tag = std::move(tag);
 }
 
-sp<GraphNode> GraphNode::toSharedPtr() const
-{
-    return _graph.toSharedPtr(*this);
-}
-
 const Graph& GraphNode::graph() const
 {
     return _graph;
@@ -97,10 +92,10 @@ Vector<GraphRoute>& GraphNode::outRoutes()
     return _out_routes;
 }
 
-void GraphNode::onVisitAdjacentNodes(const V3& /*position*/, const std::function<void(SearchingNode, float)>& visitor)
+void GraphNode::onVisitAdjacentNodes(const V3& /*position*/, const std::function<void(SearchingNode)>& visitor)
 {
     for(GraphRoute& i : _out_routes)
-        visitor(SearchingNode(i.exit().toSharedPtr()), i.weight());
+        visitor({i.exit().position(), i.weight()});
 }
 
 }

@@ -7,6 +7,8 @@
 
 #include "graphics/base/v3.h"
 
+#include "app/inf/searching_node_provider.h"
+
 namespace ark {
 
 template<typename T> class AStar {
@@ -26,13 +28,13 @@ public:
         : _start(std::move(start)), _goal(std::move(goal)), _paths{ SearchingPath{std::sqrt(getHeuristicValue2(_start)), 0, {_start}} } {
     }
 
-    Vector<T> findPath(const float distanceTolerance) {
+    Vector<T> findPath(SearchingNodeProvider& searchingNodeProvider, const float distanceTolerance) {
         const float dt2 = distanceTolerance * distanceTolerance;
         while(_paths.size() > 0) {
             if(getHeuristicValue2(_paths.begin()->_nodes.back()) <= dt2)
                 return _paths.begin()->_nodes;
 
-            if(Optional<SearchingPath> inflated = inflate())
+            if(Optional<SearchingPath> inflated = inflate(searchingNodeProvider))
                 _paths.insert(std::move(inflated.value()));
             else
                 _paths.erase(_paths.begin());
@@ -41,15 +43,17 @@ public:
     }
 
 private:
-    Optional<SearchingPath> inflate() {
+    Optional<SearchingPath> inflate(SearchingNodeProvider& searchingNodeProvider) {
         std::unique_ptr<T> nextNode;
         float nextWeight;
         float nextScore;
         float bestScore = std::numeric_limits<float>::max();
-        const auto visitor = [this, &nextNode, &nextWeight, &nextScore, &bestScore] (T node, float weight) {
+        const auto visitor = [this, &nextNode, &nextWeight, &nextScore, &bestScore] (T node) {
             if(!_close_set.contains(node)) {
                 const SearchingPath& next = *_paths.begin();
-                nextWeight = next._weight + weight;
+                //TODO: calculate default weight
+                ASSERT(node.weight());
+                nextWeight = next._weight + node.weight().value();
                 nextScore = nextWeight + std::sqrt(getHeuristicValue2(node));
                 if(bestScore > nextScore) {
                     bestScore = nextScore;
@@ -58,7 +62,7 @@ private:
             }
         };
 
-        T(_paths.begin()->_nodes.back()).visitAdjacentNodes(visitor);
+        searchingNodeProvider.onVisitAdjacentNodes(_paths.begin()->_nodes.back().position(), visitor);
         if(nextNode) {
             SearchingPath bestRoute = {nextScore, nextWeight, _paths.begin()->_nodes};
             _close_set.insert(*nextNode);

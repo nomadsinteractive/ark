@@ -27,8 +27,6 @@ public:
 //  [[script::bindings::auto]]
     void setTag(Box tag);
 
-    sp<GraphNode> toSharedPtr() const;
-
     const Graph& graph() const;
 
     void detach();
@@ -39,7 +37,7 @@ public:
     const Vector<GraphRoute>& outRoutes() const;
     Vector<GraphRoute>& outRoutes();
 
-    void onVisitAdjacentNodes(const V3& position, const std::function<void(SearchingNode, float)>& visitor) override;
+    void onVisitAdjacentNodes(const V3& position, const std::function<void(SearchingNode)>& visitor) override;
 
 private:
     Graph& _graph;

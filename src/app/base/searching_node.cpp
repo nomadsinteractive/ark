@@ -2,28 +2,16 @@
 
 #include "core/util/math.h"
 
-#include "app/base/graph_node.h"
-
 namespace ark {
-
-SearchingNode::SearchingNode(const sp<GraphNode>& graphNode)
-    : _searching_node_provider(*graphNode), _position(graphNode->position())
-{
-}
-
-SearchingNode::SearchingNode(SearchingNodeProvider& searchingNodeProvider, const V3& position)
-    : _searching_node_provider(searchingNodeProvider), _position(position)
-{
-}
 
 const V3& SearchingNode::position() const
 {
     return _position;
 }
 
-void SearchingNode::visitAdjacentNodes(const std::function<void(SearchingNode, float)>& visitor) const
+const Optional<float>& SearchingNode::weight() const
 {
-    _searching_node_provider.onVisitAdjacentNodes(_position, visitor);
+    return _weight;
 }
 
 bool SearchingNode::operator<(const SearchingNode& other) const

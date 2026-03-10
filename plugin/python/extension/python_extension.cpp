@@ -7,6 +7,8 @@
 #include "core/types/global.h"
 #include "core/util/log.h"
 
+#include "app/base/searching_node.h"
+
 #include "python/extension/callable_v1.h"
 #include "python/extension/py_instance_ref.h"
 #include "python/extension/py_cast.h"
@@ -18,21 +20,28 @@ namespace ark::plugin::python {
 
 namespace {
 
-template<typename T> class CallableA1Trivial final : public CallableV1 {
+template<typename T> Optional<T> getArgumentOpt(const Traits& args, const size_t argidx)
+{
+    if(argidx >= args.table().size())
+        return {};
+    return PyCast::toCppObject<T>(args.table().values().at(argidx).as<PyInstanceRef>()->instance());
+}
+
+class CallableA1SearchingNode final : public CallableV1 {
 public:
-    CallableA1Trivial(std::function<void(T)> func)
+    CallableA1SearchingNode(std::function<void(SearchingNode)> func)
         : _func(std::move(func)) {
     }
 
     void call(const Traits& args) override
     {
-        ASSERT(args.table().size() == 1);
-        auto a1 = PyCast::ensureCppObject<std::decay_t<T>>(args.table().values().at(0).as<PyInstanceRef>()->instance());
-        _func(std::move(a1));
+        ASSERT(args.table().size() >= 1);
+        const auto a1 = PyCast::ensureCppObject<V3>(args.table().values().at(0).as<PyInstanceRef>()->instance());
+        _func({a1, getArgumentOpt<float>(args, 1), getArgumentOpt<bool>(args, 2)});
     }
 
 private:
-    std::function<void(T)> _func;
+    std::function<void(SearchingNode)> _func;
 };
 
 }
@@ -85,11 +94,11 @@ PyObject* PythonExtension::toPyObject(const Box& box)
         return object;
     }
 
-    typedef std::function<void(const V3&)> FuncType;
+    typedef std::function<void(const SearchingNode&)> FuncType;
     if(box.typeId() == Type<FuncType>::id())
     {
         FuncType func = *box.as<FuncType>();
-        return pyNewObject(sp<CallableV1>::make<CallableA1Trivial<const V3&>>(std::move(func)));
+        return pyNewObject(sp<CallableV1>::make<CallableA1SearchingNode>(std::move(func)));
     }
 
     const auto iter = _type_by_id.find(box.typeId());

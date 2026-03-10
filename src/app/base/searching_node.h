@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include "core/types/optional.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
@@ -9,21 +9,17 @@
 
 namespace ark {
 
-class SearchingNode {
-public:
-    SearchingNode(const sp<GraphNode>& graphNode);
-    SearchingNode(SearchingNodeProvider& searchingNodeProvider, const V3& position);
+struct SearchingNode {
 
     const V3& position() const;
-
-    void visitAdjacentNodes(const std::function<void(SearchingNode, float)>& visitor) const;
+    const Optional<float>& weight() const;
 
     bool operator < (const SearchingNode& other) const;
     bool operator == (const SearchingNode& other) const;
 
-private:
-    SearchingNodeProvider& _searching_node_provider;
     V3 _position;
+    Optional<float> _weight;
+    Optional<bool> _is_goal;
 };
 
 }
