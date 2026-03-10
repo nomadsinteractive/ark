@@ -63,6 +63,38 @@ private:
     String _value;
 };
 
+template<typename T> class StringVarRepr final : public StringVar {
+public:
+    StringVarRepr(sp<Variable<T>> value)
+        : _value(std::move(value))
+    {
+        doUpdate();
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        const bool dirty = _value->update(tick);
+        if(dirty)
+            doUpdate();
+        return dirty;
+    }
+
+    StringView val() override
+    {
+        return _formatted;
+    }
+
+private:
+    void doUpdate()
+    {
+        _formatted = StringConvert::repr(_value->val());
+    }
+
+private:
+    sp<Variable<T>> _value;
+    String _formatted;
+};
+
 template<typename T> class StringVarFormatedOne final : public StringVar {
 public:
     StringVarFormatedOne(sp<Variable<T>> value, const StringView format = "")
@@ -71,7 +103,7 @@ public:
         doUpdate();
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         const bool dirty = _value->update(tick);
         if(dirty)
@@ -142,7 +174,12 @@ private:
 
 template<typename T, typename... ARGS> sp<StringVar> toStringVar(const Box& box, const String& format) {
     if(sp<Variable<T>> var = box.as<Variable<T>>())
-        return sp<StringVar>::make<StringVarFormatedOne<T>>(std::move(var), format);
+    {
+        if constexpr(std::is_same_v<T, V2> || std::is_same_v<T, V3> || std::is_same_v<T, V4>)
+            return sp<StringVar>::make<StringVarRepr<T>>(std::move(var));
+        else
+            return sp<StringVar>::make<StringVarFormatedOne<T>>(std::move(var), format);
+    }
 
     if constexpr(sizeof...(ARGS) > 0)
         return toStringVar<ARGS...>(box, format);
@@ -220,7 +257,7 @@ sp<StringVar> StringType::format(const String& format, const Scope& kwargs)
         const String m2 = matched[2].str();
         const Optional<Box> value = kwargs.getObject(name);
         CHECK(value, "Unable to get keyword name \"%s\"", name.c_str());
-        sp<StringVar> formatted = toStringVar<StringView, float, int32_t>(value.value(), m2.c_str());
+        sp<StringVar> formatted = toStringVar<StringView, float, int32_t, V2, V3, V4>(value.value(), m2.c_str());
         CHECK(formatted, "Unable to format key \"%s\"", name.c_str());
         strList.push_back(std::move(formatted));
         return true;
