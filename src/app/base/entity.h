@@ -66,7 +66,15 @@ public:
         sp<Entity> build(const Scope& args) override;
 
     private:
-        struct ComponentBuilder;
+        struct ComponentBuilder {
+            ComponentBuilder(BeanFactory& beanFactory, document manifest)
+                : _wirable(beanFactory.findBuilderByDocument<sp<Wirable>>(manifest, manifest->name(), false)), _manifest(std::move(manifest)) {
+                CHECK(_wirable, "Unable to build component from \"%s\"", Documents::toString(_manifest).c_str());
+            }
+
+            sp<Builder<Wirable>> _wirable;
+            document _manifest;
+        };
 
     private:
         sp<Builder<Vector<Box>>> _boxes;

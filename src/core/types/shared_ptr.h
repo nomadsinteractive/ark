@@ -32,7 +32,7 @@ public:
     }
 
     template<typename U = T, typename... Args> static SharedPtr<T> make(Args&&... args) {
-        return SharedPtr(new U(std::forward<Args>(args)...), std::is_same_v<T, U> ? nullptr : Class::ensureClass<U>());
+        return SharedPtr(std::make_shared<U, Args...>(std::forward<Args>(args)...), std::is_same_v<T, U> ? nullptr : Class::ensureClass<U>());
     }
 
     bool operator == (const SharedPtr<T>& sp) const {
