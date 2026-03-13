@@ -167,8 +167,6 @@ private:
     void parseDeclarations();
     String genDeclarations(const String& mainFunc) const;
 
-    void addInclude(const String& filepath);
-
     sp<String> addUniform(const String& type, const String& name, uint32_t length, const PipelineLayout::Binding& binding, String declaration);
     uint32_t getUniformSize(Uniform::Type type, const String& declaredType) const;
     uint32_t getUniformStructSize(const String& declaredType) const;
@@ -196,7 +194,6 @@ public:
 
     Source _main_source;
 
-    Source _include_declaration_source;
     Source _struct_declaration_source;
     Source _uniform_declaration_source;
     Source _attribute_declaration_source;

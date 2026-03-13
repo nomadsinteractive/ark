@@ -165,7 +165,7 @@ public:
     Vector<BindedTexture> makeBindingSamplers() const;
     Vector<BindedTexture> makeBindingImages() const;
 
-    Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
+    Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages() const;
 
     bool hasDivisors() const;
     const String& signature() const;

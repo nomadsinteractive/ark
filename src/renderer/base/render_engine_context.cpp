@@ -5,8 +5,7 @@
 namespace ark {
 
 RenderEngineContext::RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport, const enums::CoordinateSystem viewportCoordinateSystem, const enums::CoordinateSystem ndcCoordinateSystem, const enums::NDCDepthRange ndcDepthRange)
-    : _renderer(renderer), _viewport(viewport), _viewport_coordinate_system(viewportCoordinateSystem), _ndc_coordinate_system(ndcCoordinateSystem), _ndc_depth_range(ndcDepthRange),
-      _definitions{{"camera.uVP", "u_VP"}, {"camera.uView", "u_View"}, {"camera.uProjection", "u_Projection"}}
+    : _renderer(renderer), _viewport(viewport), _viewport_coordinate_system(viewportCoordinateSystem), _ndc_coordinate_system(ndcCoordinateSystem), _ndc_depth_range(ndcDepthRange)
 {
 }
 
@@ -23,16 +22,6 @@ enums::RendererVersion RenderEngineContext::version() const
 void RenderEngineContext::setVersion(const enums::RendererVersion version)
 {
     _renderer._version = version;
-}
-
-const Map<String, String>& RenderEngineContext::definitions() const
-{
-    return _definitions;
-}
-
-Map<String, String>& RenderEngineContext::definitions()
-{
-    return _definitions;
 }
 
 const Viewport& RenderEngineContext::viewport() const

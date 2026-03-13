@@ -31,9 +31,6 @@ public:
     enums::RendererVersion version() const;
     void setVersion(enums::RendererVersion version);
 
-    const Map<String, String>& definitions() const;
-    Map<String, String>& definitions();
-
     const Viewport& viewport() const;
     void setViewport(const Viewport& viewport);
 
@@ -61,7 +58,6 @@ private:
     enums::CoordinateSystem _ndc_coordinate_system;
     enums::NDCDepthRange _ndc_depth_range;
 
-    Map<String, String> _definitions;
     sp<SnippetFactory> _snippet_factory;
     Resolution _display_resolution;
     V2 _display_unit;

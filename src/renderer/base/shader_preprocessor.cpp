@@ -60,6 +60,19 @@ const char* getOutAttributePrefix(const enums::ShaderStageBit preStage)
     return STAGE_ATTR_PREFIX[preStage + 1];
 }
 
+sp<String> makeIncludeSource(const String& filepath)
+{
+    const Global<StringTable> stringtable;
+
+    Optional<String> content;
+    if(const String::size_type pos = filepath.find(':'); pos == String::npos)
+        content = stringtable->getString(filepath, false);
+    else
+        content = stringtable->getString(filepath.substr(0, pos), filepath.substr(pos + 1).lstrip('/'), false);
+    CHECK(content, "Can't open include file \"%s\"", filepath.c_str());
+    return content ? sp<String>::make(std::move(content.value())) : sp<String>();
+}
+
 }
 
 ShaderPreprocessor::ShaderPreprocessor(String source, document manifest, const enums::ShaderStageBit shaderStage, const enums::ShaderStageBit preShaderStage)
@@ -131,10 +144,9 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 
 void ShaderPreprocessor::parseDeclarations()
 {
-    this->addInclude("shaders/defines.h");
-    _main_source.replace(REGEX_INCLUDE_PATTERN, [this](const std::smatch& m) {
-        this->addInclude(m[1].str());
-        return nullptr;
+    _predefined_macros.push_back(std::move(*makeIncludeSource("shaders/defines.h")));
+    _main_source.replace(REGEX_INCLUDE_PATTERN, [](const std::smatch& m) {
+        return makeIncludeSource(m[1].str());
     });
 
     const auto structPatternReplacer = [this](const std::smatch& m) {
@@ -143,7 +155,6 @@ void ShaderPreprocessor::parseDeclarations()
         this->_struct_definitions.push_back(m[1].str(), m[2].str());
         return nullptr;
     };
-    _include_declaration_source.replace(REGEX_STRUCT_PATTERN, structPatternReplacer);
     _main_source.replace(REGEX_STRUCT_PATTERN, structPatternReplacer);
 
     const auto uniformPatternReplacer = [this](const std::smatch& m) {
@@ -152,7 +163,6 @@ void ShaderPreprocessor::parseDeclarations()
         const int32_t set = m[2].matched ? Strings::eval<int32_t>(m[2].str()) : -1;
         return this->addUniform(m[3].str(), m[4].str(), length, {binding, set}, m.str());
     };
-    _include_declaration_source.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
     _main_source.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
 
     auto ssboPattern = [this](const std::smatch& m) {
@@ -167,7 +177,6 @@ void ShaderPreprocessor::parseDeclarations()
         _ssbos[m[3].str()] = {{binding, set, qualifier}, declaration};
         return declaration;
     };
-    _include_declaration_source.replace(REGEX_SSBO_PATTERN, ssboPattern);
     _main_source.replace(REGEX_SSBO_PATTERN, ssboPattern);
 
     if(_shader_stage == enums::SHADER_STAGE_BIT_COMPUTE)
@@ -403,24 +412,10 @@ String ShaderPreprocessor::genDeclarations(const String& mainFunc) const
     }
 
     sb << _struct_declaration_source.str('\n');
-    sb << _include_declaration_source.str('\n');
     sb << _uniform_declaration_source.str('\n');
     sb << _attribute_declaration_source.str('\n');
     sb << mainFunc;
     return sb.str();
-}
-
-void ShaderPreprocessor::addInclude(const String& filepath)
-{
-    const Global<StringTable> stringtable;
-
-    Optional<String> content;
-    if(const String::size_type pos = filepath.find(':'); pos == String::npos)
-        content = stringtable->getString(filepath, false);
-    else
-        content = stringtable->getString(filepath.substr(0, pos), filepath.substr(pos + 1).lstrip('/'), false);
-    CHECK(content, "Can't open include file \"%s\"", filepath.c_str());
-    _include_declaration_source.push_back(content ? sp<String>::make(std::move(content.value())) : sp<String>());
 }
 
 ShaderPreprocessor::Function::Function(String name, String params, String returnType, String body, sp<String> placeHolder)

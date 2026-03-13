@@ -92,19 +92,13 @@ PipelineDescriptor::Trait toPipelineTrait(const PipelineDescriptor::TraitType tr
     return {};
 }
 
-String preprocess(const RenderEngineContext& renderEngineContext, const Map<String, String>& definitions, const String& source)
+String preprocess(const Map<String, String>& definitions, const String& source)
 {
-    DCHECK(renderEngineContext.version() > 0, "Unintialized RenderEngineContext");
-
     static std::regex var_pattern(R"(\$\{([\w.]+)\})");
-    const Map<String, String>& engineDefinitions = renderEngineContext.definitions();
 
-    return source.replace(var_pattern, [&engineDefinitions, &definitions] (Array<String>& matches)->String {
+    return source.replace(var_pattern, [&definitions] (Array<String>& matches)->String {
         const String& varName = matches.at(1);
-        auto iter = engineDefinitions.find(varName);
-        if(iter != engineDefinitions.end())
-            return iter->second;
-        iter = definitions.find(varName);
+        const auto iter = definitions.find(varName);
         CHECK(iter != definitions.end(), "Undefinition \"%s\"", varName.c_str());
         return iter->second;
     });
@@ -221,12 +215,11 @@ String PipelineDescriptor::generateSignature() const
     return sb.str();
 }
 
-Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const
+Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPreprocessedStages() const
 {
     Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> shaders;
-
     for(const auto& [manifest, stage, source] : _stages)
-        shaders[stage] = {manifest, stage, preprocess(renderEngineContext, _definitions, source)};
+        shaders[stage] = {manifest, stage, preprocess(_definitions, source)};
 
     return shaders;
 }
