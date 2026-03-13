@@ -10,6 +10,14 @@ struct State::Link {
     LinkType _link_type;
     State& _start;
     State& _end;
+    uint32_t _mask;
+
+    bool rejectTest(const Link& other) const
+    {
+        if(&_start == &other._start)
+            return false;
+        return _mask ? _mask & other._mask : _mask == other._mask;
+    }
 };
 
 class State::Stub : public Boolean {
@@ -116,7 +124,7 @@ void State::activate()
 
         for(const sp<Link>& i : _out_links)
             if(i->_link_type == LINK_TYPE_PROPAGATE)
-                i->_end.propagateActive(*this);
+                i->_end.propagateActive(*i);
 
         onActivate();
     }
@@ -142,9 +150,9 @@ void State::deactivate()
     }
 }
 
-void State::createLink(const LinkType linkType, State& nextState)
+void State::createLink(const LinkType linkType, State& nextState, const uint32_t mask)
 {
-    sp<Link> link = sp<Link>::make(Link{linkType, *this, nextState});
+    sp<Link> link = sp<Link>::make(Link{linkType, *this, nextState, mask});
     nextState._in_links.emplace_back(link);
     _out_links.push_back(std::move(link));
 }
@@ -196,13 +204,13 @@ void State::propagateUnsupporting(const State& from)
             i->_end.propagateUnsupporting(*this);
 }
 
-void State::propagateActive(const State& from)
+void State::propagateActive(const Link& link)
 {
     if(!_stub->_suppressed)
         onActivate();
 
     for(const sp<Link>& i : _in_links)
-        if(i->_link_type == LINK_TYPE_PROPAGATE && &from != &i->_start)
+        if(i->_link_type == LINK_TYPE_PROPAGATE && i->rejectTest(link))
             i->_start.propagateSuppress(*this);
 }
 

@@ -30,22 +30,23 @@ public:
 //  [[script::bindings::auto]]
     void deactivate();
 //  [[script::bindings::auto]]
-    void createLink(State::LinkType linkType, State& nextState);
+    void createLink(State::LinkType linkType, State& nextState, uint32_t mask = 0);
 
 private:
+    struct Link;
+
     void propagateSuppress(const State& from);
     void propagateUnsuppress(const State& from);
 
     void propagateSupporting(const State& from);
     void propagateUnsupporting(const State& from);
 
-    void propagateActive(const State& from);
+    void propagateActive(const Link& link);
     void propagateDeactive(const State& from);
 
     void onActivate() const;
     void onDeactivate() const;
 
-    struct Link;
     class Stub;
     class BooleanStateSuppressed;
 

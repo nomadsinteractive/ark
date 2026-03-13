@@ -3155,7 +3155,7 @@ class State:
     def deactivate(self):
         pass
 
-    def create_link(self, link_type: int, next_state: "State"):
+    def create_link(self, link_type: int, next_state: "State", mask: int = 0):
         pass
 
 
