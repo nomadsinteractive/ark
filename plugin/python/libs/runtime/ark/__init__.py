@@ -3104,7 +3104,7 @@ class RayCastManifold:
         return 0, 0, 0
 
     @property
-    def rigid_body(self) -> Optional[Rigidbody]:
+    def rigidbody(self) -> Optional[Rigidbody]:
         return None
 
 

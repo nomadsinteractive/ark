@@ -47,11 +47,11 @@ public:
 
 private:
     Optional<SearchingPath> inflate(SearchingNodeProvider& searchingNodeProvider) {
-        std::unique_ptr<T> nextNode;
+        std::optional<T> nextNode;
         float nextWeight;
         float nextScore;
         float bestScore = std::numeric_limits<float>::max();
-        const auto visitor = [this, &nextNode, &nextWeight, &nextScore, &bestScore] (T node) {
+        const auto visitor = [this, &nextNode, &nextWeight, &nextScore, &bestScore] (const T& node) {
             if(!_close_set.contains(node)) {
                 const SearchingPath& next = *_paths.begin();
                 const float nodeWeight = node.weight() ? node.weight().value() : Math::distance(node.position(), next._nodes.back().position());
@@ -59,7 +59,7 @@ private:
                 nextScore = nextWeight + std::sqrt(getHeuristicValue2(node));
                 if(bestScore > nextScore) {
                     bestScore = nextScore;
-                    nextNode = std::make_unique<T>(std::move(node));
+                    nextNode = {node};
                 }
             }
         };
@@ -67,8 +67,8 @@ private:
         searchingNodeProvider.onVisitAdjacentNodes(_paths.begin()->_nodes.back().position(), visitor);
         if(nextNode) {
             SearchingPath bestRoute = {nextScore, nextWeight, _paths.begin()->_nodes};
-            _close_set.insert(*nextNode);
-            bestRoute._nodes.push_back(std::move(*nextNode));
+            _close_set.insert(nextNode.value());
+            bestRoute._nodes.push_back(nextNode.value());
             return bestRoute;
         }
 

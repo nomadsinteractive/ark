@@ -37,7 +37,7 @@ public:
     const Vector<GraphRoute>& outRoutes() const;
     Vector<GraphRoute>& outRoutes();
 
-    void onVisitAdjacentNodes(const V3& position, const std::function<void(SearchingNode)>& visitor) override;
+    void onVisitAdjacentNodes(const V3& position, const std::function<void(const SearchingNode&)>& visitor) override;
 
 private:
     Graph& _graph;

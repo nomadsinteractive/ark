@@ -29,7 +29,7 @@ template<typename T> Optional<T> getArgumentOpt(const Traits& args, const size_t
 
 class CallableA1SearchingNode final : public CallableV1 {
 public:
-    CallableA1SearchingNode(std::function<void(SearchingNode)> func)
+    CallableA1SearchingNode(std::function<void(const SearchingNode&)> func)
         : _func(std::move(func)) {
     }
 
@@ -41,7 +41,7 @@ public:
     }
 
 private:
-    std::function<void(SearchingNode)> _func;
+    std::function<void(const SearchingNode&)> _func;
 };
 
 }
