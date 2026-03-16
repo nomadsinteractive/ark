@@ -30,7 +30,7 @@ public:
         sp<Alphabet> build(const Scope& args) override;
 
     private:
-        sp<Builder<String>> _src;
+        sp<IBuilder<String>> _src;
     };
 
 private:

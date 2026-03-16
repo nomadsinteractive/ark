@@ -48,7 +48,7 @@ void FileReadable::init()
 }
 
 FileReadable::BUILDER::BUILDER(BeanFactory& factory, const String& src)
-    : _src(factory.ensureBuilder<String>(src))
+    : _src(factory.ensureIBuilder<String>(src))
 {
 }
 

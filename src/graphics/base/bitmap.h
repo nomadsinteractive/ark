@@ -90,7 +90,7 @@ public:
                     T* r1 = data + (width * i + j) * channels;
                     T* r2 = data + (width * i + width - j - 1) * channels;
                     for(uint8_t k = 0; k < channels; ++k)
-                        swap(r1[k], r2[k]);
+                        std::swap(r1[k], r2[k]);
                 }
         }
 
@@ -103,7 +103,7 @@ public:
                         T* c1 = r1 + j * channels;
                         T* c2 = r2 + j * channels;
                         for(uint8_t k = 0; k < channels; ++k)
-                            swap(c1[k], c2[k]);
+                            std::swap(c1[k], c2[k]);
                     }
             }
         }
@@ -114,14 +114,8 @@ public:
                     T* r1 = data + (width * i + j) * channels;
                     T* r2 = data + (width * j + i) * channels;
                     for(uint8_t k = 0; k < channels; ++k)
-                        swap(r1[k], r2[k]);
+                        std::swap(r1[k], r2[k]);
                 }
-        }
-
-        static void swap(T& a1, T& a2) {
-            T tmp = a1;
-            a1 = a2;
-            a2 = tmp;
         }
     };
 
@@ -133,7 +127,7 @@ public:
         sp<Bitmap> build(const Scope& args) override;
 
     private:
-        sp<Builder<String>> _src;
+        sp<IBuilder<String>> _src;
         sp<BitmapLoaderBundle> _bitmap_bundle;
     };
 

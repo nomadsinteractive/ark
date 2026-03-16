@@ -18,7 +18,7 @@ public:
     int32_t seek(int32_t position, int32_t whence) override;
     uint32_t position() override;
 
-    //[[plugin::builder::by-value]]
+//  [[plugin::builder::by-value]]
     class BUILDER final : public Builder<Readable> {
     public:
         BUILDER(BeanFactory& factory, const String& src);
@@ -26,7 +26,7 @@ public:
         sp<Readable> build(const Scope& args) override;
 
     private:
-        sp<Builder<String>> _src;
+        sp<IBuilder<String>> _src;
     };
 
 private:

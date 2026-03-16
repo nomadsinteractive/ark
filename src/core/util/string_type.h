@@ -50,7 +50,7 @@ public:
         sp<StringVar> build(const Scope& args) override;
 
     private:
-        sp<Builder<String>> _value;
+        sp<IBuilder<String>> _value;
     };
 
 //  [[plugin::builder]]
@@ -64,7 +64,7 @@ public:
         String getValue(const document& manifest) const;
 
     private:
-        sp<Builder<String>> _value;
+        sp<IBuilder<String>> _value;
     };
 };
 

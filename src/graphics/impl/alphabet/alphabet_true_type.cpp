@@ -90,7 +90,7 @@ bool AlphabetTrueType::draw(const uint32_t c, Bitmap& image, const int32_t x, co
 }
 
 AlphabetTrueType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _src(factory.ensureBuilder<String>(manifest, constants::SRC))
+    : _src(factory.ensureIBuilder<String>(manifest, constants::SRC))
 {
 }
 

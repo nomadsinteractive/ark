@@ -40,7 +40,7 @@ private:
 
 }
 
-AtlasImporterImpl::AtlasImporterImpl(Vector<Directory> directories, Vector<File> files)
+AtlasImporterImpl::AtlasImporterImpl(Vector<String> directories, Vector<File> files)
     : _directories(std::move(directories)), _files(std::move(files))
 {
 }
@@ -51,10 +51,8 @@ void AtlasImporterImpl::import(Atlas& atlas, const sp<Readable>& /*readable*/)
     const ApplicationBundle& applicationBundle = Ark::instance().applicationContext()->applicationBundle();
     const sp<BitmapLoaderBundle> bitmapLoader = applicationBundle.bitmapBundle();
     BitmapLoaderBundle& bitmapLoaderBounds = applicationBundle.bitmapBoundsBundle();
-    for(const auto& [dirpath] : _directories)
-    {
-        const sp<AssetBundle> assetBundle = Ark::instance().getAssetBundle(dirpath);
-        for(const String& j : assetBundle->listAssets(""))
+    for(const auto& dirpath : _directories)
+        for(const String& j : Ark::instance().getAssetBundle(dirpath)->listAssets(""))
             if(j.endsWith(".png"))
             {
                 auto [name, ext] = j.rcut('.');
@@ -62,7 +60,6 @@ void AtlasImporterImpl::import(Atlas& atlas, const sp<Readable>& /*readable*/)
                 sp<Bitmap> bounds = bitmapLoaderBounds.get(src);
                 texturePacker.addBitmap(std::move(bounds), sp<Variable<bitmap>>::make<BitmapProvider>(bitmapLoader, std::move(src)), std::move(name.value()));
             }
-    }
 
     texturePacker.updateTexture(atlas.texture());
 
@@ -102,17 +99,20 @@ void AtlasImporterImpl::import(Atlas& atlas, const sp<Readable>& /*readable*/)
     }
 }
 
-AtlasImporterImpl::BUILDER::BUILDER(const document& manifest)
+AtlasImporterImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
     for(const document& i : manifest->children("directory"))
-        _directories.emplace_back(Documents::ensureAttribute(i, constants::SRC));
+        _directories.emplace_back(factory.ensureIBuilder<String>(i, constants::SRC));
     for(const document& i : manifest->children("file"))
         _files.emplace_back(Documents::ensureAttribute(i, "manifest"), Documents::getAttribute(i, constants::SRC));
 }
 
-sp<AtlasImporter> AtlasImporterImpl::BUILDER::build(const Scope& /*args*/)
+sp<AtlasImporter> AtlasImporterImpl::BUILDER::build(const Scope& args)
 {
-    return sp<AtlasImporter>::make<AtlasImporterImpl>(_directories, _files);
+    Vector<String> directories;
+    for(const auto& [src] : _directories)
+        directories.emplace_back(src->build(args));
+    return sp<AtlasImporter>::make<AtlasImporterImpl>(std::move(directories), _files);
 }
 
 }

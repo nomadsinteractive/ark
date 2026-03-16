@@ -77,7 +77,7 @@ const sp<Readable>& OggDecoderReadable::source() const
 }
 
 OggDecoderReadable::BUILDER::BUILDER(BeanFactory& factory, const String& src)
-    : _src(factory.ensureBuilder<String>(src))
+    : _src(factory.ensureIBuilder<String>(src))
 {
 }
 

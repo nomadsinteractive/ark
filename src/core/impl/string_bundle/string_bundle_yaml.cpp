@@ -109,7 +109,7 @@ sp<StringBundleYAML::Directory> StringBundleYAML::loadAssetDirectory(Asset& asse
 }
 
 StringBundleYAML::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _src(factory.ensureBuilder<String>(manifest, constants::SRC))
+    : _src(factory.ensureIBuilder<String>(manifest, constants::SRC))
 {
 }
 

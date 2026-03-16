@@ -275,22 +275,22 @@ sp<StringVar> StringType::dye(sp<StringVar> self, sp<Boolean> condition, String 
 }
 
 StringType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
-    : _value(factory.ensureBuilder<String>(expr))
+    : _value(factory.ensureIBuilder<String>(expr))
 {
 }
 
 sp<StringVar> StringType::DICTIONARY::build(const Scope& args)
 {
-    return StringType::create(*_value->build(args));
+    return StringType::create(_value->build(args));
 }
 
 StringType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(factory.ensureBuilder<String>(manifest, constants::VALUE)) {
+    : _value(factory.ensureIBuilder<String>(manifest, constants::VALUE)) {
 }
 
 sp<StringVar> StringType::BUILDER::build(const Scope& args)
 {
-    return StringType::create(*_value->build(args));
+    return StringType::create(_value->build(args));
 }
 
 }

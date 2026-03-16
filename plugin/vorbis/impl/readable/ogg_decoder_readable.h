@@ -27,7 +27,7 @@ public:
         sp<Readable> build(const Scope& args) override;
 
     private:
-        sp<Builder<String>> _src;
+        sp<IBuilder<String>> _src;
     };
 
 private:

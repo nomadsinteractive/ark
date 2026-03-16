@@ -942,8 +942,8 @@ class ApplicationManifest:
         return ''
 
     @property
-    def renderer_resolution(self) -> "Size":
-        return Size(0, 0)
+    def renderer_resolution(self) -> TYPE_FLOAT2:
+        return 0, 0
 
 
 class Observer(Runnable):

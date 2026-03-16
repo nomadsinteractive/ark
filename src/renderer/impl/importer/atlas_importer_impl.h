@@ -9,9 +9,9 @@
 namespace ark {
 
 class AtlasImporterImpl final : public AtlasImporter {
-public:
+private:
     struct Directory {
-        String _src;
+        sp<IBuilder<String>> _src;
     };
 
     struct File {
@@ -19,14 +19,15 @@ public:
         String _src;
     };
 
-    AtlasImporterImpl(Vector<Directory> directories, Vector<File> files);
+public:
+    AtlasImporterImpl(Vector<String> directories, Vector<File> files);
 
     void import(Atlas& atlas, const sp<Readable>& readable) override;
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<AtlasImporter> {
     public:
-        BUILDER(const document& manifest);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         sp<AtlasImporter> build(const Scope& args) override;
 
@@ -36,7 +37,7 @@ public:
     };
 
 private:
-    Vector<Directory> _directories;
+    Vector<String> _directories;
     Vector<File> _files;
 };
 

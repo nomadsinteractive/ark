@@ -22,7 +22,7 @@ public:
         sp<AtlasImporter> build(const Scope& args) override;
 
     private:
-        sp<Builder<String>> _src;
+        sp<IBuilder<String>> _src;
         float _px;
         float _py;
     };
