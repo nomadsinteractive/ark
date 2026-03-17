@@ -60,7 +60,7 @@ public:
         sp<Font> build(const Scope& args) override;
 
     private:
-        builder<String> _text_size;
+        sp<IBuilder<String>> _text_size;
     };
 
 //  [[plugin::builder::by-value]]
@@ -71,7 +71,7 @@ public:
         sp<Font> build(const Scope& args) override;
 
     private:
-        builder<String> _text_size;
+        sp<IBuilder<String>> _text_size;
     };
 
 private:

@@ -64,10 +64,10 @@ uint32_t toBitFormat(const StringView str, const uint32_t bitsOffset)
     return 0;
 }
 
-Texture::Filter getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, const Texture::Filter defValue)
+Texture::Filter getEnumValue(Dictionary<document>& dict, const String& name, const Texture::Filter defValue)
 {
     const document doc = dict.get(name);
-    return doc ? Strings::eval<Texture::Filter>(factory.ensure<String>(doc, constants::VALUE, args)) : defValue;
+    return doc ? Strings::eval<Texture::Filter>(Documents::ensureAttribute(doc, constants::VALUE)) : defValue;
 }
 
 }
@@ -275,11 +275,11 @@ Texture::Parameters::Parameters(const Type type, const document& parameters, con
 void Texture::Parameters::loadParameters(const document& parameters, BeanFactory& factory, const Scope& args)
 {
     DictionaryByAttributeName byName(parameters, constants::NAME);
-    _min_filter = getEnumValue(byName, "min_filter", factory, args, _min_filter);
-    _mag_filter = getEnumValue(byName, "mag_filter", factory, args, _mag_filter);
-    _wrap_s = getEnumValue(byName, "wrap_s", factory, args, _wrap_s);
-    _wrap_t = getEnumValue(byName, "wrap_t", factory, args, _wrap_t);
-    _wrap_r = getEnumValue(byName, "wrap_r", factory, args, _wrap_r);
+    _min_filter = getEnumValue(byName, "min_filter", _min_filter);
+    _mag_filter = getEnumValue(byName, "mag_filter", _mag_filter);
+    _wrap_s = getEnumValue(byName, "wrap_s", _wrap_s);
+    _wrap_t = getEnumValue(byName, "wrap_t", _wrap_t);
+    _wrap_r = getEnumValue(byName, "wrap_r", _wrap_r);
 }
 
 Texture::Delegate::Delegate(const Type type)
@@ -293,7 +293,7 @@ Texture::Type Texture::Delegate::type() const
 }
 
 Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, constants::SRC)), _bitmap(factory.getBuilder<Bitmap>(manifest, constants::BITMAP)),
+    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getIBuilder<String>(manifest, constants::SRC)), _bitmap(factory.getBuilder<Bitmap>(manifest, constants::BITMAP)),
       _uploader(factory.getBuilder<Texture::Uploader>(manifest, constants::UPLOADER)), _upload_strategy(Documents::getAttribute<enums::UploadStrategy>(manifest, "upload-strategy", {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}).bits())
 {
 }
@@ -304,8 +304,8 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
     sp<Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
     parameters->loadParameters(_manifest, _factory, args);
 
-    if(const sp<String> src = _src.build(args))
-        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
+    if(const String src = _src.build(args))
+        return _resource_loader_context->textureBundle()->createTexture(src, parameters);
 
     if(sp<Bitmap> bitmap = _bitmap.build(args))
         return _resource_loader_context->renderController()->createTexture2d(std::move(bitmap), std::move(parameters), enums::UploadStrategy(_upload_strategy));

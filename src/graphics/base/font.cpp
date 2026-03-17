@@ -77,23 +77,23 @@ std::pair<Font, uint32_t> Font::partition(const uint32_t combined)
 }
 
 Font::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _text_size(factory.ensureBuilder<String>(manifest, constants::SIZE))
+    : _text_size(factory.ensureIBuilder<String>(manifest, constants::SIZE))
 {
 }
 
 sp<Font> Font::BUILDER::build(const Scope& args)
 {
-    return sp<Font>::make(Strings::eval<TextSize>(*_text_size->build(args)));
+    return sp<Font>::make(Strings::eval<TextSize>(_text_size->build(args)));
 }
 
 Font::DICTIONARY::DICTIONARY(BeanFactory& beanFactory, const String& expr)
-    : _text_size(beanFactory.ensureBuilder<String>(expr))
+    : _text_size(beanFactory.ensureIBuilder<String>(expr))
 {
 }
 
 sp<Font> Font::DICTIONARY::build(const Scope& args)
 {
-    return sp<Font>::make(Strings::eval<TextSize>(*_text_size->build(args)));
+    return sp<Font>::make(Strings::eval<TextSize>(_text_size->build(args)));
 }
 
 uint32_t Font::sizeValue() const

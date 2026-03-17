@@ -179,7 +179,7 @@ public:
 
         BeanFactory _factory;
         document _manifest;
-        SafeBuilder<String> _src;
+        SafeIBuilder<String> _src;
         SafeBuilder<Bitmap> _bitmap;
         SafeBuilder<Uploader> _uploader;
         uint32_t _upload_strategy;

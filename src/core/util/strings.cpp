@@ -547,17 +547,7 @@ Strings::BUILDER::BUILDER(BeanFactory& /*factory*/, const String& value)
 {
 }
 
-sp<String> Strings::BUILDER::build(const Scope& args)
-{
-    return sp<String>::make(_delegate->build(args));
-}
-
-Strings::BUILDER_STR::BUILDER_STR(BeanFactory& /*factory*/, const String& value)
-    : _delegate(Strings::load(value))
-{
-}
-
-String Strings::BUILDER_STR::build(const Scope& args)
+String Strings::BUILDER::build(const Scope& args)
 {
     return _delegate->build(args);
 }
