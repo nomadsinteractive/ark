@@ -14,7 +14,7 @@ namespace ark {
 class ARK_API Size final : public Vec3 {
 public:
     Size();
-    Size(V3 size);
+    Size(const V3& size);
 //  [[script::bindings::auto]]
     Size(float width, float height, float depth = 0);
 //  [[script::bindings::auto]]
@@ -52,18 +52,6 @@ public:
     sp<Size> freeze();
 
     const sp<Vec3Impl>& impl() const;
-
-//  [[plugin::builder::by-value]]
-    class DICTIONARY final : public Builder<Size> {
-    public:
-        DICTIONARY(BeanFactory& factory, const String& expr);
-
-        sp<Size> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Numeric>> _width, _height, _depth;
-        String _expr;
-    };
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Size> {

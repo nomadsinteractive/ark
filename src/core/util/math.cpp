@@ -131,17 +131,17 @@ float Math::round(const float x)
     return std::round(x);
 }
 
-V2 Math::round(const V2 x)
+V2 Math::round(const V2& x)
 {
     return {std::round(x.x()), std::round(x.y())};
 }
 
-V3 Math::round(const V3 x)
+V3 Math::round(const V3& x)
 {
     return {std::round(x.x()), std::round(x.y()), std::round(x.z())};
 }
 
-V4 Math::round(const V4 x)
+V4 Math::round(const V4& x)
 {
     return {std::round(x.x()), std::round(x.y()), std::round(x.z()), std::round(x.w())};
 }
@@ -282,14 +282,14 @@ uint32_t Math::hash(const float x)
     return hashf(x);
 }
 
-uint32_t Math::hash(const V2i x)
+uint32_t Math::hash(const V2i& x)
 {
     uint32_t val = hash32(x[0]);
     hashCombine(val, hash32(x[1]));
     return val;
 }
 
-uint32_t Math::hash(const V3i x)
+uint32_t Math::hash(const V3i& x)
 {
     uint32_t val = hash32(x[0]);
     hashCombine(val, hash32(x[1]));
@@ -297,7 +297,7 @@ uint32_t Math::hash(const V3i x)
     return val;
 }
 
-uint32_t Math::hash(const V4i x)
+uint32_t Math::hash(const V4i& x)
 {
     uint32_t val = hash32(x[0]);
     hashCombine(val, hash32(x[1]));
@@ -306,14 +306,14 @@ uint32_t Math::hash(const V4i x)
     return val;
 }
 
-uint32_t Math::hash(const V2 x)
+uint32_t Math::hash(const V2& x)
 {
     uint32_t val = hashf(x.x());
     hashCombine(val, hashf(x.y()));
     return val;
 }
 
-uint32_t Math::hash(const V3 x)
+uint32_t Math::hash(const V3& x)
 {
     uint32_t val = hashf(x.x());
     hashCombine(val, hashf(x.y()));
@@ -321,7 +321,7 @@ uint32_t Math::hash(const V3 x)
     return val;
 }
 
-uint32_t Math::hash(const V4 x)
+uint32_t Math::hash(const V4& x)
 {
     uint32_t val = hashf(x.x());
     hashCombine(val, hashf(x.y()));
@@ -332,22 +332,24 @@ uint32_t Math::hash(const V4 x)
 
 float Math::normalize(const float v1)
 {
-    return v1 >= 0.0f ? 1.0f : -1.0f;
+    if(v1 == 0)
+        return 0;
+    return v1 > 0.0f ? 1.0f : -1.0f;
 }
 
-V2 Math::normalize(const V2 v2)
+V2 Math::normalize(const V2& v2)
 {
     const glm::vec2 n = glm::normalize(glm::vec2(v2.x(), v2.y()));
     return {n.x, n.y};
 }
 
-V3 Math::normalize(const V3 v3)
+V3 Math::normalize(const V3& v3)
 {
     const glm::vec3 n = glm::normalize(glm::vec3(v3.x(), v3.y(), v3.z()));
     return {n.x, n.y, n.z};
 }
 
-V4 Math::normalize(const V4 v4)
+V4 Math::normalize(const V4& v4)
 {
     const glm::vec4 n = glm::normalize(glm::vec4(v4.x(), v4.y(), v4.z(), v4.w()));
     return {n.x, n.y, n.z, n.w};
@@ -358,17 +360,17 @@ float Math::dot(const float a, const float b)
     return a * b;
 }
 
-float Math::dot(const V2 a, const V2 b)
+float Math::dot(const V2& a, const V2& b)
 {
     return a.x() * b.x() + a.y() * b.y();
 }
 
-float Math::dot(const V3 a, const V3 b)
+float Math::dot(const V3& a, const V3& b)
 {
     return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
 }
 
-float Math::dot(const V4 a, const V4 b)
+float Math::dot(const V4& a, const V4& b)
 {
     return a.x() * b.x() + a.y() * b.y() + a.z() * b.z() + a.w() * b.w();
 }
@@ -378,17 +380,17 @@ float Math::hypot(const float v1)
     return v1;
 }
 
-float Math::hypot(const V2 v2)
+float Math::hypot(const V2& v2)
 {
     return sqrt(hypot2(v2));
 }
 
-float Math::hypot(const V3 v3)
+float Math::hypot(const V3& v3)
 {
     return sqrt(hypot2(v3));
 }
 
-float Math::hypot(const V4 v4)
+float Math::hypot(const V4& v4)
 {
     return sqrt(hypot2(v4));
 }

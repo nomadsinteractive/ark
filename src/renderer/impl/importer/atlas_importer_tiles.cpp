@@ -37,8 +37,8 @@ void AtlasImporterTiles::import(Atlas& atlas, const sp<Readable>& /*readable*/)
             ++typeBase;
             if(!atlas.has(typeBase) || override)
             {
-                uint32_t left = bl + j * flowx;
-                uint32_t top = bt + i * flowy;
+                const uint32_t left = bl + j * flowx;
+                const uint32_t top = bt + i * flowy;
                 atlas.add(typeBase, left, top, left + _tile_width, top + _tile_height, Rect(0, 0, 1.0f, 1.0f), tileSize, _pivot);
             }
         }

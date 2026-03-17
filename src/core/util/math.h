@@ -238,37 +238,37 @@ public:
 //  [[script::bindings::auto]]
     static uint32_t hash(float x);
 //  [[script::bindings::auto]]
-    static uint32_t hash(V2i x);
+    static uint32_t hash(const V2i& x);
 //  [[script::bindings::auto]]
-    static uint32_t hash(V3i x);
+    static uint32_t hash(const V3i& x);
 //  [[script::bindings::auto]]
-    static uint32_t hash(V4i x);
+    static uint32_t hash(const V4i& x);
 //  [[script::bindings::auto]]
-    static uint32_t hash(V2 x);
+    static uint32_t hash(const V2& x);
 //  [[script::bindings::auto]]
-    static uint32_t hash(V3 x);
+    static uint32_t hash(const V3& x);
 //  [[script::bindings::auto]]
-    static uint32_t hash(V4 x);
+    static uint32_t hash(const V4& x);
 
     static float round(float x);
-    static V2 round(V2 x);
-    static V3 round(V3 x);
-    static V4 round(V4 x);
+    static V2 round(const V2& x);
+    static V3 round(const V3& x);
+    static V4 round(const V4& x);
 
     static float normalize(float v1);
-    static V2 normalize(V2 v2);
-    static V3 normalize(V3 v3);
-    static V4 normalize(V4 v4);
+    static V2 normalize(const V2& v2);
+    static V3 normalize(const V3& v3);
+    static V4 normalize(const V4& v4);
 
     static float dot(float a, float b);
-    static float dot(V2 a, V2 b);
-    static float dot(V3 a, V3 b);
-    static float dot(V4 a, V4 b);
+    static float dot(const V2& a, const V2& b);
+    static float dot(const V3& a, const V3& b);
+    static float dot(const V4& a, const V4& b);
 
     static float hypot(float v1);
-    static float hypot(V2 v2);
-    static float hypot(V3 v3);
-    static float hypot(V4 v4);
+    static float hypot(const V2& v2);
+    static float hypot(const V3& v3);
+    static float hypot(const V4& v4);
 
     static float hypot2(float v1);
     static float hypot2(const V2& v2);

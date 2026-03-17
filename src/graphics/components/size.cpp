@@ -15,7 +15,7 @@ Size::Size()
 {
 }
 
-Size::Size(const V3 size)
+Size::Size(const V3& size)
     : Size(size.x(), size.y(), size.z())
 {
 }
@@ -35,7 +35,7 @@ V3 Size::val()
     return _impl->val();
 }
 
-bool Size::update(uint32_t tick)
+bool Size::update(const uint32_t tick)
 {
     return _impl->update(tick);
 }
@@ -116,21 +116,6 @@ sp<Size> Size::freeze()
 const sp<Vec3Impl>& Size::impl() const
 {
     return _impl;
-}
-
-Size::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
-    : _expr(expr)
-{
-    factory.expand(expr, _width, _height, _depth);
-}
-
-sp<Size> Size::DICTIONARY::build(const Scope& args)
-{
-    sp<Numeric> w = _width->build(args);
-    sp<Numeric> h = _height->build(args);
-    sp<Numeric> d = _depth->build(args);
-    CHECK(w && h, "Cannot build Size from \"%s\"", _expr.c_str());
-    return sp<Size>::make(std::move(w), std::move(h), std::move(d));
 }
 
 Size::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
