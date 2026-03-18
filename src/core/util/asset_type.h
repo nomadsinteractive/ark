@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_ASSET_TYPE_H_
-#define ARK_CORE_UTIL_ASSET_TYPE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/string.h"
@@ -12,12 +11,8 @@ public:
 
 //  [[script::bindings::property]]
     static String location(const sp<Asset>& self);
-
 //  [[script::bindings::classmethod]]
     static String readString(const sp<Asset>& self);
-
 };
 
 }
-
-#endif

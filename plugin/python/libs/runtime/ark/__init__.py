@@ -757,6 +757,12 @@ class ApplicationFacade:
     def argv(self) -> list[str]:
         return []
 
+    def get_asset_bundle(self, path: str) -> AssetBundle:
+        pass
+
+    def get_asset(self, path: str) -> Asset:
+        pass
+
     def push_clock(self, time_scale: Optional[TYPE_NUMERIC] = None):
         pass
 

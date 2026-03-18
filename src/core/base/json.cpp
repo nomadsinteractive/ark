@@ -14,14 +14,8 @@
 namespace ark {
 
 struct Json::Stub {
-    Stub() {
-    }
-    Stub(nlohmann::json json)
-        : _json(std::move(json)) {
-    }
-
     template<typename T> sp<Array<T>> toArray() const {
-        std::vector<T> array(_json.size());
+        Vector<T> array(_json.size());
         for(size_t i = 0; i < _json.size(); ++i)
             array.push_back(_json.at(i).get<T>());
         return sp<typename Array<T>::Vector>::make(std::move(array));

@@ -56,6 +56,11 @@ public:
     void setApplicationEventListener(sp<ApplicationEventListener> applicationEventListener) const;
 
 //  [[script::bindings::auto]]
+    sp<AssetBundle> getAssetBundle(const String& path) const;
+//  [[script::bindings::auto]]
+    sp<Asset> getAsset(const String& path) const;
+
+//  [[script::bindings::auto]]
     void pushClock(sp<Numeric> timeScale = nullptr) const;
 //  [[script::bindings::auto]]
     sp<Clock> popClock() const;

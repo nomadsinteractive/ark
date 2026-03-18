@@ -222,6 +222,16 @@ void ApplicationFacade::setApplicationEventListener(sp<ApplicationEventListener>
     _context->setApplicationEventListener(std::move(applicationEventListener));
 }
 
+sp<AssetBundle> ApplicationFacade::getAssetBundle(const String& path) const
+{
+    return Ark::instance().getAssetBundle(path);
+}
+
+sp<Asset> ApplicationFacade::getAsset(const String& path) const
+{
+    return Ark::instance().getAsset(path);
+}
+
 void ApplicationFacade::pushClock(sp<Numeric> timeScale) const
 {
     _context->pushAppClock(std::move(timeScale));
