@@ -661,15 +661,15 @@ class GenClass:
             cases = []
             for i in rich_compare_methods:
                 try:
-                    cases.append('    case %s:' % RICH_COMPARE_OPS[i.operator])
-                    cases.append('        return PyCast::toPyObject(%s::%s(unpacked, obj0));' % (self._classname, i.name))
+                    cases.append(f'    case {RICH_COMPARE_OPS[i.operator]}:')
+                    cases.append(f'        return PyCast::toPyObject({self._classname}::{i.name}(std::move(unpacked), std::move(obj0)));')
                 except KeyError:
                     pass
             rich_compare_defs.extend([
                 '',
-                'static PyObject* %s_tp_richcompare (PyArkType::Instance* self, PyObject* args, int op) {' % self._py_class_name,
-                '    const sp<%s> unpacked = self->as<%s>();' % (self._binding_classname, self._binding_classname),
-                '    const sp<%s> obj0 = PyCast::ensureSharedPtr<%s>(args);' % (self._binding_classname, self._binding_classname),
+                'static PyObject* %s_tp_richcompare (PyArkType::Instance* self, PyObject* args, const int op) {' % self._py_class_name,
+                '    sp<%s> unpacked = self->as<%s>();' % (self._binding_classname, self._binding_classname),
+                '    sp<%s> obj0 = PyCast::ensureSharedPtr<%s>(args);' % (self._binding_classname, self._binding_classname),
                 '    switch(op) {'] + cases + [
                 '    default:',
                 '        break;',

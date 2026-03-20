@@ -344,6 +344,8 @@ template<> ARK_PLUGIN_PYTHON_API Optional<NamedHash> PyCast::toCppObject_impl<Na
 {
     if(Optional<String> strOpt = toStringExact(object))
         return {NamedHash(std::move(strOpt.value()))};
+    if(Optional<uint32_t> intOpt = toCppInteger<uint32_t>(object, true))
+        return {NamedHash(intOpt.value())};
     if(Optional<int32_t> intOpt = toCppInteger<int32_t>(object, true))
         return {NamedHash(intOpt.value())};
     if(PythonExtension::instance().isPyArkTypeObject(Py_TYPE(object)) && reinterpret_cast<PyArkType::Instance*>(object)->box->isEnum())
