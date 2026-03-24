@@ -133,6 +133,7 @@ PythonInterpreter::PythonInterpreter(const StringView name, const document& libr
 
 PythonInterpreter::~PythonInterpreter()
 {
+    PyEval_RestoreThread(PythonExtension::instance()._thread_state);
     Py_XDECREF(_ark_module);
     Py_XDECREF(_ark_audit_module);
     Py_Finalize();
@@ -154,11 +155,15 @@ void PythonInterpreter::initialize()
     const Global<PluginManager> pluginManager;
     for(Plugin& i : pluginManager->plugins())
         i.createScriptModule(*this);
+
+    PythonExtension::instance()._thread_state = PyEval_SaveThread();
 }
 
 void PythonInterpreter::execute(const sp<Asset>& source)
 {
     DCHECK_THREAD_FLAG();
+    const auto gil = PythonExtension::instance().ensureGIL();
+
     PyObject* m = PyImport_AddModule("__main__");
     DCHECK(m, "Module '__main__' does not exist");
 
@@ -173,6 +178,8 @@ void PythonInterpreter::execute(const sp<Asset>& source)
 Box PythonInterpreter::call(const Box& func, const Interpreter::Arguments& args)
 {
     DCHECK_THREAD_FLAG();
+    const auto gil = PythonExtension::instance().ensureGIL();
+
     const PyInstance pyfunc = PyInstance::steal(PyCast::toPyObject(func));
     ASSERT(!pyfunc.isNullptr() && pyfunc.isCallable());
 
@@ -192,6 +199,8 @@ Box PythonInterpreter::call(const Box& func, const Interpreter::Arguments& args)
 Box PythonInterpreter::attr(const Box& obj, const StringView name)
 {
     DCHECK_THREAD_FLAG();
+    const auto gil = PythonExtension::instance().ensureGIL();
+
     if(!obj)
         return getMainModuleAttr(name.data()).toBox();
 

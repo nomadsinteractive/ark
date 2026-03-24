@@ -18,6 +18,7 @@
 #include "app/base/surface.h"
 #include "app/inf/application_controller.h"
 #include "app/base/activity.h"
+#include "graphics/inf/render_view.h"
 
 namespace ark {
 
@@ -112,7 +113,7 @@ private:
 }
 
 ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface)
-    : _context(app.context()), _controller(app.controller()), _surface_controller(surface.controller()), _surface_size(app.surfaceSize())
+    : _context(app.context()), _controller(app.controller()), _surface_controller(surface.controller()), _surface_size(app.surfaceSize()), _render_view(surface.renderView())
 {
 }
 
@@ -318,12 +319,17 @@ sp<Runnable> ApplicationFacade::toCoreRunnable(const sp<Runnable>& task) const
     return _context->toCoreRunnable(task);
 }
 
+void ApplicationFacade::screenshot(const sp<Future>& future) const
+{
+    _render_view->onScreenshot(future);
+}
+
 V4 ApplicationFacade::backgroundColor() const
 {
     return _context->backgroundColor();
 }
 
-void ApplicationFacade::setBackgroundColor(const V4 backgroundColor)
+void ApplicationFacade::setBackgroundColor(const V4& backgroundColor) const
 {
     _context->setBackgroundColor(backgroundColor);
 }

@@ -16,7 +16,7 @@ public:
 //  [[script::bindings::auto]]
     void cancel();
 //  [[script::bindings::auto]]
-    void notify();
+    void notify(Box reply = {});
 
 //  [[script::bindings::property]]
     sp<Boolean> isCanceled() const;
@@ -24,6 +24,8 @@ public:
     sp<Boolean> isDone() const;
 //  [[script::bindings::property]]
     sp<Boolean> isDoneOrCanceled() const;
+//  [[script::bindings::property]]
+    const Box& reply() const;
 
 //  [[script::bindings::property]]
     const sp<Runnable>& observer() const;
@@ -37,6 +39,7 @@ private:
     OptionalVar<Boolean> _done;
     OptionalVar<Boolean> _canceled;
     uint32_t _count_down;
+    Box _reply;
 };
 
 }

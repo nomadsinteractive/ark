@@ -87,11 +87,27 @@ public:
         PyBridge::PyModule_AddObject(pythonScript->arkModule(), name, pluginModule);
     }
 
+    class EnsureGIL {
+    public:
+        EnsureGIL(PythonExtension* extension);
+        EnsureGIL(EnsureGIL&& other);
+        ~EnsureGIL();
+
+        DISALLOW_COPY_AND_ASSIGN(EnsureGIL);
+    private:
+        PythonExtension* _extension;
+    };
+
+    EnsureGIL ensureGIL();
+
 private:
     Map<TypeId, PyArkType*> _type_by_id;
     Map<void*, PyArkType*> _type_by_py_object;
-
     sp<ReferenceManager> _reference_manager;
+
+    PyThreadState* _thread_state;
+
+    friend class PythonInterpreter;
 };
 
 }

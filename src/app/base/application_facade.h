@@ -100,10 +100,13 @@ public:
 //  [[script::bindings::auto]]
     sp<Runnable> toCoreRunnable(const sp<Runnable>& task) const;
 
+//  [[script::bindings::auto]]
+    void screenshot(const sp<Future>& future) const;
+
 //  [[script::bindings::property]]
     V4 backgroundColor() const;
 //  [[script::bindings::property]]
-    void setBackgroundColor(V4 backgroundColor);
+    void setBackgroundColor(const V4& backgroundColor) const;
 
 //  [[script::bindings::property]]
     const OptionalVar<Boolean>& textInputEnabled() const;
@@ -115,6 +118,7 @@ private:
     sp<ApplicationController> _controller;
     sp<SurfaceController> _surface_controller;
     sp<Size> _surface_size;
+    sp<RenderView> _render_view;
 
     sp<Activity> _activity;
     sp<Discarded> _activity_discarded;

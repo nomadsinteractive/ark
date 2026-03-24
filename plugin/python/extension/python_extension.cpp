@@ -145,4 +145,31 @@ bool PythonExtension::exceptErr(PyObject* type) const
     return false;
 }
 
+PythonExtension::EnsureGIL::EnsureGIL(PythonExtension* extension)
+    : _extension(extension->_thread_state ? extension : nullptr)
+{
+    if(_extension)
+    {
+        PyEval_RestoreThread(_extension->_thread_state);
+        _extension->_thread_state = nullptr;
+    }
+}
+
+PythonExtension::EnsureGIL::EnsureGIL(EnsureGIL&& other)
+    : _extension(other._extension)
+{
+    other._extension = nullptr;
+}
+
+PythonExtension::EnsureGIL::~EnsureGIL()
+{
+    if(_extension)
+        _extension->_thread_state = PyEval_SaveThread();
+}
+
+PythonExtension::EnsureGIL PythonExtension::ensureGIL()
+{
+    return EnsureGIL(this);
+}
+
 }

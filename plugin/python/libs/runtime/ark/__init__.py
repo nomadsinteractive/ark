@@ -531,6 +531,10 @@ class Future(Runnable):
         pass
 
     @property
+    def reply(self) -> Any:
+        pass
+
+    @property
     def is_canceled(self) -> Boolean:
         pass
 
@@ -815,6 +819,9 @@ class ApplicationFacade:
         pass
 
     def expect(self, condition: Boolean, future: Future):
+        pass
+
+    def screenshot(self, future: Future):
         pass
 
 

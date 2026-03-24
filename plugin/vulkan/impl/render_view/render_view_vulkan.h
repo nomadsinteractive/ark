@@ -20,12 +20,16 @@ public:
     void onSurfaceChanged(uint32_t width, uint32_t height) override;
     void onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand) override;
 
+    void onScreenshot(const sp<Future>& future) override;
+
 private:
     sp<VKRenderer> _renderer;
     sp<VKGraphicsContext> _vk_graphics_context;
     sp<VKComputeContext> _vk_compute_context;
 
     op<GraphicsContext> _graphics_context;
+
+    std::atomic<std::shared_ptr<Future>> _screenshot_future;
 };
 
 }

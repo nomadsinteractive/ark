@@ -41,6 +41,8 @@ public:
 
     void onSurfaceChanged(uint32_t width, uint32_t height);
 
+    sp<Bitmap> screenshot() const;
+
 private:
     void initialize(const RenderEngine& renderEngine);
 

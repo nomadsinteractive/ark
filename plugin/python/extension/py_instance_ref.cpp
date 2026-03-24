@@ -1,8 +1,10 @@
 #include "python/extension/py_instance_ref.h"
 
+#include "python_extension.h"
+
 namespace ark::plugin::python {
 
-PyInstanceRef::PyInstanceRef(PyObject* instance, bool ownership)
+PyInstanceRef::PyInstanceRef(PyObject* instance, const bool ownership)
     : _instance(instance), _ownership(ownership)
 {
 }
@@ -10,7 +12,10 @@ PyInstanceRef::PyInstanceRef(PyObject* instance, bool ownership)
 PyInstanceRef::~PyInstanceRef()
 {
     if(_ownership)
+    {
+        const auto gil = PythonExtension::instance().ensureGIL();
         Py_XDECREF(_instance);
+    }
 }
 
 PyObject* PyInstanceRef::instance() const

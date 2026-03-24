@@ -1,6 +1,8 @@
 #include "vulkan/impl/render_view/render_view_vulkan.h"
 
+#include "core/base/future.h"
 #include "core/util/log.h"
+#include "graphics/base/bitmap.h"
 
 #include "graphics/inf/render_command.h"
 
@@ -51,6 +53,9 @@ void RenderViewVulkan::onRenderFrame(const V4& backgroundColor, RenderCommand& r
     renderCommand.draw(_graphics_context);
     _vk_graphics_context->end();
 
+    if(const std::shared_ptr<Future> sf = _screenshot_future.exchange(nullptr))
+        sf->notify(Box(swapChain->screenshot()));
+
     swapChain->swap(_vk_graphics_context);
 
     if(_vk_compute_context->vkCommandBuffer() != VK_NULL_HANDLE)
@@ -58,6 +63,17 @@ void RenderViewVulkan::onRenderFrame(const V4& backgroundColor, RenderCommand& r
 
     DPROFILER_TRACE("Wait idle", ApplicationProfiler::CATEGORY_WAIT);
     swapChain->waitIdle();
+}
+
+void RenderViewVulkan::onScreenshot(const sp<Future>& future)
+{
+    DTHREAD_CHECK(THREAD_NAME_ID_CORE);
+    while(true)
+    {
+        std::shared_ptr<Future> expected = nullptr;
+        if(_screenshot_future.compare_exchange_weak(expected, future.ptr()))
+            break;
+    }
 }
 
 }

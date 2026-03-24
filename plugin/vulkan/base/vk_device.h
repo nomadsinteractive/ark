@@ -55,6 +55,8 @@ private:
 
     VkPhysicalDeviceVulkan12Features _enabled_features_vk12;
     VkPhysicalDeviceFeatures2 _enabled_features;
+
+    friend class VKSwapChain;
 };
 
 }

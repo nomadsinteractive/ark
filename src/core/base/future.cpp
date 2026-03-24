@@ -15,11 +15,12 @@ void Future::cancel()
     _canceled.reset(true);
 }
 
-void Future::notify()
+void Future::notify(Box reply)
 {
     if(_canceled.val())
         return;
 
+    _reply = std::move(reply);
     if(_count_down == 1)
     {
         _done.reset(true);
@@ -51,6 +52,11 @@ sp<Boolean> Future::isDone() const
 sp<Boolean> Future::isDoneOrCanceled() const
 {
     return BooleanType::__or__(_done.toVar(), _canceled.toVar());
+}
+
+const Box& Future::reply() const
+{
+    return _reply;
 }
 
 const sp<Runnable>& Future::observer() const

@@ -1,6 +1,5 @@
 #include "python/impl/adapter/runnable_python.h"
 
-#include "core/impl/variable/variable_wrapper.h"
 #include "core/util/log.h"
 
 #include "python/api.h"
@@ -16,6 +15,7 @@ RunnablePython::RunnablePython(PyInstance callable)
 void RunnablePython::run()
 {
     DCHECK_THREAD_FLAG();
+    const auto gil = PythonExtension::instance().ensureGIL();
 
     CHECK_WARN(_callable, "This PyObject has been recycled by Python garbage collector");
     if(_callable.pyObject())

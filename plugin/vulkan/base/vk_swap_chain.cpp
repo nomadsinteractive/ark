@@ -2,6 +2,8 @@
 
 #include <array>
 
+#include "graphics/base/bitmap.h"
+
 #include "renderer/base/render_engine.h"
 
 #include "vulkan/base/vk_device.h"
@@ -139,6 +141,212 @@ void VKSwapChain::onSurfaceChanged(const uint32_t width, const uint32_t height)
 
     _render_pass_begin_info.renderArea.extent.width = _width;
     _render_pass_begin_info.renderArea.extent.height = _height;
+}
+
+sp<Bitmap> VKSwapChain::screenshot() const
+{
+    bool supportsBlit = true;
+
+    // Check blit support for source and destination
+    VkFormatProperties formatProps;
+
+    // Check if the device supports blitting from optimal images (the swapchain images are in optimal format)
+    vkGetPhysicalDeviceFormatProperties(_device->vkPhysicalDevice(), _swap_chain.colorFormat, &formatProps);
+    if (!(formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_SRC_BIT)) {
+        std::cerr << "Device does not support blitting from optimal tiled images, using copy instead of blit!" << std::endl;
+        supportsBlit = false;
+    }
+
+    // Check if the device supports blitting to linear images
+    vkGetPhysicalDeviceFormatProperties(_device->vkPhysicalDevice(), VK_FORMAT_R8G8B8A8_UNORM, &formatProps);
+    if (!(formatProps.linearTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT)) {
+        std::cerr << "Device does not support blitting to linear tiled images, using copy instead of blit!" << std::endl;
+        supportsBlit = false;
+    }
+
+    // Source for the copy is the last rendered swapchain image
+    VkImage srcImage = _swap_chain.images[_aquired_image_id];
+
+    // Create the linear tiled destination image to copy to and to read the memory from
+    VkImageCreateInfo imageCreateCI(vks::initializers::imageCreateInfo());
+    imageCreateCI.imageType = VK_IMAGE_TYPE_2D;
+    // Note that vkCmdBlitImage (if supported) will also do format conversions if the swapchain color format would differ
+    imageCreateCI.format = VK_FORMAT_R8G8B8A8_UNORM;
+    imageCreateCI.extent.width = _width;
+    imageCreateCI.extent.height = _height;
+    imageCreateCI.extent.depth = 1;
+    imageCreateCI.arrayLayers = 1;
+    imageCreateCI.mipLevels = 1;
+    imageCreateCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageCreateCI.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageCreateCI.tiling = VK_IMAGE_TILING_LINEAR;
+    imageCreateCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+    VkDevice device = _device->vkLogicalDevice();
+    // Create the image
+    VkImage dstImage;
+    VK_CHECK_RESULT(vkCreateImage(device, &imageCreateCI, nullptr, &dstImage));
+    // Create memory to back up the image
+    VkMemoryRequirements memRequirements;
+    VkMemoryAllocateInfo memAllocInfo(vks::initializers::memoryAllocateInfo());
+    VkDeviceMemory dstImageMemory;
+    vkGetImageMemoryRequirements(device, dstImage, &memRequirements);
+    memAllocInfo.allocationSize = memRequirements.size;
+    // Memory must be host visible to copy from
+    memAllocInfo.memoryTypeIndex = _device->_vulkan_device->getMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    VK_CHECK_RESULT(vkAllocateMemory(device, &memAllocInfo, nullptr, &dstImageMemory));
+    VK_CHECK_RESULT(vkBindImageMemory(device, dstImage, dstImageMemory, 0));
+
+    // Do the actual blit from the swapchain image to our host visible destination image
+    VkCommandBuffer copyCmd = _device->_vulkan_device->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+    // Transition destination image to transfer destination layout
+    vks::tools::insertImageMemoryBarrier(
+        copyCmd,
+        dstImage,
+        0,
+        VK_ACCESS_TRANSFER_WRITE_BIT,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
+
+    // Transition swapchain image from present to transfer source layout
+    vks::tools::insertImageMemoryBarrier(
+        copyCmd,
+        srcImage,
+        VK_ACCESS_MEMORY_READ_BIT,
+        VK_ACCESS_TRANSFER_READ_BIT,
+        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
+
+    // If source and destination support blit we'll blit as this also does automatic format conversion (e.g. from BGR to RGB)
+    if (supportsBlit)
+    {
+        // Define the region to blit (we will blit the whole swapchain image)
+        VkOffset3D blitSize;
+        blitSize.x = _width;
+        blitSize.y = _height;
+        blitSize.z = 1;
+        VkImageBlit imageBlitRegion{};
+        imageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageBlitRegion.srcSubresource.layerCount = 1;
+        imageBlitRegion.srcOffsets[1] = blitSize;
+        imageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageBlitRegion.dstSubresource.layerCount = 1;
+        imageBlitRegion.dstOffsets[1] = blitSize;
+
+        // Issue the blit command
+        vkCmdBlitImage(
+            copyCmd,
+            srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1,
+            &imageBlitRegion,
+            VK_FILTER_NEAREST);
+    }
+    else
+    {
+        // Otherwise use image copy (requires us to manually flip components)
+        VkImageCopy imageCopyRegion{};
+        imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageCopyRegion.srcSubresource.layerCount = 1;
+        imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageCopyRegion.dstSubresource.layerCount = 1;
+        imageCopyRegion.extent.width = _width;
+        imageCopyRegion.extent.height = _height;
+        imageCopyRegion.extent.depth = 1;
+
+        // Issue the copy command
+        vkCmdCopyImage(
+            copyCmd,
+            srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1,
+            &imageCopyRegion);
+    }
+
+    // Transition destination image to general layout, which is the required layout for mapping the image memory later on
+    vks::tools::insertImageMemoryBarrier(
+        copyCmd,
+        dstImage,
+        VK_ACCESS_TRANSFER_WRITE_BIT,
+        VK_ACCESS_MEMORY_READ_BIT,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        VK_IMAGE_LAYOUT_GENERAL,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
+
+    // Transition back the swap chain image after the blit is done
+    vks::tools::insertImageMemoryBarrier(
+        copyCmd,
+        srcImage,
+        VK_ACCESS_TRANSFER_READ_BIT,
+        VK_ACCESS_MEMORY_READ_BIT,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 });
+
+    _device->_vulkan_device->flushCommandBuffer(copyCmd, _queue);
+
+    // Get layout of the image (including row pitch)
+    VkImageSubresource subResource { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0 };
+    VkSubresourceLayout subResourceLayout;
+    vkGetImageSubresourceLayout(device, dstImage, &subResource, &subResourceLayout);
+
+    // Map image memory so we can start copying from it
+    const char* data;
+    vkMapMemory(device, dstImageMemory, 0, VK_WHOLE_SIZE, 0, (void**)&data);
+    data += subResourceLayout.offset;
+
+    struct ColorComponent {
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+    };
+
+    Vector<ColorComponent> colorData;
+    // If source is BGR (destination is always RGB) and we can't use blit (which does automatic conversion), we'll have to manually swizzle color components
+    bool colorSwizzle = false;
+    // Check if source is BGR
+    // Note: Not complete, only contains most common and basic BGR surface formats for demonstration purposes
+    if (!supportsBlit)
+    {
+        std::vector<VkFormat> formatsBGR = { VK_FORMAT_B8G8R8A8_SRGB, VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_SNORM };
+        colorSwizzle = (std::find(formatsBGR.begin(), formatsBGR.end(), _swap_chain.colorFormat) != formatsBGR.end());
+    }
+
+    // ppm binary pixel data
+    for (uint32_t y = 0; y < _height; y++)
+    {
+        unsigned int *row = (unsigned int*)data;
+        for (uint32_t x = 0; x < _width; x++)
+        {
+            ColorComponent cd = *reinterpret_cast<ColorComponent*>(row);
+            if(colorSwizzle)
+                std::swap(cd.r, cd.b);
+            colorData.push_back(cd);
+            row++;
+        }
+        data += subResourceLayout.rowPitch;
+    }
+
+    sp<ByteArray> bytes = sp<ByteArray>::make<ByteArray::Casted<ColorComponent>>(sp<Array<ColorComponent>>::make<Array<ColorComponent>::Vector>(std::move(colorData)));
+    sp<Bitmap> bitmap = sp<Bitmap>::make<Bitmap>(_width, _height, sizeof(ColorComponent) * _width, 3, std::move(bytes));
+
+    // Clean up resources
+    vkUnmapMemory(device, dstImageMemory);
+    vkFreeMemory(device, dstImageMemory, nullptr);
+    vkDestroyImage(device, dstImage, nullptr);
+
+    return bitmap;
 }
 
 void VKSwapChain::initialize(const RenderEngine& renderContext)
