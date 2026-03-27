@@ -22,6 +22,7 @@ struct RenderTargetContext {
 
 struct SDL3_GPU_GraphicsContext {
     SDL_GPUCommandBuffer* _command_buffer;
+    SDL_GPUTexture* _swapchain_texture = nullptr;
 
     RenderTargetContext _rt_swapchain_initial;
     RenderTargetContext _rt_swapchain_blend;

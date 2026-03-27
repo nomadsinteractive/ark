@@ -1,12 +1,15 @@
 #include "opengl/impl/render_view/render_view_opengl.h"
 
+#include "core/inf/array.h"
 #include "core/util/math.h"
 #include "core/util/log.h"
 
+#include "graphics/base/bitmap.h"
 #include "graphics/inf/render_command.h"
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
+#include "renderer/base/render_engine_context.h"
 
 #include "platform/gl/gl.h"
 
@@ -61,7 +64,17 @@ void RenderViewOpenGL::onRenderFrame(const V4& backgroundColor, RenderCommand& r
 
 sp<Bitmap> RenderViewOpenGL::doScreenshot()
 {
-    return nullptr;
+    constexpr uint8_t channels = 3;
+    const auto [width, height] = _graphics_context->renderContext()->displayResolution();
+    const uint32_t rowBytes = width * channels;
+
+    bytearray bytes = sp<ByteArray>::make<ByteArray::Allocated>(rowBytes * height);
+    GL_CHECK_ERROR(glReadPixels(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height), GL_RGB, GL_UNSIGNED_BYTE, bytes->buf()));
+
+    // OpenGL reads pixels bottom-to-top, flip vertically
+    Bitmap::Util<uint8_t>::vflip(bytes->buf(), width, height, channels);
+
+    return sp<Bitmap>::make(width, height, rowBytes, channels, std::move(bytes));
 }
 
 void RenderViewOpenGL::initialize(const uint32_t width, const uint32_t height)

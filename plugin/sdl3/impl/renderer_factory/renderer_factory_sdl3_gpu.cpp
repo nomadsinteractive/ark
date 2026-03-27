@@ -2,9 +2,11 @@
 
 #include <ranges>
 
+#include "core/inf/array.h"
 #include "core/util/uploader_type.h"
 #include "core/util/log.h"
 
+#include "graphics/base/bitmap.h"
 #include "graphics/components/size.h"
 #include "graphics/inf/render_command.h"
 #include "graphics/inf/render_view.h"
@@ -303,19 +305,79 @@ public:
                 SDL_GPU_STOREOP_STORE
             }};
             SDL3_GPU_GraphicsContext& graphicsContext = ensureGraphicsContext(_graphics_context);
-            graphicsContext = {cmdbuf, {nullptr, &swapchainRTIInitial, &_swapchain_depth_stencil_rt_initial}, {nullptr, &swapchainRTIBlend, &_swapchain_depth_stencil_rt_blend}};
+            graphicsContext = {cmdbuf, swapchainTexture, {nullptr, &swapchainRTIInitial, &_swapchain_depth_stencil_rt_initial}, {nullptr, &swapchainRTIBlend, &_swapchain_depth_stencil_rt_blend}};
             _graphics_context->onDrawFrame();
             renderCommand.draw(_graphics_context);
         }
         else
             SDL_Log("WaitAndAcquireGPUSwapchainTexture failed: %s", SDL_GetError());
 
-        SDL_SubmitGPUCommandBuffer(cmdbuf);
+        SDL3_GPU_GraphicsContext& graphicsContext = ensureGraphicsContext(_graphics_context);
+        if(graphicsContext._command_buffer)
+        {
+            SDL_SubmitGPUCommandBuffer(cmdbuf);
+            graphicsContext._command_buffer = nullptr;
+        }
     }
 
     sp<Bitmap> doScreenshot() override
     {
-        return nullptr;
+        SDL_GPUDevice* gpuDevice = ensureGPUDevice(_graphics_context);
+        const RenderEngineContext::Resolution& resolution = _graphics_context->renderContext()->displayResolution();
+        const uint32_t width = resolution.width;
+        const uint32_t height = resolution.height;
+        const uint32_t dataSize = width * height * 4;
+
+        const SDL_GPUTransferBufferCreateInfo transferBufCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD, dataSize};
+        SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufCreateInfo);
+
+        SDL3_GPU_GraphicsContext& gpuGraphicsContext = ensureGraphicsContext(_graphics_context);
+        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(gpuGraphicsContext._command_buffer);
+        const SDL_GPUTextureRegion srcRegion{gpuGraphicsContext._swapchain_texture, 0, 0, 0, 0, 0, width, height, 1};
+        const SDL_GPUTextureTransferInfo dstTransfer{transferBuffer, 0, 0, 0};
+        SDL_DownloadFromGPUTexture(copyPass, &srcRegion, &dstTransfer);
+        SDL_EndGPUCopyPass(copyPass);
+
+        SDL_GPUFence* fence = SDL_SubmitGPUCommandBufferAndAcquireFence(gpuGraphicsContext._command_buffer);
+        SDL_WaitForGPUFences(gpuDevice, true, &fence, 1);
+        SDL_ReleaseGPUFence(gpuDevice, fence);
+        gpuGraphicsContext._command_buffer = nullptr;
+
+        const uint8_t* srcData = static_cast<const uint8_t*>(SDL_MapGPUTransferBuffer(gpuDevice, transferBuffer, false));
+
+        const SDL3_Context& context = _graphics_context->traits().ensure<SDL3_Context>();
+        const SDL_GPUTextureFormat format = SDL_GetGPUSwapchainTextureFormat(gpuDevice, context._main_window);
+        const bool isBGR = (format == SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM || format == SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM_SRGB);
+
+        constexpr uint8_t channels = 3;
+        const uint32_t rowBytes = width * channels;
+        bytearray bytes = sp<ByteArray>::make<ByteArray::Allocated>(rowBytes * height);
+        uint8_t* dst = bytes->buf();
+        for(uint32_t y = 0; y < height; ++y)
+        {
+            for(uint32_t x = 0; x < width; ++x)
+            {
+                const uint8_t* pixel = srcData + (y * width + x) * 4;
+                if(isBGR)
+                {
+                    dst[0] = pixel[2];
+                    dst[1] = pixel[1];
+                    dst[2] = pixel[0];
+                }
+                else
+                {
+                    dst[0] = pixel[0];
+                    dst[1] = pixel[1];
+                    dst[2] = pixel[2];
+                }
+                dst += 3;
+            }
+        }
+
+        SDL_UnmapGPUTransferBuffer(gpuDevice, transferBuffer);
+        SDL_ReleaseGPUTransferBuffer(gpuDevice, transferBuffer);
+
+        return sp<Bitmap>::make<Bitmap>(width, height, rowBytes, channels, std::move(bytes));
     }
 
 private:
