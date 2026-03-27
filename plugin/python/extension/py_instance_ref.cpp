@@ -11,11 +11,8 @@ PyInstanceRef::PyInstanceRef(PyObject* instance, const bool ownership)
 
 PyInstanceRef::~PyInstanceRef()
 {
-    if(_ownership)
-    {
-        const auto gil = PythonExtension::instance().ensureGIL();
-        Py_XDECREF(_instance);
-    }
+    if(_ownership && _instance)
+        PythonExtension::instance().recyclePyObject(_instance);
 }
 
 PyObject* PyInstanceRef::instance() const

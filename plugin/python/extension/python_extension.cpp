@@ -152,6 +152,9 @@ PythonExtension::EnsureGIL::EnsureGIL(PythonExtension* extension)
     {
         PyEval_RestoreThread(_extension->_thread_state);
         _extension->_thread_state = nullptr;
+        for(PyObject* i : _extension->_recycled_py_objects)
+            Py_DECREF(i);
+        _extension->_recycled_py_objects.clear();
     }
 }
 
@@ -170,6 +173,11 @@ PythonExtension::EnsureGIL::~EnsureGIL()
 PythonExtension::EnsureGIL PythonExtension::ensureGIL()
 {
     return EnsureGIL(this);
+}
+
+void PythonExtension::recyclePyObject(PyObject* pyObject)
+{
+    _recycled_py_objects.push_back(pyObject);
 }
 
 }

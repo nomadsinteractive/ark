@@ -99,6 +99,7 @@ public:
     };
 
     EnsureGIL ensureGIL();
+    void recyclePyObject(PyObject* pyObject);
 
 private:
     Map<TypeId, PyArkType*> _type_by_id;
@@ -106,6 +107,7 @@ private:
     sp<ReferenceManager> _reference_manager;
 
     PyThreadState* _thread_state;
+    Vector<PyObject*> _recycled_py_objects;
 
     friend class PythonInterpreter;
 };
