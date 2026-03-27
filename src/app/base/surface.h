@@ -17,10 +17,13 @@ public:
 
     const sp<RenderView>& renderView() const;
     const sp<SurfaceController>& controller() const;
+    void screenshot(sp<Future> future);
 
     void onSurfaceCreated() const;
     void onSurfaceChanged(uint32_t width, uint32_t height) const;
-    void onRenderFrame(V4 backgroundColor) const;
+
+    void onRenderFrame(const V4& backgroundColor);
+    void onScreenshot(sp<Future> future);
 
 private:
     void requestUpdate() const;
@@ -31,6 +34,8 @@ private:
 
     sp<SurfaceController> _surface_controller;
     sp<Runnable> _update_requester;
+
+    sp<Future> _screenshot_future;
 };
 
 }

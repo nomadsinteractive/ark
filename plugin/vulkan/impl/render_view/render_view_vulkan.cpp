@@ -65,15 +65,9 @@ void RenderViewVulkan::onRenderFrame(const V4& backgroundColor, RenderCommand& r
     swapChain->waitIdle();
 }
 
-void RenderViewVulkan::onScreenshot(const sp<Future>& future)
+sp<Bitmap> RenderViewVulkan::doScreenshot()
 {
-    DTHREAD_CHECK(THREAD_NAME_ID_CORE);
-    while(true)
-    {
-        std::shared_ptr<Future> expected = nullptr;
-        if(_screenshot_future.compare_exchange_weak(expected, future.ptr()))
-            break;
-    }
+    return _renderer->renderTarget()->screenshot();
 }
 
 }

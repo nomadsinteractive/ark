@@ -12,7 +12,7 @@ public:
     virtual void onSurfaceChanged(uint32_t width, uint32_t height) = 0;
     virtual void onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand) = 0;
 
-    virtual void onScreenshot(const sp<Future>& future) {}
+    virtual sp<Bitmap> doScreenshot() = 0;
 };
 
 }

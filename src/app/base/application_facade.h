@@ -16,7 +16,7 @@ namespace ark {
 
 class ARK_API ApplicationFacade {
 public:
-    ApplicationFacade(Application& app, const Surface& surface);
+    ApplicationFacade(Application& app, const sp<Surface>& surface);
 
 //  [[script::bindings::property]]
     sp<Integer> tick() const;
@@ -118,7 +118,7 @@ private:
     sp<ApplicationController> _controller;
     sp<SurfaceController> _surface_controller;
     sp<Size> _surface_size;
-    sp<RenderView> _render_view;
+    sp<Surface> _surface;
 
     sp<Activity> _activity;
     sp<Discarded> _activity_discarded;

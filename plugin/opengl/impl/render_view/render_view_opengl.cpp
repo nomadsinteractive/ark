@@ -14,15 +14,6 @@
 
 namespace ark::plugin::opengl {
 
-namespace {
-
-void glDebugCallbackProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
-{
-    LOGD(message);
-}
-
-}
-
 RenderViewOpenGL::RenderViewOpenGL(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
     : _graphics_context(new GraphicsContext(std::move(renderContext), std::move(renderController)))
 {
@@ -68,12 +59,14 @@ void RenderViewOpenGL::onRenderFrame(const V4& backgroundColor, RenderCommand& r
     renderCommand.draw(_graphics_context);
 }
 
+sp<Bitmap> RenderViewOpenGL::doScreenshot()
+{
+    return nullptr;
+}
+
 void RenderViewOpenGL::initialize(const uint32_t width, const uint32_t height)
 {
     LOGD("Width: %d, Height: %d", width, height);
-#if !defined(__APPLE__)
-    glDebugMessageCallback(glDebugCallbackProc, nullptr);
-#endif
     glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 
     glEnable(GL_CULL_FACE);

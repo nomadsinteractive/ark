@@ -20,7 +20,7 @@ public:
     void onSurfaceChanged(uint32_t width, uint32_t height) override;
     void onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand) override;
 
-    void onScreenshot(const sp<Future>& future) override;
+    sp<Bitmap> doScreenshot() override;
 
 private:
     sp<VKRenderer> _renderer;

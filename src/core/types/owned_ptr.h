@@ -10,7 +10,7 @@ public:
     constexpr OwnedPtr(std::nullptr_t null) noexcept
         : _inst(null), _auto_release(false) {
     }
-    OwnedPtr(T* instance = nullptr, bool autoRelease = true) noexcept
+    OwnedPtr(T* instance = nullptr, const bool autoRelease = true) noexcept
         : _inst(instance), _auto_release(autoRelease) {
     }
     OwnedPtr(OwnedPtr&& other)
@@ -46,7 +46,7 @@ public:
         return _inst;
     }
 
-    void reset(T* instance = nullptr, bool autoRelease = true) {
+    void reset(T* instance = nullptr, const bool autoRelease = true) {
         if(_auto_release && _inst)
             delete _inst;
         _inst = instance;

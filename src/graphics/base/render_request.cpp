@@ -21,9 +21,9 @@ Allocator& RenderRequest::allocator() const
     return _stub->_allocator;
 }
 
-void RenderRequest::onRenderFrame(const V4 backgroundColor, RenderView& renderView) const
+const sp<RenderCommandPipeline>& RenderRequest::renderCommandPipeLine() const
 {
-    renderView.onRenderFrame(backgroundColor, _stub->_render_command_pipe_line);
+    return _stub->_render_command_pipe_line;
 }
 
 RenderRequest::RenderRequest(sp<RenderRequest::Stub> stub)

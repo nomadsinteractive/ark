@@ -313,6 +313,11 @@ public:
         SDL_SubmitGPUCommandBuffer(cmdbuf);
     }
 
+    sp<Bitmap> doScreenshot() override
+    {
+        return nullptr;
+    }
+
 private:
     op<GraphicsContext> _graphics_context;
     SDL_GPUDepthStencilTargetInfo _swapchain_depth_stencil_rt_initial;

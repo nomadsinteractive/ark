@@ -19,11 +19,10 @@ public:
     uint32_t tick() const;
     Allocator& allocator() const;
 
-    void onRenderFrame(V4 backgroundColor, RenderView& renderView) const;
+    const sp<RenderCommandPipeline>& renderCommandPipeLine() const;
 
     void addRenderCommand(sp<RenderCommand> renderCommand) const;
 
-public:
     struct Stub {
         Stub(uint32_t tick, sp<Allocator::Pool> allocatorPool);
 

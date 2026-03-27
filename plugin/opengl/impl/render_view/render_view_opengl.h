@@ -18,6 +18,8 @@ public:
     void onSurfaceChanged(uint32_t width, uint32_t height) override;
     void onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand) override;
 
+    sp<Bitmap> doScreenshot() override;
+
 private:
     void initialize(uint32_t width, uint32_t height);
     

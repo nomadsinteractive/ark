@@ -112,8 +112,8 @@ private:
 
 }
 
-ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface)
-    : _context(app.context()), _controller(app.controller()), _surface_controller(surface.controller()), _surface_size(app.surfaceSize()), _render_view(surface.renderView())
+ApplicationFacade::ApplicationFacade(Application& app, const sp<Surface>& surface)
+    : _context(app.context()), _controller(app.controller()), _surface_controller(surface->controller()), _surface_size(app.surfaceSize()), _surface(surface)
 {
 }
 
@@ -321,7 +321,8 @@ sp<Runnable> ApplicationFacade::toCoreRunnable(const sp<Runnable>& task) const
 
 void ApplicationFacade::screenshot(const sp<Future>& future) const
 {
-    _render_view->onScreenshot(future);
+    DTHREAD_CHECK(THREAD_NAME_ID_CORE);
+    _surface->screenshot(future);
 }
 
 V4 ApplicationFacade::backgroundColor() const
