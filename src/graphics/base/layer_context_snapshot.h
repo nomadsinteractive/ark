@@ -10,13 +10,14 @@ namespace ark {
 class LayerContextSnapshot {
 public:
     const PipelineLayout& pipelineInput() const;
+    const sp<ModelLoader>& modelLoader() const;
 
     bool _dirty;
     V3 _position;
     bool _visible;
     bool _discarded;
     Varyings::Snapshot _varyings;
-    RenderLayer _render_layer;
+    sp<RenderLayer::Stub> _render_layer_stub;
 };
 
 }

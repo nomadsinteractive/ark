@@ -106,8 +106,8 @@ bool Varyings::update(const uint32_t timestamp)
     for(const auto& [i, j] : _sub_properties)
         if(j->update(timestamp))
             dirty = true;
-    for(const auto& i : _slots)
-        if(i.second._uploader->update(timestamp))
+    for(const auto& v: _slots | std::views::values)
+        if(v._uploader->update(timestamp))
             dirty = true;
     return dirty;
 }

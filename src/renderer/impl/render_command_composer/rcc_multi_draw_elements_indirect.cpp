@@ -107,9 +107,9 @@ DrawingContext RCCMultiDrawElementsIndirect::compose(const RenderRequest& render
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
-    const bool reload = snapshot.needsReload();
+    const bool reload = snapshot.verticesDirty();
 
-    if(reload)
+    if(reload || snapshot.layersDirty())
         reloadIndirectCommands(snapshot);
 
     writeModelMatices(renderRequest, buf, snapshot, reload);
@@ -197,6 +197,7 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
     _indirect_cmds.clear();
     _model_instances.clear();
     for(const RenderLayerSnapshot::Element& i : snapshot._elements)
+        if(i._snapshot._state.contains(Renderable::RENDERABLE_STATE_VISIBLE))
     {
         const int32_t type = i._snapshot._type;
         const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(type);

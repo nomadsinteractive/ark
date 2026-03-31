@@ -33,7 +33,7 @@ DrawingContext RCCDrawElementsInstanced::compose(const RenderRequest& renderRequ
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
 
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
-    if(snapshot.needsReload())
+    if(snapshot.verticesDirty())
     {
         VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength, 0);
         const Model model = modelLoader->loadModel(0);

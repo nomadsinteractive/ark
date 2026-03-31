@@ -127,7 +127,7 @@ bool LayerContext::processNewCreated()
     return true;
 }
 
-LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout)
+LayerContextSnapshot LayerContext::snapshot(sp<RenderLayer::Stub> renderLayer, const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout)
 {
     const bool dirty = UpdatableUtil::update(renderRequest.tick(), _position, _visible, _discarded, _varyings);
     if(!_varyings)

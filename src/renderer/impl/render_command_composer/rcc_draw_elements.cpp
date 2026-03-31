@@ -29,7 +29,7 @@ DrawingContext RCCDrawElements::compose(const RenderRequest& renderRequest, cons
     const Buffer& vertexBuf = snapshot._stub->_pipeline_bindings->vertices();
 
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
-    if(snapshot.needsReload())
+    if(snapshot.verticesDirty())
     {
         VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesCount * snapshot._elements.size(), 0);
         for(const RenderLayerSnapshot::Element& i : snapshot._elements)

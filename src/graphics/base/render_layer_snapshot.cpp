@@ -64,9 +64,17 @@ DrawingContext RenderLayerSnapshot::toDrawingContext(const RenderRequest& render
     return drawingContext;
 }
 
-bool RenderLayerSnapshot::needsReload() const
+bool RenderLayerSnapshot::verticesDirty() const
 {
     return _vertices_dirty || _stub->_pipeline_bindings->vertices().size() == 0;
+}
+
+bool RenderLayerSnapshot::layersDirty() const
+{
+    for(const LayerContextSnapshot& i : _layer_context_snapshots)
+        if(i._dirty)
+            return true;
+    return false;
 }
 
 void RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, Vector<sp<LayerContext>>& layerContexts)
@@ -119,10 +127,10 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
 {
     const PipelineLayout& shaderLayout = _stub->_shader->layout();
 
-    _layer_context_snapshots.push_back(layerContext.snapshot(RenderLayer(_stub), renderRequest, shaderLayout));
+    _layer_context_snapshots.push_back(layerContext.snapshot(_stub, renderRequest, shaderLayout));
     const LayerContextSnapshot& layerSnapshot = _layer_context_snapshots.back();
 
-    const bool reload = needsReload();
+    const bool reload = verticesDirty();
     bool verticesDirty = layerContext.processNewCreated();
 
     for(auto iter = layerContext._renderables.begin(); iter != layerContext._renderables.end(); )
@@ -165,7 +173,7 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
 
 void RenderLayerSnapshot::snapshot(const RenderRequest& renderRequest)
 {
-    const bool reload = needsReload();
+    const bool reload = verticesDirty();
     for(Element& i : _elements)
     {
         const Renderable::Snapshot& snapshot = i.ensureSnapshot(renderRequest, reload);

@@ -113,6 +113,7 @@ private:
     Vector<sp<RenderBatch>> _render_batches;
 
     friend class Layer;
+    friend class LayerContext;
     friend class RenderLayerSnapshot;
     friend class RenderTarget;
     friend class LayerContextSnapshot;

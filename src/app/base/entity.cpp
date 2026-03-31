@@ -5,7 +5,6 @@
 #include "core/components/discarded.h"
 #include "core/inf/wirable.h"
 
-#include "core/base/constants.h"
 #include "core/base/ref_manager.h"
 #include "core/components/tags.h"
 #include "core/components/with_id.h"

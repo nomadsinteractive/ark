@@ -1,7 +1,6 @@
 #pragma once
 
 #include <deque>
-#include <list>
 
 #include "core/base/api.h"
 #include "core/inf/array.h"
@@ -38,7 +37,8 @@ public:
     sp<RenderCommand> compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator) const;
     DrawingContext toDrawingContext(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
 
-    bool needsReload() const;
+    bool verticesDirty() const;
+    bool layersDirty() const;
 
     void addLayerContext(const RenderRequest& renderRequest, Vector<sp<LayerContext>>& layerContexts);
     void snapshot(const RenderRequest& renderRequest);
@@ -55,7 +55,7 @@ public:
     DISALLOW_COPY_AND_ASSIGN(RenderLayerSnapshot);
 
 private:
-    std::list<LayerContextSnapshot> _layer_context_snapshots;
+    List<LayerContextSnapshot> _layer_context_snapshots;
     class OnceGuard;
 
 private:

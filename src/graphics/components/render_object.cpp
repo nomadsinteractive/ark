@@ -168,7 +168,7 @@ Renderable::State RenderObject::updateState(const RenderRequest& renderRequest)
 Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state)
 {
     const int32_t typeId = _type->val();
-    sp<Model> model = snapshotContext._render_layer.modelLoader()->loadModel(typeId);
+    sp<Model> model = snapshotContext.modelLoader()->loadModel(typeId);
     if(state.contains(RENDERABLE_STATE_DIRTY))
         return {state, typeId, std::move(model), _position.val(), _size.val(), _transform, _transform->snapshot(), _varyings ? _varyings->snapshot(snapshotContext.pipelineInput(), renderRequest.allocator()) : Varyings::Snapshot()};
     return {state, typeId, std::move(model)};
