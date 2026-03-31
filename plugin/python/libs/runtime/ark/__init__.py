@@ -293,6 +293,9 @@ class _Var:
     def set(self, v):
         pass
 
+    def reset(self, v:Self = None):
+        pass
+
     def freeze(self):
         pass
 
@@ -999,6 +1002,9 @@ class Renderer:
         pass
 
     def to_render_layer(self) -> Optional["RenderLayer"]:
+        pass
+
+    def with_visible(self, visible: TYPE_BOOLEAN) -> Self:
         pass
 
 

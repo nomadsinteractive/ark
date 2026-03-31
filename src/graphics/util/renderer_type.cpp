@@ -2,15 +2,36 @@
 
 #include "core/base/enum.h"
 #include "core/collection/traits.h"
-#include "core/components/discarded.h"
 #include "core/util/strings.h"
 #include "core/util/string_convert.h"
 
+#include "graphics/base/render_request.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/impl/renderer/renderer_wrapper.h"
 #include "graphics/impl/renderer/render_group.h"
 
 namespace ark {
+
+namespace {
+
+class RendererWithVisible final : public Renderer, public Wrapper<Renderer> {
+public:
+    RendererWithVisible(sp<Renderer> delegate, sp<Boolean> visible)
+        : Wrapper(std::move(delegate)), _visible(std::move(visible)) {
+    }
+
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override
+    {
+        _visible->update(renderRequest.tick());
+        if(_visible->val())
+            _wrapped->render(renderRequest, position, drawDecorator);
+    }
+
+private:
+    sp<Boolean> _visible;
+};
+
+}
 
 sp<Renderer> RendererType::create(sp<Renderer> delegate)
 {
@@ -45,6 +66,11 @@ sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)
 {
     const sp<Wrapper<Renderer>> rd = self.ensureInstance<Wrapper<Renderer>>("Renderer is not an instance of Wrapper<Renderer>");
     return rd->reset(std::move(wrapped));
+}
+
+sp<Renderer> RendererType::withVisible(sp<Renderer> self, sp<Boolean> visible)
+{
+    return sp<Renderer>::make<RendererWithVisible>(std::move(self), std::move(visible));
 }
 
 template<> ARK_API RendererType::Priority StringConvert::eval<RendererType::Priority>(const String& expr)

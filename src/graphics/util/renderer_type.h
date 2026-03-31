@@ -39,6 +39,8 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Renderer> reset(const sp<Renderer>& self, sp<Renderer> wrapped);
 
+//  [[script::bindings::classmethod]]
+    static sp<Renderer> withVisible(sp<Renderer> self, sp<Boolean> visible);
 };
 
 }

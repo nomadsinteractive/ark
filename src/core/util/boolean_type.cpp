@@ -209,6 +209,19 @@ void BooleanType::set(const sp<BooleanWrapper>& self, const bool value)
     self->set(value);
 }
 
+void BooleanType::reset(const sp<BooleanWrapper>& self, sp<Boolean> value)
+{
+    if(value)
+        self->set(std::move(value));
+    else
+        self->set(false);
+}
+
+void BooleanType::reset(const sp<BooleanWrapper>& self, bool value)
+{
+    self->set(value);
+}
+
 sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String message)
 {
 #ifdef ARK_FLAG_PUBLISHING_BUILD
