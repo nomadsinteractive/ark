@@ -60,17 +60,6 @@ public:
 
 //  [[script::bindings::type]]
     static sp<Boolean> InTick(sp<Integer> tickStart, sp<Integer> tickEnd = nullptr);
-
-//  [[plugin::builder::by-value]]
-    class DICTIONARY final : public Builder<Boolean> {
-    public:
-        DICTIONARY(BeanFactory&, const String& expr);
-
-        sp<Boolean> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Boolean>> _value;
-    };
 };
 
 }

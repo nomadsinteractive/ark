@@ -2074,7 +2074,7 @@ class RenderLayer(Renderer):
         pass
 
     @visible.setter
-    def visible(self, visible: Optional[Boolean]):
+    def visible(self, visible: TYPE_BOOLEAN):
         pass
 
     def make_layer(self, model_loader: Optional[ModelLoader] = None, position: Optional[Vec3] = None, visible: Optional[Boolean] = None,
@@ -2100,6 +2100,14 @@ class Layer:
 
     @position.setter
     def position(self, position: TYPE_VEC3):
+        pass
+
+    @property
+    def visible(self) -> Boolean:
+        pass
+
+    @visible.setter
+    def visible(self, visible: TYPE_BOOLEAN):
         pass
 
     @property

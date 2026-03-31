@@ -6,11 +6,10 @@
 #include "core/base/bean_factory.h"
 #include "core/base/constants.h"
 #include "core/impl/variable/variable_dyed.h"
-#include "core/impl/variable/variable_op1.h"
-#include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/inf/array.h"
-#include "core/util/expression.h"
+
+#include "graphics/base/v4.h"
 
 namespace ark {
 
@@ -24,11 +23,6 @@ public:
 
     bool update(const uint32_t tick) override {
         return _timestamp.update(tick);
-    }
-
-    void set(String value)
-    {
-        _value = std::move(value);
     }
 
     StringView val() override {

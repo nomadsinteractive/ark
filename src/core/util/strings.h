@@ -81,7 +81,7 @@ public:
 
     static String stripReference(const String& id);
 
-    static bool isNumeric(const String& value);
+    static bool isNumeric(StringView value);
     static bool isArgumentOrReference(const String& value);
     static bool isVariableName(const String& name, bool allowDash = true);
 

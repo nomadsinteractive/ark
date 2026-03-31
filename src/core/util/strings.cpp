@@ -511,11 +511,10 @@ String Strings::stripReference(const String& id)
     return isVariableCharacter(id.at(0)) ? id : id.substr(1);
 }
 
-bool Strings::isNumeric(const String& value)
+bool Strings::isNumeric(const StringView value)
 {
-    const char* str = value.c_str();
-    while(*str)
-        if(const char c = *(str++); c < '+' || c > '9' || c == '/')
+    for(const char c : value)
+        if(c < '+' || c > '9' || c == '/')
             return false;
     return true;
 }

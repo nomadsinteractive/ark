@@ -5,8 +5,7 @@
 #include "core/impl/variable/variable_expect.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
-#include "core/inf/array.h"
-#include "core/util/expression.h"
+#include "core/util/operators.h"
 
 namespace ark {
 
@@ -73,63 +72,6 @@ private:
     sp<Integer> _tick_end;
     bool _value;
 };
-
-class BooleanOperation {
-public:
-    template <typename T> using OP2 = VariableOP2<sp<Numeric>, sp<Numeric>, T>;
-
-    static bool isConstant(const String& expr) {
-        return expr == "true" || expr == "false";
-    }
-
-    static sp<Builder<Boolean>> booleanAnd(const sp<Builder<Boolean>>& a1, const sp<Builder<Boolean>>& a2) {
-        return sp<OperationBuilder<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::And<bool>>>>::make(a1, a2);
-    }
-
-    static sp<Builder<Boolean>> booleanOr(const sp<Builder<Boolean>>& a1, const sp<Builder<Boolean>>& a2) {
-        return sp<OperationBuilder<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::Or<bool>>>>::make(a1, a2);
-    }
-
-    static sp<Builder<Boolean>> eval(BeanFactory& factory, const String& expr) {
-        static std::regex PATTERN("([\\-+\\s\\w\\d_$@.]+)\\s+([><]=?)\\s+([\\-+\\s\\w\\d_$@.]+)");
-        const array<String> matches = expr.match(PATTERN);
-        if(!matches) {
-            for(const String& i : NEGATIVE_OPS)
-                if(expr.startsWith(i))
-                    return sp<NegativeBooleanBuilder>::make(eval(factory, expr.substr(i.length())));
-
-            const Identifier id = Identifier::parse(expr);
-            if(id.isRef())
-                return factory.getBuilderByRef<sp<Boolean>>(id);
-            if(id.isArg())
-                return factory.getBuilderByArg<sp<Boolean>>(id.arg());
-        }
-        CHECK(matches && matches->length() == 4, "Illegal expression: \"%s\" syntax error", expr.c_str());
-        const String* ptr = matches->buf();
-        const sp<Builder<Numeric>> lvalue = factory.ensureBuilder<Numeric>(ptr[1]);
-        const String& op = ptr[2];
-        const sp<Builder<Numeric>> rvalue = factory.ensureBuilder<Numeric>(ptr[3]);
-        if(op == ">")
-            return sp<OperationBuilder<OP2<Operators::GT<float>>, Numeric>>::make(lvalue, rvalue);
-        if(op == "<")
-            return sp<OperationBuilder<OP2<Operators::GT<float>>, Numeric>>::make(lvalue, rvalue);
-        if(op == ">=")
-            return sp<OperationBuilder<OP2<Operators::GE<float>>, Numeric>>::make(lvalue, rvalue);
-        if(op == "<=")
-            return sp<OperationBuilder<OP2<Operators::LE<float>>, Numeric>>::make(lvalue, rvalue);
-        return nullptr;
-    }
-
-    static Expression::Operator<bool> OPS[2];
-    static String NEGATIVE_OPS[2];
-};
-
-Expression::Operator<bool> BooleanOperation::OPS[2] = {
-    {"&&", 2, BooleanOperation::booleanAnd},
-    {"||", 1, BooleanOperation::booleanOr}
-};
-
-String BooleanOperation::NEGATIVE_OPS[2] = {"!", "not "};
 
 }
 
@@ -234,17 +176,6 @@ sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String mes
 sp<Boolean> BooleanType::InTick(sp<Integer> tickStart, sp<Integer> tickEnd)
 {
     return sp<Boolean>::make<BooleanInTick>(std::move(tickStart), std::move(tickEnd));
-}
-
-BooleanType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
-    : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, expr.strip()))
-{
-    DCHECK(_value, "Boolean expression compile failed: %s", expr.c_str());
-}
-
-sp<Boolean> BooleanType::DICTIONARY::build(const Scope& args)
-{
-    return _value->build(args);
 }
 
 }

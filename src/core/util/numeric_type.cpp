@@ -18,7 +18,6 @@
 #include "core/impl/variable/variable_ternary.h"
 #include "core/impl/variable/variable_tracking.h"
 #include "core/util/boolean_type.h"
-#include "core/util/expression.h"
 #include "core/util/operators.h"
 
 #include "app/base/application_context.h"
@@ -34,7 +33,7 @@ public:
     {
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         return UpdatableUtil::update(tick, _a1, _a2);
     }
@@ -50,8 +49,26 @@ private:
     float _tolerance;
 };
 
+template<typename T> sp<Builder<Variable<T>>> toBuilder(BeanFactory& factory, const String& expr)
+{
+    typedef Variable<T> VarType;
+    typedef Builder<Variable<T>> BuilderType;
+
+    if(Strings::isNumeric(expr))
+        return sp<BuilderType>::make<BuilderType::Prebuilt>(sp<VarType>::make<VarType::Const>(Strings::eval<T>(expr)));
+
+    const char* str = expr.c_str();
+    if(expr.length() > 1 && (*str == '@' || *str == '$') && Strings::isVariableName(str + 1))
+    {
+        const sp<BuilderType> builder = *str == '@' ? factory.getBuilderByRef<sp<VarType>>(Identifier::parseRef(str + 1)) : factory.getBuilderByArg<sp<VarType>>(str + 1);
+        DCHECK(builder, "Cannot build \"%s\"", expr.c_str());
+        return builder;
+    }
+
+    return nullptr;
 }
 
+}
 
 sp<NumericWrapper> NumericType::create(float value)
 {
@@ -352,7 +369,7 @@ sp<Numeric> NumericType::distance2(sp<Numeric> self, sp<Numeric> other)
 }
 
 NumericType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
-    : _value(Expression::Compiler<float, NumericOperation<float>>().compile(factory, expr.strip()))
+    : _value(toBuilder<float>(factory, expr.strip()))
 {
     CHECK(_value, "Numeric expression compile failed: %s", expr.c_str());
 }
@@ -363,7 +380,7 @@ sp<Numeric> NumericType::DICTIONARY::build(const Scope& args)
 }
 
 NumericType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(Expression::Compiler<float, NumericOperation<float>>().compile(factory, Documents::ensureAttribute(manifest, constants::VALUE)))
+    : _value(toBuilder<float>(factory, Documents::ensureAttribute(manifest, constants::VALUE)))
 {
 }
 

@@ -16,8 +16,6 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/inf/array.h"
-#include "core/types/global.h"
-#include "core/util/expression.h"
 #include "core/util/operators.h"
 
 namespace ark {
@@ -90,6 +88,25 @@ private:
     uint32_t _current_frame_index;
     uint32_t _last_updated_tick;
 };
+
+template<typename T> sp<Builder<Variable<T>>> toBuilder(BeanFactory& factory, const String& expr)
+{
+    typedef Variable<T> VarType;
+    typedef Builder<Variable<T>> BuilderType;
+
+    if(Strings::isNumeric(expr))
+        return sp<BuilderType>::make<BuilderType::Prebuilt>(sp<VarType>::make<VarType::Const>(Strings::eval<T>(expr)));
+
+    const char* str = expr.c_str();
+    if(expr.length() > 1 && (*str == '@' || *str == '$') && Strings::isVariableName(str + 1))
+    {
+        const sp<BuilderType> builder = *str == '@' ? factory.getBuilderByRef<sp<VarType>>(Identifier::parseRef(str + 1)) : factory.getBuilderByArg<sp<VarType>>(str + 1);
+        DCHECK(builder, "Cannot build \"%s\"", expr.c_str());
+        return builder;
+    }
+
+    return nullptr;
+}
 
 }
 
@@ -307,7 +324,7 @@ sp<Integer> IntegerType::dye(sp<Integer> self, sp<Boolean> condition, String mes
 }
 
 IntegerType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _value(value && value.at(0) == '#' ? sp<Builder<Integer>>::make<Prebuilt>(sp<Integer>::make<Integer::Const>(value.substr(1).hash())) : Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, value))
+    : _value(value && value.at(0) == '#' ? sp<Builder<Integer>>::make<Prebuilt>(sp<Integer>::make<Integer::Const>(value.substr(1).hash())) : toBuilder<int32_t>(factory, value))
 {
     CHECK(_value, "Integer expression compile failed: %s. Use \"#%s\" if you need to build a NamedHash integer", value.c_str(), value.c_str());
 }
