@@ -26,10 +26,7 @@ private:
     sp<VKRenderer> _renderer;
     sp<VKGraphicsContext> _vk_graphics_context;
     sp<VKComputeContext> _vk_compute_context;
-
     op<GraphicsContext> _graphics_context;
-
-    std::atomic<std::shared_ptr<Future>> _screenshot_future;
 };
 
 }

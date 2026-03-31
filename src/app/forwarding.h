@@ -28,7 +28,7 @@ class EventListenerList;
 class EventListenerWrapper;
 class Graph;
 class GraphNode;
-class SearchingNode;
+struct SearchingNode;
 class GraphRoute;
 class ViewHierarchy;
 class Level;

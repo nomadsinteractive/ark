@@ -2,8 +2,8 @@
 
 #include "core/base/future.h"
 #include "core/util/log.h"
-#include "graphics/base/bitmap.h"
 
+#include "graphics/base/bitmap.h"
 #include "graphics/inf/render_command.h"
 
 #include "renderer/base/render_controller.h"
@@ -52,9 +52,6 @@ void RenderViewVulkan::onRenderFrame(const V4& backgroundColor, RenderCommand& r
     _vk_graphics_context->begin(imageId, backgroundColor);
     renderCommand.draw(_graphics_context);
     _vk_graphics_context->end();
-
-    if(const std::shared_ptr<Future> sf = _screenshot_future.exchange(nullptr))
-        sf->notify(Box(swapChain->screenshot()));
 
     swapChain->swap(_vk_graphics_context);
 
