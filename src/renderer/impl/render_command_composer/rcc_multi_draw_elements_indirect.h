@@ -87,7 +87,7 @@ private:
     Buffer _draw_indirect;
 
     Table<uint64_t, IndirectCmds> _indirect_cmds;
-    std::unordered_map<size_t, ModelInstance> _model_instances;
+    HashMap<size_t, ModelInstance> _model_instances;
 };
 
 }

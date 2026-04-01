@@ -359,11 +359,11 @@ class _Var:
 
 class _Boolean(_Var):
 
-    def negative(self) -> "Boolean":
+    def negate(self) -> "Boolean":
         pass
 
-    def expect(self, expectation: TYPE_BOOLEAN, future: "Future") -> Self:
-        return self
+    def expect(self, expectation: TYPE_BOOLEAN, future: "Future") -> "Boolean":
+        pass
 
     def __or__(self, other) -> "Boolean":
         pass

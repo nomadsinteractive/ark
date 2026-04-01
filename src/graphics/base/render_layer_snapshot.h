@@ -23,7 +23,7 @@ public:
     struct Element {
         Element(Renderable& renderable, const LayerContextSnapshot& layerContext, LayerContext::ElementState& state, const Renderable::Snapshot& snapshot);
 
-        const Renderable::Snapshot& ensureSnapshot(const RenderRequest& renderRequest, bool reload);
+        const Renderable::Snapshot& ensureSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& renderLayerSnapshot, bool reload);
 
         Renderable& _renderable;
         const LayerContextSnapshot& _layer_context;

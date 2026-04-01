@@ -11,13 +11,13 @@
 #include "core/util/updatable_util.h"
 
 #include "graphics/impl/transform/transform_impl.h"
-#include "graphics/base/transform_3d.h"
 #include "graphics/components/rotation.h"
 #include "graphics/components/scale.h"
 #include "graphics/components/translation.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/components/varyings.h"
 
@@ -165,12 +165,12 @@ Renderable::State RenderObject::updateState(const RenderRequest& renderRequest)
     return {dirty ? RENDERABLE_STATE_DIRTY : RENDERABLE_STATE_NONE, _visible.val() ? RENDERABLE_STATE_VISIBLE : RENDERABLE_STATE_NONE};
 }
 
-Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state)
+Renderable::Snapshot RenderObject::snapshot(const RenderLayerSnapshot& renderLayerSnapshot, const RenderRequest& renderRequest, const State state)
 {
     const int32_t typeId = _type->val();
-    sp<Model> model = snapshotContext.modelLoader()->loadModel(typeId);
+    sp<Model> model = renderLayerSnapshot._stub->_model_loader->loadModel(typeId);
     if(state.contains(RENDERABLE_STATE_DIRTY))
-        return {state, typeId, std::move(model), _position.val(), _size.val(), _transform, _transform->snapshot(), _varyings ? _varyings->snapshot(snapshotContext.pipelineInput(), renderRequest.allocator()) : Varyings::Snapshot()};
+        return {state, typeId, std::move(model), _position.val(), _size.val(), _transform, _transform->snapshot(), _varyings ? _varyings->snapshot(*renderLayerSnapshot._stub->_pipeline_bindings->pipelineLayout(), renderRequest.allocator()) : Varyings::Snapshot()};
     return {state, typeId, std::move(model)};
 }
 

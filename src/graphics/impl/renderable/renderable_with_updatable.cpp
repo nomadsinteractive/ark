@@ -18,9 +18,9 @@ Renderable::State RenderableWithUpdatable::updateState(const RenderRequest& rend
     return state;
 }
 
-Renderable::Snapshot RenderableWithUpdatable::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state)
+Renderable::Snapshot RenderableWithUpdatable::snapshot(const RenderLayerSnapshot& renderLayerSnapshot, const RenderRequest& renderRequest, const State state)
 {
-    return _wrapped->snapshot(snapshotContext, renderRequest, state);
+    return _wrapped->snapshot(renderLayerSnapshot, renderRequest, state);
 }
 
 }

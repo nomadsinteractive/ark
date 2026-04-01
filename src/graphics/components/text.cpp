@@ -187,8 +187,8 @@ public:
         return state;
     }
 
-    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const State state) override {
-        Snapshot snapshot = _delegate->snapshot(snapshotContext, renderRequest, state);
+    Snapshot snapshot(const RenderLayerSnapshot& renderLayerSnapshot, const RenderRequest& renderRequest, const State state) override {
+        Snapshot snapshot = _delegate->snapshot(renderLayerSnapshot, renderRequest, state);
         snapshot._position += V3(_layout_node->offsetPosition() + _offset_position, 0);
         snapshot._size *= V3(_layout_info->_scale.val(), 1.0f);
         return snapshot;

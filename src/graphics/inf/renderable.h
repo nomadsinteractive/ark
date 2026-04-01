@@ -40,7 +40,7 @@ public:
     };
 
     virtual State updateState(const RenderRequest& renderRequest) = 0;
-    virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, State state) = 0;
+    virtual Snapshot snapshot(const RenderLayerSnapshot& renderLayerSnapshot, const RenderRequest& renderRequest, State state) = 0;
 };
 
 }

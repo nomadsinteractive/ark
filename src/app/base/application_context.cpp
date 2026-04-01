@@ -141,7 +141,7 @@ public:
 };
 
 ApplicationContext::AppClock::AppClock()
-    : _steady(Platform::getSteadyClock()), _time_scale(nullptr, 1.0f), _time_ns(sp<Variable<uint64_t>::Impl>::make(0)), _interval(sp<Numeric::Impl>::make(0)), _clock(sp<Clock>::make(_time_ns)), _timestamp(_steady->val()), _tick(0)
+    : _steady(Platform::getSteadyClock()), _time_scale(nullptr, 1.0f), _time_ns(sp<Variable<uint64_t>::Impl>::make(0)), _interval(sp<Numeric::Impl>::make(0.0f)), _clock(sp<Clock>::make(_time_ns)), _timestamp(_steady->val()), _tick(0)
 {
 }
 

@@ -12,7 +12,7 @@ public:
     RenderableWithUpdatable(sp<Renderable> delegate, sp<Updatable> updatable);
 
     State updateState(const RenderRequest& renderRequest) override;
-    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, State state) override;
+    Snapshot snapshot(const RenderLayerSnapshot& renderLayerSnapshot, const RenderRequest& renderRequest, State state) override;
 
 private:
     sp<Updatable> _updatable;

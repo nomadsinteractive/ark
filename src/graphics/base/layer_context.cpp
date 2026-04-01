@@ -127,12 +127,12 @@ bool LayerContext::processNewCreated()
     return true;
 }
 
-LayerContextSnapshot LayerContext::snapshot(sp<RenderLayer::Stub> renderLayer, const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout)
+LayerContextSnapshot LayerContext::snapshot(const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout)
 {
     const bool dirty = UpdatableUtil::update(renderRequest.tick(), _position, _visible, _discarded, _varyings);
     if(!_varyings)
         _varyings = sp<Varyings>::make(pipelineLayout);
-    return {dirty, _position.val(), _visible.val(), _discarded.val(), _varyings->snapshot(pipelineLayout, renderRequest.allocator()), std::move(renderLayer)};
+    return {_position.val(), dirty, _visible.val(), _discarded.val(), _varyings->snapshot(pipelineLayout, renderRequest.allocator())};
 }
 
 LayerContext::ElementState& LayerContext::addElementState(void* key)

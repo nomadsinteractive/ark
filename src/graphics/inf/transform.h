@@ -20,7 +20,10 @@ public:
     public:
         Snapshot() = default;
         template<typename T> Snapshot(const T& data)
-            : _magic(Type<T>::id()) {
+#ifndef ARK_FLAG_PUBLISHING_BUILD
+            : _magic(Type<T>::id())
+#endif
+        {
             *reinterpret_cast<T*>(_data) = data;
         }
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
@@ -32,7 +35,9 @@ public:
         }
 
         alignas(64) uint8_t _data[64];
+#ifndef ARK_FLAG_PUBLISHING_BUILD
         TypeId _magic;
+#endif
     };
 
     struct Stub {

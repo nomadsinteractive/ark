@@ -33,7 +33,7 @@ public:
     }
 
     sp<Boolean> build(const Scope& args) override {
-        return BooleanType::negative(_a1->build(args));
+        return BooleanType::negate(_a1->build(args));
     }
 
 private:
@@ -95,7 +95,7 @@ sp<Boolean> BooleanType::__or__(sp<Boolean> self, sp<Boolean> rvalue)
     return sp<Boolean>::make<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::Or<bool>>>(std::move(self), std::move(rvalue));
 }
 
-sp<Boolean> BooleanType::negative(sp<Boolean> self)
+sp<Boolean> BooleanType::negate(sp<Boolean> self)
 {
     return sp<Boolean>::make<VariableOP1<bool>>(Operators::Not<bool>(), std::move(self));
 }

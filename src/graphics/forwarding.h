@@ -17,7 +17,7 @@ class RotationEuler;
 class Font;
 class Glyph;
 class Layer;
-class LayerContextSnapshot;
+struct LayerContextSnapshot;
 class Layout;
 class LayoutParam;
 class Mat2Impl;

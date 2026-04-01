@@ -2,8 +2,8 @@
 
 #include "core/base/named_hash.h"
 #include "core/impl/writable/writable_with_offset.h"
-#include "graphics/base/material.h"
 
+#include "graphics/base/material.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_request.h"
 #include "graphics/impl/mat/mat4_impl.h"
@@ -17,8 +17,6 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/vertex_writer.h"
-#include "renderer/inf/model_loader.h"
-
 
 namespace ark {
 
@@ -30,7 +28,8 @@ public:
         : Uploader(modelBundle->vertexLength() * pipelineInput->getStreamLayout(0).stride()), _model_bundle(std::move(modelBundle)), _pipeline_input(std::move(pipelineInput)) {
     }
 
-    void upload(Writable& uploader) override {
+    void upload(Writable& uploader) override
+    {
         uint32_t offset = 0;
         const size_t stride = _pipeline_input->getStreamLayout(0).stride();
         const PipelineLayout::VertexDescriptor attributes(_pipeline_input);
@@ -46,7 +45,8 @@ public:
         }
     }
 
-    bool update(uint32_t /*tick*/) override {
+    bool update(uint32_t /*tick*/) override
+    {
         return false;
     }
 
@@ -61,7 +61,8 @@ public:
         : Uploader(multiModels->indexLength() * sizeof(element_index_t)), _model_bundle(std::move(multiModels)) {
     }
 
-    void upload(Writable& uploader) override {
+    void upload(Writable& uploader) override
+    {
         size_t offset = 0;
         for(const auto& i: _model_bundle->modelLayouts())
         {
@@ -72,13 +73,13 @@ public:
         }
     }
 
-    bool update(uint32_t /*tick*/) override {
+    bool update(uint32_t /*tick*/) override
+    {
         return false;
     }
 
 private:
     sp<ModelBundle> _model_bundle;
-
 };
 
 V3 toScale(const V3& displaySize, const Boundaries& metrics)
@@ -107,9 +108,9 @@ DrawingContext RCCMultiDrawElementsIndirect::compose(const RenderRequest& render
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
-    const bool reload = snapshot.verticesDirty();
+    const bool reload = snapshot.verticesDirty() || snapshot.layersDirty();
 
-    if(reload || snapshot.layersDirty())
+    if(reload)
         reloadIndirectCommands(snapshot);
 
     writeModelMatices(renderRequest, buf, snapshot, reload);
@@ -142,17 +143,15 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         const Renderable::Snapshot& snapshot = s._snapshot;
         if(reload || s._snapshot._state.contains(Renderable::RENDERABLE_STATE_DIRTY))
             if(!snapshot._varyings_snapshot._sub_properties.empty())
-            {
-                const auto iter = _model_instances.find(i);
-                DASSERT(iter != _model_instances.end());
+                if(const auto iter = _model_instances.find(i); iter != _model_instances.end())
+                {
+                    if(!iter->second.isDynamicLayout())
+                        iter->second.toDynamicLayout();
 
-                if(!iter->second.isDynamicLayout())
-                    iter->second.toDynamicLayout();
-
-                for(const auto& [j, k] : snapshot._varyings_snapshot._sub_properties)
-                    if(Varyings::Divided subProperty = k.getDivided(1); subProperty._content.length() >= sizeof(M4))
-                        iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
-            }
+                    for(const auto& [j, k] : snapshot._varyings_snapshot._sub_properties)
+                        if(Varyings::Divided subProperty = k.getDivided(1); subProperty._content.length() >= sizeof(M4))
+                            iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
+                }
     }
 
     size_t instanceId = 0;
@@ -198,30 +197,30 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
     _model_instances.clear();
     for(const RenderLayerSnapshot::Element& i : snapshot._elements)
         if(i._snapshot._state.contains(Renderable::RENDERABLE_STATE_VISIBLE))
-    {
-        const int32_t type = i._snapshot._type;
-        const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(type);
-        ModelInstance& modelInstance = _model_instances[offset];
-        modelInstance = ModelInstance(offset, modelLayout);
-        for(const Node::WithTransform& j : modelLayout._node_layouts)
         {
-            const sp<NodeInstance> nodeInstance = sp<NodeInstance>::make(modelInstance, j._node->name().hash());
-            for(const sp<Mesh>& k : j._node->meshes())
+            const int32_t type = i._snapshot._type;
+            const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(type);
+            ModelInstance& modelInstance = _model_instances[offset];
+            modelInstance = ModelInstance(offset, modelLayout);
+            for(const Node::WithTransform& j : modelLayout._node_layouts)
             {
-                uint64_t cmdHash = 0;
-                Math::hashCombine(cmdHash, type);
-                Math::hashCombine(cmdHash, k->id());
-                const ModelBundle::MeshLayout& meshLayout = modelLayout._mesh_layouts.at(k->id());
-                IndirectCmds& modelIndirect = _indirect_cmds[cmdHash];
-                if(modelIndirect._mesh_instances.empty())
-                    modelIndirect._command = {static_cast<uint32_t>(meshLayout._mesh->indices().size()), 0, static_cast<uint32_t>(meshLayout._index_offset), static_cast<uint32_t>(meshLayout._vertex_offset), 0};
+                const sp<NodeInstance> nodeInstance = sp<NodeInstance>::make(modelInstance, j._node->name().hash());
+                for(const sp<Mesh>& k : j._node->meshes())
+                {
+                    uint64_t cmdHash = 0;
+                    Math::hashCombine(cmdHash, type);
+                    Math::hashCombine(cmdHash, k->id());
+                    const ModelBundle::MeshLayout& meshLayout = modelLayout._mesh_layouts.at(k->id());
+                    IndirectCmds& modelIndirect = _indirect_cmds[cmdHash];
+                    if(modelIndirect._mesh_instances.empty())
+                        modelIndirect._command = {static_cast<uint32_t>(meshLayout._mesh->indices().size()), 0, static_cast<uint32_t>(meshLayout._index_offset), static_cast<uint32_t>(meshLayout._vertex_offset), 0};
 
-                ++ modelIndirect._command._instance_count;
-                modelIndirect._mesh_instances.push_back(MeshInstance{nodeInstance, meshLayout._mesh});
+                    ++ modelIndirect._command._instance_count;
+                    modelIndirect._mesh_instances.push_back(MeshInstance{nodeInstance, meshLayout._mesh});
+                }
             }
+            offset ++;
         }
-        offset ++;
-    }
 }
 
 RCCMultiDrawElementsIndirect::NodeLayoutInstance::NodeLayoutInstance(const Node& node, const NodeLayoutInstance& parentLayout)

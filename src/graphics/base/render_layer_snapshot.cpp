@@ -127,7 +127,7 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
 {
     const PipelineLayout& shaderLayout = _stub->_shader->layout();
 
-    _layer_context_snapshots.push_back(layerContext.snapshot(_stub, renderRequest, shaderLayout));
+    _layer_context_snapshots.push_back(layerContext.snapshot(renderRequest, shaderLayout));
     const LayerContextSnapshot& layerSnapshot = _layer_context_snapshots.back();
 
     const bool reload = verticesDirty();
@@ -173,10 +173,10 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
 
 void RenderLayerSnapshot::snapshot(const RenderRequest& renderRequest)
 {
-    const bool reload = verticesDirty();
+    const bool reload = verticesDirty() || layersDirty();
     for(Element& i : _elements)
     {
-        const Renderable::Snapshot& snapshot = i.ensureSnapshot(renderRequest, reload);
+        const Renderable::Snapshot& snapshot = i.ensureSnapshot(renderRequest, *this, reload);
         _index_count += snapshot._model->indexCount();
     }
 }
@@ -186,11 +186,11 @@ RenderLayerSnapshot::Element::Element(Renderable& renderable, const LayerContext
 {
 }
 
-const Renderable::Snapshot& RenderLayerSnapshot::Element::ensureSnapshot(const RenderRequest& renderRequest, const bool reload)
+const Renderable::Snapshot& RenderLayerSnapshot::Element::ensureSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& renderLayerSnapshot, const bool reload)
 {
     if(reload)
         _snapshot._state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
-    _snapshot =_renderable.snapshot(_layer_context, renderRequest, _snapshot._state);
+    _snapshot =_renderable.snapshot(renderLayerSnapshot, renderRequest, _snapshot._state);
     ASSERT(_snapshot._model);
     _snapshot._position += _layer_context._position;
     _snapshot.applyVaryings(_layer_context._varyings);

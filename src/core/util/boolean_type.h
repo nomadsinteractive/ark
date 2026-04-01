@@ -38,7 +38,7 @@ public:
     static sp<Boolean> wrap(sp<Boolean> self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Boolean> negative(sp<Boolean> self);
+    static sp<Boolean> negate(sp<Boolean> self);
 
 //  [[script::bindings::classmethod]]
     static sp<Boolean> expect(sp<Boolean> self, sp<Boolean> expectation, sp<Future> future);

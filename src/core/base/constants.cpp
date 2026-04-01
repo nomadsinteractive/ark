@@ -57,7 +57,7 @@ Constants::Constants()
     : DOCUMENT_NONE(document::make("")), BOOLEAN_TRUE(sp<Boolean>::make<Boolean::Const>(true)), BOOLEAN_FALSE(sp<Boolean>::make<Boolean::Const>(false)), BOUNDARIES_UNIT(sp<Boundaries>::make(V3(-0.5f), V3(0.5f))),
       MODEL_UNIT_QUAD_RHS(makeUnitQuadModel(BOUNDARIES_UNIT, false)), MODEL_UNIT_QUAD_LHS(makeUnitQuadModel(BOUNDARIES_UNIT, true)),
       MODEL_UNIT_NINE_PATCH_TRIANGLE_STRIPS(makeUnitNinePatchTriangleStripsModel(BOUNDARIES_UNIT)), MODEL_UNIT_NINE_PATCH_QUADS(makeUnitNinePatchQuadsModel(BOUNDARIES_UNIT)),
-      MODEL_NDC(makeNDCModel(BOUNDARIES_UNIT)), NUMERIC_ZERO(sp<Numeric>::make<Numeric::Const>(0)), NUMERIC_ONE(sp<Numeric>::make<Numeric::Const>(1.0f))
+      MODEL_NDC(makeNDCModel(BOUNDARIES_UNIT)), NUMERIC_ZERO(sp<Numeric>::make<Numeric::Const>(0.0f)), NUMERIC_ONE(sp<Numeric>::make<Numeric::Const>(1.0f))
 {
 }
 

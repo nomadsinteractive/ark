@@ -49,7 +49,7 @@ public:
 
     bool processNewCreated();
 
-    LayerContextSnapshot snapshot(sp<RenderLayer::Stub> renderLayer, const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout);
+    LayerContextSnapshot snapshot(const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout);
 
     bool ensureState(void* stateKey);
     ElementState& addElementState(void* key);
