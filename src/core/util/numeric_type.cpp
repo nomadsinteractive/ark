@@ -3,7 +3,6 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
-#include "core/base/wrapper.h"
 #include "core/impl/variable/at_least.h"
 #include "core/impl/variable/at_most.h"
 #include "core/impl/variable/clamp.h"
@@ -49,8 +48,9 @@ private:
     float _tolerance;
 };
 
-template<typename T> sp<Builder<Variable<T>>> toBuilder(BeanFactory& factory, const String& expr)
+sp<Builder<Numeric>> toBuilder(BeanFactory& factory, const String& expr)
 {
+    typedef float T;
     typedef Variable<T> VarType;
     typedef Builder<Variable<T>> BuilderType;
 
@@ -369,7 +369,7 @@ sp<Numeric> NumericType::distance2(sp<Numeric> self, sp<Numeric> other)
 }
 
 NumericType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
-    : _value(toBuilder<float>(factory, expr.strip()))
+    : _value(toBuilder(factory, expr.strip()))
 {
     CHECK(_value, "Numeric expression compile failed: %s", expr.c_str());
 }
@@ -380,7 +380,7 @@ sp<Numeric> NumericType::DICTIONARY::build(const Scope& args)
 }
 
 NumericType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(toBuilder<float>(factory, Documents::ensureAttribute(manifest, constants::VALUE)))
+    : _value(toBuilder(factory, Documents::ensureAttribute(manifest, constants::VALUE)))
 {
 }
 

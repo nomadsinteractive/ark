@@ -89,8 +89,9 @@ private:
     uint32_t _last_updated_tick;
 };
 
-template<typename T> sp<Builder<Variable<T>>> toBuilder(BeanFactory& factory, const String& expr)
+sp<Builder<Integer>> toBuilder(BeanFactory& factory, const String& expr)
 {
+    typedef int32_t T;
     typedef Variable<T> VarType;
     typedef Builder<Variable<T>> BuilderType;
 
@@ -324,7 +325,7 @@ sp<Integer> IntegerType::dye(sp<Integer> self, sp<Boolean> condition, String mes
 }
 
 IntegerType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _value(value && value.at(0) == '#' ? sp<Builder<Integer>>::make<Prebuilt>(sp<Integer>::make<Integer::Const>(value.substr(1).hash())) : toBuilder<int32_t>(factory, value))
+    : _value(value && value.at(0) == '#' ? sp<Builder<Integer>>::make<Prebuilt>(sp<Integer>::make<Integer::Const>(value.substr(1).hash())) : toBuilder(factory, value))
 {
     CHECK(_value, "Integer expression compile failed: %s. Use \"#%s\" if you need to build a NamedHash integer", value.c_str(), value.c_str());
 }
