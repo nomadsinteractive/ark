@@ -8,21 +8,25 @@ namespace ark {
 V4::V4(const float v)
     : V3(v), _w(v)
 {
+    DASSERT(!(std::isinf(_w) || std::isnan(_w)));
 }
 
 V4::V4(const float x, const float y, const float z, const float w)
     : V3(x, y, z), _w(w)
 {
+    DASSERT(!(std::isinf(_w) || std::isnan(_w)));
 }
 
 V4::V4(const V2 xy, const float z, const float w)
     : V3(xy.x(), xy.y(), z), _w(w)
 {
+    DASSERT(!(std::isinf(_w) || std::isnan(_w)));
 }
 
-V4::V4(const V3 xyz, const float w)
+V4::V4(const V3& xyz, const float w)
     : V3(xyz), _w(w)
 {
+    DASSERT(!(std::isinf(_w) || std::isnan(_w)));
 }
 
 V4::V4(const std::initializer_list<float>& values)

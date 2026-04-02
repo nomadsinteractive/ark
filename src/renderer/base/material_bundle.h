@@ -31,7 +31,7 @@ public:
             if(const auto iter = _materials.find(materialName); iter != _materials.end())
                 return {iter->second, false};
 
-            sp<Material> material = sp<Material>::make(_materials.size(), materialName);
+            sp<Material> material = sp<Material>::make(static_cast<uint32_t>(_materials.size()), materialName);
             _materials.push_back(std::move(materialName), material);
             return {material, true};
         }

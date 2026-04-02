@@ -66,24 +66,30 @@ bool ModelLoaderText::GlyphBundle::prepareOne(const uint32_t timestamp, const in
 {
     if(Optional<Alphabet::Metrics> optMetrics = _alphabet->measure(c))
     {
-        const auto& [width, height, bitmapWidth, bitmapHeight, bitmap_x, bitmap_y] = optMetrics.value();
+        const auto [width, height, bitmapWidth, bitmapHeight, bitmapX, bitmapY] = optMetrics.value();
         CHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
-        const MaxRectsBinPack::Rect packedBounds = _atlas_attachment._bin_pack.Insert(bitmapWidth + 2, bitmapHeight + 2, MaxRectsBinPack::RectBestShortSideFit);
-        if(packedBounds.height == 0)
-            return false;
 
-        const uint32_t cx = packedBounds.x + 1;
-        const uint32_t cy = packedBounds.y + 1;
-        _alphabet->draw(c, _atlas_attachment._glyph_bitmap, cx, cy);
+        uint32_t cx = 0;
+        uint32_t cy = 0;
+        if(bitmapWidth > 0 && bitmapHeight > 0)
+        {
+            const MaxRectsBinPack::Rect packedBounds = _atlas_attachment._bin_pack.Insert(bitmapWidth + 2, bitmapHeight + 2, MaxRectsBinPack::RectBestShortSideFit);
+            if(packedBounds.height == 0)
+                return false;
 
-        const float bottom = static_cast<float>(_is_lhs ? bitmap_y : height - bitmapHeight - bitmap_y) / bitmapHeight;
+            cx = packedBounds.x + 1;
+            cy = packedBounds.y + 1;
+            _alphabet->draw(c, _atlas_attachment._glyph_bitmap, cx, cy);
+        }
+
+        const float bottom = bitmapHeight > 0 ? static_cast<float>(_is_lhs ? bitmapY : height - bitmapHeight - bitmapY) / bitmapHeight : 0.0f;
         const Rect bounds(0, bottom, 1.0f, bottom + 1.0f);
         const V2 charSize(static_cast<float>(bitmapWidth), static_cast<float>(bitmapHeight));
         const uint32_t textureWidth = _atlas_attachment._glyph_bitmap->width();
         const uint32_t textureHeight = _atlas_attachment._glyph_bitmap->height();
         const Atlas::UV uv = Atlas::toUV(cx, cy, cx + bitmapWidth, cy + bitmapHeight, textureWidth, textureHeight);
         Atlas::Item item = _atlas_attachment._atlas.toItem(uv, bounds, charSize, V2(0));
-        const V3 xyz(static_cast<float>(bitmap_x), static_cast<float>(bitmap_y), 0);
+        const V3 xyz(static_cast<float>(bitmapX), static_cast<float>(bitmapY), 0);
         sp<Boundaries> content = sp<Boundaries>::make(V3(0), V3(charSize, 0));
         sp<Boundaries> occupies = sp<Boundaries>::make(-xyz, V3(static_cast<float>(width), static_cast<float>(height), 0) - xyz);
         _glyphs[ckey] = GlyphModel(sp<Model>::make(_unit_glyph_model->indices(), _is_lhs ? sp<Vertices>::make<VerticesQuadLHS>(item) : sp<Vertices>::make<VerticesQuadRHS>(item), std::move(content), std::move(occupies)), timestamp);

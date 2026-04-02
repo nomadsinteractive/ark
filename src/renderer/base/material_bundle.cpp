@@ -128,7 +128,7 @@ void MaterialBundle::initialize()
             _stub->_texture_height = std::max(texturePackers[i]->height(), _stub->_texture_height);
         }
 
-    const sp<Size> textureSize = sp<Size>::make(_stub->_texture_width, _stub->_texture_height);
+    const sp<Size> textureSize = sp<Size>::make(static_cast<float>(_stub->_texture_width), static_cast<float>(_stub->_texture_height));
     for(size_t i = 0; i < MaterialTexture::TYPE_LENGTH; ++i)
         if(texturePackers[i])
         {

@@ -14,7 +14,7 @@ V2::V2(const float v)
 V2::V2(const float x, const float y)
     : _x(x), _y(y)
 {
-    DASSERT(!(std::isinf(_x) || std::isinf(_y)));
+    DASSERT(!(std::isinf(_x) || std::isinf(_y) || std::isnan(_x) || std::isnan(_y)));
 }
 
 V2::V2(const std::initializer_list<float>& values)
@@ -153,12 +153,14 @@ float& V2::operator[](const size_t idx)
 void V2::initialize(const std::initializer_list<float>& values, const size_t len)
 {
     ASSERT(values.size() <= len);
-
     memset(this, 0, sizeof(float) * len);
 
     int32_t idx = 0;
     for(const float i : values)
+    {
+        DASSERT(!(std::isinf(i) || std::isnan(i)));
         (*this)[idx++] = i;
+    }
 }
 
 }

@@ -8,16 +8,19 @@ namespace ark {
 V3::V3(const float v)
     : V2(v), _z(v)
 {
+    DASSERT(!(std::isinf(_z) || std::isnan(_z)));
 }
 
 V3::V3(const float x, const float y, const float z)
     : V2(x, y), _z(z)
 {
+    DASSERT(!(std::isinf(_z) || std::isnan(_z)));
 }
 
 V3::V3(const V2 other, const float z)
     : V2(other._x, other._y), _z(z)
 {
+    DASSERT(!(std::isinf(_z) || std::isnan(_z)));
 }
 
 V3::V3(const std::initializer_list<float>& values)
