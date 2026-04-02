@@ -182,13 +182,13 @@ b2BodyId RigidbodyBox2D::body() const
 
 float RigidbodyBox2D::angle()
 {
-    FATAL("Unimplemented");
-    return 0;
+    return b2Rot_GetAngle(b2Body_GetTransform(_stub->body()).q);
 }
 
 void RigidbodyBox2D::setAngle(float rad)
 {
-    FATAL("Unimplemented");
+    const b2Vec2 pos = b2Body_GetPosition(_stub->body());
+    b2Body_SetTransform(_stub->body(), pos, b2MakeRot(rad));
 }
 
 V3 RigidbodyBox2D::position() const
@@ -198,7 +198,8 @@ V3 RigidbodyBox2D::position() const
 
 void RigidbodyBox2D::setPosition(const V3& position)
 {
-    FATAL("Unimplemented");
+    const b2Rot rot = b2Body_GetTransform(_stub->body()).q;
+    b2Body_SetTransform(_stub->body(), {position.x(), position.y()}, rot);
 }
 
 V3 RigidbodyBox2D::centralForce() const
@@ -257,13 +258,19 @@ void RigidbodyBox2D::applyCentralImpulse(const V3& impulse)
 
 float RigidbodyBox2D::friction() const
 {
-    FATAL("Unimplemented");
+    b2ShapeId shapeIds[1];
+    const int32_t count = b2Body_GetShapes(_stub->body(), shapeIds, 1);
+    if(count > 0)
+        return b2Shape_GetFriction(shapeIds[0]);
     return 0;
 }
 
 void RigidbodyBox2D::setFriction(float friction)
 {
-    FATAL("Unimplemented");
+    b2ShapeId shapeIds[128];
+    const int32_t count = b2Body_GetShapes(_stub->body(), shapeIds, 128);
+    for(int32_t i = 0; i < count; i++)
+        b2Shape_SetFriction(shapeIds[i], friction);
 }
 
 float RigidbodyBox2D::gravityScale() const

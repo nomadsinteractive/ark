@@ -12,14 +12,15 @@ BodyCreateInfo::BodyCreateInfo(const sp<Shape>& shape, const float density, cons
 {
 }
 
-b2ShapeDef BodyCreateInfo::toFixtureDef(const b2ShapeId shape) const
+b2ShapeDef BodyCreateInfo::toShapeDef() const
 {
-    b2ShapeDef fixture = b2DefaultShapeDef();
-    // fixture.shape = shape;
-    fixture.density = density;
-    // fixture.friction = friction;
-    fixture.isSensor = is_sensor;
-    return fixture;
+    b2ShapeDef shapeDef = b2DefaultShapeDef();
+    shapeDef.density = density;
+    shapeDef.material.friction = friction;
+    shapeDef.isSensor = is_sensor;
+    shapeDef.enableContactEvents = true;
+    shapeDef.enableSensorEvents = is_sensor;
+    return shapeDef;
 }
 
 }

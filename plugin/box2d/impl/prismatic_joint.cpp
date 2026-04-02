@@ -13,7 +13,7 @@ PrismaticJoint::PrismaticJoint(const sp<ColliderBox2D>& world, const RigidbodyBo
 
 b2JointId PrismaticJoint::makeJoint(b2WorldId b2World, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
 {
-    b2PrismaticJointDef jointDef;
+    b2PrismaticJointDef jointDef = b2DefaultPrismaticJointDef();
     jointDef.bodyIdA = b1.body();
     jointDef.bodyIdB = b2.body();
     jointDef.localAnchorA = b2Vec2(anchorA.x(), anchorA.y());

@@ -10,11 +10,10 @@ namespace ark::plugin::box2d {
 
 void Box::apply(b2BodyId body, const V3& size, const BodyCreateInfo& createInfo)
 {
-    // b2PolygonShape shape;
-    // shape.SetAsBox(size.x() / 2.0f, size.y() / 2.0f);
-    //
-    // b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
-    // body->CreateFixture(&fixtureDef);
+    b2Polygon polygon = b2MakeBox(size.x() / 2.0f, size.y() / 2.0f);
+
+    b2ShapeDef shapeDef = createInfo.toShapeDef();
+    b2CreatePolygonShape(body, &shapeDef, &polygon);
 }
 
 Box::BUILDER::BUILDER()

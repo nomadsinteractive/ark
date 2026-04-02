@@ -13,7 +13,7 @@ WeldJoint::WeldJoint(const sp<ColliderBox2D>& world, const RigidbodyBox2D& b1, c
 
 b2JointId WeldJoint::makeJoint(b2WorldId b2World, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
 {
-    b2WeldJointDef jointDef;
+    b2WeldJointDef jointDef = b2DefaultWeldJointDef();
     jointDef.bodyIdA = b1.body();
     jointDef.bodyIdB = b2.body();
     jointDef.localAnchorA = b2Vec2(anchorA.x(), anchorA.y());

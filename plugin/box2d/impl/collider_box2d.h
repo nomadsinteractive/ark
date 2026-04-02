@@ -87,22 +87,6 @@ public:
     void setBodyManifest(int32_t id, const BodyCreateInfo& bodyManifest);
 
 private:
-    // class ContactListenerImpl {
-    // public:
-    //     virtual void BeginContact(const b2ContactData* contact);
-    //     virtual void EndContact(const b2ContactData* contact);
-    // };
-    //
-    // class DestructionListenerImpl : public b2DestructionListener {
-    // public:
-    //     virtual void SayGoodbye(b2JointId joint) override;
-    //     virtual void SayGoodbye(b2Fixture* fixture) override;
-    //
-    //     void track(const sp<Joint::Stub>& joint);
-    //
-    // private:
-    //     HashMap<b2JointId, WeakPtr<Joint::Stub>> _joints;
-    // };
 
     struct Stub final : Runnable {
         Stub(const b2Vec2& gravity, const V2& pixelPerMeter);
@@ -120,8 +104,6 @@ private:
         b2WorldId _world_id;
         HashMap<HashId, BodyCreateInfo> _body_manifests;
 
-        // ContactListenerImpl _contact_listener;
-        // DestructionListenerImpl _destruction_listener;
     };
 
 private:

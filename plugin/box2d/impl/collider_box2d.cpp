@@ -77,8 +77,17 @@ sp<Constraint> ColliderBox2D::createFixedConstraint(Rigidbody& rigidbodyA, Rigid
 
 Vector<RayCastManifold> ColliderBox2D::rayCast(V3 from, V3 to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
-    DFATAL("Unimplemented");
-    return {};
+    const b2Vec2 origin = {toMeterX(from.x()), toMeterY(from.y())};
+    const b2Vec2 translation = {toMeterX(to.x()) - origin.x, toMeterY(to.y()) - origin.y};
+    const b2RayResult result = b2World_CastRayClosest(_stub->_world_id, origin, translation, b2DefaultQueryFilter());
+
+    Vector<RayCastManifold> manifolds;
+    if(result.hit)
+    {
+        const V3 normal(result.normal.x, result.normal.y, 0);
+        manifolds.push_back(RayCastManifold(result.fraction, normal));
+    }
+    return manifolds;
 }
 
 b2WorldId ColliderBox2D::world() const
@@ -140,9 +149,8 @@ int32_t ColliderBox2D::bodyCount() const
     return b2World_GetAwakeBodyCount(_stub->_world_id);
 }
 
-void ColliderBox2D::track(const sp<Joint::Stub>& joint) const
+void ColliderBox2D::track(const sp<Joint::Stub>& /*joint*/) const
 {
-    // _stub->_destruction_listener.track(joint);
 }
 
 void ColliderBox2D::setBodyManifest(int32_t id, const BodyCreateInfo& bodyManifest)
@@ -263,71 +271,5 @@ void ColliderBox2D::Stub::run()
         onEndContact(contactEvents.endEvents[i]);
 }
 
-// void ColliderBox2D::ContactListenerImpl::BeginContact(const b2ContactData* contact)
-// {
-//     RigidbodyBox2D* s1 = static_cast<RigidbodyBox2D*>(b2Body_GetUserData(b2Shape_GetBody(contact->shapeIdA)));
-//     RigidbodyBox2D* s2 = static_cast<RigidbodyBox2D*>(b2Body_GetUserData(b2Shape_GetBody(contact->shapeIdB)));
-//     if(s1 && s2)
-//     {
-//         const b2Manifold& manifold = contact->manifold;
-//         const V3 normal = V3(manifold.normal.x, manifold.normal.y, 0);
-//         const b2ManifoldPoint& contactPoint = manifold.points[0];
-//         const RefId id1 = s1->rigidbodyStub()->_ref->id(), id2 = s2->rigidbodyStub()->_ref->id();
-//         if(!s1->_stub->_contacts.contains(id2))
-//         {
-//             s1->_stub->_contacts.insert(id2);
-//             s1->_rigidbody_stub->onBeginContact(s2->makeShadow(), CollisionManifold(V3(contactPoint.point.x, contactPoint.point.y, 0), normal));
-//         }
-//         if(!s2->_stub->_contacts.contains(id1))
-//         {
-//             s2->_stub->_contacts.insert(id1);
-//             s2->_rigidbody_stub->onBeginContact(s1->makeShadow(), CollisionManifold(V3(contactPoint.point.x, contactPoint.point.y, 0), -normal));
-//         }
-//     }
-// }
-//
-// void ColliderBox2D::ContactListenerImpl::EndContact(const b2ContactData* contact)
-// {
-//     RigidbodyBox2D* s1 = static_cast<RigidbodyBox2D*>(b2Body_GetUserData(b2Shape_GetBody(contact->shapeIdA)));
-//     RigidbodyBox2D* s2 = static_cast<RigidbodyBox2D*>(b2Body_GetUserData(b2Shape_GetBody(contact->shapeIdB)));
-//     if(s1 && s2)
-//     {
-//         const sp<RigidbodyBox2D::Stub>& body1 = s1->_stub;
-//         const sp<RigidbodyBox2D::Stub>& body2 = s2->_stub;
-//         const RefId id1 = s1->rigidbodyStub()->_ref->id(), id2 = s2->rigidbodyStub()->_ref->id();
-//         if(const auto it1 = body1->_contacts.find(id2); it1 != body1->_contacts.end())
-//         {
-//             body1->_contacts.erase(it1);
-//             s1->_rigidbody_stub->onEndContact(s2->makeShadow());
-//         }
-//         if(const auto it2 = body2->_contacts.find(id1); it2 != body2->_contacts.end())
-//         {
-//             body2->_contacts.erase(it2);
-//             s2->_rigidbody_stub->onEndContact(s1->makeShadow());
-//         }
-//     }
-// }
-//
-// void ColliderBox2D::DestructionListenerImpl::SayGoodbye(b2JointId joint)
-// {
-//     auto iter = _joints.find(joint);
-//     if(iter != _joints.end())
-//     {
-//         const sp<Joint::Stub> obj = iter->second.lock();
-//         if(obj)
-//             obj->release();
-//
-//         _joints.erase(iter);
-//     }
-// }
-//
-// void ColliderBox2D::DestructionListenerImpl::SayGoodbye(b2Fixture* /*fixture*/)
-// {
-// }
-//
-// void ColliderBox2D::DestructionListenerImpl::track(const sp<Joint::Stub>& joint)
-// {
-//     _joints[joint->_joint] = joint;
-// }
 
 }
