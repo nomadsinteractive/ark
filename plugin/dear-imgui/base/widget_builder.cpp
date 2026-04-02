@@ -178,7 +178,7 @@ public:
         {
             bool selected = _selected->val();
             r = ImGui::MenuItem(_label.c_str(), _shortcut.c_str(), &selected, _enabled.val());
-            BooleanType::set(_selected, selected);
+            BooleanType::reset(_selected, selected);
         }
         else
             r = ImGui::MenuItem(_label.c_str(), _shortcut.c_str(), _selected->val(), _enabled.val());

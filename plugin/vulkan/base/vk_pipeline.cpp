@@ -36,7 +36,8 @@ public:
 
 namespace {
 
-struct VKDrawArrays final : VKPipeline::BakedRenderer {
+class VKDrawArrays final : public VKPipeline::BakedRenderer {
+public:
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override
     {
         const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
@@ -44,7 +45,8 @@ struct VKDrawArrays final : VKPipeline::BakedRenderer {
     }
 };
 
-struct VKDrawElements final : VKPipeline::BakedRenderer {
+class VKDrawElements final : public VKPipeline::BakedRenderer {
+public:
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override
     {
         const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
@@ -52,7 +54,8 @@ struct VKDrawElements final : VKPipeline::BakedRenderer {
     }
 };
 
-struct VKDrawElementsInstanced final : VKPipeline::BakedRenderer {
+class VKDrawElementsInstanced final : public VKPipeline::BakedRenderer {
+public:
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override
     {
         VkDeviceSize offsets = 0;
@@ -68,21 +71,25 @@ struct VKDrawElementsInstanced final : VKPipeline::BakedRenderer {
     }
 };
 
-struct VKMultiDrawElementsIndirect final : VKPipeline::BakedRenderer {
+class VKMultiDrawElementsIndirect final : public VKPipeline::BakedRenderer {
+public:
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override
     {
-        VkDeviceSize offsets = 0;
         const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
-        for(const auto& [i, j] : param._instance_buffer_snapshots)
+        if(param._indirect_cmd_count > 0)
         {
-            j.upload(graphicsContext);
-            DCHECK(j.id(), "Invaild Instanced Array Buffer: %d", i);
-            VkBuffer vkInstanceVertexBuffer = (VkBuffer) (j.id());
-            vkCmdBindVertexBuffers(commandBuffer, i, 1, &vkInstanceVertexBuffer, &offsets);
-        }
+            VkDeviceSize offsets = 0;
+            for(const auto& [i, j] : param._instance_buffer_snapshots)
+            {
+                j.upload(graphicsContext);
+                DCHECK(j.id(), "Invaild Instanced Array Buffer: %d", i);
+                VkBuffer vkInstanceVertexBuffer = (VkBuffer) (j.id());
+                vkCmdBindVertexBuffers(commandBuffer, i, 1, &vkInstanceVertexBuffer, &offsets);
+            }
 
-        param._indirect_cmds.upload(graphicsContext);
-        vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._indirect_cmd_count, sizeof(DrawingParams::DrawElementsIndirectCommand));
+            param._indirect_cmds.upload(graphicsContext);
+            vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._indirect_cmd_count, sizeof(DrawingParams::DrawElementsIndirectCommand));
+        }
     }
 };
 
@@ -134,7 +141,7 @@ bool isDirty(const ByteArray::Borrowed& dirtyFlags)
     return false;
 }
 
-VkBlendFactor toBlendFactor(PipelineDescriptor::BlendFactor blendFactor)
+VkBlendFactor toBlendFactor(const PipelineDescriptor::BlendFactor blendFactor)
 {
     switch(blendFactor) {
         case PipelineDescriptor::BLEND_FACTOR_ZERO:
@@ -316,13 +323,13 @@ void VKPipeline::upload(GraphicsContext& graphicsContext)
 
 ResourceRecycleFunc VKPipeline::recycle()
 {
-    const sp<VKDevice> device = _renderer->device();
+    sp<VKDevice> device = _renderer->device();
 
     VkPipelineLayout layout = _layout;
     VkPipeline pipeline = _pipeline;
     _pipeline = VK_NULL_HANDLE;
 
-    return [device, layout, descriptorSetLayout = std::move(_descriptor_set_layouts), pipeline](GraphicsContext&) {
+    return [device = std::move(device), layout, descriptorSetLayout = std::move(_descriptor_set_layouts), pipeline](GraphicsContext&) {
         if(layout)
             vkDestroyPipelineLayout(device->vkLogicalDevice(), layout, nullptr);
         for(const VkDescriptorSetLayout i : descriptorSetLayout)
