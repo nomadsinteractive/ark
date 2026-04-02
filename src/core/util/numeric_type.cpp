@@ -231,19 +231,22 @@ float NumericType::val(const sp<Numeric>& self)
     return self->val();
 }
 
-void NumericType::set(const sp<Numeric::Impl>& self, const float value)
+void NumericType::reset(const sp<Numeric::Impl>& self, const float value)
 {
     self->set(value);
 }
 
-void NumericType::set(const sp<NumericWrapper>& self, const float value)
+void NumericType::reset(const sp<NumericWrapper>& self, const float value)
 {
     self->set(value);
 }
 
-void NumericType::set(const sp<NumericWrapper>& self, sp<Numeric> value)
+void NumericType::reset(const sp<NumericWrapper>& self, sp<Numeric> value)
 {
-    self->set(std::move(value));
+    if(value)
+        self->set(std::move(value));
+    else
+        self->set(0);
 }
 
 float NumericType::update(const sp<Numeric>& self)

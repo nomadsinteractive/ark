@@ -43,13 +43,6 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Boolean> expect(sp<Boolean> self, sp<Boolean> expectation, sp<Future> future);
 
-    [[deprecated("Use `reset` instead")]]
-//  [[script::bindings::classmethod]]
-    static void set(const sp<BooleanWrapper>& self, sp<Boolean> value);
-    [[deprecated("Use `reset` instead")]]
-//  [[script::bindings::classmethod]]
-    static void set(const sp<BooleanWrapper>& self, bool value);
-
 //  [[script::bindings::classmethod]]
     static void reset(const sp<BooleanWrapper>& self, sp<Boolean> value = nullptr);
 //  [[script::bindings::classmethod]]

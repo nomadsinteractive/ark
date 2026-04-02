@@ -18,7 +18,7 @@ ResourceLoaderContext::ResourceLoaderContext(sp<Dictionary<document>> documents,
 ResourceLoaderContext::~ResourceLoaderContext()
 {
     LOGD("");
-    _discarded->set(true);
+    _discarded->reset(true);
 }
 
 const sp<Dictionary<document>>& ResourceLoaderContext::documents() const

@@ -84,11 +84,11 @@ public:
     static float val(const sp<Numeric>& self);
 
 //  [[script::bindings::classmethod]]
-    static void set(const sp<Numeric::Impl>& self, float value);
+    static void reset(const sp<Numeric::Impl>& self, float value);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<NumericWrapper>& self, float value);
+    static void reset(const sp<NumericWrapper>& self, float value);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<NumericWrapper>& self, sp<Numeric> value);
+    static void reset(const sp<NumericWrapper>& self, sp<Numeric> value = nullptr);
 
 //  [[script::bindings::classmethod]]
     static float update(const sp<Numeric>& self);

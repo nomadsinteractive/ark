@@ -130,7 +130,7 @@ private:
 struct LayoutInfo {
     LayoutInfo(sp<LayoutParam> layoutParam, sp<Vec2> scale, const float letterSpacing, const float lineIndent, LayoutLength lineHeight)
         : _scale(std::move(scale), {1.0f, 1.0f}), _letter_spacing(letterSpacing), _line_indent(lineIndent), _line_height(lineHeight.isAuto() ? LayoutLength(100, LayoutLength::LENGTH_TYPE_PERCENTAGE) : std::move(lineHeight)),
-          _auto_width(sp<Numeric::Impl>::make(0)), _auto_height(sp<Numeric::Impl>::make(0))
+          _auto_width(sp<Numeric::Impl>::make(0.0f)), _auto_height(sp<Numeric::Impl>::make(0.0f))
     {
         setLayoutNode(sp<Layout::Node>::make(std::move(layoutParam)));
     }

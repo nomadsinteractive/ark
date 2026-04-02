@@ -149,15 +149,18 @@ public:
         return sp<Numeric>::make<VariableOP1<float, T>>(Operators::Hypot2<T>(), std::move(self));
     }
 
-    static void set(const sp<VariableWrapper<T>>& self, sp<VarType> val) {
-        self->set(std::move(val));
-    }
-
-    static void set(const sp<VariableWrapper<T>>& self, const T& val) {
+    static void reset(const sp<VariableWrapper<T>>& self, const T& val) {
         self->set(val);
     }
 
-    static void set(const sp<VarType>& self, const T& val) {
+    static void reset(const sp<VariableWrapper<T>>& self, sp<VarType> val) {
+        if(val)
+            self->set(std::move(val));
+        else
+            self->set(T());
+    }
+
+    static void reset(const sp<VarType>& self, const T& val) {
         ensureImpl(self)->set(val);
     }
 

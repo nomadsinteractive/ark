@@ -61,11 +61,11 @@ public:
     static sp<Numeric> hypot2(sp<Vec4> self);
 
 //  [[script::bindings::classmethod]]
-    static void set(const sp<VariableWrapper<V4>>& self, sp<Vec4> val);
+    static void reset(const sp<VariableWrapper<V4>>& self, const V4& val);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<VariableWrapper<V4>>& self, const V4& val);
+    static void reset(const sp<VariableWrapper<V4>>& self, sp<Vec4> val = nullptr);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<Vec4>& self, const V4& val);
+    static void reset(const sp<Vec4>& self, const V4& val);
 
 //  [[script::bindings::property]]
     static V4 val(const sp<Vec4>& self);

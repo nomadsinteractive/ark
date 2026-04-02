@@ -30,14 +30,17 @@ void Discarded::discard() const
     _discarded->set(true);
 }
 
-void Discarded::set(const bool discarded) const
+void Discarded::reset(const bool discarded) const
 {
     _discarded->set(discarded);
 }
 
-void Discarded::set(sp<Boolean> discarded) const
+void Discarded::reset(sp<Boolean> discarded) const
 {
-    _discarded->set(std::move(discarded));
+    if(discarded)
+        _discarded->set(std::move(discarded));
+    else
+        _discarded->set(false);
 }
 
 }

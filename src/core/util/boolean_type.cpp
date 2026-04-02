@@ -138,19 +138,6 @@ sp<Boolean> BooleanType::wrap(sp<Boolean> self)
     return sp<Boolean>::make<BooleanWrapper>(std::move(self));
 }
 
-void BooleanType::set(const sp<BooleanWrapper>& self, sp<Boolean> value)
-{
-    if(value)
-        self->set(std::move(value));
-    else
-        self->set(false);
-}
-
-void BooleanType::set(const sp<BooleanWrapper>& self, const bool value)
-{
-    self->set(value);
-}
-
 void BooleanType::reset(const sp<BooleanWrapper>& self, sp<Boolean> value)
 {
     if(value)
@@ -159,7 +146,7 @@ void BooleanType::reset(const sp<BooleanWrapper>& self, sp<Boolean> value)
         self->set(false);
 }
 
-void BooleanType::reset(const sp<BooleanWrapper>& self, bool value)
+void BooleanType::reset(const sp<BooleanWrapper>& self, const bool value)
 {
     self->set(value);
 }

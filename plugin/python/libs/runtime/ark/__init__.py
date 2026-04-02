@@ -290,10 +290,7 @@ class _Var:
     def delegate(self, v):
         pass
 
-    def set(self, v):
-        pass
-
-    def reset(self, v:Self = None):
+    def reset(self, v = None):
         pass
 
     def freeze(self):
@@ -1312,9 +1309,6 @@ class Vec2(_Var):
     @property
     def delegate(self):
         return self
-
-    def set(self, val):
-        pass
 
     def transform(self, transform):
         return self._x, self._y

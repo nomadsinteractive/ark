@@ -258,22 +258,25 @@ int32_t IntegerType::val(const sp<Integer>& self)
     return self->val();
 }
 
-void IntegerType::set(const sp<Integer>& self, const int32_t value)
+void IntegerType::reset(const sp<Integer>& self, const int32_t value)
 {
     const sp<IntegerWrapper> nw = self.ensureInstance<IntegerWrapper>("Must be an IntegerWrapper instance(result of a wrap() function call) to set its value");
     nw->set(value);
 }
 
-void IntegerType::set(const sp<Integer>& self, const NamedHash& value)
+void IntegerType::reset(const sp<Integer>& self, const NamedHash& value)
 {
     const sp<IntegerWrapper> nw = self.ensureInstance<IntegerWrapper>("Must be an IntegerWrapper instance(result of a wrap() function call) to set its value");
     nw->set(value.hash());
 }
 
-void IntegerType::set(const sp<Integer>& self, sp<Integer> value)
+void IntegerType::reset(const sp<Integer>& self, sp<Integer> value)
 {
     const sp<IntegerWrapper> nw = self.ensureInstance<IntegerWrapper>("Must be an IntegerWrapper instance(result of a wrap() function call) to set its value");
-    nw->set(std::move(value));
+    if(value)
+        nw->set(std::move(value));
+    else
+        nw->set(0);
 }
 
 sp<Integer> IntegerType::wrap(const sp<Integer>& self)

@@ -47,11 +47,11 @@ public:
     static sp<Vec3> absolute(sp<Vec3> self);
 
 //  [[script::bindings::classmethod]]
-    static void set(const sp<VariableWrapper<V3>>& self, sp<Vec3> val);
+    static void reset(const sp<VariableWrapper<V3>>& self, const V3& val);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<VariableWrapper<V3>>& self, const V3& val);
+    static void reset(const sp<VariableWrapper<V3>>& self, sp<Vec3> val = nullptr);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<Vec3>& self, const V3& val);
+    static void reset(const sp<Vec3>& self, const V3& val);
 
 //  [[script::bindings::property]]
     static V3 val(const sp<Vec3>& self);

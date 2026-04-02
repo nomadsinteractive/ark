@@ -106,13 +106,13 @@ class Window:
 
     def show(self):
         if self.is_open is not None:
-            self.is_open.set(True)
+            self.is_open.reset(True)
         self.ready(_mark_studio.imgui)
         self.on_show()
 
     def close(self):
         if self.is_open is not None:
-            self.is_open.set(False)
+            self.is_open.reset(False)
         self.on_close()
 
     def discard(self):
@@ -390,7 +390,7 @@ class MarkStudio:
             if i.is_open:
                 i.show()
 
-        self._discarded.set(True)
+        self._discarded.reset(True)
         self._discarded = Boolean(False)
 
         self._imgui.show(self._discarded)
@@ -400,7 +400,7 @@ class MarkStudio:
         _mark_studio = None
 
         self._imgui = None
-        self._discarded.set(True)
+        self._discarded.reset(True)
         return True
 
     def register_window(self, window: Window):

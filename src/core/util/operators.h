@@ -277,7 +277,7 @@ public:
             : _idx(idx) {
         }
 
-        U operator()(T val) {
+        U operator()(const T& val) const {
             return static_cast<U>(val[_idx]);
         }
 
@@ -287,7 +287,7 @@ public:
 
     template<typename T> class Normalize {
     public:
-        T operator()(const T v) {
+        T operator()(const T& v) const {
             return Math::normalize(v);
         }
     };

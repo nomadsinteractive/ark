@@ -78,11 +78,11 @@ public:
     static int32_t val(const sp<Integer>& self);
 
 //  [[script::bindings::classmethod]]
-    static void set(const sp<Integer>& self, int32_t value);
+    static void reset(const sp<Integer>& self, int32_t value);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<Integer>& self, const NamedHash& value);
+    static void reset(const sp<Integer>& self, const NamedHash& value);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<Integer>& self, sp<Integer> value);
+    static void reset(const sp<Integer>& self, sp<Integer> value = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Integer> wrap(const sp<Integer>& self);
