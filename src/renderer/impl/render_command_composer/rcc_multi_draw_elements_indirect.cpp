@@ -139,18 +139,18 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     const auto& renderLayerItems = renderLayerSnapshot._elements;
     for(size_t i = 0; i < renderLayerItems.size(); ++i)
     {
-        const RenderLayerSnapshot::Element& s = renderLayerItems.at(i);
-        const Renderable::Snapshot& snapshot = s._snapshot;
-        if(reload || s._snapshot._state.contains(Renderable::RENDERABLE_STATE_DIRTY))
+        const Renderable::Snapshot& snapshot = renderLayerItems.at(i)._snapshot;
+        if(reload || snapshot._state.contains(Renderable::RENDERABLE_STATE_DIRTY))
             if(!snapshot._varyings_snapshot._sub_properties.empty())
                 if(const auto iter = _model_instances.find(i); iter != _model_instances.end())
                 {
                     if(!iter->second.isDynamicLayout())
                         iter->second.toDynamicLayout();
 
-                    for(const auto& [j, k] : snapshot._varyings_snapshot._sub_properties)
-                        if(Varyings::Divided subProperty = k.getDivided(1); subProperty._content.length() >= sizeof(M4))
-                            iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
+                    if(snapshot._state.contains(Renderable::RENDERABLE_STATE_VISIBLE))
+                        for(const auto& [j, k] : snapshot._varyings_snapshot._sub_properties)
+                            if(Varyings::Divided subProperty = k.getDivided(1); subProperty._content.length() >= sizeof(M4))
+                                iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
                 }
     }
 
@@ -162,8 +162,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     for(const IndirectCmds& i : _indirect_cmds.values())
         for(const auto& [nodeInstance, mesh] : i._mesh_instances)
         {
-            const RenderLayerSnapshot::Element& s = renderLayerItems.at(nodeInstance->snapshotIndex());
-            const Renderable::Snapshot& snapshot = s._snapshot;
+            const Renderable::Snapshot& snapshot = renderLayerItems.at(nodeInstance->snapshotIndex())._snapshot;
             if(reload || snapshot._state.contains(Renderable::RENDERABLE_STATE_DIRTY))
                 if(snapshot._varyings_snapshot._buffers.length() > 0)
                 {
@@ -192,16 +191,17 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
 
 void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnapshot& snapshot)
 {
-    size_t offset = 0;
     _indirect_cmds.clear();
     _model_instances.clear();
-    for(const RenderLayerSnapshot::Element& i : snapshot._elements)
-        if(i._snapshot._state.contains(Renderable::RENDERABLE_STATE_VISIBLE))
+    for(size_t i = 0; i < snapshot._elements.size(); ++i)
+    {
+        const RenderLayerSnapshot::Element& j = snapshot._elements.at(i);
+        if(j._snapshot._state.contains(Renderable::RENDERABLE_STATE_VISIBLE))
         {
-            const int32_t type = i._snapshot._type;
+            const int32_t type = j._snapshot._type;
             const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(type);
-            ModelInstance& modelInstance = _model_instances[offset];
-            modelInstance = ModelInstance(offset, modelLayout);
+            ModelInstance& modelInstance = _model_instances[i];
+            modelInstance = ModelInstance(i, modelLayout);
             for(const Node::WithTransform& j : modelLayout._node_layouts)
             {
                 const sp<NodeInstance> nodeInstance = sp<NodeInstance>::make(modelInstance, j._node->name().hash());
@@ -219,8 +219,8 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
                     modelIndirect._mesh_instances.push_back(MeshInstance{nodeInstance, meshLayout._mesh});
                 }
             }
-            offset ++;
         }
+    }
 }
 
 RCCMultiDrawElementsIndirect::NodeLayoutInstance::NodeLayoutInstance(const Node& node, const NodeLayoutInstance& parentLayout)

@@ -189,10 +189,12 @@ sp<CollisionShapeRef> createCollisionShape(const NamedHash& type, const Optional
 
 struct BtRigibodyObject {
     BtRigibodyObject(RigidbodyBullet btRigidbodyRef)
-        : _bt_rigidbody_ref(std::move(btRigidbodyRef))
+        : _collision_object_ref(btRigidbodyRef.collisionObjectRef()), _rigidbody_stub(btRigidbodyRef.stub()), _bt_rigidbody_ref(std::move(btRigidbodyRef))
     {
     }
 
+    sp<CollisionObjectRef> _collision_object_ref;
+    sp<Rigidbody::Stub> _rigidbody_stub;
     RigidbodyBullet _bt_rigidbody_ref;
 
     class ListFilter {
@@ -201,11 +203,13 @@ struct BtRigibodyObject {
 
         FilterAction operator() (const BtRigibodyObject& item) const
         {
-            const btCollisionObject* collisionObject = item._bt_rigidbody_ref.collisionObjectRef()->collisionObject();
+            const btCollisionObject* collisionObject = item._collision_object_ref->collisionObject();
             if(!collisionObject || collisionObject->getUserPointer() == nullptr)
                 return FILTER_ACTION_REMOVE;
-            if(!item._bt_rigidbody_ref.validate())
+
+            if(const RigidbodyBullet body = getRigidBodyFromCollisionObject(collisionObject); !body.validate())
                 return FILTER_ACTION_REMOVE;
+
             return item._bt_rigidbody_ref.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
         }
     };
@@ -401,7 +405,7 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
     const uint32_t timestamp = self->_stub->_timestamp;
     for(const BtRigibodyObject& i : self->_stub->_passive_objects)
     {
-        const Rigidbody::Stub& rigidbody = i._bt_rigidbody_ref.stub();
+        const Rigidbody::Stub& rigidbody = *i._rigidbody_stub;
         rigidbody._position.update(timestamp);
         rigidbody._rotation.update(timestamp);
         const V3 pos = rigidbody._position.val() + rigidbody._shape->origin();
@@ -410,7 +414,7 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
         transform.setIdentity();
         transform.setRotation(btQuaternion(quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w()));
         transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
-        i._bt_rigidbody_ref.collisionObjectRef()->collisionObject()->setWorldTransform(transform);
+        i._collision_object_ref->collisionObject()->setWorldTransform(transform);
     }
 
     for(auto iter = self->_stub->_mark_for_destroys.begin(); iter != self->_stub->_mark_for_destroys.end(); )

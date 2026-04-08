@@ -1,9 +1,7 @@
 #pragma once
 
-#include <list>
-#include <vector>
 
-#include "core/types/shared_ptr.h"
+#include "core/types/weak_ptr.h"
 
 #include "graphics/forwarding.h"
 
@@ -34,11 +32,11 @@ private:
     sp<VKRenderer> _renderer;
     VkPipelineStageFlags _stage_flags[8];
 
-    std::list<VkCommandBuffer> _submit_queue;
-    std::vector<VkSubmitInfo> _submit_infos;
-    std::vector<VkSemaphore> _wait_semaphores;
+    List<VkCommandBuffer> _submit_queue;
+    Vector<VkSubmitInfo> _submit_infos;
+    Vector<VkSemaphore> _wait_semaphores;
 
-    std::vector<sp<VKSemaphore>> _signal_semaphores;
+    Vector<WeakPtr<VKSemaphore>> _signal_semaphores;
 };
 
 }

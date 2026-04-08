@@ -20,6 +20,7 @@ public:
     RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
 
     bool validate() const;
+    [[deprecated]]
     bool unique() const;
 
     bool active() const override;

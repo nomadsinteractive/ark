@@ -21,7 +21,7 @@ sp<VKSemaphore> VKSubmitQueue::createSignalSemaphore()
     return semaphore;
 }
 
-void VKSubmitQueue::begin(VkSemaphore waitSemaphore)
+void VKSubmitQueue::begin(const VkSemaphore waitSemaphore)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     _submit_infos.clear();
@@ -44,13 +44,15 @@ void VKSubmitQueue::submit(const VkQueue queue)
         Vector<VkSemaphore> signalSemaphores;
         signalSemaphores.reserve(_signal_semaphores.size());
         for(auto iter = _signal_semaphores.begin(); iter != _signal_semaphores.end(); )
-            if(iter->unique())
-                iter = _signal_semaphores.erase(iter);
-            else
+        {
+            if(const sp<VKSemaphore> semaphore = iter->lock())
             {
-                signalSemaphores.push_back(iter->get()->vkSemaphore());
+                signalSemaphores.push_back(semaphore->vkSemaphore());
                 ++iter;
             }
+            else
+                iter = _signal_semaphores.erase(iter);
+        }
 
         VkSubmitInfo& firstSubmitInfo = _submit_infos.front();
         VkSubmitInfo& lastSubmitInfo = _submit_infos.back();

@@ -102,10 +102,6 @@ public:
         return _ptr.use_count() == 1;
     }
 
-    const std::shared_ptr<T>& ptr() const {
-        return _ptr;
-    };
-
 private:
     SharedPtr(T* instance, const Class* clazz) noexcept
         : _ptr(instance), _class(clazz) {

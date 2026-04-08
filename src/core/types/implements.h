@@ -33,9 +33,10 @@ template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_dow
     }
     if(const Class* clazz = Class::ensureClass<U>(); clazz && clazz->isInstance(id))
         return clazz->cast(Box(ptr.template cast<U>()), id);
-    if(sizeof...(INTERFACES) != 0)
+    if constexpr(sizeof...(INTERFACES) != 0)
        return _dynamic_down_cast<T, INTERFACES...>(ptr, id);
-    return {};
+    else
+        return {};
 }
 
 template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_up_cast(const Box& box) {
@@ -43,9 +44,10 @@ template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_up_
         const sp<U>& unpacked = box.toPtr<U>();
         return Box(unpacked.template cast<T>());
     }
-    if(sizeof...(INTERFACES) != 0)
+    if constexpr(sizeof...(INTERFACES) != 0)
        return _dynamic_up_cast<T, INTERFACES...>(box);
-    return {};
+    else
+        return {};
 }
 
 template<typename T, typename... INTERFACES> class ClassImpl final : public IClass {

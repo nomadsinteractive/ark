@@ -1,9 +1,5 @@
 #pragma once
 
-#include <mutex>
-#include <vector>
-#include <unordered_map>
-
 #include "core/collection/table.h"
 
 #include "renderer/forwarding.h"
@@ -87,7 +83,7 @@ private:
     Buffer _draw_indirect;
 
     Table<uint64_t, IndirectCmds> _indirect_cmds;
-    HashMap<size_t, ModelInstance> _model_instances;
+    Map<size_t, ModelInstance> _model_instances;
 };
 
 }

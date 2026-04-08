@@ -415,7 +415,13 @@ template<> ARK_PLUGIN_PYTHON_API Optional<TypeId> PyCast::toCppObject_impl<TypeI
     }
 
     if(const Optional<String> opt = toStringExact(object))
+    {
+#ifdef ARK_FLAG_PUBLISHING_BUILD
         return {TypeId(string_hash(opt.value().c_str()))};
+#else
+        return {TypeId(NamedHash(opt.value()).hash())};
+#endif
+    }
 
     if(const Optional<HashId> opt = toCppObject<HashId>(object))
         return {TypeId(opt.value())};

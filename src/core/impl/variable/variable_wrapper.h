@@ -8,7 +8,7 @@
 
 namespace ark {
 
-template<typename T> class VariableWrapper final : public Variable<T>, public Wrapper<Variable<T>>, Implements<VariableWrapper<T>, Variable<T>, Wrapper<Variable<T>>> {
+template<typename T> class VariableWrapper final : public Variable<T>, public Wrapper<Variable<T>>, Implements<VariableWrapper<T>, Variable<T>, Updatable, Wrapper<Variable<T>>> {
 public:
     VariableWrapper(sp<Variable<T>> delegate)
         : Wrapper<Variable<T>>(std::move(delegate)) {

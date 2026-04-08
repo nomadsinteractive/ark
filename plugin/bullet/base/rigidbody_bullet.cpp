@@ -43,7 +43,7 @@ RigidbodyBullet::RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> r
 
 bool RigidbodyBullet::validate() const
 {
-    if(_stub->_marked_for_destroy || !_stub->_collision_object_ref)
+    if(!_stub || _stub->_marked_for_destroy || !_stub->_collision_object_ref)
         return false;
 
     if(_stub->_rigidbody_stub->_ref->isDiscarded())
