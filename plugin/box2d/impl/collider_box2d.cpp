@@ -62,7 +62,7 @@ Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shap
             b2Shape_SetFilter(shapeIds[i], filter);
     }
 
-    return {body->rigidbodyStub(), nullptr, body};
+    return {body->rigidbodyStub(), body};
 }
 
 sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)

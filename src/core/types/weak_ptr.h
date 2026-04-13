@@ -44,10 +44,6 @@ public:
         return _weak_ptr.expired();
     }
 
-    bool unique() const {
-        return _weak_ptr.use_count() == 1;
-    }
-
     int32_t useCount() const {
         return _weak_ptr.use_count();
     }

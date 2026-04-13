@@ -1,12 +1,10 @@
 #include "app/components/rigidbody.h"
 
 #include "core/base/bean_factory.h"
-#include "core/base/ref_manager.h"
 #include "core/base/string.h"
 #include "core/components/discarded.h"
 #include "core/components/tags.h"
 #include "core/inf/variable.h"
-#include "core/types/global.h"
 #include "core/types/ref.h"
 #include "core/util/string_convert.h"
 
@@ -38,11 +36,6 @@ void Rigidbody::Stub::onEndContact(const Rigidbody& rigidBody) const
         _collision_callback->onEndContact(rigidBody);
 }
 
-Rigidbody::Rigidbody(BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded, sp<RigidbodyController> controller, const bool isShadow)
-    : _impl{sp<Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation)), nullptr, std::move(controller)}, _is_shadow(isShadow)
-{
-}
-
 Rigidbody::Rigidbody(Impl impl, const bool isShadow)
     : _impl(std::move(impl)), _is_shadow(isShadow)
 {
@@ -51,12 +44,7 @@ Rigidbody::Rigidbody(Impl impl, const bool isShadow)
 Rigidbody::~Rigidbody()
 {
     if(!_is_shadow)
-    {
-        if(_impl._stub->_ref->discarded())
-            _impl._collider->_orphan_impls.push_back(std::move(_impl));
-        else
-            _impl._stub->_ref->discard();
-    }
+        _impl._stub->_ref->discard();
 }
 
 void Rigidbody::discard()

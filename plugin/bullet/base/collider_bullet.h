@@ -76,7 +76,6 @@ private:
 private:
     sp<Stub> _stub;
     Map<sp<CollisionObjectRef>, ContactInfo> _contact_infos;
-    float _time_elapsed;
 };
 
 }

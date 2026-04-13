@@ -563,7 +563,6 @@ class Future(Runnable):
 
 
 class Ref:
-
     def __init__(self, refid: int):
         pass
 
@@ -586,9 +585,6 @@ class Ref:
         pass
 
     def to_entity(self) -> "Entity":
-        pass
-
-    def to_rigidbody(self) -> "Rigidbody":
         pass
 
 

@@ -54,11 +54,6 @@ bool RigidbodyBullet::validate() const
     return true;
 }
 
-bool RigidbodyBullet::unique() const
-{
-    return _stub.unique();
-}
-
 const sp<Ref>& RigidbodyBullet::ref() const
 {
     return _stub->_rigidbody_stub->_ref;

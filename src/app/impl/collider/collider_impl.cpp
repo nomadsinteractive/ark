@@ -305,9 +305,9 @@ Rigidbody::Impl ColliderImpl::createBody(const Rigidbody::BodyType type, sp<Shap
     CHECK(type == Rigidbody::BODY_TYPE_KINEMATIC || type == Rigidbody::BODY_TYPE_DYNAMIC || type == Rigidbody::BODY_TYPE_STATIC || type == Rigidbody::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
     if(!shape->implementation())
         shape = createShape(shape->type(), shape->optionalScale(), shape->origin());
-    const sp<RigidbodyImpl> rigidbodyImpl = _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
-    sp<Rigidbody::Stub> stub = rigidbodyImpl->_rigidbody_stub;
-    return Rigidbody::Impl{std::move(stub), nullptr, rigidbodyImpl};
+    const sp<RigidbodyImpl> rigidbodyController = _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
+    sp<Rigidbody::Stub> stub = rigidbodyController->_rigidbody_stub;
+    return {std::move(stub), rigidbodyController};
 }
 
 sp<Shape> ColliderImpl::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)

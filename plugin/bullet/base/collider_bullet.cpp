@@ -271,7 +271,7 @@ struct ColliderBullet::Stub final : Updatable {
 };
 
 ColliderBullet::ColliderBullet(const V3 gravity, sp<ModelLoader> modelLoader)
-    : _stub(sp<Stub>::make(gravity, std::move(modelLoader))), _time_elapsed(0)
+    : _stub(sp<Stub>::make(gravity, std::move(modelLoader)))
 {
     _stub->_dynamics_world->setInternalTickCallback(myInternalPreTickCallback, this, true);
     _stub->_dynamics_world->setInternalTickCallback(myInternalTickCallback, this);
@@ -293,7 +293,7 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
         sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(collisionObjectRef), type, std::move(shape), std::move(position), rotation, std::move(collisionFilter), std::move(discarded));
         sp<Rigidbody::Stub> stub = impl->stub();
         _stub->_passive_objects.emplace_back(BtRigibodyObject(*impl));
-        return {std::move(stub), nullptr, impl};
+        return {std::move(stub), impl};
     }
 
     CHECK(position, "Dynamic/Static rigidbody must have a position");
@@ -312,7 +312,7 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
     sp<Vec4> btRotation = type == Rigidbody::BODY_TYPE_STATIC ? sp<Vec4>::make<Vec4::Const>(quat) : sp<Vec4>::make<DynamicRotation>(std::move(motionState));
     sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btRigidbodyRef), type, std::move(shape), std::move(btPosition), std::move(btRotation), std::move(collisionFilter), std::move(discarded));
     sp<Rigidbody::Stub> stub = impl->stub();
-    return {std::move(stub), nullptr, impl};
+    return {std::move(stub), impl};
 }
 
 sp<Shape> ColliderBullet::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)
@@ -423,7 +423,7 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
             ++ iter;
 }
 
-void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, const btScalar timeStep)
+void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, const btScalar /*timeStep*/)
 {
     btDispatcher* dispatcher = dynamicsWorld->getDispatcher();
     const int32_t numManifolds = dispatcher->getNumManifolds();
@@ -477,17 +477,6 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, cons
             iter = self->_contact_infos.erase(iter);
         else
             ++iter;
-    }
-
-    self->_time_elapsed += timeStep;
-    if(self->_time_elapsed > 1.0f)
-    {
-        for(auto iter = self->_orphan_impls.begin(); iter != self->_orphan_impls.end(); )
-            if(iter->_stub->_ref->isDiscarded())
-                iter = self->_orphan_impls.erase(iter);
-            else
-                ++iter;
-        self->_time_elapsed = 0.0f;
     }
 }
 

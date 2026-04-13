@@ -46,12 +46,10 @@ public:
 
     struct Impl {
         sp<Stub> _stub;
-        sp<Collider> _collider;
         sp<RigidbodyController> _controller;
     };
 
 public:
-    Rigidbody(BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded, sp<RigidbodyController> controller, bool isShadow = false);
     Rigidbody(Impl impl, bool isShadow);
     ~Rigidbody() override;
 

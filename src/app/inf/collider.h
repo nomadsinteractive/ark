@@ -24,12 +24,7 @@ public:
     virtual sp<Constraint> createFixedConstraint(Rigidbody& rigidbodyA, Rigidbody& rigidbodyB) = 0;
 
 //  [[script::bindings::classmethod]]
-    static sp<Rigidbody> createBody(sp<Collider> self, Rigidbody::BodyType bodyType, sp<Shape> shape = nullptr, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr);
-
-protected:
-    std::deque<Rigidbody::Impl> _orphan_impls;
-
-    friend class Rigidbody;
+    static sp<Rigidbody> createBody(const sp<Collider>& self, Rigidbody::BodyType bodyType, sp<Shape> shape = nullptr, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr);
 };
 
 }
