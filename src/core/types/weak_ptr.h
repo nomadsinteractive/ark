@@ -23,11 +23,9 @@ public:
     }
 
     SharedPtr<T> lock() const {
-        std::shared_ptr<T> ptr = _weak_ptr.lock();
-        if(!ptr)
-            return nullptr;
-
-        return SharedPtr<T>(std::move(ptr), _weak_class);
+        if(std::shared_ptr<T> ptr = _weak_ptr.lock())
+            return SharedPtr<T>(std::move(ptr), _weak_class);
+        return nullptr;
     }
 
     SharedPtr<T> ensure() const {

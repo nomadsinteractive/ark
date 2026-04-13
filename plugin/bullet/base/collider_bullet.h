@@ -20,14 +20,6 @@ namespace ark::plugin::bullet {
 
 class ARK_PLUGIN_BULLET_API ColliderBullet final : public Collider, Implements<ColliderBullet, Collider> {
 public:
-    class [[deprecated]] RigidbodyImporter {
-    public:
-        virtual ~RigidbodyImporter() = default;
-
-        virtual void import(ColliderBullet& collider, const document& manifest) = 0;
-    };
-
-public:
     ColliderBullet(V3 gravity, sp<ModelLoader> modelLoader);
 
     Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr) override;
@@ -54,7 +46,6 @@ public:
     private:
         V3 _gravity;
         SafeBuilder<ModelLoader> _model_loader;
-        Vector<std::pair<sp<Builder<RigidbodyImporter>>, document>> _importers;
     };
 
 //  [[plugin::builder("PyBullet")]]

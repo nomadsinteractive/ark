@@ -339,7 +339,7 @@ sp<Bitmap> VKSwapChain::screenshot() const
     }
 
     sp<ByteArray> bytes = sp<ByteArray>::make<ByteArray::Casted<ColorComponent>>(sp<Array<ColorComponent>>::make<Array<ColorComponent>::Vector>(std::move(colorData)));
-    sp<Bitmap> bitmap = sp<Bitmap>::make<Bitmap>(_width, _height, sizeof(ColorComponent) * _width, 3, std::move(bytes));
+    sp<Bitmap> bitmap = sp<Bitmap>::make<Bitmap>(_width, _height, static_cast<uint32_t>(sizeof(ColorComponent) * _width), 3, std::move(bytes));
 
     // Clean up resources
     vkUnmapMemory(device, dstImageMemory);

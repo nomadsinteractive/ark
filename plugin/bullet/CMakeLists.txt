@@ -12,7 +12,6 @@ ark_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(base LOCAL_SRC_LIST)
-aux_source_directory(importer LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(bullet core ark::plugin::bullet base rigid_body importer)

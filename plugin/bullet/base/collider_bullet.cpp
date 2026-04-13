@@ -5,6 +5,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
+#include "core/types/ref.h"
 #include "core/util/boolean_type.h"
 
 #include "graphics/base/v3.h"
@@ -24,7 +25,6 @@
 #include "bullet/base/collision_object_ref.h"
 #include "bullet/base/collision_shape_ref.h"
 #include "bullet/base/rigidbody_bullet.h"
-#include "core/types/ref.h"
 
 
 namespace ark::plugin::bullet {
@@ -188,14 +188,13 @@ sp<CollisionShapeRef> createCollisionShape(const NamedHash& type, const Optional
 }
 
 struct BtRigibodyObject {
-    BtRigibodyObject(RigidbodyBullet btRigidbodyRef)
-        : _collision_object_ref(btRigidbodyRef.collisionObjectRef()), _rigidbody_stub(btRigidbodyRef.stub()), _bt_rigidbody_ref(std::move(btRigidbodyRef))
+    BtRigibodyObject(const RigidbodyBullet& btRigidbodyRef)
+        : _collision_object_ref(btRigidbodyRef.collisionObjectRef()), _rigidbody_stub(btRigidbodyRef.stub())
     {
     }
 
     sp<CollisionObjectRef> _collision_object_ref;
     sp<Rigidbody::Stub> _rigidbody_stub;
-    RigidbodyBullet _bt_rigidbody_ref;
 
     class ListFilter {
     public:
@@ -210,7 +209,7 @@ struct BtRigibodyObject {
             if(const RigidbodyBullet body = getRigidBodyFromCollisionObject(collisionObject); !body.validate())
                 return FILTER_ACTION_REMOVE;
 
-            return item._bt_rigidbody_ref.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+            return FILTER_ACTION_NONE;
         }
     };
 };
@@ -535,15 +534,11 @@ sp<CollisionShapeRef> ColliderBullet::ensureCollisionShapeRef(const NamedHash& t
 ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest)
     : _gravity(Documents::getAttribute<V3>(manifest, "gravity", {0, -9.8f, 0})), _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL_LOADER))
 {
-    for(const auto& i : manifest->children("import"))
-        _importers.emplace_back(factory.ensureBuilder<RigidbodyImporter>(i), i);
 }
 
 sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)
 {
     const sp<ColliderBullet> collider = sp<ColliderBullet>::make(_gravity, _model_loader.build(args));
-    for(const auto& [k, v] : _importers)
-        k->build(args)->import(collider, v);
     Ark::instance().renderController()->addPreComposeUpdatable(collider->_stub, sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 0));
     return collider;
 }
