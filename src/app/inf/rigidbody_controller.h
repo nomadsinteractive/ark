@@ -5,11 +5,15 @@
 
 #include "graphics/forwarding.h"
 
+#include "app/components/rigidbody.h"
+
 namespace ark {
 
 class ARK_API RigidbodyController {
 public:
     virtual ~RigidbodyController() = default;
+
+    virtual const sp<Rigidbody::Stub>& stub() const = 0;
 
 //  [[script::bindings::property]]
     virtual bool active() const = 0;

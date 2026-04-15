@@ -62,7 +62,7 @@ Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shap
             b2Shape_SetFilter(shapeIds[i], filter);
     }
 
-    return {body->rigidbodyStub(), body};
+    return {body->stub(), body};
 }
 
 sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)
@@ -225,16 +225,16 @@ void ColliderBox2D::onBeginContact(const b2ContactBeginTouchEvent& event)
         const b2Manifold& manifold = event.manifold;
         const V3 normal = V3(manifold.normal.x, manifold.normal.y, 0);
         const b2ManifoldPoint& contactPoint = manifold.points[0];
-        const RefId id1 = s1->rigidbodyStub()->_ref->id(), id2 = s2->rigidbodyStub()->_ref->id();
-        if(!s1->_stub->_contacts.contains(id2))
+        const RefId id1 = s1->stub()->_ref->id(), id2 = s2->stub()->_ref->id();
+        if(!s1->_box2d_stub->_contacts.contains(id2))
         {
-            s1->_stub->_contacts.insert(id2);
-            s1->_rigidbody_stub->onBeginContact(s2->makeShadow(), CollisionManifold(V3(contactPoint.point.x, contactPoint.point.y, 0), normal));
+            s1->_box2d_stub->_contacts.insert(id2);
+            s1->_stub->onBeginContact(s2->makeShadow(), CollisionManifold(V3(contactPoint.point.x, contactPoint.point.y, 0), normal));
         }
-        if(!s2->_stub->_contacts.contains(id1))
+        if(!s2->_box2d_stub->_contacts.contains(id1))
         {
-            s2->_stub->_contacts.insert(id1);
-            s2->_rigidbody_stub->onBeginContact(s1->makeShadow(), CollisionManifold(V3(contactPoint.point.x, contactPoint.point.y, 0), -normal));
+            s2->_box2d_stub->_contacts.insert(id1);
+            s2->_stub->onBeginContact(s1->makeShadow(), CollisionManifold(V3(contactPoint.point.x, contactPoint.point.y, 0), -normal));
         }
     }
 }
@@ -245,18 +245,18 @@ void ColliderBox2D::onEndContact(const b2ContactEndTouchEvent& event)
     const RigidbodyBox2D* s2 = static_cast<RigidbodyBox2D*>(b2Body_GetUserData(b2Shape_GetBody(event.shapeIdB)));
     if(s1 && s2)
     {
-        const sp<RigidbodyBox2D::Stub>& body1 = s1->_stub;
-        const sp<RigidbodyBox2D::Stub>& body2 = s2->_stub;
-        const RefId id1 = s1->rigidbodyStub()->_ref->id(), id2 = s2->rigidbodyStub()->_ref->id();
+        const sp<RigidbodyBox2D::Stub>& body1 = s1->_box2d_stub;
+        const sp<RigidbodyBox2D::Stub>& body2 = s2->_box2d_stub;
+        const RefId id1 = s1->stub()->_ref->id(), id2 = s2->stub()->_ref->id();
         if(const auto it1 = body1->_contacts.find(id2); it1 != body1->_contacts.end())
         {
             body1->_contacts.erase(it1);
-            s1->_rigidbody_stub->onEndContact(s2->makeShadow());
+            s1->_stub->onEndContact(s2->makeShadow());
         }
         if(const auto it2 = body2->_contacts.find(id1); it2 != body2->_contacts.end())
         {
             body2->_contacts.erase(it2);
-            s2->_rigidbody_stub->onEndContact(s1->makeShadow());
+            s2->_stub->onEndContact(s1->makeShadow());
         }
     }
 }

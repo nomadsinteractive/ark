@@ -90,6 +90,11 @@ public:
         return {Rigidbody::Impl{_rigidbody_stub, nullptr}, true};
     }
 
+    const sp<Rigidbody::Stub>& stub() const override
+    {
+        return _rigidbody_stub;
+    }
+
     bool active() const override
     {
         return true;

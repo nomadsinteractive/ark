@@ -164,42 +164,42 @@ RigidbodyBox2D::RigidbodyBox2D(const ColliderBox2D& world, Rigidbody::BodyType t
 
 //TODO: Manual rotation
 RigidbodyBox2D::RigidbodyBox2D(const sp<Stub>& stub, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const OptionalVar<Numeric>& rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
-    : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, sp<ark::Shape>::make(0, size), sp<_RigidBodyPosition>::make(stub, position), sp<Vec4>::make<RotationAxisTheta>(sp<Vec3>::make<Vec3::Const>(V3(constants::AXIS_Z)), sp<Numeric>::make<_RigidBodyRotation>(stub)), std::move(collisionFilter))),
-      _stub(stub)
+    : _stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, sp<ark::Shape>::make(0, size), sp<_RigidBodyPosition>::make(stub, position), sp<Vec4>::make<RotationAxisTheta>(sp<Vec3>::make<Vec3::Const>(V3(constants::AXIS_Z)), sp<Numeric>::make<_RigidBodyRotation>(stub)), std::move(collisionFilter))),
+      _box2d_stub(stub)
 {
-    b2Body_SetUserData(_stub->_body, this);
+    b2Body_SetUserData(_box2d_stub->_body, this);
 }
 
-const sp<Rigidbody::Stub>& RigidbodyBox2D::rigidbodyStub() const
+const sp<Rigidbody::Stub>& RigidbodyBox2D::stub() const
 {
-    return _rigidbody_stub;
+    return _stub;
 }
 
 b2BodyId RigidbodyBox2D::body() const
 {
-    return _stub->body();
+    return _box2d_stub->body();
 }
 
 float RigidbodyBox2D::angle()
 {
-    return b2Rot_GetAngle(b2Body_GetTransform(_stub->body()).q);
+    return b2Rot_GetAngle(b2Body_GetTransform(_box2d_stub->body()).q);
 }
 
 void RigidbodyBox2D::setAngle(float rad)
 {
-    const b2Vec2 pos = b2Body_GetPosition(_stub->body());
-    b2Body_SetTransform(_stub->body(), pos, b2MakeRot(rad));
+    const b2Vec2 pos = b2Body_GetPosition(_box2d_stub->body());
+    b2Body_SetTransform(_box2d_stub->body(), pos, b2MakeRot(rad));
 }
 
 V3 RigidbodyBox2D::position() const
 {
-    return _rigidbody_stub->_position.val();
+    return _stub->_position.val();
 }
 
 void RigidbodyBox2D::setPosition(const V3& position)
 {
-    const b2Rot rot = b2Body_GetTransform(_stub->body()).q;
-    b2Body_SetTransform(_stub->body(), {position.x(), position.y()}, rot);
+    const b2Rot rot = b2Body_GetTransform(_box2d_stub->body()).q;
+    b2Body_SetTransform(_box2d_stub->body(), {position.x(), position.y()}, rot);
 }
 
 V3 RigidbodyBox2D::centralForce() const
@@ -209,23 +209,23 @@ V3 RigidbodyBox2D::centralForce() const
 
 void RigidbodyBox2D::setCentralForce(const V3& force)
 {
-    b2Body_ApplyForceToCenter(_stub->body(), {force.x(), force.y()}, true);
+    b2Body_ApplyForceToCenter(_box2d_stub->body(), {force.x(), force.y()}, true);
 }
 
 V3 RigidbodyBox2D::linearVelocity() const
 {
-    const b2Vec2 velocity = b2Body_GetLinearVelocity(_stub->body());
+    const b2Vec2 velocity = b2Body_GetLinearVelocity(_box2d_stub->body());
     return {velocity.x, velocity.y, 0};
 }
 
 V3 RigidbodyBox2D::angularVelocity() const
 {
-    return V3(0, 0, b2Body_GetAngularVelocity(_stub->body()));
+    return V3(0, 0, b2Body_GetAngularVelocity(_box2d_stub->body()));
 }
 
 void RigidbodyBox2D::setAngularVelocity(const V3& velocity)
 {
-    b2Body_SetAngularVelocity(_stub->body(), velocity.z());
+    b2Body_SetAngularVelocity(_box2d_stub->body(), velocity.z());
 }
 
 V3 RigidbodyBox2D::angularFactor() const
@@ -239,7 +239,7 @@ void RigidbodyBox2D::setAngularFactor(const V3& /*factor*/)
 
 void RigidbodyBox2D::setLinearVelocity(const V3& velocity)
 {
-    b2Body_SetLinearVelocity(_stub->body(), {velocity.x(), velocity.y()});
+    b2Body_SetLinearVelocity(_box2d_stub->body(), {velocity.x(), velocity.y()});
 }
 
 V3 RigidbodyBox2D::linearFactor() const
@@ -253,13 +253,13 @@ void RigidbodyBox2D::setLinearFactor(const V3& factor)
 
 void RigidbodyBox2D::applyCentralImpulse(const V3& impulse)
 {
-    b2Body_ApplyLinearImpulseToCenter(_stub->body(), {impulse.x(), impulse.y()}, true);
+    b2Body_ApplyLinearImpulseToCenter(_box2d_stub->body(), {impulse.x(), impulse.y()}, true);
 }
 
 float RigidbodyBox2D::friction() const
 {
     b2ShapeId shapeIds[1];
-    const int32_t count = b2Body_GetShapes(_stub->body(), shapeIds, 1);
+    const int32_t count = b2Body_GetShapes(_box2d_stub->body(), shapeIds, 1);
     if(count > 0)
         return b2Shape_GetFriction(shapeIds[0]);
     return 0;
@@ -268,77 +268,77 @@ float RigidbodyBox2D::friction() const
 void RigidbodyBox2D::setFriction(float friction)
 {
     b2ShapeId shapeIds[128];
-    const int32_t count = b2Body_GetShapes(_stub->body(), shapeIds, 128);
+    const int32_t count = b2Body_GetShapes(_box2d_stub->body(), shapeIds, 128);
     for(int32_t i = 0; i < count; i++)
         b2Shape_SetFriction(shapeIds[i], friction);
 }
 
 float RigidbodyBox2D::gravityScale() const
 {
-    return b2Body_GetGravityScale(_stub->body());
+    return b2Body_GetGravityScale(_box2d_stub->body());
 }
 
 void RigidbodyBox2D::setGravityScale(float scale)
 {
-    b2Body_SetGravityScale(_stub->body(), scale);
+    b2Body_SetGravityScale(_box2d_stub->body(), scale);
 }
 
 bool RigidbodyBox2D::active() const
 {
-    return b2Body_IsAwake(_stub->_body);
+    return b2Body_IsAwake(_box2d_stub->_body);
 }
 
 void RigidbodyBox2D::setActive(const bool active)
 {
-    b2Body_SetAwake(_stub->_body, active);
+    b2Body_SetAwake(_box2d_stub->_body, active);
 }
 
 float RigidbodyBox2D::mass() const
 {
-    return b2Body_GetMass(_stub->body());
+    return b2Body_GetMass(_box2d_stub->body());
 }
 
 void RigidbodyBox2D::setMass(const float mass)
 {
-    b2MassData massData = b2Body_GetMassData(_stub->body());
+    b2MassData massData = b2Body_GetMassData(_box2d_stub->body());
     massData.mass = mass;
-    b2Body_SetMassData(_stub->body(), massData);
+    b2Body_SetMassData(_box2d_stub->body(), massData);
 }
 
 void RigidbodyBox2D::applyTorque(float torque, bool wake)
 {
-    b2Body_ApplyTorque(_stub->_body, torque, wake);
+    b2Body_ApplyTorque(_box2d_stub->_body, torque, wake);
 }
 
 void RigidbodyBox2D::applyForce(const V2& force, const V2& point, bool wake)
 {
-    b2Body_ApplyForce(_stub->_body, {force.x(), force.y()}, {point.x(), point.y()}, wake);
+    b2Body_ApplyForce(_box2d_stub->_body, {force.x(), force.y()}, {point.x(), point.y()}, wake);
 }
 
 void RigidbodyBox2D::applyCentralForce(const V3& force)
 {
-    b2Body_ApplyForceToCenter(_stub->_body, {force.x(), force.y()}, true);
+    b2Body_ApplyForceToCenter(_box2d_stub->_body, {force.x(), force.y()}, true);
 }
 
 void RigidbodyBox2D::applyLinearImpulse(const V2& impulse, const V2& point, bool wake)
 {
-    b2Body_ApplyLinearImpulse(_stub->_body, {impulse.x(), impulse.y()}, {point.x(), point.y()}, true);
+    b2Body_ApplyLinearImpulse(_box2d_stub->_body, {impulse.x(), impulse.y()}, {point.x(), point.y()}, true);
 }
 
 void RigidbodyBox2D::applyAngularImpulse(float impulse, bool wake)
 {
-    b2Body_ApplyAngularImpulse(_stub->_body, impulse, wake);
+    b2Body_ApplyAngularImpulse(_box2d_stub->_body, impulse, wake);
 }
 
 void RigidbodyBox2D::setTransform(const V2& position, float angle)
 {
-    b2Body_SetTransform(_stub->_body, {position.x(), position.y()}, b2MakeRot(angle));
+    b2Body_SetTransform(_box2d_stub->_body, {position.x(), position.y()}, b2MakeRot(angle));
 }
 
 sp<Future> RigidbodyBox2D::applyLinearVelocity(const sp<Vec2>& velocity)
 {
     sp<Future> future = sp<Future>::make();
-    sp<ManualLinearVelocity> task = sp<ManualLinearVelocity>::make(_stub, velocity, future);
+    sp<ManualLinearVelocity> task = sp<ManualLinearVelocity>::make(_box2d_stub, velocity, future);
     Ark::instance().applicationContext()->addPreComposeRunnable(std::move(task), future->isDoneOrCanceled());
     return future;
 }
@@ -346,14 +346,14 @@ sp<Future> RigidbodyBox2D::applyLinearVelocity(const sp<Vec2>& velocity)
 sp<Future> RigidbodyBox2D::applyRotate(const sp<Numeric>& rotate)
 {
     sp<Future> future = sp<Future>::make();
-    sp<Runnable> task = sp<ManualApplyRotate>::make(_stub, rotate, future);
+    sp<Runnable> task = sp<ManualApplyRotate>::make(_box2d_stub, rotate, future);
     Ark::instance().applicationContext()->addPreComposeRunnable(std::move(task), future->isDoneOrCanceled());
     return future;
 }
 
 Rigidbody RigidbodyBox2D::makeShadow() const
 {
-    return {{_rigidbody_stub, nullptr}, true};
+    return {{_stub, nullptr}, true};
 }
 
 RigidbodyBox2D::Stub::Stub(const ColliderBox2D& world, b2BodyId body)

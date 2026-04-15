@@ -37,7 +37,7 @@ public:
     RigidbodyBox2D(const ColliderBox2D& world, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const OptionalVar<Numeric>& rotate, sp<CollisionFilter> collisionFilter, const BodyCreateInfo& createInfo);
     RigidbodyBox2D(const sp<Stub>& stub, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const OptionalVar<Numeric>& rotate, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded = nullptr);
 
-    const sp<Rigidbody::Stub>& rigidbodyStub() const;
+    const sp<Rigidbody::Stub>& stub() const override;
     b2BodyId body() const;
 
     float angle();
@@ -95,8 +95,8 @@ public:
     Rigidbody makeShadow() const;
 
 private:
-    sp<Rigidbody::Stub> _rigidbody_stub;
-    sp<Stub> _stub;
+    sp<Rigidbody::Stub> _stub;
+    sp<Stub> _box2d_stub;
 
     friend class ColliderBox2D;
 };

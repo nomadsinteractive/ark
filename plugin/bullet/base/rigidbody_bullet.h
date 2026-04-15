@@ -52,7 +52,7 @@ public:
     void setMass(float mass) override;
 
     const sp<Ref>& ref() const;
-    const sp<Rigidbody::Stub>& stub() const;
+    const sp<Rigidbody::Stub>& stub() const override;
 
     Rigidbody makeShadow() const;
     const sp<CollisionCallback>& collisionCallback() const;
