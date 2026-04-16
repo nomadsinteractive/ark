@@ -277,7 +277,7 @@ ColliderBullet::ColliderBullet(const V3 gravity, sp<ModelLoader> modelLoader)
     _stub->_dynamics_world->setInternalTickCallback(myInternalTickCallback, this);
 }
 
-Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
+sp<RigidbodyController> ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
 {
     sp<CollisionShapeRef> cs = shape->asImplementation<CollisionShapeRef>();
     if(!cs)
@@ -291,9 +291,8 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
         sp<CollisionObjectRef> collisionObjectRef = type == Rigidbody::BODY_TYPE_KINEMATIC ? makeRigidBody(btDynamicWorld(), std::move(cs), nullptr, type, 0, collisionFilter)
                                                                                            : makeGhostObject(btDynamicWorld(), std::move(cs), type, collisionFilter);
         sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(collisionObjectRef), type, std::move(shape), std::move(position), rotation, std::move(collisionFilter), std::move(discarded));
-        sp<Rigidbody::Stub> stub = impl->stub();
         _stub->_passive_objects.emplace_back(BtRigibodyObject(*impl));
-        return {std::move(stub), impl};
+        return impl;
     }
 
     CHECK(position, "Dynamic/Static rigidbody must have a position");
@@ -310,9 +309,7 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
     sp<CollisionObjectRef> btRigidbodyRef = makeRigidBody(btDynamicWorld(), std::move(cs), motionState, type, mass, collisionFilter);
     sp<Vec3> btPosition = type == Rigidbody::BODY_TYPE_STATIC ? sp<Vec3>::make<Vec3::Const>(pos - origin) : sp<Vec3>::make<DynamicPosition>(motionState, origin);
     sp<Vec4> btRotation = type == Rigidbody::BODY_TYPE_STATIC ? sp<Vec4>::make<Vec4::Const>(quat) : sp<Vec4>::make<DynamicRotation>(std::move(motionState));
-    sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btRigidbodyRef), type, std::move(shape), std::move(btPosition), std::move(btRotation), std::move(collisionFilter), std::move(discarded));
-    sp<Rigidbody::Stub> stub = impl->stub();
-    return {std::move(stub), impl};
+    return sp<RigidbodyBullet>::make(*this, std::move(btRigidbodyRef), type, std::move(shape), std::move(btPosition), std::move(btRotation), std::move(collisionFilter), std::move(discarded));
 }
 
 sp<Shape> ColliderBullet::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)

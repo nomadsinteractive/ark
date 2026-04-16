@@ -87,7 +87,7 @@ public:
 
     Rigidbody makeShadow() const
     {
-        return {Rigidbody::Impl{_rigidbody_stub, nullptr}, true};
+        return {_rigidbody_stub, nullptr, true};
     }
 
     const sp<Rigidbody::Stub>& stub() const override
@@ -305,14 +305,12 @@ ColliderImpl::ColliderImpl(Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>
     renderController.addPreComposeUpdatable(_stub, sp<Boolean>::make<BooleanByWeakRef<Stub>>(_stub, 1));
 }
 
-Rigidbody::Impl ColliderImpl::createBody(const Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
+sp<RigidbodyController> ColliderImpl::createBody(const Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
 {
     CHECK(type == Rigidbody::BODY_TYPE_KINEMATIC || type == Rigidbody::BODY_TYPE_DYNAMIC || type == Rigidbody::BODY_TYPE_STATIC || type == Rigidbody::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
     if(!shape->implementation())
         shape = createShape(shape->type(), shape->optionalScale(), shape->origin());
-    const sp<RigidbodyImpl> rigidbodyController = _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
-    sp<Rigidbody::Stub> stub = rigidbodyController->_rigidbody_stub;
-    return {std::move(stub), rigidbodyController};
+    return _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
 }
 
 sp<Shape> ColliderImpl::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)

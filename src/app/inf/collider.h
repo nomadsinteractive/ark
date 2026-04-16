@@ -15,7 +15,7 @@ class ARK_API Collider {
 public:
     virtual ~Collider() = default;
 
-    virtual Rigidbody::Impl createBody(Rigidbody::BodyType bodyType, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded) = 0;
+    virtual sp<RigidbodyController> createBody(Rigidbody::BodyType bodyType, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded) = 0;
 //  [[script::bindings::auto]]
     virtual sp<Shape> createShape(const NamedHash& type, Optional<V3> scale = {}, const V3& origin = V3(0)) = 0;
 //  [[script::bindings::auto]]

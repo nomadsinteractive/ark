@@ -36,20 +36,20 @@ void Rigidbody::Stub::onEndContact(const Rigidbody& rigidBody) const
         _collision_callback->onEndContact(rigidBody);
 }
 
-Rigidbody::Rigidbody(Impl impl, const bool isShadow)
-    : _impl(std::move(impl)), _is_shadow(isShadow)
+Rigidbody::Rigidbody(sp<Stub> stub, sp<RigidbodyController> controller, const bool isShadow)
+    : _stub(std::move(stub)), _controller(std::move(controller)), _is_shadow(isShadow)
 {
 }
 
 Rigidbody::~Rigidbody()
 {
     if(!_is_shadow)
-        _impl._stub->_ref->discard();
+        _stub->_ref->discard();
 }
 
 void Rigidbody::discard()
 {
-    _impl._stub->_ref->discard();
+    _stub->_ref->discard();
 }
 
 void Rigidbody::onWire(const WiringContext& context, const Box& self)
@@ -57,100 +57,100 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
     if(type() == BODY_TYPE_DYNAMIC)
     {
         if(const sp<Translation> translation = context.getInterface<Translation>())
-            translation->reset(_impl._stub->_position.toVar());
+            translation->reset(_stub->_position.toVar());
         if(const sp<Rotation> rotation = context.getInterface<Rotation>())
-            rotation->reset(_impl._stub->_rotation.toVar());
+            rotation->reset(_stub->_rotation.toVar());
     }
     else
     {
         if(sp<Vec3> position = context.getComponent<Translation>())
-            _impl._stub->_position.reset(std::move(position));
+            _stub->_position.reset(std::move(position));
         if(sp<Vec4> rotation = context.getComponent<Rotation>())
-            _impl._stub->_rotation.reset(std::move(rotation));
+            _stub->_rotation.reset(std::move(rotation));
     }
 
     if(sp<Boolean> discarded = context.getComponent<Discarded>())
-        _impl._stub->_ref->setDiscarded(std::move(discarded));
+        _stub->_ref->setDiscarded(std::move(discarded));
 
-    if(!_impl._stub->_collision_callback)
+    if(!_stub->_collision_callback)
         if(auto collisionCallback = context.getComponent<CollisionCallback>())
-            _impl._stub->_collision_callback = std::move(collisionCallback);
+            _stub->_collision_callback = std::move(collisionCallback);
 
     if(sp<Tags> tags = context.getComponent<Tags>())
-        _impl._stub->_tags = std::move(tags);
+        _stub->_tags = std::move(tags);
 }
 
 RefId Rigidbody::id() const
 {
-    return _impl._stub->_ref->id();
+    return _stub->_ref->id();
 }
 
 Rigidbody::BodyType Rigidbody::type() const
 {
-    return _impl._stub->_type;
+    return _stub->_type;
 }
 
 const sp<Shape>& Rigidbody::shape() const
 {
-    return _impl._stub->_shape;
+    return _stub->_shape;
 }
 
 const OptionalVar<Vec3>& Rigidbody::position() const
 {
-    return _impl._stub->_position;
+    return _stub->_position;
 }
 
 const OptionalVar<Vec4>& Rigidbody::rotation() const
 {
-    return _impl._stub->_rotation;
+    return _stub->_rotation;
 }
 
 const OptionalVar<Boolean>& Rigidbody::discarded() const
 {
-    return _impl._stub->_ref->discarded();
+    return _stub->_ref->discarded();
 }
 
 const sp<CollisionCallback>& Rigidbody::collisionCallback() const
 {
-    return _impl._stub->_collision_callback;
+    return _stub->_collision_callback;
 }
 
 void Rigidbody::setCollisionCallback(sp<CollisionCallback> collisionCallback)
 {
-    _impl._stub->_collision_callback = std::move(collisionCallback);
+    _stub->_collision_callback = std::move(collisionCallback);
 }
 
 const sp<CollisionFilter>& Rigidbody::collisionFilter() const
 {
-    return _impl._stub->_collision_filter;
+    return _stub->_collision_filter;
 }
 
 void Rigidbody::setCollisionFilter(sp<CollisionFilter> collisionFilter)
 {
-    _impl._stub->_collision_filter = std::move(collisionFilter);
+    _stub->_collision_filter = std::move(collisionFilter);
 }
 
 Box Rigidbody::tag() const
 {
-    return _impl._stub->_tags ? _impl._stub->_tags->tag() : nullptr;
+    return _stub->_tags ? _stub->_tags->tag() : nullptr;
 }
 
 void Rigidbody::setTag(Box tag)
 {
-    if(_impl._stub->_tags)
-        _impl._stub->_tags->setTag(0, std::move(tag));
+    if(_stub->_tags)
+        _stub->_tags->setTag(0, std::move(tag));
     else
-        _impl._stub->_tags = sp<Tags>::make(std::move(tag));
+        _stub->_tags = sp<Tags>::make(std::move(tag));
 }
 
 const sp<RigidbodyController>& Rigidbody::controller() const
 {
-    return _impl._controller;
+    return _controller;
 }
 
 sp<Rigidbody> Rigidbody::makeShadow() const
 {
-    return sp<Rigidbody>::make(_impl, true);
+    return sp<Rigidbody>::make(_stub, _controller, true);
 }
 
 Rigidbody::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -183,12 +183,12 @@ template<> ARK_API Rigidbody::BodyType StringConvert::eval<Rigidbody::BodyType>(
 
 void Rigidbody::onBeginContact(const Rigidbody& rigidbody, const CollisionManifold& manifold) const
 {
-    _impl._stub->onBeginContact(rigidbody, manifold);
+    _stub->onBeginContact(rigidbody, manifold);
 }
 
 void Rigidbody::onEndContact(const Rigidbody& rigidbody) const
 {
-    _impl._stub->onEndContact(rigidbody);
+    _stub->onEndContact(rigidbody);
 }
 
 Rigidbody::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)

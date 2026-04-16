@@ -22,7 +22,7 @@ class ARK_PLUGIN_BULLET_API ColliderBullet final : public Collider, Implements<C
 public:
     ColliderBullet(V3 gravity, sp<ModelLoader> modelLoader);
 
-    Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr) override;
+    sp<RigidbodyController> createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr) override;
     sp<Shape> createShape(const NamedHash& type, Optional<V3> scale, const V3& origin) override;
     sp<Constraint> createFixedConstraint(Rigidbody& rigidbodyA, Rigidbody& rigidbodyB) override;
     Vector<RayCastManifold> rayCast(V3 from, V3 to, const sp<CollisionFilter>& collisionFilter = nullptr) override;

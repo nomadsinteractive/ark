@@ -38,14 +38,14 @@ void ColliderBox2D::run()
     _stub->run();
 }
 
-Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
+sp<ark::RigidbodyController> ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
 {
     const auto iter = _stub->_body_manifests.find(shape->type().hash());
     CHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-type: %ud not found", shape->type().hash());
     const BodyCreateInfo& manifest = iter->second;
     const sp<Rotation> rot = rotation.asInstance<Rotation>();
     const sp<RotationAxisTheta> axisTheta = rot ? rot.asInstance<RotationAxisTheta>() : sp<RotationAxisTheta>();
-    const sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->optionalScale().value(), axisTheta ? axisTheta->theta() : nullptr, std::move(collisionFilter), manifest);
+    sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->optionalScale().value(), axisTheta ? axisTheta->theta() : nullptr, std::move(collisionFilter), manifest);
     if(axisTheta)
         body->setAngle(axisTheta->theta()->val());
     CHECK(!discarded, "Unimplemented");
@@ -62,7 +62,7 @@ Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shap
             b2Shape_SetFilter(shapeIds[i], filter);
     }
 
-    return {body->stub(), body};
+    return body;
 }
 
 sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)

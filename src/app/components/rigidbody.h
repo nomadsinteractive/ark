@@ -44,13 +44,8 @@ public:
         sp<Tags> _tags;
     };
 
-    struct Impl {
-        sp<Stub> _stub;
-        sp<RigidbodyController> _controller;
-    };
-
 public:
-    Rigidbody(Impl impl, bool isShadow);
+    Rigidbody(sp<Stub> stub, sp<RigidbodyController> controller, bool isShadow);
     ~Rigidbody() override;
 
     void onWire(const WiringContext& context, const Box& self) override;
@@ -125,7 +120,8 @@ public:
     };
 
 protected:
-    Impl _impl;
+    sp<Stub> _stub;
+    sp<RigidbodyController> _controller;
     bool _is_shadow;
 };
 

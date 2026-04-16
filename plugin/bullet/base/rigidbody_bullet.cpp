@@ -71,7 +71,7 @@ const sp<CollisionCallback>& RigidbodyBullet::collisionCallback() const
 
 Rigidbody RigidbodyBullet::makeShadow() const
 {
-    return {{_stub->_rigidbody_stub, nullptr}, true};
+    return {_stub->_rigidbody_stub, nullptr, true};
 }
 
 bool RigidbodyBullet::active() const

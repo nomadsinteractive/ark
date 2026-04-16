@@ -353,7 +353,7 @@ sp<Future> RigidbodyBox2D::applyRotate(const sp<Numeric>& rotate)
 
 Rigidbody RigidbodyBox2D::makeShadow() const
 {
-    return {{_stub, nullptr}, true};
+    return {_stub, nullptr, true};
 }
 
 RigidbodyBox2D::Stub::Stub(const ColliderBox2D& world, b2BodyId body)
