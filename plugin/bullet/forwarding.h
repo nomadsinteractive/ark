@@ -1,19 +1,10 @@
-#ifndef ARK_PLUGIN_BULLET_FORWARDING_H_
-#define ARK_PLUGIN_BULLET_FORWARDING_H_
+#pragma once
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
-class Body;
-class BodyCreateInfo;
 class CollisionObjectRef;
 class CollisionShapeRef;
 class ColliderBullet;
-class RigidbodyBullet;
+class RigidbodyControllerBullet;
 
 }
-}
-}
-
-#endif

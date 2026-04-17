@@ -24,7 +24,7 @@
 
 #include "bullet/base/collision_object_ref.h"
 #include "bullet/base/collision_shape_ref.h"
-#include "bullet/base/rigidbody_bullet.h"
+#include "bullet/base/rigidbody_controller_bullet.h"
 
 
 namespace ark::plugin::bullet {
@@ -156,9 +156,9 @@ sp<CollisionObjectRef> makeGhostObject(btDynamicsWorld* world, sp<CollisionShape
     return sp<CollisionObjectRef>::make(ghostObject, std::move(shape));
 }
 
-RigidbodyBullet getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject)
+RigidbodyControllerBullet getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject)
 {
-    return RigidbodyBullet::fromCollisionObjectPointer(collisionObject->getUserPointer());
+    return RigidbodyControllerBullet::fromCollisionObjectPointer(collisionObject->getUserPointer());
 }
 
 sp<CollisionShapeRef> createCollisionShape(const NamedHash& type, const Optional<V3>& scale, ModelLoader& modelLoader)
@@ -188,7 +188,7 @@ sp<CollisionShapeRef> createCollisionShape(const NamedHash& type, const Optional
 }
 
 struct BtRigibodyObject {
-    BtRigibodyObject(const RigidbodyBullet& btRigidbodyRef)
+    BtRigibodyObject(const RigidbodyControllerBullet& btRigidbodyRef)
         : _collision_object_ref(btRigidbodyRef.collisionObjectRef()), _rigidbody_stub(btRigidbodyRef.stub())
     {
     }
@@ -206,7 +206,7 @@ struct BtRigibodyObject {
             if(!collisionObject || collisionObject->getUserPointer() == nullptr)
                 return FILTER_ACTION_REMOVE;
 
-            if(const RigidbodyBullet body = getRigidBodyFromCollisionObject(collisionObject); !body.validate())
+            if(const RigidbodyControllerBullet body = getRigidBodyFromCollisionObject(collisionObject); !body.validate())
                 return FILTER_ACTION_REMOVE;
 
             return FILTER_ACTION_NONE;
@@ -290,7 +290,7 @@ sp<RigidbodyController> ColliderBullet::createBody(Rigidbody::BodyType type, sp<
     {
         sp<CollisionObjectRef> collisionObjectRef = type == Rigidbody::BODY_TYPE_KINEMATIC ? makeRigidBody(btDynamicWorld(), std::move(cs), nullptr, type, 0, collisionFilter)
                                                                                            : makeGhostObject(btDynamicWorld(), std::move(cs), type, collisionFilter);
-        sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(collisionObjectRef), type, std::move(shape), std::move(position), rotation, std::move(collisionFilter), std::move(discarded));
+        sp<RigidbodyControllerBullet> impl = sp<RigidbodyControllerBullet>::make(*this, std::move(collisionObjectRef), type, std::move(shape), std::move(position), rotation, std::move(collisionFilter), std::move(discarded));
         _stub->_passive_objects.emplace_back(BtRigibodyObject(*impl));
         return impl;
     }
@@ -309,7 +309,7 @@ sp<RigidbodyController> ColliderBullet::createBody(Rigidbody::BodyType type, sp<
     sp<CollisionObjectRef> btRigidbodyRef = makeRigidBody(btDynamicWorld(), std::move(cs), motionState, type, mass, collisionFilter);
     sp<Vec3> btPosition = type == Rigidbody::BODY_TYPE_STATIC ? sp<Vec3>::make<Vec3::Const>(pos - origin) : sp<Vec3>::make<DynamicPosition>(motionState, origin);
     sp<Vec4> btRotation = type == Rigidbody::BODY_TYPE_STATIC ? sp<Vec4>::make<Vec4::Const>(quat) : sp<Vec4>::make<DynamicRotation>(std::move(motionState));
-    return sp<RigidbodyBullet>::make(*this, std::move(btRigidbodyRef), type, std::move(shape), std::move(btPosition), std::move(btRotation), std::move(collisionFilter), std::move(discarded));
+    return sp<RigidbodyControllerBullet>::make(*this, std::move(btRigidbodyRef), type, std::move(shape), std::move(btPosition), std::move(btRotation), std::move(collisionFilter), std::move(discarded));
 }
 
 sp<Shape> ColliderBullet::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)
@@ -320,8 +320,8 @@ sp<Shape> ColliderBullet::createShape(const NamedHash& type, Optional<V3> scale,
 
 sp<Constraint> ColliderBullet::createFixedConstraint(Rigidbody& rigidbodyA, Rigidbody& rigidbodyB)
 {
-    const sp<RigidbodyBullet> btRigidbodyA = rigidbodyA.controller().cast<RigidbodyBullet>();
-    const sp<RigidbodyBullet> btRigidbodyB = rigidbodyB.controller().cast<RigidbodyBullet>();
+    const sp<RigidbodyControllerBullet> btRigidbodyA = rigidbodyA.controller().cast<RigidbodyControllerBullet>();
+    const sp<RigidbodyControllerBullet> btRigidbodyB = rigidbodyB.controller().cast<RigidbodyControllerBullet>();
     btRigidBody& btBodyA = *btRigidbodyA->_stub->_collision_object_ref->rigidBody();
     btRigidBody& btBodyB = *btRigidbodyB->_stub->_collision_object_ref->rigidBody();
     btTransform globalFrame;
@@ -368,7 +368,7 @@ Vector<RayCastManifold> ColliderBullet::rayCast(const V3 from, const V3 to, cons
         for(int32_t i = 0; i < allHitResults.m_hitFractions.size(); ++i)
         {
             const btVector3& n = allHitResults.m_hitNormalWorld.at(i);
-            const RigidbodyBullet& rigidBody = getRigidBodyFromCollisionObject(allHitResults.m_collisionObjects.at(i));
+            const RigidbodyControllerBullet& rigidBody = getRigidBodyFromCollisionObject(allHitResults.m_collisionObjects.at(i));
             manifolds.emplace_back(allHitResults.m_hitFractions.at(i), V3(n.x(), n.y(), n.z()), sp<Rigidbody>::make(rigidBody.makeShadow()));
         }
     }
@@ -430,8 +430,8 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, cons
     {
         if(const btPersistentManifold* contactManifold = manifolds[i]; contactManifold->getNumContacts() > 0)
         {
-            const RigidbodyBullet& objA = getRigidBodyFromCollisionObject(contactManifold->getBody0());
-            const RigidbodyBullet& objB = getRigidBodyFromCollisionObject(contactManifold->getBody1());
+            const RigidbodyControllerBullet& objA = getRigidBodyFromCollisionObject(contactManifold->getBody0());
+            const RigidbodyControllerBullet& objB = getRigidBodyFromCollisionObject(contactManifold->getBody1());
             if(objA.validate() && objB.validate())
             {
                 const sp<CollisionCallback>& ccObjA = objA.collisionCallback();
@@ -461,7 +461,7 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, cons
     {
         const sp<CollisionObjectRef>& rigidBody = iter->first;
         ContactInfo& contactInfo = iter->second;
-        if(const RigidbodyBullet& obj = getRigidBodyFromCollisionObject(rigidBody->collisionObject()); obj.collisionCallback())
+        if(const RigidbodyControllerBullet& obj = getRigidBodyFromCollisionObject(rigidBody->collisionObject()); obj.collisionCallback())
             for(const sp<CollisionObjectRef>& i : contactInfo._last_tick)
                 if(i->collisionObject())
                 {
@@ -482,7 +482,7 @@ void ColliderBullet::addTickContactInfo(const sp<CollisionObjectRef>& rigidBody,
     ContactInfo& contactInfo = _contact_infos[rigidBody];
     contactInfo._current_tick.insert(contact);
     if(!contactInfo._last_tick.contains(contact))
-        if(const RigidbodyBullet& obj = getRigidBodyFromCollisionObject(contact->collisionObject()); obj.validate())
+        if(const RigidbodyControllerBullet& obj = getRigidBodyFromCollisionObject(contact->collisionObject()); obj.validate())
             callback->onBeginContact(obj.makeShadow(), CollisionManifold(cp, normal));
 }
 

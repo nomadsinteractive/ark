@@ -1,6 +1,6 @@
 #include "bullet/base/collision_object_ref.h"
 
-#include "rigidbody_bullet.h"
+#include "bullet/base/rigidbody_controller_bullet.h"
 
 namespace ark::plugin::bullet {
 
@@ -28,7 +28,7 @@ bool CollisionObjectRef::destroyCountDown(btDynamicsWorld* dynamicsWorld)
     const int32_t countDown = _collision_object->getUserIndex() - 1;
     if(countDown <= 0)
     {
-        RigidbodyBullet::releaseCollisionObjectPointer(_collision_object->getUserPointer());
+        RigidbodyControllerBullet::releaseCollisionObjectPointer(_collision_object->getUserPointer());
         dynamicsWorld->removeCollisionObject(_collision_object.get());
         _collision_object->setUserPointer(nullptr);
         _collision_object.reset();

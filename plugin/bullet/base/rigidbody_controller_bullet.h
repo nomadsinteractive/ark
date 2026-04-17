@@ -15,9 +15,9 @@
 
 namespace ark::plugin::bullet {
 
-class ARK_PLUGIN_BULLET_API RigidbodyBullet final : public RigidbodyController {
+class ARK_PLUGIN_BULLET_API RigidbodyControllerBullet final : public RigidbodyController {
 public:
-    RigidbodyBullet(ColliderBullet& world, sp<CollisionObjectRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
+    RigidbodyControllerBullet(ColliderBullet& world, sp<CollisionObjectRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
 
     bool validate() const;
 
@@ -58,7 +58,7 @@ public:
     const sp<CollisionCallback>& collisionCallback() const;
     const sp<CollisionObjectRef>& collisionObjectRef() const;
 
-    static RigidbodyBullet fromCollisionObjectPointer(void* ptr);
+    static RigidbodyControllerBullet fromCollisionObjectPointer(void* ptr);
     static void releaseCollisionObjectPointer(void* ptr);
 
 private:
@@ -75,7 +75,7 @@ private:
         bool _marked_for_destroy;
     };
 
-    RigidbodyBullet(sp<Stub> stub);
+    RigidbodyControllerBullet(sp<Stub> stub);
 
 private:
     sp<Stub> _stub;
