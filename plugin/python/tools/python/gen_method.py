@@ -396,10 +396,13 @@ class GenSetPropMethod(GenMethod):
 class GenOperatorMethod(GenMethod):
     def __init__(self, name, args, return_type: str, operator: str, is_static: bool):
         GenMethod.__init__(self, name, args, return_type, is_static)
-        is_call_operator = operator == 'call'
-        self._self_argument = None if self._is_static or is_call_operator else self._arguments and self._arguments[0]
-        if not is_call_operator:
-            self._arguments = self._arguments if self._is_static else self._arguments[1:]
+        self._is_binary_operator = operator in ('+', '-', '*', '/', '//', '%', 'pow', '@', '&', '|')
+        if self._is_binary_operator:
+            assert self._is_static, "Binary functions should be static"
+            self._self_argument = None
+        elif self._is_static:
+            self._self_argument = self._arguments and self._arguments[0]
+            self._arguments = self._arguments[1:]
         self._operator = operator
         self._return_bool = self._return_type == 'bool'
 
@@ -407,7 +410,7 @@ class GenOperatorMethod(GenMethod):
         return 'int32_t' if self._return_bool else 'PyObject*'
 
     def need_unpack_statement(self):
-        return not self._is_static and super().need_unpack_statement()
+        return not self._is_binary_operator and super().need_unpack_statement()
 
     @property
     def check_argument_type(self):
@@ -418,7 +421,7 @@ class GenOperatorMethod(GenMethod):
             return f'Instance* self, PyObject* args, PyObject* kws'
         arglen = len(self._arguments)
         args = [f'PyObject* oparg{i}' for i in range(arglen)]
-        if self._is_static:
+        if self._is_binary_operator:
             return ', '.join(args)
         return ', '.join(['Instance* self'] + args)
 
@@ -426,8 +429,10 @@ class GenOperatorMethod(GenMethod):
         return len(self._arguments)
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]):
-        if self._is_static:
+        if self._is_binary_operator:
             return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join(argvalues))
+        elif self._is_static:
+            return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join([self.gen_self_statement(genclass)] + argvalues))
         return super()._gen_calling_statement(genclass, argvalues)
 
     def gen_return_statement(self, return_type, py_return):

@@ -161,6 +161,9 @@ class Runnable:
     def __call__(self):
         pass
 
+    def defer(self, delay: float = 0, canceled: TYPE_BOOLEAN | None = None) -> Self:
+        pass
+
 
 class Writable:
     pass

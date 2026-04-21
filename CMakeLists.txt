@@ -157,7 +157,7 @@ if(ARK_USE_STB_IMAGE)
 endif()
 
 ark_find_vcpkg_package(freetype LIBRARIES freetype)
-ark_find_vcpkg_package(glslang LIBRARIES glslang::glslang glslang::glslang-default-resource-limits glslang::SPIRV glslang::SPVRemapper)
+ark_find_vcpkg_package(glslang LIBRARIES glslang::glslang glslang::glslang-default-resource-limits glslang::SPIRV)
 
 ark_add_plugin_directory(python plugin/python)
 ark_add_plugin_directory(box2d plugin/box2d)
