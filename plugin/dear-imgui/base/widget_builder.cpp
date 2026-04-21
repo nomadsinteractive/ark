@@ -552,12 +552,10 @@ private:
     sp<BooleanWrapper> _is_open;
 };
 
-bool Items_VectorGetter(void* data, int idx, const char** out_text)
+const char* Items_VectorGetter(void* data, const int idx)
 {
     const auto items = static_cast<const Vector<String>*>(data);
-    if (out_text)
-        *out_text = items->at(static_cast<size_t>(idx)).c_str();
-    return true;
+    return items->at(static_cast<size_t>(idx)).c_str();
 }
 
 }
@@ -687,7 +685,7 @@ sp<Observer> WidgetBuilder::combo(const String& label, const sp<Integer>& option
 
 void WidgetBuilder::listBox(const String& label, const sp<Integer>& option, const Vector<String>& items)
 {
-    addWidget(sp<Widget>::make<Input<int32_t>>([items](const char* l, int32_t* v) { return ImGui::ListBox(l, v, Items_VectorGetter, reinterpret_cast<void*>(const_cast<Vector<String>*>(&items)), static_cast<int32_t>(items.size())); }, label, option));
+    addWidget(sp<Widget>::make<Input<int32_t>>([items](const char* l, int32_t* v) { return ImGui::ListBox(l, v, Items_VectorGetter, const_cast<Vector<String>*>(&items), static_cast<int32_t>(items.size())); }, label, option));
 }
 
 void WidgetBuilder::indent(const float w)
