@@ -12,6 +12,8 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/impl/variable/variable_wrapper.h"
+#include "core/impl/variable/variable_dirty_callback.h"
+#include "core/impl/variable/variable_tracking.h"
 #include "core/inf/variable.h"
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
@@ -22,7 +24,6 @@
 #include "graphics/impl/vec/vec_subscribed.h"
 
 #include "app/base/application_context.h"
-#include "core/impl/variable/variable_tracking.h"
 
 namespace ark {
 
@@ -272,6 +273,10 @@ public:
         sp<VariableWrapper<T>> wrapper = self.template asInstance<VariableWrapper<T>>();
         CHECK_WARN(wrapper, "Non-Vec%dWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.", DIMENSION);
         return wrapper ? wrapper->wrapped() : nullptr;
+    }
+
+    static sp<VarType> wrapDirtyCallback(sp<VarType> self, sp<Runnable> callback) {
+        return sp<VarType>::template make<VariableDirtyCallback<T>>(std::move(self), std::move(callback));
     }
 
     static sp<Size> toSize(const sp<VarType>& self) {

@@ -83,6 +83,9 @@ public:
     static Optional<float> getItem(const sp<Vec3>& self, ptrdiff_t idx);
 
 //  [[script::bindings::classmethod]]
+    static sp<Vec3> wrapDirtyCallback(sp<Vec3> self, sp<Runnable> callback);
+
+//  [[script::bindings::classmethod]]
     static sp<Size> toSize(const sp<Vec3>& self);
 
 //  [[script::bindings::classmethod]]

@@ -323,6 +323,9 @@ class _Var:
     def if_else(self, condition, otherwise):
         pass
 
+    def wrap_dirty_callback(self, callback: Runnable) -> Self:
+        pass
+
     def __int__(self) -> int:
         return 0
 

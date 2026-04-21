@@ -100,7 +100,7 @@ public:
     static sp<Vec4> freeze(const sp<Vec4>& self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Size> toSize(const sp<Vec4>& self);
+    static sp<Vec4> wrapDirtyCallback(sp<Vec4> self, sp<Runnable> callback);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec4> wrap(sp<Vec4> self);

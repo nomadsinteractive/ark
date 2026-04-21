@@ -82,6 +82,9 @@ public:
     static sp<Numeric> y(const sp<Vec2>& self);
 
 //  [[script::bindings::classmethod]]
+    static sp<Vec2> wrapDirtyCallback(sp<Vec2> self, sp<Runnable> callback);
+
+//  [[script::bindings::classmethod]]
     static sp<Size> toSize(const sp<Vec2>& self);
 //  [[script::bindings::property]]
     static sp<Vec2> xy(sp<Vec2> self);

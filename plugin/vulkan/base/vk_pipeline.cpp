@@ -625,7 +625,7 @@ sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
         poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_pipeline_bindings.samplers().size() + _pipeline_bindings.images().size());
     if(!_pipeline_bindings.images().empty())
         poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_IMAGE] = static_cast<uint32_t>(_pipeline_bindings.images().size());
-    return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes), _descriptor_set_layouts.size());
+    return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes), static_cast<uint32_t>(_descriptor_set_layouts.size()));
 }
 
 void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots) const
