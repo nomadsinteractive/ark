@@ -379,10 +379,6 @@ class Boolean(_Boolean):
     def __init__(self, value: TYPE_BOOLEAN):
         pass
 
-    class InTick(_Boolean):
-        def __init__(self, tick_start: TYPE_BOOLEAN, tick_end: Optional[TYPE_BOOLEAN] = None):
-            pass
-
 
 class Behavior:
     def __init__(self, delegate: Any):

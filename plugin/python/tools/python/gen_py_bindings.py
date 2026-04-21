@@ -456,8 +456,8 @@ class GenInterfaceMethod(GenMethod):
 
 
 class GenStaticMethod(GenMethod):
-    def __init__(self, name, args, return_type, is_type: bool = False):
-        GenMethod.__init__(self, name, args, return_type, True, is_type)
+    def __init__(self, name, args, return_type):
+        GenMethod.__init__(self, name, args, return_type, True)
         self._flags = self._flags + '|METH_STATIC'
 
     def gen_py_method_def(self, genclass):
@@ -702,10 +702,8 @@ def main(params, paths):
         genclass = get_result_class(binding_classes, filename, main_class)
         method_modifier = x[0]
         name, args, return_type, is_static = GenMethod.split(x[1:])
-        is_type = method_modifier == 'type'
-        assert not (is_type and not is_static), f'Illegal modifier for method "{name}". "type" modifier only works for static methods'
-        if is_static and method_modifier in ('auto', 'type'):
-            genmethod = GenStaticMethod(name, args, return_type, is_type)
+        if is_static and method_modifier == 'auto':
+            genmethod = GenStaticMethod(name, args, return_type)
         elif genclass.classname == name:
             genmethod = GenConstructorMethod(name, args, is_static)
         elif is_static and method_modifier == 'classmethod':

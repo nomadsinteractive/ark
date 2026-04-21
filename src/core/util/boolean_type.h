@@ -50,9 +50,6 @@ public:
 
 //  [[script::bindings::classmethod]]
     static sp<Boolean> dye(sp<Boolean> self, sp<Boolean> condition = nullptr, String message = "");
-
-//  [[script::bindings::type]]
-    static sp<Boolean> InTick(sp<Integer> tickStart, sp<Integer> tickEnd = nullptr);
 };
 
 }

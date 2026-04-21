@@ -160,9 +160,4 @@ sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String mes
     return sp<Boolean>::make<VariableDyed<bool>>(std::move(self), std::move(condition), std::move(message));
 }
 
-sp<Boolean> BooleanType::InTick(sp<Integer> tickStart, sp<Integer> tickEnd)
-{
-    return sp<Boolean>::make<BooleanInTick>(std::move(tickStart), std::move(tickEnd));
-}
-
 }
