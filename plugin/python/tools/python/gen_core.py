@@ -169,67 +169,47 @@ ARK_PY_ARGUMENTS = (
 
 class GenArgument:
     def __init__(self, index: int, accept_type: str, default_value: str, meta: GenArgumentMeta, argtype: str, argname: Optional[str] = None):
-        self._index = index
-        self._accept_type = accept_type
-        self._default_value = default_value
-        self._meta = meta
+        self.index = index
+        self.accept_type = accept_type
+        self.default_value = default_value
+        self.meta = meta
         self._str = argtype
-        self._argname = argname
-
-    @property
-    def index(self):
-        return self._index
-
-    @property
-    def argname(self):
-        return self._argname
-
-    @property
-    def accept_type(self):
-        return self._accept_type
-
-    @property
-    def default_value(self) -> str:
-        return self._default_value
-
-    @property
-    def meta(self):
-        return self._meta
+        self.argname = argname
 
     @property
     def typename(self):
-        return self._meta.typename
+        return self.meta.typename
 
     @property
     def parse_signature(self) -> str:
-        s = self._meta.parse_signature
+        s = self.meta.parse_signature
         if s.startswith('*'):
             return ''
         return '|' + s if self.has_defvalue else s
 
     @property
     def has_defvalue(self):
-        return self._default_value or self._meta.has_defvalue
+        return self.default_value or self.meta.has_defvalue
 
     def type_compare(self, *typenames) -> bool:
         return any(acg.type_compare(i, self._str) for i in typenames)
 
     def gen_type_check(self, varname, is_overloaded_func: bool):
-        if self._accept_type in ARK_PY_ARGUMENT_TYPE_CHECKERS:
-            return f'{varname} && {ARK_PY_ARGUMENT_TYPE_CHECKERS[self._accept_type].check(varname, is_overloaded_func)}'
+        if self.accept_type in ARK_PY_ARGUMENT_TYPE_CHECKERS:
+            return f'{varname} && {ARK_PY_ARGUMENT_TYPE_CHECKERS[self.accept_type].check(varname, is_overloaded_func)}'
         return None
 
     def gen_declare(self, gen_method, objname: str, argname: str, extract_cast: bool = False, optional_check: bool = False):
-        typename = self._meta.cast_signature
-        if self._meta.is_base_type:
+        typename = self.meta.cast_signature
+        if self.meta.is_base_type:
             return f'{typename} {objname} = {gen_cast_call(typename, argname)};'
-        if self.typename == self._meta.cast_signature:
+        if self.typename == self.meta.cast_signature:
             return f'{typename} {objname} = {argname};'
-        m = acg.get_shared_ptr_type(self._accept_type)
+        m = acg.get_shared_ptr_type(self.accept_type)
         if m == 'Scope':
             return f'const Scope {objname} = PyCast::toScope(kws);'
         elif m == 'Traits':
-            return f'Traits {objname} = PyCast::toTraits(args, {self._index - 1 if gen_method.self_argument else self._index});'
+            return f'Traits {objname} = PyCast::toTraits(args, {self.index - 1 if gen_method.self_argument else self.index});'
 
         is_optional_type = 'Optional<' in m
         optional_cast_prefix = 'to' if optional_check or is_optional_type else 'ensure'
@@ -241,7 +221,7 @@ class GenArgument:
         if m in TYPE_DEFINED_SP:
             return self._gen_var_declare(m, objname, to_cpp_object, m, argname, False, optional_check)
         typename = acg.remove_crv(typename)
-        if m != self._accept_type and not is_collection_template_type(typename):
+        if m != self.accept_type and not is_collection_template_type(typename):
             return self._gen_var_declare('sp<%s>' % m, objname, '%sSharedPtr' % optional_cast_prefix, m, argname, extract_cast, optional_check)
         functype = acg.get_template_type(typename, 'Optional') if is_optional_type else typename
         return self._gen_var_declare(typename, objname, to_cpp_object, functype, argname, False, optional_check)
@@ -249,15 +229,15 @@ class GenArgument:
     def _gen_var_declare(self, typename, varname, funcname: str, functype: str, argname, extract_cast: bool = False, optional_check: bool = False):
         if optional_check:
             typename = f'Optional<{typename}>'
-        if self._default_value and (self._accept_type.startswith('sp<') or self._meta.parse_signature == 'O'):
+        if self.default_value and (self.accept_type.startswith('sp<') or self.meta.parse_signature == 'O'):
             return '%s %s = %s ? PyCast::%s<%s>(%s) : %s;' % (
                 typename, varname, argname, funcname, functype, argname, self._gen_default_value_declare(typename, optional_check))
         return f'{typename} {varname} = PyCast::{funcname}<{functype}>({argname});'
 
     def _gen_default_value_declare(self, typename: str, optional_check: bool):
-        if self._default_value.startswith('{') and self._default_value.endswith('}'):
-            return f'{typename}{self._default_value}'
-        return f'{typename}({self._default_value})' if optional_check else self._default_value
+        if self.default_value.startswith('{') and self.default_value.endswith('}'):
+            return f'{typename}{self.default_value}'
+        return f'{typename}({self.default_value})' if optional_check else self.default_value
 
     def str(self):
         return self._str
@@ -271,13 +251,13 @@ def create_overloaded_method_type(base_type, **kwargs):
     class GenOverloadedMethod(base_type):
         def __init__(self, m1, m2):
             base_type.__init__(self, m1.name, [], m1.return_type, **kwargs)
-            self._arguments = self._replace_arguments(m1.arguments, m2.arguments)
+            self.arguments = self._replace_arguments(m1.arguments, m2.arguments)
             self._overloaded_methods = []
             self.add_overloaded_method(m1)
             self.add_overloaded_method(m2)
 
         def gen_definition_body(self, genclass, lines, arguments, gen_type_check_args, exact_cast, check_args, optional_check=False):
-            not_overloaded_args = [i for i in self._arguments]
+            not_overloaded_args = [i for i in self.arguments]
 
             for i in self._overloaded_methods:
                 for j, k in enumerate(not_overloaded_args):
@@ -297,7 +277,7 @@ def create_overloaded_method_type(base_type, **kwargs):
                 lines.append('}')
             return_type = m0.err_return_value
             if m0.check_argument_type:
-                lines.append(f'constexpr char errstr[] = "Calling overloaded method({genclass.name}::{self._name}) failed, no arguments matched";')
+                lines.append(f'constexpr char errstr[] = "Calling overloaded method({genclass.name}::{self.name}) failed, no arguments matched";')
                 lines.append('PyBridge::setRuntimeErrString(errstr);')
                 lines.append('DFATAL(errstr);')
             lines.append(return_type + ';')
@@ -308,7 +288,7 @@ def create_overloaded_method_type(base_type, **kwargs):
                 if len(m1.arguments) != len(method.arguments):
                     print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, method))
                     sys.exit(-1)
-            self._arguments = method._arguments = self._replace_arguments(method.arguments, self._arguments)
+            self.arguments = method.arguments = self._replace_arguments(method.arguments, self.arguments)
             self._overloaded_methods.append(method)
 
         def _replace_arguments(self, args1: list[GenArgument], args2: list[GenArgument]):

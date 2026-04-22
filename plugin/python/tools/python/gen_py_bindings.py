@@ -318,13 +318,13 @@ class GenConstructorMethod(GenMethod):
     def __init__(self, name, args, is_static, return_type: str = ''):
         GenMethod.__init__(self, '__init__', args, return_type)
         self._funcname = name
-        self._is_static = is_static
+        self.is_static = is_static
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]):
-        if self._is_static:
+        if self.is_static:
             cs = f'{genclass.classname}::{self._funcname}({", ".join(argvalues)})'
-        elif self._return_type:
-            cs = f'{self._return_type}::make<{self._funcname}>({", ".join(argvalues)})'
+        elif self.return_type:
+            cs = f'{self.return_type}::make<{self._funcname}>({", ".join(argvalues)})'
         else:
             cs = f'sp<{self._funcname}>::make({", ".join(argvalues)})'
         return f'self->box = new Box({cs});'
@@ -353,8 +353,8 @@ class GenPropertyMethod(GenMethod):
     def __init__(self, name, args, return_type, is_static):
         GenMethod.__init__(self, name, args, return_type, is_static)
         if is_static:
-            self._self_argument = self._arguments and self._arguments[0]
-            self._arguments = self._arguments[1:]
+            self.self_argument = self.arguments and self.arguments[0]
+            self.arguments = self.arguments[1:]
         self._is_setter = name.startswith('set')
         self._property_name = name[3].lower() + name[4:] if self._is_setter else name
 
@@ -366,7 +366,7 @@ class GenPropertyMethod(GenMethod):
 
     def gen_convert_args_code(self, genclass, lines, argdeclare, optional_check=False):
         if argdeclare:
-            arg0 = self._arguments[0]
+            arg0 = self.arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
             ga = GenArgument(0, arg0.accept_type, arg0.default_value, meta, str(arg0))
             lines.append(ga.gen_declare(self, 'obj0', 'arg0', optional_check=optional_check))
@@ -384,7 +384,7 @@ class GenPropertyMethod(GenMethod):
     def gen_py_getset_def(self, properties, genclass):
         trycatch_suffix = '_r' if 't' in get_params() else ''
         property_def = self._ensure_property_def(properties)
-        func = f'{genclass.py_class_name}::{self._name}{trycatch_suffix}'
+        func = f'{genclass.py_class_name}::{self.name}{trycatch_suffix}'
         if self._is_setter:
             property_def[2] = f'(setter) {func}'
         else:
@@ -392,10 +392,10 @@ class GenPropertyMethod(GenMethod):
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]):
         self_statement = self.gen_self_statement(genclass)
-        if self._is_static:
-            lines = ['%s::%s(%s);' % (genclass.classname, self._name, ', '.join([self_statement] + argvalues))]
+        if self.is_static:
+            lines = ['%s::%s(%s);' % (genclass.classname, self.name, ', '.join([self_statement] + argvalues))]
         else:
-            lines = ['%s->%s(%s);' % (self_statement, self._name, ', '.join(argvalues))]
+            lines = ['%s->%s(%s);' % (self_statement, self.name, ', '.join(argvalues))]
         return '\n    '.join(lines)
 
     def _ensure_property_def(self, properties):
@@ -467,34 +467,34 @@ class GenStaticMethod(GenMethod):
         return False
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]):
-        return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join(argvalues))
+        return '%s::%s(%s);' % (genclass.classname, self.name, ', '.join(argvalues))
 
 
 class GenStaticMemberMethod(GenMethod):
     def __init__(self, name, args, return_type):
         GenMethod.__init__(self, name, args, return_type)
-        self._self_argument = self._arguments and self._arguments[0]
-        self._arguments = self._arguments[1:]
+        self.self_argument = self.arguments and self.arguments[0]
+        self.arguments = self.arguments[1:]
 
     def gen_py_method_def(self, genclass):
         return self.gen_py_method_def_tp(genclass)
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]):
-        return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join([self.gen_self_statement(genclass)] + argvalues))
+        return '%s::%s(%s);' % (genclass.classname, self.name, ', '.join([self.gen_self_statement(genclass)] + argvalues))
 
 
 class GenRichCompareMethod(GenMethod):
     def __init__(self, name, args, return_type, operator):
         GenMethod.__init__(self, name, args, return_type)
-        self._self_argument = self._arguments and self._arguments[0]
-        self._arguments = self._arguments[1:]
-        self._operator = operator
+        self.self_argument = self.arguments and self.arguments[0]
+        self.arguments = self.arguments[1:]
+        self.operator = operator
 
     def gen_py_return(self):
         return 'PyObject*'
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]):
-        return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join([self.gen_self_statement(genclass)] + argvalues))
+        return '%s::%s(%s);' % (genclass.classname, self.name, ', '.join([self.gen_self_statement(genclass)] + argvalues))
 
     @staticmethod
     def gen_convert_args_code(lines, genclass, argdeclare, optional_check=False):
@@ -506,36 +506,20 @@ class GenRichCompareMethod(GenMethod):
             ga = GenArgument(0, args[0].accept_type, args[0].default_value, meta, str(args[0]))
             lines.append(ga.gen_declare(self, 'obj0', 'args'))
 
-    @property
-    def operator(self):
-        return self._operator
-
 
 class GenClass:
     def __init__(self, filename: str, class_name: str, has_debris: bool = False):
-        self._py_src_name = f'py_ark_{acg.camel_case_to_snake_case(class_name)}_type'
-        self._py_class_name = f'PyArk{class_name}Type'
-        self._filename = filename
-        self._name = class_name
-        self._classname = class_name
+        self.py_src_name = f'py_ark_{acg.camel_case_to_snake_case(class_name)}_type'
+        self.py_class_name = f'PyArk{class_name}Type'
+        self.filename = filename
+        self.name = class_name
+        self.classname = class_name
         self._binding_classname = class_name
-        self._base_classname = None
-        self._has_debris = has_debris
+        self.base_classname = None
+        self.has_debris = has_debris
         self._method_dict = {}
         self._methods = []
-        self._enum_constants = {}
-
-    @property
-    def classname(self):
-        return self._classname
-
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, v):
-        self._name = v
+        self.enum_constants = {}
 
     @property
     def binding_classname(self):
@@ -543,42 +527,14 @@ class GenClass:
 
     @binding_classname.setter
     def binding_classname(self, v):
-        self._py_src_name = 'py_ark_' + acg.camel_case_to_snake_case(v) + '_type'
-        self._py_class_name = 'PyArk%sType' % v
+        self.py_src_name = 'py_ark_' + acg.camel_case_to_snake_case(v) + '_type'
+        self.py_class_name = 'PyArk%sType' % v
         self._binding_classname = v
-        self._name = v
-
-    @property
-    def base_classname(self):
-        return self._base_classname
-
-    @base_classname.setter
-    def base_classname(self, base_classname):
-        self._base_classname = base_classname
-
-    @property
-    def py_src_name(self):
-        return self._py_src_name
-
-    @property
-    def py_class_name(self):
-        return self._py_class_name
+        self.name = v
 
     @property
     def methods(self):
         return self._method_dict.values()
-
-    @property
-    def enum_constants(self):
-        return self._enum_constants
-
-    @property
-    def filename(self):
-        return self._filename
-
-    @property
-    def has_debris(self):
-        return self._has_debris
 
     def add_method(self, method):
         try:
@@ -594,7 +550,7 @@ class GenClass:
         self._method_dict[method.name] = method
 
     def add_enum_constant(self, name: str, value: str):
-        self._enum_constants[name] = value
+        self.enum_constants[name] = value
 
     def has_methods(self):
         return len(self._method_dict) > 0
@@ -662,12 +618,12 @@ class GenClass:
             for i in rich_compare_methods:
                 try:
                     cases.append(f'    case {RICH_COMPARE_OPS[i.operator]}:')
-                    cases.append(f'        return PyCast::toPyObject({self._classname}::{i.name}(std::move(unpacked), std::move(obj0)));')
+                    cases.append(f'        return PyCast::toPyObject({self.classname}::{i.name}(std::move(unpacked), std::move(obj0)));')
                 except KeyError:
                     pass
             rich_compare_defs.extend([
                 '',
-                'static PyObject* %s_tp_richcompare (PyArkType::Instance* self, PyObject* args, const int op) {' % self._py_class_name,
+                'static PyObject* %s_tp_richcompare (PyArkType::Instance* self, PyObject* args, const int op) {' % self.py_class_name,
                 '    sp<%s> unpacked = self->as<%s>();' % (self._binding_classname, self._binding_classname),
                 '    sp<%s> obj0 = PyCast::ensureSharedPtr<%s>(args);' % (self._binding_classname, self._binding_classname),
                 '    switch(op) {'] + cases + [

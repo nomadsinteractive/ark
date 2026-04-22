@@ -75,31 +75,23 @@ PY_RETURN_NONE = 'return PyBridge::incRefNone()'
 
 class GenMethod(object):
     def __init__(self, name, args, return_type, is_static: bool = False):
-        self._name = name
-        self._return_type = return_type
-        self._is_static = is_static
-        self._arguments = parse_method_arguments(args)
-        self._has_args_argument = args and self._arguments[-1].type_compare('Traits')
-        self._has_kwargs_argument = args and self._arguments[-1].type_compare('Scope')
+        self.name = name
+        self.return_type = return_type
+        self.is_static = is_static
+        self.arguments = parse_method_arguments(args)
+        self._has_args_argument = args and self.arguments[-1].type_compare('Traits')
+        self._has_kwargs_argument = args and self.arguments[-1].type_compare('Scope')
         self._has_scope_or_traits_argument = self._has_args_argument or self._has_kwargs_argument
         self._has_keyword_arguments = self._has_scope_or_traits_argument or self._has_keyword_names()
         self._flags = ('METH_VARARGS|METH_KEYWORDS' if self._has_keyword_arguments else 'METH_VARARGS')
-        self._self_argument = None
-
-    @property
-    def is_static(self):
-        return self._is_static
-
-    @property
-    def self_argument(self):
-        return self._self_argument
+        self.self_argument = None
 
     def gen_py_method_def(self, genclass):
         return None
 
     def gen_py_method_def_tp(self, genclass):
         trycatch_suffix = '_r' if 't' in get_params() else ''
-        return f'{{"{acg.camel_case_to_snake_case(self._name)}", (PyCFunction) {genclass.py_class_name}::{self._name}{trycatch_suffix}, {self._flags}, nullptr}}'
+        return f'{{"{acg.camel_case_to_snake_case(self.name)}", (PyCFunction) {genclass.py_class_name}::{self.name}{trycatch_suffix}, {self._flags}, nullptr}}'
 
     def gen_py_return(self):
         return 'PyObject*'
@@ -112,7 +104,7 @@ class GenMethod(object):
 
     def gen_local_var_declarations(self):
         declares = {}
-        for i, j in enumerate(self._arguments):
+        for i, j in enumerate(self.arguments):
             if j.meta.parse_signature == '*':
                 continue
 
@@ -146,18 +138,6 @@ class GenMethod(object):
         return [i + ';' for i in declares.values()]
 
     @property
-    def name(self):
-        return self._name
-
-    @property
-    def arguments(self):
-        return self._arguments
-
-    @property
-    def return_type(self):
-        return self._return_type
-
-    @property
     def err_return_value(self):
         return PY_RETURN_NONE
 
@@ -166,13 +146,13 @@ class GenMethod(object):
         return True
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]):
-        return 'unpacked->%s(%s);' % (self._name, ', '.join(argvalues))
+        return 'unpacked->%s(%s);' % (self.name, ', '.join(argvalues))
 
     def _gen_calling_body(self, genclass, calling_lines):
         return calling_lines
 
     def gen_return_type(self) -> str:
-        return acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
+        return acg.strip_key_words(self.return_type, ['virtual', 'const', '&'])
 
     def gen_return_statement(self, return_type: str, py_return: str):
         if acg.type_compare(return_type, py_return):
@@ -216,7 +196,7 @@ class GenMethod(object):
 
     def _gen_parse_tuple_args(self) -> (str, str):
         if self._has_args_argument:
-            args_idx = len(self._arguments) - 1
+            args_idx = len(self.arguments) - 1
             args_name = f'args0_{args_idx}'
             return f'{args_name}.pyObject()', f'const PyInstance {args_name} = PyInstance::steal(PyBridge::PyTuple_GetSlice(args, 0, {args_idx}));\n    '
         return 'args', ''
@@ -225,29 +205,29 @@ class GenMethod(object):
         return '''const char* argnames[] = {
         %s%s
         nullptr
-    };''' % (f',\n{INDENT * 2}'.join(f'"{acg.camel_case_to_snake_case(i.argname)}"' for i in self._arguments), ',' if self._arguments else '')
+    };''' % (f',\n{INDENT * 2}'.join(f'"{acg.camel_case_to_snake_case(i.argname)}"' for i in self.arguments), ',' if self.arguments else '')
 
     def _has_keyword_names(self) -> bool:
-        return all(i.argname is not None for i in self._arguments)
+        return all(i.argname is not None for i in self.arguments)
 
     def need_unpack_statement(self):
-        return not (self._self_argument and self._self_argument.type_compare('Box'))
+        return not (self.self_argument and self.self_argument.type_compare('Box'))
 
     def is_constructor(self):
         return False
 
     def gen_self_statement(self, genclass):
-        if self._self_argument:
-            if self._self_argument.type_compare('Box'):
+        if self.self_argument:
+            if self.self_argument.type_compare('Box'):
                 return '*self->box'
-            if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>', f'{genclass.binding_classname}&'):
-                return f'unpacked.cast<{acg.get_shared_ptr_type(self._self_argument.accept_type)}>()'
+            if not self.self_argument.type_compare(f'sp<{genclass.binding_classname}>', f'{genclass.binding_classname}&'):
+                return f'unpacked.cast<{acg.get_shared_ptr_type(self.self_argument.accept_type)}>()'
         return 'unpacked'
 
     def gen_declaration(self):
         return [
-            f'static {self.gen_py_return()} {self._name}({self.gen_py_arguments()});',
-            f'constexpr static auto {self._name}_r = ark::plugin::python::PyCast::RuntimeFuncWrapper<decltype(&{self._name}), {self._name}>;'
+            f'static {self.gen_py_return()} {self.name}({self.gen_py_arguments()});',
+            f'constexpr static auto {self.name}_r = ark::plugin::python::PyCast::RuntimeFuncWrapper<decltype(&{self.name}), {self.name}>;'
         ]
 
     def gen_convert_args_code(self, genclass, lines: list[str], argdeclare: list[str], optional_check: bool = False):
@@ -257,14 +237,14 @@ class GenMethod(object):
     def gen_definition(self, genclass):
         lines = []
 
-        if len(self._arguments) > 0:
-            self._gen_parse_tuple_code(lines, self.gen_local_var_declarations(), self._arguments)
+        if len(self.arguments) > 0:
+            self._gen_parse_tuple_code(lines, self.gen_local_var_declarations(), self.arguments)
 
         if self.need_unpack_statement():
             class_name = genclass.binding_classname
             lines.append(f'sp<{class_name}> unpacked = self->as<{class_name}>();')
 
-        self.gen_definition_body(genclass, lines, self._arguments, [None] * len(self._arguments), not self.check_argument_type, not self.check_argument_type)
+        self.gen_definition_body(genclass, lines, self.arguments, [None] * len(self.arguments), not self.check_argument_type, not self.check_argument_type)
         return '\n    '.join(lines)
 
     def gen_definition_body(self, genclass, lines: list[str], not_overloaded_args: list[GenArgument], gen_type_check_args, exact_cast, check_args=False, optional_check=False):
@@ -273,22 +253,22 @@ class GenMethod(object):
         args_set = {i for i, j in args}
         argdeclare = [j.gen_declare(self, f'obj{i}', f'arg{i}', exact_cast, optional_check) for i, j in args]
         self_type_checks = []
-        if self._self_argument:
-            if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>', f'{genclass.binding_classname}&', 'Box'):
-                self_type_checks.append(f'unpacked.isInstance<{acg.get_shared_ptr_type(self._self_argument.accept_type)}>()')
+        if self.self_argument:
+            if not self.self_argument.type_compare(f'sp<{genclass.binding_classname}>', f'{genclass.binding_classname}&', 'Box'):
+                self_type_checks.append(f'unpacked.isInstance<{acg.get_shared_ptr_type(self.self_argument.accept_type)}>()')
         self.gen_convert_args_code(genclass, bodylines, argdeclare, optional_check)
 
         if check_args and args:
             bodylines.append("if(%s) %s;" % (' || '.join([f'!obj{i}' for i, j in args]), self.err_return_value))
 
         r = self.gen_return_type()
-        argtypes = [' '.join(i.gen_declare(self, 't', 't').split('=')[0].strip().split()[:-1]) for i in self._arguments]
-        argvalues = list(gen_method_call_arg(f'obj{i}.value()' if optional_check and i in args_set else f'obj{i}', j, argtypes[i]) for i, j in enumerate(self._arguments))
+        argtypes = [' '.join(i.gen_declare(self, 't', 't').split('=')[0].strip().split()[:-1]) for i in self.arguments]
+        argvalues = list(gen_method_call_arg(f'obj{i}.value()' if optional_check and i in args_set else f'obj{i}', j, argtypes[i]) for i, j in enumerate(self.arguments))
         callstatement = self._gen_calling_statement(genclass, argvalues)
         py_return = self.gen_py_return()
         pyret = ['return 0;'] if py_return == 'int' else self.gen_return_statement(r, py_return)
         if r != 'void' and r:
-            callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
+            callstatement = '%s ret = %s' % (acg.strip_key_words(self.return_type, ['virtual']), callstatement)
         calling_lines = [callstatement] + pyret
         type_checks = [(i, j.gen_type_check('t', False)) for i, j in enumerate(gen_type_check_args) if j]
         nullptr_check = [f'(obj{i} || {i} >= argc)' for i, j in type_checks if not j]
@@ -346,7 +326,7 @@ class GenGetPropMethod(GenMethod):
 
     def gen_convert_args_code(self, genclass, lines, argdeclare, optional_check=False):
         if argdeclare:
-            arg0 = self._arguments[0]
+            arg0 = self.arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
             ga = GenArgument(0, arg0.accept_type, arg0.default_value, meta, str(arg0))
             lines.append(ga.gen_declare(self, 'obj0', 'arg0'))
@@ -398,13 +378,13 @@ class GenOperatorMethod(GenMethod):
         GenMethod.__init__(self, name, args, return_type, is_static)
         self._is_binary_operator = operator in ('+', '-', '*', '/', '//', '%', 'pow', '@', '&', '|')
         if self._is_binary_operator:
-            assert self._is_static, "Binary functions should be static"
-            self._self_argument = None
-        elif self._is_static:
-            self._self_argument = self._arguments and self._arguments[0]
-            self._arguments = self._arguments[1:]
-        self._operator = operator
-        self._return_bool = self._return_type == 'bool'
+            assert self.is_static, "Binary functions should be static"
+            self.self_argument = None
+        elif self.is_static:
+            self.self_argument = self.arguments and self.arguments[0]
+            self.arguments = self.arguments[1:]
+        self.operator = operator
+        self._return_bool = self.return_type == 'bool'
 
     def gen_py_return(self):
         return 'int32_t' if self._return_bool else 'PyObject*'
@@ -414,34 +394,34 @@ class GenOperatorMethod(GenMethod):
 
     @property
     def check_argument_type(self):
-        return self._operator not in ('&&', '||')
+        return self.operator not in ('&&', '||')
 
     def gen_py_arguments(self):
-        if self._operator == 'call':
+        if self.operator == 'call':
             return f'Instance* self, PyObject* args, PyObject* kws'
-        arglen = len(self._arguments)
+        arglen = len(self.arguments)
         args = [f'PyObject* oparg{i}' for i in range(arglen)]
         if self._is_binary_operator:
             return ', '.join(args)
         return ', '.join(['Instance* self'] + args)
 
     def gen_py_argc(self):
-        return len(self._arguments)
+        return len(self.arguments)
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]):
         if self._is_binary_operator:
-            return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join(argvalues))
-        elif self._is_static:
-            return '%s::%s(%s);' % (genclass.classname, self._name, ', '.join([self.gen_self_statement(genclass)] + argvalues))
+            return '%s::%s(%s);' % (genclass.classname, self.name, ', '.join(argvalues))
+        elif self.is_static:
+            return '%s::%s(%s);' % (genclass.classname, self.name, ', '.join([self.gen_self_statement(genclass)] + argvalues))
         return super()._gen_calling_statement(genclass, argvalues)
 
     def gen_return_statement(self, return_type, py_return):
-        if self._operator in ('+=', '-=', '*=', '/='):
+        if self.operator in ('+=', '-=', '*=', '/='):
             return ['Py_INCREF(self);', 'return reinterpret_cast<PyObject*>(self);']
         return super().gen_return_statement(return_type, py_return)
 
     def _gen_parse_tuple_code(self, lines: list[str], declares: list[str], args: list[GenArgument]):
-        if self._operator == 'call':
+        if self.operator == 'call':
             super()._gen_parse_tuple_code(lines, declares, args)
         else:
             for i, j in enumerate(args):
@@ -456,10 +436,6 @@ class GenOperatorMethod(GenMethod):
     def err_return_value(self):
         return 'return 0' if self._return_bool else 'Py_RETURN_NOTIMPLEMENTED'
 
-    @property
-    def operator(self):
-        return self._operator
-
     def overload(self, m1, m2):
         try:
             m1.add_overloaded_method(m2)
@@ -471,25 +447,20 @@ class GenOperatorMethod(GenMethod):
 
 class GenSubscribableMethod(GenMethod):
     def __init__(self, name, args, return_type, operator, is_static: bool):
-        self._operator = operator
-        self._is_static = is_static
+        self.operator = operator
         self._is_len_func = operator == 'len'
         self._is_set_func = operator == 'set'
-        super().__init__(name, args[1:] if self._is_static else args, return_type, is_static)
-
-    @property
-    def operator(self):
-        return self._operator
+        super().__init__(name, args[1:] if is_static else args, return_type, is_static)
 
     @property
     def err_return_value(self):
-        return 'return -1' if len(self._arguments) == 2 else super().err_return_value
+        return 'return -1' if len(self.arguments) == 2 else super().err_return_value
 
     def _gen_parse_tuple_code(self, lines, declares, args):
         pass
 
     def gen_py_argc(self):
-        return len(self._arguments)
+        return len(self.arguments)
 
     def gen_py_return(self):
         if self._is_len_func:
@@ -504,7 +475,7 @@ class GenSubscribableMethod(GenMethod):
             return create_overloaded_method_type(type(self), is_static=m1.is_static, operator=m1.operator)(m1, m2)
 
     def _gen_calling_statement(self, genclass, argvalues: list[str]) -> str:
-        calling_statement = '%s::%s(%s);' % (genclass.classname, self._name, ', '.join(['unpacked'] + argvalues)) if self._is_static else super()._gen_calling_statement(genclass, argvalues)
+        calling_statement = '%s::%s(%s);' % (genclass.classname, self.name, ', '.join(['unpacked'] + argvalues)) if self.is_static else super()._gen_calling_statement(genclass, argvalues)
         if self._is_set_func:
             for i in genclass.subscribe_methods():
                 if i.operator == 'del':
@@ -520,7 +491,7 @@ class GenMappingMethod(GenSubscribableMethod):
     def gen_convert_args_code(self, genclass, lines: list[str], argdeclare: list[str], optional_check: bool = False):
         has_del_method = any(i.operator == 'del' for i in genclass.subscribe_methods())
         if argdeclare and not self._is_len_func:
-            for i, j in enumerate(self._arguments):
+            for i, j in enumerate(self.arguments):
                 meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
                 ga = GenArgument(j.index, j.accept_type, j.default_value, meta, str(j))
                 if has_del_method and self._is_set_func and i == 1:
@@ -548,9 +519,9 @@ class GenSequenceMethod(GenSubscribableMethod):
 
     def gen_convert_args_code(self, genclass, lines, argdeclare, optional_check=False):
         if argdeclare and not self._is_len_func:
-            arg0 = self._arguments[0]
+            arg0 = self.arguments[0]
             lines.append(f'{arg0.accept_type} obj0 = static_cast<{arg0.accept_type}>(arg0);')
-            for i, j in enumerate(self._arguments[1:]):
+            for i, j in enumerate(self.arguments[1:]):
                 meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
                 ga = GenArgument(j.index, j.accept_type, j.default_value, meta, str(j))
                 lines.append(ga.gen_declare(self, f'obj{i + 1}', f'arg{i + 1}', False, optional_check))
