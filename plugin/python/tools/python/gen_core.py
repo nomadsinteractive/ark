@@ -252,6 +252,7 @@ def create_overloaded_method_type(base_type, **kwargs):
         def __init__(self, m1, m2):
             base_type.__init__(self, m1.name, [], m1.return_type, **kwargs)
             self.arguments = self._replace_arguments(m1.arguments, m2.arguments)
+            self._overloaded_arguments = self.arguments
             self._overloaded_methods = []
             self.add_overloaded_method(m1)
             self.add_overloaded_method(m2)
@@ -288,8 +289,11 @@ def create_overloaded_method_type(base_type, **kwargs):
                 if len(m1.arguments) != len(method.arguments):
                     print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, method))
                     sys.exit(-1)
-            self.arguments = method.arguments = self._replace_arguments(method.arguments, self.arguments)
+            self._overloaded_arguments = method.arguments = self._replace_arguments(method.arguments, self.arguments)
             self._overloaded_methods.append(method)
+
+        def _gen_parse_tuple_code(self, lines: list[str], declares: list[str], args: list[GenArgument]):
+            return super()._gen_parse_tuple_code(lines, declares, self._overloaded_arguments)
 
         def _replace_arguments(self, args1: list[GenArgument], args2: list[GenArgument]):
             assert len(args1) == len(args2)

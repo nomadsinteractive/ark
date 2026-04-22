@@ -194,7 +194,7 @@ class GenMethod(object):
         if parse_format:
             lines.append(parsestatement)
 
-    def _gen_parse_tuple_args(self) -> (str, str):
+    def _gen_parse_tuple_args(self) -> tuple[str, str]:
         if self._has_args_argument:
             args_idx = len(self.arguments) - 1
             args_name = f'args0_{args_idx}'

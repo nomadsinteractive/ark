@@ -1,10 +1,11 @@
 #include "core/util/runnable_type.h"
 
-#include "app/base/application_context.h"
-#include "app/base/application_facade.h"
 #include "core/ark.h"
 #include "core/inf/runnable.h"
 #include "core/types/shared_ptr.h"
+
+#include "app/base/application_context.h"
+#include "app/base/application_facade.h"
 
 namespace ark {
 
