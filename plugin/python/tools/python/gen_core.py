@@ -308,7 +308,7 @@ def create_overloaded_method_type(base_type, **kwargs):
                 if len(m1.arguments) != len(method.arguments):
                     print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, method))
                     sys.exit(-1)
-            method._arguments = self._replace_arguments(method.arguments, self._arguments)
+            self._arguments = method._arguments = self._replace_arguments(method.arguments, self._arguments)
             self._overloaded_methods.append(method)
 
         def _replace_arguments(self, args1: list[GenArgument], args2: list[GenArgument]):

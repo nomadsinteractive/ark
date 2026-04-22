@@ -19,10 +19,7 @@
     "libjpeg-turbo",
     "libvorbis",
     "libyaml",
-    "libzip", {
-      "name": "pthread",
-      "platform": "osx"
-    },
+    "libzip",
     "miniaudio",
     "nlohmann-json",
     "python3",
