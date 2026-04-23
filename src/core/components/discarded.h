@@ -22,9 +22,9 @@ public:
     void discard() const;
 
 //  [[script::bindings::auto]]
-    void reset(sp<Boolean> discarded = nullptr) const;
+    void reset(sp<Boolean> discarded) const;
 //  [[script::bindings::auto]]
-    void reset(bool discarded) const;
+    void reset(bool discarded = false) const;
 
 private:
     sp<BooleanWrapper> _discarded;

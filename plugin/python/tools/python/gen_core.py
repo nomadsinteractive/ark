@@ -112,16 +112,16 @@ class GenConverter:
         self._check_func = check_func
         self._overloaded_check_func = overloaded_check_func
 
-    def check(self, var, is_overloaded_func: bool) -> str:
+    def check(self, var: str, is_overloaded_func: bool) -> str:
         check_func = self._check_func.format(var)
         return f'{self._overloaded_check_func.format(var)} && {check_func}' if is_overloaded_func else check_func
 
 
 ARK_PY_ARGUMENT_TYPE_CHECKERS = {
-    'bool': GenConverter('true', '!PythonExtension::instance().isInstance<Boolean>({0})'),
-    'int32_t': GenConverter('PyBridge::isPyLongExact({0})'),
-    'uint32_t': GenConverter('PyBridge::isPyLongExact({0})'),
-    'float': GenConverter('(PyBridge::isPyLongExact({0}) || PyBridge::isPyFloatExact({0}))'),
+    'bool': GenConverter('true', '!({0} && PythonExtension::instance().isInstance<Boolean>({0}))'),
+    'int32_t': GenConverter('(!{0} || PyBridge::isPyLongExact({0}))'),
+    'uint32_t': GenConverter('(!{0} ||PyBridge::isPyLongExact({0}))'),
+    'float': GenConverter('(!{0} || PyBridge::isPyLongExact({0}) || PyBridge::isPyFloatExact({0}))'),
     'std::vector<float>': GenConverter('PyBridge::isPySequence({0})'),
     'std::vector<int32_t>': GenConverter('PyBridge::isPySequence({0})'),
     'V2': GenConverter('PyBridge::isPySequence({0}) && PyBridge::PyObject_Size({0}) == 2', '!PythonExtension::instance().isInstance<Vec2>({0})'),
@@ -194,10 +194,11 @@ class GenArgument:
     def type_compare(self, *typenames) -> bool:
         return any(acg.type_compare(i, self._str) for i in typenames)
 
-    def gen_type_check(self, varname, is_overloaded_func: bool):
+    def gen_type_check(self, varname: str, is_overloaded_func: bool):
+        checks = [varname] if self.default_value is None else []
         if self.accept_type in ARK_PY_ARGUMENT_TYPE_CHECKERS:
-            return f'{varname} && {ARK_PY_ARGUMENT_TYPE_CHECKERS[self.accept_type].check(varname, is_overloaded_func)}'
-        return None
+            checks.append(ARK_PY_ARGUMENT_TYPE_CHECKERS[self.accept_type].check(varname, is_overloaded_func))
+        return ' && '.join(checks) if checks else None
 
     def gen_declare(self, gen_method, objname: str, argname: str, extract_cast: bool = False, optional_check: bool = False):
         typename = self.meta.cast_signature
