@@ -8,7 +8,6 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/layout_length.h"
-#include "graphics/inf/render_batch.h"
 
 namespace ark {
 
@@ -83,7 +82,6 @@ public:
 
 private:
     sp<Content> _content;
-    sp<RenderBatch> _render_batch;
 };
 
 }

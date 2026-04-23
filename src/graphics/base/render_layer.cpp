@@ -1,11 +1,14 @@
 #include "graphics/base/render_layer.h"
 
 #include "core/ark.h"
+#include "core/base/named_hash.h"
+#include "core/types/global.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_request.h"
-#include "graphics/impl/render_batch/render_batch_post_process.h"
+#include "graphics/components/render_object.h"
+#include "graphics/util/renderable_type.h"
 
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_layout.h"
@@ -18,23 +21,6 @@
 #include "renderer/inf/drawing_context_composer.h"
 
 namespace ark {
-
-class RenderLayer::RenderBatchImpl final : public RenderBatch {
-public:
-
-    Vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override
-    {
-        return _layer_contexts;
-    }
-
-    void addLayerContext(sp<LayerContext> layerContext)
-    {
-        _layer_contexts.push_back(std::move(layerContext));
-    }
-
-private:
-    Vector<sp<LayerContext>> _layer_contexts;
-};
 
 RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)
     : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _visible(std::move(visible), true),
@@ -54,7 +40,7 @@ RenderLayer::RenderLayer(sp<RenderController> renderController, sp<ModelLoader> 
 }
 
 RenderLayer::RenderLayer(sp<RenderLayer::Stub> stub)
-    : _stub(std::move(stub)), _render_batch(sp<RenderBatchImpl>::make()), _render_batches{_render_batch}
+    : _stub(std::move(stub))
 {
 }
 
@@ -63,22 +49,7 @@ RenderLayerSnapshot RenderLayer::snapshot(const RenderRequest& renderRequest)
     DPROFILER_TRACE("Snapshot");
 
     RenderLayerSnapshot renderLayerSnapshot(renderRequest, _stub);
-    for(auto iter = _render_batches.begin(); iter != _render_batches.end();)
-    {
-        const sp<RenderBatch>& i = *iter;
-        Vector<sp<LayerContext>>& layerContexts = i->snapshot(renderRequest);
-        if(i->discarded() && i->discarded()->val())
-        {
-            renderLayerSnapshot.addDiscardedLayerContexts(layerContexts);
-            iter = _render_batches.erase(iter);
-        }
-        else
-        {
-            renderLayerSnapshot.addLayerContext(renderRequest, layerContexts);
-            ++iter;
-        }
-    }
-
+    renderLayerSnapshot.addLayerContext(renderRequest, _layer_contexts);
     renderLayerSnapshot.snapshot(renderRequest);
 
     DPROFILER_LOG("Signature", _stub->_pipeline_bindings->pipelineDescriptor()->signature());
@@ -111,19 +82,19 @@ sp<LayerContext> RenderLayer::makeLayerContext(sp<ModelLoader> modelLoader, sp<V
     return sp<LayerContext>::make(_stub->_shader, modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _stub->_model_loader, std::move(position), std::move(visible), std::move(discarded), _stub->_varyings);
 }
 
-sp<LayerContext> RenderLayer::addLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const
+sp<LayerContext> RenderLayer::addLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded)
 {
     sp<LayerContext> layerContext = makeLayerContext(std::move(modelLoader), std::move(position), std::move(visible), std::move(discarded));
-    _render_batch->addLayerContext(layerContext);
+    _layer_contexts.push_back(layerContext);
     return layerContext;
 }
 
-void RenderLayer::addRenderBatch(sp<RenderBatch> renderBatch)
+void RenderLayer::addLayerContext(sp<LayerContext> layerContext)
 {
-    _render_batches.push_back(std::move(renderBatch));
+    _layer_contexts.push_back(std::move(layerContext));
 }
 
-sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const
+sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded)
 {
     return sp<Layer>::make(addLayerContext(std::move(modelLoader), std::move(position), std::move(visible), std::move(discarded)));
 }
@@ -173,7 +144,10 @@ RenderLayer::RENDERER_POST_PROCESS::RENDERER_POST_PROCESS(BeanFactory& factory, 
 sp<Renderer> RenderLayer::RENDERER_POST_PROCESS::build(const Scope& args)
 {
     sp<RenderLayer> renderLayer = _impl.build(args);
-    renderLayer->addRenderBatch(sp<RenderBatch>::make<RenderBatchPostProcess>());
+    sp<LayerContext> layerContext = sp<LayerContext>::make(nullptr, sp<ModelLoader>::make<ModelLoaderNDC>(), nullptr, nullptr, Global<Constants>()->BOOLEAN_FALSE);
+    sp<Renderable> renderable = RenderableType::create(sp<Renderable>::make<RenderObject>(NamedHash(1), sp<Vec3>::make<Vec3::Const>(V3(0, 0, 1.0f))), Global<Constants>()->BOOLEAN_FALSE);
+    layerContext->pushBack(std::move(renderable));
+    renderLayer->addLayerContext(std::move(layerContext));
     return renderLayer;
 }
 

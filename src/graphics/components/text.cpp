@@ -445,14 +445,14 @@ private:
 
 }
 
-struct Text::Content {
+struct Text::Content final : public Updatable {
     Content(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<Vec2> scale, sp<GlyphMaker> glyphMaker, const float letterSpacing, LayoutLength lineHeight, const float lineIndent)
         : _render_layer(std::move(renderLayer)), _text(text ? std::move(text) : StringType::create()), _position(std::move(position)), _layout_info(sp<LayoutInfo>::make(std::move(layoutParam), std::move(scale), letterSpacing, lineIndent, std::move(lineHeight))),
           _glyph_maker(std::move(glyphMaker)), _layout(sp<Layout>::make<LayoutText>(_layout_info))
     {
     }
 
-    bool update(const uint32_t tick)
+    bool update(const uint32_t tick) override
     {
         const bool contentDirty = _text->update(tick);
         const bool layoutDirty = _timestamp.update(tick);
@@ -546,24 +546,6 @@ struct Text::Content {
     Timestamp _timestamp;
 };
 
-class RenderBatchContent final : public RenderBatch {
-public:
-    RenderBatchContent(sp<Text::Content> content, sp<Boolean> discarded)
-        : RenderBatch(std::move(discarded)), _content(std::move(content)) {
-    }
-
-    Vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override {
-        _layer_contexts.clear();
-        _content->update(renderRequest.tick());
-        _layer_contexts.push_back(_content->_layer_context);
-        return _layer_contexts;
-    }
-
-private:
-    sp<Text::Content> _content;
-    Vector<sp<LayerContext>> _layer_contexts;
-};
-
 Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<Vec2> scale, sp<GlyphMaker> glyphMaker, float letterSpacing, LayoutLength lineHeight, float lineIndent)
     : _content(sp<Content>::make(std::move(renderLayer), std::move(text), std::move(position), std::move(layoutParam), std::move(scale), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerFont>(nullptr), letterSpacing, std::move(lineHeight), lineIndent))
 {
@@ -631,18 +613,21 @@ void Text::show(sp<Boolean> discarded, const sp<RenderLayer>& renderLayer)
 
     const sp<RenderLayer>& rl = renderLayer ? renderLayer : _content->_render_layer;
     CHECK(rl, "Must specify text's RenderLayer");
-    _content->_layer_context = rl->makeLayerContext(nullptr, _content->_position.toVar(), nullptr, discarded);
-
+    sp<Boolean> effectiveDiscarded = discarded ? std::move(discarded) : sp<Boolean>::make<BooleanByWeakRef<Content>>(_content, 0);
+    _content->_layer_context = rl->makeLayerContext(nullptr, _content->_position.toVar(), nullptr, std::move(effectiveDiscarded));
+    _content->_layer_context->setUpdatable(_content);
     _content->update(Timestamp::now());
-    _render_batch = sp<RenderBatch>::make<RenderBatchContent>(_content, discarded ? std::move(discarded) : sp<Boolean>::make<BooleanByWeakRef<Content>>(_content, 0));
-    rl->addRenderBatch(_render_batch);
+    rl->addLayerContext(_content->_layer_context);
 }
 
 void Text::discard()
 {
-    if(_render_batch)
-        _render_batch->setDiscarded(Global<Constants>()->BOOLEAN_TRUE);
-    _render_batch = nullptr;
+    if(_content->_layer_context)
+    {
+        _content->_layer_context->discard();
+        _content->_layer_context->setUpdatable(nullptr);
+    }
+    _content->_layer_context = nullptr;
 }
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

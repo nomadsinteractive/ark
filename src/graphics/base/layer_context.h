@@ -26,6 +26,8 @@ public:
 
     const sp<Shader>& shader() const;
 
+    void setUpdatable(sp<Updatable> updatable);
+
     const OptionalVar<Vec3>& position() const;
     void setPosition(sp<Vec3> position);
 
@@ -63,6 +65,7 @@ private:
     OptionalVar<Boolean> _discarded;
 
     sp<Varyings> _varyings;
+    sp<Updatable> _updatable;
 
     std::deque<std::pair<sp<Renderable>, Renderable::State>> _renderables;
     Vector<sp<Renderable>> _created_push_front;

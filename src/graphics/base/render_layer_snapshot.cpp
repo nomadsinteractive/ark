@@ -117,12 +117,6 @@ void RenderLayerSnapshot::addDiscardedLayerContext(LayerContext& lc)
     lc._element_states.clear();
 }
 
-void RenderLayerSnapshot::addDiscardedLayerContexts(const Vector<sp<LayerContext>>& layerContexts)
-{
-    for(const sp<LayerContext>& lc : layerContexts)
-        addDiscardedLayerContext(lc);
-}
-
 bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext)
 {
     const PipelineLayout& shaderLayout = _stub->_shader->layout();

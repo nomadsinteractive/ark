@@ -32,7 +32,6 @@ class Varyings;
 class RendererMaker;
 class Transform;
 class Renderable;
-class RenderBatch;
 class RenderCommand;
 class RenderCommandPipeline;
 class RenderLayer;

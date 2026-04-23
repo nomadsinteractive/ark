@@ -54,12 +54,12 @@ public:
     const sp<Shader>& shader() const;
 
 //  [[script::bindings::auto]]
-    sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr) const;
+    sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 
     sp<LayerContext> makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const;
-    sp<LayerContext> addLayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr) const;
+    sp<LayerContext> addLayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 
-    void addRenderBatch(sp<RenderBatch> renderBatch);
+    void addLayerContext(sp<LayerContext> layerContext);
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<RenderLayer> {
@@ -108,9 +108,7 @@ private:
 private:
     sp<Stub> _stub;
 
-    class RenderBatchImpl;
-    sp<RenderBatchImpl> _render_batch;
-    Vector<sp<RenderBatch>> _render_batches;
+    Vector<sp<LayerContext>> _layer_contexts;
 
     friend class Layer;
     friend class LayerContext;

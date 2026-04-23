@@ -64,7 +64,6 @@ private:
     bool doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext);
     bool addDiscardedState(LayerContext& lc, const void* stateKey);
     void addDiscardedLayerContext(LayerContext& lc);
-    void addDiscardedLayerContexts(const Vector<sp<LayerContext>>& layerContexts);
 
     friend class RenderLayer;
 };
