@@ -157,6 +157,8 @@ class Readable:
 
 
 class Runnable:
+    def __init__(self, delegate: TYPE_RUNNABLE):
+        pass
 
     def __call__(self):
         pass

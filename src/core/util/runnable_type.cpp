@@ -30,6 +30,11 @@ private:
 
 }
 
+sp<Runnable> RunnableType::create(sp<Runnable> delegate)
+{
+    return delegate;
+}
+
 void RunnableType::run(const sp<Runnable>& self)
 {
     self->run();
