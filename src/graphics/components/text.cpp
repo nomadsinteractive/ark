@@ -456,43 +456,47 @@ struct Text::Content final : public Updatable {
     {
         const bool contentDirty = _text->update(tick);
         const bool layoutDirty = _timestamp.update(tick);
-        if(contentDirty)
-            createContent(Strings::fromUTF8(_text->val()));
-        else if(layoutDirty)
-            updateLayoutContent();
+        if(const sp<LayerContext> lc = _layer_context.lock())
+        {
+            if(contentDirty)
+                createContent(*lc, Strings::fromUTF8(_text->val()));
+            else if(layoutDirty)
+                updateLayoutContent(*lc);
+        }
         return contentDirty || layoutDirty || UpdatableUtil::update(tick, _updatable_layout);
     }
 
     void setText(const std::wstring& text)
     {
         _text = StringType::create(Strings::toUTF8(text));
-        createContent(text);
+        if(const sp<LayerContext> lc = _layer_context.lock())
+            createContent(*lc, text);
     }
 
-    void createContent(const std::wstring& text)
+    void createContent(LayerContext& layerContext, const std::wstring& text)
     {
         _glyphs = _glyph_maker->makeGlyphs(text);
-        _layout_chars = toLayoutCharacters(_glyphs, _layer_context->modelLoader());
-        createLayerContent();
+        _layout_chars = toLayoutCharacters(_glyphs, layerContext.modelLoader());
+        createLayerContent(layerContext);
     }
 
-    void createLayerContent()
+    void createLayerContent(LayerContext& layerContext)
     {
         _render_objects.clear();
         for(const sp<Glyph>& i : _glyphs)
             _render_objects.push_back(i->toRenderObject());
 
-        updateLayoutContent();
+        updateLayoutContent(layerContext);
     }
 
-    void updateLayoutContent()
+    void updateLayoutContent(LayerContext& layerContext)
     {
-        _layer_context->clear();
+        layerContext.clear();
 
         Layout::Hierarchy hierarchy = makeHierarchy();
         DASSERT(_render_objects.size() == hierarchy._child_nodes.size());
         for(size_t i = 0; i < _render_objects.size(); ++i)
-            _layer_context->pushBack(sp<Renderable>::make<RenderableCharacter>(_render_objects.at(i), hierarchy._child_nodes.at(i)._node, _layout_info, _layout_chars.at(i)._offset));
+            layerContext.pushBack(sp<Renderable>::make<RenderableCharacter>(_render_objects.at(i), hierarchy._child_nodes.at(i)._node, _layout_info, _layout_chars.at(i)._offset));
 
         _updatable_layout = _layout->inflate(std::move(hierarchy));
         _updatable_layout->update(Timestamp::now());
@@ -540,7 +544,7 @@ struct Text::Content final : public Updatable {
     Vector<Character> _layout_chars;
     Vector<sp<RenderObject>> _render_objects;
 
-    sp<LayerContext> _layer_context;
+    WeakPtr<LayerContext> _layer_context;
     sp<Updatable> _updatable_layout;
 
     Timestamp _timestamp;
@@ -614,20 +618,18 @@ void Text::show(sp<Boolean> discarded, const sp<RenderLayer>& renderLayer)
     const sp<RenderLayer>& rl = renderLayer ? renderLayer : _content->_render_layer;
     CHECK(rl, "Must specify text's RenderLayer");
     sp<Boolean> effectiveDiscarded = discarded ? std::move(discarded) : sp<Boolean>::make<BooleanByWeakRef<Content>>(_content, 0);
-    _content->_layer_context = rl->makeLayerContext(nullptr, _content->_position.toVar(), nullptr, std::move(effectiveDiscarded));
-    _content->_layer_context->setUpdatable(_content);
+    sp<LayerContext> layerContext = rl->makeLayerContext(nullptr, _content->_position.toVar(), nullptr, std::move(effectiveDiscarded));
+    layerContext->setUpdatable(_content);
+    _content->_layer_context = layerContext;
     _content->update(Timestamp::now());
-    rl->addLayerContext(_content->_layer_context);
+    rl->addLayerContext(std::move(layerContext));
 }
 
 void Text::discard()
 {
-    if(_content->_layer_context)
-    {
-        _content->_layer_context->discard();
-        _content->_layer_context->setUpdatable(nullptr);
-    }
-    _content->_layer_context = nullptr;
+    if(const sp<LayerContext> lc = _content->_layer_context.lock())
+        lc->discard();
+    _content->_layer_context = {};
 }
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
