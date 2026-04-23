@@ -13,20 +13,16 @@
 
 namespace ark {
 
-class ARK_API LayerContext final : public Updatable {
+class ARK_API LayerContext final  {
 public:
     struct ElementState {
         Optional<element_index_t> _index;
     };
 
 public:
-    LayerContext(sp<Shader> shader = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr, sp<Varyings> varyings = nullptr);
-
-    bool update(uint32_t tick) override;
+    LayerContext(sp<Shader> shader = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr, sp<Varyings> varyings = nullptr, sp<Updatable> updatable = nullptr);
 
     const sp<Shader>& shader() const;
-
-    void setUpdatable(sp<Updatable> updatable);
 
     const OptionalVar<Vec3>& position() const;
     void setPosition(sp<Vec3> position);

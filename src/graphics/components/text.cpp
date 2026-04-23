@@ -618,8 +618,7 @@ void Text::show(sp<Boolean> discarded, const sp<RenderLayer>& renderLayer)
     const sp<RenderLayer>& rl = renderLayer ? renderLayer : _content->_render_layer;
     CHECK(rl, "Must specify text's RenderLayer");
     sp<Boolean> effectiveDiscarded = discarded ? std::move(discarded) : sp<Boolean>::make<BooleanByWeakRef<Content>>(_content, 0);
-    sp<LayerContext> layerContext = rl->makeLayerContext(nullptr, _content->_position.toVar(), nullptr, std::move(effectiveDiscarded));
-    layerContext->setUpdatable(_content);
+    sp<LayerContext> layerContext = rl->makeLayerContext(nullptr, _content->_position.toVar(), nullptr, std::move(effectiveDiscarded), _content);
     _content->_layer_context = layerContext;
     _content->update(Timestamp::now());
     rl->addLayerContext(std::move(layerContext));

@@ -14,25 +14,15 @@
 
 namespace ark {
 
-LayerContext::LayerContext(sp<Shader> shader, sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings)
+LayerContext::LayerContext(sp<Shader> shader, sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Updatable> updatable)
     : _shader(std::move(shader)), _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(std::move(discarded), false),
-      _varyings(std::move(varyings))
+      _varyings(std::move(varyings)), _updatable(std::move(updatable))
 {
-}
-
-bool LayerContext::update(uint32_t tick)
-{
-    return UpdatableUtil::update(tick, _timestamp, _updatable);
 }
 
 const sp<Shader>& LayerContext::shader() const
 {
     return _shader;
-}
-
-void LayerContext::setUpdatable(sp<Updatable> updatable)
-{
-    _updatable = std::move(updatable);
 }
 
 const OptionalVar<Vec3>& LayerContext::position() const
