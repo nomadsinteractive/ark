@@ -323,7 +323,7 @@ class NoiseGeneratorWindow(Window):
 
 
 class MarkStudio:
-    def __init__(self, application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, toolbar_items: Sequence[ToolbarButton] = tuple(), console_cmds: Sequence[ConsoleCommand] = tuple()):
+    def __init__(self, application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, toolbar_items: Sequence[ToolbarButton] = tuple(), console_cmds: Sequence[ConsoleCommand] = tuple(), windows: Sequence[Window | Callable] = tuple()):
         global _mark_studio
         _mark_studio = self
 
@@ -334,19 +334,16 @@ class MarkStudio:
 
         self._widget = dear_imgui.Widget()
         self._imgui.add_widget(self._widget)
-        self._windows: list[Window] = [ConsoleWindow(console_cmds, True), NoiseGeneratorWindow(False)]
+        self._windows = [ConsoleWindow(console_cmds, True), NoiseGeneratorWindow(False)] + list(windows)
         self.on_create()
 
         self._main_window = ToolbarWindow(self, None, toolbar_items)
-
-    @property
-    def windows(self) -> tuple[Window, ...]:
-        return tuple(self._windows)
 
     def on_create(self):
         builder = dear_imgui.WidgetBuilder(self._imgui)
         imgui_demo_is_open = Boolean(False)
         imgui_about_is_open = Boolean(False)
+
         if builder.begin_main_menu_bar():
 
             if builder.begin_menu('File'):
@@ -354,6 +351,7 @@ class MarkStudio:
                 builder.end_menu()
 
             if builder.begin_menu('Windows'):
+                self._windows = [i if isinstance(i, Window) else i() for i in self._windows]
                 for i in self._windows:
                     i.ready(self._imgui)
                     builder.menu_item(i.title, p_selected=i.is_open)
@@ -430,7 +428,8 @@ def close_mark_studio():
         _mark_studio.close()
 
 
-def show_mark_studio(application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, toolbar_items: Sequence[ToolbarButton] = tuple(), console_cmds: Sequence[ConsoleCommand] = tuple()):
+def show_mark_studio(application_facade: ApplicationFacade, imgui: dear_imgui.Imgui, resolution: Vec2, toolbar_items: Sequence[ToolbarButton] = tuple(), console_cmds: Sequence[ConsoleCommand] = tuple(),
+                     windows: Sequence[Window | Callable] = tuple()):
     if not _mark_studio or _mark_studio.discarded:
-        mark_studio = MarkStudio(application_facade, imgui, resolution, toolbar_items, console_cmds)
+        mark_studio = MarkStudio(application_facade, imgui, resolution, toolbar_items, console_cmds, windows)
         mark_studio.show()
