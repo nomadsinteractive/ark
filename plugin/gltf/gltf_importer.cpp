@@ -299,9 +299,9 @@ Vector<sp<Material>> loadMaterials(const tinygltf::Model& gltfModel, MaterialBun
 			}
 			else
 			{
+				const std::lock_guard lg(materialInitializer._mutex);
 				const tinygltf::Texture& texture = gltfModel.textures.at(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index);
 				const tinygltf::Image& image = gltfModel.images.at(texture.source);
-				const std::lock_guard<std::mutex> lg(materialInitializer._mutex);
 				const auto iter = materialInitializer._images.find(image.name);
 				sp<Bitmap> bitmap = iter != materialInitializer._images.end() ? iter->second : nullptr;
 				if(!bitmap)
@@ -309,10 +309,10 @@ Vector<sp<Material>> loadMaterials(const tinygltf::Model& gltfModel, MaterialBun
 					bitmap = sp<Bitmap>::make(image.width, image.height, image.bits / 8 * image.component * image.width, image.component, sp<ByteArray>::make<ByteArray::Vector>(image.image));
 					materialInitializer._images[image.name] = bitmap;
 				}
-				material->setBaseColor(sp<MaterialMap>::make(nullptr, std::move(bitmap)));
+				material->setBaseColor(sp<MaterialMap>::make(nullptr, nullptr, std::move(bitmap)));
 			}
-			material->roughness()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor), 0, 0, 0)));
-			material->metallic()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor), 0, 0, 0)));
+			material->roughness()->setValue(sp<Numeric>::make<Numeric::Const>(static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor)));
+			material->metallic()->setValue(sp<Numeric>::make<Numeric::Const>(static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor)));
 
 			const Vector<double>& emissionFactor = gltfMaterial.emissiveFactor;
 			const V3 emission(emissionFactor.at(0), emissionFactor.at(1), emissionFactor.at(2));

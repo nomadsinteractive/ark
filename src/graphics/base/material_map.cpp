@@ -7,8 +7,8 @@
 
 namespace ark {
 
-MaterialMap::MaterialMap(sp<Vec4> color, sp<Bitmap> bitmap)
-    : _color(std::move(color)), _bitmap(std::move(bitmap))
+MaterialMap::MaterialMap(sp<Vec4> color, sp<Numeric> value, sp<Bitmap> bitmap)
+    : _color(std::move(color)), _value(std::move(value)), _bitmap(std::move(bitmap))
 {
 }
 
@@ -20,6 +20,16 @@ const sp<Vec4>& MaterialMap::color() const
 void MaterialMap::setColor(sp<Vec4> color)
 {
     _color = std::move(color);
+}
+
+const sp<Numeric>& MaterialMap::value() const
+{
+    return _value;
+}
+
+void MaterialMap::setValue(sp<Numeric> value)
+{
+    _value = std::move(value);
 }
 
 const sp<Bitmap>& MaterialMap::bitmap() const

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/forwarding.h"
-#include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -21,12 +20,17 @@ public:
         TYPE_LENGTH
     };
 
-    MaterialMap(sp<Vec4> color = nullptr, sp<Bitmap> bitmap = nullptr);
+    MaterialMap(sp<Vec4> color = nullptr, sp<Numeric> value = nullptr, sp<Bitmap> bitmap = nullptr);
 
 //  [[script::bindings::property]]
     const sp<Vec4>& color() const;
 //  [[script::bindings::property]]
     void setColor(sp<Vec4> color);
+
+//  [[script::bindings::property]]
+    const sp<Numeric>& value() const;
+//  [[script::bindings::property]]
+    void setValue(sp<Numeric> value);
 
 //  [[script::bindings::property]]
     const sp<Bitmap>& bitmap() const;
@@ -35,6 +39,7 @@ public:
 
 private:
     sp<Vec4> _color;
+    sp<Numeric> _value;
     sp<Bitmap> _bitmap;
 };
 

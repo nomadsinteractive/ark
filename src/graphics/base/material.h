@@ -11,7 +11,7 @@ namespace ark {
 
 class ARK_API Material {
 public:
-    Material(uint32_t id, String name, bitmap baseColor = nullptr, bitmap normal = nullptr, bitmap roughness = nullptr, bitmap metallic = nullptr, bitmap specular = nullptr);
+    Material(uint32_t id, String name, sp<Bitmap> baseColor = nullptr, sp<Bitmap> normal = nullptr, sp<Bitmap> roughness = nullptr, sp<Bitmap> metallic = nullptr, sp<Bitmap> specular = nullptr);
 
 //  [[script::bindings::property]]
     uint32_t id() const;

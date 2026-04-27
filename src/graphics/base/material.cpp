@@ -8,14 +8,14 @@
 
 namespace ark {
 
-Material::Material(const uint32_t id, String name, bitmap baseColor, bitmap normal, bitmap roughness, bitmap metallic, bitmap specular)
+Material::Material(const uint32_t id, String name, sp<Bitmap> baseColor, sp<Bitmap> normal, sp<Bitmap> roughness, sp<Bitmap> metallic, sp<Bitmap> specular)
     : _id(id), _name(std::move(name))
 {
-    _textures[MaterialMap::TYPE_BASE_COLOR] = sp<MaterialMap>::make(nullptr, std::move(baseColor));
-    _textures[MaterialMap::TYPE_NORMAL] = sp<MaterialMap>::make(nullptr, std::move(normal));
-    _textures[MaterialMap::TYPE_ROUGHNESS] = sp<MaterialMap>::make(nullptr, std::move(roughness));
-    _textures[MaterialMap::TYPE_METALLIC] = sp<MaterialMap>::make(nullptr, std::move(metallic));
-    _textures[MaterialMap::TYPE_SPECULAR] = sp<MaterialMap>::make(nullptr, std::move(specular));
+    _textures[MaterialMap::TYPE_BASE_COLOR] = sp<MaterialMap>::make(nullptr, nullptr, std::move(baseColor));
+    _textures[MaterialMap::TYPE_NORMAL] = sp<MaterialMap>::make(nullptr, nullptr, std::move(normal));
+    _textures[MaterialMap::TYPE_ROUGHNESS] = sp<MaterialMap>::make(nullptr, nullptr, std::move(roughness));
+    _textures[MaterialMap::TYPE_METALLIC] = sp<MaterialMap>::make(nullptr, nullptr, std::move(metallic));
+    _textures[MaterialMap::TYPE_SPECULAR] = sp<MaterialMap>::make(nullptr, nullptr, std::move(specular));
     _textures[MaterialMap::TYPE_EMISSION] = sp<MaterialMap>::make();
 }
 

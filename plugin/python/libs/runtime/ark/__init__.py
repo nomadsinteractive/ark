@@ -1593,10 +1593,14 @@ class Animation:
         pass
 
 
-class MaterialTexture:
+class MaterialMap:
 
     @property
     def color(self) -> Optional[Vec4]:
+        return None
+
+    @property
+    def value(self) -> Optional[Numeric]:
         return None
 
     @property
@@ -1619,27 +1623,27 @@ class Material:
         return ''
 
     @property
-    def base_color(self) -> Optional[MaterialTexture]:
+    def base_color(self) -> Optional[MaterialMap]:
         return None
 
     @property
-    def normal(self) -> Optional[MaterialTexture]:
+    def normal(self) -> Optional[MaterialMap]:
         return None
 
     @property
-    def roughness(self) -> Optional[MaterialTexture]:
+    def roughness(self) -> Optional[MaterialMap]:
         return None
 
     @property
-    def metallic(self) -> Optional[MaterialTexture]:
+    def metallic(self) -> Optional[MaterialMap]:
         return None
 
     @property
-    def specular(self) -> Optional[MaterialTexture]:
+    def specular(self) -> Optional[MaterialMap]:
         return None
 
     @property
-    def emission(self) -> Optional[MaterialTexture]:
+    def emission(self) -> Optional[MaterialMap]:
         return None
 
 
