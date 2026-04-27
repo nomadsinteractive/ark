@@ -5,7 +5,7 @@
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/material_texture.h"
+#include "graphics/base/material_map.h"
 
 #include "renderer/base/model.h"
 #include "renderer/inf/model_loader.h"
@@ -67,7 +67,7 @@ public:
 //  [[script::bindings::property]]
     const Map<String, sp<Bitmap>>& images() const;
 //  [[script::bindings::property]]
-    const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& textures() const;
+    const std::array<sp<Texture>, MaterialMap::TYPE_LENGTH>& textures() const;
 
 //  [[script::bindings::auto]]
     sp<Material> getMaterial(const String& name) const;

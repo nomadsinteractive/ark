@@ -5,7 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/material_texture.h"
+#include "graphics/base/material_map.h"
 
 namespace ark {
 
@@ -21,29 +21,29 @@ public:
     const String& name() const;
 
 //  [[script::bindings::property]]
-    const sp<MaterialTexture>& baseColor() const;
+    const sp<MaterialMap>& baseColor() const;
 //  [[script::bindings::property]]
-    void setBaseColor(sp<MaterialTexture> materialTexture);
+    void setBaseColor(sp<MaterialMap> map);
 //  [[script::bindings::property]]
-    const sp<MaterialTexture>& normal() const;
+    const sp<MaterialMap>& normal() const;
 //  [[script::bindings::property]]
-    void setNormal(sp<MaterialTexture> materialTexture);
+    void setNormal(sp<MaterialMap> map);
 //  [[script::bindings::property]]
-    const sp<MaterialTexture>& roughness() const;
+    const sp<MaterialMap>& roughness() const;
 //  [[script::bindings::property]]
-    void setRoughness(sp<MaterialTexture> materialTexture);
+    void setRoughness(sp<MaterialMap> map);
 //  [[script::bindings::property]]
-    const sp<MaterialTexture>& metallic() const;
+    const sp<MaterialMap>& metallic() const;
 //  [[script::bindings::property]]
-    void setMetallic(sp<MaterialTexture> materialTexture);
+    void setMetallic(sp<MaterialMap> map);
 //  [[script::bindings::property]]
-    const sp<MaterialTexture>& specular() const;
+    const sp<MaterialMap>& specular() const;
 //  [[script::bindings::property]]
-    void setSpecular(sp<MaterialTexture> materialTexture);
+    void setSpecular(sp<MaterialMap> map);
 //  [[script::bindings::property]]
-    const sp<MaterialTexture>& emission() const;
+    const sp<MaterialMap>& emission() const;
 //  [[script::bindings::property]]
-    void setEmission(sp<MaterialTexture> materialTexture);
+    void setEmission(sp<MaterialMap> map);
 
     const sp<Variable<Rect>>& uv() const;
     void setUV(sp<Variable<Rect>> uv);
@@ -51,13 +51,13 @@ public:
     Rect toTextureUV() const;
 
 //  [[script::bindings::auto]]
-    const sp<MaterialTexture>& getTexture(MaterialTexture::Type type) const;
+    const sp<MaterialMap>& getTexture(MaterialMap::Type type) const;
 
 private:
     uint32_t _id;
     String _name;
     sp<Variable<Rect>> _uv;
-    sp<MaterialTexture> _textures[MaterialTexture::TYPE_LENGTH];
+    sp<MaterialMap> _textures[MaterialMap::TYPE_LENGTH];
 };
 
 }

@@ -230,7 +230,7 @@ const Map<String, sp<Bitmap>>& ModelBundle::images() const
     return _stub->_material_bundle->images();
 }
 
-const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& ModelBundle::textures() const
+const std::array<sp<Texture>, MaterialMap::TYPE_LENGTH>& ModelBundle::textures() const
 {
     return _stub->_material_bundle->textures();
 }

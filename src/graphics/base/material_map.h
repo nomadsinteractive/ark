@@ -8,7 +8,7 @@
 
 namespace ark {
 
-class ARK_API MaterialTexture {
+class ARK_API MaterialMap {
 public:
 //  [[script::bindings::enumeration]]
     enum Type {
@@ -21,7 +21,7 @@ public:
         TYPE_LENGTH
     };
 
-    MaterialTexture(sp<Vec4> color = nullptr, sp<Bitmap> bitmap = nullptr);
+    MaterialMap(sp<Vec4> color = nullptr, sp<Bitmap> bitmap = nullptr);
 
 //  [[script::bindings::property]]
     const sp<Vec4>& color() const;
@@ -29,13 +29,13 @@ public:
     void setColor(sp<Vec4> color);
 
 //  [[script::bindings::property]]
-    sp<Bitmap> bitmap() const;
+    const sp<Bitmap>& bitmap() const;
 //  [[script::bindings::property]]
     void setBitmap(sp<Bitmap> bitmap);
 
 private:
     sp<Vec4> _color;
-    sp<Variable<sp<Bitmap>>> _bitmap_provider;
+    sp<Bitmap> _bitmap;
 };
 
 }

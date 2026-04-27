@@ -10,7 +10,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/material.h"
-#include "graphics/base/material_texture.h"
+#include "graphics/base/material_map.h"
 #include "graphics/base/rect.h"
 
 #include "renderer/forwarding.h"
@@ -43,7 +43,7 @@ public:
     const Vector<sp<Material>>& materials() const;
     const Map<String, sp<Bitmap>>& images() const;
 
-    const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& textures() const;
+    const std::array<sp<Texture>, MaterialMap::TYPE_LENGTH>& textures() const;
 
     sp<Material> getMaterial(const String& name) const;
     Rect getMaterialUV(const String& name) const;
@@ -58,7 +58,7 @@ private:
     ImmutableTable<String, sp<Material>> _materials;
     Map<String, sp<Bitmap>> _images;
 
-    std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> _textures;
+    std::array<sp<Texture>, MaterialMap::TYPE_LENGTH> _textures;
     sp<Stub> _stub;
 };
 

@@ -375,7 +375,7 @@ private:
 
 template<> inline Optional<sp<String>> PyCast::toSharedPtrImpl<String>(PyObject* object)
 {
-    DCHECK_WARN("toSharedPtrImpl<String> has been deprecated");
+    DCHECK_WARN(false, "toSharedPtrImpl<String> has been deprecated");
     if(Optional<String> opt = toStringExact(object))
         return sp<String>::make(std::move(opt.value()));
     return {};

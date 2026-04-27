@@ -52,12 +52,12 @@ Table<String, sp<Material>> toMaterialMap(const Vector<sp<Material>>& materials)
     return materialMap;
 }
 
-Vector<std::pair<sp<Material>, sp<Bitmap>>> getMaterialImages(const Vector<sp<Material>>& materials, const MaterialTexture::Type type)
+Vector<std::pair<sp<Material>, sp<Bitmap>>> getMaterialImages(const Vector<sp<Material>>& materials, const MaterialMap::Type type)
 {
     Vector<std::pair<sp<Material>, sp<Bitmap>>> images;
     for(const sp<Material>& i : materials)
     {
-        const sp<MaterialTexture>& texture = i->getTexture(type);
+        const sp<MaterialMap>& texture = i->getTexture(type);
         if(sp<Bitmap> bitmap = texture->bitmap())
             images.emplace_back(i, std::move(bitmap));
     }
@@ -100,7 +100,7 @@ const Map<String, sp<Bitmap>>& MaterialBundle::images() const
     return _images;
 }
 
-const std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>& MaterialBundle::textures() const
+const std::array<sp<Texture>, MaterialMap::TYPE_LENGTH>& MaterialBundle::textures() const
 {
     return _textures;
 }
@@ -113,9 +113,9 @@ sp<Material> MaterialBundle::getMaterial(const String& name) const
 
 void MaterialBundle::initialize()
 {
-    sp<TexturePacker> texturePackers[MaterialTexture::TYPE_LENGTH];
-    for(size_t i = 0; i < MaterialTexture::TYPE_LENGTH; ++i)
-        if(auto images = getMaterialImages(_materials.values(), static_cast<MaterialTexture::Type>(i)); !images.empty())
+    sp<TexturePacker> texturePackers[MaterialMap::TYPE_LENGTH];
+    for(size_t i = 0; i < MaterialMap::TYPE_LENGTH; ++i)
+        if(auto images = getMaterialImages(_materials.values(), static_cast<MaterialMap::Type>(i)); !images.empty())
         {
             texturePackers[i] = makeTexturePackerForImages(images);
             for(auto& [k, v] : images)
@@ -129,7 +129,7 @@ void MaterialBundle::initialize()
         }
 
     const sp<Size> textureSize = sp<Size>::make(static_cast<float>(_stub->_texture_width), static_cast<float>(_stub->_texture_height));
-    for(size_t i = 0; i < MaterialTexture::TYPE_LENGTH; ++i)
+    for(size_t i = 0; i < MaterialMap::TYPE_LENGTH; ++i)
         if(texturePackers[i])
         {
             if(_textures[i])
