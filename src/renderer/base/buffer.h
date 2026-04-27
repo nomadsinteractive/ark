@@ -27,7 +27,7 @@ public:
         USAGE_BIT_TRANSFER_SRC,
         USAGE_BIT_HOST_VISIBLE
     };
-    typedef BitSet<UsageBits, true> Usage;
+    typedef BitSet<UsageBits, std::true_type> Usage;
 
     class ARK_API Delegate : public Resource {
     public:

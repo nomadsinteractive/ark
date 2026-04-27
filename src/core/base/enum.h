@@ -133,9 +133,9 @@ enum ShaderTypeQualifierBits {
 
 
 typedef BitSet<RenderingBackendBit> RenderingBackendSet;
-typedef BitSet<ShaderStageBit, true> ShaderStageSet;
+typedef BitSet<ShaderStageBit, std::true_type> ShaderStageSet;
 typedef BitSet<UploadStrategyBit> UploadStrategy;
-typedef BitSet<ShaderTypeQualifierBits, true> ShaderTypeQualifier;
+typedef BitSet<ShaderTypeQualifierBits, std::true_type> ShaderTypeQualifier;
 
 
 template<typename V, size_t N> using LookupTable = std::array<std::pair<StringView, V>, N>;

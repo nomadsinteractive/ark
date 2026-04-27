@@ -142,6 +142,9 @@ public:
     void upload(GraphicsContext& graphicsContext) override;
     ResourceRecycleFunc recycle() override;
 
+//  [[script::bindings::property]]
+    Texture::Format format() const;
+
     Type type() const;
     Usage usage() const;
 

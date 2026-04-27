@@ -649,6 +649,10 @@ class Texture:
         pass
 
     @property
+    def format(self) -> int:
+        return 0
+
+    @property
     def width(self) -> int:
         return 0
 

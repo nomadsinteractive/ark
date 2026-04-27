@@ -5,7 +5,7 @@
 
 namespace ark {
 
-template<typename T, bool DO_SHIFT> class BitSet {
+template<typename T, typename DO_SHIFT> class BitSet {
 public:
     typedef uint32_t convertable_type;
 
@@ -86,7 +86,7 @@ public:
     template<typename U> U toFlags(const std::function<U(T)>& converter, const size_t count) const {
         U flags = static_cast<U>(0);
         for(size_t i = 0; i < count; ++i)
-            if(const T bits = static_cast<T>(DO_SHIFT ? i : 1 << i); contains(bits))
+            if(const T bits = static_cast<T>(DO_SHIFT::value ? i : 1 << i); contains(bits))
                 flags = static_cast<U>(flags | converter(bits));
         return flags;
     }
@@ -105,11 +105,11 @@ private:
     }
     template<typename... Args> constexpr static convertable_type toConvertableType(const T value, Args... args) {
         if constexpr(sizeof...(args) != 0) {
-            if constexpr(DO_SHIFT)
+            if constexpr(DO_SHIFT::value)
                 return 1 << value | toConvertableType(args...);
             return value | toConvertableType(args...);
         }
-        if constexpr(DO_SHIFT)
+        if constexpr(DO_SHIFT::value)
             return 1 << value;
         return value;
     }

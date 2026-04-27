@@ -6,9 +6,9 @@
 
 #include <Python.h>
 
+#include "core/forwarding.h"
 #include "core/base/bean_factory.h"
 #include "core/base/named_hash.h"
-#include "core/forwarding.h"
 #include "core/inf/array.h"
 #include "core/types/box.h"
 #include "core/types/optional.h"
@@ -16,7 +16,6 @@
 #include "core/types/optional_var.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/rect.h"
 
 #include "app/forwarding.h"
 
@@ -26,6 +25,10 @@
 #include "python/extension/py_bridge.h"
 
 namespace ark::plugin::python {
+
+template<typename T, template<typename...> class Template> struct is_specialization : std::false_type {};
+template<template<typename...> class Template, typename... Args> struct is_specialization<Template<Args...>, Template> : std::true_type {};
+template<class T, template<typename...> class Template> constexpr bool is_specialization_v = is_specialization<T, Template>::value;
 
 class ARK_PLUGIN_PYTHON_API PyCast {
 public:
@@ -168,7 +171,7 @@ private:
         return pySet;
     }
 
-    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::_PtrType*) {
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, std::enable_if_t<is_specialization_v<T, SharedPtr> || is_specialization_v<T, OptionalVar>>*) {
         return toSharedPtr<typename T::_PtrType>(obj);
     }
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::value_type*) {
@@ -180,12 +183,12 @@ private:
             return {static_cast<T>(PyBridge::PyLong_AsLong(pyObj.pyObject()))};
         return {};
     }
-    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::convertable_type*) {
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, std::enable_if_t<is_specialization_v<T, BitSet>>*) {
         if(Optional<typename T::convertable_type> value = toCppObject<typename T::convertable_type>(obj))
             return {T(value.value())};
         return {};
     }
-    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::second_type*) {
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, std::enable_if_t<is_specialization_v<T, std::pair>>*) {
         if(PyBridge::PyTuple_Size(obj) != 2)
             return {};
 
@@ -226,16 +229,16 @@ private:
                 return ensureCppObject<R>(result.pyObject());
         });
     }
-    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::result_type*) {
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, std::enable_if_t<is_specialization_v<T, std::function>>*) {
         return toCppObject_function(obj, reinterpret_cast<T*>(0));
     }
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, ...) {
         return toCppObject_impl<T>(obj);
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& ptr, typename T::_PtrType*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T& ptr, std::enable_if_t<is_specialization_v<T, SharedPtr> || is_specialization_v<T, OptionalVar>>*) {
         return toPyObject_SharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& ptr, typename T::OPT_TYPE*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T& ptr, std::enable_if_t<is_specialization_v<T, Optional>>*) {
         return ptr ? toPyObject(ptr.value()) : PyBridge::incRefNone();
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& iterable, std::enable_if_t<!(std::is_same_v<T, std::string> || std::is_same_v<T, std::wstring> || std::is_same_v<T, StringView> || std::is_same_v<T, BytesView>), decltype(iterable.begin())>*) {
@@ -261,16 +264,16 @@ private:
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_floating_point_v<T>>*) {
         return PyBridge::PyFloat_FromDouble(value);
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::pair<decltype(value.first), decltype(value.second)>*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T value, std::enable_if_t<is_specialization_v<T, BitSet>>*) {
+        return PyBridge::PyLong_FromUnsignedLong(value.bits());
+    }
+    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<is_specialization_v<T, std::pair>>*) {
         PyObject* pyPair = PyBridge::PyTuple_New(2);
         PyBridge::PyTuple_SetItem(pyPair, 0, toPyObject(value.first));
         PyBridge::PyTuple_SetItem(pyPair, 1, toPyObject(value.second));
         return pyPair;
     }
-
-    template <typename> struct is_tuple: std::false_type {};
-    template <typename ...T> struct is_tuple<std::tuple<T...>>: std::true_type {};
-    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<is_tuple<T>::value>*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<is_specialization_v<T, std::tuple>>*) {
         PyObject* pyTuple = PyBridge::PyTuple_New(std::tuple_size_v<T>);
         if constexpr(std::tuple_size_v<T> > 0)
             toPyObject_tuple<T, 0, std::tuple_size_v<T>>(value, pyTuple);
@@ -306,7 +309,8 @@ private:
 
         std::array<U, sizeof(T) / sizeof(U)> array;
         if(copyToCppObject<U>(obj, array.begin()))
-            return array;
+            return {std::move(array)};
+
         return {};
     }
     template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
@@ -371,6 +375,7 @@ private:
 
 template<> inline Optional<sp<String>> PyCast::toSharedPtrImpl<String>(PyObject* object)
 {
+    DCHECK_WARN("toSharedPtrImpl<String> has been deprecated");
     if(Optional<String> opt = toStringExact(object))
         return sp<String>::make(std::move(opt.value()));
     return {};

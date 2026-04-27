@@ -15,7 +15,7 @@
 namespace ark {
 
 template<typename T> class Array;
-template<typename T, bool SHIFT = false> class BitSet;
+template<typename T, typename SHIFT = std::false_type> class BitSet;
 template<typename T> class Dictionary;
 template<typename T> class Duck;
 template<typename T> class Global;

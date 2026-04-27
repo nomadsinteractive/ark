@@ -101,6 +101,11 @@ ResourceRecycleFunc Texture::recycle()
     return _stub->_delegate->recycle();
 }
 
+Texture::Format Texture::format() const
+{
+    return _stub->_parameters->_format;
+}
+
 Texture::Type Texture::type() const
 {
     return _stub->_parameters->_type;

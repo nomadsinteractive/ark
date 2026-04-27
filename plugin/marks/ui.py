@@ -264,8 +264,19 @@ class PropertiesWindow(Window):
             i.build(builder)
 
 
+def _get_texture_components(texture: Texture) -> int:
+    if (texture.format & Texture.FORMAT_RGBA) == Texture.FORMAT_RGBA:
+        return 4
+    if (texture.format & Texture.FORMAT_RGB) == Texture.FORMAT_RGB:
+        return 3
+    if (texture.format & Texture.FORMAT_RG) == Texture.FORMAT_RG:
+        return 2
+    assert (texture.format & Texture.FORMAT_R) == Texture.FORMAT_R
+    return 1
+
+
 class NoiseGeneratorWindow(Window):
-    def __init__(self, is_open: Optional[TYPE_BOOLEAN] = None):
+    def __init__(self, texture: Texture | None = None, is_open: Optional[TYPE_BOOLEAN] = None):
         try:
             from ark import noise
         except ImportError:
@@ -273,27 +284,28 @@ class NoiseGeneratorWindow(Window):
         self._noise = noise
         self._type = Integer(int(self._noise.Generator.NOISE_TYPE_PERLIN) if self._noise else 0)
         self._type_options = ['NOISE_TYPE_CELLULAR', 'NOISE_TYPE_SIMPLEX', 'NOISE_TYPE_PERLIN']
-        self._components = Integer(1)
-        self._size = Vec2(256, 256)
+        self._components = Integer(_get_texture_components(texture) if texture else 1)
+        size_x, size_y = texture.size.xy if texture else (256, 256)
+        self._size = Vec2(size_x, size_y)
         self._position = Vec2(0, 0)
-        self._frequency = Numeric(0.04)
-        self._enable_fractal = Boolean(False)
+        self._frequency = Integer(4)
+        self._enable_fractal = Boolean(True)
         self._fractal_octaves = Integer(4)
         self._fractal_gain = Numeric(0.2)
-        self._fractal_lacunarity = Numeric(1.0)
-        self._texture = self._do_generate()
+        self._fractal_lacunarity = Numeric(2.0)
+        self._texture = texture or self._do_generate()
         super().__init__('Noise Generator', is_open)
 
     def on_create(self, builder: dear_imgui.WidgetBuilder):
         builder.combo('Type', self._type, self._type_options)
         builder.slider_int('Components', self._components, 1, 4)
+        builder.slider_int('Frequency', self._frequency, 1, 10)
         builder.input_float2('Position', self._position)
         builder.input_float2('Size', self._size)
-        builder.input_float('Frequency', self._frequency)
         builder.checkbox('Enable Fractal', self._enable_fractal)
         builder.slider_int('Fractal Octaves', self._fractal_octaves, 2, 8)
-        builder.input_float('Fractal Gain', self._fractal_gain)
-        builder.input_float('Fractal Lacunarity', self._fractal_lacunarity)
+        builder.slider_float('Fractal Gain', self._fractal_gain, 0, 2)
+        builder.slider_float('Fractal Lacunarity', self._fractal_lacunarity, 1, 4)
         if self._noise:
             builder.button('Generate').add_callback(lambda: self._texture.reset(self._do_generate()))
             builder.image(self._texture)
@@ -310,8 +322,9 @@ class NoiseGeneratorWindow(Window):
 
         float_arrays = []
         component_size = self._components.val
+        frequency = self._frequency.val / width
         for i in range(component_size):
-            generator = self._noise.Generator(generator_type, Random().rand(), self._frequency.val)
+            generator = self._noise.Generator(generator_type, Random().rand(), frequency)
             if self._enable_fractal:
                 generator.set_fractal_octaves(self._fractal_octaves.val)
                 generator.set_fractal_gain(self._fractal_gain.val)
@@ -334,7 +347,7 @@ class MarkStudio:
 
         self._widget = dear_imgui.Widget()
         self._imgui.add_widget(self._widget)
-        self._windows = [ConsoleWindow(console_cmds, True), NoiseGeneratorWindow(False)] + list(windows)
+        self._windows = [ConsoleWindow(console_cmds, True)] + list(windows)
         self.on_create()
 
         self._main_window = ToolbarWindow(self, None, toolbar_items)
