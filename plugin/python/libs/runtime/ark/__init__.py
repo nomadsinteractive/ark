@@ -3374,15 +3374,6 @@ class Entity:
         pass
 
 
-class WithId:
-    def __init__(self):
-        pass
-
-    @property
-    def id(self) -> int:
-        return 0
-
-
 class CollisionCallback:
 
     def on_begin_contact(self, rigidbody: Rigidbody, collision_manifold: CollisionManifold):

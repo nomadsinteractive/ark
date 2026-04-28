@@ -7,7 +7,6 @@
 
 #include "core/base/ref_manager.h"
 #include "core/components/tags.h"
-#include "core/components/with_id.h"
 #include "core/types/global.h"
 
 namespace ark {
@@ -243,9 +242,6 @@ sp<Entity> Entity::BUILDER::build(const Scope& args)
 
 void Entity::preWire()
 {
-    if(const sp<WithId>& withId = _components.get<WithId>())
-        withId->_id = _ref->id();
-
     if(!_components.get<Discarded>())
         _components.put(sp<Discarded>::make(sp<Boolean>::make<RefDiscarded>(_ref)));
 }

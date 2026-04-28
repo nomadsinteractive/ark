@@ -4,7 +4,6 @@
 #include "core/base/named_hash.h"
 #include "core/components/discarded.h"
 #include "core/components/tags.h"
-#include "core/components/with_id.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
 #include "core/inf/wirable.h"
@@ -18,7 +17,6 @@
 
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_bindings.h"
-#include "renderer/base/shader.h"
 #include "renderer/components/varyings.h"
 
 #include "app/view/view.h"
@@ -219,12 +217,7 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
         _tags = std::move(tags);
 
     if(const auto layer = context.getInterface<Layer>())
-    {
         layer->add(self.as<RenderObject>(), nullptr, nullptr, context.getEnum<enums::InsertPosition>(enums::InsertPosition::INSERT_POSITION_BACK));
-
-        if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layer->shader() && layer->shader()->layout()->getAttribute("Id"))
-            varyings()->setProperty(constants::ID, sp<Integer>::make<Integer::Const>(withId->id()));
-    }
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
