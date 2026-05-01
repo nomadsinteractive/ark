@@ -83,6 +83,13 @@ template<typename T, typename... Args> void setVaryingProperties(Varyings& varyi
 
 }
 
+struct Varyings::SlotSnapshot {
+    void* _content;
+    uint32_t _offset;
+    uint32_t _size;
+    SlotSnapshot* _next = nullptr;
+};
+
 Varyings::Varyings(const Scope& kwargs)
 {
     for(const auto& [k, v] : kwargs.variables())
@@ -103,8 +110,8 @@ Varyings::Varyings(const PipelineLayout& pipelineLayout)
 bool Varyings::update(const uint32_t timestamp)
 {
     bool dirty = _timestamp.update(timestamp);
-    for(const auto& [i, j] : _sub_properties)
-        if(j->update(timestamp))
+    for(const auto& i : _sub_properties | std::views::values)
+        if(i->update(timestamp))
             dirty = true;
     for(const auto& v: _slots | std::views::values)
         if(v._uploader->update(timestamp))
@@ -210,10 +217,10 @@ Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineLayout, Allo
     for(const auto& [i, j] : _slot_strides)
         new(&buffers.at(idx++)) Divided(i, allocator.sbrkSpan(j));
 
-    for(const auto& i : std::views::values(_slots))
+    for(const auto& [k, v] : _slots)
     {
-        DASSERT(i._divisor < buffers.length());
-        buffers.at(i._divisor).addSnapshot(allocator, i);
+        DASSERT(v._divisor < buffers.length());
+        buffers.at(v._divisor).addSnapshot(allocator, k, v);
     }
 
     Snapshot snapshot(buffers);
@@ -307,20 +314,17 @@ void Varyings::Divided::apply(const SlotSnapshot* slots)
     }
 }
 
-void Varyings::Divided::addSnapshot(Allocator& allocator, const Slot& slot)
+void Varyings::Divided::addSnapshot(Allocator& allocator, const String& name, const Slot& slot)
 {
-    DASSERT(slot._offset >= 0);
+    DCHECK(slot._offset >= 0, "Attribute \"%s\" has not been initialized", name.c_str());
     const uint32_t size = static_cast<uint32_t>(slot._uploader->size());
     void* content = allocator.sbrk(size);
 
     UploaderType::writeTo(slot._uploader, content);
     memcpy(_content.buf() + slot._offset, content, size);
-    addSlotSnapshot(new(allocator.sbrk(sizeof(SlotSnapshot))) SlotSnapshot(content, slot._offset, size));
-}
 
-void Varyings::Divided::addSlotSnapshot(SlotSnapshot* slotSnapshot)
-{
-    DASSERT(slotSnapshot->_offset + slotSnapshot->_size <= _content.length());
+    SlotSnapshot* slotSnapshot = new(allocator.sbrk(sizeof(SlotSnapshot))) SlotSnapshot{content, static_cast<uint32_t>(slot._offset), size};
+    DCHECK(slotSnapshot->_offset + slotSnapshot->_size <= _content.length(), "Varyings buffer(size = %zu) overflow while adding attribute \"%s\" offset = %d size = %d ", _content.length(), name.c_str(), slotSnapshot->_offset, slotSnapshot->_size);
 
     if(!_slot_snapshot)
     {
@@ -332,11 +336,6 @@ void Varyings::Divided::addSlotSnapshot(SlotSnapshot* slotSnapshot)
     while(tail->_next != nullptr)
         tail = tail->_next;
     tail->_next = slotSnapshot;
-}
-
-Varyings::SlotSnapshot::SlotSnapshot(void* content, uint32_t offset, uint32_t size)
-    : _content(content), _offset(offset), _size(size), _next(nullptr)
-{
 }
 
 }

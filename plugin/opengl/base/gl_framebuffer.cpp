@@ -63,7 +63,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
     uint32_t idx = 0;
     Vector<GLenum> drawBuffers;
 
-    for(const auto& [t, cv] : _configure._color_attachments)
+    for(const auto& [t, b, cv] : _configure._color_attachments)
     {
         const Texture::Usage usage = t->parameters()->_usage;
         ASSERT(usage == Texture::USAGE_AUTO || usage.contains(Texture::USAGE_COLOR_ATTACHMENT));

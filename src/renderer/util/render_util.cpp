@@ -475,9 +475,10 @@ uint32_t RenderUtil::getComponentSize(const Texture::Format format)
     return 4;
 }
 
-bool RenderUtil::shouldSupportAlphaBlending(const Texture::Format format)
+bool RenderUtil::shouldSupportAlphaBlending(const RenderTarget::Attachment& attachment)
 {
-    return format.has(Texture::FORMAT_RGBA) && !format.contains(Texture::FORMAT_INTEGER);
+    const Texture::Format format = attachment._texture->format();
+    return attachment._blend_enabled && format.has(Texture::FORMAT_RGBA) && !format.contains(Texture::FORMAT_INTEGER);
 }
 
 std::pair<int32_t, int32_t> RenderUtil::getRenderTargetResolution(const RenderTarget::Configure& configure)

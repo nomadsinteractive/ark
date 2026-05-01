@@ -26,6 +26,7 @@ public:
 
     struct Attachment {
         sp<Texture> _texture;
+        bool _blend_enabled;
         V4 _clear_value;
     };
 
@@ -58,6 +59,7 @@ public:
 
             sp<Builder<Texture>> _texture;
             V4 _clear_value;
+            bool _blend_enabled;
         };
 
         sp<Builder<Renderer>> _renderer;

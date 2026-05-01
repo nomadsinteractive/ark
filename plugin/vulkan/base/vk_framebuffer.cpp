@@ -90,7 +90,7 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
 {
 
     if(_configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
-        for(const auto& [t, cv] : _configure._color_attachments)
+        for(const auto& [t, b, cv] : _configure._color_attachments)
             _clear_values.push_back({{{cv.x(), cv.y(), cv.z(), cv.w()}}});
 
     VkClearValue clearDepthStencil;
@@ -115,7 +115,7 @@ Vector<VkPipelineColorBlendAttachmentState> VKFramebuffer::Stub::makeColorBlendA
     for(uint32_t i = 0; i < stateCount; ++i)
     {
         VkPipelineColorBlendAttachmentState cbaState = mainState;
-        cbaState.blendEnable = i == 0 || (i < _configure._color_attachments.size() && RenderUtil::shouldSupportAlphaBlending(_configure._color_attachments.at(i)._texture->parameters()->_format));
+        cbaState.blendEnable = i == 0 || (i < _configure._color_attachments.size() && RenderUtil::shouldSupportAlphaBlending(_configure._color_attachments.at(i)));
         blendAttachmentStates.push_back(cbaState);
     }
     return blendAttachmentStates;
@@ -134,7 +134,7 @@ VkRenderPass VKFramebuffer::Stub::acquire()
     const VkAttachmentLoadOp colorAttachmentLoadOp = !_configure._color_attachment_op || _configure._color_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
                                                      : _configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
     const VkAttachmentStoreOp colorAttachmentStoreOp = _configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    for(const auto& [t, cv] : _configure._color_attachments)
+    for(const auto& [t, b, cv] : _configure._color_attachments)
     {
         VkAttachmentDescription colorAttachmentDescription = {};
         colorAttachmentDescription.format = VKUtil::toTextureFormat(t->parameters()->_format);

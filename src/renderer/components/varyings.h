@@ -19,14 +19,7 @@ namespace ark {
 
 class ARK_API Varyings {
 private:
-    struct SlotSnapshot {
-        SlotSnapshot(void* content, uint32_t offset, uint32_t size);
-
-        void* _content;
-        uint32_t _offset;
-        uint32_t _size;
-        SlotSnapshot* _next;
-    };
+    struct SlotSnapshot;
 
     struct Slot {
         sp<Uploader> _uploader;
@@ -42,9 +35,7 @@ public:
         explicit operator bool() const;
 
         void apply(const SlotSnapshot* slots = nullptr);
-        void addSnapshot(Allocator& allocator, const Slot& slot);
-
-        void addSlotSnapshot(SlotSnapshot* slotSnapshot);
+        void addSnapshot(Allocator& allocator, const String& name, const Slot& slot);
 
         uint32_t _divisor;
 

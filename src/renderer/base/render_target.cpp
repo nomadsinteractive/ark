@@ -48,7 +48,7 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
     {
         sp<Texture> tex = i._texture->build(args);
         if(const Texture::Usage usage = tex->usage(); usage == Texture::USAGE_AUTO || usage.contains(Texture::USAGE_COLOR_ATTACHMENT))
-            configure._color_attachments.emplace_back(std::move(tex), i._clear_value);
+            configure._color_attachments.emplace_back(std::move(tex), i._blend_enabled, i._clear_value);
         else
         {
             CHECK(usage.contains(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "RenderTarget textures must have either color attachment or depth stencil usage declared: %d", usage);
@@ -60,7 +60,7 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
 }
 
 RenderTarget::BUILDER::AttachmentBuilder::AttachmentBuilder(BeanFactory& factory, const document& manifest)
-    : _texture(factory.ensureBuilder<Texture>(manifest)), _clear_value(Documents::getAttributeValue<V4>(manifest, "clear-value", V4(0)))
+    : _texture(factory.ensureBuilder<Texture>(manifest)), _clear_value(Documents::getAttributeValue<V4>(manifest, "clear-value", V4(0))), _blend_enabled(Documents::getAttributeValue<bool>(manifest, "blend-enabled", true))
 {
 }
 

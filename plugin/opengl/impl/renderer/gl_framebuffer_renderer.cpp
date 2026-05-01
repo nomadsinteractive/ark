@@ -50,9 +50,9 @@ public:
                 glClearBufferfv(GL_COLOR, static_cast<GLint>(i), reinterpret_cast<const GLfloat *>(&configure._color_attachments.at(i)._clear_value));
 
         uint32_t attachmentIndex = 0;
-        for(const auto& [t, _] : configure._color_attachments)
+        for(const RenderTarget::Attachment& i : configure._color_attachments)
         {
-            if(!RenderUtil::shouldSupportAlphaBlending(t->parameters()->_format) && glIsEnabledi(GL_BLEND, attachmentIndex))
+            if(!RenderUtil::shouldSupportAlphaBlending(i) && glIsEnabledi(GL_BLEND, attachmentIndex))
             {
                 _stub->_blending_disabled_attachments.push_back(attachmentIndex);
                 glDisablei(GL_BLEND, attachmentIndex);
