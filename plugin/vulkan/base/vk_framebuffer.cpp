@@ -115,7 +115,7 @@ Vector<VkPipelineColorBlendAttachmentState> VKFramebuffer::Stub::makeColorBlendA
     for(uint32_t i = 0; i < stateCount; ++i)
     {
         VkPipelineColorBlendAttachmentState cbaState = mainState;
-        cbaState.blendEnable = i == 0 || (i < _configure._color_attachments.size() && RenderUtil::shouldSupportAlphaBlending(_configure._color_attachments.at(i)));
+        cbaState.blendEnable = i < _configure._color_attachments.size() && RenderUtil::shouldSupportAlphaBlending(_configure._color_attachments.at(i));
         blendAttachmentStates.push_back(cbaState);
     }
     return blendAttachmentStates;
