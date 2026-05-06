@@ -401,6 +401,21 @@ public:
                 };
                 numColorTargets = 1;
             }
+            for(const PipelineDescriptor::TraitColorMask* colorMask : _pipeline_descriptor->getTraitList<PipelineDescriptor::TraitColorMask>())
+            {
+                CHECK(colorMask->_attachment < numColorTargets, "TraitColorMask attachment index(%d) out of range(%d)", colorMask->_attachment, numColorTargets);
+                SDL_GPUColorComponentFlags writeMask = 0;
+                if(colorMask->_color_mask.has(PipelineDescriptor::COLOR_MASK_RED))
+                    writeMask |= SDL_GPU_COLORCOMPONENT_R;
+                if(colorMask->_color_mask.has(PipelineDescriptor::COLOR_MASK_GREEN))
+                    writeMask |= SDL_GPU_COLORCOMPONENT_G;
+                if(colorMask->_color_mask.has(PipelineDescriptor::COLOR_MASK_BLUE))
+                    writeMask |= SDL_GPU_COLORCOMPONENT_B;
+                if(colorMask->_color_mask.has(PipelineDescriptor::COLOR_MASK_ALPHA))
+                    writeMask |= SDL_GPU_COLORCOMPONENT_A;
+                colorTargetDescriptions[colorMask->_attachment].blend_state.color_write_mask = writeMask;
+                colorTargetDescriptions[colorMask->_attachment].blend_state.enable_color_write_mask = true;
+            }
             const SDL_GPUGraphicsPipelineCreateInfo pipelineCreateInfo = {
                 vertexShader,
                 fragmentShader,

@@ -12,7 +12,6 @@ public:
     virtual ~RenderCommand() = default;
 
     virtual void draw(GraphicsContext& graphicsContext) = 0;
-
 };
 
 }

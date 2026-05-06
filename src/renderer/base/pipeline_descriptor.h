@@ -191,6 +191,14 @@ public:
         return nullptr;
     }
 
+    template<typename T> Vector<const T*> getTraitList() const {
+        Vector<const T*> traits;
+        for(const Trait& i : _configuration._traits)
+            if(const T* ptr = std::get_if<T>(&i))
+                traits.push_back(ptr);
+        return traits;
+    }
+
 private:
     String generateSignature() const;
 

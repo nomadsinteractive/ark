@@ -528,6 +528,20 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
 
     Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = state._render_pass_phrase->makeColorBlendAttachmentStates(colorBlendAttachmentState, pipelineDescriptor.layout()->colorAttachmentCount());
     CHECK_WARN(!blendAttachmentStates.empty(), "Graphics pipeline has no color attachment");
+    for(const PipelineDescriptor::TraitColorMask* colorMask : pipelineDescriptor.getTraitList<PipelineDescriptor::TraitColorMask>())
+    {
+        CHECK(colorMask->_attachment < blendAttachmentStates.size(), "TraitColorMask attachment index(%d) out of range(%d)", colorMask->_attachment, blendAttachmentStates.size());
+        VkColorComponentFlags writeMask = 0;
+        if(colorMask->_color_mask.has(PipelineDescriptor::COLOR_MASK_RED))
+            writeMask |= VK_COLOR_COMPONENT_R_BIT;
+        if(colorMask->_color_mask.has(PipelineDescriptor::COLOR_MASK_GREEN))
+            writeMask |= VK_COLOR_COMPONENT_G_BIT;
+        if(colorMask->_color_mask.has(PipelineDescriptor::COLOR_MASK_BLUE))
+            writeMask |= VK_COLOR_COMPONENT_B_BIT;
+        if(colorMask->_color_mask.has(PipelineDescriptor::COLOR_MASK_ALPHA))
+            writeMask |= VK_COLOR_COMPONENT_A_BIT;
+        blendAttachmentStates[colorMask->_attachment].colorWriteMask = writeMask;
+    }
     VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(static_cast<uint32_t>(blendAttachmentStates.size()), blendAttachmentStates.data());
 
     VkRect2D vkScissors;

@@ -296,7 +296,8 @@ public:
             GL_CHECK_ERROR(glScissor(static_cast<GLint>(scissor->left()), static_cast<GLint>(scissor->top()), static_cast<GLsizei>(scissor->width()), static_cast<GLsizei>(scissor->height())));
         }
     }
-    ~GLScissor() {
+    ~GLScissor()
+    {
         if(_enabled)
             glDisable(GL_SCISSOR_TEST);
     }
@@ -311,7 +312,8 @@ public:
         : _enabled(trait._enabled), _front_face(trait._front_face == PipelineDescriptor::FRONT_FACE_DEFAULT ? GL_ZERO : (trait._front_face == PipelineDescriptor::FRONT_FACE_CLOCK_WISE ? GL_CW : GL_CCW)), _pre_front_face(GL_ZERO) {
     }
 
-    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override
+    {
         if(_enabled) {
             if(_front_face != GL_ZERO) {
                 if(_pre_front_face == GL_ZERO)
@@ -323,7 +325,8 @@ public:
             glDisable(GL_CULL_FACE);
     }
 
-    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override
+    {
         if(_enabled) {
             if(_front_face != GL_ZERO)
                 glFrontFace(_pre_front_face);
@@ -365,7 +368,8 @@ public:
         }
     }
 
-    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override
+    {
         if(_enabled)
         {
             if(_func != GL_ZERO)
@@ -391,13 +395,15 @@ public:
         : _delegate(std::move(delegate)) {
     }
 
-    void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+    void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
+    {
         glEnable(GL_STENCIL_TEST);
         for(const sp<DrawDecorator>& i : _delegate)
             i->preDraw(graphicsContext, context);
     }
 
-    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override
+    {
         glStencilMask(0);
         glDisable(GL_STENCIL_TEST);
     }
@@ -413,7 +419,8 @@ public:
           _ref(conf._ref), _op(GLUtil::toStencilFunc(conf._op)), _op_dfail(GLUtil::toStencilFunc(conf._op_dfail)), _op_dpass(GLUtil::toStencilFunc(conf._op_dpass)) {
     }
 
-    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override
+    {
         glStencilMaskSeparate(_face, _mask);
         glStencilFuncSeparate(_face, _func, _ref, _compare_mask);
         glStencilOpSeparate(_face, _op, _op_dfail, _op_dpass);
@@ -436,7 +443,8 @@ public:
           _src_alpha_factor(GLUtil::toBlendFactor(conf._src_alpha_factor)), _dest_alpha_factor(GLUtil::toBlendFactor(conf._dst_alpha_factor)) {
     }
 
-    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override
+    {
         glGetIntegerv(GL_BLEND_SRC_RGB, &_src_rgb_factor_default);
         glGetIntegerv(GL_BLEND_SRC_ALPHA, &_src_alpha_factor_default);
         glGetIntegerv(GL_BLEND_DST_RGB, &_dest_rgb_factor_default);
@@ -445,7 +453,8 @@ public:
                             _src_alpha_factor ? _src_alpha_factor.value() : _src_alpha_factor_default, _dest_alpha_factor ? _dest_alpha_factor.value() : _dest_alpha_factor_default);
     }
 
-    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override
+    {
         glBlendFuncSeparate(_src_rgb_factor_default, _dest_rgb_factor_default, _src_alpha_factor_default, _dest_alpha_factor_default);
     }
 
@@ -459,6 +468,29 @@ private:
     GLenum _dest_rgb_factor_default;
     GLenum _src_alpha_factor_default;
     GLenum _dest_alpha_factor_default;
+};
+
+class GLTraitColorMask final : public DrawDecorator {
+public:
+    GLTraitColorMask(const PipelineDescriptor::TraitColorMask& conf)
+        : _attachment(conf._attachment), _red(conf._color_mask.has(PipelineDescriptor::COLOR_MASK_RED) ? GL_TRUE : GL_FALSE), _green(conf._color_mask.has(PipelineDescriptor::COLOR_MASK_GREEN) ? GL_TRUE : GL_FALSE),
+          _blue(conf._color_mask.has(PipelineDescriptor::COLOR_MASK_BLUE) ? GL_TRUE : GL_FALSE), _alpha(conf._color_mask.has(PipelineDescriptor::COLOR_MASK_ALPHA) ? GL_TRUE : GL_FALSE) {
+    }
+
+    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+        glColorMaski(_attachment, _red, _green, _blue, _alpha);
+    }
+
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+        glColorMaski(_attachment, GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    }
+
+private:
+    GLuint _attachment;
+    GLboolean _red;
+    GLboolean _green;
+    GLboolean _blue;
+    GLboolean _alpha;
 };
 
 class GLDrawArrays final : public PipelineDrawCommand {
@@ -777,6 +809,8 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, const uint32_t version, Map
     }
     if(const PipelineDescriptor::TraitBlend* blend = pipelineDescriptor.getTrait<PipelineDescriptor::TraitBlend>())
         _draw_decorators.push_back(sp<DrawDecorator>::make<GLTraitBlend>(*blend));
+    for(const PipelineDescriptor::TraitColorMask* colorMask : pipelineDescriptor.getTraitList<PipelineDescriptor::TraitColorMask>())
+        _draw_decorators.push_back(sp<DrawDecorator>::make<GLTraitColorMask>(*colorMask));
 }
 
 GLPipeline::~GLPipeline()
