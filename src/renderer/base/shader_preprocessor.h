@@ -104,9 +104,9 @@ private:
         uint32_t _divisor;
     };
 
-    struct Function {
-        Function(String name, String params, String returnType, String body, sp<String> placeHolder);
-        DEFAULT_COPY_AND_ASSIGN(Function);
+    struct MainEntry {
+        MainEntry(String name, String params, String returnType, String body, sp<String> placeHolder);
+        DEFAULT_COPY_AND_ASSIGN(MainEntry);
 
         void parse(PipelineBuildingContext& buildingContext);
 
@@ -130,7 +130,7 @@ private:
     };
 
 public:
-    ShaderPreprocessor(String source, document manifest, enums::ShaderStageBit shaderStage, enums::ShaderStageBit preShaderStage);
+    ShaderPreprocessor(String resid, String source, document manifest, enums::ShaderStageBit shaderStage, enums::ShaderStageBit preShaderStage);
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
@@ -176,8 +176,9 @@ private:
     static void linkParameters(const Vector<Parameter>& parameters, const ShaderPreprocessor& preStage, Set<String>& passThroughVars);
 
 private:
+    String _resid;
     String _source;
-    sp<Function> _main_block;
+    sp<MainEntry> _main_entry;
 
     struct ResultModifer {
         String _pre_modifier;

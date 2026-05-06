@@ -17,9 +17,10 @@ namespace ark {
 class ARK_API Shader {
 public:
     struct StageManifest {
-        StageManifest(enums::ShaderStageBit type, sp<IBuilder<String>> source);
+        StageManifest(String src, enums::ShaderStageBit type, sp<IBuilder<String>> source);
         StageManifest(BeanFactory& factory, const document& manifest);
 
+        String _src;
         enums::ShaderStageBit _type;
         sp<IBuilder<String>> _source;
         document _manifest;

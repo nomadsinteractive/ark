@@ -119,7 +119,7 @@ void PipelineBuildingContext::initializeAttributes()
     for(const auto& [k, v] : attributes)
         if(!firstStage._declaration_ins.has(k)
            && !firstStage._declaration_outs.has(k)
-           && !firstStage._main_block->hasOutAttribute(k))
+           && !firstStage._main_entry->hasOutAttribute(k))
         {
             generated.push_back(k);
             addAttribute(k, v, 0);
@@ -150,7 +150,7 @@ void PipelineBuildingContext::initializeAttributes()
             firstStage.passThroughDeclare(attributes.at(i), i);
     }
 
-    for(const auto& i : firstStage._main_block->_args)
+    for(const auto& i : firstStage._main_entry->_args)
         if(i._annotation == ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_INOUT)
             firstStage.passThroughDeclare(i._type, Strings::capitalizeFirst(i._name));
         else if(i._annotation & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_OUT)
@@ -293,11 +293,11 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::getRenderStage(enums::Sha
     return iter->second;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(String source, document manifest, const enums::ShaderStageBit shaderStage, const enums::ShaderStageBit preShaderStage)
+const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(String resid, String source, document manifest, const enums::ShaderStageBit shaderStage, const enums::ShaderStageBit preShaderStage)
 {
     op<ShaderPreprocessor>& stage = shaderStage == enums::SHADER_STAGE_BIT_COMPUTE ? _computing_stage : _rendering_stages[shaderStage];
     CHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
-    stage.reset(new ShaderPreprocessor(std::move(source), std::move(manifest), shaderStage, preShaderStage));
+    stage.reset(new ShaderPreprocessor(std::move(resid), std::move(source), std::move(manifest), shaderStage, preShaderStage));
     _stages.emplace_back(stage.get());
     return stage;
 }

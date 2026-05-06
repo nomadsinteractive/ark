@@ -69,7 +69,7 @@ public:
 
     ShaderPreprocessor* tryGetRenderStage(enums::ShaderStageBit shaderStage) const;
     const op<ShaderPreprocessor>& getRenderStage(enums::ShaderStageBit shaderStage) const;
-    const op<ShaderPreprocessor>& addStage(String source, document manifest, enums::ShaderStageBit shaderStage, enums::ShaderStageBit preShaderStage);
+    const op<ShaderPreprocessor>& addStage(String resid, String source, document manifest, enums::ShaderStageBit shaderStage, enums::ShaderStageBit preShaderStage);
 
     Map<String, String> toDefinitions() const;
 

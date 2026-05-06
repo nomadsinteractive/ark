@@ -84,7 +84,7 @@ private:
         Filter _filter;
     };
 
-    typedef std::list<Item> ListImpl;
+    typedef List<Item> ListImpl;
 
 public:
     template<typename U> class FilteredIterator : public IteratorBase<U> {

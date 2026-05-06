@@ -110,7 +110,7 @@ PipelineLayout::PipelineLayout()
 void PipelineLayout::initialize(const PipelineBuildingContext& buildingContext)
 {
     if(const ShaderPreprocessor* fragment = buildingContext.tryGetRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT))
-        _color_attachment_count = fragment->_main_block->outArgumentCount() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
+        _color_attachment_count = fragment->_main_entry->outArgumentCount() + (fragment->_main_entry->hasReturnValue() ? 1 : 0);
 
     for(const auto& v : std::views::values(buildingContext._ubos))
     {

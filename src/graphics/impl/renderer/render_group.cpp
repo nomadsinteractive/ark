@@ -44,7 +44,7 @@ void RenderGroup::render(RenderRequest& renderRequest, const V3& position, const
     {
         sp<Renderer> firstRenderer, lastRenderer;
         sp<DrawDecoratorGroupWrapper> firstDrawDecorator;
-        for(auto& v : _phrases | std::views::values)
+        for(auto& v : _renderers | std::views::values)
             for(const sp<Renderer>& i : v.update(renderRequest.tick()))
             {
                 if(!firstRenderer)
@@ -64,7 +64,7 @@ void RenderGroup::render(RenderRequest& renderRequest, const V3& position, const
         }
     }
     else
-        for(auto& v : _phrases | std::views::values)
+        for(auto& v : _renderers | std::views::values)
             for(const sp<Renderer>& i : v.update(renderRequest.tick()))
                 i->render(renderRequest, position, nullptr);
 }
@@ -75,16 +75,16 @@ void RenderGroup::addRenderer(sp<Renderer> renderer, const Traits& traits)
     const sp<Discarded>& discarded = traits.get<Discarded>();
     const sp<Visibility>& visibility = traits.get<Visibility>();
     const RendererType::Priority phrase = traits.getEnum<RendererType::Priority>(RendererType::PRIORITY_DEFAULT);
-    _phrases[phrase].emplace_back(std::move(renderer), discarded, visibility);
+    _renderers[phrase].emplace_back(std::move(renderer), discarded, visibility);
 }
 
 void RenderGroup::add(const RendererType::Priority priority, sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)
 {
-    _phrases[priority].emplace_back(std::move(renderer), std::move(discarded), std::move(visible));
+    _renderers[priority].emplace_back(std::move(renderer), std::move(discarded), std::move(visible));
 }
 
 RenderGroup::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
-    : _renderers(beanFactory.makeBuilderListObject<Phrase<Renderer, RendererType::PRIORITY_DEFAULT>>(manifest, constants::RENDERER)), _render_layers(beanFactory.makeBuilderListObject<Phrase<RenderLayer, RendererType::PRIORITY_RENDER_LAYER>>(manifest, constants::RENDER_LAYER))
+    : _renderers(beanFactory.makeBuilderListObject<RendererBuilder>(manifest, constants::RENDERER))
 {
 }
 
@@ -92,8 +92,6 @@ sp<RenderGroup> RenderGroup::BUILDER::build(const Scope& args)
 {
     sp<RenderGroup> renderGroup = sp<RenderGroup>::make();
     for(const auto& i : _renderers)
-        renderGroup->add(i._priority, i._renderer->build(args));
-    for(const auto& i : _render_layers)
         renderGroup->add(i._priority, i._renderer->build(args));
     return renderGroup;
 }

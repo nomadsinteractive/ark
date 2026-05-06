@@ -27,17 +27,17 @@ public:
         sp<RenderGroup> build(const Scope& args) override;
 
     private:
-        template<typename T, RendererType::Priority P> struct Phrase {
-            Phrase(BeanFactory& beanFactory, const document& manifest)
-                : _renderer(beanFactory.ensureBuilder<T>(manifest)), _priority(Documents::getAttribute<RendererType::Priority>(manifest, "priority", P))
+        struct RendererBuilder {
+            RendererBuilder(BeanFactory& beanFactory, const document& manifest)
+                : _renderer(beanFactory.ensureBuilder<Renderer>(manifest)), _priority(Documents::getAttribute<RendererType::Priority>(manifest, "priority", RendererType::PRIORITY_DEFAULT))
             {
             }
 
-            sp<Builder<T>> _renderer;
+            sp<Builder<Renderer>> _renderer;
             RendererType::Priority _priority;
         };
-        Vector<Phrase<Renderer, RendererType::PRIORITY_DEFAULT>> _renderers;
-        Vector<Phrase<RenderLayer, RendererType::PRIORITY_RENDER_LAYER>> _render_layers;
+
+        Vector<RendererBuilder> _renderers;
     };
 
 //  [[plugin::builder("render-group")]]
@@ -52,7 +52,7 @@ public:
     };
 
 private:
-    Map<RendererType::Priority, DV_FList<sp<Renderer>>> _phrases;
+    Map<RendererType::Priority, DV_FList<sp<Renderer>>> _renderers;
 };
 
 }
