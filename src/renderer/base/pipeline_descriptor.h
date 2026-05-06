@@ -21,7 +21,8 @@ public:
         TRAIT_TYPE_DEPTH_TEST,
         TRAIT_TYPE_STENCIL_TEST,
         TRAIT_TYPE_SCISSOR_TEST,
-        TRAIT_TYPE_BLEND
+        TRAIT_TYPE_BLEND,
+        TRAIT_TYPE_COLOR_MASK
     };
 
     enum CompareFunc {
@@ -79,6 +80,14 @@ public:
         BLEND_FACTOR_CONST_ALPHA,
     };
 
+    enum ColorMaskBits {
+        COLOR_MASK_RED,
+        COLOR_MASK_GREEN,
+        COLOR_MASK_BLUE,
+        COLOR_MASK_ALPHA
+    };
+    typedef BitSet<ColorMaskBits, std::true_type> ColorMaskBitSet;
+
     struct TraitDepthTest {
         bool _enabled;
         bool _write_enabled;
@@ -116,7 +125,12 @@ public:
         bool _dynamic;
     };
 
-    typedef std::variant<TraitDepthTest, TraitStencilTest, TraitCullFaceTest, TraitScissorTest, TraitBlend> Trait;
+    struct TraitColorMask {
+        uint32_t _attachment;
+        ColorMaskBitSet _color_mask;
+    };
+
+    typedef std::variant<TraitDepthTest, TraitStencilTest, TraitCullFaceTest, TraitScissorTest, TraitBlend, TraitColorMask> Trait;
     typedef Vector<Trait> PipelineTraitTable;
 
     struct Configuration {

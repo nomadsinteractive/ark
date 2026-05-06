@@ -88,6 +88,14 @@ PipelineDescriptor::Trait toPipelineTrait(const PipelineDescriptor::TraitType tr
             };
             return {std::move(scissorTest)};
         }
+        case PipelineDescriptor::TRAIT_TYPE_COLOR_MASK:
+        {
+            PipelineDescriptor::TraitColorMask colorMask = {
+                Documents::getAttribute<uint32_t>(manifest, "attachment", 0),
+                Documents::ensureAttribute<PipelineDescriptor::ColorMaskBitSet>(manifest, "color-mask")
+            };
+            return {std::move(colorMask)};
+        }
     }
     return {};
 }
@@ -270,12 +278,13 @@ PipelineDescriptor::Configuration PipelineDescriptor::Configuration::BUILDER::bu
 
 template<> ARK_API PipelineDescriptor::TraitType StringConvert::eval<PipelineDescriptor::TraitType>(const String& str)
 {
-    constexpr enums::LookupTable<PipelineDescriptor::TraitType, 5> table = {{
+    constexpr enums::LookupTable<PipelineDescriptor::TraitType, 6> table = {{
         {"cull_face_test", PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST},
         {"depth_test", PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST},
         {"scissor_test", PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST},
         {"stencil_test", PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST},
-        {"blend", PipelineDescriptor::TRAIT_TYPE_BLEND}
+        {"blend", PipelineDescriptor::TRAIT_TYPE_BLEND},
+        {"color_mask", PipelineDescriptor::TRAIT_TYPE_COLOR_MASK}
     }};
     return enums::lookup(table, str);
 }
@@ -345,6 +354,17 @@ template<> ARK_API PipelineDescriptor::BlendFactor StringConvert::eval<PipelineD
         {"const_alpha", PipelineDescriptor::BLEND_FACTOR_CONST_ALPHA}
     }};
     return enums::lookup(table, str);
+}
+
+template<> ARK_API PipelineDescriptor::ColorMaskBitSet StringConvert::eval<PipelineDescriptor::ColorMaskBitSet>(const String& str)
+{
+    constexpr PipelineDescriptor::ColorMaskBitSet::LookupTable<4> table = {{
+        {"r", PipelineDescriptor::COLOR_MASK_RED},
+        {"g", PipelineDescriptor::COLOR_MASK_GREEN},
+        {"b", PipelineDescriptor::COLOR_MASK_BLUE},
+        {"a", PipelineDescriptor::COLOR_MASK_ALPHA}
+    }};
+    return PipelineDescriptor::ColorMaskBitSet::toBitSet(str, table);
 }
 
 }

@@ -122,7 +122,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 
     CHECK_WARN(source.search(REGEX_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
 
-    static const std::regex FUNC_PATTERN(R"((vec4|void)\s+ark_main\(([^{]*)\)[\s\r\n]*\{)");
+    static const std::regex FUNC_PATTERN(R"(([ui]?vec4|void)\s+ark_main\(([^{]*)\)[\s\r\n]*\{)");
 
     source.search(FUNC_PATTERN, [this] (const std::smatch& m)->bool {
         const String prefix = m.prefix().str();
