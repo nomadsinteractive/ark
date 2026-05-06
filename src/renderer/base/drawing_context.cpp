@@ -20,7 +20,8 @@ public:
         : _context(std::move(context)), _draw_decorator(std::move(drawDecorator)) {
     }
 
-    void draw(GraphicsContext& graphicsContext) override {
+    void draw(GraphicsContext& graphicsContext) override
+    {
         _draw_decorator->preDraw(graphicsContext, _context);
         _context._bindings->ensurePipeline(graphicsContext);
         _draw_decorator->postDraw(graphicsContext, _context);
@@ -37,7 +38,8 @@ public:
         : _context(std::move(context)) {
     }
 
-    void draw(GraphicsContext& graphicsContext) override {
+    void draw(GraphicsContext& graphicsContext) override
+    {
         _context._bindings->ensurePipeline(graphicsContext);
     }
 
@@ -51,7 +53,8 @@ public:
         : _context(std::move(context)), _draw_decorator(std::move(drawDecorator)) {
     }
 
-    void draw(GraphicsContext& graphicsContext) override {
+    void draw(GraphicsContext& graphicsContext) override
+    {
         DPROFILER_TRACE(_context._bindings->pipelineDescriptor()->signature().c_str());
 
         _draw_decorator->preDraw(graphicsContext, _context);
@@ -73,7 +76,8 @@ public:
         : _context(std::move(context)) {
     }
 
-    void draw(GraphicsContext& graphicsContext) override {
+    void draw(GraphicsContext& graphicsContext) override
+    {
         DPROFILER_TRACE(_context._bindings->pipelineDescriptor()->signature().c_str());
 
         _context.upload(graphicsContext);
