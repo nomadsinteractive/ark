@@ -69,18 +69,9 @@ void RenderGroup::render(RenderRequest& renderRequest, const V3& position, const
                 i->render(renderRequest, position, nullptr);
 }
 
-void RenderGroup::addRenderer(sp<Renderer> renderer, const Traits& traits)
+void RenderGroup::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded, const RendererType::Priority priority)
 {
-    ASSERT(renderer);
-    const sp<Discarded>& discarded = traits.get<Discarded>();
-    const sp<Visibility>& visibility = traits.get<Visibility>();
-    const RendererType::Priority phrase = traits.getEnum<RendererType::Priority>(RendererType::PRIORITY_DEFAULT);
-    _renderers[phrase].emplace_back(std::move(renderer), discarded, visibility);
-}
-
-void RenderGroup::add(const RendererType::Priority priority, sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)
-{
-    _renderers[priority].emplace_back(std::move(renderer), std::move(discarded), std::move(visible));
+    _renderers[priority].emplace_back(std::move(renderer), std::move(discarded));
 }
 
 RenderGroup::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
@@ -92,7 +83,7 @@ sp<RenderGroup> RenderGroup::BUILDER::build(const Scope& args)
 {
     sp<RenderGroup> renderGroup = sp<RenderGroup>::make();
     for(const auto& i : _renderers)
-        renderGroup->add(i._priority, i._renderer->build(args));
+        renderGroup->addRenderer(i._renderer->build(args), nullptr, i._priority);
     return renderGroup;
 }
 

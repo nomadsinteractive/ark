@@ -46,10 +46,10 @@ sp<Renderer> RendererType::create(Vector<sp<Renderer>> delegate)
     return rendererGroup;
 }
 
-void RendererType::addRenderer(const sp<Renderer>& self, sp<Renderer> renderer, const Traits& traits)
+void RendererType::addRenderer(const sp<Renderer>& self, sp<Renderer> renderer, sp<Boolean> discarded, const RendererType::Priority priority)
 {
-    const sp<Renderer::Group> rendererGroup = self.ensureInstance<Renderer::Group>("Cannot call addRenderer on a none-group renderer");
-    rendererGroup->addRenderer(std::move(renderer), traits);
+    const sp<RenderGroup> rendererGroup = self.ensureInstance<RenderGroup>("Cannot call addRenderer on a none-group renderer");
+    rendererGroup->addRenderer(std::move(renderer), std::move(discarded), priority);
 }
 
 sp<Renderer> RendererType::wrap(sp<Renderer> self)

@@ -13,8 +13,8 @@ class ARK_API RendererType final {
 public:
 //  [[script::bindings::enumeration]]
     enum Priority {
-        PRIORITY_UI,
-        PRIORITY_DEFAULT,
+        PRIORITY_DEFAULT = 0,
+        PRIORITY_UI = 16,
         PRIORITY_UI_BLEND,
         PRIORITY_UI_TEXT,
         PRIORITY_RENDER_LAYER,
@@ -29,7 +29,7 @@ public:
     static sp<Renderer> create(Vector<sp<Renderer>> delegate);
 
 //  [[script::bindings::classmethod]]
-    static void addRenderer(const sp<Renderer>& self, sp<Renderer> renderer, const Traits& traits);
+    static void addRenderer(const sp<Renderer>& self, sp<Renderer> renderer, sp<Boolean> discarded = nullptr, RendererType::Priority priority = RendererType::PRIORITY_DEFAULT);
 //  [[script::bindings::classmethod]]
     static sp<Renderer> wrap(sp<Renderer> self);
 

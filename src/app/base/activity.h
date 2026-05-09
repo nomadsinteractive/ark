@@ -15,7 +15,7 @@
 namespace ark {
 
 //[[script::bindings::extends(Renderer)]]
-class ARK_API Activity final : public EventListener, public Renderer, public Renderer::Group {
+class ARK_API Activity final : public EventListener, public Renderer {
 public:
 //  [[script::bindings::auto]]
     Activity();
@@ -23,7 +23,7 @@ public:
     ~Activity() override;
 
 //  [[script::bindings::auto]]
-    void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
+    void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, RendererType::Priority priority = RendererType::PRIORITY_DEFAULT);
 //  [[script::bindings::auto]]
     void addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded = nullptr);
 

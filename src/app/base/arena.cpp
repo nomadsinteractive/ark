@@ -10,10 +10,9 @@
 namespace ark {
 
 struct Arena::Stub {
-    Stub(sp<ResourceLoader> resourceLoader, sp<Boolean> discarded, sp<Renderer> renderer, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
-        : _resource_loader(std::move(resourceLoader)), _renderer(std::move(renderer)), _render_layers(std::move(renderLayers)), _layers(std::move(layers)), _discarded(sp<Discarded>::make(std::move(discarded)))
+    Stub(sp<ResourceLoader> resourceLoader, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
+        : _resource_loader(std::move(resourceLoader)), _render_layers(std::move(renderLayers)), _layers(std::move(layers))
     {
-        CHECK(!_renderer || _renderer.isInstance<Renderer::Group>(), "Renderer of an Arena should be nullptr or instance of Renderer::Group");
     }
 
     sp<Layer> getLayer(const String& name)
@@ -37,20 +36,15 @@ struct Arena::Stub {
             sp<RenderLayer> renderLayer = _resource_loader->load<RenderLayer>(name, {});
             CHECK(renderLayer, "Cannot get RenderLayer \"%s\"", name.c_str());
             _render_layers.insert(std::make_pair(name, renderLayer));
-            if(_renderer)
-                RendererType::addRenderer(_renderer, renderLayer, {_discarded, RendererType::PRIORITY_RENDER_LAYER});
             return renderLayer;
         }
         return iter->second;
     }
 
     sp<ResourceLoader> _resource_loader;
-    sp<Renderer> _renderer;
 
     Map<String, sp<RenderLayer>> _render_layers;
     Map<String, sp<Layer>> _layers;
-
-    sp<Discarded> _discarded;
 };
 
 class Arena::LayerBundle final : public BoxBundle {
@@ -83,19 +77,9 @@ private:
     sp<Stub> _stub;
 };
 
-Arena::Arena(sp<ResourceLoader> resourceLoader, sp<Boolean> discarded, sp<Renderer> renderer, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
-    : _stub(sp<Stub>::make(std::move(resourceLoader), std::move(discarded), std::move(renderer), std::move(renderLayers), std::move(layers))), _layers(sp<BoxBundle>::make<LayerBundle>(_stub)), _render_layers(sp<BoxBundle>::make<RenderLayerBundle>(_stub))
+Arena::Arena(sp<ResourceLoader> resourceLoader, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
+    : _stub(sp<Stub>::make(std::move(resourceLoader), std::move(renderLayers), std::move(layers))), _layers(sp<BoxBundle>::make<LayerBundle>(_stub)), _render_layers(sp<BoxBundle>::make<RenderLayerBundle>(_stub))
 {
-}
-
-Arena::~Arena()
-{
-    discard();
-}
-
-void Arena::discard() const
-{
-    _stub->_discarded->discard();
 }
 
 const sp<BoxBundle>& Arena::layers() const

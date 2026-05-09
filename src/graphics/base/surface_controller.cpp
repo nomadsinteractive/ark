@@ -15,9 +15,9 @@ SurfaceController::SurfaceController()
 {
 }
 
-void SurfaceController::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible, const RendererType::Priority priority)
+void SurfaceController::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded, const RendererType::Priority priority)
 {
-    _renderer_phrase.add(priority, std::move(renderer), std::move(discarded), std::move(visible));
+    _renderer_phrase.addRenderer(std::move(renderer), std::move(discarded), priority);
 }
 
 void SurfaceController::requestRender(const uint32_t tick)

@@ -27,9 +27,9 @@ Activity::~Activity()
     LOGD("");
 }
 
-void Activity::addRenderer(sp<Renderer> renderer, const Traits& traits)
+void Activity::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded, const RendererType::Priority priority)
 {
-    _render_group->addRenderer(std::move(renderer), traits);
+    _render_group->addRenderer(std::move(renderer), std::move(discarded), priority);
 }
 
 void Activity::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
@@ -51,7 +51,7 @@ void Activity::addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded)
 {
     if(!discarded)
         discarded = sp<Boolean>::make<BooleanByWeakRef<Renderer>>(renderLayer, 1);
-    _render_group->add(RendererType::PRIORITY_RENDER_LAYER, std::move(renderLayer), std::move(discarded));
+    _render_group->addRenderer(std::move(renderLayer), std::move(discarded), RendererType::PRIORITY_RENDER_LAYER);
 }
 
 Activity::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

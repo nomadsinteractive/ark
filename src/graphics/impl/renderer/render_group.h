@@ -11,13 +11,12 @@
 
 namespace ark {
 
-class ARK_API RenderGroup final : public Renderer, public Renderer::Group {
+class ARK_API RenderGroup final : public Renderer {
 public:
 
-    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
-    void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
+    void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, RendererType::Priority priority = RendererType::PRIORITY_DEFAULT);
 
-    void add(RendererType::Priority priority, sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<RenderGroup> {
@@ -52,7 +51,7 @@ public:
     };
 
 private:
-    Map<RendererType::Priority, DV_FList<sp<Renderer>>> _renderers;
+    Map<RendererType::Priority, D_FList<sp<Renderer>>> _renderers;
 };
 
 }

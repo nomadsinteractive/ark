@@ -16,7 +16,7 @@ public:
     SurfaceController();
 
 // [[script::bindings::auto]]
-    void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr, RendererType::Priority priority = RendererType::PRIORITY_DEFAULT);
+    void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, RendererType::Priority priority = RendererType::PRIORITY_DEFAULT);
 
     void requestRender(uint32_t tick);
 

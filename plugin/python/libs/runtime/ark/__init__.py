@@ -983,17 +983,18 @@ class Shader:
 
 class Renderer:
 
-    PRIORITY_UI = -10,
-    PRIORITY_DEFAULT = 0,
-    PRIORITY_UI_BLEND = 10,
-    PRIORITY_UI_TEXT = 20
-    PRIORITY_RENDER_LAYER = 30
-    PRIORITY_CONTROL = 50
+    PRIORITY_DEFAULT = 0
+
+    PRIORITY_UI = 16
+    PRIORITY_UI_BLEND = 17
+    PRIORITY_UI_TEXT = 18
+    PRIORITY_RENDER_LAYER = 19
+    PRIORITY_CONTROL = 20
 
     def __init__(self, delegate: Optional["Renderer"] | Sequence["Renderer"] = None):
         self._delegate = delegate
 
-    def add_renderer(self, renderer: "Renderer", *traits):
+    def add_renderer(self, renderer: "Renderer", discarded: TYPE_BOOLEAN, priorty: int = PRIORITY_DEFAULT):
         pass
 
     def reset(self, v: Optional["Renderer"]) -> Optional["Renderer"]:
@@ -2133,7 +2134,7 @@ class Artifact(Uploader):
 
 
 class Arena:
-    def __init__(self, resource_loader: ResourceLoader, discarded: Optional[Boolean] = None, renderer: Optional[Renderer] = None, render_layers: dict[str, RenderLayer] = None, layers: dict[str, Layer] = None):
+    def __init__(self, resource_loader: ResourceLoader, render_layers: dict[str, RenderLayer] = None, layers: dict[str, Layer] = None):
         pass
 
     @property
@@ -2154,9 +2155,6 @@ class Arena:
 class Activity(Renderer):
     def __init__(self):
         super().__init__()
-
-    def add_renderer(self, renderer: Renderer, *traits):
-        pass
 
     def add_render_layer(self, render_layer: Renderer, discarded: Optional[Boolean] = None):
         pass
@@ -3090,7 +3088,7 @@ class Rigidbody:
 
 class SurfaceController:
 
-    def add_renderer(self, renderer: Renderer, discarded: Optional[Boolean] = None, visible: Optional[Boolean] = None, priority: int = Renderer.PRIORITY_DEFAULT):
+    def add_renderer(self, renderer: Renderer, discarded: Optional[Boolean] = None, priority: int = Renderer.PRIORITY_DEFAULT):
         pass
 
 
