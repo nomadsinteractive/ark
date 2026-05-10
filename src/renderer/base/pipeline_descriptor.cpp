@@ -100,18 +100,6 @@ PipelineDescriptor::Trait toPipelineTrait(const PipelineDescriptor::TraitType tr
     return {};
 }
 
-String preprocess(const Map<String, String>& definitions, const String& source)
-{
-    static std::regex var_pattern(R"(\$\{([\w.]+)\})");
-
-    return source.replace(var_pattern, [&definitions] (Array<String>& matches)->String {
-        const String& varName = matches.at(1);
-        const auto iter = definitions.find(varName);
-        CHECK(iter != definitions.end(), "Undefinition \"%s\"", varName.c_str());
-        return iter->second;
-    });
-}
-
 sp<Snippet> createCoreSnippet(sp<Snippet> next)
 {
     sp<Snippet> coreSnippet = Ark::instance().renderController()->renderEngine()->context()->snippetFactory()->createCoreSnippet();
@@ -134,7 +122,7 @@ PipelineDescriptor::Configuration initConfiguration(PipelineDescriptor::Configur
 
 PipelineDescriptor::PipelineDescriptor(Camera camera, PipelineBuildingContext& buildingContext, Configuration configuration)
     : _camera(std::move(camera)), _configuration(initConfiguration(std::move(configuration), buildingContext, _camera)), _layout(buildingContext._pipeline_layout),
-      _predefined_samplers(std::move(buildingContext._samplers)), _predefined_images(std::move(buildingContext._images)), _definitions(buildingContext.toDefinitions())
+      _predefined_samplers(std::move(buildingContext._samplers)), _predefined_images(std::move(buildingContext._images)), _definitions(std::move(buildingContext._definitions))
 {
     if(const op<ShaderPreprocessor>& computeStage = buildingContext.computingStage())
     {
@@ -227,7 +215,7 @@ Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPre
 {
     Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> shaders;
     for(const auto& [manifest, stage, source] : _stages)
-        shaders[stage] = {manifest, stage, preprocess(_definitions, source)};
+        shaders[stage] = {manifest, stage, Strings::replaceDefinitions(source, _definitions)};
 
     return shaders;
 }

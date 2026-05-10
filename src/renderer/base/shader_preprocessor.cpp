@@ -44,7 +44,7 @@ constexpr char ANNOTATION_FRAG_COLOR[] = "f_FragColor";
 
 size_t parseFunctionBody(const String& s, String& body)
 {
-    const size_t end = Strings::parentheses(s, 0, '{', '}', 1);
+    const size_t end = Strings::parseBlock(s, 0, '{', '}', 1);
     body = s.substr(0, end - 1).strip();
     return end + 1;
 }

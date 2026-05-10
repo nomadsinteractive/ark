@@ -293,21 +293,13 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::getRenderStage(enums::Sha
     return iter->second;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(String resid, String source, document manifest, const enums::ShaderStageBit shaderStage, const enums::ShaderStageBit preShaderStage)
+const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(String resid, const String& source, document manifest, const enums::ShaderStageBit shaderStage, const enums::ShaderStageBit preShaderStage)
 {
     op<ShaderPreprocessor>& stage = shaderStage == enums::SHADER_STAGE_BIT_COMPUTE ? _computing_stage : _rendering_stages[shaderStage];
     CHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
-    stage.reset(new ShaderPreprocessor(std::move(resid), std::move(source), std::move(manifest), shaderStage, preShaderStage));
+    stage.reset(new ShaderPreprocessor(std::move(resid), Strings::replaceDefinitions(source, _definitions), std::move(manifest), shaderStage, preShaderStage));
     _stages.emplace_back(stage.get());
     return stage;
-}
-
-Map<String, String> PipelineBuildingContext::toDefinitions() const
-{
-    Map<String, String> definitions;
-    for(const auto& [i, j] : _definitions)
-        definitions.insert(std::make_pair(i, j->val().data()));
-    return definitions;
 }
 
 void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
@@ -421,7 +413,7 @@ void PipelineBuildingContext::loadDefinitions(const document& manifest)
     {
         String name = Documents::getAttribute(i, constants::NAME);
         CHECK_WARN(!_definitions.contains(name), "Definition \"%s\" redefined", name.c_str());
-        _definitions.insert(std::make_pair(name, _factory.ensureBuilder<StringVar>(i, constants::VALUE)->build(_args)));
+        _definitions.insert(std::make_pair(name, _factory.ensureBuilder<StringVar>(i, constants::VALUE)->build(_args)->val()));
     }
 }
 

@@ -17,12 +17,12 @@ public:
 
     static String unwrap(const String& str, char open, char close);
 
-    static void parentheses(const String& expr, String& lvalue, String& remaining);
-    static size_t parentheses(const String& expr, size_t start, char open = '(', char close = ')', int count = 0);
+    static size_t parseBlock(const String& expr, size_t start, char open = '(', char close = ')', int count = 0);
 
     static bool parseArrayAndIndex(const String& expr, String& name, int32_t& index);
 
     static Map<String, String> parseProperties(const String& str, char delim = ';', char equal = ':');
+    static String replaceDefinitions(const String& source, const Map<String, String>& definitions);
 
     static String toUTF8(const std::wstring& text);
     static std::wstring fromUTF8(StringView text);

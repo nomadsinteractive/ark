@@ -146,6 +146,8 @@ sp<Shader> Shader::BUILDER::build(const Scope& args, const Vector<StageManifest>
 PipelineBuildingContext Shader::BUILDER::makePipelineBuildingContext(const Scope& args, const Vector<StageManifest>& defaultStages) const
 {
     PipelineBuildingContext context(_factory, args);
+    context.loadManifest(_manifest);
+
     const auto [vertexOpt, vertexIndex] = findStageManifest(enums::SHADER_STAGE_BIT_VERTEX, _stages);
     const auto [fragmentOpt, fragmentIndex] = findStageManifest(enums::SHADER_STAGE_BIT_FRAGMENT, _stages);
     const auto [computeOpt, computeIndex] = findStageManifest(enums::SHADER_STAGE_BIT_COMPUTE, _stages);
@@ -165,7 +167,6 @@ PipelineBuildingContext Shader::BUILDER::makePipelineBuildingContext(const Scope
         context.addStage(std::move(computeOpt->_src), computeOpt->_source->build(args), computeOpt->_manifest, enums::SHADER_STAGE_BIT_COMPUTE, computeAfterGraphics ? enums::SHADER_STAGE_BIT_FRAGMENT : enums::SHADER_STAGE_BIT_NONE);
     }
 
-    context.loadManifest(_manifest);
     return context;
 }
 

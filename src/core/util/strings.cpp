@@ -344,14 +344,7 @@ String Strings::unwrap(const String& str, const char open, const char close)
     return str;
 }
 
-void Strings::parentheses(const String& expr, String& lvalue, String& remaining)
-{
-    const size_t pos = parentheses(expr, 0);
-    lvalue = expr.substr(1, pos);
-    remaining = expr.substr(pos + 1).strip();
-}
-
-size_t Strings::parentheses(const String& expr, const size_t start, const char open, const char close, int32_t count)
+size_t Strings::parseBlock(const String& expr, const size_t start, const char open, const char close, int32_t count)
 {
     CHECK(expr.length() > start, "Illegal expression: unexpected end");
     CHECK(count > 0 || expr.at(0) == open, "Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
@@ -391,6 +384,19 @@ Map<String, String> Strings::parseProperties(const String& str, char delim, char
     return properties;
 }
 
+String Strings::replaceDefinitions(const String& source, const Map<String, String>& definitions)
+{
+    static std::regex var_pattern(R"(\$\{([\w.]+)\})");
+
+    return source.replace(var_pattern, [&definitions] (Array<String>& matches)->String {
+        const String& varName = matches.at(1);
+        DTRACE(varName == "image_type", "");
+        const auto iter = definitions.find(varName);
+        CHECK(iter != definitions.end(), "Undefinition \"%s\"", varName.c_str());
+        return iter->second;
+    });
+}
+
 String Strings::toUTF8(const std::wstring& text)
 {
     String utf8;
@@ -426,7 +432,7 @@ bool Strings::splitFunction(const String& expr, String& func, String& args)
     {
         func = expr.substr(0, idx);
         args = expr.substr(idx + 1, expr.length() - 1);
-        return isVariableName(func, false) && Strings::parentheses(expr, idx) == expr.length() - 1;
+        return isVariableName(func, false) && Strings::parseBlock(expr, idx) == expr.length() - 1;
     }
     return false;
 }

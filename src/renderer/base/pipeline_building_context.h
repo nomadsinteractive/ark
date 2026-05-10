@@ -48,7 +48,7 @@ public:
     const Scope& _args;
 
     Map<String, Attribute> _attributes;
-    Map<String, sp<StringVar>> _definitions;
+    Map<String, String> _definitions;
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
     Table<String, sp<Texture>> _images;
@@ -69,9 +69,7 @@ public:
 
     ShaderPreprocessor* tryGetRenderStage(enums::ShaderStageBit shaderStage) const;
     const op<ShaderPreprocessor>& getRenderStage(enums::ShaderStageBit shaderStage) const;
-    const op<ShaderPreprocessor>& addStage(String resid, String source, document manifest, enums::ShaderStageBit shaderStage, enums::ShaderStageBit preShaderStage);
-
-    Map<String, String> toDefinitions() const;
+    const op<ShaderPreprocessor>& addStage(String resid, const String& source, document manifest, enums::ShaderStageBit shaderStage, enums::ShaderStageBit preShaderStage);
 
     void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera);
 
