@@ -322,9 +322,9 @@ class NoiseGeneratorWindow(Window):
 
         float_arrays = []
         component_size = self._components.val
-        frequency = self._frequency.val / width
         for i in range(component_size):
-            generator = self._noise.Generator(generator_type, Random().rand(), frequency)
+            generator = self._noise.Generator(generator_type, Random().rand())
+            generator.frequency = self._frequency
             if self._enable_fractal:
                 generator.set_fractal_octaves(self._fractal_octaves.val)
                 generator.set_fractal_gain(self._fractal_gain.val)

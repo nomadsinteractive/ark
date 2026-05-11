@@ -27,14 +27,14 @@ void normalize(FloatArray& floatArray)
 
 class RunnableGenUniformGrid2D final : public Runnable {
 public:
-    RunnableGenUniformGrid2D(FastNoise::SmartNode<FastNoise::Generator> generator, sp<Future> future, sp<FloatArray> floatArray, const RectI& bounds, const int32_t seed, const float frequency)
-        : _generator(std::move(generator)), _future(std::move(future)), _float_array(std::move(floatArray)), _bounds(bounds), _seed(seed), _frequency(frequency)
+    RunnableGenUniformGrid2D(FastNoise::SmartNode<FastNoise::Generator> generator, sp<Future> future, sp<FloatArray> floatArray, const RectI& bounds, const int32_t seed)
+        : _generator(std::move(generator)), _future(std::move(future)), _float_array(std::move(floatArray)), _bounds(bounds), _seed(seed)
     {
     }
 
     void run() override
     {
-        _generator->GenUniformGrid2D(_float_array->buf(), _bounds.left(), _bounds.top(), _bounds.width(), _bounds.height(), _frequency, _seed);
+        _generator->GenUniformGrid2D(_float_array->buf(), _bounds.left(), _bounds.top(), _bounds.width(), _bounds.height(), 1.0f, 1.0f, _seed);
         normalize(_float_array);
         Ark::instance().applicationContext()->coreExecutor()->execute(_future);
     }
@@ -45,7 +45,6 @@ private:
     sp<FloatArray> _float_array;
     RectI _bounds;
     int32_t _seed;
-    float _frequency;
 };
 
 }
@@ -53,18 +52,27 @@ private:
 struct Generator::Stub {
     FastNoise::SmartNode<FastNoise::Generator> _generator;
     FastNoise::SmartNode<FastNoise::Generator> _source_generator;
+    FastNoise::SmartNode<FastNoise::ScalableGenerator> _scalable_generator;
     FastNoise::SmartNode<FastNoise::Fractal<>> _fractal_generator;
 };
 
-Generator::Generator(const NoiseType type, const int32_t seed, const float frequency)
-    : _seed(seed), _frequency(frequency), _stub(new Stub())
+Generator::Generator(const NoiseType type, const int32_t seed)
+    : _seed(seed), _frequency(100.0f), _stub(new Stub())
 {
     if(type == NOISE_TYPE_CELLULAR)
         _stub->_source_generator = FastNoise::New<FastNoise::CellularDistance>();
     else if(type == NOISE_TYPE_SIMPLEX)
-        _stub->_source_generator = FastNoise::New<FastNoise::Simplex>();
+    {
+        const auto generator = FastNoise::New<FastNoise::Simplex>();
+        _stub->_source_generator = generator;
+        _stub->_scalable_generator = generator;
+    }
     else if(type == NOISE_TYPE_PERLIN)
-        _stub->_source_generator = FastNoise::New<FastNoise::Perlin>();
+    {
+        const auto generator = FastNoise::New<FastNoise::Perlin>();
+        _stub->_source_generator = generator;
+        _stub->_scalable_generator = generator;
+    }
     CHECK(_stub->_source_generator, "Unknow noise type: %d", type);
     _stub->_generator = _stub->_source_generator;
 }
@@ -91,6 +99,8 @@ float Generator::frequency() const
 void Generator::setFrequency(const float frequency)
 {
     _frequency = frequency;
+    if(_stub->_scalable_generator)
+        _stub->_scalable_generator->SetScale(frequency);
 }
 
 bool Generator::useFractal() const
@@ -145,10 +155,10 @@ sp<FloatArray> Generator::noiseMap2d(const RectI& bounds, sp<Future> future) con
     ASSERT(bounds.width() > 0 && bounds.height() > 0);
     sp<FloatArray> floatArray = FloatArrayType::create(bounds.width() * bounds.height());
     if(future)
-        Ark::instance().applicationContext()->threadPoolExecutor()->execute(sp<Runnable>::make<RunnableGenUniformGrid2D>(_stub->_generator, std::move(future), floatArray, bounds, _seed, _frequency));
+        Ark::instance().applicationContext()->threadPoolExecutor()->execute(sp<Runnable>::make<RunnableGenUniformGrid2D>(_stub->_generator, std::move(future), floatArray, bounds, _seed));
     else
     {
-        _stub->_generator->GenUniformGrid2D(floatArray->buf(), bounds.left(), bounds.top(), bounds.width(), bounds.height(), _frequency, _seed);
+        _stub->_generator->GenUniformGrid2D(floatArray->buf(), bounds.left(), bounds.top(), bounds.width(), bounds.height(), 1.0f, 1.0f, _seed);
         normalize(floatArray);
     }
     return floatArray;

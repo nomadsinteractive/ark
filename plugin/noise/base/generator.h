@@ -21,7 +21,7 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Generator(Generator::NoiseType type = Generator::NOISE_TYPE_SIMPLEX, int32_t seed = 0, float frequency = 1.0f);
+    Generator(Generator::NoiseType type = Generator::NOISE_TYPE_SIMPLEX, int32_t seed = 0);
     ~Generator();
 
 //  [[script::bindings::property]]
