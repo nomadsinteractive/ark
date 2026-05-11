@@ -17,7 +17,8 @@ RendererContext::RendererContext(const sp<Shader>& shader)
 
 void RendererContext::addDefaultTexture(sp<Texture> texture)
 {
-    _draw_commands[nullptr] = sp<DrawCommandPool>::make(_shader, Ark::instance().renderController(), std::move(texture));
+    void* key = texture.get();
+    _draw_commands[key] = sp<DrawCommandPool>::make(_shader, Ark::instance().renderController(), std::move(texture));
 }
 
 const sp<DrawCommandPool>& RendererContext::obtainDrawCommandPool(void* texture) const

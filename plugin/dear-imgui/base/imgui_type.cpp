@@ -80,6 +80,7 @@ sp<Imgui> Imgui::BUILDER::build(const Scope& args)
     RenderController& renderController = Ark::instance().renderController();
     sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray>::make<ByteArray::Borrowed>(pixels, width * height * bytesPerPixel));
     sp<Texture> texture = renderController.createTexture2d(std::move(bitmap));
+    io.Fonts->SetTexID(reinterpret_cast<ImTextureID>(texture.get()));
     sp<Shader> shader = _shader->build(args);
     const Viewport& viewport = renderController.renderEngine()->viewport();
     _camera->ortho(0, viewport.width(), viewport.height(), 0, viewport.clipNear(), viewport.clipFar());

@@ -390,7 +390,6 @@ String Strings::replaceDefinitions(const String& source, const Map<String, Strin
 
     return source.replace(var_pattern, [&definitions] (Array<String>& matches)->String {
         const String& varName = matches.at(1);
-        DTRACE(varName == "image_type", "");
         const auto iter = definitions.find(varName);
         CHECK(iter != definitions.end(), "Undefinition \"%s\"", varName.c_str());
         return iter->second;
