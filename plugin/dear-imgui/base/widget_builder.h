@@ -75,9 +75,9 @@ public:
     void unindent(float w = 0);
 
 //  [[script::bindings::auto]]
-    sp<Widget> sameLine(float offsetFromStartX = 0.0f, float spacing = -1.0f);
+    void sameLine(float offsetFromStartX = 0.0f, float spacing = -1.0f);
 //  [[script::bindings::auto]]
-    sp<Widget> newLine();
+    void newLine();
 //  [[script::bindings::auto]]
     void separator();
 //  [[script::bindings::auto]]

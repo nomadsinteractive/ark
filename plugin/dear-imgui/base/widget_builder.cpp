@@ -907,18 +907,14 @@ void WidgetBuilder::image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, con
     addWidget(sp<Widget>::make<Image>(std::move(texture), std::move(size), uv0, uv1, std::move(color), std::move(borderColor), _renderer_context));
 }
 
-sp<Widget> WidgetBuilder::sameLine(float offsetFromStartX, float spacing)
+void WidgetBuilder::sameLine(float offsetFromStartX, float spacing)
 {
-    sp<Widget> widget = WidgetType::create(sp<Widget>::make<FunctionCall>([offsetFromStartX, spacing] { ImGui::SameLine(offsetFromStartX, spacing); }));
-    addWidget(widget);
-    return widget;
+    addWidget(sp<Widget>::make<FunctionCall>([offsetFromStartX, spacing] { ImGui::SameLine(offsetFromStartX, spacing); }));
 }
 
-sp<Widget> WidgetBuilder::newLine()
+void WidgetBuilder::newLine()
 {
-    sp<Widget> widget = WidgetType::create(sp<Widget>::make<FunctionCall>(ImGui::NewLine));
-    addWidget(widget);
-    return widget;
+    addWidget(sp<Widget>::make<FunctionCall>(ImGui::NewLine));
 }
 
 void WidgetBuilder::separator()
@@ -984,17 +980,19 @@ void WidgetBuilder::addFunctionCall(std::function<void()> func)
 
 void WidgetBuilder::addWidget(sp<Widget> widget)
 {
+    ASSERT(widget);
     current()->addWidget(std::move(widget));
 }
 
 sp<Widget> WidgetBuilder::makeWidget() const
 {
     CHECK(_stub->_states.size() == 1, "Builder has uncompleted begin/end states");
-    return _stub->_states.top();
+    return WidgetType::create(_stub->_states.top().cast<Widget>());
 }
 
 void WidgetBuilder::push(sp<WidgetGroup> widgetGroup)
 {
+    ASSERT(widgetGroup);
     _stub->_states.push(std::move(widgetGroup));
 }
 

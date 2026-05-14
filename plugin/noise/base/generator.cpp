@@ -77,6 +77,7 @@ Generator::Generator(const NoiseType type, const int32_t seed)
     _stub->_generator = _stub->_source_generator;
 }
 
+// We delcare an explicit destructor to avoid calling noise APIs in more than one module instances.
 Generator::~Generator()
 {
 }

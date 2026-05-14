@@ -68,9 +68,9 @@ sp<Widget> WidgetType::create(Vector<sp<Widget>> delegate)
     return sp<Widget>::make<WidgetWrapper>(sp<Widget>::make<WidgetList>(std::move(delegate)));
 }
 
-void WidgetType::visibleIf(const sp<Widget>& self, sp<Boolean> visibility)
+sp<Widget> WidgetType::visibleIf(const sp<Widget>& self, sp<Boolean> visibility)
 {
-    reset(self, sp<Widget>::make<WidgetWithVisibility>(self.ensureInstance<Wrapper<Widget>>()->wrapped(), std::move(visibility)));
+    return sp<Widget>::make<WidgetWithVisibility>(self, std::move(visibility));
 }
 
 void WidgetType::reset(const sp<Widget>& self, sp<Widget> wrapped)

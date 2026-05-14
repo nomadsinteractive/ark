@@ -18,7 +18,7 @@ public:
     static sp<Widget> create(Vector<sp<Widget>> delegate);
 
 //  [[script::bindings::classmethod]]
-    static void visibleIf(const sp<Widget>& self, sp<Boolean> visibility);
+    static sp<Widget> visibleIf(const sp<Widget>& self, sp<Boolean> visibility);
 
 //  [[script::bindings::classmethod]]
     static void reset(const sp<Widget>& self, sp<Widget> wrapped = nullptr);
