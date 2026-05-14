@@ -34,7 +34,7 @@ public:
 public:
     RenderLayerSnapshot(RenderLayerSnapshot&& other) = default;
 
-    sp<RenderCommand> compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator) const;
+    sp<RenderCommand> compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator);
     DrawingContext toDrawingContext(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
 
     bool verticesDirty() const;
@@ -51,6 +51,7 @@ public:
     std::deque<LayerContext::ElementState> _elements_deleted;
     Rect _scissor;
     bool _vertices_dirty;
+    bool _render_layer_dirty;
 
     DISALLOW_COPY_AND_ASSIGN(RenderLayerSnapshot);
 

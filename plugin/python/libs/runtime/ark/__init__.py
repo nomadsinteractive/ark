@@ -1003,7 +1003,7 @@ class Renderer:
     def wrap(self) -> Self:
         pass
 
-    def to_render_layer(self) -> Optional["RenderLayer"]:
+    def to_render_layer(self) -> "RenderLayer":
         pass
 
     def with_visible(self, visible: TYPE_BOOLEAN) -> Self:

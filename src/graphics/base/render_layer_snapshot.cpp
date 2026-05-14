@@ -3,6 +3,7 @@
 #include <ranges>
 
 #include "core/util/log.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/layer_context_snapshot.h"
@@ -34,16 +35,13 @@ private:
 };
 
 RenderLayerSnapshot::RenderLayerSnapshot(const RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub)
-    : _stub(stub), _index_count(0), _vertices_dirty(false)
+    : _stub(stub), _index_count(0), _vertices_dirty(false), _render_layer_dirty(UpdatableUtil::update(renderRequest.tick(), _stub->_visible, _stub->_scissor))
 {
     if(_stub->_scissor)
-    {
-        _stub->_scissor->update(renderRequest.tick());
         _scissor = Rect(_stub->_scissor->val());
-    }
 }
 
-sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator) const
+sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator)
 {
     const OnceGuard guard(*this);
     if(!_elements.empty() && _stub->_visible.val())
@@ -71,6 +69,9 @@ bool RenderLayerSnapshot::verticesDirty() const
 
 bool RenderLayerSnapshot::layersDirty() const
 {
+    if(_render_layer_dirty)
+        return true;
+
     for(const LayerContextSnapshot& i : _layer_context_snapshots)
         if(i._dirty)
             return true;

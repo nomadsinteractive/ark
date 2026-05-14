@@ -59,7 +59,7 @@ sp<Renderer> RendererType::wrap(sp<Renderer> self)
 
 sp<RenderLayer> RendererType::toRenderLayer(const sp<Renderer>& self)
 {
-    return self.asInstance<RenderLayer>();
+    return self.ensureInstance<RenderLayer>();
 }
 
 sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)
