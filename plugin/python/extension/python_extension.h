@@ -64,8 +64,6 @@ public:
     PyObject* toPyObject(const Box& box);
     bool isPyObject(TypeId type) const;
 
-    const sp<ReferenceManager>& referenceManager() const;
-
     void printStack() const;
     void logErr() const;
     void flushErr() const;
@@ -104,7 +102,6 @@ public:
 private:
     Map<TypeId, PyArkType*> _type_by_id;
     Map<void*, PyArkType*> _type_by_py_object;
-    sp<ReferenceManager> _reference_manager;
 
     PyThreadState* _thread_state;
     Vector<PyObject*> _recycled_py_objects;

@@ -245,10 +245,10 @@ Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object)
 Optional<sp<Boolean>> PyCast::toBoolean(PyObject* object)
 {
     if(isNoneOrNull(object))
-        return sp<Boolean>::make<Boolean::Const>(false);
+        return {sp<Boolean>::make<Boolean::Const>(false)};
 
     if(PyBool_Check(object))
-        return sp<Boolean>::make<Boolean::Const>(PyObject_IsTrue(object));
+        return {sp<Boolean>::make<Boolean::Const>(PyObject_IsTrue(object))};
 
     return toSharedPtrDefault<Boolean>(object);
 }
@@ -256,7 +256,8 @@ Optional<sp<Boolean>> PyCast::toBoolean(PyObject* object)
 Optional<sp<Integer>> PyCast::toInteger(PyObject* object)
 {
     if(PyLong_CheckExact(object))
-        return sp<Integer>::make<Integer::Const>(PyLong_AsLong(object));
+        if(const Optional<int32_t> optInt = toCppInteger<int32_t>(object))
+            return sp<Integer>::make<Integer::Const>(optInt.value());
 
     return toSharedPtrDefault<Integer>(object);
 }
@@ -275,7 +276,7 @@ Scope PyCast::toScope(PyObject* kws)
             PyObject* item = PyDict_GetItem(kws, key);
             const String sKey = toString(key);
             if(PyList_CheckExact(item) || PyTuple_CheckExact(item))
-                scope.put(sKey, Box(sp<PyListDuckType>::make(PyInstance::track(item))));
+                scope.put(sKey, Box(sp<PyListDuckType>::make(PyInstance::own(item))));
             else if(pi.isPyArkTypeObject(Py_TYPE(item)))
                 scope.put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else if(PyBool_Check(item))
@@ -283,7 +284,7 @@ Scope PyCast::toScope(PyObject* kws)
             else if(Py_IsNone(item))
                 scope.put(sKey, {});
             else
-                scope.put(sKey, Box(sp<PyObjectDuckType>::make(PyInstance::track(item))));
+                scope.put(sKey, Box(sp<PyObjectDuckType>::make(PyInstance::own(item))));
         }
         Py_DECREF(keys);
     }
@@ -356,7 +357,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<NamedHash> PyCast::toCppObject_impl<Na
 template<> ARK_PLUGIN_PYTHON_API Optional<Json> PyCast::toCppObject_impl<Json>(PyObject* object)
 {
     Optional<sp<Json>> opt = toSharedPtr<Json>(object);
-    return opt ? Optional<Json>(std::move(*opt.value())) : Optional<Json>();
+    return {opt ? Optional<Json>(std::move(*opt.value())) : Optional<Json>()};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<Box> PyCast::toCppObject_impl<Box>(PyObject* object)
@@ -365,7 +366,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<Box> PyCast::toCppObject_impl<Box>(PyO
         return {*reinterpret_cast<PyArkType::Instance*>(object)->box};
     if(PyBool_Check(object))
         return Py_IsTrue(object) ? Box(sp<Boolean>::make<Boolean::Const>(true)) : Box();
-    return object != Py_None ? Box(PyInstance::track(object).ref()) : Box();
+    return {object != Py_None ? Box(PyInstance::own(object).ref()) : Box()};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<bool> PyCast::toCppObject_impl<bool>(PyObject* object)

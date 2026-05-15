@@ -12,8 +12,6 @@
 #include "python/extension/callable_v1.h"
 #include "python/extension/py_instance_ref.h"
 #include "python/extension/py_cast.h"
-#include "python/extension/reference_manager.h"
-
 #include "python/impl/adapter/runnable_python.h"
 
 namespace ark::plugin::python {
@@ -46,11 +44,6 @@ private:
 
 }
 
-const sp<ReferenceManager>& PythonExtension::referenceManager() const
-{
-    return _reference_manager;
-}
-
 PythonExtension& PythonExtension::instance()
 {
     Global<PythonExtension> instance;
@@ -58,7 +51,6 @@ PythonExtension& PythonExtension::instance()
 }
 
 PythonExtension::PythonExtension()
-    : _reference_manager(sp<ReferenceManager>::make())
 {
 }
 

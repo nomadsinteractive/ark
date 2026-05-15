@@ -289,8 +289,9 @@ class NoiseGeneratorWindow(Window):
         self._components = Integer(_get_texture_components(texture) if texture else 1)
         size_x, size_y = texture.size.xy if texture else (256, 256)
         self._size = Vec2(size_x, size_y)
-        self._position = Vec2(0, 0)
-        self._frequency = Integer(4)
+        self._seed = Integer(Random().rand())
+        self._seed_auto_regen = Boolean(True)
+        self._frequency = Integer(20)
         self._enable_fractal = Boolean(True)
         self._fractal_octaves = Integer(4)
         self._fractal_gain = Numeric(0.2)
@@ -299,18 +300,24 @@ class NoiseGeneratorWindow(Window):
         super().__init__('Noise Generator', is_open)
 
     def on_create(self, builder: dear_imgui.WidgetBuilder):
+        builder.button('Generate').add_callback(lambda: self._texture.reset(self._do_generate()))
         builder.combo('Type', self._type, self._type_options)
+        builder.input_int('Seed', self._seed)
+        builder.same_line()
+        builder.checkbox('Auto Regen', self._seed_auto_regen)
         builder.slider_int('Components', self._components, 1, 4)
-        builder.slider_int('Frequency', self._frequency, 1, 10)
-        builder.input_float2('Position', self._position)
-        builder.input_float2('Size', self._size)
+        builder.slider_int('Frequency', self._frequency, 1, 100)
+        builder.slider_float2('Size', self._size, 8, 2048)
         builder.checkbox('Enable Fractal', self._enable_fractal)
-        builder.slider_int('Fractal Octaves', self._fractal_octaves, 2, 8)
-        builder.slider_float('Fractal Gain', self._fractal_gain, 0, 2)
-        builder.slider_float('Fractal Lacunarity', self._fractal_lacunarity, 1, 4)
+        fractal_option_builder = make_widget_builder()
+        fractal_option_builder.slider_int('Octaves', self._fractal_octaves, 2, 8)
+        fractal_option_builder.slider_float('Gain', self._fractal_gain, 0, 2)
+        fractal_option_builder.slider_float('Lacunarity', self._fractal_lacunarity, 1, 4)
+        builder.add_widget(fractal_option_builder.make_widget().visible_if(self._enable_fractal))
         if self._noise:
-            builder.button('Generate').add_callback(lambda: self._texture.reset(self._do_generate()))
-            builder.image(self._texture)
+            builder.begin('Preview')
+            builder.image(self._texture, builder.get_content_region_avail())
+            builder.end()
         else:
             builder.text_wrapped('Cannot import noise library, please make sure you have declared "ark-noise" and "ark-noise-pybindings" plugin in the ApplicationManifest')
 
@@ -319,19 +326,22 @@ class NoiseGeneratorWindow(Window):
             return None
 
         generator_type = getattr(self._noise.Generator, self._type_options[self._type.val])
-        x, y = (int(i) for i in self._position)
         width, height = (int(i) for i in self._size)
 
         float_arrays = []
+        seed = self._seed.val
+        if self._seed_auto_regen:
+            self._seed.reset(Random().rand())
+        generator = self._noise.Generator(generator_type, seed)
+        if self._enable_fractal:
+            generator.set_fractal_octaves(self._fractal_octaves.val)
+            generator.set_fractal_gain(self._fractal_gain.val)
+            generator.set_fractal_lacunarity(self._fractal_lacunarity.val)
+
         component_size = self._components.val
         for i in range(component_size):
-            generator = self._noise.Generator(generator_type, Random().rand())
             generator.frequency = self._frequency
-            if self._enable_fractal:
-                generator.set_fractal_octaves(self._fractal_octaves.val)
-                generator.set_fractal_gain(self._fractal_gain.val)
-                generator.set_fractal_lacunarity(self._fractal_lacunarity.val)
-            float_arrays.append(generator.noise_map2d((x, y, x + width, y + height)))
+            float_arrays.append(generator.noise_map2d((width * i, height * i, width * (i + 1), height * (i + 1))))
         buf_arrays = float_arrays[0] if len(float_arrays) == 1 else float_arrays[0].intertwine(float_arrays[1:])
         bitmap = Bitmap(width, height, width * 4 * component_size, component_size, buf_arrays.to_byte_array())
         return Texture(bitmap, Texture.FORMAT_FLOAT | [Texture.FORMAT_R, Texture.FORMAT_RG, Texture.FORMAT_RGB, Texture.FORMAT_RGBA][component_size - 1])

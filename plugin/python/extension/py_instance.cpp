@@ -3,7 +3,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "python/extension/python_extension.h"
-#include "python/extension/reference_manager.h"
 
 namespace ark::plugin::python {
 
@@ -26,14 +25,6 @@ PyInstance PyInstance::own(PyObject* object)
 {
     Py_XINCREF(object);
     return {object ? sp<PyInstanceRef>::make(object, true) : nullptr};
-}
-
-PyInstance PyInstance::track(PyObject* object)
-{
-    Py_XINCREF(object);
-    sp<PyInstanceRef> ref = sp<PyInstanceRef>::make(object, true);
-    PythonExtension::instance().referenceManager()->track(ref);
-    return ref;
 }
 
 const sp<PyInstanceRef>& PyInstance::ref() const

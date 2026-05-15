@@ -22,8 +22,6 @@ public:
     static PyInstance steal(PyObject* object);
     static PyInstance own(PyObject* object);
 
-    static PyInstance track(PyObject* object);
-
     const sp<PyInstanceRef>& ref() const;
     void traverse(const Debris::Visitor& visitor) const;
 

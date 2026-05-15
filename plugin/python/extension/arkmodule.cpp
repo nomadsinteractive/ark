@@ -138,11 +138,6 @@ PyObject* ark_dirSeparator(PyObject* /*self*/, PyObject* /*args*/)
     return PyCast::toPyObject_impl<String>(ds);
 }
 
-PyObject* ark_getRefManager(PyObject* /*self*/, PyObject* /*args*/)
-{
-    return PyCast::toPyObject(PythonExtension::instance().referenceManager());
-}
-
 PyObject* ark_getApplicationFacade(PyObject* /*self*/, PyObject* /*args*/)
 {
     return PyCast::toPyObject(Ark::instance().applicationContext()->applicationFacade());
@@ -179,7 +174,6 @@ PyMethodDef ARK_METHODS[] = {
     {"is_ark_type",  ark_isArkType, METH_VARARGS, "is_ark_type"},
     {"load_file",  ark_loadFile, METH_VARARGS, "loadFile"},
     {"dir_separator",  ark_dirSeparator, METH_VARARGS, "dir_separator"},
-    {"get_ref_manager",  ark_getRefManager, METH_VARARGS, "get_ref_manager"},
     {"facade",  ark_getApplicationFacade, METH_VARARGS, "get ApplicationFacade interface"},
     {"hash_id",  ark_hashId, METH_VARARGS, "hash function"},
     {"__trace__",  ark_trace_, METH_VARARGS, "__trace__"},

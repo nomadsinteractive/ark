@@ -68,10 +68,6 @@ def load_asset_bundle(filepath: str) -> Optional["AssetBundle"]:
     pass
 
 
-def get_ref_manager():
-    return None
-
-
 def facade() -> "ApplicationFacade":
     return None
 
