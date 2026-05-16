@@ -120,12 +120,7 @@ PythonInterpreter::PythonInterpreter(const StringView name, const document& libr
         const String& v = Documents::ensureAttribute(i, "path");
         _paths.push_back(v);
     }
-    if(!Py_HasFileSystemDefaultEncoding)
-    {
-        char* encodings = static_cast<char*>(PyMem_RawMalloc(8));
-        strncpy(encodings, "utf-8", 8);
-        Py_FileSystemDefaultEncoding = encodings;
-    }
+
 #ifdef ARK_FLAG_PUBLISHING_BUILD
     Py_NoSiteFlag = 1;
 #endif
