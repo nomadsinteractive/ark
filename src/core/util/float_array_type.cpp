@@ -2,7 +2,7 @@
 
 namespace ark {
 
-sp<FloatArray> FloatArrayType::derivative2d(const sp<FloatArray>& self, const size_t width, const size_t height)
+sp<FloatArray> FloatArrayType::derivative2D(const sp<FloatArray>& self, const size_t width, const size_t height)
 {
     CHECK(self->length() == width * height, "Array length(%zu) != width(%zu) * height(%zu)", self->length(), width, height);
 
@@ -26,7 +26,7 @@ sp<FloatArray> FloatArrayType::derivative2d(const sp<FloatArray>& self, const si
     return result;
 }
 
-sp<FloatArray> FloatArrayType::integral2d(const sp<FloatArray>& self, const size_t width, const size_t height)
+sp<FloatArray> FloatArrayType::integral2D(const sp<FloatArray>& self, const size_t width, const size_t height)
 {
     CHECK(self->length() == width * height, "Array length(%zu) != width(%zu) * height(%zu)", self->length(), width, height);
 

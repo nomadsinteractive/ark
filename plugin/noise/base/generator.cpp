@@ -141,17 +141,17 @@ void Generator::setFractalWeightedStrength(const float weightedStrength)
     _stub->_fractal_generator->SetWeightedStrength(weightedStrength);
 }
 
-float Generator::noise2d(const float x, const float y) const
+float Generator::noise2D(const float x, const float y) const
 {
     return _stub->_generator->GenSingle2D(x, y, _seed);
 }
 
-float Generator::noise3d(const float x, const float y, const float z) const
+float Generator::noise3D(const float x, const float y, const float z) const
 {
     return _stub->_generator->GenSingle3D(x, y, z, _seed);
 }
 
-sp<FloatArray> Generator::noiseMap2d(const RectI& bounds, sp<Future> future) const
+sp<FloatArray> Generator::noiseMap2D(const RectI& bounds, sp<Future> future) const
 {
     ASSERT(bounds.width() > 0 && bounds.height() > 0);
     sp<FloatArray> floatArray = FloatArrayType::create(bounds.width() * bounds.height());

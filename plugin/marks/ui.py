@@ -297,8 +297,8 @@ class NoiseGeneratorWindow(Window):
         self._fractal_octaves = Integer(4)
         self._fractal_gain = Numeric(0.2)
         self._fractal_lacunarity = Numeric(2.0)
-        self._texture = texture or self._do_generate()
         self._texture_derivative = self._make_texture(None)
+        self._texture = texture or self._do_generate()
         super().__init__('Noise Generator', is_open)
 
     def on_create(self, builder: dear_imgui.WidgetBuilder):
@@ -350,9 +350,9 @@ class NoiseGeneratorWindow(Window):
         component_size = self._components.val
         for i in range(component_size):
             generator.frequency = self._frequency
-            noise_array = generator.noise_map2d((width * i, height * i, width * (i + 1), height * (i + 1)))
+            noise_array = generator.noise_map_2d((width * i, height * i, width * (i + 1), height * (i + 1)))
             texture_components.append(noise_array)
-            texture_derivative_components.append(noise_array.derivative2d(width, height))
+            texture_derivative_components.append(noise_array.derivative_2d(width, height))
 
         self._texture_derivative.reset(self._make_texture(FloatArray.zip(texture_derivative_components).to_byte_array()))
 

@@ -47,8 +47,11 @@ class Generator:
     def set_fractal_weighted_strength(self, weighted_strength: float):
         pass
 
-    def noise2d(self, x: float, y: float) -> float:
+    def noise_2d(self, x: float, y: float) -> float:
         pass
 
-    def noise_map2d(self, bounds: tuple[int, int, int, int], future: Optional[Future] = None) -> FloatArray:
+    def noise_3d(self, x: float, y: float, z: float) -> float:
+        pass
+
+    def noise_map_2d(self, bounds: tuple[int, int, int, int], future: Optional[Future] = None) -> FloatArray:
         pass

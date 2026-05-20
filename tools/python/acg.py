@@ -7,7 +7,7 @@ import os
 
 _INTEGER_PATTERN = re.compile(r'\d+')
 FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
-ALL_CAP_RE = re.compile('([a-z0-9])([A-Z])')
+ALL_CAP_RE = re.compile(r'([a-z])(\d*[A-Z])')
 
 
 class HeaderPattern:

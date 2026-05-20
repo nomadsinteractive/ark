@@ -49,12 +49,12 @@ public:
     void setFractalWeightedStrength(float weightedStrength);
 
 //  [[script::bindings::auto]]
-    float noise2d(float x, float y) const;
+    float noise2D(float x, float y) const;
 //  [[script::bindings::auto]]
-    float noise3d(float x, float y, float z) const;
+    float noise3D(float x, float y, float z) const;
 
 //  [[script::bindings::auto]]
-    sp<FloatArray> noiseMap2d(const RectI& bounds, sp<Future> future = nullptr) const;
+    sp<FloatArray> noiseMap2D(const RectI& bounds, sp<Future> future = nullptr) const;
 
 private:
     void ensureFractalGenerator() const;
