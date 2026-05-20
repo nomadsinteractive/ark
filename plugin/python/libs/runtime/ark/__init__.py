@@ -212,9 +212,6 @@ class _Array:
     def reset(self, other):
         pass
 
-    def intertwine(self, components: list[Self]) -> Self:
-        pass
-
     def to_bytes(self) -> bytes:
         pass
 
@@ -228,6 +225,10 @@ class _Array:
         pass
 
     def __setitem__(self, item, value):
+        pass
+
+    @staticmethod
+    def zip(components: list["_Array"]) -> "_Array":
         pass
 
 

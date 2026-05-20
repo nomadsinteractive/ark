@@ -116,20 +116,22 @@ public:
         return sp<ByteArray>::make<ByteArray::Casted<T>>(std::move(self));
     }
 
-    static sp<Array<T>> intertwine(Array<T>& self, const Vector<sp<Array<T>>>& components) {
+    static sp<Array<T>> zip(const Vector<sp<Array<T>>>& components) {
         const size_t componentSize = components.size();
-        ASSERT(componentSize > 0);
-        const size_t length = self.length();
-        for(size_t i = 0; i < componentSize; ++i)
-            CHECK(components.at(i)->length() == length, "All intertwined components should have the same length(%zu), but components[%d] does not(%zu)", length, i, components.at(i)->length());
+        if(componentSize == 0)
+            return create(0);
 
-        sp<Array<T>> array = create(length * (componentSize + 1));
-        for(size_t i = 0; i <= componentSize; ++i) {
+        const size_t length = components.at(0)->length();
+        for(size_t i = 0; i < componentSize; ++i)
+            CHECK(components.at(i)->length() == length, "All zipped components should have the same length(%zu), but components[%d] does not(%zu)", length, i, components.at(i)->length());
+
+        sp<Array<T>> array = create(length * componentSize);
+        for(size_t i = 0; i < componentSize; ++i) {
             T* dstbuf = array->buf() + i;
-            T* srcbuf = i == 0 ? self.buf() : components.at(i - 1)->buf();
+            T* srcbuf = components.at(i)->buf();
             for(size_t j = 0; j < length; ++j) {
                 *dstbuf = srcbuf[j];
-                dstbuf += (componentSize + 1);
+                dstbuf += componentSize;
             }
         }
 

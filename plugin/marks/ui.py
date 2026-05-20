@@ -2,7 +2,7 @@ import inspect
 from collections.abc import Sequence, Callable
 from typing import Any, Optional
 
-from ark import Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, TYPE_BOOLEAN, Discarded, Random, Behavior
+from ark import Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, TYPE_BOOLEAN, Discarded, Random, Behavior, FloatArray
 from ark import dear_imgui
 
 
@@ -342,7 +342,7 @@ class NoiseGeneratorWindow(Window):
         for i in range(component_size):
             generator.frequency = self._frequency
             float_arrays.append(generator.noise_map2d((width * i, height * i, width * (i + 1), height * (i + 1))))
-        buf_arrays = float_arrays[0] if len(float_arrays) == 1 else float_arrays[0].intertwine(float_arrays[1:])
+        buf_arrays = FloatArray.zip(float_arrays)
         bitmap = Bitmap(width, height, width * 4 * component_size, component_size, buf_arrays.to_byte_array())
         return Texture(bitmap, Texture.FORMAT_FLOAT | [Texture.FORMAT_R, Texture.FORMAT_RG, Texture.FORMAT_RGB, Texture.FORMAT_RGBA][component_size - 1])
 

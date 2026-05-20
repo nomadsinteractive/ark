@@ -39,13 +39,13 @@ public:
     static int32_t subscribeAssign(const sp<ByteArray>& self, const Slice& index, const Vector<uint8_t>& value);
 
 //  [[script::bindings::classmethod]]
-    static sp<ByteArray> intertwine(ByteArray& self, const Vector<sp<ByteArray>>& components);
-
-//  [[script::bindings::classmethod]]
     static BytesView toBytes(const sp<ByteArray>& self);
 
 //  [[script::bindings::operator(str)]]
     static String str(const sp<ByteArray>& self);
+
+//  [[script::bindings::auto]]
+    static sp<ByteArray> zip(const Vector<sp<ByteArray>>& components);
 */
 
 //  [[script::bindings::classmethod]]

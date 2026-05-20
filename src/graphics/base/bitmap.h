@@ -52,24 +52,6 @@ public:
     void dump(StringView filepath) const;
 
     template<typename T> class Util {
-    private:
-        static std::array<T*, 4> toRotationSpots(T* data, uint32_t n, uint8_t channels, uint32_t x, uint32_t y) {
-            return {data + (y * n + x) * channels, data + (x * n + y) * channels, data + ((n -  y) * n + x) * channels, data + (x * n + n - y) * channels};
-        }
-
-        static std::array<uint32_t, 4> toRotationSequences(const std::array<uint32_t, 4>& seq, int32_t rotation) {
-            switch(rotation % 4) {
-            case 0:
-                return seq;
-            case 1:
-                return {seq[3], seq[0], seq[1], seq[2]};
-            case 2:
-                return {seq[2], seq[3], seq[0], seq[1]};
-            case 3:
-                return {seq[1], seq[2], seq[3], seq[0]};
-            }
-        }
-
     public:
         static void rotate(T* data, uint32_t width, uint32_t height, uint8_t channels, int32_t degrees) {
             DCHECK(width == height, "Can only rotate squares");
