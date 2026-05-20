@@ -2,7 +2,8 @@ import inspect
 from collections.abc import Sequence, Callable
 from typing import Any, Optional
 
-from ark import Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, TYPE_BOOLEAN, Discarded, Random, Behavior, FloatArray
+from ark import Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, TYPE_BOOLEAN, Discarded, Random, Behavior, FloatArray, \
+    ByteArray
 from ark import dear_imgui
 
 
@@ -297,10 +298,11 @@ class NoiseGeneratorWindow(Window):
         self._fractal_gain = Numeric(0.2)
         self._fractal_lacunarity = Numeric(2.0)
         self._texture = texture or self._do_generate()
+        self._texture_derivative = self._make_texture(None)
         super().__init__('Noise Generator', is_open)
 
     def on_create(self, builder: dear_imgui.WidgetBuilder):
-        builder.button('Generate').add_callback(lambda: self._texture.reset(self._do_generate()))
+        builder.button('Generate').add_callback(self._on_generate_clicked)
         builder.combo('Type', self._type, self._type_options)
         builder.input_int('Seed', self._seed)
         builder.same_line()
@@ -315,20 +317,24 @@ class NoiseGeneratorWindow(Window):
         fractal_option_builder.slider_float('Lacunarity', self._fractal_lacunarity, 1, 4)
         builder.add_widget(fractal_option_builder.make_widget().visible_if(self._enable_fractal))
         if self._noise:
-            builder.begin('Preview')
+            builder.begin('Noise')
             builder.image(self._texture, builder.get_content_region_avail())
+            builder.end()
+            builder.begin('Derivative')
+            builder.image(self._texture_derivative, builder.get_content_region_avail())
             builder.end()
         else:
             builder.text_wrapped('Cannot import noise library, please make sure you have declared "ark-noise" and "ark-noise-pybindings" plugin in the ApplicationManifest')
+
+    def _on_generate_clicked(self):
+        self._texture.reset(self._do_generate())
 
     def _do_generate(self) -> Optional[Texture]:
         if not self._noise:
             return None
 
         generator_type = getattr(self._noise.Generator, self._type_options[self._type.val])
-        width, height = (int(i) for i in self._size)
 
-        float_arrays = []
         seed = self._seed.val
         if self._seed_auto_regen:
             self._seed.reset(Random().rand())
@@ -338,12 +344,24 @@ class NoiseGeneratorWindow(Window):
             generator.set_fractal_gain(self._fractal_gain.val)
             generator.set_fractal_lacunarity(self._fractal_lacunarity.val)
 
+        texture_components = []
+        texture_derivative_components = []
+        width, height = (int(i) for i in self._size)
         component_size = self._components.val
         for i in range(component_size):
             generator.frequency = self._frequency
-            float_arrays.append(generator.noise_map2d((width * i, height * i, width * (i + 1), height * (i + 1))))
-        buf_arrays = FloatArray.zip(float_arrays)
-        bitmap = Bitmap(width, height, width * 4 * component_size, component_size, buf_arrays.to_byte_array())
+            noise_array = generator.noise_map2d((width * i, height * i, width * (i + 1), height * (i + 1)))
+            texture_components.append(noise_array)
+            texture_derivative_components.append(noise_array.derivative2d(width, height))
+
+        self._texture_derivative.reset(self._make_texture(FloatArray.zip(texture_derivative_components).to_byte_array()))
+
+        return self._make_texture(FloatArray.zip(texture_components).to_byte_array())
+
+    def _make_texture(self, data: Optional[ByteArray]) -> Texture:
+        width, height = (int(i) for i in self._size)
+        component_size = self._components.val
+        bitmap = Bitmap(width, height, width * 4 * component_size, component_size, data)
         return Texture(bitmap, Texture.FORMAT_FLOAT | [Texture.FORMAT_R, Texture.FORMAT_RG, Texture.FORMAT_RGB, Texture.FORMAT_RGBA][component_size - 1])
 
 

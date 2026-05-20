@@ -241,6 +241,12 @@ class FloatArray(_Array):
     def __init__(self, size: int, fill: int = 0):
         pass
 
+    def derivative2d(self, width: int, height: int) -> Self:
+        pass
+
+    def integral2d(self, width: int, height: int) -> Self:
+        pass
+
 
 class ByteArray(_Array):
     def __init__(self, size: int, fill: int = 0):

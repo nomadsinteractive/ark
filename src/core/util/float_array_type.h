@@ -51,6 +51,12 @@ public:
     static sp<FloatArray> zip(const Vector<sp<FloatArray>>& components);
 */
 
+//  [[script::bindings::classmethod]]
+    static sp<FloatArray> derivative2d(const sp<FloatArray>& self, size_t width, size_t height);
+
+//  [[script::bindings::classmethod]]
+    static sp<FloatArray> integral2d(const sp<FloatArray>& self, size_t width, size_t height);
+
 };
 
 }
