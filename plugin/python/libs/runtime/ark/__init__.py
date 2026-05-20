@@ -218,6 +218,15 @@ class _Array:
     def to_byte_array(self) -> "ByteArray":
         pass
 
+    def derivative_2d(self, width: int, height: int) -> "FloatArray":
+        pass
+
+    def integral_2d(self, width: int, height: int) -> "FloatArray":
+        pass
+
+    def convolve_2d(self, width: int, height: int, kernel: "Mat3") -> "FloatArray":
+        pass
+
     def __len__(self) -> int:
         return 0
 
@@ -239,12 +248,6 @@ class IntArray(_Array):
 
 class FloatArray(_Array):
     def __init__(self, size: int, fill: int = 0):
-        pass
-
-    def derivative_2d(self, width: int, height: int) -> Self:
-        pass
-
-    def integral_2d(self, width: int, height: int) -> Self:
         pass
 
 
@@ -530,6 +533,9 @@ class ApplicationBundle:
         pass
 
     def load_string(self, resid: str) -> str:
+        pass
+
+    def load_bitmap(self, resid: str) -> "Bitmap":
         pass
 
 

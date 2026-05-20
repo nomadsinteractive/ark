@@ -46,6 +46,13 @@ public:
 
 //  [[script::bindings::auto]]
     static sp<ByteArray> zip(const Vector<sp<ByteArray>>& components);
+
+//  [[script::bindings::classmethod]]
+    static sp<FloatArray> derivative2D(const sp<ByteArray>& self, size_t width, size_t height);
+//  [[script::bindings::classmethod]]
+    static sp<FloatArray> integral2D(const sp<ByteArray>& self, size_t width, size_t height);
+//  [[script::bindings::classmethod]]
+    static sp<FloatArray> convolve2D(const sp<ByteArray>& self, size_t width, size_t height, const sp<Mat3>& kernel);
 */
 
 //  [[script::bindings::classmethod]]
