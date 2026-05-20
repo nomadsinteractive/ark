@@ -57,7 +57,7 @@ struct Generator::Stub {
 };
 
 Generator::Generator(const NoiseType type, const int32_t seed)
-    : _seed(seed), _frequency(100.0f), _stub(new Stub())
+    : _seed(seed), _scale(100.0f), _stub(new Stub())
 {
     if(type == NOISE_TYPE_CELLULAR)
         _stub->_source_generator = FastNoise::New<FastNoise::CellularDistance>();
@@ -92,16 +92,16 @@ void Generator::setSeed(const int32_t seed)
     _seed = seed;
 }
 
-float Generator::frequency() const
+float Generator::scale() const
 {
-    return _frequency;
+    return _scale;
 }
 
-void Generator::setFrequency(const float frequency)
+void Generator::setScale(const float scale)
 {
-    _frequency = frequency;
+    _scale = scale;
     if(_stub->_scalable_generator)
-        _stub->_scalable_generator->SetScale(frequency);
+        _stub->_scalable_generator->SetScale(scale);
 }
 
 bool Generator::useFractal() const

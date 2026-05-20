@@ -30,9 +30,9 @@ public:
     void setSeed(int32_t seed);
 
 //  [[script::bindings::property]]
-    float frequency() const;
+    float scale() const;
 //  [[script::bindings::property]]
-    void setFrequency(float frequency);
+    void setScale(float scale);
 
 //  [[script::bindings::property]]
     bool useFractal() const;
@@ -63,7 +63,7 @@ private:
 
 private:
     int32_t _seed;
-    float _frequency;
+    float _scale;
 
     op<Stub> _stub;
 };

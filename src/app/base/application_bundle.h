@@ -26,6 +26,8 @@ public:
     Json loadJson(const String& resid) const;
 //  [[script::bindings::auto]]
     String loadString(const String& resid) const;
+//  [[script::bindings::auto]]
+    sp<Bitmap> loadBitmap(const String& resid) const;
 
 private:
     sp<DocumentLoaderBundle> createDocumentLoaderBundle() const;

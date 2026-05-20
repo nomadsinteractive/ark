@@ -258,8 +258,8 @@ class ConsoleWindow(Window):
 
 
 class PropertiesWindow(Window):
-    def __init__(self, input_fields: Sequence[InputField] = None, title: str = 'Properties', is_open: Optional[TYPE_BOOLEAN] = None):
-        self._input_fields = input_fields or []
+    def __init__(self, input_fields: Sequence[InputField] = (), title: str = 'Properties', is_open: Optional[TYPE_BOOLEAN] = None):
+        self._input_fields = input_fields
         super().__init__(title, is_open)
 
     def on_create(self, builder: dear_imgui.WidgetBuilder):
@@ -297,7 +297,6 @@ class NoiseGeneratorWindow(Window):
         self._fractal_octaves = Integer(4)
         self._fractal_gain = Numeric(0.2)
         self._fractal_lacunarity = Numeric(2.0)
-        self._texture_derivative = self._make_texture(None)
         self._texture = texture or self._do_generate()
         super().__init__('Noise Generator', is_open)
 
@@ -319,9 +318,6 @@ class NoiseGeneratorWindow(Window):
         if self._noise:
             builder.begin('Noise')
             builder.image(self._texture, builder.get_content_region_avail())
-            builder.end()
-            builder.begin('Derivative')
-            builder.image(self._texture_derivative, builder.get_content_region_avail())
             builder.end()
         else:
             builder.text_wrapped('Cannot import noise library, please make sure you have declared "ark-noise" and "ark-noise-pybindings" plugin in the ApplicationManifest')
@@ -345,16 +341,12 @@ class NoiseGeneratorWindow(Window):
             generator.set_fractal_lacunarity(self._fractal_lacunarity.val)
 
         texture_components = []
-        texture_derivative_components = []
         width, height = (int(i) for i in self._size)
         component_size = self._components.val
         for i in range(component_size):
-            generator.frequency = self._frequency
+            generator.scale = width / self._frequency
             noise_array = generator.noise_map_2d((width * i, height * i, width * (i + 1), height * (i + 1)))
             texture_components.append(noise_array)
-            texture_derivative_components.append(noise_array.derivative_2d(width, height))
-
-        self._texture_derivative.reset(self._make_texture(FloatArray.zip(texture_derivative_components).to_byte_array()))
 
         return self._make_texture(FloatArray.zip(texture_components).to_byte_array())
 

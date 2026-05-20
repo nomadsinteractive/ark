@@ -20,11 +20,11 @@ class Generator:
         pass
 
     @property
-    def frequency(self) -> float:
-        return 0
+    def scale(self) -> float:
+        return 1
 
-    @frequency.setter
-    def frequency(self, frequency: float):
+    @scale.setter
+    def scale(self, frequency: float):
         pass
 
     @property

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/inf/builder.h"

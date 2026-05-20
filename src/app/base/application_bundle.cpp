@@ -53,6 +53,11 @@ String ApplicationBundle::loadString(const String& resid) const
     return _string_loader_bundle->get(resid);
 }
 
+sp<Bitmap> ApplicationBundle::loadBitmap(const String& resid) const
+{
+    return _bitmap_bundle->get(resid);
+}
+
 sp<DocumentLoaderBundle> ApplicationBundle::createDocumentLoaderBundle() const
 {
     sp<DocumentLoader> xmlLoader = sp<DocumentLoaderXML>::make();
