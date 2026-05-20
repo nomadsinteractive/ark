@@ -75,6 +75,9 @@ public:
     static sp<Mat3> toMat3(sp<ByteArray> self);
 //  [[script::bindings::classmethod]]
     static sp<Mat4> toMat4(sp<ByteArray> self);
+
+//  [[script::bindings::classmethod]]
+    static sp<FloatArray> toFloatArray(sp<ByteArray> self);
 };
 
 }

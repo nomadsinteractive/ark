@@ -279,6 +279,9 @@ class ByteArray(_Array):
     def to_mat4(self) -> "Mat4":
         pass
 
+    def to_float_array(self) -> "FloatArray":
+        pass
+
     def __getitem__(self, item: slice) -> Self:
         pass
 
@@ -935,6 +938,10 @@ class Bitmap:
 
     @property
     def height(self) -> int:
+        return 0
+
+    @property
+    def channels(self) -> int:
         return 0
 
     @property

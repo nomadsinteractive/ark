@@ -22,7 +22,7 @@ public:
         CHECK_WARN(_byte_array->size() == sizeof(T), "Bytearray (size %d) is longer than type\"%d\"(size %d)", _byte_array->size(), Type<T>::id(), sizeof(T));
     }
 
-    bool update(uint32_t tick) override
+    bool update(const uint32_t tick) override
     {
         if(_timestamp.update(tick))
             return true;
@@ -48,6 +48,27 @@ private:
 
     Timestamp _timestamp;
     T _value;
+};
+
+template<typename T> class ByteArrayToArray final : public Array<T> {
+public:
+    ByteArrayToArray(sp<ByteArray> byteArray)
+        : _byte_array(std::move(byteArray))
+    {
+    }
+
+    size_t length() override
+    {
+        return _byte_array->size() / sizeof(T);
+    }
+
+    T* buf() override
+    {
+        return reinterpret_cast<T*>(_byte_array->buf());
+    }
+
+private:
+    sp<ByteArray> _byte_array;
 };
 
 }
@@ -95,6 +116,11 @@ sp<Mat3> ByteArrayType::toMat3(sp<ByteArray> self)
 sp<Mat4> ByteArrayType::toMat4(sp<ByteArray> self)
 {
     return sp<Mat4>::make<ByteArrayToVariable<M4>>(std::move(self));
+}
+
+sp<FloatArray> ByteArrayType::toFloatArray(sp<ByteArray> self)
+{
+    return sp<FloatArray>::make<ByteArrayToArray<float>>(std::move(self));
 }
 
 }

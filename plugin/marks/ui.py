@@ -27,7 +27,7 @@ class ToolbarButton(ToolbarItem):
         builder.small_button(self._text).add_callback(onclick)
 
 
-class ToolbatComboBox(ToolbarItem):
+class ToolbarComboBox(ToolbarItem):
     def __init__(self, label: str, options: Sequence[str], on_change: Callable[[int], None] = None):
         self._label = label
         self._options = options
@@ -279,7 +279,7 @@ def _get_texture_components(texture: Texture) -> int:
 
 
 class NoiseGeneratorWindow(Window):
-    def __init__(self, texture: Texture | None = None, is_open: Optional[TYPE_BOOLEAN] = None):
+    def __init__(self, texture: Texture | None = None, is_open: Optional[TYPE_BOOLEAN] = None, on_generate: Callable | None = None):
         try:
             from ark import noise
         except ImportError:
@@ -297,6 +297,7 @@ class NoiseGeneratorWindow(Window):
         self._fractal_octaves = Integer(4)
         self._fractal_gain = Numeric(0.2)
         self._fractal_lacunarity = Numeric(2.0)
+        self._on_generate = on_generate
         self._texture = texture or self._do_generate()
         super().__init__('Noise Generator', is_open)
 
@@ -308,7 +309,7 @@ class NoiseGeneratorWindow(Window):
         builder.checkbox('Auto Regen', self._seed_auto_regen)
         builder.slider_int('Components', self._components, 1, 4)
         builder.slider_int('Frequency', self._frequency, 1, 100)
-        builder.slider_float2('Size', self._size, 8, 2048)
+        builder.input_float2('Size', self._size)
         builder.checkbox('Enable Fractal', self._enable_fractal)
         fractal_option_builder = make_widget_builder()
         fractal_option_builder.slider_int('Octaves', self._fractal_octaves, 2, 8)
@@ -354,6 +355,8 @@ class NoiseGeneratorWindow(Window):
         width, height = (int(i) for i in self._size)
         component_size = self._components.val
         bitmap = Bitmap(width, height, width * 4 * component_size, component_size, data)
+        if self._on_generate:
+            self._on_generate(bitmap)
         return Texture(bitmap, Texture.FORMAT_FLOAT | [Texture.FORMAT_R, Texture.FORMAT_RG, Texture.FORMAT_RGB, Texture.FORMAT_RGBA][component_size - 1])
 
 
@@ -436,15 +439,11 @@ class MarkStudio:
         self._discarded.reset(True)
         return True
 
-    def register_window(self, window: Window):
-        window_type = type(window)
-        for i, j in enumerate(self._windows):
-            if window_type is type(j):
-                self._windows[i] = window
-                break
-        else:
-            self._windows.append(window)
-        self.on_create()
+    def find_window(self, window_type: type):
+        for i in self._windows:
+            if window_type is type(i):
+                return i
+        return None
 
 
 _mark_studio: Optional[MarkStudio] = None
