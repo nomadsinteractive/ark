@@ -145,7 +145,7 @@ public:
         return StringConvert::repr<sp<Array<T>>>(self);
     }
 
-    template<typename T> static sp<FloatArray> derivative2D(const sp<Array<T>>& self, const size_t width, const size_t height) {
+    static sp<FloatArray> derivative2D(const sp<Array<T>>& self, const size_t width, const size_t height) {
         CHECK(self->length() == width * height, "Array length(%zu) != width(%zu) * height(%zu)", self->length(), width, height);
 
         sp<FloatArray> result = sp<FloatArray::Vector>::make(Vector<float>(width * height, 0));
@@ -168,7 +168,7 @@ public:
         return result;
     }
 
-    template<typename T> static sp<FloatArray> integral2D(const sp<Array<T>>& self, const size_t width, const size_t height) {
+    static sp<FloatArray> integral2D(const sp<Array<T>>& self, const size_t width, const size_t height) {
         CHECK(self->length() == width * height, "Array length(%zu) != width(%zu) * height(%zu)", self->length(), width, height);
 
         sp<FloatArray> result = sp<FloatArray::Vector>::make(Vector<float>(width * height, 0));
@@ -191,7 +191,7 @@ public:
         return result;
     }
 
-    template<typename T> static sp<FloatArray> convolve2D(const sp<Array<T>>& self, const size_t width, const size_t height, const sp<Mat3>& kernel) {
+    static sp<FloatArray> convolve2D(const sp<Array<T>>& self, const size_t width, const size_t height, const sp<Mat3>& kernel) {
         CHECK(self->length() == width * height, "Array length(%zu) != width(%zu) * height(%zu)", self->length(), width, height);
 
         const M3 k = kernel->val();
