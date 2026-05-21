@@ -23,11 +23,6 @@ public:
     static Optional<GLenum> toBlendFactor(PipelineDescriptor::BlendFactor blendFactor);
     static GLenum toFrontFaceType(PipelineDescriptor::FrontFaceType face);
 
-    static GLenum getEnum(const String& name);
-    static GLenum getEnum(const String& name, GLenum defValue);
-    static GLenum getEnum(const document& manifest, const String& name);
-    static GLenum getEnum(const document& manifest, const String& name, GLenum defValue);
-
     static GLenum getTextureInternalFormat(Texture::Usage usage, Texture::Format format, const Bitmap& bitmap);
     static GLenum getTextureInternalFormat(Texture::Usage usage, Texture::Format format, uint32_t channelSize, uint32_t componentSize);
     static GLenum getTextureFormat(Texture::Usage usage, Texture::Format format, uint8_t channels);

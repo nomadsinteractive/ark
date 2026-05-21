@@ -114,7 +114,7 @@ sp<Texture> TexturePacker::createTexture(sp<Size> size, sp<Texture::Parameters> 
 
     sp<Size> s = size ? std::move(size) : sp<Size>::make(static_cast<float>(_bin_pack.width()), static_cast<float>(_bin_pack.height()));
     sp<Texture::Uploader> uploader = sp<Texture::Uploader>::make<PackedTextureUploader>(s, _channels, _packed_bitmaps);
-    return Ark::instance().renderController()->createTexture(std::move(s), parameters ? std::move(parameters) : sp<Texture::Parameters>::make(Texture::TYPE_2D, nullptr, toTextureFormat(_channels)), std::move(uploader));
+    return Ark::instance().renderController()->createTexture(std::move(s), parameters ? std::move(parameters) : sp<Texture::Parameters>::make(Texture::TYPE_2D, toTextureFormat(_channels)), std::move(uploader));
 }
 
 void TexturePacker::updateTexture(Texture& texture, sp<Size> size) const

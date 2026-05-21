@@ -62,10 +62,10 @@ public:
         TYPE_COUNT
     };
 
+//  [[script::bindings::enumeration]]
     enum Filter {
         FILTER_NEAREST,
         FILTER_LINEAR,
-        FILTER_LINEAR_MIPMAP,
         FILTER_CLAMP_TO_EDGE,
         FILTER_CLAMP_TO_BORDER,
         FILTER_MIRRORED_REPEAT,
@@ -75,22 +75,18 @@ public:
     };
 
     struct Parameters {
-        Parameters(Type type, const document& parameters = nullptr, Format format = FORMAT_AUTO, Usage usages = USAGE_AUTO, Feature features = FEATURE_DEFAULT);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Parameters);
-
-        void loadParameters(const document& parameters, BeanFactory& factory, const Scope& args);
-
         Type _type;
-        Usage _usage;
-        Format _format;
-        Feature _features;
 
-        Filter _min_filter;
-        Filter _mag_filter;
+        Format _format = FORMAT_AUTO;
+        Usage _usage = USAGE_AUTO;
+        Feature _features = FEATURE_DEFAULT;
 
-        Filter _wrap_s;
-        Filter _wrap_t;
-        Filter _wrap_r;
+        Filter _min_filter = FILTER_LINEAR;
+        Filter _mag_filter = FILTER_LINEAR;
+
+        Filter _wrap_s = FILTER_REPEAT;
+        Filter _wrap_t = FILTER_REPEAT;
+        Filter _wrap_r = FILTER_REPEAT;
     };
 
     class Delegate;
@@ -133,7 +129,8 @@ public:
     };
 
 //  [[script::bindings::auto]]
-    Texture(sp<Bitmap> bitmap, Texture::Format format = Texture::FORMAT_AUTO, Texture::Usage usages = Texture::USAGE_AUTO, enums::UploadStrategy uploadStrategy = {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}, sp<Future> future = nullptr);
+    Texture(sp<Bitmap> bitmap, Texture::Format format = Texture::FORMAT_AUTO, Texture::Usage usages = Texture::USAGE_AUTO, Texture::Filter minFilter = Texture::FILTER_LINEAR, Texture::Filter magFilter = Texture::FILTER_LINEAR,
+            enums::UploadStrategy uploadStrategy = {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}, sp<Future> future = nullptr);
 
     Texture(sp<Delegate> delegate, sp<Size> size, sp<Uploader> uploader, sp<Parameters> parameters);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Texture);

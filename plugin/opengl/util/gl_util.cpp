@@ -98,63 +98,6 @@ GLenum GLUtil::toFrontFaceType(PipelineDescriptor::FrontFaceType face)
     return glFaceTypes[face];
 }
 
-constexpr enums::LookupTable<GLenum, 34> glEnumTable = {{
-    {"nearest", GL_NEAREST},
-    {"linear", GL_LINEAR},
-    {"texture_mag_filter", GL_TEXTURE_MAG_FILTER},
-    {"texture_min_filter", GL_TEXTURE_MIN_FILTER},
-    {"texture_wrap_s", GL_TEXTURE_WRAP_S},
-    {"texture_wrap_t", GL_TEXTURE_WRAP_T},
-    {"texture_wrap_r", GL_TEXTURE_WRAP_R},
-    {"clamp_to_edge", GL_CLAMP_TO_EDGE},
-    {"clamp_to_border", GL_CLAMP_TO_BORDER},
-    {"mirrored_repeat", GL_MIRRORED_REPEAT},
-    {"repeat", GL_REPEAT},
-    {"mirror_clamp_to_edge", GL_MIRROR_CLAMP_TO_EDGE},
-    {"rgba", GL_RGBA},
-    {"rgb", GL_RGB},
-    {"alpha", GL_ALPHA},
-    {"rg", GL_RG},
-    {"always", GL_ALWAYS},
-    {"never", GL_NEVER},
-    {"equal", GL_EQUAL},
-    {"not_equal", GL_NOTEQUAL},
-    {"less", GL_LESS},
-    {"greater", GL_GREATER},
-    {"less_equal", GL_LEQUAL},
-    {"greater_equal", GL_GEQUAL},
-    {"keep", GL_KEEP},
-    {"zero", GL_ZERO},
-    {"replace", GL_REPLACE},
-    {"incr", GL_INCR},
-    {"decr", GL_DECR},
-    {"cw", GL_CW},
-    {"ccw", GL_CCW},
-    {"front", GL_FRONT},
-    {"back", GL_BACK},
-    {"front_and_back", GL_FRONT_AND_BACK}
-}};
-
-GLenum GLUtil::getEnum(const String& name)
-{
-    return enums::lookup(glEnumTable, name);
-}
-
-GLenum GLUtil::getEnum(const String& name, const GLenum defValue)
-{
-    return enums::lookup(glEnumTable, name, defValue);
-}
-
-GLenum GLUtil::getEnum(const document& manifest, const String& name)
-{
-    return getEnum(Documents::ensureAttribute(manifest, name));
-}
-
-GLenum GLUtil::getEnum(const document& manifest, const String& name, GLenum defValue)
-{
-    return getEnum(Documents::getAttribute(manifest, name), defValue);
-}
-
 GLenum GLUtil::getTextureInternalFormat(const Texture::Usage usage, const Texture::Format format, const Bitmap& bitmap)
 {
     return getTextureInternalFormat(usage, format, bitmap.channels(), bitmap.rowBytes() / bitmap.width() / bitmap.channels());

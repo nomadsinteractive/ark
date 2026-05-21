@@ -1,3 +1,4 @@
+#include "texture.h"
 #include "renderer/base/texture.h"
 
 #include "core/ark.h"
@@ -70,6 +71,20 @@ Texture::Filter getEnumValue(Dictionary<document>& dict, const String& name, con
     return doc ? Strings::eval<Texture::Filter>(Documents::ensureAttribute(doc, constants::VALUE)) : defValue;
 }
 
+void loadTextureParameters(Texture::Parameters& parameters, const document& manifest)
+{
+    parameters._usage = Documents::getAttribute<Texture::Usage>(manifest, "usage", parameters._usage);
+    parameters._format = Documents::getAttribute<Texture::Format>(manifest, "format", parameters._format);
+    parameters._features = Documents::getAttribute<Texture::Feature>(manifest, "feature", parameters._features);
+
+    DictionaryByAttributeName byName(manifest, constants::NAME);
+    parameters._min_filter = getEnumValue(byName, "min_filter", parameters._min_filter);
+    parameters._mag_filter = getEnumValue(byName, "mag_filter", parameters._mag_filter);
+    parameters._wrap_s = getEnumValue(byName, "wrap_s", parameters._wrap_s);
+    parameters._wrap_t = getEnumValue(byName, "wrap_t", parameters._wrap_t);
+    parameters._wrap_r = getEnumValue(byName, "wrap_r", parameters._wrap_r);
+}
+
 }
 
 struct Texture::Stub {
@@ -81,8 +96,8 @@ struct Texture::Stub {
     Timestamp _timestamp;
 };
 
-Texture::Texture(sp<Bitmap> bitmap, const Format format, const Usage usages, const enums::UploadStrategy uploadStrategy, sp<Future> future)
-    : Texture(*Ark::instance().renderController()->createTexture2d(std::move(bitmap), sp<Parameters>::make(TYPE_2D, nullptr, format, usages), uploadStrategy, std::move(future)))
+Texture::Texture(sp<Bitmap> bitmap, const Format format, const Usage usages, const Filter minFilter, const Filter magFilter, const enums::UploadStrategy uploadStrategy, sp<Future> future)
+    : Texture(*Ark::instance().renderController()->createTexture2d(std::move(bitmap), sp<Parameters>::make(TYPE_2D, format, usages, FEATURE_DEFAULT, minFilter, magFilter), uploadStrategy, std::move(future)))
 {
 }
 
@@ -258,7 +273,6 @@ template<> ARK_API Texture::Filter StringConvert::eval<Texture::Filter>(const St
     constexpr enums::LookupTable<Texture::Filter, 8> table = {{
         {"nearest", Texture::FILTER_NEAREST},
         {"linear", Texture::FILTER_LINEAR},
-        {"linear_mipmap", Texture::FILTER_LINEAR_MIPMAP},
         {"clamp_to_edge", Texture::FILTER_CLAMP_TO_EDGE},
         {"clamp_to_border", Texture::FILTER_CLAMP_TO_BORDER},
         {"mirrored_repeat", Texture::FILTER_MIRRORED_REPEAT},
@@ -266,25 +280,6 @@ template<> ARK_API Texture::Filter StringConvert::eval<Texture::Filter>(const St
         {"mirror_clamp_to_edge", Texture::FILTER_MIRROR_CLAMP_TO_EDGE}
     }};
     return enums::lookup(table, str);
-}
-
-Texture::Parameters::Parameters(const Type type, const document& parameters, const Format format, const Usage usages, const Feature features)
-    : _type(type), _usage(parameters ? Documents::getAttribute<Usage>(parameters, "usage", usages) : usages),
-      _format(parameters ? Documents::getAttribute<Format>(parameters, "format", format) : format),
-      _features(parameters ? Documents::getAttribute<Feature>(parameters, "feature", features) : features),
-      _min_filter((features & FEATURE_MIPMAPS) ? FILTER_LINEAR_MIPMAP : FILTER_LINEAR), _mag_filter(FILTER_LINEAR),
-      _wrap_s(FILTER_REPEAT), _wrap_t(FILTER_REPEAT), _wrap_r(FILTER_REPEAT)
-{
-}
-
-void Texture::Parameters::loadParameters(const document& parameters, BeanFactory& factory, const Scope& args)
-{
-    DictionaryByAttributeName byName(parameters, constants::NAME);
-    _min_filter = getEnumValue(byName, "min_filter", _min_filter);
-    _mag_filter = getEnumValue(byName, "mag_filter", _mag_filter);
-    _wrap_s = getEnumValue(byName, "wrap_s", _wrap_s);
-    _wrap_t = getEnumValue(byName, "wrap_t", _wrap_t);
-    _wrap_r = getEnumValue(byName, "wrap_r", _wrap_r);
 }
 
 Texture::Delegate::Delegate(const Type type)
@@ -306,8 +301,8 @@ Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
 sp<Texture> Texture::BUILDER::build(const Scope& args)
 {
     const Type type = Documents::getAttribute<Type>(_manifest, constants::TYPE, TYPE_2D);
-    sp<Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
-    parameters->loadParameters(_manifest, _factory, args);
+    sp<Parameters> parameters = sp<Parameters>::make(type);
+    loadTextureParameters(*parameters, _manifest);
 
     if(const String src = _src.build(args))
         return _resource_loader_context->textureBundle()->createTexture(src, parameters);

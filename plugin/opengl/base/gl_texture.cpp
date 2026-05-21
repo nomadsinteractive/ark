@@ -10,9 +10,21 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
+
 #include "opengl/util/gl_util.h"
 
 namespace ark::plugin::opengl {
+
+namespace {
+
+GLenum toGLFilter(const GLenum glFilter, const bool isMipmap)
+{
+    if(glFilter == GL_LINEAR && isMipmap)
+        return GL_LINEAR_MIPMAP_LINEAR;
+    return glFilter;
+}
+
+}
 
 GLTexture::GLTexture(sp<Recycler> recycler, sp<Size> size, const uint32_t target, const Texture::Type type, sp<Texture::Parameters> parameters)
     : Texture::Delegate(type), _recycler(std::move(recycler)), _size(std::move(size)), _target(target), _parameters(std::move(parameters)), _id(0), _fbo(0)
@@ -30,13 +42,14 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
     const bool uninitialized = _id == 0;
     if(uninitialized)
     {
-        constexpr GLenum glParameters[Texture::FILTER_COUNT] = {GL_NEAREST, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT, GL_REPEAT, GL_MIRROR_CLAMP_TO_EDGE};
+        constexpr std::array<GLenum, Texture::FILTER_COUNT> glParameters = {GL_NEAREST, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT, GL_REPEAT, GL_MIRROR_CLAMP_TO_EDGE};
 
         glGenTextures(1, &_id);
         LOGD("Generating GLTexture[%d]", _id);
         GL_CHECK_ERROR(glBindTexture(static_cast<GLenum>(_target), _id));
-        glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(glParameters[_parameters->_min_filter]));
-        glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(glParameters[_parameters->_mag_filter]));
+        const bool isMipmap = _parameters->_features == Texture::FEATURE_MIPMAPS;
+        glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(toGLFilter(glParameters[_parameters->_min_filter], isMipmap)));
+        glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(toGLFilter(glParameters[_parameters->_mag_filter], isMipmap)));
         glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_S, static_cast<GLint>(glParameters[_parameters->_wrap_s]));
         glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_T, static_cast<GLint>(glParameters[_parameters->_wrap_t]));
         glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_R, static_cast<GLint>(glParameters[_parameters->_wrap_r]));

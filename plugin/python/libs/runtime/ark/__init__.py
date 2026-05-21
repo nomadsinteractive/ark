@@ -230,7 +230,7 @@ class _Array:
     def __len__(self) -> int:
         return 0
 
-    def __getitem__(self, item) -> Self:
+    def __getitem__(self, item):
         pass
 
     def __setitem__(self, item, value):
@@ -657,7 +657,15 @@ class Texture:
     USAGE_COMPUTE_STORAGE = 32
     USAGE_STORAGE = USAGE_GRAPHICS_STORAGE | USAGE_COMPUTE_STORAGE
 
-    def __init__(self, bitmap: "Bitmap", format: int = FORMAT_AUTO, usages: int = USAGE_AUTO, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE | Enum.UPLOAD_STRATEGY_ON_SURFACE_READY, future: Optional[Future] = None):
+    FILTER_NEAREST = 0,
+    FILTER_LINEAR = 1,
+    FILTER_CLAMP_TO_EDGE = 2
+    FILTER_CLAMP_TO_BORDER = 3
+    FILTER_MIRRORED_REPEAT = 4
+    FILTER_REPEAT = 5
+    FILTER_MIRROR_CLAMP_TO_EDGE = 6
+
+    def __init__(self, bitmap: "Bitmap", format: int = FORMAT_AUTO, usages: int = USAGE_AUTO, min_filter: int = 1, mag_filter: int = 1, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE | Enum.UPLOAD_STRATEGY_ON_SURFACE_READY, future: Optional[Future] = None):
         pass
 
     @property
