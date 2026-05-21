@@ -464,6 +464,9 @@ uint32_t RenderUtil::getPixelSize(const Texture::Format format)
 
 uint32_t RenderUtil::getComponentSize(const Texture::Format format)
 {
+    if(!format.contains(Texture::FORMAT_BIT_MASK) && (format.contains(Texture::FORMAT_INTEGER) || format.contains(Texture::FORMAT_FLOAT)))
+        return 4;
+
     const uint32_t componentFormat = (format & Texture::FORMAT_BIT_MASK).bits();
     if(componentFormat == Texture::FORMAT_8_BIT || componentFormat == 0)
         return 1;
