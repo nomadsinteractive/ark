@@ -279,21 +279,22 @@ def _get_texture_components(texture: Texture) -> int:
 
 
 class NoiseGeneratorWindow(Window):
-    def __init__(self, texture: Texture | None = None, is_open: Optional[TYPE_BOOLEAN] = None, on_generate: Callable | None = None):
+    def __init__(self, texture: Texture | None = None, is_open: Optional[TYPE_BOOLEAN] = None, on_generate: Callable | None = None, noise_type: int = 2, components: int = 1, size: tuple[int, int] = (256, 256),
+                 seed: int | None = None, frequency: int = 20, enable_fractal: bool = True):
         try:
             from ark import noise
         except ImportError:
             noise = None
         self._noise = noise
-        self._type = Integer(int(self._noise.Generator.NOISE_TYPE_PERLIN) if self._noise else 0)
+        self._type = Integer(noise_type)
         self._type_options = ['NOISE_TYPE_CELLULAR', 'NOISE_TYPE_SIMPLEX', 'NOISE_TYPE_PERLIN']
-        self._components = Integer(_get_texture_components(texture) if texture else 1)
-        size_x, size_y = texture.size.xy if texture else (256, 256)
+        self._components = Integer(_get_texture_components(texture) if texture else components)
+        size_x, size_y = texture.size.xy if texture else size
         self._size = Vec2(size_x, size_y)
-        self._seed = Integer(Random().rand())
-        self._seed_auto_regen = Boolean(True)
-        self._frequency = Integer(20)
-        self._enable_fractal = Boolean(True)
+        self._seed = Integer(Random().rand() if seed is None else seed)
+        self._seed_auto_regen = Boolean(seed is None)
+        self._frequency = Integer(frequency)
+        self._enable_fractal = Boolean(enable_fractal)
         self._fractal_octaves = Integer(4)
         self._fractal_gain = Numeric(0.2)
         self._fractal_lacunarity = Numeric(2.0)
@@ -373,6 +374,7 @@ class MarkStudio:
         self._widget = dear_imgui.Widget()
         self._imgui.add_widget(self._widget)
         self._windows = [ConsoleWindow(console_cmds, True)] + list(windows)
+        self._windows_widget = dear_imgui.Widget()
         self.on_create()
 
         self._main_window = ToolbarWindow(self, None, toolbar_items)
@@ -389,10 +391,8 @@ class MarkStudio:
                 builder.end_menu()
 
             if builder.begin_menu('Windows'):
-                self._windows = [i if isinstance(i, Window) else i() for i in self._windows]
-                for i in self._windows:
-                    i.ready(self._imgui)
-                    builder.menu_item(i.title, p_selected=i.is_open)
+                builder.add_widget(self._windows_widget)
+                self._reload_windows()
 
                 builder.separator_text('Imgui')
                 builder.menu_item('Imgui Demo', p_selected=imgui_demo_is_open)
@@ -444,6 +444,23 @@ class MarkStudio:
             if window_type is type(i):
                 return i
         return None
+
+    def add_window(self, window: Window):
+        for i, j in enumerate(self._windows):
+            if type(j) is type(window):
+                self._windows[i] = window
+                break
+        else:
+            self._windows.append(window)
+        self._reload_windows()
+
+    def _reload_windows(self):
+        builder = make_widget_builder()
+        self._windows = [i if isinstance(i, Window) else i() for i in self._windows]
+        for i in self._windows:
+            i.ready(self._imgui)
+            builder.menu_item(i.title, p_selected=i.is_open)
+        self._windows_widget.reset(builder.make_widget())
 
 
 _mark_studio: Optional[MarkStudio] = None
