@@ -8,17 +8,6 @@
 
 namespace ark {
 
-void EventListenerList::addEventListener(sp<EventListener> eventListener, const Traits& traits)
-{
-    ASSERT(eventListener);
-    const enums::InsertPosition ip = traits.getEnum<enums::InsertPosition>(enums::InsertPosition::INSERT_POSITION_BACK);
-    const sp<Discarded> discarded = traits.get<Discarded>();
-    if(ip == enums::INSERT_POSITION_BACK)
-        _event_listeners.emplace_back(std::move(eventListener), discarded);
-    else
-        _event_listeners.emplace_front(std::move(eventListener), discarded);
-}
-
 void EventListenerList::addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
     ASSERT(eventListener);

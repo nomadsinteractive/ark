@@ -255,10 +255,22 @@ public:
     static V3 round(const V3& x);
     static V4 round(const V4& x);
 
-    static float normalize(float v1);
-    static V2 normalize(const V2& v2);
-    static V3 normalize(const V3& v3);
-    static V4 normalize(const V4& v4);
+//  [[script::bindings::auto]]
+    static float normalize(float x);
+//  [[script::bindings::auto]]
+    static sp<Numeric> normalize(sp<Numeric> x);
+//  [[script::bindings::auto]]
+    static V2 normalize(const V2& x);
+//  [[script::bindings::auto]]
+    static sp<Vec2> normalize(sp<Vec2> x);
+//  [[script::bindings::auto]]
+    static V3 normalize(const V3& x);
+//  [[script::bindings::auto]]
+    static sp<Vec3> normalize(sp<Vec3> x);
+//  [[script::bindings::auto]]
+    static V4 normalize(const V4& x);
+//  [[script::bindings::auto]]
+    static sp<Vec4> normalize(sp<Vec4> x);
 
     static float dot(float a, float b);
     static float dot(const V2& a, const V2& b);

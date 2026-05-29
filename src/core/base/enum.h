@@ -57,12 +57,6 @@ enum UploadPriority {
 };
 
 //[[script::bindings::enumeration(Enum)]]
-enum InsertPosition {
-    INSERT_POSITION_BACK = 0,
-    INSERT_POSITION_FRONT
-};
-
-//[[script::bindings::enumeration(Enum)]]
 enum CoordinateSystem {
     COORDINATE_SYSTEM_DEFAULT = 0,
     COORDINATE_SYSTEM_LHS = 1,

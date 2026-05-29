@@ -2141,7 +2141,7 @@ class Layer:
     def discarded(self) -> Boolean:
         pass
 
-    def add(self, render_object: RenderObject, discarded: Boolean = None, updatable: Any = None, insert_position: int = Enum.INSERT_POSITION_BACK):
+    def add(self, render_object: RenderObject, discarded: Boolean = None, updatable: Any = None):
         pass
 
     def clear(self):
@@ -2183,7 +2183,7 @@ class Activity(Renderer):
     def add_render_layer(self, render_layer: Renderer, discarded: Optional[Boolean] = None):
         pass
 
-    def add_event_listener(self, event_listener: Union[Callable[["Event"], bool], "EventListener"], *traits):
+    def add_event_listener(self, event_listener: Union[Callable[["Event"], bool], "EventListener"], disabled: Optional[Boolean] = None):
         pass
 
 
@@ -2509,6 +2509,10 @@ class Math:
 
     @staticmethod
     def dot(x, y) -> Numeric:
+        pass
+
+    @staticmethod
+    def normalize(x):
         pass
 
     @staticmethod

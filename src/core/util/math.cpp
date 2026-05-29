@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <math.h>
 #include <random>
-#include <stdlib.h>
 
 #include <glm/glm.hpp>
 #include <glm/detail/type_quat.hpp>
@@ -13,11 +12,14 @@
 #include "core/impl/variable/lerp.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
-#include "core/types/optional_var.h"
 #include "core/util/operators.h"
 #include "core/util/log.h"
+#include "core/util/numeric_type.h"
 
 #include "graphics/base/v4.h"
+#include "graphics/util/vec2_type.h"
+#include "graphics/util/vec3_type.h"
+#include "graphics/util/vec4_type.h"
 
 namespace ark {
 
@@ -330,29 +332,49 @@ uint32_t Math::hash(const V4& x)
     return val;
 }
 
-float Math::normalize(const float v1)
+float Math::normalize(const float x)
 {
-    if(v1 == 0)
+    if(x == 0)
         return 0;
-    return v1 > 0.0f ? 1.0f : -1.0f;
+    return x > 0.0f ? 1.0f : -1.0f;
 }
 
-V2 Math::normalize(const V2& v2)
+sp<Numeric> Math::normalize(sp<Numeric> x)
 {
-    const glm::vec2 n = glm::normalize(glm::vec2(v2.x(), v2.y()));
+    return NumericType::normalize(std::move(x));
+}
+
+V2 Math::normalize(const V2& x)
+{
+    const glm::vec2 n = glm::normalize(glm::vec2(x.x(), x.y()));
     return {n.x, n.y};
 }
 
-V3 Math::normalize(const V3& v3)
+sp<Vec2> Math::normalize(sp<Vec2> x)
 {
-    const glm::vec3 n = glm::normalize(glm::vec3(v3.x(), v3.y(), v3.z()));
+    return Vec2Type::normalize(std::move(x));
+}
+
+V3 Math::normalize(const V3& x)
+{
+    const glm::vec3 n = glm::normalize(glm::vec3(x.x(), x.y(), x.z()));
     return {n.x, n.y, n.z};
 }
 
-V4 Math::normalize(const V4& v4)
+sp<Vec3> Math::normalize(sp<Vec3> x)
 {
-    const glm::vec4 n = glm::normalize(glm::vec4(v4.x(), v4.y(), v4.z(), v4.w()));
+    return Vec3Type::normalize(std::move(x));
+}
+
+V4 Math::normalize(const V4& x)
+{
+    const glm::vec4 n = glm::normalize(glm::vec4(x.x(), x.y(), x.z(), x.w()));
     return {n.x, n.y, n.z, n.w};
+}
+
+sp<Vec4> Math::normalize(sp<Vec4> x)
+{
+    return Vec4Type::normalize(std::move(x));
 }
 
 float Math::dot(const float a, const float b)

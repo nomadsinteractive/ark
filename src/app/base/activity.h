@@ -31,7 +31,7 @@ public:
     bool onEvent(const Event& event) override;
 
 //  [[script::bindings::auto]]
-    void addEventListener(sp<EventListener> eventListener, const Traits& traits);
+    void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Activity> {

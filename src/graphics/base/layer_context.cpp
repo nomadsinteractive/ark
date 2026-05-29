@@ -61,22 +61,16 @@ void LayerContext::setModelLoader(sp<ModelLoader> modelLoader)
     _model_loader = std::move(modelLoader);
 }
 
-void LayerContext::pushFront(sp<Renderable> renderable)
-{
-    _created_push_front.push_back(std::move(renderable));
-}
-
 void LayerContext::pushBack(sp<Renderable> renderable)
 {
-    _created_push_back.push_back(std::move(renderable));
+    _newly_created_renderables.push_back(std::move(renderable));
 }
 
 void LayerContext::clear()
 {
     for(auto& j : std::views::values(_renderables))
         j = Renderable::RENDERABLE_STATE_DISCARDED;
-    _created_push_front.clear();
-    _created_push_back.clear();
+    _newly_created_renderables.clear();
 }
 
 void LayerContext::discard()
@@ -101,24 +95,15 @@ void LayerContext::markDirty()
 
 bool LayerContext::processNewCreated()
 {
-    if(_created_push_front.empty() && _created_push_back.empty())
+    if(_newly_created_renderables.empty())
         return false;
 
-    if(!_created_push_front.empty())
-    {
-        for(sp<Renderable>& i : _created_push_front)
-        {
-            addElementState(i.get());
-            _renderables.emplace_front(std::move(i), Renderable::State(Renderable::RENDERABLE_STATE_NEW));
-        }
-    }
-    for(sp<Renderable>& i : _created_push_back)
+    for(sp<Renderable>& i : _newly_created_renderables)
     {
         addElementState(i.get());
         _renderables.emplace_back(std::move(i), Renderable::State(Renderable::RENDERABLE_STATE_NEW));
     }
-    _created_push_front.clear();
-    _created_push_back.clear();
+    _newly_created_renderables.clear();
     return true;
 }
 

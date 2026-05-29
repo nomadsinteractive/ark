@@ -41,7 +41,7 @@ public:
     sp<ModelLoader> modelLoader() const;
 
 //  [[script::bindings::auto]]
-    void add(const sp<RenderObject>& renderObject, sp<Boolean> discarded = nullptr, sp<Updatable> updatable = nullptr, enums::InsertPosition insertPosition = enums::INSERT_POSITION_BACK);
+    void add(const sp<RenderObject>& renderObject, sp<Boolean> discarded = nullptr, sp<Updatable> updatable = nullptr);
 //  [[script::bindings::auto]]
     void clear();
 

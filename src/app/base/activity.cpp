@@ -42,9 +42,9 @@ bool Activity::onEvent(const Event& event)
     return _event_listeners->onEvent(event);
 }
 
-void Activity::addEventListener(sp<EventListener> eventListener, const Traits& traits)
+void Activity::addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
-    _event_listeners->addEventListener(std::move(eventListener), traits);
+    _event_listeners->addEventListener(std::move(eventListener), std::move(discarded));
 }
 
 void Activity::addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded)

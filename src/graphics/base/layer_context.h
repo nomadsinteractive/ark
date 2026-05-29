@@ -64,8 +64,7 @@ private:
     sp<Updatable> _updatable;
 
     std::deque<std::pair<sp<Renderable>, Renderable::State>> _renderables;
-    Vector<sp<Renderable>> _created_push_front;
-    Vector<sp<Renderable>> _created_push_back;
+    Vector<sp<Renderable>> _newly_created_renderables;
 
     HashMap<const void*, ElementState> _element_states;
 

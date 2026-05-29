@@ -217,7 +217,7 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
         _tags = std::move(tags);
 
     if(const auto layer = context.getInterface<Layer>())
-        layer->add(self.as<RenderObject>(), nullptr, nullptr, context.getEnum<enums::InsertPosition>(enums::InsertPosition::INSERT_POSITION_BACK));
+        layer->add(self.as<RenderObject>());
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

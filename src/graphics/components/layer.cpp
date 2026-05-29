@@ -67,15 +67,9 @@ const sp<LayerContext>& Layer::context() const
     return _layer_context;
 }
 
-void Layer::add(const sp<RenderObject>& renderObject, sp<Boolean> discarded, sp<Updatable> updatable, const enums::InsertPosition insertPosition)
+void Layer::add(const sp<RenderObject>& renderObject, sp<Boolean> discarded, sp<Updatable> updatable)
 {
-    if(insertPosition == enums::INSERT_POSITION_BACK)
-        _layer_context->pushBack(RenderableType::create(renderObject, discarded ? std::move(discarded) : sp<Boolean>(renderObject->discarded()), std::move(updatable)));
-    else
-    {
-        ASSERT(insertPosition == enums::INSERT_POSITION_FRONT);
-        _layer_context->pushFront(RenderableType::create(renderObject, discarded ? std::move(discarded) : sp<Boolean>(renderObject->discarded()), std::move(updatable)));
-    }
+    _layer_context->pushBack(RenderableType::create(renderObject, discarded ? std::move(discarded) : sp<Boolean>(renderObject->discarded()), std::move(updatable)));
 }
 
 void Layer::clear()
