@@ -93,7 +93,7 @@ public:
         : _on_visit_adjacent_nodes(std::move(onVisitAdjacentNodes)) {
     }
 
-    void onVisitAdjacentNodes(const V3& position, const std::function<void(const SearchingNode&)>& visitor) override
+    void onVisitAdjacentNodes(int32_t nodeId, const V3& position, const std::function<void(const SearchingNode&)>& visitor) override
     {
         _on_visit_adjacent_nodes->call({
             Box(sp<Vec3>::make<Vec3::Const>(position)),

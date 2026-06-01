@@ -4,21 +4,6 @@
 
 namespace ark {
 
-const V3& SearchingNode::position() const
-{
-    return _position;
-}
-
-const Optional<bool>& SearchingNode::isGoal() const
-{
-    return _is_goal;
-}
-
-const Optional<float>& SearchingNode::weight() const
-{
-    return _weight;
-}
-
 bool SearchingNode::operator<(const SearchingNode& other) const
 {
     if(_position.x() != other._position.x())

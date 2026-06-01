@@ -5,16 +5,16 @@
 #include "graphics/base/v3.h"
 
 #include "app/forwarding.h"
-#include "app/base/graph.h"
 #include "app/base/graph_route.h"
-#include "app/inf/searching_node_provider.h"
 
 namespace ark {
 
-class ARK_API GraphNode final : public SearchingNodeProvider {
+class ARK_API GraphNode final {
 public:
-    GraphNode(Graph& graph, const V3& position, Box tag);
+    GraphNode(Graph& graph, int32_t id, const V3& position, Box tag);
 
+//  [[script::bindings::property]]
+    int32_t id() const;
 //  [[script::bindings::property]]
     const V3& position() const;
 //  [[script::bindings::auto]]
@@ -37,15 +37,16 @@ public:
     const Vector<GraphRoute>& outRoutes() const;
     Vector<GraphRoute>& outRoutes();
 
-    void onVisitAdjacentNodes(const V3& position, const std::function<void(const SearchingNode&)>& visitor) override;
-
 private:
     Graph& _graph;
+    int32_t _id;
     V3 _position;
     Box _tag;
 
     Vector<GraphRoute> _in_routes;
     Vector<GraphRoute> _out_routes;
+
+    friend class Graph;
 };
 
 }

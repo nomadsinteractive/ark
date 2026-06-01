@@ -6,17 +6,18 @@
 #include "graphics/forwarding.h"
 
 #include "app/forwarding.h"
+#include "app/inf/searching_node_provider.h"
 
 namespace ark {
 
-class ARK_API Graph {
+class ARK_API Graph : public SearchingNodeProvider {
 public:
 //  [[script::bindings::auto]]
     Graph();
     ~Graph();
 
 //  [[script::bindings::property]]
-    const Vector<sp<GraphNode>>& nodes() const;
+    const Map<int32_t, sp<GraphNode>>& nodes() const;
 //  [[script::bindings::auto]]
     sp<GraphNode> makeNode(const V3& position, Box tag = nullptr);
 //  [[script::bindings::auto]]
@@ -24,8 +25,10 @@ public:
 
     sp<GraphNode> toSharedPtr(const GraphNode& node) const;
 
+    void onVisitAdjacentNodes(int32_t nodeId, const V3& position, const std::function<void(const SearchingNode&)>& visitor) override;
+
 private:
-    Vector<sp<GraphNode>> _nodes;
+    Map<int32_t, sp<GraphNode>> _nodes;
 };
 
 }

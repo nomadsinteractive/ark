@@ -22,9 +22,14 @@ void disconnectNode(Vector<GraphRoute>& routes, GraphNode* toNode, const bool en
 
 }
 
-GraphNode::GraphNode(Graph& graph, const V3& position, Box tag)
-    : _graph(graph), _position(position), _tag(std::move(tag))
+GraphNode::GraphNode(Graph& graph, const int32_t id, const V3& position, Box tag)
+    : _graph(graph), _id(id), _position(position), _tag(std::move(tag))
 {
+}
+
+int32_t GraphNode::id() const
+{
+    return _id;
 }
 
 const V3& GraphNode::position() const
@@ -90,12 +95,6 @@ const Vector<GraphRoute>& GraphNode::outRoutes() const
 Vector<GraphRoute>& GraphNode::outRoutes()
 {
     return _out_routes;
-}
-
-void GraphNode::onVisitAdjacentNodes(const V3& /*position*/, const std::function<void(const SearchingNode&)>& visitor)
-{
-    for(GraphRoute& i : _out_routes)
-        visitor({i.exit().position(), {}, i.weight()});
 }
 
 }

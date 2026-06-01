@@ -35,7 +35,7 @@ public:
     {
         ASSERT(args.table().size() >= 1);
         const auto a1 = PyCast::ensureCppObject<V3>(args.table().values().at(0).as<PyInstanceRef>()->instance());
-        _func({a1, getArgumentOpt<bool>(args, 1), getArgumentOpt<float>(args, 2)});
+        _func({0, a1, getArgumentOpt<bool>(args, 1), getArgumentOpt<float>(args, 2)});
     }
 
 private:
