@@ -38,7 +38,7 @@ const Map<int32_t, sp<GraphNode>>& Graph::nodes() const
 
 sp<GraphNode> Graph::makeNode(const V3& position, Box tag)
 {
-    const int32_t id = _nodes.empty() ? 0 : _nodes.rbegin()->second->id();
+    const int32_t id = _nodes.empty() ? 0 : _nodes.rbegin()->second->id() + 1;
     sp<GraphNode> node = sp<GraphNode>::make(*this, id, position, std::move(tag));
     _nodes.insert({id, node});
     return node;
