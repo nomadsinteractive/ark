@@ -25,11 +25,18 @@ uintptr_t Box::id() const
     if(!_stub)
         return 0;
 
-    if(PtrStub* stub = std::get_if<PtrStub>(_stub.get()))
+    if(const PtrStub* stub = std::get_if<PtrStub>(_stub.get()))
         return reinterpret_cast<uintptr_t>(stub->instance_ptr);
 
-    int32_t hashvalue = _ensure_enum_stub()->_value;
-    Math::hashCombine(hashvalue, _type_id);
+    int32_t hashvalue = _type_id;
+    if(const TrivialStub* stub = std::get_if<TrivialStub>(_stub.get()))
+    {
+        for(size_t i = 0; i < array_size(stub->_values); ++i)
+            Math::hashCombine(hashvalue, i);
+        return hashvalue;
+    }
+
+    Math::hashCombine(hashvalue, toEnumValue());
     return hashvalue;
 }
 

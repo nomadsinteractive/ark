@@ -46,37 +46,37 @@ template<> ARK_API enums::UploadStrategy StringConvert::eval<enums::UploadStrate
 
 uint32_t Enum::__index__(const Box& self)
 {
-    return self.toInteger();
+    return self.toEnumValue();
 }
 
 int32_t Enum::__and__(const int32_t lhs, const Box& rhs)
 {
-    return lhs & rhs.toInteger();
+    return lhs & rhs.toEnumValue();
 }
 
 int32_t Enum::__and__(const Box& lhs, int32_t rhs)
 {
-    return lhs.toInteger() & rhs;
+    return lhs.toEnumValue() & rhs;
 }
 
 int32_t Enum::__and__(const Box& lhs, const Box& rhs)
 {
-    return lhs.toInteger() & rhs.toInteger();
+    return lhs.toEnumValue() & rhs.toEnumValue();
 }
 
 int32_t Enum::__or__(const Box& lhs, const Box& rhs)
 {
-    return lhs.toInteger() | rhs.toInteger();
+    return lhs.toEnumValue() | rhs.toEnumValue();
 }
 
 int32_t Enum::__or__(const int32_t lhs, const Box& rhs)
 {
-    return lhs | rhs.toInteger();
+    return lhs | rhs.toEnumValue();
 }
 
 int32_t Enum::__or__(const Box& lhs, const int32_t rhs)
 {
-    return lhs.toInteger() | rhs;
+    return lhs.toEnumValue() | rhs;
 }
 
 }

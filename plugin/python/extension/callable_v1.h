@@ -11,7 +11,7 @@ public:
     virtual ~CallableV1() = default;
 
 //  [[script::bindings::operator(call)]]
-    virtual void call(const Traits& args) = 0;
+    virtual Box call(const Traits& args) = 0;
 };
 
 }

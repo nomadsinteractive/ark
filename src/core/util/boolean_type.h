@@ -4,7 +4,6 @@
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {

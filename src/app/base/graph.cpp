@@ -57,7 +57,7 @@ sp<GraphNode> Graph::toSharedPtr(const GraphNode& node) const
     return iter->second;
 }
 
-void Graph::onVisitAdjacentNodes(const int32_t nodeId, const V3& position, const std::function<void(const SearchingNode&)>& visitor)
+void Graph::onVisitAdjacentNodes(const int32_t nodeId, const V3& position, const std::function<bool(const SearchingNode&)>& visitor)
 {
     const sp<GraphNode>& node = _nodes.at(nodeId);
     for(GraphRoute& i : node->_out_routes)

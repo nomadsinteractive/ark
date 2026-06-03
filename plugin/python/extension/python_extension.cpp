@@ -3,11 +3,12 @@
 #include "core/base/json.h"
 #include "core/base/observer.h"
 #include "core/base/scope.h"
+#include "core/inf/variable.h"
 #include "core/types/box.h"
 #include "core/types/global.h"
-#include "core/util/log.h"
 
 #include "app/base/searching_node.h"
+#include "core/util/boolean_type.h"
 
 #include "python/extension/callable_v1.h"
 #include "python/extension/py_instance_ref.h"
@@ -27,19 +28,20 @@ template<typename T> Optional<T> getArgumentOpt(const Traits& args, const size_t
 
 class CallableA1SearchingNode final : public CallableV1 {
 public:
-    CallableA1SearchingNode(std::function<void(const SearchingNode&)> func)
+    CallableA1SearchingNode(std::function<bool(const SearchingNode&)> func)
         : _func(std::move(func)) {
     }
 
-    void call(const Traits& args) override
+    Box call(const Traits& args) override
     {
         ASSERT(args.table().size() >= 1);
         const auto a1 = PyCast::ensureCppObject<V3>(args.table().values().at(0).as<PyInstanceRef>()->instance());
-        _func({0, a1, getArgumentOpt<bool>(args, 1), getArgumentOpt<float>(args, 2)});
+        const bool r = _func({0, a1, getArgumentOpt<bool>(args, 1), getArgumentOpt<float>(args, 2)});
+        return Box(r);
     }
 
 private:
-    std::function<void(const SearchingNode&)> _func;
+    std::function<bool(const SearchingNode&)> _func;
 };
 
 }
@@ -86,7 +88,20 @@ PyObject* PythonExtension::toPyObject(const Box& box)
         return object;
     }
 
-    typedef std::function<void(const SearchingNode&)> FuncType;
+    if(box.isType<bool>())
+        return PyCast::toPyObject(box.toTrivialValue<bool>());
+    if(box.isType<int32_t>())
+        return PyCast::toPyObject(box.toTrivialValue<int32_t>());
+    if(box.isType<float>())
+        return PyCast::toPyObject(box.toTrivialValue<float>());
+    if(box.isType<V2>())
+        return PyCast::toPyObject(box.toTrivialValue<V2>());
+    if(box.isType<V3>())
+        return PyCast::toPyObject(box.toTrivialValue<V3>());
+    if(box.isType<V4>())
+        return PyCast::toPyObject(box.toTrivialValue<V4>());
+
+    typedef std::function<bool(const SearchingNode&)> FuncType;
     if(box.typeId() == Type<FuncType>::id())
     {
         FuncType func = *box.as<FuncType>();

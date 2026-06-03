@@ -350,7 +350,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<NamedHash> PyCast::toCppObject_impl<Na
     if(Optional<int32_t> intOpt = toCppInteger<int32_t>(object, true))
         return {NamedHash(intOpt.value())};
     if(PythonExtension::instance().isPyArkTypeObject(Py_TYPE(object)) && reinterpret_cast<PyArkType::Instance*>(object)->box->isEnum())
-        return {NamedHash(reinterpret_cast<PyArkType::Instance*>(object)->box->toInteger())};
+        return {NamedHash(reinterpret_cast<PyArkType::Instance*>(object)->box->toEnumValue())};
     return {};
 }
 

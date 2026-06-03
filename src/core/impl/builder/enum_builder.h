@@ -29,7 +29,7 @@ public:
         if(const Optional<Box> optVar = args.getObject(_id.arg()))
         {
             if(optVar->isEnum())
-                return static_cast<T>(optVar->toInteger());
+                return static_cast<T>(optVar->toEnumValue());
             if(const sp<Integer> intval = optVar->as<Integer>())
                 return static_cast<T>(intval->val());
             return StringConvert::eval<T>(*optVar->as<String>());

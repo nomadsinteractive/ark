@@ -25,7 +25,7 @@ public:
 
     sp<GraphNode> toSharedPtr(const GraphNode& node) const;
 
-    void onVisitAdjacentNodes(int32_t nodeId, const V3& position, const std::function<void(const SearchingNode&)>& visitor) override;
+    void onVisitAdjacentNodes(int32_t nodeId, const V3& position, const std::function<bool(const SearchingNode&)>& visitor) override;
 
 private:
     Map<int32_t, sp<GraphNode>> _nodes;

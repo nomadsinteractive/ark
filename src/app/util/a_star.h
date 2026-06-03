@@ -52,17 +52,19 @@ private:
         float nextWeight;
         float nextScore;
         float bestScore = std::numeric_limits<float>::max();
-        const auto visitor = [this, &nextNode, &nextWeight, &nextScore, &bestScore] (const SearchingNode& node) {
-            if(!_close_set.contains(node)) {
-                const SearchingPath& next = *_paths.begin();
-                const float nodeWeight = node._weight ? node._weight.value() : Math::distance(node._position, next._nodes.back()._position);
-                nextWeight = next._weight + nodeWeight;
-                nextScore = nextWeight + std::sqrt(getHeuristicValue2(node));
-                if(bestScore > nextScore) {
-                    bestScore = nextScore;
-                    nextNode = {node};
-                }
+        const auto visitor = [this, &nextNode, &nextWeight, &nextScore, &bestScore] (const SearchingNode& node) -> bool {
+            if(_close_set.contains(node))
+                return false;
+
+            const SearchingPath& next = *_paths.begin();
+            const float nodeWeight = node._weight ? node._weight.value() : Math::distance(node._position, next._nodes.back()._position);
+            nextWeight = next._weight + nodeWeight;
+            nextScore = nextWeight + std::sqrt(getHeuristicValue2(node));
+            if(bestScore > nextScore) {
+                bestScore = nextScore;
+                nextNode = {node};
             }
+            return true;
         };
 
         searchingNodeProvider.onVisitAdjacentNodes(_paths.begin()->_nodes.back()._id, _paths.begin()->_nodes.back()._position, visitor);

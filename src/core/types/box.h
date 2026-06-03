@@ -24,8 +24,14 @@ public:
     template<typename T> explicit Box(sp<T> sharedPtr) noexcept
         : _type_id(Type<T>::id()), _class(sharedPtr.getClass()), _stub(sharedPtr ? _make_ptr_stub(new SharedPtr<T>(std::move(sharedPtr))) : nullptr) {
     }
-    template<typename T> explicit Box(T enumValue) noexcept
-        : _type_id(Type<T>::id()), _class(Class::ensureClass<T>()), _stub(_make_enum_stub<T>(enumValue)) {
+    template<typename T> explicit Box(const T value) noexcept
+        : _type_id(Type<T>::id()), _class(Class::ensureClass<T>()) {
+        if constexpr (std::is_enum_v<T>)
+            _stub = std::make_shared<_StubVariant>(EnumStub(value));
+        else {
+            static_assert(std::is_trivial_v<T>, "Only Enum and trivial types are accepted");
+            _stub = std::make_shared<_StubVariant>(TrivialStub(value));
+        }
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Box);
 
@@ -47,15 +53,30 @@ public:
 
     template<typename T> T toEnum() const {
         _type_check<T>();
-        return static_cast<T>(toInteger());
+        return static_cast<T>(toEnumValue());
+    }
+
+    template<typename T> bool isType() const {
+        return _type_id == Type<T>::id();
     }
 
     bool isEnum() const {
         return std::get_if<EnumStub>(_stub.get()) != nullptr;
     }
 
-    int32_t toInteger() const {
-        return _stub ? _ensure_enum_stub()->_value : 0;
+    template<typename T> T toTrivialValue() const {
+        const TrivialStub* stub = std::get_if<TrivialStub>(_stub.get());
+        ASSERT(stub);
+        return stub->unpack<T>();
+    }
+
+    int32_t toEnumValue() const {
+        if(!_stub)
+            return 0;
+
+        const EnumStub* stub = std::get_if<EnumStub>(_stub.get());
+        ASSERT(stub);
+        return stub->_value;
     }
 
     Box cast(const TypeId typeId) const {
@@ -102,15 +123,25 @@ private:
     };
 
     struct EnumStub {
-        EnumStub(const int32_t value)
-            : _value(value) {
-        }
 
         template<typename T> T unpack() const {
             return static_cast<T>(_value);
         }
 
         int32_t _value;
+    };
+
+    struct TrivialStub {
+        template<typename T> explicit TrivialStub(const T value) {
+            static_assert(sizeof(T) <= sizeof(_values));
+            *reinterpret_cast<T*>(_values) = value;
+        }
+
+        template<typename T> T unpack() const {
+            return *reinterpret_cast<const T*>(_values);
+        }
+
+        int32_t _values[4] = { 0 };
     };
 
     template<typename T> static void _shared_ptr_destructor(const void* inst) {
@@ -121,28 +152,11 @@ private:
         CHECK(_type_id == Type<T>::id(), "Wrong type being unpacked");
     }
 
-    typedef std::variant<PtrStub, EnumStub> _StubVariant;
+    typedef std::variant<PtrStub, EnumStub, TrivialStub> _StubVariant;
 
 private:
     template<typename T> static std::shared_ptr<_StubVariant> _make_ptr_stub(const sp<T>* sharedPtr) {
         return sharedPtr ? std::make_shared<_StubVariant>(PtrStub(sharedPtr, sharedPtr->get(), _shared_ptr_destructor<T>)) : nullptr;
-    }
-
-    template<typename T> static std::shared_ptr<_StubVariant> _make_enum_stub(T enumValue)  {
-        static_assert(std::is_enum_v<T>);
-        return std::make_shared<_StubVariant>(EnumStub(enumValue));
-    }
-
-    PtrStub* _ensure_ptr_stub() const {
-        PtrStub* stub = std::get_if<PtrStub>(_stub.get());
-        DASSERT(stub);
-        return stub;
-    }
-
-    EnumStub* _ensure_enum_stub() const {
-        EnumStub* stub = std::get_if<EnumStub>(_stub.get());
-        DASSERT(stub);
-        return stub;
     }
 
 private:
