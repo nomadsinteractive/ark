@@ -3,6 +3,7 @@
 #include "core/ark.h"
 #include "core/base/resource_loader.h"
 #include "core/base/scope.h"
+#include "core/collection/args.h"
 #include "core/inf/interpreter.h"
 #include "core/util/log.h"
 

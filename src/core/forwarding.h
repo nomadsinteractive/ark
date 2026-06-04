@@ -54,6 +54,7 @@ template <typename T> using array = sp<Array<T>>;
 template <typename T> using Builder = IBuilder<SharedPtr<T>>;
 template <typename T> using builder = SharedPtr<Builder<T>>;
 
+struct Args;
 class Ark;
 class Allocator;
 class ApplicationContext;

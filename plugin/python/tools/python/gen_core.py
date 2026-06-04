@@ -144,6 +144,7 @@ class GenArgumentMeta:
 ARK_PY_ARGUMENTS = (
     (r'String\s*&?', GenArgumentMeta('const char*', 'const char*', 's')),
     (r'Scope\s*&', GenArgumentMeta('PyObject*', 'Scope', '**')),
+    (r'Args\s*&?', GenArgumentMeta('PyObject*', 'Args', '*')),
     (r'Traits\s*&?', GenArgumentMeta('PyObject*', 'Traits', '*')),
     (r'std::wstring\s*&?', GenArgumentMeta('PyObject*', 'std::wstring', 'O')),
     (r'Box\s*&?', GenArgumentMeta('PyObject*', 'Box', 'O')),
@@ -209,6 +210,8 @@ class GenArgument:
         m = acg.get_shared_ptr_type(self.accept_type)
         if m == 'Scope':
             return f'const Scope {objname} = PyCast::toScope(kws);'
+        elif m == 'Args':
+            return f'Args {objname} = PyCast::toArgs(args, {self.index - 1 if gen_method.self_argument else self.index});'
         elif m == 'Traits':
             return f'Traits {objname} = PyCast::toTraits(args, {self.index - 1 if gen_method.self_argument else self.index});'
 

@@ -1,6 +1,7 @@
 #include "app/components/behavior.h"
 
 #include "core/ark.h"
+#include "core/collection/args.h"
 #include "core/inf/interpreter.h"
 #include "core/util/log.h"
 
@@ -52,7 +53,7 @@ public:
         {
             Box arg1(rigidBody.makeShadow());
             Box arg2(sp<CollisionManifold>::make(manifold));
-            _on_begin_contact->call({std::move(arg1), std::move(arg2)});
+            _on_begin_contact->call({{std::move(arg1), std::move(arg2)}});
         }
     }
 
@@ -61,7 +62,7 @@ public:
         if(_on_begin_contact)
         {
             Box arg1(rigidBody.makeShadow());
-            _on_end_contact->call({std::move(arg1)});
+            _on_end_contact->call({{std::move(arg1)}});
         }
     }
 
@@ -80,7 +81,7 @@ public:
     bool onEvent(const Event& event) override
     {
         Box arg1(sp<Event>::make(event));
-        return static_cast<bool>(_on_event->call({std::move(arg1)}));
+        return static_cast<bool>(_on_event->call({{std::move(arg1)}}));
     }
 
 private:
@@ -93,12 +94,13 @@ public:
         : _on_visit_adjacent_nodes(std::move(onVisitAdjacentNodes)) {
     }
 
-    void onVisitAdjacentNodes(int32_t nodeId, const V3& position, const std::function<bool(const SearchingNode&)>& visitor) override
+    void onVisitAdjacentNodes(const V3i& nodeId, const V3& position, const std::function<bool(const SearchingNode&)>& visitor) override
     {
-        _on_visit_adjacent_nodes->call({
-            Box(sp<Vec3>::make<Vec3::Const>(position)),
+        _on_visit_adjacent_nodes->call({{
+            Box(nodeId),
+            Box(position),
             Box(sp<std::function<bool(const SearchingNode&)>>::make(visitor))
-        });
+        }});
     }
 
 private:
@@ -125,7 +127,7 @@ public:
     bool onUnhandledEvent(const Event& event) override
     {
         Box arg1(sp<Event>::make(event));
-        return static_cast<bool>(_on_unhandled_event->call({std::move(arg1)}));
+        return static_cast<bool>(_on_unhandled_event->call({{std::move(arg1)}}));
     }
 
 private:
@@ -201,7 +203,7 @@ Behavior::Method::Method(sp<Interpreter> interpreter, Box function)
 {
 }
 
-Box Behavior::Method::call(const Interpreter::Arguments& args) const
+Box Behavior::Method::call(const Args& args) const
 {
     return _interpreter->call(_function, args);
 }

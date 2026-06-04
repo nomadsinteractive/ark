@@ -2,6 +2,7 @@
 
 #include "core/base/plugin_manager.h"
 #include "core/base/thread.h"
+#include "core/collection/args.h"
 #include "core/inf/asset.h"
 #include "core/types/global.h"
 #include "core/util/log.h"
@@ -74,11 +75,11 @@ bool preInitialize()
     return false;
 }
 
-PyObject* argumentsToTuple(const Interpreter::Arguments& args)
+PyObject* argumentsToTuple(const Args& args)
 {
-    PyObject* tuple = PyTuple_New(args.size());
+    PyObject* tuple = PyTuple_New(args._values.size());
     uint32_t i = 0;
-    for(const Box& arg : args)
+    for(const Box& arg : args._values)
         PyTuple_SetItem(tuple, i++, PythonExtension::instance().toPyObject(arg));
     return tuple;
 }
@@ -170,7 +171,7 @@ void PythonInterpreter::execute(const sp<Asset>& source)
         PythonExtension::instance().logErr();
 }
 
-Box PythonInterpreter::call(const Box& func, const Interpreter::Arguments& args)
+Box PythonInterpreter::call(const Box& func, const Args& args)
 {
     DCHECK_THREAD_FLAG();
     const auto gil = PythonExtension::instance().ensureGIL();

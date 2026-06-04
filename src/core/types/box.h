@@ -29,7 +29,7 @@ public:
         if constexpr (std::is_enum_v<T>)
             _stub = std::make_shared<_StubVariant>(EnumStub(value));
         else {
-            static_assert(std::is_trivial_v<T>, "Only Enum and trivial types are accepted");
+            static_assert(std::is_trivially_copyable_v<T>, "Only Enum and trivial copyable types are accepted");
             _stub = std::make_shared<_StubVariant>(TrivialStub(value));
         }
     }

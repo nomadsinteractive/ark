@@ -18,6 +18,7 @@
 
 #include "app/base/event.h"
 #include "app/base/raycast_manifold.h"
+#include "core/collection/args.h"
 
 #include "python/api.h"
 #include "python/extension/python_extension.h"
@@ -289,6 +290,20 @@ Scope PyCast::toScope(PyObject* kws)
         Py_DECREF(keys);
     }
     return scope;
+}
+
+Args PyCast::toArgs(PyObject* args, const size_t offset)
+{
+    Vector<Box> values;
+    if(const Py_ssize_t size = PyTuple_Size(args); size > 0)
+        for(size_t i = offset; i < size; ++i)
+        {
+            if(PyObject* v = PyTuple_GetItem(args, i); PythonExtension::instance().isPyArkTypeObject(Py_TYPE(v)))
+                values.push_back(*reinterpret_cast<PyArkType::Instance*>(v)->box);
+            else
+                values.push_back(PyInstance::own(v).toBox());
+        }
+    return {std::move(values)};
 }
 
 Traits PyCast::toTraits(PyObject* args, const size_t offset)

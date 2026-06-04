@@ -3,14 +3,13 @@
 #include "core/base/json.h"
 #include "core/base/observer.h"
 #include "core/base/scope.h"
-#include "core/inf/variable.h"
 #include "core/types/box.h"
 #include "core/types/global.h"
 
 #include "app/base/searching_node.h"
-#include "core/util/boolean_type.h"
+#include "core/collection/args.h"
 
-#include "python/extension/callable_v1.h"
+#include "python/extension/callable.h"
 #include "python/extension/py_instance_ref.h"
 #include "python/extension/py_cast.h"
 #include "python/impl/adapter/runnable_python.h"
@@ -19,24 +18,25 @@ namespace ark::plugin::python {
 
 namespace {
 
-template<typename T> Optional<T> getArgumentOpt(const Traits& args, const size_t argidx)
+template<typename T> Optional<T> getArgumentOpt(const Args& args, const size_t argidx)
 {
-    if(argidx >= args.table().size())
+    if(argidx >= args._values.size())
         return {};
-    return PyCast::toCppObject<T>(args.table().values().at(argidx).as<PyInstanceRef>()->instance());
+    return PyCast::toCppObject<T>(args._values.at(argidx).as<PyInstanceRef>()->instance());
 }
 
-class CallableA1SearchingNode final : public CallableV1 {
+class CallablePathFinderVisitorCallback final : public Callable {
 public:
-    CallableA1SearchingNode(std::function<bool(const SearchingNode&)> func)
+    CallablePathFinderVisitorCallback(std::function<bool(const SearchingNode&)> func)
         : _func(std::move(func)) {
     }
 
-    Box call(const Traits& args) override
+    Box call(const Args& args) override
     {
-        ASSERT(args.table().size() >= 1);
-        const auto a1 = PyCast::ensureCppObject<V3>(args.table().values().at(0).as<PyInstanceRef>()->instance());
-        const bool r = _func({0, a1, getArgumentOpt<bool>(args, 1), getArgumentOpt<float>(args, 2)});
+        ASSERT(args._values.size() >= 2);
+        const auto nodeId = PyCast::ensureCppObject<V3i>(args._values.at(0).as<PyInstanceRef>()->instance());
+        const auto position = PyCast::ensureCppObject<V3>(args._values.at(1).as<PyInstanceRef>()->instance());
+        const bool r = _func({nodeId, position, getArgumentOpt<bool>(args, 2), getArgumentOpt<float>(args, 3)});
         return Box(r);
     }
 
@@ -105,7 +105,7 @@ PyObject* PythonExtension::toPyObject(const Box& box)
     if(box.typeId() == Type<FuncType>::id())
     {
         FuncType func = *box.as<FuncType>();
-        return pyNewObject(sp<CallableV1>::make<CallableA1SearchingNode>(std::move(func)));
+        return pyNewObject(sp<Callable>::make<CallablePathFinderVisitorCallback>(std::move(func)));
     }
 
     const auto iter = _type_by_id.find(box.typeId());

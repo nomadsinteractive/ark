@@ -13,7 +13,7 @@ public:
     virtual ~SearchingNodeProvider() = default;
 
 //  [[script::bindings::interface]]
-    virtual void onVisitAdjacentNodes(int32_t nodeId, const V3& position, const std::function<bool(const SearchingNode&)>& visitor) = 0;
+    virtual void onVisitAdjacentNodes(const V3i& nodeId, const V3& position, const std::function<bool(const SearchingNode&)>& visitor) = 0;
 };
 
 }
