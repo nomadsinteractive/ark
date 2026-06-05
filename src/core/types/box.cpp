@@ -6,7 +6,8 @@
 namespace ark {
 
 Box::Box(const TypeId typeId, const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor) noexcept
-    : _type_id(typeId), _class(clazz), _stub(std::make_shared<_StubVariant>(PtrStub(sharedPtr, instancePtr, std::move(destructor))))
+    : _type_id(typeId), _class(clazz), _stub_type(StubType::PTR),
+      _stub(std::make_shared<std::any>(PtrStub(sharedPtr, instancePtr, std::move(destructor))))
 {
 }
 
@@ -20,19 +21,44 @@ const Class* Box::getClass() const
     return _class;
 }
 
+bool Box::isEnum() const
+{
+    return _stub_type == StubType::ENUM;
+}
+
+bool Box::isFunction() const
+{
+    return _stub_type == StubType::FUNCTION;
+}
+
+int32_t Box::toEnumValue() const
+{
+    if(!_stub)
+        return 0;
+
+    ASSERT(_stub_type == StubType::ENUM);
+    return std::any_cast<int32_t>(*_stub);
+}
+
+Box Box::cast(const TypeId typeId) const
+{
+    return _class->cast(*this, typeId);
+}
+
 uintptr_t Box::id() const
 {
     if(!_stub)
         return 0;
 
-    if(const PtrStub* stub = std::get_if<PtrStub>(_stub.get()))
-        return reinterpret_cast<uintptr_t>(stub->instance_ptr);
+    if(_stub_type == StubType::PTR)
+        return reinterpret_cast<uintptr_t>(std::any_cast<const PtrStub&>(*_stub)._instance_ptr);
 
     int32_t hashvalue = _type_id;
-    if(const TrivialStub* stub = std::get_if<TrivialStub>(_stub.get()))
+    if(_stub_type == StubType::TRIVIAL)
     {
-        for(size_t i = 0; i < array_size(stub->_values); ++i)
-            Math::hashCombine(hashvalue, i);
+        const TrivialCopyableStorage& storage = std::any_cast<const TrivialCopyableStorage&>(*_stub);
+        for(size_t i = 0; i < storage.size(); ++i)
+            Math::hashCombine(hashvalue, storage[i]);
         return hashvalue;
     }
 
@@ -44,8 +70,8 @@ Box::operator bool() const
 {
     if(_stub)
     {
-        if(const PtrStub* ptrStub = std::get_if<PtrStub>(_stub.get()))
-            return ptrStub->instance_ptr != nullptr;
+        if(_stub_type == StubType::PTR)
+            return std::any_cast<const PtrStub&>(*_stub)._instance_ptr != nullptr;
         return true;
     }
     return false;

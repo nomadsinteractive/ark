@@ -138,7 +138,7 @@ Box Rigidbody::tag() const
 void Rigidbody::setTag(Box tag)
 {
     if(_stub->_tags)
-        _stub->_tags->setTag(0, std::move(tag));
+        _stub->_tags->setTag({}, std::move(tag));
     else
         _stub->_tags = sp<Tags>::make(std::move(tag));
 }

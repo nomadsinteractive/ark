@@ -5,13 +5,13 @@
 namespace ark {
 
 constexpr TypeId toVectorTypeId(const TypeId typeId) {
-    return string_hash("Vector<>", typeId);
+    return {string_hash("Vector<>", typeId)};
 }
 
 template<typename T> class Type {
 public:
     static constexpr TypeId id() {
-        return string_hash(__ARK_FUNCTION__);
+        return {string_hash(__ARK_FUNCTION__)};
     }
 
     static constexpr TypeId vectorId() {

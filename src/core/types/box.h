@@ -1,7 +1,9 @@
 #pragma once
 
+#include <any>
+#include <array>
+#include <functional>
 #include <memory>
-#include <variant>
 
 #include "core/base/api.h"
 #include "core/inf/duck.h"
@@ -22,15 +24,21 @@ public:
         : _type_id(0), _class(nullptr) {
     }
     template<typename T> explicit Box(sp<T> sharedPtr) noexcept
-        : _type_id(Type<T>::id()), _class(sharedPtr.getClass()), _stub(sharedPtr ? _make_ptr_stub(new SharedPtr<T>(std::move(sharedPtr))) : nullptr) {
+        : _type_id(Type<T>::id()), _class(sharedPtr.getClass()), _stub_type(StubType::PTR),
+          _stub(sharedPtr ? _make_ptr_stub(new SharedPtr<T>(std::move(sharedPtr))) : nullptr) {
     }
-    template<typename T> explicit Box(const T value) noexcept
-        : _type_id(Type<T>::id()), _class(Class::ensureClass<T>()) {
-        if constexpr (std::is_enum_v<T>)
-            _stub = std::make_shared<_StubVariant>(EnumStub(value));
-        else {
-            static_assert(std::is_trivially_copyable_v<T>, "Only Enum and trivial copyable types are accepted");
-            _stub = std::make_shared<_StubVariant>(TrivialStub(value));
+    template<typename T> explicit Box(T value) noexcept
+        : _type_id(Type<std::remove_cvref_t<T>>::id()), _class(Class::ensureClass<T>()) {
+        if constexpr (std::is_enum_v<T>) {
+            _stub_type = StubType::ENUM;
+            _stub = std::make_shared<std::any>(static_cast<int32_t>(value));
+        } else if constexpr (std::is_trivially_copyable_v<T>) {
+            _stub_type = StubType::TRIVIAL;
+            _stub = std::make_shared<std::any>(_to_trivial_storage(value));
+        } else {
+            static_assert(is_specialization_v<T, std::function>, "Only Enum, trivial copyable and std::function types are accepted");
+            _stub_type = StubType::FUNCTION;
+            _stub = std::make_shared<std::any>(std::move(value));
         }
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Box);
@@ -48,7 +56,7 @@ public:
         if(!_stub)
             return nullptr;
         _type_check<T>();
-        return std::get<PtrStub>(*_stub).unpack<T>();
+        return std::any_cast<const PtrStub&>(*_stub).unpack<T>();
     }
 
     template<typename T> T toEnum() const {
@@ -56,39 +64,36 @@ public:
         return static_cast<T>(toEnumValue());
     }
 
+    template<typename T> const T& toFunction() const {
+        _type_check<T>();
+        ASSERT(_stub && _stub_type == StubType::FUNCTION);
+        return *std::any_cast<T>(_stub.get());
+    }
+
     template<typename T> bool isType() const {
         return _type_id == Type<T>::id();
     }
 
-    bool isEnum() const {
-        return std::get_if<EnumStub>(_stub.get()) != nullptr;
-    }
+    bool isEnum() const;
+    bool isFunction() const;
+
+    int32_t toEnumValue() const;
 
     template<typename T> T toTrivialValue() const {
-        const TrivialStub* stub = std::get_if<TrivialStub>(_stub.get());
-        ASSERT(stub);
-        return stub->unpack<T>();
+        ASSERT(_stub && _stub_type == StubType::TRIVIAL);
+        const TrivialCopyableStorage& storage = std::any_cast<const TrivialCopyableStorage&>(*_stub);
+        return *reinterpret_cast<const T*>(storage.data());
     }
 
-    int32_t toEnumValue() const {
-        if(!_stub)
-            return 0;
 
-        const EnumStub* stub = std::get_if<EnumStub>(_stub.get());
-        ASSERT(stub);
-        return stub->_value;
-    }
-
-    Box cast(const TypeId typeId) const {
-        return _class->cast(*this, typeId);
-    }
+    Box cast(const TypeId typeId) const;
 
     template<typename T> sp<T> as() const {
         if(!_stub)
             return nullptr;
 
         const TypeId typeId = Type<T>::id();
-        const PtrStub& ptrStub = std::get<PtrStub>(*_stub);
+        const PtrStub& ptrStub = std::any_cast<const PtrStub&>(*_stub);
         sp<T> inst = typeId == _type_id ? ptrStub.unpack<T>() : _class->cast(*this, typeId).toPtr<T>();
         if(!inst) {
             if(const sp<Duck<T>> duck = cast(Type<Duck<T>>::id()).template toPtr<Duck<T>>())
@@ -98,51 +103,41 @@ public:
     }
 
 private:
+    typedef std::array<int32_t, 4> TrivialCopyableStorage;
+
     Box(TypeId typeId, const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor) noexcept;
+
+    // Discriminator for the payload currently held in _stub. The isXXX() queries
+    // read this enum instead of probing the std::any for its contained type.
+    enum class StubType {
+        NONE,
+        PTR,
+        ENUM,
+        TRIVIAL,
+        FUNCTION
+    };
 
     struct PtrStub {
         PtrStub(const void* sharedPtr, const void* instancePtr, Destructor destructor)
-            : shared_ptr(sharedPtr), instance_ptr(instancePtr), destructor(std::move(destructor)) {
-        }
-        PtrStub(PtrStub&& other)
-            : shared_ptr(other.shared_ptr), instance_ptr(other.instance_ptr), destructor(other.destructor) {
-            other.shared_ptr = nullptr;
-        }
-        ~PtrStub() {
-            if(shared_ptr)
-                destructor(shared_ptr);
+            : _shared_ptr(sharedPtr, std::move(destructor)), _instance_ptr(instancePtr) {
         }
 
         template<typename T> sp<T> unpack() const {
-            return shared_ptr ? *static_cast<const sp<T>*>(shared_ptr) : nullptr;
+            return _shared_ptr ? *static_cast<const sp<T>*>(_shared_ptr.get()) : nullptr;
         }
 
-        const void* shared_ptr;
-        const void* instance_ptr;
-        Destructor destructor;
+        // Owns the heap-allocated SharedPtr<T> through a type-erased deleter, which keeps
+        // PtrStub copyable (std::any requires it) without risking a double free.
+        std::shared_ptr<const void> _shared_ptr;
+        const void* _instance_ptr;
     };
 
-    struct EnumStub {
-
-        template<typename T> T unpack() const {
-            return static_cast<T>(_value);
-        }
-
-        int32_t _value;
-    };
-
-    struct TrivialStub {
-        template<typename T> explicit TrivialStub(const T value) {
-            static_assert(sizeof(T) <= sizeof(_values));
-            *reinterpret_cast<T*>(_values) = value;
-        }
-
-        template<typename T> T unpack() const {
-            return *reinterpret_cast<const T*>(_values);
-        }
-
-        int32_t _values[4] = { 0 };
-    };
+    template<typename T> static TrivialCopyableStorage _to_trivial_storage(const T value) {
+        static_assert(sizeof(T) <= sizeof(TrivialCopyableStorage));
+        TrivialCopyableStorage storage = {};
+        *reinterpret_cast<T*>(storage.data()) = value;
+        return storage;
+    }
 
     template<typename T> static void _shared_ptr_destructor(const void* inst) {
         delete static_cast<const SharedPtr<T>*>(inst);
@@ -152,17 +147,16 @@ private:
         CHECK(_type_id == Type<T>::id(), "Wrong type being unpacked");
     }
 
-    typedef std::variant<PtrStub, EnumStub, TrivialStub> _StubVariant;
-
-private:
-    template<typename T> static std::shared_ptr<_StubVariant> _make_ptr_stub(const sp<T>* sharedPtr) {
-        return sharedPtr ? std::make_shared<_StubVariant>(PtrStub(sharedPtr, sharedPtr->get(), _shared_ptr_destructor<T>)) : nullptr;
+    template<typename T> static std::shared_ptr<std::any> _make_ptr_stub(const sp<T>* sharedPtr) {
+        return std::make_shared<std::any>(PtrStub(sharedPtr, sharedPtr->get(), _shared_ptr_destructor<T>));
     }
 
 private:
     TypeId _type_id;
     const Class* _class;
-    std::shared_ptr<_StubVariant> _stub;
+    StubType _stub_type = StubType::NONE;
+
+    std::shared_ptr<std::any> _stub;
 
     template<typename T> friend class SharedPtr;
 };

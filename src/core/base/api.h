@@ -130,9 +130,32 @@ template<typename T, size_t N> constexpr size_t array_size(const T (&)[N]) {
     return N - 1;
 }
 
+template<typename T, template<typename...> class Template> struct is_specialization : std::false_type {};
+template<template<typename...> class Template, typename... Args> struct is_specialization<Template<Args...>, Template> : std::true_type {};
+template<class T, template<typename...> class Template> constexpr bool is_specialization_v = is_specialization<T, Template>::value;
+
 constexpr HashId string_hash(const char* s, const HashId base = 0) {
     constexpr HashId some_prime_number = 101;
     return *s ? (*(s + 1) ? *s + (*(s + 1)) * some_prime_number + (*(s + 2) ? (*(s + 3) ? *(s + 2) + (*(s + 3)) * some_prime_number + string_hash(s + 4, base) * some_prime_number * some_prime_number : *(s + 2)) : base) * some_prime_number * some_prime_number : *s) : base;
 }
 
+struct TypeId {
+
+    constexpr operator HashId() const {
+        return _hash;
+    }
+
+    constexpr auto operator <=> (const TypeId other) const {
+        return _hash <=> other._hash;
+    }
+
+    HashId _hash = 0;
+};
+
 }
+
+template <> struct std::hash<ark::TypeId> {
+    size_t operator()(const ark::TypeId typeId) const {
+        return typeId._hash;
+    }
+};

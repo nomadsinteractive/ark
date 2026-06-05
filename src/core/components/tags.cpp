@@ -9,7 +9,7 @@ namespace ark {
 Tags::Tags(Box tag, Vector<Box> tags)
 {
     if(tag)
-        setTag(0, std::move(tag));
+        setTag({}, std::move(tag));
 
     for(Box& i : tags)
         setTag(i.typeId(), std::move(i));
@@ -17,7 +17,7 @@ Tags::Tags(Box tag, Vector<Box> tags)
 
 Box Tags::tag() const
 {
-    return getTag(0);
+    return getTag({});
 }
 
 void Tags::setTag(const TypeId typeId, Box tag)

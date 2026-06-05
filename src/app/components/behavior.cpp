@@ -99,7 +99,7 @@ public:
         _on_visit_adjacent_nodes->call({{
             Box(nodeId),
             Box(position),
-            Box(sp<std::function<bool(const SearchingNode&)>>::make(visitor))
+            Box(visitor)
         }});
     }
 

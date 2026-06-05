@@ -132,25 +132,6 @@ typedef Array<float>    FloatArray;
 typedef uint32_t RefId;
 typedef uint32_t HashId;
 
-struct TypeId {
-    constexpr TypeId()
-        : _hash(0) {
-    }
-    constexpr TypeId(const HashId hash)
-        : _hash(hash) {
-    }
-
-    constexpr operator HashId() const {
-        return _hash;
-    }
-
-    constexpr bool operator < (const TypeId other) const {
-        return _hash < other._hash;
-    }
-
-    HashId _hash;
-};
-
 typedef sp<DOMAttribute> attribute;
 typedef sp<DOMElement> element;
 typedef sp<DOMDocument> document;
@@ -172,13 +153,6 @@ typedef Loader<String> StringLoader;
 typedef LoaderBundle<String> StringLoaderBundle;
 
 }
-
-template <> struct std::hash<ark::TypeId> {
-    size_t operator()(const ark::TypeId typeId) const {
-        return typeId._hash;
-    }
-};
-
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
     TypeName(const TypeName&) = delete;   \

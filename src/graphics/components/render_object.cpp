@@ -105,7 +105,7 @@ Box RenderObject::tag() const
 void RenderObject::setTag(Box tag)
 {
     if(_tags)
-        _tags->setTag(0, std::move(tag));
+        _tags->setTag({}, std::move(tag));
     else
         _tags = sp<Tags>::make(std::move(tag));
 }

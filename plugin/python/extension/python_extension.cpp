@@ -25,6 +25,16 @@ template<typename T> Optional<T> getArgumentOpt(const Args& args, const size_t a
     return PyCast::toCppObject<T>(args._values.at(argidx).as<PyInstanceRef>()->instance());
 }
 
+template<typename T, typename... Args> PyObject* toPyObjectFromTrivialType(const Box& box)
+{
+    if(box.isType<T>())
+        return PyCast::toPyObject(box.toTrivialValue<T>());
+
+    if constexpr (sizeof...(Args) > 0)
+        return toPyObjectFromTrivialType<Args...>(box);
+    return nullptr;
+}
+
 class CallablePathFinderVisitorCallback final : public Callable {
 public:
     CallablePathFinderVisitorCallback(std::function<bool(const SearchingNode&)> func)
@@ -88,25 +98,12 @@ PyObject* PythonExtension::toPyObject(const Box& box)
         return object;
     }
 
-    if(box.isType<bool>())
-        return PyCast::toPyObject(box.toTrivialValue<bool>());
-    if(box.isType<int32_t>())
-        return PyCast::toPyObject(box.toTrivialValue<int32_t>());
-    if(box.isType<float>())
-        return PyCast::toPyObject(box.toTrivialValue<float>());
-    if(box.isType<V2>())
-        return PyCast::toPyObject(box.toTrivialValue<V2>());
-    if(box.isType<V3>())
-        return PyCast::toPyObject(box.toTrivialValue<V3>());
-    if(box.isType<V4>())
-        return PyCast::toPyObject(box.toTrivialValue<V4>());
+    if(PyObject* obj = toPyObjectFromTrivialType<bool, int32_t, float, V2, V3, V4, V2i, V3i, V4i>(box))
+        return obj;
 
     typedef std::function<bool(const SearchingNode&)> FuncType;
-    if(box.typeId() == Type<FuncType>::id())
-    {
-        FuncType func = *box.as<FuncType>();
-        return pyNewObject(sp<Callable>::make<CallablePathFinderVisitorCallback>(std::move(func)));
-    }
+    if(box.isType<FuncType>())
+        return pyNewObject(sp<Callable>::make<CallablePathFinderVisitorCallback>(box.toFunction<FuncType>()));
 
     const auto iter = _type_by_id.find(box.typeId());
     return iter != _type_by_id.end() ? iter->second->create(box) : getPyArkType<Box>()->create(box);
