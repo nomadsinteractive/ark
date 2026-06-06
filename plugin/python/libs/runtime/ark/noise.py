@@ -8,6 +8,19 @@ class Generator:
     NOISE_TYPE_SIMPLEX = 1
     NOISE_TYPE_PERLIN = 2
 
+    CELLULAR_RETURN_TYPE_INDEX0 = 0
+    CELLULAR_RETURN_TYPE_INDEX0_ADD1 = 1
+    CELLULAR_RETURN_TYPE_INDEX0_SUB1 = 2
+    CELLULAR_RETURN_TYPE_INDEX0_MUL1 = 3
+    CELLULAR_RETURN_TYPE_INDEX0_DIV1 = 4
+
+    CELLULAR_DISTANCE_FUNCTION_EUCLIDEAN = 0
+    CELLULAR_DISTANCE_FUNCTION_EUCLIDEAN_SQUARED = 1
+    CELLULAR_DISTANCE_FUNCTION_MANHATTAN = 2
+    CELLULAR_DISTANCE_FUNCTION_HYBRID = 3
+    CELLULAR_DISTANCE_FUNCTION_MAX_AXIS = 4
+    CELLULAR_DISTANCE_FUNCTION_MINKOWSKI = 5
+
     def __init__(self, noise_type: int = NOISE_TYPE_SIMPLEX, seed: int = 0):
         pass
 
@@ -45,6 +58,15 @@ class Generator:
         pass
 
     def set_fractal_weighted_strength(self, weighted_strength: float):
+        pass
+
+    def set_cellular_return_type(self, return_type: int):
+        pass
+
+    def set_cellular_distance_function(self, distance_function: int):
+        pass
+
+    def set_grid_jitter(self, jitter: float):
         pass
 
     def noise_2d(self, x: float, y: float) -> float:

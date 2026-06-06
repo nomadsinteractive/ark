@@ -53,6 +53,7 @@ struct Generator::Stub {
     FastNoise::SmartNode<FastNoise::Generator> _generator;
     FastNoise::SmartNode<FastNoise::Generator> _source_generator;
     FastNoise::SmartNode<FastNoise::ScalableGenerator> _scalable_generator;
+    FastNoise::SmartNode<FastNoise::CellularDistance> _cellular;
     FastNoise::SmartNode<FastNoise::Fractal<>> _fractal_generator;
 };
 
@@ -60,7 +61,12 @@ Generator::Generator(const NoiseType type, const int32_t seed)
     : _seed(seed), _scale(100.0f), _stub(new Stub())
 {
     if(type == NOISE_TYPE_CELLULAR)
-        _stub->_source_generator = FastNoise::New<FastNoise::CellularDistance>();
+    {
+        const auto generator = FastNoise::New<FastNoise::CellularDistance>();
+        _stub->_source_generator = generator;
+        _stub->_scalable_generator = generator;
+        _stub->_cellular = generator;
+    }
     else if(type == NOISE_TYPE_SIMPLEX)
     {
         const auto generator = FastNoise::New<FastNoise::Simplex>();
@@ -139,6 +145,24 @@ void Generator::setFractalWeightedStrength(const float weightedStrength)
 {
     ensureFractalGenerator();
     _stub->_fractal_generator->SetWeightedStrength(weightedStrength);
+}
+
+void Generator::setCellularReturnType(const CellularReturnType returnType)
+{
+    if(_stub->_cellular)
+        _stub->_cellular->SetReturnType(static_cast<FastNoise::CellularDistance::ReturnType>(returnType));
+}
+
+void Generator::setCellularDistanceFunction(const CellularDistanceFunction distanceFunction)
+{
+    if(_stub->_cellular)
+        _stub->_cellular->SetDistanceFunction(static_cast<FastNoise::DistanceFunction>(distanceFunction));
+}
+
+void Generator::setGridJitter(const float jitter)
+{
+    if(_stub->_cellular)
+        _stub->_cellular->SetGridJitter(jitter);
 }
 
 float Generator::noise2D(const float x, const float y) const

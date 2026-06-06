@@ -19,6 +19,25 @@ public:
         NOISE_TYPE_PERLIN
     };
 
+//  [[script::bindings::enumeration]]
+    enum CellularReturnType {
+        CELLULAR_RETURN_TYPE_INDEX0,
+        CELLULAR_RETURN_TYPE_INDEX0_ADD1,
+        CELLULAR_RETURN_TYPE_INDEX0_SUB1,
+        CELLULAR_RETURN_TYPE_INDEX0_MUL1,
+        CELLULAR_RETURN_TYPE_INDEX0_DIV1
+    };
+
+//  [[script::bindings::enumeration]]
+    enum CellularDistanceFunction {
+        CELLULAR_DISTANCE_FUNCTION_EUCLIDEAN,
+        CELLULAR_DISTANCE_FUNCTION_EUCLIDEAN_SQUARED,
+        CELLULAR_DISTANCE_FUNCTION_MANHATTAN,
+        CELLULAR_DISTANCE_FUNCTION_HYBRID,
+        CELLULAR_DISTANCE_FUNCTION_MAX_AXIS,
+        CELLULAR_DISTANCE_FUNCTION_MINKOWSKI
+    };
+
 public:
 //  [[script::bindings::auto]]
     Generator(Generator::NoiseType type = Generator::NOISE_TYPE_SIMPLEX, int32_t seed = 0);
@@ -47,6 +66,14 @@ public:
     void setFractalLacunarity(float lacunarity);
 //  [[script::bindings::auto]]
     void setFractalWeightedStrength(float weightedStrength);
+
+//  Cellular-only settings; no-ops for Simplex/Perlin generators.
+//  [[script::bindings::auto]]
+    void setCellularReturnType(Generator::CellularReturnType returnType);
+//  [[script::bindings::auto]]
+    void setCellularDistanceFunction(Generator::CellularDistanceFunction distanceFunction);
+//  [[script::bindings::auto]]
+    void setGridJitter(float jitter);
 
 //  [[script::bindings::auto]]
     float noise2D(float x, float y) const;
