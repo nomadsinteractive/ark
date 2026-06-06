@@ -29,7 +29,7 @@ public:
     }
 
 private:
-    Vector<std::pair<size_t, ByteArray::Borrowed>> _strips;
+    Vector<std::pair<size_t, ByteArray::View>> _strips;
 };
 
 class RunnableBufferSynchronizer final : public Runnable {
@@ -118,7 +118,7 @@ Buffer::operator bool() const
     return static_cast<bool>(_delegate);
 }
 
-Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
+Buffer::Snapshot Buffer::snapshot(const ByteArray::View& strip) const
 {
     return {_delegate, strip.length(), sp<UploaderBufferSnapshot>::make(strip.length(), Vector<Buffer::Strip>{{0, strip}})};
 }
@@ -170,7 +170,7 @@ Buffer::Snapshot Buffer::SnapshotFactory::toSnapshot(const Buffer& buffer)
     return buffer.snapshot(sp<Uploader>::make<UploaderBufferSnapshot>(_size, std::move(_strips)));
 }
 
-void Buffer::SnapshotFactory::addStrip(const size_t offset, ByteArray::Borrowed& content)
+void Buffer::SnapshotFactory::addStrip(const size_t offset, ByteArray::View& content)
 {
     _strips.emplace_back(offset, content);
     _size = std::max(_size, content.length() + offset);

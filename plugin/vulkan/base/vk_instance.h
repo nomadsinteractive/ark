@@ -11,7 +11,7 @@ public:
     VKInstance();
     ~VKInstance();
 
-    void initialize(const RenderEngine& renderEngine);
+    void initialize(const RenderBackend& renderEngine);
 
     VkInstance vkInstance() const;
 

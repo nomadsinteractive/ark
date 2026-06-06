@@ -28,7 +28,7 @@
 #include "graphics/util/vec2_type.h"
 
 #include "renderer/base/model.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/model_loader.h"
 

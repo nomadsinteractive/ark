@@ -278,7 +278,7 @@ bytearray RenderUtil::makeUnitCubeVertices(const bool flipWindingOrder)
         return flipped;
     }
 
-    return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
+    return sp<ByteArray::View>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 
 Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& type, Attribute::Usage layoutType)

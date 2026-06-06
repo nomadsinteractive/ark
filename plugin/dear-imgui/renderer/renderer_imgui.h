@@ -52,7 +52,7 @@ private:
 
 private:
     sp<Shader> _shader;
-    sp<RenderEngine> _render_engine;
+    sp<RenderBackend> _render_engine;
     sp<Texture> _texture;
 
     sp<RendererContext> _renderer_context;

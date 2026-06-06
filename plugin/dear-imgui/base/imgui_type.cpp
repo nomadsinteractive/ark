@@ -78,7 +78,7 @@ sp<Imgui> Imgui::BUILDER::build(const Scope& args)
 
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytesPerPixel);
     RenderController& renderController = Ark::instance().renderController();
-    sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray>::make<ByteArray::Borrowed>(pixels, width * height * bytesPerPixel));
+    sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray>::make<ByteArray::View>(pixels, width * height * bytesPerPixel));
     sp<Texture> texture = renderController.createTexture2d(std::move(bitmap));
     io.Fonts->SetTexID(reinterpret_cast<ImTextureID>(texture.get()));
     sp<Shader> shader = _shader->build(args);

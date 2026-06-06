@@ -1,20 +1,20 @@
 #include "renderer/base/graphics_context.h"
 
-#include "render_engine.h"
+#include "render_backend.h"
 #include "core/types/global.h"
 
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 
 namespace ark {
 
 GraphicsContext::GraphicsContext()
-    : _render_context(Ark::instance().renderController()->renderEngine()->context()), _render_controller(Ark::instance().renderController())
+    : _render_backend_info(Ark::instance().renderController()->renderEngine()->context()), _render_controller(Ark::instance().renderController())
 {
 }
 
-GraphicsContext::GraphicsContext(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
-    : _render_context(std::move(renderContext)), _render_controller(std::move(renderController)), _tick(0)
+GraphicsContext::GraphicsContext(sp<RenderBackendInfo> renderBackendInfo, sp<RenderController> renderController)
+    : _render_backend_info(std::move(renderBackendInfo)), _render_controller(std::move(renderController)), _tick(0)
 {
 }
 
@@ -47,17 +47,17 @@ const sp<Recycler>& GraphicsContext::recycler() const
 
 Traits& GraphicsContext::traits()
 {
-    return _render_context->traits();
+    return _render_backend_info->traits();
 }
 
 const Traits& GraphicsContext::traits() const
 {
-    return _render_context->traits();
+    return _render_backend_info->traits();
 }
 
-const sp<RenderEngineContext>& GraphicsContext::renderContext() const
+const sp<RenderBackendInfo>& GraphicsContext::renderBackendInfo() const
 {
-    return _render_context;
+    return _render_backend_info;
 }
 
 uint32_t GraphicsContext::tick() const

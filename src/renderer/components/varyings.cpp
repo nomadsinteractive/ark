@@ -211,7 +211,7 @@ Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineLayout, Allo
             _slot_strides[k] = v.stride();
     }
 
-    Array<Divided>::Borrowed buffers(reinterpret_cast<Divided*>(allocator.sbrkSpan(sizeof(Divided) * _slot_strides.size()).buf()), _slot_strides.size());
+    Array<Divided>::View buffers(reinterpret_cast<Divided*>(allocator.sbrkSpan(sizeof(Divided) * _slot_strides.size()).buf()), _slot_strides.size());
 
     size_t idx = 0;
     for(const auto& [i, j] : _slot_strides)
@@ -250,7 +250,7 @@ Varyings::BUILDER::UploaderBuilder::UploaderBuilder(BeanFactory& factory, const 
 {
 }
 
-Varyings::Snapshot::Snapshot(const Array<Divided>::Borrowed& buffers)
+Varyings::Snapshot::Snapshot(const Array<Divided>::View& buffers)
     : _buffers(buffers)
 {
 }
@@ -292,7 +292,7 @@ Varyings::Divided::Divided()
 {
 }
 
-Varyings::Divided::Divided(const uint32_t divisor, ByteArray::Borrowed content)
+Varyings::Divided::Divided(const uint32_t divisor, ByteArray::View content)
     : _divisor(divisor), _content(std::move(content)), _slot_snapshot(nullptr)
 {
 }

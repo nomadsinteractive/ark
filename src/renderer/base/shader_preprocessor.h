@@ -6,7 +6,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 #include "renderer/base/uniform.h"
 
 namespace ark {

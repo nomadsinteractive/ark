@@ -7,7 +7,7 @@
 #include "graphics/base/bitmap.h"
 
 #include "renderer/base/attribute.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/util/render_util.h"
 

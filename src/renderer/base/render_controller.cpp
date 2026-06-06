@@ -12,7 +12,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/model.h"
 #include "renderer/base/recycler.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
 #include "renderer/inf/renderer_factory.h"
@@ -186,7 +186,7 @@ Buffer::Snapshot RenderController::PrimitiveIndexBuffer::snapshot(RenderControll
     return _buffer.snapshot(size);
 }
 
-RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
+RenderController::RenderController(const sp<RenderBackend>& renderEngine, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
     : _render_engine(renderEngine), _recycler(sp<Recycler>::make()), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _gba(*this)
 {
 }
@@ -268,7 +268,7 @@ const sp<Recycler>& RenderController::recycler() const
     return _recycler;
 }
 
-const sp<RenderEngine>& RenderController::renderEngine() const
+const sp<RenderBackend>& RenderController::renderEngine() const
 {
     return _render_engine;
 }

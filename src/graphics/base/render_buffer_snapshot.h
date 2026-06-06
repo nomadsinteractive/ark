@@ -9,8 +9,8 @@ namespace ark {
 struct RenderBufferSnapshot {
 
     struct UBOSnapshot {
-        ByteArray::Borrowed _dirty_flags;
-        ByteArray::Borrowed _buffer;
+        ByteArray::View _dirty_flags;
+        ByteArray::View _buffer;
     };
 
     Vector<UBOSnapshot> _ubos;

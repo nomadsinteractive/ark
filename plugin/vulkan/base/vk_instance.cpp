@@ -9,8 +9,8 @@
 #include "vulkan/util/vk_util.h"
 
 #include "app/base/application_manifest.h"
-#include "renderer/base/render_engine.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend.h"
+#include "renderer/base/render_backend_info.h"
 
 #if defined(ARK_FLAG_BUILD_TYPE) && !defined(ARK_PLATFORM_ANDROID)
 #define ARK_VK_DEBUG_LAYER_ENABLED  1
@@ -83,7 +83,7 @@ VKInstance::~VKInstance()
     vkDestroyInstance(_instance, nullptr);
 }
 
-void VKInstance::initialize(const RenderEngine& renderEngine)
+void VKInstance::initialize(const RenderBackend& renderEngine)
 {
     VkApplicationInfo appInfo = {VK_STRUCTURE_TYPE_APPLICATION_INFO};
     appInfo.pApplicationName = Ark::instance().manifest()->name().c_str();

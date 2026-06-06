@@ -18,7 +18,7 @@
 #include "graphics/impl/vec/vec2_impl.h"
 
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/renderer_factory.h"
 
@@ -162,7 +162,7 @@ uint32_t ApplicationContext::AppClock::onTick()
     return tick;
 }
 
-ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
+ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderBackend> renderEngine)
     : _steady_clock(sp<Variable<uint64_t>>::make<SteadyClock>()), _cursor_position(sp<Vec2Impl>::make()), _quitting(sp<Boolean::Impl>::make(false)), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
       _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _sys_clock(sp<Clock>::make(_steady_clock)),
       _worker_strategy(sp<ExecutorWorkerStrategy>::make()), _main_executor(sp<ExecutorScheduled>::make()), _string_table(Global<StringTable>()), _background_color(0, 0, 0, 1.0f), _paused(false)
@@ -265,7 +265,7 @@ void ApplicationContext::setApplicationEventListener(sp<ApplicationEventListener
     _application_event_listener = std::move(applicationEventListener);
 }
 
-const sp<RenderEngine>& ApplicationContext::renderEngine() const
+const sp<RenderBackend>& ApplicationContext::renderEngine() const
 {
     return _render_engine;
 }

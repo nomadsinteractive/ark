@@ -42,7 +42,7 @@ void IrradianceCubemapUploader::initialize(GraphicsContext& graphicsContext, Tex
     const Bitmap uploadingBitmap(n, n, n * 4 * 4, 4, false);
     std::vector<sp<ByteArray>> imagedata;
     for(uint32_t i = 0; i < 6; ++i)
-        imagedata.push_back(sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(faceList[imageFaceIndices[i]].m_data), faceList[imageFaceIndices[i]].m_dataSize));
+        imagedata.push_back(sp<ByteArray::View>::make(reinterpret_cast<uint8_t*>(faceList[imageFaceIndices[i]].m_data), faceList[imageFaceIndices[i]].m_dataSize));
     delegate.uploadBitmap(graphicsContext, uploadingBitmap, imagedata);
 
     ::cmft::imageUnload(input);

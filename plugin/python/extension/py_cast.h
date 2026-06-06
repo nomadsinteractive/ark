@@ -443,7 +443,7 @@ template<> inline Optional<sp<Mat4>> PyCast::toSharedPtrImpl<Mat4>(PyObject* obj
 template<> inline Optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyObject* object) {
     if(PyBytes_Check(object)) {
         Py_ssize_t len = PyBytes_Size(object);
-        return sp<ByteArray>::make<ByteArray::Borrowed>(reinterpret_cast<uint8_t*>(PyBytes_AsString(object)), len);
+        return sp<ByteArray>::make<ByteArray::View>(reinterpret_cast<uint8_t*>(PyBytes_AsString(object)), len);
     }
     if(PyObject_CheckBuffer(object)) {
         Py_buffer buf;

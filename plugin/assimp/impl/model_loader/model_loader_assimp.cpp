@@ -17,7 +17,7 @@
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/model.h"
 #include "renderer/base/node.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
 
@@ -111,9 +111,9 @@ bitmap ModelImporterAssimp::loadBitmap(const sp<BitmapLoaderBundle>& imageResour
     if(tex->mHeight == 0)
     {
         const sp<BitmapLoader>& bitmapLoader = imageResource->getLoader(tex->achFormatHint);
-        return bitmapLoader->load(sp<BytearrayReadable>::make(sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth)));
+        return bitmapLoader->load(sp<BytearrayReadable>::make(sp<ByteArray::View>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth)));
     }
-    return bitmap::make(tex->mWidth, tex->mHeight, tex->mWidth * 4, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth * tex->mHeight * 4));
+    return bitmap::make(tex->mWidth, tex->mHeight, tex->mWidth * 4, 4, sp<ByteArray::View>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth * tex->mHeight * 4));
 }
 
 void ModelImporterAssimp::loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex)

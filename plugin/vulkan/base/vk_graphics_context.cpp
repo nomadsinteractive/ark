@@ -21,7 +21,7 @@ VkClearColorValue toVkClearColorValue(const V4& rgba)
 
 class MainRenderPassPhrase final : public VKGraphicsContext::RenderPassPhrase {
 public:
-    MainRenderPassPhrase(const RenderEngineContext::Resolution& resolution, const sp<VKRenderer>& renderer, const VkCommandBuffer commandBuffer, const VkFramebuffer framebuffer, const V4& backgroundColor)
+    MainRenderPassPhrase(const RenderBackendInfo::Resolution& resolution, const sp<VKRenderer>& renderer, const VkCommandBuffer commandBuffer, const VkFramebuffer framebuffer, const V4& backgroundColor)
         : RenderPassPhrase(resolution, 1, commandBuffer), _renderer(renderer), _framebuffer(framebuffer), _clear_color_value(toVkClearColorValue(backgroundColor)) {
     }
 
@@ -112,7 +112,7 @@ void VKGraphicsContext::begin(const uint32_t imageId, const V4& backgroundColor)
     const Vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
 
     VkCommandBuffer commandBuffer = commandBuffers.at(imageId);
-    const RenderEngineContext::Resolution resolution = {_render_target->width(), _render_target->height()};
+    const RenderBackendInfo::Resolution resolution = {_render_target->width(), _render_target->height()};
     _state_stack.emplace(sp<RenderPassPhrase>::make<MainRenderPassPhrase>(resolution, _renderer, commandBuffer, renderTarget.frameBuffers().at(imageId), backgroundColor), commandBuffer, true);
 
     constexpr VkCommandBufferBeginInfo cmdBufInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
@@ -132,12 +132,12 @@ VKSubmitQueue& VKGraphicsContext::submitQueue()
     return _submit_queue;
 }
 
-VKGraphicsContext::RenderPassPhrase::RenderPassPhrase(const RenderEngineContext::Resolution resolution, const uint32_t colorAttachmentCount, const VkCommandBuffer commandBuffer)
+VKGraphicsContext::RenderPassPhrase::RenderPassPhrase(const RenderBackendInfo::Resolution resolution, const uint32_t colorAttachmentCount, const VkCommandBuffer commandBuffer)
     : _resolution(resolution), _color_attachment_count(colorAttachmentCount), _command_buffer(commandBuffer)
 {
 }
 
-const RenderEngineContext::Resolution& VKGraphicsContext::RenderPassPhrase::resolution() const
+const RenderBackendInfo::Resolution& VKGraphicsContext::RenderPassPhrase::resolution() const
 {
     return _resolution;
 }

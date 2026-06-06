@@ -35,7 +35,7 @@ limitations under the License.
 #include "core/types/optional.h"
 #include "core/util/asset_bundle_type.h"
 
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 #include "renderer/inf/renderer_factory.h"
 
 #include "app/base/application_bundle.h"
@@ -46,7 +46,7 @@ limitations under the License.
 
 #include "generated/ark_bootstrap.h"
 #include "generated/base_plugin.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 
 namespace ark {
 
@@ -110,7 +110,7 @@ sp<RendererFactory> chooseRenderFactory(const Vector<sp<RendererFactory>>& rende
     return nullptr;
 }
 
-sp<RenderEngine> doCreateRenderEngine(BeanFactory& beanFactory, const ApplicationManifest::Renderer& renderer)
+sp<RenderBackend> doCreateRenderEngine(BeanFactory& beanFactory, const ApplicationManifest::Renderer& renderer)
 {
     Vector<sp<RendererFactory>> rendererFactories;
     for(const auto& [k, v] : beanFactory.makeValueBuilderList<RendererFactory>())
@@ -123,7 +123,7 @@ sp<RenderEngine> doCreateRenderEngine(BeanFactory& beanFactory, const Applicatio
         rendererInUse._version = enums::RENDERER_VERSION_VULKAN_13;
 
     if(sp<RendererFactory> rendererFactory = chooseRenderFactory(rendererFactories, rendererInUse._backend))
-        return sp<RenderEngine>::make(rendererInUse, std::move(rendererFactory));
+        return sp<RenderBackend>::make(rendererInUse, std::move(rendererFactory));
     return nullptr;
 }
 
@@ -135,10 +135,10 @@ void loadPlugins(const ApplicationManifest& manifest)
         pluginManager->load(i);
 }
 
-sp<RenderEngine> createRenderEngine(BeanFactory& beanFactory, const ApplicationManifest::Renderer& renderer)
+sp<RenderBackend> createRenderEngine(BeanFactory& beanFactory, const ApplicationManifest::Renderer& renderer)
 {
     if(renderer._class)
-        return sp<RenderEngine>::make(renderer, beanFactory.ensure<RendererFactory>(renderer._class, {}));
+        return sp<RenderBackend>::make(renderer, beanFactory.ensure<RendererFactory>(renderer._class, {}));
 
     if(renderer._version != enums::RENDERER_VERSION_AUTO)
         return doCreateRenderEngine(beanFactory, renderer);
@@ -147,7 +147,7 @@ sp<RenderEngine> createRenderEngine(BeanFactory& beanFactory, const ApplicationM
     for(const enums::RenderingBackendBit i : Platform::getPreferedRenderBackends())
     {
         rendererInUse._backend = i;
-        if(sp<RenderEngine> renderEngine = doCreateRenderEngine(beanFactory, rendererInUse))
+        if(sp<RenderBackend> renderEngine = doCreateRenderEngine(beanFactory, rendererInUse))
             return renderEngine;
     }
 
@@ -180,7 +180,7 @@ sp<Camera::Delegate> makeCameraDelegate(const enums::CoordinateSystem coordinate
 }
 
 
-sp<ApplicationContext> createApplicationContext(sp<ApplicationBundle> appResource, sp<RenderEngine> renderEngine)
+sp<ApplicationContext> createApplicationContext(sp<ApplicationBundle> appResource, sp<RenderBackend> renderEngine)
 {
     const Global<PluginManager> pluginManager;
     const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(std::move(appResource), std::move(renderEngine));
@@ -336,7 +336,7 @@ void Ark::initialize(sp<ApplicationManifest> manifest)
     sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("."));
 
     const sp<BeanFactory> factory = createBeanFactory(sp<Dictionary<document>>::make<DictionaryImpl<document>>());
-    sp<RenderEngine> renderEngine = createRenderEngine(factory, _manifest->renderer());
+    sp<RenderBackend> renderEngine = createRenderEngine(factory, _manifest->renderer());
     _application_context = createApplicationContext(std::move(applicationBundle), std::move(renderEngine));
     _application_context->initialize(_manifest->resourceLoader());
 }
@@ -430,7 +430,7 @@ Camera Ark::createCamera(enums::CoordinateSystem appCoordinateSystem) const
     if(appCoordinateSystem == enums::COORDINATE_SYSTEM_DEFAULT)
         appCoordinateSystem = _manifest->renderer()._coordinate_system;
 
-    const RenderEngineContext& renderEngineContext = _application_context->renderController()->renderEngine()->context();
+    const RenderBackendInfo& renderEngineContext = _application_context->renderController()->renderEngine()->context();
     if(appCoordinateSystem == enums::COORDINATE_SYSTEM_DEFAULT)
         appCoordinateSystem = renderEngineContext.viewportCoordinateSystem();
 

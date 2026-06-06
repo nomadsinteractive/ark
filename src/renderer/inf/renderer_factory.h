@@ -31,13 +31,13 @@ public:
         return _features;
     }
 
-    virtual void onSurfaceCreated(RenderEngine& renderEngine) = 0;
+    virtual void onSurfaceCreated(RenderBackend& renderEngine) = 0;
 
-    virtual sp<RenderEngineContext> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) = 0;
+    virtual sp<RenderBackendInfo> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) = 0;
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Usage usage) = 0;
     virtual sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;
-    virtual sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) = 0;
+    virtual sp<RenderView> createRenderView(const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController) = 0;
     virtual sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) = 0;
 
 protected:

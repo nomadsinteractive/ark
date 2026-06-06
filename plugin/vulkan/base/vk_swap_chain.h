@@ -15,7 +15,7 @@ namespace ark::plugin::vulkan {
 
 class VKSwapChain {
 public:
-    VKSwapChain(const RenderEngine& renderEngine, sp<VKDevice> device);
+    VKSwapChain(const RenderBackend& renderEngine, sp<VKDevice> device);
     ~VKSwapChain();
 
     uint32_t width() const;
@@ -43,7 +43,7 @@ public:
     sp<Bitmap> screenshot() const;
 
 private:
-    void initialize(const RenderEngine& renderEngine);
+    void initialize(const RenderBackend& renderEngine);
 
     void setupDepthStencil();
     void setupRenderPass();

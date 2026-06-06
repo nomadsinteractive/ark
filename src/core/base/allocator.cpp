@@ -68,7 +68,7 @@ uint8_t* Allocator::_sbrk(const size_t size)
     }
 }
 
-ByteArray::Borrowed Allocator::sbrkSpan(size_t size, const size_t alignment)
+ByteArray::View Allocator::sbrkSpan(size_t size, const size_t alignment)
 {
     return {sbrk(size, alignment), size};
 }

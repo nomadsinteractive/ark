@@ -30,7 +30,7 @@ private:
 public:
     struct Divided {
         Divided();
-        Divided(uint32_t divisor, ByteArray::Borrowed content);
+        Divided(uint32_t divisor, ByteArray::View content);
 
         explicit operator bool() const;
 
@@ -39,18 +39,18 @@ public:
 
         uint32_t _divisor;
 
-        ByteArray::Borrowed _content;
+        ByteArray::View _content;
         SlotSnapshot* _slot_snapshot;
     };
 
     struct Snapshot {
         Snapshot() = default;
-        Snapshot(const Array<Divided>::Borrowed& buffers);
+        Snapshot(const Array<Divided>::View& buffers);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
         void apply(const Snapshot* defaults = nullptr);
 
-        Array<Divided>::Borrowed _buffers;
+        Array<Divided>::View _buffers;
         Map<HashId, Snapshot> _sub_properties;
 
         explicit operator bool() const;

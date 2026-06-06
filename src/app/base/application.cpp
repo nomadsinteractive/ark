@@ -12,8 +12,8 @@
 #include "graphics/base/viewport.h"
 #include "graphics/inf/render_view.h"
 
-#include "renderer/base/render_engine.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend.h"
+#include "renderer/base/render_backend_info.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_delegate.h"

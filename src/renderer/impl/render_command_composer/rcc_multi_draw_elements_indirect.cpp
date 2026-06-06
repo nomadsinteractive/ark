@@ -120,9 +120,9 @@ DrawingContext RCCMultiDrawElementsIndirect::compose(const RenderRequest& render
     return snapshot.toDrawingContext(renderRequest, vertices.snapshot(), _indices.snapshot(), 0, std::move(drawParams));
 }
 
-ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const RenderRequest& renderRequest) const
+ByteArray::View RCCMultiDrawElementsIndirect::makeIndirectBuffer(const RenderRequest& renderRequest) const
 {
-    ByteArray::Borrowed cmds = renderRequest.allocator().sbrkSpan(_indirect_cmds.size() * sizeof(DrawingParams::DrawElementsIndirectCommand));
+    ByteArray::View cmds = renderRequest.allocator().sbrkSpan(_indirect_cmds.size() * sizeof(DrawingParams::DrawElementsIndirectCommand));
     DrawingParams::DrawElementsIndirectCommand* pcmds = reinterpret_cast<DrawingParams::DrawElementsIndirectCommand*>(cmds.buf());
     uint32_t baseInstance = 0;
     for(const IndirectCmds& i : _indirect_cmds.values())
@@ -180,7 +180,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                     }
                     if(hasMaterialId && mesh->material())
                         writer.writeAttribute(mesh->material()->id(), Attribute::USAGE_MATERIAL_ID);
-                    if(ByteArray::Borrowed divided = snapshot._varyings_snapshot.getDivided(1)._content; divided.length() > attributeStride && writer.stride() > attributeStride)
+                    if(ByteArray::View divided = snapshot._varyings_snapshot.getDivided(1)._content; divided.length() > attributeStride && writer.stride() > attributeStride)
                     {
                         CHECK(writer.stride() == divided.length(), "RenderObject has more custom attributes to fit in shader's vertex descriptors");
                         writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);

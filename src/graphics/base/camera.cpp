@@ -17,7 +17,7 @@
 #include "graphics/util/mat4_type.h"
 #include "graphics/util/vec3_type.h"
 
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_manifest.h"
@@ -186,7 +186,7 @@ private:
 
 class WorldPosition final : public Vec3 {
 public:
-    WorldPosition(sp<RenderEngine> renderEngine, sp<Mat4> viewProjectionInverse, sp<Vec3> screenPosition)
+    WorldPosition(sp<RenderBackend> renderEngine, sp<Mat4> viewProjectionInverse, sp<Vec3> screenPosition)
         : _render_engine(std::move(renderEngine)), _view_projecttion_inverse(std::move(viewProjectionInverse)), _screen_position(std::move(screenPosition))
     {
     }
@@ -204,7 +204,7 @@ public:
     }
 
 private:
-    sp<RenderEngine> _render_engine;
+    sp<RenderBackend> _render_engine;
     sp<Mat4> _view_projecttion_inverse;
     sp<Vec3> _screen_position;
 };

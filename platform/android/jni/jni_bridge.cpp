@@ -12,7 +12,7 @@
 #include "graphics/traits/size.h"
 
 #include "renderer/base/render_engine.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_engine_info.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_delegate_impl.h"

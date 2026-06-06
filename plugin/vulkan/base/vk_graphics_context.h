@@ -9,7 +9,7 @@
 #include "vulkan/base/vk_submit_queue.h"
 
 #include "platform/vulkan/vulkan.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 
 namespace ark::plugin::vulkan {
 
@@ -25,10 +25,10 @@ public:
 
     class RenderPassPhrase {
     public:
-        RenderPassPhrase(RenderEngineContext::Resolution resolution, uint32_t colorAttachmentCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+        RenderPassPhrase(RenderBackendInfo::Resolution resolution, uint32_t colorAttachmentCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
         virtual ~RenderPassPhrase() = default;
 
-        const RenderEngineContext::Resolution& resolution() const;
+        const RenderBackendInfo::Resolution& resolution() const;
         uint32_t colorAttachmentCount() const;
         VkCommandBuffer vkCommandBuffer() const;
 
@@ -38,7 +38,7 @@ public:
         virtual VkRenderPass begin(VkCommandBuffer commandBuffer) = 0;
 
     protected:
-        RenderEngineContext::Resolution _resolution;
+        RenderBackendInfo::Resolution _resolution;
         uint32_t _color_attachment_count;
         VkCommandBuffer _command_buffer;
     };

@@ -10,8 +10,8 @@
 #include "graphics/base/viewport.h"
 
 #include "renderer/base/render_target.h"
-#include "renderer/base/render_engine.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend.h"
+#include "renderer/base/render_backend_info.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/texture.h"
 #include "renderer/util/render_util.h"
@@ -33,7 +33,7 @@ namespace ark::plugin::opengl {
 
 namespace {
 
-void setVersion(const enums::RendererVersion version, RenderEngineContext& glContext)
+void setVersion(const enums::RendererVersion version, RenderBackendInfo& glContext)
 {
     LOGD("Choose GLVersion = %d", version);
     glContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactoryGLES30>());
@@ -47,15 +47,15 @@ RendererFactoryOpenGL::RendererFactoryOpenGL()
 {
 }
 
-sp<RenderEngineContext> RendererFactoryOpenGL::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
+sp<RenderBackendInfo> RendererFactoryOpenGL::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f), enums::COORDINATE_SYSTEM_RHS, enums::COORDINATE_SYSTEM_LHS, enums::NDC_DEPTH_RANGE_NEGATIVE_ONE_TO_ONE);
+    const sp<RenderBackendInfo> renderContext = sp<RenderBackendInfo>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f), enums::COORDINATE_SYSTEM_RHS, enums::COORDINATE_SYSTEM_LHS, enums::NDC_DEPTH_RANGE_NEGATIVE_ONE_TO_ONE);
     if(renderer._version != enums::RENDERER_VERSION_AUTO)
         setVersion(renderer._version, renderContext);
     return renderContext;
 }
 
-void RendererFactoryOpenGL::onSurfaceCreated(RenderEngine& renderEngine)
+void RendererFactoryOpenGL::onSurfaceCreated(RenderBackend& renderEngine)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     glbinding::Binding::initialize(nullptr);
@@ -69,7 +69,7 @@ void RendererFactoryOpenGL::onSurfaceCreated(RenderEngine& renderEngine)
     }
 }
 
-sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
+sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController)
 {
     return sp<RenderView>::make<RenderViewOpenGL>(renderContext, renderController);
 }

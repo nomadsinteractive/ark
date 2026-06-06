@@ -9,7 +9,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/pipeline_bindings.h"
 
@@ -131,7 +131,7 @@ VkStencilOpState makeStencilState(const PipelineDescriptor::TraitStencilTestSepa
     return state;
 }
 
-bool isDirty(const ByteArray::Borrowed& dirtyFlags)
+bool isDirty(const ByteArray::View& dirtyFlags)
 {
     const size_t size = dirtyFlags.length();
     const uint8_t* buf = dirtyFlags.buf();

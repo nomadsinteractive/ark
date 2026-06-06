@@ -6,7 +6,7 @@
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 #include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/impl/draw_decorator/draw_decorator_factory_compute.h"
 #include "renderer/impl/draw_decorator/draw_decorator_factory_compound.h"

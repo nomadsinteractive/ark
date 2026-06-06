@@ -15,12 +15,12 @@ public:
     RendererFactoryVulkan();
     ~RendererFactoryVulkan() override = default;
 
-    sp<RenderEngineContext> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) override;
-    void onSurfaceCreated(RenderEngine& renderEngine) override;
+    sp<RenderBackendInfo> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) override;
+    void onSurfaceCreated(RenderBackend& renderEngine) override;
 
     sp<Buffer::Delegate> createBuffer(Buffer::Usage usage) override;
     sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure) override;
-    sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
+    sp<RenderView> createRenderView(const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController) override;
     sp<PipelineFactory> createPipelineFactory() override;
     sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
 

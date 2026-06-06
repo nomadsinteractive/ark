@@ -21,7 +21,7 @@ namespace ark::plugin::vulkan {
 
 namespace {
 
-RenderEngineContext::Resolution getFramebufferResolution(const RenderTarget::Configure& configure)
+RenderBackendInfo::Resolution getFramebufferResolution(const RenderTarget::Configure& configure)
 {
     const auto [width, height] = RenderUtil::getRenderTargetResolution(configure);
     return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};

@@ -9,7 +9,7 @@
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 
 #include "platform/gl/gl.h"
 
@@ -17,7 +17,7 @@
 
 namespace ark::plugin::opengl {
 
-RenderViewOpenGL::RenderViewOpenGL(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
+RenderViewOpenGL::RenderViewOpenGL(sp<RenderBackendInfo> renderContext, sp<RenderController> renderController)
     : _graphics_context(new GraphicsContext(std::move(renderContext), std::move(renderController)))
 {
 }
@@ -49,7 +49,7 @@ void RenderViewOpenGL::onSurfaceCreated()
 
 void RenderViewOpenGL::onSurfaceChanged(uint32_t width, uint32_t height)
 {
-    _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
+    _graphics_context.reset(new GraphicsContext(_graphics_context->renderBackendInfo(), _graphics_context->renderController()));
     initialize(width, height);
 }
 
@@ -65,7 +65,7 @@ void RenderViewOpenGL::onRenderFrame(const V4& backgroundColor, RenderCommand& r
 sp<Bitmap> RenderViewOpenGL::doScreenshot()
 {
     constexpr uint8_t channels = 3;
-    const auto [width, height] = _graphics_context->renderContext()->displayResolution();
+    const auto [width, height] = _graphics_context->renderBackendInfo()->displayResolution();
     const uint32_t rowBytes = width * channels;
 
     bytearray bytes = sp<ByteArray>::make<ByteArray::Allocated>(rowBytes * height);

@@ -14,9 +14,9 @@
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 #include "renderer/inf/renderer_factory.h"
 
 #include "app/base/application_context.h"
@@ -226,8 +226,8 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[i];
 
-        ByteArray::Borrowed vb = renderRequest.allocator().sbrkSpan(static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
-        ByteArray::Borrowed ib = renderRequest.allocator().sbrkSpan(static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));
+        ByteArray::View vb = renderRequest.allocator().sbrkSpan(static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
+        ByteArray::View ib = renderRequest.allocator().sbrkSpan(static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));
 
         memcpy(vb.buf(), cmd_list->VtxBuffer.Data, vb.length());
         memcpy(ib.buf(), cmd_list->IdxBuffer.Data, ib.length());

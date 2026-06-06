@@ -4,7 +4,7 @@
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_bindings.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 
 #include "opengl/base/gl_pipeline.h"
 
@@ -12,7 +12,7 @@ namespace ark::plugin::opengl {
 
 sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, Map<enums::ShaderStageBit, String> stages)
 {
-    const sp<RenderEngineContext>& renderContext = graphicsContext.renderContext();
+    const sp<RenderBackendInfo>& renderContext = graphicsContext.renderBackendInfo();
     return sp<Pipeline>::make<GLPipeline>(graphicsContext.recycler(), renderContext->getGLSLVersion(), std::move(stages), pipelineBindings);
 }
 

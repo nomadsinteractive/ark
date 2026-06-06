@@ -10,7 +10,7 @@
 #include "graphics/base/surface_controller.h"
 #include "graphics/impl/vec/vec2_impl.h"
 
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 #include "renderer/inf/renderer_factory.h"
 
 #include "app/base/application.h"
@@ -139,7 +139,7 @@ sp<Vec2> ApplicationFacade::cursorPosition() const
 
 sp<Vec2> ApplicationFacade::toFragCoord(sp<Vec2> xy, sp<Size> resolution) const
 {
-    const RenderEngine& renderEngine = _context->renderController()->renderEngine();
+    const RenderBackend& renderEngine = _context->renderController()->renderEngine();
     const Viewport& viewport = renderEngine.viewport();
     if(renderEngine.isViewportFlipped())
         xy = sp<Vec2>::make<FragCoordRevert>(std::move(xy), viewport.height());

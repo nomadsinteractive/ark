@@ -51,7 +51,7 @@ DrawingContext RCCDrawElementsInstanced::compose(const RenderRequest& renderRequ
         writer.next();
         if(hasModelMatrix)
             writer.writeAttribute(MatrixUtil::translate({}, snapshot._position) * MatrixUtil::scale(snapshot._transform->toMatrix(snapshot._transform_snapshot), snapshot._size), Attribute::USAGE_MODEL_MATRIX);
-        ByteArray::Borrowed divided = snapshot._varyings_snapshot.getDivided(1)._content;
+        ByteArray::View divided = snapshot._varyings_snapshot.getDivided(1)._content;
         if(divided.length() > attributeStride)
             writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);
     }

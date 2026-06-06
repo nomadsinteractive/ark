@@ -18,7 +18,7 @@
 
 namespace ark::plugin::vulkan {
 
-RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
+RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController)
     : _renderer(renderer), _graphics_context(new GraphicsContext(renderContext, renderController))
 {
 }
@@ -36,7 +36,7 @@ void RenderViewVulkan::onSurfaceChanged(const uint32_t width, const uint32_t hei
     if(_vk_graphics_context)
         _renderer->device()->waitIdle();
 
-    _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
+    _graphics_context.reset(new GraphicsContext(_graphics_context->renderBackendInfo(), _graphics_context->renderController()));
 
     _renderer->renderTarget()->onSurfaceChanged(width, height);
 

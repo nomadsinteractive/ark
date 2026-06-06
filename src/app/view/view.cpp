@@ -11,7 +11,7 @@
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 
 #include "app/base/application_context.h"
 #include "app/view/view_hierarchy.h"

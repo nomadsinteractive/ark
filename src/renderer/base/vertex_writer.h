@@ -54,7 +54,7 @@ private:
     const Transform::Snapshot* _transform_snapshot;
     V3 _translate;
 
-    ByteArray::Borrowed _varying_contents;
+    ByteArray::View _varying_contents;
 };
 
 }

@@ -49,7 +49,7 @@ void LatLongCubemapUploader::initialize(GraphicsContext& graphicsContext, Textur
     {
         ::cmft::Image& face = faceList[imageFaceIndices[i]];
         ::cmft::imageResize(face, n, n);
-        imagedata.push_back(sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(face.m_data), face.m_dataSize));
+        imagedata.push_back(sp<ByteArray::View>::make(reinterpret_cast<uint8_t*>(face.m_data), face.m_dataSize));
     }
     delegate.uploadBitmap(graphicsContext, Bitmap(n, n, n * 4 * 3, 3, false), imagedata);
 

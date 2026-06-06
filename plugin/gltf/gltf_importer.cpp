@@ -26,7 +26,7 @@
 #include "renderer/base/model.h"
 #include "renderer/base/node.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 #include "renderer/base/shader_data_type.h"
 
 namespace ark::plugin::gltf {

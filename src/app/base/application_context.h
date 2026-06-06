@@ -20,7 +20,7 @@ namespace ark {
 
 class ARK_API ApplicationContext {
 public:
-    ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine);
+    ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderBackend> renderEngine);
 
     sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args);
     sp<ResourceLoader> createResourceLoader(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -30,7 +30,7 @@ public:
     const sp<ApplicationEventListener>& applicationEventListener() const;
     void setApplicationEventListener(sp<ApplicationEventListener> applicationEventListener);
 
-    const sp<RenderEngine>& renderEngine() const;
+    const sp<RenderBackend>& renderEngine() const;
     const sp<RenderController>& renderController() const;
     const sp<ResourceLoader>& resourceLoader() const;
     const sp<Interpreter>& interpreter() const;
@@ -127,7 +127,7 @@ private:
     sp<ApplicationFacade> _application_facade;
     sp<ApplicationEventListener> _application_event_listener;
 
-    sp<RenderEngine> _render_engine;
+    sp<RenderBackend> _render_engine;
     sp<RenderController> _render_controller;
     sp<Clock> _sys_clock;
     Vector<AppClock> _app_clocks;

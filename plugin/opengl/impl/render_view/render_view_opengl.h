@@ -11,7 +11,7 @@ namespace ark::plugin::opengl {
 
 class RenderViewOpenGL final : public RenderView {
 public:
-    RenderViewOpenGL(sp<RenderEngineContext> renderContext, sp<RenderController> renderController);
+    RenderViewOpenGL(sp<RenderBackendInfo> renderContext, sp<RenderController> renderController);
     ~RenderViewOpenGL() override;
 
     void onSurfaceCreated() override;

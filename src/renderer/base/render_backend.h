@@ -28,7 +28,7 @@ typedef struct _NSWindow NSWindow;
 
 namespace ark {
 
-class ARK_API RenderEngine {
+class ARK_API RenderBackend {
 public:
     union PlatformInfo {
 #ifdef ARK_PLATFORM_WINDOWS
@@ -60,14 +60,14 @@ public:
     };
 
 public:
-    RenderEngine(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory);
+    RenderBackend(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory);
 
     enums::RendererVersion version() const;
     enums::CoordinateSystem viewportCoordinateSystem() const;
     enums::CoordinateSystem ndcCoordinateSystem() const;
 
     const sp<RendererFactory>& rendererFactory() const;
-    const sp<RenderEngineContext>& context() const;
+    const sp<RenderBackendInfo>& context() const;
 
     const Viewport& viewport() const;
 
@@ -87,15 +87,15 @@ public:
     sp<RenderView> createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const;
     sp<Pipeline> createPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<enums::ShaderStageBit, String> stages);
 
-    const PlatformInfo& info() const;
-    PlatformInfo& info();
+    const PlatformInfo& platformInfo() const;
+    PlatformInfo& platformInfo();
 
 private:
-    sp<RenderEngineContext> _render_context;
+    sp<RenderBackendInfo> _render_context;
     sp<RendererFactory> _renderer_factory;
     sp<PipelineFactory> _pipeline_factory;
     enums::CoordinateSystem _coordinate_system;
-    PlatformInfo _info;
+    PlatformInfo _platform_info;
 };
 
 }

@@ -71,7 +71,7 @@ private:
     };
 
 private:
-    ByteArray::Borrowed makeIndirectBuffer(const RenderRequest& renderRequest) const;
+    ByteArray::View makeIndirectBuffer(const RenderRequest& renderRequest) const;
     void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayerSnapshot& renderLayerSnapshot, bool reload);
 
     void reloadIndirectCommands(const RenderLayerSnapshot& snapshot);

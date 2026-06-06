@@ -69,7 +69,7 @@ public:
     }
 
     class Allocated;
-    class Borrowed;
+    class View;
     class Vector;
     class Sliced;
 
@@ -107,45 +107,44 @@ private:
 };
 
 
-template<typename T> class Array<T>::Borrowed final : public Array<T> {
+template<typename T> class Array<T>::View final : public Array<T> {
 public:
-    Borrowed()
-        : _data(nullptr), _length(0) {
+    View() {
     }
-    Borrowed(T* data, size_t length)
-        : _data(data), _length(length) {
+    View(T* data, const size_t length)
+        : _view(data, length) {
     }
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Borrowed);
+    View(const std::span<T> view)
+        : _view(view) {
+    }
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(View);
 
     size_t length() override {
-        return _length;
+        return _view.size();
     }
 
     T* buf() override {
-        return _data;
+        return _view.data();
     }
 
     size_t length() const {
-        return _length;
+        return _view.size();
     }
 
     const T* buf() const {
-        return _data;
+        return _view.data();
     }
 
-    T& at(size_t i) {
-        ASSERT(i < _length);
-        return _data[i];
+    T& at(const size_t i) {
+        return _view[i];
     }
 
-    const T& at(size_t i) const {
-        DASSERT(i < _length);
-        return _data[i];
+    const T& at(const size_t i) const {
+        return _view[i];
     }
 
 private:
-    T* _data;
-    size_t _length;
+    std::span<T> _view;
 };
 
 

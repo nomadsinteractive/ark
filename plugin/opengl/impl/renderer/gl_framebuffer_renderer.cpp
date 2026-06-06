@@ -7,7 +7,7 @@
 #include "renderer/base/render_target.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 
 #include "opengl/base/gl_framebuffer.h"
 
@@ -81,7 +81,7 @@ public:
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        const auto [width, height] = graphicsContext.renderContext()->displayResolution();
+        const auto [width, height] = graphicsContext.renderBackendInfo()->displayResolution();
         glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
     }
 

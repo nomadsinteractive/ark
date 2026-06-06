@@ -4,7 +4,7 @@
 
 #include "graphics/base/bitmap.h"
 
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 
 #include "vulkan/base/vk_device.h"
 #include "vulkan/base/vk_command_pool.h"
@@ -18,7 +18,7 @@ struct NSView;
 
 namespace ark::plugin::vulkan {
 
-VKSwapChain::VKSwapChain(const RenderEngine& renderEngine, sp<VKDevice> device)
+VKSwapChain::VKSwapChain(const RenderBackend& renderEngine, sp<VKDevice> device)
     : _device(std::move(device)), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0), _vsync(renderEngine.context()->renderer()._vsync)
 {
     _swap_chain.connect(_device->vkInstance(), _device->vkPhysicalDevice(), _device->vkLogicalDevice());
@@ -347,9 +347,9 @@ sp<Bitmap> VKSwapChain::screenshot() const
     return bitmap;
 }
 
-void VKSwapChain::initialize(const RenderEngine& renderContext)
+void VKSwapChain::initialize(const RenderBackend& renderContext)
 {
-    const RenderEngine::PlatformInfo& info = renderContext.info();
+    const RenderBackend::PlatformInfo& info = renderContext.platformInfo();
 #if defined(_WIN32)
     _swap_chain.initSurface(info.windows.hinstance, info.windows.window);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)

@@ -2,7 +2,6 @@
 
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/surface_controller.h"
-#include "graphics/inf/render_view.h"
 
 namespace ark {
 
@@ -24,11 +23,6 @@ Allocator& RenderRequest::allocator() const
 const sp<RenderCommandPipeline>& RenderRequest::renderCommandPipeLine() const
 {
     return _stub->_render_command_pipe_line;
-}
-
-RenderRequest::RenderRequest(sp<RenderRequest::Stub> stub)
-    : _stub(std::move(stub))
-{
 }
 
 void RenderRequest::addRenderCommand(sp<RenderCommand> renderCommand) const

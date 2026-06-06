@@ -32,9 +32,6 @@ public:
     };
 
 private:
-    RenderRequest(sp<Stub> stub);
-
-private:
     sp<Stub> _stub;
 
     friend struct Stub;

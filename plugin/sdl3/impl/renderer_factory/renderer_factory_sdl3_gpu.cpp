@@ -14,8 +14,8 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/render_engine.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend.h"
+#include "renderer/base/render_backend_info.h"
 #include "renderer/inf/snippet_factory.h"
 #include "renderer/inf/snippet.h"
 #include "renderer/util/render_util.h"
@@ -156,7 +156,7 @@ public:
     }
 };
 
-void setVersion(const enums::RendererVersion version, RenderEngineContext& vkContext)
+void setVersion(const enums::RendererVersion version, RenderBackendInfo& vkContext)
 {
     LOGD("Choose Renderer Version = %d", version);
     vkContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactorySDL3>());
@@ -247,7 +247,7 @@ private:
 
 class RenderViewSDL3_GPU final : public RenderView {
 public:
-    RenderViewSDL3_GPU(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
+    RenderViewSDL3_GPU(sp<RenderBackendInfo> renderContext, sp<RenderController> renderController)
         : _graphics_context(new GraphicsContext(std::move(renderContext), std::move(renderController))), _swapchain_depth_stencil_rt_initial{nullptr, 1.0f, SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE},
           _swapchain_depth_stencil_rt_blend{nullptr, 0.0f, SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_STORE}
     {
@@ -259,13 +259,13 @@ public:
 
     void onSurfaceChanged(const uint32_t width, const uint32_t height) override
     {
-        _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
+        _graphics_context.reset(new GraphicsContext(_graphics_context->renderBackendInfo(), _graphics_context->renderController()));
 
         const SDL3_GPU_Context& gpuContext = ensureGPUContext(_graphics_context);
         if(_swapchain_depth_stencil_rt_initial.texture)
             SDL_ReleaseGPUTexture(gpuContext._gpu_gevice, _swapchain_depth_stencil_rt_initial.texture);
 
-        const RenderEngineContext::Resolution& resolution = _graphics_context->renderContext()->displayResolution();
+        const RenderBackendInfo::Resolution& resolution = _graphics_context->renderBackendInfo()->displayResolution();
         const SDL_GPUTextureCreateInfo textureCreateInfo = {SDL_GPU_TEXTURETYPE_2D, SDL_GPU_TEXTUREFORMAT_D32_FLOAT, SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET, resolution.width, resolution.height, 1, 1};
         SDL_GPUTexture* texture = SDL_CreateGPUTexture(gpuContext._gpu_gevice, &textureCreateInfo);
         _swapchain_depth_stencil_rt_initial.texture = texture;
@@ -323,7 +323,7 @@ public:
     sp<Bitmap> doScreenshot() override
     {
         SDL_GPUDevice* gpuDevice = ensureGPUDevice(_graphics_context);
-        const RenderEngineContext::Resolution& resolution = _graphics_context->renderContext()->displayResolution();
+        const RenderBackendInfo::Resolution& resolution = _graphics_context->renderBackendInfo()->displayResolution();
         const uint32_t width = resolution.width;
         const uint32_t height = resolution.height;
         const uint32_t dataSize = width * height * 4;
@@ -415,7 +415,7 @@ RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
 {
 }
 
-void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
+void RendererFactorySDL3_GPU::onSurfaceCreated(RenderBackend& renderEngine)
 {
     const SDL_GPUShaderFormat shaderFormat = toGPUShaderFormat(renderEngine.context()->renderer()._backend);
     _gpu_device = SDL_CreateGPUDevice(
@@ -437,9 +437,9 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
     CHECK(success, "SDL_ClaimWindowForGPUDevice failed: %s", SDL_GetError());
 }
 
-sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
+sp<RenderBackendInfo> RendererFactorySDL3_GPU::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_LHS, enums::NDC_DEPTH_RANGE_ZERO_TO_ONE);
+    const sp<RenderBackendInfo> renderContext = sp<RenderBackendInfo>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_LHS, enums::NDC_DEPTH_RANGE_ZERO_TO_ONE);
     setVersion(renderer._backend == enums::RENDERING_BACKEND_AUTO ? enums::RENDERER_VERSION_VULKAN_13 : getRendererVersion(renderer._backend), renderContext);
     return renderContext;
 }
@@ -469,7 +469,7 @@ sp<PipelineFactory> RendererFactorySDL3_GPU::createPipelineFactory()
     return sp<PipelineFactory>::make<PipelineFactorySDL3_GPU>();
 }
 
-sp<RenderView> RendererFactorySDL3_GPU::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
+sp<RenderView> RendererFactorySDL3_GPU::createRenderView(const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController)
 {
     return sp<RenderView>::make<RenderViewSDL3_GPU>(renderContext, renderController);
 }

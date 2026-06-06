@@ -44,7 +44,7 @@ public:
     };
 
 public:
-    typedef std::pair<size_t, ByteArray::Borrowed> Strip;
+    typedef std::pair<size_t, ByteArray::View> Strip;
 
     class ARK_API Snapshot {
     public:
@@ -78,7 +78,7 @@ public:
 
         Snapshot toSnapshot(const Buffer& buffer);
 
-        void addStrip(size_t offset, ByteArray::Borrowed& content);
+        void addStrip(size_t offset, ByteArray::View& content);
 
         size_t _stride;
         size_t _size;
@@ -99,7 +99,7 @@ public:
     size_t size() const;
 
     Snapshot snapshot(size_t size) const;
-    Snapshot snapshot(const ByteArray::Borrowed& strip) const;
+    Snapshot snapshot(const ByteArray::View& strip) const;
     Snapshot snapshot(sp<Uploader> uploader = nullptr, size_t size = 0) const;
 
 //  [[script::bindings::property]]

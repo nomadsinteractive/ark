@@ -13,7 +13,7 @@ public:
     ~Allocator();
 
     uint8_t* sbrk(size_t size, size_t alignment = sizeof(void*));
-    ByteArray::Borrowed sbrkSpan(size_t size, size_t alignment = sizeof(void*));
+    ByteArray::View sbrkSpan(size_t size, size_t alignment = sizeof(void*));
 
 private:
     uint8_t* _sbrk(size_t size);

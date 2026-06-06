@@ -170,7 +170,7 @@ void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
     for(auto& [k, v] : stages)
         sources.emplace(k, std::move(v._source));
 
-    RenderEngine& renderEngine = Ark::instance().renderController()->renderEngine();
+    RenderBackend& renderEngine = Ark::instance().renderController()->renderEngine();
     if(const auto iter = sources.find(enums::SHADER_STAGE_BIT_COMPUTE); iter != sources.end() && sources.size() > 1)
     {
         _compute_pipeline = renderEngine.createPipeline(graphicsContext, *this, Map<enums::ShaderStageBit, String>{{iter->first, iter->second}});

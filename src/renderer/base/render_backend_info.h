@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/ark.h"
 #include "core/base/api.h"
 #include "core/base/string.h"
@@ -16,7 +14,7 @@
 
 namespace ark {
 
-class ARK_API RenderEngineContext {
+class ARK_API RenderBackendInfo {
 public:
     struct Resolution {
         uint32_t width;
@@ -24,7 +22,7 @@ public:
     };
 
 public:
-    RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport, enums::CoordinateSystem viewportCoordinateSystem, enums::CoordinateSystem ndcCoordinateSystem, enums::NDCDepthRange ndcDepthRange);
+    RenderBackendInfo(const ApplicationManifest::Renderer& renderer, const Viewport& viewport, enums::CoordinateSystem viewportCoordinateSystem, enums::CoordinateSystem ndcCoordinateSystem, enums::NDCDepthRange ndcDepthRange);
 
     const ApplicationManifest::Renderer& renderer() const;
 

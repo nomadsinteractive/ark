@@ -10,13 +10,13 @@ class RendererFactorySDL3_GPU final : public RendererFactory {
 public:
     RendererFactorySDL3_GPU();
 
-    void onSurfaceCreated(RenderEngine& renderEngine) override;
+    void onSurfaceCreated(RenderBackend& renderEngine) override;
 
-    sp<RenderEngineContext> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) override;
+    sp<RenderBackendInfo> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) override;
     sp<Buffer::Delegate> createBuffer(Buffer::Usage usage) override;
     sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure) override;
     sp<PipelineFactory> createPipelineFactory() override;
-    sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
+    sp<RenderView> createRenderView(const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController) override;
     sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
 
 private:

@@ -1,72 +1,72 @@
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 
 #include "renderer/inf/snippet_factory.h"
 
 namespace ark {
 
-RenderEngineContext::RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport, const enums::CoordinateSystem viewportCoordinateSystem, const enums::CoordinateSystem ndcCoordinateSystem, const enums::NDCDepthRange ndcDepthRange)
+RenderBackendInfo::RenderBackendInfo(const ApplicationManifest::Renderer& renderer, const Viewport& viewport, const enums::CoordinateSystem viewportCoordinateSystem, const enums::CoordinateSystem ndcCoordinateSystem, const enums::NDCDepthRange ndcDepthRange)
     : _renderer(renderer), _viewport(viewport), _viewport_coordinate_system(viewportCoordinateSystem), _ndc_coordinate_system(ndcCoordinateSystem), _ndc_depth_range(ndcDepthRange)
 {
 }
 
-const ApplicationManifest::Renderer& RenderEngineContext::renderer() const
+const ApplicationManifest::Renderer& RenderBackendInfo::renderer() const
 {
     return _renderer;
 }
 
-enums::RendererVersion RenderEngineContext::version() const
+enums::RendererVersion RenderBackendInfo::version() const
 {
     return _renderer._version;
 }
 
-void RenderEngineContext::setVersion(const enums::RendererVersion version)
+void RenderBackendInfo::setVersion(const enums::RendererVersion version)
 {
     _renderer._version = version;
 }
 
-const Viewport& RenderEngineContext::viewport() const
+const Viewport& RenderBackendInfo::viewport() const
 {
     return _viewport;
 }
 
-void RenderEngineContext::setViewport(const Viewport& viewport)
+void RenderBackendInfo::setViewport(const Viewport& viewport)
 {
     _viewport = viewport;
     _display_unit = V2(_display_resolution.width / _viewport.width(), _display_resolution.height / _viewport.height());
 }
 
-enums::CoordinateSystem RenderEngineContext::viewportCoordinateSystem() const
+enums::CoordinateSystem RenderBackendInfo::viewportCoordinateSystem() const
 {
     return _viewport_coordinate_system;
 }
 
-enums::CoordinateSystem RenderEngineContext::ndcCoordinateSystem() const
+enums::CoordinateSystem RenderBackendInfo::ndcCoordinateSystem() const
 {
     return _ndc_coordinate_system;
 }
 
-enums::NDCDepthRange RenderEngineContext::ndcDepthRange() const
+enums::NDCDepthRange RenderBackendInfo::ndcDepthRange() const
 {
     return _ndc_depth_range;
 }
 
-const RenderEngineContext::Resolution& RenderEngineContext::displayResolution() const
+const RenderBackendInfo::Resolution& RenderBackendInfo::displayResolution() const
 {
     return _display_resolution;
 }
 
-void RenderEngineContext::setDisplayResolution(const Resolution& displayResolution)
+void RenderBackendInfo::setDisplayResolution(const Resolution& displayResolution)
 {
     _display_resolution = displayResolution;
     _display_unit = V2(_display_resolution.width / _viewport.width(), _display_resolution.height / _viewport.height());
 }
 
-const V2& RenderEngineContext::displayUnit() const
+const V2& RenderBackendInfo::displayUnit() const
 {
     return _display_unit;
 }
 
-uint32_t RenderEngineContext::getGLSLVersion() const
+uint32_t RenderBackendInfo::getGLSLVersion() const
 {
     switch(_renderer._version) {
     case enums::RENDERER_VERSION_OPENGL_30:
@@ -91,24 +91,24 @@ uint32_t RenderEngineContext::getGLSLVersion() const
     return 110;
 }
 
-Traits& RenderEngineContext::traits()
+Traits& RenderBackendInfo::traits()
 {
     return _traits;
 }
 
-const Traits& RenderEngineContext::traits() const
+const Traits& RenderBackendInfo::traits() const
 {
     return _traits;
 }
 
-void RenderEngineContext::setSnippetFactory(sp<SnippetFactory> snippetfactory)
+void RenderBackendInfo::setSnippetFactory(sp<SnippetFactory> snippetfactory)
 {
     _snippet_factory = std::move(snippetfactory);
 }
 
-const sp<SnippetFactory>& RenderEngineContext::snippetFactory() const
+const sp<SnippetFactory>& RenderBackendInfo::snippetFactory() const
 {
-    DCHECK(_snippet_factory, "Uninitialized RenderEngineContext");
+    DCHECK(_snippet_factory, "Uninitialized RenderEngineInfo");
     return _snippet_factory;
 }
 

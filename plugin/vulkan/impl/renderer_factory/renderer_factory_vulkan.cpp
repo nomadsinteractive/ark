@@ -7,7 +7,7 @@
 #include "graphics/base/viewport.h"
 
 #include "renderer/base/render_target.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 #include "renderer/base/render_controller.h"
 
 #include "vulkan/base/vk_instance.h"
@@ -28,14 +28,14 @@
 #include "platform/platform.h"
 
 #include "generated/vulkan_plugin.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 
 
 namespace ark::plugin::vulkan {
 
 namespace {
 
-void setVersion(const enums::RendererVersion version, RenderEngineContext& vkContext)
+void setVersion(const enums::RendererVersion version, RenderBackendInfo& vkContext)
 {
     LOGD("Choose Vulkan Version = %d", version);
     vkContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactoryVulkan>());
@@ -49,9 +49,9 @@ RendererFactoryVulkan::RendererFactoryVulkan()
 {
 }
 
-sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
+sp<RenderBackendInfo> RendererFactoryVulkan::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_RHS, enums::NDC_DEPTH_RANGE_ZERO_TO_ONE);
+    sp<RenderBackendInfo> vkContext = sp<RenderBackendInfo>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_RHS, enums::NDC_DEPTH_RANGE_ZERO_TO_ONE);
     if(renderer._version == enums::RENDERER_VERSION_AUTO)
         setVersion(enums::RENDERER_VERSION_VULKAN_12, vkContext);
     else
@@ -59,7 +59,7 @@ sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(const A
     return vkContext;
 }
 
-void RendererFactoryVulkan::onSurfaceCreated(RenderEngine& renderEngine)
+void RendererFactoryVulkan::onSurfaceCreated(RenderBackend& renderEngine)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
 
@@ -100,7 +100,7 @@ sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer
     return sp<RenderTarget>::make(std::move(renderer), std::move(fbo), std::move(fboRenderer));
 }
 
-sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
+sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController)
 {
     return sp<RenderView>::make<RenderViewVulkan>(_renderer, renderContext, renderController);
 }

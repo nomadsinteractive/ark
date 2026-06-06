@@ -19,7 +19,7 @@
 #include "platform/platform.h"
 
 #include "generated/py_ark_bindings.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/render_backend.h"
 
 namespace ark::plugin::python {
 

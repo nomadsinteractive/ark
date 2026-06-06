@@ -14,8 +14,8 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/components/size.h"
 
-#include "renderer/base/render_engine.h"
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend.h"
+#include "renderer/base/render_backend_info.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_delegate.h"
@@ -375,7 +375,7 @@ void ApplicationSDL3::initialize()
     else
         SDL_HideCursor();
 
-    RenderEngine& renderEngine = _application_context->renderEngine();
+    RenderBackend& renderEngine = _application_context->renderEngine();
     _use_open_gl = renderEngine.version() < enums::RENDERER_VERSION_VULKAN_11;
 
     const SDL_PropertiesID props = SDL_CreateProperties();
@@ -405,7 +405,7 @@ void ApplicationSDL3::initialize()
     SDL3_Context& sdl3GPUContext = renderEngine.context()->traits().ensure<SDL3_Context>();
     sdl3GPUContext._main_window = _main_window;
 
-    RenderEngine::PlatformInfo& info = renderEngine.info();
+    RenderBackend::PlatformInfo& info = renderEngine.platformInfo();
 #if defined(ARK_PLATFORM_WINDOWS)
     info.windows.hinstance = static_cast<HINSTANCE>(SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_WIN32_INSTANCE_POINTER, nullptr));
     info.windows.hdc = static_cast<HDC>(SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_WIN32_HDC_POINTER, nullptr));

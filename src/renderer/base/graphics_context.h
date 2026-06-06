@@ -12,14 +12,14 @@ namespace ark {
 class ARK_API GraphicsContext {
 public:
     GraphicsContext();
-    GraphicsContext(sp<RenderEngineContext> renderContext, sp<RenderController> renderController);
+    GraphicsContext(sp<RenderBackendInfo> renderBackendInfo, sp<RenderController> renderController);
 
     static GraphicsContext& mocked();
 
     void onSurfaceReady();
     void onDrawFrame();
 
-    const sp<RenderEngineContext>& renderContext() const;
+    const sp<RenderBackendInfo>& renderBackendInfo() const;
     const sp<RenderController>& renderController() const;
     const sp<Recycler>& recycler() const;
 
@@ -29,7 +29,7 @@ public:
     uint32_t tick() const;
 
 private:
-    sp<RenderEngineContext> _render_context;
+    sp<RenderBackendInfo> _render_backend_info;
     sp<RenderController> _render_controller;
     uint32_t _tick;
 };

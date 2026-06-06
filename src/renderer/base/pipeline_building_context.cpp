@@ -6,7 +6,7 @@
 #include "core/inf/uploader.h"
 #include "core/util/strings.h"
 
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_backend_info.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/inf/renderer_factory.h"
