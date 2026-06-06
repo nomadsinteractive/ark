@@ -6,8 +6,8 @@
 
 namespace ark {
 
-RenderRequest::RenderRequest(const uint32_t tick, sp<Allocator::Pool> allocatorPool)
-    : _stub(sp<Stub>::make(tick, std::move(allocatorPool)))
+RenderRequest::RenderRequest(const uint32_t tick)
+    : _stub(sp<Stub>::make(tick))
 {
 }
 
@@ -36,8 +36,8 @@ void RenderRequest::addRenderCommand(sp<RenderCommand> renderCommand) const
     _stub->_render_command_pipe_line->add(std::move(renderCommand));
 }
 
-RenderRequest::Stub::Stub(const uint32_t tick, sp<Allocator::Pool> allocatorPool)
-    : _tick(tick), _allocator(std::move(allocatorPool)), _render_command_pipe_line(sp<RenderCommandPipeline>::make())
+RenderRequest::Stub::Stub(const uint32_t tick)
+    : _tick(tick), _render_command_pipe_line(sp<RenderCommandPipeline>::make())
 {
 }
 

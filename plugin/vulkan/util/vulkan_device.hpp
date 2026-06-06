@@ -39,9 +39,6 @@ namespace vks
 		/** @brief Default command pool for the graphics queue family index */
 		VkCommandPool commandPool = VK_NULL_HANDLE;
 
-		/** @brief Set to true when the debug marker extension is detected */
-		bool enableDebugMarkers = false;
-
 		/** @brief Contains queue family indices */
 		struct
 		{
@@ -288,18 +285,19 @@ namespace vks
 				deviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 			}
 
+			// If the physical device advertises VK_KHR_portability_subset it must be enabled (e.g. on portability
+			// implementations such as MoltenVK / macOS), see VUID-VkDeviceCreateInfo-pProperties-04451.
+			// The name is used as a literal because the macro lives in vulkan_beta.h, which we do not include.
+			if (extensionSupported("VK_KHR_portability_subset"))
+			{
+				deviceExtensions.push_back("VK_KHR_portability_subset");
+			}
+
 			VkDeviceCreateInfo deviceCreateInfo = {VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
 			deviceCreateInfo.pNext = pNext;
 			deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());;
 			deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
 			deviceCreateInfo.pEnabledFeatures = enabledFeatures;
-
-			// Enable the debug marker extension if it is present (likely meaning a debugging tool is present)
-			if (extensionSupported(VK_EXT_DEBUG_MARKER_EXTENSION_NAME))
-			{
-				deviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
-				enableDebugMarkers = true;
-			}
 
 			if (deviceExtensions.size() > 0)
 			{

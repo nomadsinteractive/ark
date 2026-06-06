@@ -66,19 +66,44 @@ private:
 
 VKGraphicsContext::VKGraphicsContext(const GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer)
     : _renderer(renderer), _render_target(_renderer->renderTarget()), _command_buffers(sp<VKCommandBuffers>::make(graphicsContext.recycler(), _render_target)),
-      _submit_queue(_renderer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT), _semaphore_render_complete(_submit_queue.createSignalSemaphore())
+      _submit_queue(_renderer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT), _image_count(static_cast<uint32_t>(_command_buffers->vkCommandBuffers().size())),
+      _current_frame(0), _current_image(0)
 {
-    VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
-    // Create synchronization objects
+    const VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
+
     constexpr VkSemaphoreCreateInfo semaphoreCreateInfo{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-    // Create a semaphore used to synchronize image presentation
-    // Ensures that the image is displayed before we start submitting new commands to the queu
-    VKUtil::checkResult(vkCreateSemaphore(vkLogicalDevice, &semaphoreCreateInfo, nullptr, &_semaphore_present_complete));
+    // Fences start signaled so that the first vkWaitForFences on each frame slot returns immediately.
+    constexpr VkFenceCreateInfo fenceCreateInfo{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, nullptr, VK_FENCE_CREATE_SIGNALED_BIT };
+
+    // Per frame-in-flight image-available semaphores and submit fences.
+    for(uint32_t i = 0; i < kMaxFramesInFlight; ++i)
+    {
+        VKUtil::checkResult(vkCreateSemaphore(vkLogicalDevice, &semaphoreCreateInfo, nullptr, &_present_complete[i]));
+        VKUtil::checkResult(vkCreateFence(vkLogicalDevice, &fenceCreateInfo, nullptr, &_in_flight_fences[i]));
+    }
+
+    // Per swapchain image render-complete semaphores.
+    _render_complete.resize(_image_count);
+    for(uint32_t i = 0; i < _image_count; ++i)
+        VKUtil::checkResult(vkCreateSemaphore(vkLogicalDevice, &semaphoreCreateInfo, nullptr, &_render_complete[i]));
+
+    _images_in_flight.resize(_image_count, VK_NULL_HANDLE);
 }
 
 VKGraphicsContext::~VKGraphicsContext()
 {
-    vkDestroySemaphore(_renderer->vkLogicalDevice(), _semaphore_present_complete, nullptr);
+    const VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
+    // The synchronization objects may still be referenced by in-flight GPU work (this context can be torn down
+    // mid-pipeline on shutdown or surface resize), so drain the device before destroying them.
+    vkDeviceWaitIdle(vkLogicalDevice);
+
+    for(uint32_t i = 0; i < kMaxFramesInFlight; ++i)
+    {
+        vkDestroySemaphore(vkLogicalDevice, _present_complete[i], nullptr);
+        vkDestroyFence(vkLogicalDevice, _in_flight_fences[i], nullptr);
+    }
+    for(const VkSemaphore renderComplete : _render_complete)
+        vkDestroySemaphore(vkLogicalDevice, renderComplete, nullptr);
 }
 
 void VKGraphicsContext::begin(const uint32_t imageId, const V4& backgroundColor)
@@ -93,7 +118,7 @@ void VKGraphicsContext::begin(const uint32_t imageId, const V4& backgroundColor)
     constexpr VkCommandBufferBeginInfo cmdBufInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     VKUtil::checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
 
-    _submit_queue.begin(_semaphore_present_complete);
+    _submit_queue.begin(_present_complete[_current_frame]);
 }
 
 void VKGraphicsContext::end()
@@ -160,19 +185,44 @@ VkCommandBuffer VKGraphicsContext::popState()
     return commandBuffer;
 }
 
+void VKGraphicsContext::waitForFrameAvailable() const
+{
+    VKUtil::checkResult(vkWaitForFences(_renderer->vkLogicalDevice(), 1, &_in_flight_fences[_current_frame], VK_TRUE, UINT64_MAX));
+}
+
+VkSemaphore VKGraphicsContext::currentPresentComplete() const
+{
+    return _present_complete[_current_frame];
+}
+
+void VKGraphicsContext::onImageAcquired(const uint32_t imageId)
+{
+    _current_image = imageId;
+    const VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
+
+    // A different in-flight frame may still be using this image (image acquisition order is not guaranteed to be
+    // round-robin). Wait it out before reusing the image's command buffer, framebuffer and render-complete semaphore.
+    if(_images_in_flight[imageId] != VK_NULL_HANDLE)
+        VKUtil::checkResult(vkWaitForFences(vkLogicalDevice, 1, &_images_in_flight[imageId], VK_TRUE, UINT64_MAX));
+    _images_in_flight[imageId] = _in_flight_fences[_current_frame];
+
+    // Reset only after every wait that might target this fence, immediately before it is handed to vkQueueSubmit.
+    VKUtil::checkResult(vkResetFences(vkLogicalDevice, 1, &_in_flight_fences[_current_frame]));
+}
+
 void VKGraphicsContext::submit(const VkQueue queue)
 {
-    _submit_queue.submit(queue);
+    _submit_queue.submit(queue, _render_complete[_current_image], _in_flight_fences[_current_frame]);
 }
 
-const sp<VKSemaphore>& VKGraphicsContext::semaphoreRenderComplete() const
+VkSemaphore VKGraphicsContext::currentRenderComplete() const
 {
-    return _semaphore_render_complete;
+    return _render_complete[_current_image];
 }
 
-VkSemaphore VKGraphicsContext::semaphorePresentComplete() const
+void VKGraphicsContext::endFrame()
 {
-    return _semaphore_present_complete;
+    _current_frame = (_current_frame + 1) % kMaxFramesInFlight;
 }
 
 VKGraphicsContext::State::State(sp<RenderPassPhrase> renderPassPhrase, const VkCommandBuffer commandBuffer, const bool commandBufferBegan)

@@ -10,6 +10,7 @@
 
 #include "vulkan/base/vk_command_buffers.h"
 #include "vulkan/base/vk_compute_context.h"
+#include "vulkan/base/vk_device.h"
 #include "vulkan/base/vk_graphics_context.h"
 #include "vulkan/base/vk_renderer.h"
 #include "vulkan/base/vk_swap_chain.h"
@@ -29,6 +30,12 @@ void RenderViewVulkan::onSurfaceCreated()
 void RenderViewVulkan::onSurfaceChanged(const uint32_t width, const uint32_t height)
 {
     LOGD("Width: %d, Height: %d", width, height);
+
+    // Frames may still be in flight from the previous surface; drain the device before the swapchain, its
+    // framebuffers and the per-frame synchronization objects are torn down and recreated below.
+    if(_vk_graphics_context)
+        _renderer->device()->waitIdle();
+
     _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
 
     _renderer->renderTarget()->onSurfaceChanged(width, height);
@@ -44,6 +51,7 @@ void RenderViewVulkan::onSurfaceChanged(const uint32_t width, const uint32_t hei
 
 void RenderViewVulkan::onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand)
 {
+    _vk_graphics_context->waitForFrameAvailable();
     _graphics_context->onDrawFrame();
 
     const sp<VKSwapChain>& swapChain = _renderer->renderTarget();
@@ -57,9 +65,6 @@ void RenderViewVulkan::onRenderFrame(const V4& backgroundColor, RenderCommand& r
 
     if(_vk_compute_context->vkCommandBuffer() != VK_NULL_HANDLE)
         _vk_compute_context->end();
-
-    DPROFILER_TRACE("Wait idle", ApplicationProfiler::CATEGORY_WAIT);
-    swapChain->waitIdle();
 }
 
 sp<Bitmap> RenderViewVulkan::doScreenshot()

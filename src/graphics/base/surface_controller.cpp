@@ -11,7 +11,6 @@
 namespace ark {
 
 SurfaceController::SurfaceController()
-    : _allocator_pool(sp<Allocator::Pool>::make())
 {
 }
 
@@ -23,7 +22,7 @@ void SurfaceController::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded
 void SurfaceController::requestRender(const uint32_t tick)
 {
     const V3 position(0);
-    RenderRequest renderRequest(tick, _allocator_pool);
+    RenderRequest renderRequest(tick);
     _renderer_phrase.render(renderRequest, position, nullptr);
     _render_requests.push(std::move(renderRequest));
 }

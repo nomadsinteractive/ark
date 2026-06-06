@@ -36,31 +36,49 @@ void VKSubmitQueue::submitCommandBuffer(VkCommandBuffer commandBuffer)
     addSubmitInfo(1, &_submit_queue.back());
 }
 
-void VKSubmitQueue::submit(const VkQueue queue)
+void VKSubmitQueue::submit(const VkQueue queue, const VkSemaphore signalSemaphore, const VkFence fence)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
+
+    // Collect the persistently registered signal semaphores (e.g. the compute context chains off these),
+    // dropping any that have since expired, then append the per-submit signal semaphore (the swapchain
+    // render-complete semaphore) supplied by the caller.
+    Vector<VkSemaphore> signalSemaphores;
+    signalSemaphores.reserve(_signal_semaphores.size() + 1);
+    for(auto iter = _signal_semaphores.begin(); iter != _signal_semaphores.end(); )
+    {
+        if(const sp<VKSemaphore> semaphore = iter->lock())
+        {
+            signalSemaphores.push_back(semaphore->vkSemaphore());
+            ++iter;
+        }
+        else
+            iter = _signal_semaphores.erase(iter);
+    }
+    if(signalSemaphore != VK_NULL_HANDLE)
+        signalSemaphores.push_back(signalSemaphore);
+
     if(!_submit_infos.empty())
     {
-        Vector<VkSemaphore> signalSemaphores;
-        signalSemaphores.reserve(_signal_semaphores.size());
-        for(auto iter = _signal_semaphores.begin(); iter != _signal_semaphores.end(); )
-        {
-            if(const sp<VKSemaphore> semaphore = iter->lock())
-            {
-                signalSemaphores.push_back(semaphore->vkSemaphore());
-                ++iter;
-            }
-            else
-                iter = _signal_semaphores.erase(iter);
-        }
-
         VkSubmitInfo& firstSubmitInfo = _submit_infos.front();
         VkSubmitInfo& lastSubmitInfo = _submit_infos.back();
         firstSubmitInfo.pWaitSemaphores = _wait_semaphores.data();
         firstSubmitInfo.waitSemaphoreCount = static_cast<uint32_t>(_wait_semaphores.size());
         lastSubmitInfo.pSignalSemaphores = signalSemaphores.data();
         lastSubmitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
-        VKUtil::checkResult(vkQueueSubmit(queue, static_cast<uint32_t>(_submit_infos.size()), _submit_infos.data(), VK_NULL_HANDLE));
+        VKUtil::checkResult(vkQueueSubmit(queue, static_cast<uint32_t>(_submit_infos.size()), _submit_infos.data(), fence));
+    }
+    else if(fence != VK_NULL_HANDLE || !_wait_semaphores.empty() || !signalSemaphores.empty())
+    {
+        // Degenerate frame that recorded no command buffers: still consume the wait semaphore(s), signal the
+        // completion semaphore(s) and the fence so the frame-in-flight slot does not stall the next acquire.
+        VkSubmitInfo submitInfo = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        submitInfo.pWaitDstStageMask = _stage_flags;
+        submitInfo.waitSemaphoreCount = static_cast<uint32_t>(_wait_semaphores.size());
+        submitInfo.pWaitSemaphores = _wait_semaphores.data();
+        submitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
+        submitInfo.pSignalSemaphores = signalSemaphores.data();
+        VKUtil::checkResult(vkQueueSubmit(queue, 1, &submitInfo, fence));
     }
     _wait_semaphores.clear();
 }

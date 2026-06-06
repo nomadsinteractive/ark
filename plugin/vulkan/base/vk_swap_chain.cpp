@@ -100,13 +100,15 @@ Vector<VkCommandBuffer> VKSwapChain::makeCommandBuffers() const
 uint32_t VKSwapChain::acquire(VKGraphicsContext& vkContext)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
-    VkResult result = _swap_chain.acquireNextImage(vkContext.semaphorePresentComplete(), &_aquired_image_id);
+    const VkSemaphore presentComplete = vkContext.currentPresentComplete();
+    VkResult result = _swap_chain.acquireNextImage(presentComplete, &_aquired_image_id);
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
         onSurfaceChanged(_width, _height);
-        result = _swap_chain.acquireNextImage(vkContext.semaphorePresentComplete(), &_aquired_image_id);
+        result = _swap_chain.acquireNextImage(presentComplete, &_aquired_image_id);
     }
     VKUtil::checkResult(result);
+    vkContext.onImageAcquired(_aquired_image_id);
     return _aquired_image_id;
 }
 
@@ -119,12 +121,8 @@ void VKSwapChain::swap(VKGraphicsContext& vkGraphicsContext)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     vkGraphicsContext.submit(_queue);
-    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, vkGraphicsContext.semaphoreRenderComplete()->vkSemaphore()));
-}
-
-void VKSwapChain::waitIdle() const
-{
-    vkQueueWaitIdle(_queue);
+    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, vkGraphicsContext.currentRenderComplete()));
+    vkGraphicsContext.endFrame();
 }
 
 void VKSwapChain::onSurfaceChanged(const uint32_t width, const uint32_t height)

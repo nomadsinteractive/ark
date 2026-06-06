@@ -20,7 +20,7 @@ public:
 
     void begin(VkSemaphore waitSemaphore);
     void submitCommandBuffer(VkCommandBuffer commandBuffer);
-    void submit(VkQueue queue);
+    void submit(VkQueue queue, VkSemaphore signalSemaphore = VK_NULL_HANDLE, VkFence fence = VK_NULL_HANDLE);
 
     void addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers);
     void addWaitSemaphore(VkSemaphore semaphore, VkPipelineStageFlags waitStageFlag);

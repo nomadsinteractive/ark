@@ -13,18 +13,17 @@ namespace ark {
 class ARK_API RenderRequest {
 public:
     RenderRequest() = default;
-    RenderRequest(uint32_t tick, sp<Allocator::Pool> allocatorPool);
+    RenderRequest(uint32_t tick);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderRequest);
 
     uint32_t tick() const;
     Allocator& allocator() const;
 
     const sp<RenderCommandPipeline>& renderCommandPipeLine() const;
-
     void addRenderCommand(sp<RenderCommand> renderCommand) const;
 
     struct Stub {
-        Stub(uint32_t tick, sp<Allocator::Pool> allocatorPool);
+        Stub(uint32_t tick);
 
         uint32_t _tick;
         Allocator _allocator;

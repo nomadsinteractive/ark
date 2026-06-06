@@ -8,22 +8,8 @@
 namespace ark {
 
 class ARK_API Allocator {
-private:
-    struct Block;
-
 public:
-    struct Pool {
-        Pool(size_t blockSize = 128 * 1024);
-
-        sp<Block> obtain();
-        void recycle(sp<Block> block);
-
-        size_t _block_size;
-        LFStack<sp<Block>> _blocks;
-    };
-
-public:
-    Allocator(sp<Pool> pool);
+    Allocator();
     ~Allocator();
 
     uint8_t* sbrk(size_t size, size_t alignment = sizeof(void*));
@@ -33,11 +19,11 @@ private:
     uint8_t* _sbrk(size_t size);
 
 private:
-    sp<Pool> _pool;
-    size_t _block_size;
+    size_t _default_chunk_size;
 
-    LFStack<sp<Block>> _actived;
-    LFStack<sp<Block>> _allocated;
+    struct Chunk;
+    LFStack<sp<Chunk>> _actived;
+    LFStack<sp<Chunk>> _allocated;
 };
 
 }
