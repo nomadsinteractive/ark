@@ -102,7 +102,7 @@ PipelineDescriptor::Trait toPipelineTrait(const PipelineDescriptor::TraitType tr
 
 sp<Snippet> createCoreSnippet(sp<Snippet> next)
 {
-    sp<Snippet> coreSnippet = Ark::instance().renderController()->renderEngine()->context()->snippetFactory()->createCoreSnippet();
+    sp<Snippet> coreSnippet = Ark::instance().renderController()->renderBackend()->info()->snippetFactory()->createCoreSnippet();
     DASSERT(coreSnippet);
     if(next)
         return sp<Snippet>::make<SnippetComposite>(std::move(coreSnippet), std::move(next));

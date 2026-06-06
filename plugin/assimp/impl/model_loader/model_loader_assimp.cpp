@@ -211,7 +211,7 @@ const aiScene* ModelImporterAssimp::loadScene(Assimp::Importer& importer, const 
     importer.SetIOHandler(new ArkIOSystem);
     importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
     uint32_t flags = static_cast<uint32_t>(aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_LimitBoneWeights | aiProcess_OptimizeMeshes);
-    if(Ark::instance().renderController()->renderEngine()->isLHS())
+    if(Ark::instance().renderController()->renderBackend()->isLHS())
         flags |= aiProcess_FlipWindingOrder;
     LOGD("Loading scene %s", src.c_str());
     const aiScene* scene = importer.ReadFile(src.c_str(), flags);

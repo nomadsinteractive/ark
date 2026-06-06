@@ -19,7 +19,7 @@ struct NSView;
 namespace ark::plugin::vulkan {
 
 VKSwapChain::VKSwapChain(const RenderBackend& renderEngine, sp<VKDevice> device)
-    : _device(std::move(device)), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0), _vsync(renderEngine.context()->renderer()._vsync)
+    : _device(std::move(device)), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0), _vsync(renderEngine.info()->renderer()._vsync)
 {
     _swap_chain.connect(_device->vkInstance(), _device->vkPhysicalDevice(), _device->vkLogicalDevice());
 

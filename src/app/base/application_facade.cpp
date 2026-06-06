@@ -139,7 +139,7 @@ sp<Vec2> ApplicationFacade::cursorPosition() const
 
 sp<Vec2> ApplicationFacade::toFragCoord(sp<Vec2> xy, sp<Size> resolution) const
 {
-    const RenderBackend& renderEngine = _context->renderController()->renderEngine();
+    const RenderBackend& renderEngine = _context->renderController()->renderBackend();
     const Viewport& viewport = renderEngine.viewport();
     if(renderEngine.isViewportFlipped())
         xy = sp<Vec2>::make<FragCoordRevert>(std::move(xy), viewport.height());

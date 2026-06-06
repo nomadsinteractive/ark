@@ -28,6 +28,7 @@
 #include "generated/opengl_plugin.h"
 
 #include "platform/gl/gl.h"
+#include "renderer/base/graphics_context.h"
 
 namespace ark::plugin::opengl {
 
@@ -47,7 +48,7 @@ RendererFactoryOpenGL::RendererFactoryOpenGL()
 {
 }
 
-sp<RenderBackendInfo> RendererFactoryOpenGL::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
+sp<RenderBackendInfo> RendererFactoryOpenGL::createRenderBackendInfo(const ApplicationManifest::Renderer& renderer)
 {
     const sp<RenderBackendInfo> renderContext = sp<RenderBackendInfo>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f), enums::COORDINATE_SYSTEM_RHS, enums::COORDINATE_SYSTEM_LHS, enums::NDC_DEPTH_RANGE_NEGATIVE_ONE_TO_ONE);
     if(renderer._version != enums::RENDERER_VERSION_AUTO)
@@ -65,13 +66,13 @@ void RendererFactoryOpenGL::onSurfaceCreated(RenderBackend& renderEngine)
         int glMajorVersion = 0, glMinorVersion = 0;
         glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
         glGetIntegerv(GL_MINOR_VERSION, &glMinorVersion);
-        setVersion(static_cast<enums::RendererVersion>(enums::RENDERER_VERSION_OPENGL + glMajorVersion * 10 + glMinorVersion), renderEngine.context());
+        setVersion(static_cast<enums::RendererVersion>(enums::RENDERER_VERSION_OPENGL + glMajorVersion * 10 + glMinorVersion), renderEngine.info());
     }
 }
 
 sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController)
 {
-    return sp<RenderView>::make<RenderViewOpenGL>(renderContext, renderController);
+    return sp<RenderView>::make<RenderViewOpenGL>(renderController);
 }
 
 sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(const Buffer::Usage usage)

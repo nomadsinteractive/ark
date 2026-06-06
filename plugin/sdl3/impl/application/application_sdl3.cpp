@@ -402,7 +402,7 @@ void ApplicationSDL3::initialize()
         FATAL(SDL_GetError());
     }
 
-    SDL3_Context& sdl3GPUContext = renderEngine.context()->traits().ensure<SDL3_Context>();
+    SDL3_Context& sdl3GPUContext = renderEngine.info()->traits().ensure<SDL3_Context>();
     sdl3GPUContext._main_window = _main_window;
 
     RenderBackend::PlatformInfo& info = renderEngine.platformInfo();

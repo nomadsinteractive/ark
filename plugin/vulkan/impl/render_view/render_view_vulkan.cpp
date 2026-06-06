@@ -18,8 +18,8 @@
 
 namespace ark::plugin::vulkan {
 
-RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController)
-    : _renderer(renderer), _graphics_context(new GraphicsContext(renderContext, renderController))
+RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, op<GraphicsContext> surfaceContext)
+    : _renderer(renderer), _surface_context(std::move(surfaceContext))
 {
 }
 
@@ -36,29 +36,29 @@ void RenderViewVulkan::onSurfaceChanged(const uint32_t width, const uint32_t hei
     if(_vk_graphics_context)
         _renderer->device()->waitIdle();
 
-    _graphics_context.reset(new GraphicsContext(_graphics_context->renderBackendInfo(), _graphics_context->renderController()));
+    _surface_context.reset(new GraphicsContext(_surface_context->renderController()));
 
     _renderer->renderTarget()->onSurfaceChanged(width, height);
 
-    _vk_graphics_context = sp<VKGraphicsContext>::make(_graphics_context, _renderer);
-    _graphics_context->traits().put<VKGraphicsContext>(_vk_graphics_context);
+    _vk_graphics_context = sp<VKGraphicsContext>::make(_surface_context, _renderer);
+    _surface_context->traits().put<VKGraphicsContext>(_vk_graphics_context);
 
-    _vk_compute_context = sp<VKComputeContext>::make(_graphics_context, _renderer);
-    _graphics_context->traits().put<VKComputeContext>(_vk_compute_context);
+    _vk_compute_context = sp<VKComputeContext>::make(_surface_context, _renderer);
+    _surface_context->traits().put<VKComputeContext>(_vk_compute_context);
 
-    _graphics_context->onSurfaceReady();
+    _surface_context->onSurfaceReady();
 }
 
 void RenderViewVulkan::onRenderFrame(const V4& backgroundColor, RenderCommand& renderCommand)
 {
     _vk_graphics_context->waitForFrameAvailable();
-    _graphics_context->onDrawFrame();
+    _surface_context->onDrawFrame();
 
     const sp<VKSwapChain>& swapChain = _renderer->renderTarget();
     const uint32_t imageId = swapChain->acquire(_vk_graphics_context);
 
     _vk_graphics_context->begin(imageId, backgroundColor);
-    renderCommand.draw(_graphics_context);
+    renderCommand.draw(_surface_context);
     _vk_graphics_context->end();
 
     swapChain->swap(_vk_graphics_context);

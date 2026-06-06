@@ -88,7 +88,7 @@ void VKInstance::initialize(const RenderBackend& renderEngine)
     VkApplicationInfo appInfo = {VK_STRUCTURE_TYPE_APPLICATION_INFO};
     appInfo.pApplicationName = Ark::instance().manifest()->name().c_str();
     appInfo.pEngineName = "ark";
-    switch(renderEngine.context()->renderer()._version)
+    switch(renderEngine.info()->renderer()._version)
     {
         case enums::RENDERER_VERSION_VULKAN_11:
             appInfo.apiVersion = VK_API_VERSION_1_1;

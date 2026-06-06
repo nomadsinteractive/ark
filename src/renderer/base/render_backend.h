@@ -67,7 +67,7 @@ public:
     enums::CoordinateSystem ndcCoordinateSystem() const;
 
     const sp<RendererFactory>& rendererFactory() const;
-    const sp<RenderBackendInfo>& context() const;
+    const sp<RenderBackendInfo>& info() const;
 
     const Viewport& viewport() const;
 

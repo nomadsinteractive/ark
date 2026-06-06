@@ -248,7 +248,7 @@ private:
 class RenderViewSDL3_GPU final : public RenderView {
 public:
     RenderViewSDL3_GPU(sp<RenderBackendInfo> renderContext, sp<RenderController> renderController)
-        : _graphics_context(new GraphicsContext(std::move(renderContext), std::move(renderController))), _swapchain_depth_stencil_rt_initial{nullptr, 1.0f, SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE},
+        : _graphics_context(new GraphicsContext(std::move(renderController))), _swapchain_depth_stencil_rt_initial{nullptr, 1.0f, SDL_GPU_LOADOP_CLEAR, SDL_GPU_STOREOP_STORE},
           _swapchain_depth_stencil_rt_blend{nullptr, 0.0f, SDL_GPU_LOADOP_LOAD, SDL_GPU_STOREOP_STORE}
     {
     }
@@ -259,7 +259,7 @@ public:
 
     void onSurfaceChanged(const uint32_t width, const uint32_t height) override
     {
-        _graphics_context.reset(new GraphicsContext(_graphics_context->renderBackendInfo(), _graphics_context->renderController()));
+        _graphics_context.reset(new GraphicsContext(_graphics_context->renderController()));
 
         const SDL3_GPU_Context& gpuContext = ensureGPUContext(_graphics_context);
         if(_swapchain_depth_stencil_rt_initial.texture)
@@ -417,7 +417,7 @@ RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
 
 void RendererFactorySDL3_GPU::onSurfaceCreated(RenderBackend& renderEngine)
 {
-    const SDL_GPUShaderFormat shaderFormat = toGPUShaderFormat(renderEngine.context()->renderer()._backend);
+    const SDL_GPUShaderFormat shaderFormat = toGPUShaderFormat(renderEngine.info()->renderer()._backend);
     _gpu_device = SDL_CreateGPUDevice(
             shaderFormat,
 #if ARK_FLAG_BUILD_TYPE
@@ -428,8 +428,8 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderBackend& renderEngine)
             nullptr);
     CHECK(_gpu_device, "GPUCreateDevice failed: %s", SDL_GetError());
 
-    const SDL3_Context& context = renderEngine.context()->traits().ensure<SDL3_Context>();
-    SDL3_GPU_Context& gpuContext = renderEngine.context()->traits().ensure<SDL3_GPU_Context>();
+    const SDL3_Context& context = renderEngine.info()->traits().ensure<SDL3_Context>();
+    SDL3_GPU_Context& gpuContext = renderEngine.info()->traits().ensure<SDL3_GPU_Context>();
     ASSERT(context._main_window);
     gpuContext._gpu_gevice = _gpu_device;
 
@@ -437,7 +437,7 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderBackend& renderEngine)
     CHECK(success, "SDL_ClaimWindowForGPUDevice failed: %s", SDL_GetError());
 }
 
-sp<RenderBackendInfo> RendererFactorySDL3_GPU::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
+sp<RenderBackendInfo> RendererFactorySDL3_GPU::createRenderBackendInfo(const ApplicationManifest::Renderer& renderer)
 {
     const sp<RenderBackendInfo> renderContext = sp<RenderBackendInfo>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_LHS, enums::NDC_DEPTH_RANGE_ZERO_TO_ONE);
     setVersion(renderer._backend == enums::RENDERING_BACKEND_AUTO ? enums::RENDERER_VERSION_VULKAN_13 : getRendererVersion(renderer._backend), renderContext);

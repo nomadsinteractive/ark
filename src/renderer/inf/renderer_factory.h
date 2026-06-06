@@ -33,7 +33,7 @@ public:
 
     virtual void onSurfaceCreated(RenderBackend& renderEngine) = 0;
 
-    virtual sp<RenderBackendInfo> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) = 0;
+    virtual sp<RenderBackendInfo> createRenderBackendInfo(const ApplicationManifest::Renderer& renderer) = 0;
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Usage usage) = 0;
     virtual sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;

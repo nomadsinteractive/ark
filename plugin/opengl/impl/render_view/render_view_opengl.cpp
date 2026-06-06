@@ -14,11 +14,12 @@
 #include "platform/gl/gl.h"
 
 #include "opengl/util/gl_debug.h"
+#include "renderer/base/render_backend.h"
 
 namespace ark::plugin::opengl {
 
-RenderViewOpenGL::RenderViewOpenGL(sp<RenderBackendInfo> renderContext, sp<RenderController> renderController)
-    : _graphics_context(new GraphicsContext(std::move(renderContext), std::move(renderController)))
+RenderViewOpenGL::RenderViewOpenGL(sp<RenderController> renderController)
+    : _render_controller(std::move(renderController))
 {
 }
 
@@ -47,9 +48,8 @@ void RenderViewOpenGL::onSurfaceCreated()
     LOGD("Max Compute Work Group Size: (%d, %d, %d)", work_grp_size[0], work_grp_size[1], work_grp_size[2]);
 }
 
-void RenderViewOpenGL::onSurfaceChanged(uint32_t width, uint32_t height)
+void RenderViewOpenGL::onSurfaceChanged(const uint32_t width, const uint32_t height)
 {
-    _graphics_context.reset(new GraphicsContext(_graphics_context->renderBackendInfo(), _graphics_context->renderController()));
     initialize(width, height);
 }
 
@@ -58,14 +58,15 @@ void RenderViewOpenGL::onRenderFrame(const V4& backgroundColor, RenderCommand& r
     glClearColor(backgroundColor.x(), backgroundColor.y(), backgroundColor.z(), backgroundColor.w());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    _graphics_context->onDrawFrame();
-    renderCommand.draw(_graphics_context);
+    GraphicsContext graphicsContext(_render_controller);
+    graphicsContext.onDrawFrame();
+    renderCommand.draw(graphicsContext);
 }
 
 sp<Bitmap> RenderViewOpenGL::doScreenshot()
 {
     constexpr uint8_t channels = 3;
-    const auto [width, height] = _graphics_context->renderBackendInfo()->displayResolution();
+    const auto [width, height] = _render_controller->renderBackend()->info()->displayResolution();
     const uint32_t rowBytes = width * channels;
 
     bytearray bytes = sp<ByteArray>::make<ByteArray::Allocated>(rowBytes * height);
@@ -97,7 +98,7 @@ void RenderViewOpenGL::initialize(const uint32_t width, const uint32_t height)
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 #endif
 
-    _graphics_context->onSurfaceReady();
+    _render_controller->onSurfaceReady(GraphicsContext::mocked());
 }
 
 }

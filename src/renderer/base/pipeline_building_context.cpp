@@ -130,7 +130,7 @@ void PipelineBuildingContext::initializeAttributes()
     for(VertexAttribute& i : vertexAttributes)
         doAddVertexAttribute(std::move(i._name), std::move(i._type), i._divisor);
 
-    const uint32_t alignment = Ark::instance().renderController()->renderEngine()->rendererFactory()->features()._attribute_alignment;
+    const uint32_t alignment = Ark::instance().renderController()->renderBackend()->rendererFactory()->features()._attribute_alignment;
     _pipeline_layout->setStreamLayoutAlignment(alignment);
 
     //TODO: link all outputs to next stage's inputs

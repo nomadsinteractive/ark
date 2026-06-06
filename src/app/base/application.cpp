@@ -198,7 +198,7 @@ void Application::onSurfaceChanged(const uint32_t width, const uint32_t height)
         _application_context->renderController()->reset();
     });
 
-    _application_context->renderEngine()->context()->setDisplayResolution({width, height});
+    _application_context->renderEngine()->info()->setDisplayResolution({width, height});
     _surface->onSurfaceChanged(width, height);
     _application_delegate->onSurfaceChanged(width, height);
 }
@@ -218,7 +218,7 @@ bool Application::onEvent(const Event& event)
 
 V2 Application::toViewportPosition(const V2& xy) const
 {
-    const bool flip = Ark::instance().renderController()->renderEngine()->isViewportFlipped();
+    const bool flip = Ark::instance().renderController()->renderBackend()->isViewportFlipped();
     return {_viewport.toViewportX(xy.x(), _surface_size->widthAsFloat()), _viewport.toViewportY(xy.y(), _surface_size->heightAsFloat(), flip)};
 }
 

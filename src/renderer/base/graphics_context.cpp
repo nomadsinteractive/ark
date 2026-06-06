@@ -9,18 +9,17 @@
 namespace ark {
 
 GraphicsContext::GraphicsContext()
-    : _render_backend_info(Ark::instance().renderController()->renderEngine()->context()), _render_controller(Ark::instance().renderController())
+    : _render_controller(Ark::instance().renderController())
 {
 }
 
-GraphicsContext::GraphicsContext(sp<RenderBackendInfo> renderBackendInfo, sp<RenderController> renderController)
-    : _render_backend_info(std::move(renderBackendInfo)), _render_controller(std::move(renderController)), _tick(0)
+GraphicsContext::GraphicsContext(sp<RenderController> renderController)
+    : _render_controller(std::move(renderController))
 {
 }
 
 GraphicsContext& GraphicsContext::mocked()
 {
-    DTHREAD_CHECK(THREAD_NAME_ID_RENDERER);
     return Global<GraphicsContext>();
 }
 
@@ -31,7 +30,6 @@ void GraphicsContext::onSurfaceReady()
 
 void GraphicsContext::onDrawFrame()
 {
-    ++_tick;
     _render_controller->onDrawFrame(*this);
 }
 
@@ -47,22 +45,17 @@ const sp<Recycler>& GraphicsContext::recycler() const
 
 Traits& GraphicsContext::traits()
 {
-    return _render_backend_info->traits();
-}
-
-const Traits& GraphicsContext::traits() const
-{
-    return _render_backend_info->traits();
+    return _render_controller->renderBackend()->info()->traits();
 }
 
 const sp<RenderBackendInfo>& GraphicsContext::renderBackendInfo() const
 {
-    return _render_backend_info;
+    return _render_controller->renderBackend()->info();
 }
 
 uint32_t GraphicsContext::tick() const
 {
-    return _tick;
+    return _render_controller->tick();
 }
 
 }

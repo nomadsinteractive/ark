@@ -66,7 +66,7 @@ private:
     };
 
 public:
-    RenderController(const sp<RenderBackend>& renderEngine, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader);
+    RenderController(const sp<RenderBackend>& renderBackend, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader);
 
     void reset();
 
@@ -82,7 +82,7 @@ public:
 //  [[script::bindings::auto]]
     void uploadBuffer(const Buffer& buffer, sp<Uploader> input, enums::UploadStrategy strategy, sp<Future> future = nullptr, enums::UploadPriority priority = enums::UPLOAD_PRIORITY_NORMAL);
 
-    const sp<RenderBackend>& renderEngine() const;
+    const sp<RenderBackend>& renderBackend() const;
 
     sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, enums::UploadStrategy us = {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}, sp<Future> future = nullptr);
     sp<Texture> createTexture2d(sp<Bitmap> bitmap, sp<Texture::Parameters> parameters = nullptr, enums::UploadStrategy us = {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}, sp<Future> future = nullptr);
@@ -115,6 +115,8 @@ public:
     void deferUnref(Box box);
 
     GraphicsBufferAllocator& gba();
+
+    uint32_t tick() const;
 
 private:
     class RenderResource {
@@ -160,7 +162,7 @@ private:
     void prepare(GraphicsContext& graphicsContext, LFQueue<UploadingRenderResource>& items);
 
 private:
-    sp<RenderBackend> _render_engine;
+    sp<RenderBackend> _render_backend;
     sp<Recycler> _recycler;
     sp<Dictionary<bitmap>> _bitmap_loader;
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
@@ -180,6 +182,7 @@ private:
     Map<uint32_t, sp<PrimitiveIndexBuffer>> _shared_primitive_index_buffer;
 
     GraphicsBufferAllocator _gba;
+    uint32_t _tick;
 
     friend class TextureBundle;
 };

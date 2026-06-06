@@ -56,7 +56,7 @@ void VKHeap::recycle(GraphicsContext& /*graphicsContext*/, const VKMemoryPtr& pt
     _heaps[ptr._stub->_type_index]->free(ptr);
 }
 
-VKMemory VKHeap::makeMemory(GraphicsContext& graphicsContext, VkDeviceSize size, uint32_t typeIndex)
+VKMemory VKHeap::makeMemory(GraphicsContext& graphicsContext, const VkDeviceSize size, const uint32_t typeIndex)
 {
     VKMemory memory(_device, graphicsContext.recycler(), size, typeIndex);
     memory.upload(graphicsContext);

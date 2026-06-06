@@ -109,7 +109,7 @@ ImGuiKey toImGuiKey(const Event::Code code) {
 }
 
 RendererImgui::RendererImgui(sp<Shader> shader, sp<Texture> texture)
-    : _shader(std::move(shader)), _render_engine(Ark::instance().renderController()->renderEngine()), _texture(std::move(texture)), _renderer_context(sp<RendererContext>::make(_shader)), _text_input_enabled(sp<BooleanWrapper>::make(false))
+    : _shader(std::move(shader)), _render_engine(Ark::instance().renderController()->renderBackend()), _texture(std::move(texture)), _renderer_context(sp<RendererContext>::make(_shader)), _text_input_enabled(sp<BooleanWrapper>::make(false))
 {
     _renderer_context->addDefaultTexture(_texture);
     Ark::instance().applicationContext()->applicationFacade()->setTextInputEnabled(_text_input_enabled);
@@ -156,7 +156,7 @@ bool RendererImgui::onEvent(const Event& event)
         io.AddMouseButtonEvent(MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT], event.action() == Event::ACTION_DOWN);
     case Event::ACTION_MOVE:
         {
-            const float eventy = Ark::instance().renderController()->renderEngine()->isLHS() ? event.y() : io.DisplaySize.y - event.y();
+            const float eventy = Ark::instance().renderController()->renderBackend()->isLHS() ? event.y() : io.DisplaySize.y - event.y();
             io.AddMousePosEvent(event.x(), eventy);
             break;
         }

@@ -108,7 +108,7 @@ public:
         element_index_t s0 = 0;
         element_index_t s1 = static_cast<element_index_t>(_cols + 1);
         indices.reserve(_cols * _rows * 2 * 3);
-        const bool flipWindingOrder = Ark::instance().renderController()->renderEngine()->isLHS();
+        const bool flipWindingOrder = Ark::instance().renderController()->renderBackend()->isLHS();
 
         for(size_t i = 0; i < _rows; ++i) {
             element_index_t v0 = s0;

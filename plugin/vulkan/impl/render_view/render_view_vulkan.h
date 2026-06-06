@@ -14,7 +14,7 @@ namespace ark::plugin::vulkan {
 
 class RenderViewVulkan final : public RenderView {
 public:
-    RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController);
+    RenderViewVulkan(const sp<VKRenderer>& renderer, op<GraphicsContext> surfaceContext);
 
     void onSurfaceCreated() override;
     void onSurfaceChanged(uint32_t width, uint32_t height) override;
@@ -26,7 +26,7 @@ private:
     sp<VKRenderer> _renderer;
     sp<VKGraphicsContext> _vk_graphics_context;
     sp<VKComputeContext> _vk_compute_context;
-    op<GraphicsContext> _graphics_context;
+    op<GraphicsContext> _surface_context;
 };
 
 }

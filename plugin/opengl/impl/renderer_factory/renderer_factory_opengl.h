@@ -15,7 +15,7 @@ public:
 
     void onSurfaceCreated(RenderBackend& renderEngine) override;
 
-    sp<RenderBackendInfo> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) override;
+    sp<RenderBackendInfo> createRenderBackendInfo(const ApplicationManifest::Renderer& renderer) override;
     sp<Buffer::Delegate> createBuffer(Buffer::Usage usage) override;
     sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure) override;
     sp<RenderView> createRenderView(const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController) override;

@@ -136,8 +136,7 @@ Rect Atlas::getItemUV(const NamedHash& resid) const
 sp<BitmapBundle> Atlas::makeBitmapBundle() const
 {
     GetTextureBitmap textureBitmap(_texture->delegate());
-    GraphicsContext graphicsContext(nullptr, nullptr);
-    _texture->uploader()->initialize(graphicsContext, textureBitmap);
+    _texture->uploader()->initialize(GraphicsContext::mocked(), textureBitmap);
     return sp<BitmapBundle>::make(*this, textureBitmap.bitmap());
 }
 

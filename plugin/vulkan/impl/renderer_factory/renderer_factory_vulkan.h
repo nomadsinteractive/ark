@@ -15,7 +15,7 @@ public:
     RendererFactoryVulkan();
     ~RendererFactoryVulkan() override = default;
 
-    sp<RenderBackendInfo> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) override;
+    sp<RenderBackendInfo> createRenderBackendInfo(const ApplicationManifest::Renderer& renderer) override;
     void onSurfaceCreated(RenderBackend& renderEngine) override;
 
     sp<Buffer::Delegate> createBuffer(Buffer::Usage usage) override;

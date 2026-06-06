@@ -92,7 +92,7 @@ void Level::doLoad(const String& src)
                 const M4 matrix = Rotation(sp<Vec4>::make<Vec4::Const>(obj._rotation ? obj._rotation.value() : constants::QUATERNION_ONE)).toMatrix()->val();
                 const V3 front = MatrixUtil::mul(matrix, V3(0, -1.0f, 0));
                 const V3 up = MatrixUtil::mul(matrix, V3(0, 0, -1.0f));
-                const RenderBackend& renderEngine = Ark::instance().renderController()->renderEngine();
+                const RenderBackend& renderEngine = Ark::instance().renderController()->renderBackend();
                 Camera c = Ark::instance().createCamera(enums::COORDINATE_SYSTEM_RHS, false, renderEngine.shouldFlipY());
                 c.perspective(fovy, 16.0f / 9, clipNear, clipFar);
                 c.lookAt(obj._position, obj._position + front, up);

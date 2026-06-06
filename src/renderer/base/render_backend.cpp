@@ -11,7 +11,7 @@
 namespace ark {
 
 RenderBackend::RenderBackend(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory)
-    : _render_context(rendererFactory->createRenderEngineContext(renderer)), _renderer_factory(std::move(rendererFactory)), _coordinate_system(renderer._coordinate_system == enums::COORDINATE_SYSTEM_DEFAULT ? _render_context->viewportCoordinateSystem() : renderer._coordinate_system)
+    : _render_context(rendererFactory->createRenderBackendInfo(renderer)), _renderer_factory(std::move(rendererFactory)), _coordinate_system(renderer._coordinate_system == enums::COORDINATE_SYSTEM_DEFAULT ? _render_context->viewportCoordinateSystem() : renderer._coordinate_system)
 {
 }
 
@@ -35,7 +35,7 @@ const sp<RendererFactory>& RenderBackend::rendererFactory() const
     return _renderer_factory;
 }
 
-const sp<RenderBackendInfo>& RenderBackend::context() const
+const sp<RenderBackendInfo>& RenderBackend::info() const
 {
     return _render_context;
 }

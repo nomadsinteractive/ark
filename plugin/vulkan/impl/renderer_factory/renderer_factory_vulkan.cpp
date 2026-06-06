@@ -49,7 +49,7 @@ RendererFactoryVulkan::RendererFactoryVulkan()
 {
 }
 
-sp<RenderBackendInfo> RendererFactoryVulkan::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
+sp<RenderBackendInfo> RendererFactoryVulkan::createRenderBackendInfo(const ApplicationManifest::Renderer& renderer)
 {
     sp<RenderBackendInfo> vkContext = sp<RenderBackendInfo>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), enums::COORDINATE_SYSTEM_LHS, enums::COORDINATE_SYSTEM_RHS, enums::NDC_DEPTH_RANGE_ZERO_TO_ONE);
     if(renderer._version == enums::RENDERER_VERSION_AUTO)
@@ -66,7 +66,7 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderBackend& renderEngine)
     _renderer->_instance = sp<VKInstance>::make();
     _renderer->_instance->initialize(renderEngine);
 
-    _renderer->_device = sp<VKDevice>::make(_renderer->_instance, _renderer->_instance->physicalDevices()[0], renderEngine.context()->version());
+    _renderer->_device = sp<VKDevice>::make(_renderer->_instance, _renderer->_instance->physicalDevices()[0], renderEngine.info()->version());
     _renderer->_heap = sp<VKHeap>::make(_renderer->_device);
     _renderer->_render_target = sp<VKSwapChain>::make(renderEngine, _renderer->_device);
 }
@@ -102,7 +102,7 @@ sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController)
 {
-    return sp<RenderView>::make<RenderViewVulkan>(_renderer, renderContext, renderController);
+    return sp<RenderView>::make<RenderViewVulkan>(_renderer, new GraphicsContext(renderController));
 }
 
 sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()

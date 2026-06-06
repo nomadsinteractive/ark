@@ -34,9 +34,9 @@ sp<Model> makeNDCModel(const sp<Boundaries>& content)
     // RHS ndc bounds
     const Rect bounds(-1.0f, -1.0f, 1.0f, 1.0f);
     uint16_t uy = 0, vy = std::numeric_limits<uint16_t>::max();
-    if(Ark::instance().renderController()->renderEngine()->isBackendLHS())
+    if(Ark::instance().renderController()->renderBackend()->isBackendLHS())
         std::swap(uy, vy);
-    sp<Vertices> vertices = Ark::instance().renderController()->renderEngine()->ndcCoordinateSystem() == enums::COORDINATE_SYSTEM_RHS ? sp<Vertices>::make<VerticesQuadLHS>(bounds, 0, uy, std::numeric_limits<uint16_t>::max(), vy)
+    sp<Vertices> vertices = Ark::instance().renderController()->renderBackend()->ndcCoordinateSystem() == enums::COORDINATE_SYSTEM_RHS ? sp<Vertices>::make<VerticesQuadLHS>(bounds, 0, uy, std::numeric_limits<uint16_t>::max(), vy)
                                                                                         : sp<Vertices>::make<VerticesQuadRHS>(bounds, 0, uy, std::numeric_limits<uint16_t>::max(), vy);
     return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), std::move(vertices), content);
 }

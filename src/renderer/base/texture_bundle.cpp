@@ -31,7 +31,7 @@ private:
 }
 
 TextureBundle::TextureBundle(const sp<RenderController>& renderController)
-    : _render_controller(renderController), _renderer_factory(_render_controller->_render_engine->rendererFactory()),
+    : _render_controller(renderController), _renderer_factory(_render_controller->_render_backend->rendererFactory()),
       _bitmap_loader(_render_controller->_bitmap_loader), _bitmap_bounds_loader(_render_controller->_bitmap_bounds_loader)
 {
 }

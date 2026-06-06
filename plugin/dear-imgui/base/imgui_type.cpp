@@ -43,7 +43,7 @@ void Imgui::show(sp<Boolean> discarded) const
 }
 
 Imgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _manifest(manifest), _camera(sp<Camera>::make(Ark::instance().createCamera(enums::COORDINATE_SYSTEM_LHS, false, Ark::instance().renderController()->renderEngine()->shouldFlipY()))),
+    : _manifest(manifest), _camera(sp<Camera>::make(Ark::instance().createCamera(enums::COORDINATE_SYSTEM_LHS, false, Ark::instance().renderController()->renderBackend()->shouldFlipY()))),
       _shader(Shader::makeBuilder(factory, manifest, "shaders/imgui.vert", "shaders/imgui.frag"))
 {
 }
@@ -82,7 +82,7 @@ sp<Imgui> Imgui::BUILDER::build(const Scope& args)
     sp<Texture> texture = renderController.createTexture2d(std::move(bitmap));
     io.Fonts->SetTexID(reinterpret_cast<ImTextureID>(texture.get()));
     sp<Shader> shader = _shader->build(args);
-    const Viewport& viewport = renderController.renderEngine()->viewport();
+    const Viewport& viewport = renderController.renderBackend()->viewport();
     _camera->ortho(0, viewport.width(), viewport.height(), 0, viewport.clipNear(), viewport.clipFar());
     shader->setCamera(_camera);
     return sp<Imgui>::make(sp<RendererImgui>::make(std::move(shader), std::move(texture)));

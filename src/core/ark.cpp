@@ -430,7 +430,7 @@ Camera Ark::createCamera(enums::CoordinateSystem appCoordinateSystem) const
     if(appCoordinateSystem == enums::COORDINATE_SYSTEM_DEFAULT)
         appCoordinateSystem = _manifest->renderer()._coordinate_system;
 
-    const RenderBackendInfo& renderEngineContext = _application_context->renderController()->renderEngine()->context();
+    const RenderBackendInfo& renderEngineContext = _application_context->renderController()->renderBackend()->info();
     if(appCoordinateSystem == enums::COORDINATE_SYSTEM_DEFAULT)
         appCoordinateSystem = renderEngineContext.viewportCoordinateSystem();
 
@@ -442,7 +442,7 @@ Camera Ark::createCamera(enums::CoordinateSystem appCoordinateSystem) const
 
 Camera Ark::createCamera(enums::CoordinateSystem cs, const bool flipx, const bool flipy) const
 {
-    sp<Camera::Delegate> cameraDelegate = makeCameraDelegate(cs, _application_context->renderController()->renderEngine()->context()->ndcDepthRange());
+    sp<Camera::Delegate> cameraDelegate = makeCameraDelegate(cs, _application_context->renderController()->renderBackend()->info()->ndcDepthRange());
     if(flipx || flipy)
         return {cs, sp<Camera::Delegate>::make<CameraDelegateCHS>(std::move(cameraDelegate), flipx, flipy)};
     return {cs, std::move(cameraDelegate)};

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/types/owned_ptr.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/inf/render_view.h"
@@ -11,7 +11,7 @@ namespace ark::plugin::opengl {
 
 class RenderViewOpenGL final : public RenderView {
 public:
-    RenderViewOpenGL(sp<RenderBackendInfo> renderContext, sp<RenderController> renderController);
+    RenderViewOpenGL(sp<RenderController> renderController);
     ~RenderViewOpenGL() override;
 
     void onSurfaceCreated() override;
@@ -24,7 +24,7 @@ private:
     void initialize(uint32_t width, uint32_t height);
     
 private:
-    op<GraphicsContext> _graphics_context;
+    sp<RenderController> _render_controller;
 };
 
 }

@@ -80,7 +80,7 @@ ShaderPreprocessor::ShaderPreprocessor(String resid, String source, document man
       _declaration_uniforms(_uniform_declaration_source, {enums::SHADER_TYPE_QUALIFIER_UNIFORM}), _declaration_samplers(_uniform_declaration_source, {enums::SHADER_TYPE_QUALIFIER_UNIFORM}), _declaration_images(_uniform_declaration_source, {enums::SHADER_TYPE_QUALIFIER_UNIFORM}),
       _pre_main(sp<String>::make()), _post_main(sp<String>::make())
 {
-    _predefined_macros.push_back(Strings::sprintf("#define ARK_Z_DIRECTION %.2f", Ark::instance().renderController()->renderEngine()->toLayoutDirection(1.0f)));
+    _predefined_macros.push_back(Strings::sprintf("#define ARK_Z_DIRECTION %.2f", Ark::instance().renderController()->renderBackend()->toLayoutDirection(1.0f)));
 }
 
 void ShaderPreprocessor::addPreMainSource(const String& source)

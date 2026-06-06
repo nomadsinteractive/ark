@@ -186,8 +186,8 @@ Buffer::Snapshot RenderController::PrimitiveIndexBuffer::snapshot(RenderControll
     return _buffer.snapshot(size);
 }
 
-RenderController::RenderController(const sp<RenderBackend>& renderEngine, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-    : _render_engine(renderEngine), _recycler(sp<Recycler>::make()), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _gba(*this)
+RenderController::RenderController(const sp<RenderBackend>& renderBackend, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
+    : _render_backend(renderBackend), _recycler(sp<Recycler>::make()), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _gba(*this), _tick(0)
 {
 }
 
@@ -224,6 +224,7 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
 {
     DPROFILER_TRACE("PreFrameUpdate");
 
+    ++_tick;
     prepare(graphicsContext, _uploading_resources);
     _on_every_frame.foreach(graphicsContext, false, true);
 
@@ -268,14 +269,14 @@ const sp<Recycler>& RenderController::recycler() const
     return _recycler;
 }
 
-const sp<RenderBackend>& RenderController::renderEngine() const
+const sp<RenderBackend>& RenderController::renderBackend() const
 {
-    return _render_engine;
+    return _render_backend;
 }
 
 sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, const enums::UploadStrategy us, sp<Future> future)
 {
-    sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters);
+    sp<Texture::Delegate> delegate = _render_backend->rendererFactory()->createTexture(size, parameters);
     DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
     sp<Texture> texture = sp<Texture>::make(std::move(delegate), std::move(size), std::move(uploader), std::move(parameters));
     upload(texture, us, nullptr, std::move(future));
@@ -291,7 +292,7 @@ sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, sp<Texture::Par
 Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uploader, const enums::UploadStrategy us, sp<Future> future)
 {
     DTHREAD_CHECK(THREAD_NAME_ID_CORE);
-    Buffer buffer(usage, _render_engine->rendererFactory()->createBuffer(usage));
+    Buffer buffer(usage, _render_backend->rendererFactory()->createBuffer(usage));
     if(uploader)
         uploadBuffer(buffer, std::move(uploader), us, std::move(future));
     return buffer;
@@ -336,7 +337,7 @@ sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveI
 
 sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
-    sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(configure));
+    sp<RenderTarget> renderTarget = renderBackend()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(configure));
     if(renderTarget->fbo())
         upload(renderTarget->fbo(), {enums::UPLOAD_STRATEGY_ONCE, enums::UPLOAD_STRATEGY_ON_SURFACE_READY}, nullptr, nullptr, enums::UPLOAD_PRIORITY_LOW);
     return renderTarget;
@@ -398,6 +399,11 @@ void RenderController::deferUnref(Box box)
 GraphicsBufferAllocator& RenderController::gba()
 {
     return _gba;
+}
+
+uint32_t RenderController::tick() const
+{
+    return _tick;
 }
 
 RenderController::RenderResource::RenderResource(sp<Resource> resource, sp<Future> future)
