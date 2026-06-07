@@ -6,6 +6,7 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/inf/render_command.h"
 
+#include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
 
 #include "vulkan/base/vk_command_buffers.h"
