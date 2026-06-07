@@ -13,7 +13,7 @@
 
 namespace ark::plugin::vulkan {
 
-VKComputeContext::VKComputeContext(GraphicsContext& graphicsContext, sp<VKRenderer> renderer)
+VKComputeContext::VKComputeContext(sp<VKRenderer> renderer)
     : _renderer(std::move(renderer)), _command_pool(_renderer->device()->makeComputeCommandPool()), _submit_queue(_renderer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT), _command_buffer(VK_NULL_HANDLE),
       _semaphore_render_complete(VK_NULL_HANDLE)
 {

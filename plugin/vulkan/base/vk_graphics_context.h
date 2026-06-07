@@ -15,7 +15,7 @@ namespace ark::plugin::vulkan {
 
 class VKGraphicsContext {
 public:
-    VKGraphicsContext(const GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer);
+    VKGraphicsContext(const RenderController& renderController, const sp<VKRenderer>& renderer);
     ~VKGraphicsContext();
 
     void begin(uint32_t imageId, const V4& backgroundColor);

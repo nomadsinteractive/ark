@@ -102,7 +102,7 @@ sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderBackendInfo>& renderContext, const sp<RenderController>& renderController)
 {
-    return sp<RenderView>::make<RenderViewVulkan>(_renderer, new GraphicsContext(renderController));
+    return sp<RenderView>::make<RenderViewVulkan>(_renderer, renderController);
 }
 
 sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()

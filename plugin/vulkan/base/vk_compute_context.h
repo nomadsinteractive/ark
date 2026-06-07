@@ -13,9 +13,7 @@ namespace ark::plugin::vulkan {
 
 class VKComputeContext {
 public:
-    VKComputeContext(GraphicsContext& graphicsContext, sp<VKRenderer> renderer);
-
-    void initialize(GraphicsContext& graphicsContext);
+    VKComputeContext(sp<VKRenderer> renderer);
 
     void begin();
     void end();

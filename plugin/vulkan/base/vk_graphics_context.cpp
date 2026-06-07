@@ -64,8 +64,8 @@ private:
 
 }
 
-VKGraphicsContext::VKGraphicsContext(const GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer)
-    : _renderer(renderer), _render_target(_renderer->renderTarget()), _command_buffers(sp<VKCommandBuffers>::make(graphicsContext.recycler(), _render_target)),
+VKGraphicsContext::VKGraphicsContext(const RenderController& renderController, const sp<VKRenderer>& renderer)
+    : _renderer(renderer), _render_target(_renderer->renderTarget()), _command_buffers(sp<VKCommandBuffers>::make(renderController.recycler(), _render_target)),
       _submit_queue(_renderer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT), _image_count(static_cast<uint32_t>(_command_buffers->vkCommandBuffers().size())),
       _current_frame(0), _current_image(0)
 {
