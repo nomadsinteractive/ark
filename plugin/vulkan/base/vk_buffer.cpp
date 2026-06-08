@@ -49,10 +49,41 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader
         copyRegions.reserve(records.size());
         for(const auto& [k, v] : records)
             copyRegions.push_back({k, k, v});
-        const VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+        const sp<VKCommandPool> commandPool = _renderer->commandPool();
+        const VkCommandBuffer copyCmd = commandPool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, static_cast<uint32_t>(copyRegions.size()), copyRegions.data());
-        _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
-        stagingBuffer.recycle()(graphicsContext);
+
+        // Order the transfer write before the consuming reads on the GPU with a pipeline barrier instead of stalling
+        // the CPU with a vkQueueWaitIdle. The barrier's second synchronization scope spans submission order on this
+        // (graphics) queue, so it also covers the frame's render command buffer submitted later on the same queue.
+        VkPipelineStageFlags dstStages = 0;
+        VkAccessFlags dstAccess = 0;
+        if(_usage_flags & VK_BUFFER_USAGE_INDEX_BUFFER_BIT)    { dstStages |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT; dstAccess |= VK_ACCESS_INDEX_READ_BIT; }
+        if(_usage_flags & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)   { dstStages |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT; dstAccess |= VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT; }
+        if(_usage_flags & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)  { dstStages |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; dstAccess |= VK_ACCESS_UNIFORM_READ_BIT; }
+        if(_usage_flags & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)  { dstStages |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; dstAccess |= VK_ACCESS_SHADER_READ_BIT; }
+        if(_usage_flags & VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT) { dstStages |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT; dstAccess |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT; }
+        if(dstStages == 0) { dstStages = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT; dstAccess = VK_ACCESS_MEMORY_READ_BIT; }
+
+        VkBufferMemoryBarrier barrier = { VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER };
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = dstAccess;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.buffer = _descriptor.buffer;
+        barrier.offset = 0;
+        barrier.size = VK_WHOLE_SIZE;
+        vkCmdPipelineBarrier(copyCmd, VK_PIPELINE_STAGE_TRANSFER_BIT, dstStages, 0, 0, nullptr, 1, &barrier, 0, nullptr);
+
+        commandPool->submitCommandBuffer(copyCmd);
+
+        // No vkQueueWaitIdle: the copy is still in flight, so the command buffer cannot be freed yet and the staging
+        // buffer must outlive it. Both are reclaimed by the recycler's deferred pass (hundreds of frames later, long
+        // after the copy completes) instead of with a per-upload fence. The staging buffer defers via its destructor.
+        _recycler->recycle([commandPool, copyCmd](GraphicsContext&) {
+            commandPool->destroyCommandBuffers(1, &copyCmd);
+        });
     }
 }
 

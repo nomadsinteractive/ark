@@ -18,6 +18,11 @@ public:
 
     void flushCommandBuffer(VkCommandBuffer commandBuffer, bool free) const;
 
+    // Ends and submits a command buffer WITHOUT waiting for completion and without freeing it. The caller must keep
+    // the command buffer alive until the GPU is done with it (e.g. via the recycler's deferred destruction), since a
+    // pending command buffer cannot be freed. GPU-side ordering must be arranged with a pipeline barrier/semaphore.
+    void submitCommandBuffer(VkCommandBuffer commandBuffer) const;
+
     void destroyCommandBuffers(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers) const;
 
 private:

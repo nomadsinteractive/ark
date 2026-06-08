@@ -77,6 +77,20 @@ void VKCommandPool::flushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
         vkFreeCommandBuffers(_logical_device, _command_pool, 1, &commandBuffer);
 }
 
+void VKCommandPool::submitCommandBuffer(VkCommandBuffer commandBuffer) const
+{
+    if(commandBuffer == VK_NULL_HANDLE)
+        return;
+
+    VKUtil::checkResult(vkEndCommandBuffer(commandBuffer));
+
+    VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    VKUtil::checkResult(vkQueueSubmit(_queue, 1, &submitInfo, VK_NULL_HANDLE));
+}
+
 void VKCommandPool::destroyCommandBuffers(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers) const
 {
     vkFreeCommandBuffers(_logical_device, _command_pool, commandBufferCount, pCommandBuffers);
