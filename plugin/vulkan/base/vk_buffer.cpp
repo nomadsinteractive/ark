@@ -3,6 +3,7 @@
 #include "core/util/uploader_type.h"
 
 #include "renderer/base/recycler.h"
+#include "renderer/inf/recyclable.h"
 
 #include "vulkan/base/vk_command_pool.h"
 #include "vulkan/base/vk_heap.h"
@@ -11,6 +12,47 @@
 
 namespace ark::plugin::vulkan {
 
+namespace {
+
+class RecyclableVKBuffer final : public Recyclable {
+public:
+    RecyclableVKBuffer(sp<VKDevice> device, sp<VKHeap> heap, const VkBuffer buffer, VKMemoryPtr memory)
+        : _device(std::move(device)), _heap(std::move(heap)), _buffer(buffer), _memory(std::move(memory)) {
+    }
+
+    ~RecyclableVKBuffer() override {
+        if(_buffer)
+            vkDestroyBuffer(_device->vkLogicalDevice(), _buffer, nullptr);
+        if(_memory)
+            _heap->recycle(_memory);
+    }
+
+private:
+    sp<VKDevice> _device;
+    sp<VKHeap> _heap;
+    VkBuffer _buffer;
+    VKMemoryPtr _memory;
+};
+
+class RecyclableCommandBuffer final : public Recyclable {
+public:
+    RecyclableCommandBuffer(sp<VKCommandPool> commandPool, const VkCommandBuffer commandBuffer)
+        : _command_pool(std::move(commandPool)), _command_buffer(commandBuffer)
+    {
+    }
+
+    ~RecyclableCommandBuffer() override
+    {
+        _command_pool->destroyCommandBuffers(1, &_command_buffer);
+    }
+
+private:
+    sp<VKCommandPool> _command_pool;
+    VkCommandBuffer _command_buffer;
+};
+
+}
+
 VKBuffer::VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, const VkBufferUsageFlags usageFlags, const VkMemoryPropertyFlags memoryPropertyFlags)
     : Delegate(), _renderer(std::move(renderer)), _recycler(std::move(recycler)), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags), _descriptor{}, _memory_requirements{}
 {
@@ -18,7 +60,8 @@ VKBuffer::VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, const VkBuffe
 
 VKBuffer::~VKBuffer()
 {
-    _recycler->recycle(*this);
+    if(id())
+        _recycler->recycle(toRecyclable());
 }
 
 uint64_t VKBuffer::id()
@@ -50,7 +93,7 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader
         for(const auto& [k, v] : records)
             copyRegions.push_back({k, k, v});
 
-        const sp<VKCommandPool> commandPool = _renderer->commandPool();
+        sp<VKCommandPool> commandPool = _renderer->commandPool();
         const VkCommandBuffer copyCmd = commandPool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, static_cast<uint32_t>(copyRegions.size()), copyRegions.data());
 
@@ -81,9 +124,7 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader
         // No vkQueueWaitIdle: the copy is still in flight, so the command buffer cannot be freed yet and the staging
         // buffer must outlive it. Both are reclaimed by the recycler's deferred pass (hundreds of frames later, long
         // after the copy completes) instead of with a per-upload fence. The staging buffer defers via its destructor.
-        _recycler->recycle([commandPool, copyCmd](GraphicsContext&) {
-            commandPool->destroyCommandBuffers(1, &copyCmd);
-        });
+        _recycler->recycle(new RecyclableCommandBuffer(std::move(commandPool), copyCmd));
     }
 }
 
@@ -106,27 +147,19 @@ void VKBuffer::downloadBuffer(GraphicsContext& graphicsContext, const size_t off
 
         memcpy(ptr, stagingBuffer._memory->map(), size);
         stagingBuffer._memory->unmap();
-        stagingBuffer.recycle()(graphicsContext);
+        stagingBuffer.toRecyclable();
     }
 }
 
-ResourceRecycleFunc VKBuffer::recycle()
+op<Recyclable> VKBuffer::toRecyclable()
 {
-    const sp<VKDevice> device = _renderer->device();
-    const sp<VKHeap> heap = _renderer->heap();
-    VkBuffer buffer = _descriptor.buffer;
-    VKMemoryPtr memory = std::move(_memory);
+    op<Recyclable> recyclable(new RecyclableVKBuffer(_renderer->device(), _renderer->heap(), _descriptor.buffer, std::move(_memory)));
 
     _size = 0;
     _memory_requirements.size = 0;
     _descriptor.buffer = VK_NULL_HANDLE;
 
-    return [device, buffer, heap, memory](GraphicsContext& graphicsContext) {
-        if (buffer)
-            vkDestroyBuffer(device->vkLogicalDevice(), buffer, nullptr);
-        if (memory)
-            heap->recycle(graphicsContext, memory);
-    };
+    return recyclable;
 }
 
 void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const ByteArray::View& buf) const
@@ -148,7 +181,7 @@ const VkBuffer& VKBuffer::vkBuffer() const
 void VKBuffer::allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs)
 {
     if(_memory)
-        _renderer->heap()->recycle(graphicsContext, _memory);
+        _renderer->heap()->recycle(_memory);
     _memory = _renderer->heap()->allocate(graphicsContext, memReqs, _memory_property_flags);
 }
 

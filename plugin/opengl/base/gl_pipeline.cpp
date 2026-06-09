@@ -15,6 +15,7 @@
 #include "renderer/base/texture.h"
 #include "renderer/base/uniform.h"
 #include "renderer/inf/draw_decorator.h"
+#include "renderer/inf/recyclable.h"
 #include "renderer/inf/resource.h"
 #include "renderer/util/render_util.h"
 
@@ -28,6 +29,21 @@
 namespace ark::plugin::opengl {
 
 namespace {
+
+class RecyclableGLPipeline final : public Recyclable {
+public:
+    RecyclableGLPipeline(const uint32_t id)
+        : _id(id) {
+    }
+
+    ~RecyclableGLPipeline() override {
+        LOGD("glDeleteProgram(%d)", _id);
+        glDeleteProgram(_id);
+    }
+
+private:
+    uint32_t _id;
+};
 
 void setVertexPointer(const Attribute& attribute, const GLuint location, const GLsizei stride, const uint32_t length, const uint32_t offset)
 {
@@ -714,6 +730,21 @@ private:
     Vector<GLBufferBaseBinder> _ssbo_binders;
 };
 
+class RecyclableStage final : public Recyclable {
+public:
+    RecyclableStage(const uint32_t id)
+        : _id(id) {
+    }
+
+    ~RecyclableStage() override {
+        LOGD("glDeleteShader(%d)", _id);
+        glDeleteShader(_id);
+    }
+
+private:
+    uint32_t _id;
+};
+
 class Stage {
 public:
     Stage(sp<Recycler> recycler, const uint32_t version, const GLenum type, const String& source)
@@ -722,11 +753,7 @@ public:
     }
     ~Stage()
     {
-        uint32_t id = _id;
-        _recycler->recycle([id](GraphicsContext&) {
-            LOGD("glDeleteShader(%d)", id);
-            glDeleteShader(id);
-        });
+        _recycler->recycle(new RecyclableStage(_id));
     }
     DISALLOW_COPY_AND_ASSIGN(Stage);
 
@@ -815,7 +842,8 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, const uint32_t version, Map
 
 GLPipeline::~GLPipeline()
 {
-    _recycler->recycle(*this);
+    if(id())
+        _recycler->recycle(toRecyclable());
 }
 
 uint64_t GLPipeline::id()
@@ -855,18 +883,13 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     LOGD("Compile and link success, program size: %d", programSize);
 }
 
-ResourceRecycleFunc GLPipeline::recycle()
+op<Recyclable> GLPipeline::toRecyclable()
 {
-    uint32_t id = _stub->_id;
+    op<Recyclable> recyclable(new RecyclableGLPipeline(_stub->_id));
     _stub->_id = 0;
-
     _stub->_attributes.clear();
     _stub->_uniforms.clear();
-
-    return [id](GraphicsContext&) {
-        LOGD("glDeleteProgram(%d)", id);
-        glDeleteProgram(id);
-    };
+    return recyclable;
 }
 
 void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)

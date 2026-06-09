@@ -6,6 +6,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/texture.h"
+#include "renderer/inf/recyclable.h"
 #include "renderer/util/render_util.h"
 
 #include "vulkan/base/vk_command_pool.h"
@@ -20,6 +21,24 @@
 namespace ark::plugin::vulkan {
 
 namespace {
+
+class RecyclableVKFramebuffer final : public Recyclable {
+public:
+    RecyclableVKFramebuffer(sp<VKDevice> device, const VkFramebuffer framebuffer, const VkRenderPass renderPass)
+        : _device(std::move(device)), _framebuffer(framebuffer), _render_pass(renderPass) {
+    }
+
+    ~RecyclableVKFramebuffer() override {
+        const VkDevice logicalDevice = _device->vkLogicalDevice();
+        vkDestroyRenderPass(logicalDevice, _render_pass, nullptr);
+        vkDestroyFramebuffer(logicalDevice, _framebuffer, nullptr);
+    }
+
+private:
+    sp<VKDevice> _device;
+    VkFramebuffer _framebuffer;
+    VkRenderPass _render_pass;
+};
 
 RenderBackendInfo::Resolution getFramebufferResolution(const RenderTarget::Configure& configure)
 {
@@ -36,7 +55,8 @@ VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>&
 
 VKFramebuffer::~VKFramebuffer()
 {
-    _stub->_recycler->recycle(*this);
+    if(id())
+        _stub->_recycler->recycle(toRecyclable());
 }
 
 uint64_t VKFramebuffer::id()
@@ -49,21 +69,12 @@ void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/)
     _stub->initialize();
 }
 
-ResourceRecycleFunc VKFramebuffer::recycle()
+op<Recyclable> VKFramebuffer::toRecyclable()
 {
-    const sp<VKDevice> device = _stub->_renderer->device();
-
-    VkFramebuffer framebuffer = _stub->_render_pass_begin_info.framebuffer;
-    VkRenderPass renderPass = _stub->_render_pass_begin_info.renderPass;
-
+    op<Recyclable> recyclable(new RecyclableVKFramebuffer(_stub->_renderer->device(), _stub->_render_pass_begin_info.framebuffer, _stub->_render_pass_begin_info.renderPass));
     _stub->_render_pass_begin_info.framebuffer = VK_NULL_HANDLE;
     _stub->_render_pass_begin_info.renderPass = VK_NULL_HANDLE;
-
-    return [=](GraphicsContext&) {
-        const VkDevice logicalDevice = device->vkLogicalDevice();
-        vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
-        vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
-    };
+    return recyclable;
 }
 
 void VKFramebuffer::beginRenderPass(GraphicsContext& graphicsContext) const

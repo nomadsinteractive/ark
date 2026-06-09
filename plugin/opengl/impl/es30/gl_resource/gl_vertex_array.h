@@ -15,7 +15,7 @@ public:
 
     uint64_t id() override;
     void upload(GraphicsContext& graphicsContext) override;
-    ResourceRecycleFunc recycle() override;
+    op<Recyclable> toRecyclable() override;
 
 private:
     PipelineBindings _pipeline_bindings;

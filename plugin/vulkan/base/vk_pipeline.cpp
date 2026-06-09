@@ -12,6 +12,7 @@
 #include "renderer/base/render_backend_info.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/pipeline_bindings.h"
+#include "renderer/inf/recyclable.h"
 
 #include "vulkan/base/vk_buffer.h"
 #include "vulkan/base/vk_command_buffers.h"
@@ -35,6 +36,28 @@ public:
 };
 
 namespace {
+
+class RecyclableVKPipeline final : public Recyclable {
+public:
+    RecyclableVKPipeline(sp<VKDevice> device, const VkPipelineLayout layout, Vector<VkDescriptorSetLayout> descriptorSetLayouts, const VkPipeline pipeline)
+        : _device(std::move(device)), _layout(layout), _descriptor_set_layouts(std::move(descriptorSetLayouts)), _pipeline(pipeline) {
+    }
+
+    ~RecyclableVKPipeline() override {
+        if(_layout)
+            vkDestroyPipelineLayout(_device->vkLogicalDevice(), _layout, nullptr);
+        for(const VkDescriptorSetLayout i : _descriptor_set_layouts)
+            vkDestroyDescriptorSetLayout(_device->vkLogicalDevice(), i, nullptr);
+        if(_pipeline)
+            vkDestroyPipeline(_device->vkLogicalDevice(), _pipeline, nullptr);
+    }
+
+private:
+    sp<VKDevice> _device;
+    VkPipelineLayout _layout;
+    Vector<VkDescriptorSetLayout> _descriptor_set_layouts;
+    VkPipeline _pipeline;
+};
 
 class VKDrawArrays final : public VKPipeline::BakedRenderer {
 public:
@@ -292,7 +315,8 @@ VKPipeline::VKPipeline(const PipelineBindings& pipelineBindings, const sp<Recycl
 
 VKPipeline::~VKPipeline()
 {
-    _recycler->recycle(*this);
+    if(id())
+        _recycler->recycle(toRecyclable());
 }
 
 VkPipeline VKPipeline::vkPipeline() const
@@ -321,22 +345,11 @@ void VKPipeline::upload(GraphicsContext& graphicsContext)
         setupGraphicsPipeline(graphicsContext);
 }
 
-ResourceRecycleFunc VKPipeline::recycle()
+op<Recyclable> VKPipeline::toRecyclable()
 {
-    sp<VKDevice> device = _renderer->device();
-
-    VkPipelineLayout layout = _layout;
-    VkPipeline pipeline = _pipeline;
+    op<Recyclable> recyclable(new RecyclableVKPipeline(_renderer->device(), _layout, std::move(_descriptor_set_layouts), _pipeline));
     _pipeline = VK_NULL_HANDLE;
-
-    return [device = std::move(device), layout, descriptorSetLayout = std::move(_descriptor_set_layouts), pipeline](GraphicsContext&) {
-        if(layout)
-            vkDestroyPipelineLayout(device->vkLogicalDevice(), layout, nullptr);
-        for(const VkDescriptorSetLayout i : descriptorSetLayout)
-            vkDestroyDescriptorSetLayout(device->vkLogicalDevice(), i, nullptr);
-        if(pipeline)
-            vkDestroyPipeline(device->vkLogicalDevice(), pipeline, nullptr);
-    };
+    return recyclable;
 }
 
 void VKPipeline::bind(GraphicsContext& graphicsContext, const PipelineContext& pipelineContext)

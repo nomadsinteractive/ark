@@ -1,24 +1,20 @@
 #include "renderer/base/recycler.h"
 
-#include "renderer/inf/resource.h"
+#include "core/types/owned_ptr.h"
+
+#include "renderer/inf/recyclable.h"
 
 namespace ark {
 
-void Recycler::recycle(Resource& resource)
+void Recycler::recycle(op<Recyclable> recyclable)
 {
-    if(resource.id())
-        _recyclers.push(resource.recycle());
+    _recyclables.push(std::move(recyclable));
 }
 
-void Recycler::recycle(ResourceRecycleFunc recycler)
+void Recycler::doRecycling()
 {
-    _recyclers.push(std::move(recycler));
-}
-
-void Recycler::doRecycling(GraphicsContext& graphicsContext)
-{
-    for(auto& recycler : _recyclers.clear())
-        recycler(graphicsContext);
+    // Recyclables clean up in their destructors; clearing the stack drops the owning ptrs and frees the resources.
+    _recyclables.clear();
 }
 
 }

@@ -3,9 +3,29 @@
 #include "core/inf/writable.h"
 #include "core/util/uploader_type.h"
 
+#include "renderer/inf/recyclable.h"
+
 #include "sdl3/base/context_sdl3_gpu.h"
 
 namespace ark::plugin::sdl3 {
+
+namespace {
+
+class RecyclableBufferSDL3_GPU final : public Recyclable {
+public:
+    RecyclableBufferSDL3_GPU(SDL_GPUBuffer* buffer)
+        : _buffer(buffer) {
+    }
+
+    ~RecyclableBufferSDL3_GPU() override {
+        SDL_ReleaseGPUBuffer(ensureGPUDevice(), _buffer);
+    }
+
+private:
+    SDL_GPUBuffer* _buffer;
+};
+
+}
 
 BufferSDL3_GPU::BufferSDL3_GPU(const SDL_GPUBufferUsageFlags usageFlags)
     : _usage_flags(usageFlags), _buffer(nullptr), _buffer_size(0)
@@ -21,15 +41,12 @@ void BufferSDL3_GPU::upload(GraphicsContext& graphicsContext)
 {
 }
 
-ResourceRecycleFunc BufferSDL3_GPU::recycle()
+op<Recyclable> BufferSDL3_GPU::toRecyclable()
 {
-    SDL_GPUBuffer* buffer = _buffer;
+    op<Recyclable> recyclable(new RecyclableBufferSDL3_GPU(_buffer));
     _buffer = nullptr;
     _buffer_size = 0;
-
-    return [buffer] (GraphicsContext& graphicsContext) {
-        SDL_ReleaseGPUBuffer(ensureGPUDevice(graphicsContext), buffer);
-    };
+    return recyclable;
 }
 
 class WritableSDL3_GPU_Buffer final : public Writable {

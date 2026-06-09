@@ -13,6 +13,7 @@
 #include "renderer/base/model.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_backend.h"
+#include "renderer/inf/recyclable.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
 #include "renderer/inf/renderer_factory.h"
@@ -55,8 +56,8 @@ public:
         _buffer->uploadBuffer(graphicsContext, _uploader_snapshot);
     }
 
-    ResourceRecycleFunc recycle() override {
-        return _buffer->recycle();
+    op<Recyclable> toRecyclable() override {
+        return _buffer->toRecyclable();
     }
 
 private:
@@ -231,7 +232,7 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
     if(const uint32_t tick = graphicsContext.tick() % 300; tick == 0)
         _on_surface_ready.foreach(graphicsContext, false, false);
     else if (tick == 150)
-        _recycler->doRecycling(graphicsContext);
+        _recycler->doRecycling();
 
     for(const sp<Runnable>& runnable : _on_pre_render_runnable.update(0))
         runnable->run();
@@ -426,9 +427,10 @@ void RenderController::RenderResource::upload(GraphicsContext& graphicsContext) 
     _resource->upload(graphicsContext);
 }
 
-void RenderController::RenderResource::recycle(GraphicsContext& graphicsContext) const
+void RenderController::RenderResource::recycle(GraphicsContext& /*graphicsContext*/) const
 {
-    _resource->recycle()(graphicsContext);
+    // The Recyclable returned by toRecyclable() frees the resource in its destructor as it goes out of scope here.
+    _resource->toRecyclable();
 }
 
 uint64_t RenderController::RenderResource::id() const

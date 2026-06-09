@@ -7,10 +7,22 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/inf/pipeline.h"
+#include "renderer/inf/recyclable.h"
 
 namespace ark {
 
 namespace {
+
+class RecyclablePipelineComposite final : public Recyclable {
+public:
+    RecyclablePipelineComposite(op<Recyclable> draw, op<Recyclable> compute)
+        : _draw(std::move(draw)), _compute(std::move(compute)) {
+    }
+
+private:
+    op<Recyclable> _draw;
+    op<Recyclable> _compute;
+};
 
 class PipelineComposite final : public Pipeline {
 public:
@@ -27,14 +39,9 @@ public:
     {
     }
 
-    ResourceRecycleFunc recycle() override
+    op<Recyclable> toRecyclable() override
     {
-        ResourceRecycleFunc func1 = _pipeline_draw->recycle();
-        ResourceRecycleFunc func2 = _pipeline_compute->recycle();
-        return [func1 = std::move(func1), func2 = std::move(func2)] (GraphicsContext& graphicsContext) {
-            func1(graphicsContext);
-            func2(graphicsContext);
-        };
+        return op<Recyclable>(new RecyclablePipelineComposite(_pipeline_draw->toRecyclable(), _pipeline_compute->toRecyclable()));
     }
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override

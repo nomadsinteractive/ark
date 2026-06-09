@@ -5,6 +5,7 @@
 
 #include "renderer/base/recycler.h"
 #include "renderer/base/texture.h"
+#include "renderer/inf/recyclable.h"
 
 #include "opengl/base/gl_texture.h"
 #include "opengl/base/gl_renderbuffer.h"
@@ -15,6 +16,21 @@
 namespace ark::plugin::opengl {
 
 namespace {
+
+class RecyclableGLFramebuffer final : public Recyclable {
+public:
+    RecyclableGLFramebuffer(const uint32_t id)
+        : _id(id) {
+    }
+
+    ~RecyclableGLFramebuffer() override {
+        LOGD("Deleting GLFramebuffer[%d]", _id);
+        glDeleteFramebuffers(1, &_id);
+    }
+
+private:
+    uint32_t _id;
+};
 
 sp<GLRenderbuffer> ensureRenderBuffer(GraphicsContext& graphicsContext, GLTexture& texture, sp<Recycler> recycler)
 {
@@ -37,7 +53,8 @@ GLFramebuffer::GLFramebuffer(sp<Recycler> recycler, RenderTarget::Configure conf
 
 GLFramebuffer::~GLFramebuffer()
 {
-    _recycler->recycle(*this);
+    if(id())
+        _recycler->recycle(toRecyclable());
 }
 
 uint64_t GLFramebuffer::id()
@@ -137,14 +154,11 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
     GL_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
-ResourceRecycleFunc GLFramebuffer::recycle()
+op<Recyclable> GLFramebuffer::toRecyclable()
 {
-    uint32_t id = _id;
+    op<Recyclable> recyclable(new RecyclableGLFramebuffer(_id));
     _id = 0;
-    return [id](GraphicsContext&) {
-        LOGD("Deleting GLFramebuffer[%d]", id);
-        glDeleteFramebuffers(1, &id);
-    };
+    return recyclable;
 }
 
 const RenderTarget::Configure& GLFramebuffer::configure() const

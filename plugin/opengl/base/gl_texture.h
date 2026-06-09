@@ -19,7 +19,7 @@ public:
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override;
-    virtual ResourceRecycleFunc recycle() override;
+    virtual op<Recyclable> toRecyclable() override;
 
     virtual void clear(GraphicsContext& /*graphicsContext*/) override;
 
@@ -30,9 +30,6 @@ public:
 
     const sp<GLRenderbuffer>& renderbuffer() const;
     void setRenderbuffer(sp<GLRenderbuffer> renderbuffer);
-
-private:
-    ResourceRecycleFunc doRecycle();
 
 protected:
     sp<Recycler> _recycler;

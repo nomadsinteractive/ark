@@ -10,14 +10,13 @@ namespace ark {
 class ARK_API Recycler {
 public:
 
-    void recycle(Resource& resource);
-    void recycle(ResourceRecycleFunc recycler);
+    void recycle(op<Recyclable> recyclable);
 
 private:
-    void doRecycling(GraphicsContext& graphicsContext);
+    void doRecycling();
 
 private:
-    LFStack<ResourceRecycleFunc> _recyclers;
+    LFStack<op<Recyclable>> _recyclables;
 
     friend class ResourceManager;
     friend class RenderController;

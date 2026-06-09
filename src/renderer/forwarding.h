@@ -1,7 +1,5 @@
 #pragma once
 
-#include <functional>
-
 #include "core/forwarding.h"
 
 namespace ark {
@@ -34,6 +32,7 @@ class PipelineFactory;
 class PipelineLayout;
 class PipelineDescriptor;
 class PipelineBuildingContext;
+class Recyclable;
 class Recycler;
 class Resource;
 class RenderBackendInfo;
@@ -55,7 +54,5 @@ class Uniform;
 
 //[[script::bindings::auto]]
 typedef Importer<Atlas> AtlasImporter;
-
-typedef std::function<void(GraphicsContext&)> ResourceRecycleFunc;
 
 }

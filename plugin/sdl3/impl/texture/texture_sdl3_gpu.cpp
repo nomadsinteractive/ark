@@ -4,11 +4,32 @@
 
 #include "graphics/base/bitmap.h"
 
+#include "renderer/inf/recyclable.h"
+
 #include "sdl3/base/context_sdl3_gpu.h"
 
 namespace ark::plugin::sdl3 {
 
 namespace {
+
+class RecyclableTextureSDL3_GPU final : public Recyclable {
+public:
+    RecyclableTextureSDL3_GPU(SDL_GPUTexture* texture, SDL_GPUSampler* sampler)
+        : _texture(texture), _sampler(sampler) {
+    }
+
+    ~RecyclableTextureSDL3_GPU() override {
+        SDL_GPUDevice* gpuDevice = ensureGPUDevice();
+        if(_texture)
+            SDL_ReleaseGPUTexture(gpuDevice, _texture);
+        if(_sampler)
+            SDL_ReleaseGPUSampler(gpuDevice, _sampler);
+    }
+
+private:
+    SDL_GPUTexture* _texture;
+    SDL_GPUSampler* _sampler;
+};
 
 SDL_GPUTextureFormat toChannelFormat(const SDL_GPUTextureFormat* channelFormat, const uint32_t depths, const Texture::Format format)
 {
@@ -100,21 +121,12 @@ void TextureSDL3_GPU::upload(GraphicsContext& graphicsContext, const sp<Texture:
     }
 }
 
-ResourceRecycleFunc TextureSDL3_GPU::recycle()
+op<Recyclable> TextureSDL3_GPU::toRecyclable()
 {
-    SDL_GPUTexture* texture = _texture;
-    SDL_GPUSampler* sampler = _sampler;
-
+    op<Recyclable> recyclable(new RecyclableTextureSDL3_GPU(_texture, _sampler));
     _texture = nullptr;
     _sampler = nullptr;
-
-    return [texture, sampler] (GraphicsContext& graphicsContext) {
-        SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
-        if(texture)
-            SDL_ReleaseGPUTexture(gpuDevice, texture);
-        if(sampler)
-            SDL_ReleaseGPUSampler(gpuDevice, sampler);
-    };
+    return recyclable;
 }
 
 void TextureSDL3_GPU::clear(GraphicsContext& graphicsContext)

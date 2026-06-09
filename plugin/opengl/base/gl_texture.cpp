@@ -10,12 +10,31 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/inf/recyclable.h"
 
 #include "opengl/util/gl_util.h"
 
 namespace ark::plugin::opengl {
 
 namespace {
+
+class RecyclableGLTexture final : public Recyclable {
+public:
+    RecyclableGLTexture(const uint32_t id, const uint32_t fbo)
+        : _id(id), _fbo(fbo) {
+    }
+
+    ~RecyclableGLTexture() override {
+        LOGD("Deleting GLTexture[%d]", _id);
+        glDeleteTextures(1, &_id);
+        if(_fbo)
+            glDeleteFramebuffers(1, &_fbo);
+    }
+
+private:
+    uint32_t _id;
+    uint32_t _fbo;
+};
 
 GLenum toGLFilter(const GLenum glFilter, const bool isMipmap)
 {
@@ -34,7 +53,7 @@ GLTexture::GLTexture(sp<Recycler> recycler, sp<Size> size, const uint32_t target
 GLTexture::~GLTexture()
 {
     if(_id)
-        _recycler->recycle(doRecycle());
+        _recycler->recycle(toRecyclable());
 }
 
 void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader)
@@ -69,9 +88,12 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
         GL_CHECK_ERROR(glGenerateMipmap(static_cast<GLenum>(_target)));
 }
 
-ResourceRecycleFunc GLTexture::recycle()
+op<Recyclable> GLTexture::toRecyclable()
 {
-    return doRecycle();
+    op<Recyclable> recyclable(new RecyclableGLTexture(_id, _fbo));
+    _id = 0;
+    _fbo = 0;
+    return recyclable;
 }
 
 void GLTexture::clear(GraphicsContext& /*graphicsContext*/)
@@ -116,20 +138,6 @@ const sp<GLRenderbuffer>& GLTexture::renderbuffer() const
 void GLTexture::setRenderbuffer(sp<GLRenderbuffer> renderbuffer)
 {
     _renderbuffer = std::move(renderbuffer);
-}
-
-ResourceRecycleFunc GLTexture::doRecycle()
-{
-    uint32_t id = _id;
-    uint32_t fbo = _fbo;
-    _id = 0;
-    _fbo = 0;
-    return [id, fbo](GraphicsContext&) {
-        LOGD("Deleting GLTexture[%d]", id);
-        glDeleteTextures(1, &id);
-        if(fbo)
-            glDeleteFramebuffers(1, &fbo);
-    };
 }
 
 uint64_t GLTexture::id()

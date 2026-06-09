@@ -16,7 +16,7 @@ public:
     uint64_t id() override;
 
     void upload(GraphicsContext& graphicsContext) override;
-    ResourceRecycleFunc recycle() override;
+    op<Recyclable> toRecyclable() override;
 
     const RenderTarget::Configure& configure() const;
 

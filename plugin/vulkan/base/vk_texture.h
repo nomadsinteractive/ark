@@ -21,7 +21,7 @@ public:
 
     uint64_t id() override;
     void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override;
-    ResourceRecycleFunc recycle() override;
+    op<Recyclable> toRecyclable() override;
 
     void clear(GraphicsContext& graphicsContext) override;
     bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
@@ -36,8 +36,6 @@ protected:
 
 private:
     void doCreateSamplerDescriptor(VkDevice logicalDevice);
-
-    ResourceRecycleFunc doRecycle();
 
 private:
     sp<Recycler> _recycler;

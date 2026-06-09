@@ -2,10 +2,29 @@
 
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_bindings.h"
+#include "renderer/inf/recyclable.h"
 
 #include "platform/gl/gl.h"
 
 namespace ark::plugin::opengl {
+
+namespace {
+
+class RecyclableGLVertexArray final : public Recyclable {
+public:
+    RecyclableGLVertexArray(const uint32_t id)
+        : _id(id) {
+    }
+
+    ~RecyclableGLVertexArray() override {
+        glDeleteVertexArrays(1, &_id);
+    }
+
+private:
+    uint32_t _id;
+};
+
+}
 
 GLVertexArray::GLVertexArray(const PipelineBindings& pipelineBindings, sp<GLPipeline> pipeline, sp<Buffer::Delegate> vertices)
     : _pipeline_bindings(pipelineBindings), _pipeline(std::move(pipeline)), _vertex(std::move(vertices)), _id(0)
@@ -27,13 +46,11 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
     glBindVertexArray(0);
 }
 
-ResourceRecycleFunc GLVertexArray::recycle()
+op<Recyclable> GLVertexArray::toRecyclable()
 {
-    uint32_t id = _id;
+    op<Recyclable> recyclable(new RecyclableGLVertexArray(_id));
     _id = 0;
-    return [id](GraphicsContext&) {
-        glDeleteVertexArrays(1, &id);
-    };
+    return recyclable;
 }
 
 }

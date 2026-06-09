@@ -2,9 +2,13 @@
 
 #include <SDL3_shadercross/SDL_shadercross.h>
 
+#include "core/ark.h"
 #include "core/collection/traits.h"
 
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/render_backend.h"
+#include "renderer/base/render_backend_info.h"
+#include "renderer/base/render_controller.h"
 
 namespace ark::plugin::sdl3 {
 
@@ -57,6 +61,13 @@ SDL3_GPU_GraphicsContext& ensureGraphicsContext(GraphicsContext& graphicsContext
 SDL_GPUDevice* ensureGPUDevice(GraphicsContext& graphicsContext)
 {
     SDL_GPUDevice* gpuDevice = graphicsContext.traits().ensure<SDL3_GPU_Context>()->_gpu_gevice;
+    ASSERT(gpuDevice);
+    return gpuDevice;
+}
+
+SDL_GPUDevice* ensureGPUDevice()
+{
+    SDL_GPUDevice* gpuDevice = Ark::instance().renderController()->renderBackend()->info()->traits().ensure<SDL3_GPU_Context>()->_gpu_gevice;
     ASSERT(gpuDevice);
     return gpuDevice;
 }

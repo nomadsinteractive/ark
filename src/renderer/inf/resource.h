@@ -3,6 +3,7 @@
 #include <functional>
 
 #include "core/base/api.h"
+#include "core/types/owned_ptr.h"
 
 #include "renderer/forwarding.h"
 
@@ -15,7 +16,8 @@ public:
     virtual uint64_t id() = 0;
 
     virtual void upload(GraphicsContext& graphicsContext) = 0;
-    virtual ResourceRecycleFunc recycle() = 0;
+
+    virtual op<Recyclable> toRecyclable() = 0;
 };
 
 }

@@ -18,7 +18,7 @@ private:
 
         virtual uint64_t id() override;
         virtual void upload(GraphicsContext& graphicsContext) override;
-        virtual ResourceRecycleFunc recycle() override;
+        virtual op<Recyclable> toRecyclable() override;
 
         sp<VKDevice> _device;
         sp<Recycler> _recycler;

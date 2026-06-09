@@ -7,6 +7,7 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/texture.h"
+#include "renderer/inf/recyclable.h"
 #include "renderer/util/render_util.h"
 
 #include "vulkan/base/vk_device.h"
@@ -17,6 +18,27 @@
 namespace ark::plugin::vulkan {
 
 namespace {
+
+class RecyclableVKTexture final : public Recyclable {
+public:
+    RecyclableVKTexture(sp<VKDevice> device, const VkDescriptorImageInfo& descriptor, const VkImage image, const VkDeviceMemory memory)
+        : _device(std::move(device)), _descriptor(descriptor), _image(image), _memory(memory) {
+    }
+
+    ~RecyclableVKTexture() override {
+        const VkDevice logicalDevice = _device->vkLogicalDevice();
+        vkDestroyImageView(logicalDevice, _descriptor.imageView, nullptr);
+        vkDestroyImage(logicalDevice, _image, nullptr);
+        vkDestroySampler(logicalDevice, _descriptor.sampler, nullptr);
+        vkFreeMemory(logicalDevice, _memory, nullptr);
+    }
+
+private:
+    sp<VKDevice> _device;
+    VkDescriptorImageInfo _descriptor;
+    VkImage _image;
+    VkDeviceMemory _memory;
+};
 
 void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, const size_t imageDataSize)
 {
@@ -67,7 +89,7 @@ VKTexture::VKTexture(sp<Recycler> recycler, sp<VKRenderer> renderer, uint32_t wi
 VKTexture::~VKTexture()
 {
     if(_image)
-        _recycler->recycle(doRecycle());
+        _recycler->recycle(toRecyclable());
 }
 
 uint64_t VKTexture::id()
@@ -99,9 +121,13 @@ void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
     }
 }
 
-ResourceRecycleFunc VKTexture::recycle()
+op<Recyclable> VKTexture::toRecyclable()
 {
-    return doRecycle();
+    op<Recyclable> recyclable(new RecyclableVKTexture(_renderer->device(), _descriptor, _image, _memory));
+    _image = VK_NULL_HANDLE;
+    _memory = VK_NULL_HANDLE;
+    _observer.notify();
+    return recyclable;
 }
 
 void VKTexture::clear(GraphicsContext& /*graphicsContext*/)
@@ -410,25 +436,6 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
     // Clean up staging resources
     vkFreeMemory(logicalDevice, stagingMemory, nullptr);
     vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
-}
-
-ResourceRecycleFunc VKTexture::doRecycle()
-{
-    const sp<VKDevice> device = _renderer->device();
-    VkDescriptorImageInfo descriptor = _descriptor;
-    VkImage image = _image;
-    VkDeviceMemory memory = _memory;
-
-    _image = VK_NULL_HANDLE;
-    _memory = VK_NULL_HANDLE;
-    _observer.notify();
-
-    return [device, descriptor, image, memory](GraphicsContext&) {
-        vkDestroyImageView(device->vkLogicalDevice(), descriptor.imageView, nullptr);
-        vkDestroyImage(device->vkLogicalDevice(), image, nullptr);
-        vkDestroySampler(device->vkLogicalDevice(), descriptor.sampler, nullptr);
-        vkFreeMemory(device->vkLogicalDevice(), memory, nullptr);
-    };
 }
 
 }

@@ -12,7 +12,7 @@ public:
 
     uint64_t id() override;
     void upload(GraphicsContext& graphicsContext) override;
-    ResourceRecycleFunc recycle() override;
+    op<Recyclable> toRecyclable() override;
     void uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader) override;
     void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
 

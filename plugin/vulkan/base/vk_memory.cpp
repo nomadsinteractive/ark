@@ -2,6 +2,7 @@
 
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_controller.h"
+#include "renderer/inf/recyclable.h"
 
 #include "vulkan/base/vk_device.h"
 #include "vulkan/base/vk_memory_ptr.h"
@@ -10,6 +11,26 @@
 
 namespace ark::plugin::vulkan {
 
+namespace {
+
+class RecyclableVKMemory final : public Recyclable {
+public:
+    RecyclableVKMemory(sp<VKDevice> device, const VkDeviceMemory memory)
+        : _device(std::move(device)), _memory(memory) {
+    }
+
+    ~RecyclableVKMemory() override {
+        if(_memory)
+            vkFreeMemory(_device->vkLogicalDevice(), _memory, nullptr);
+    }
+
+private:
+    sp<VKDevice> _device;
+    VkDeviceMemory _memory;
+};
+
+}
+
 VKMemory::Stub::Stub(const sp<VKDevice>& device, const sp<Recycler>& recycler, VkDeviceSize size, uint32_t memoryType)
     : _device(device), _recycler(recycler), _memory(VK_NULL_HANDLE), _allocation_info{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, nullptr, size, memoryType}
 {
@@ -17,7 +38,8 @@ VKMemory::Stub::Stub(const sp<VKDevice>& device, const sp<Recycler>& recycler, V
 
 VKMemory::Stub::~Stub()
 {
-    _recycler->recycle(*this);
+    if(id())
+        _recycler->recycle(toRecyclable());
 }
 
 uint64_t VKMemory::Stub::id()
@@ -30,16 +52,11 @@ void VKMemory::Stub::upload(GraphicsContext& /*graphicsContext*/)
     VKUtil::checkResult(vkAllocateMemory(_device->vkLogicalDevice(), &_allocation_info, nullptr, &_memory));
 }
 
-ResourceRecycleFunc VKMemory::Stub::recycle()
+op<Recyclable> VKMemory::Stub::toRecyclable()
 {
-    const sp<VKDevice> device = _device;
-    VkDeviceMemory memory = _memory;
+    op<Recyclable> recyclable(new RecyclableVKMemory(_device, _memory));
     _memory = VK_NULL_HANDLE;
-
-    return [device, memory](GraphicsContext& ) {
-        if(memory)
-            vkFreeMemory(device->vkLogicalDevice(), memory, nullptr);
-    };
+    return recyclable;
 }
 
 VKMemory::VKMemory(const sp<VKDevice>& device, const sp<Recycler>& recycler, VkDeviceSize size, uint32_t memoryType)

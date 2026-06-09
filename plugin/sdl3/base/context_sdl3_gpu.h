@@ -41,5 +41,6 @@ const SDL3_GPU_Context& ensureGPUContext(GraphicsContext& graphicsContext);
 SDL3_GPU_GraphicsContext& ensureGraphicsContext(GraphicsContext& graphicsContext);
 
 SDL_GPUDevice* ensureGPUDevice(GraphicsContext& graphicsContext);
+SDL_GPUDevice* ensureGPUDevice();
 
 }

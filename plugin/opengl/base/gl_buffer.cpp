@@ -4,12 +4,28 @@
 #include "core/util/log.h"
 
 #include "renderer/base/recycler.h"
+#include "renderer/inf/recyclable.h"
 
 #include "opengl/util/gl_util.h"
 
 namespace ark::plugin::opengl {
 
 namespace {
+
+class RecyclableGLBuffer final : public Recyclable {
+public:
+    RecyclableGLBuffer(const uint32_t id)
+        : _id(id) {
+    }
+
+    ~RecyclableGLBuffer() override {
+        LOGD("Recycling GLBuffer[%d]", _id);
+        glDeleteBuffers(1, &_id);
+    }
+
+private:
+    uint32_t _id;
+};
 
 class WritableGLBuffer final : public Writable {
 public:
@@ -57,7 +73,8 @@ GLBuffer::GLBuffer(const Buffer::Usage usage, sp<Recycler> recycler)
 
 GLBuffer::~GLBuffer()
 {
-    _recycler->recycle(recycle());
+    if(id())
+        _recycler->recycle(toRecyclable());
 }
 
 void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader)
@@ -97,15 +114,12 @@ void GLBuffer::downloadBuffer(GraphicsContext& /*graphicsContext*/, const size_t
     GL_CHECK_ERROR(glGetBufferSubData(_target, static_cast<GLintptr>(offset), static_cast<GLsizeiptr>(size), ptr));
 }
 
-ResourceRecycleFunc GLBuffer::recycle()
+op<Recyclable> GLBuffer::toRecyclable()
 {
-    uint32_t id = _id;
+    op<Recyclable> recyclable(new RecyclableGLBuffer(_id));
     _id = 0;
     _size = 0;
-    return [id](GraphicsContext&) {
-        LOGD("Recycling GLBuffer[%d]", id);
-        glDeleteBuffers(1, &id);
-    };
+    return recyclable;
 }
 
 }

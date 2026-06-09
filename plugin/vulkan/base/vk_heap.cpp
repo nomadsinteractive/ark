@@ -50,7 +50,7 @@ VKMemoryPtr VKHeap::doAllocate(GraphicsContext& graphicsContext, VkDeviceSize si
     return memory;
 }
 
-void VKHeap::recycle(GraphicsContext& /*graphicsContext*/, const VKMemoryPtr& ptr)
+void VKHeap::recycle(const VKMemoryPtr& ptr)
 {
     DASSERT(ptr._stub->_type_index < VK_MAX_MEMORY_TYPES);
     _heaps[ptr._stub->_type_index]->free(ptr);

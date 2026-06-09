@@ -13,6 +13,7 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/texture_bundle.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/inf/recyclable.h"
 #include "renderer/util/render_util.h"
 
 namespace ark {
@@ -110,9 +111,9 @@ void Texture::upload(GraphicsContext& graphicsContext)
     _stub->_delegate->upload(graphicsContext, _stub->_uploader);
 }
 
-ResourceRecycleFunc Texture::recycle()
+op<Recyclable> Texture::toRecyclable()
 {
-    return _stub->_delegate->recycle();
+    return _stub->_delegate->toRecyclable();
 }
 
 Texture::Format Texture::format() const

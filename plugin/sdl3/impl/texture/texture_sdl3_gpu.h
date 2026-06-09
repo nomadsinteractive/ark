@@ -13,7 +13,7 @@ public:
     uint64_t id() override;
 
     void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override;
-    ResourceRecycleFunc recycle() override;
+    op<Recyclable> toRecyclable() override;
     void clear(GraphicsContext& graphicsContext) override;
     bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
     void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;

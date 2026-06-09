@@ -21,7 +21,7 @@ public:
 
     VKMemoryPtr allocate(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs, VkMemoryPropertyFlags propertyFlags);
 
-    void recycle(GraphicsContext& graphicsContext, const VKMemoryPtr& ptr);
+    void recycle(const VKMemoryPtr& ptr);
 
 private:
     VKMemory makeMemory(GraphicsContext& graphicsContext, VkDeviceSize size, uint32_t typeIndex);

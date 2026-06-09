@@ -21,7 +21,7 @@ public:
     void upload(GraphicsContext& graphicsContext) override;
     void uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader) override;
     void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
-    ResourceRecycleFunc recycle() override;
+    op<Recyclable> toRecyclable() override;
 
     void reload(GraphicsContext& graphicsContext, const ByteArray::View& buf) const;
 

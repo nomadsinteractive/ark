@@ -1,11 +1,31 @@
 #include "vulkan/base/vk_descriptor_pool.h"
 
 #include "renderer/base/recycler.h"
+#include "renderer/inf/recyclable.h"
 
 #include "vulkan/base/vk_device.h"
 #include "vulkan/util/vk_util.h"
 
 namespace ark::plugin::vulkan {
+
+namespace {
+
+class RecyclableVKDescriptorPool final : public Recyclable {
+public:
+    RecyclableVKDescriptorPool(sp<VKDevice> device, const VkDescriptorPool descriptorPool)
+        : _device(std::move(device)), _descriptor_pool(descriptorPool) {
+    }
+
+    ~RecyclableVKDescriptorPool() override {
+        vkDestroyDescriptorPool(_device->vkLogicalDevice(), _descriptor_pool, nullptr);
+    }
+
+private:
+    sp<VKDevice> _device;
+    VkDescriptorPool _descriptor_pool;
+};
+
+}
 
 VKDescriptorPool::VKDescriptorPool(const sp<Recycler>& recycler, const sp<VKDevice>& device, Map<VkDescriptorType, uint32_t> poolSizes, const uint32_t maxSets)
     : _recycler(recycler), _device(device), _pool_sizes(std::move(poolSizes)), max_sets(maxSets), _descriptor_pool(VK_NULL_HANDLE)
@@ -14,11 +34,7 @@ VKDescriptorPool::VKDescriptorPool(const sp<Recycler>& recycler, const sp<VKDevi
 
 VKDescriptorPool::~VKDescriptorPool()
 {
-    VkDescriptorPool descriptorPool = _descriptor_pool;
-    _descriptor_pool = VK_NULL_HANDLE;
-    _recycler->recycle([device = std::move(_device), descriptorPool](GraphicsContext&) {
-        vkDestroyDescriptorPool(device->vkLogicalDevice(), descriptorPool, nullptr);
-    });
+    _recycler->recycle(new RecyclableVKDescriptorPool(std::move(_device), _descriptor_pool));
 }
 
 void VKDescriptorPool::upload(GraphicsContext& /*graphicsContext*/)

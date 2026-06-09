@@ -12,6 +12,7 @@
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/inf/pipeline.h"
+#include "renderer/inf/recyclable.h"
 #include "renderer/util/render_util.h"
 
 #include "sdl3/base/sdl3_context.h"
@@ -300,6 +301,21 @@ void bindInstanceBuffers(GraphicsContext& graphicsContext, SDL_GPURenderPass* re
     SDL_BindGPUVertexBuffers(renderPass, 1, instanceBuffers, numInstanceBuffers);
 }
 
+class RecyclableDrawPipelineSDL3_GPU final : public Recyclable {
+public:
+    RecyclableDrawPipelineSDL3_GPU(SDL_GPUGraphicsPipeline* pipeline)
+        : _pipeline(pipeline) {
+    }
+
+    ~RecyclableDrawPipelineSDL3_GPU() override
+    {
+        SDL_ReleaseGPUGraphicsPipeline(ensureGPUDevice(), _pipeline);
+    }
+
+private:
+    SDL_GPUGraphicsPipeline* _pipeline;
+};
+
 class DrawPipelineSDL3_GPU final : public Pipeline {
 public:
     DrawPipelineSDL3_GPU(const PipelineBindings& pipelineBindings, String vertexShader, String fragmentShader)
@@ -311,15 +327,11 @@ public:
         return reinterpret_cast<uint64_t>(_pipeline);
     }
 
-    ResourceRecycleFunc recycle() override
+    op<Recyclable> toRecyclable() override
     {
-        SDL_GPUGraphicsPipeline* pipeline = _pipeline;
+        op<Recyclable> recyclable(new RecyclableDrawPipelineSDL3_GPU(_pipeline));
         _pipeline = nullptr;
-
-        return [pipeline] (GraphicsContext& graphicsContext) {
-            SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
-            SDL_ReleaseGPUGraphicsPipeline(gpuDevice, pipeline);
-        };
+        return recyclable;
     }
 
     void upload(GraphicsContext& graphicsContext) override
@@ -552,6 +564,21 @@ private:
     SDL_GPUGraphicsPipeline* _pipeline;
 };
 
+class RecyclableComputePipelineSDL3_GPU final : public Recyclable {
+public:
+    RecyclableComputePipelineSDL3_GPU(SDL_GPUComputePipeline* pipeline)
+        : _pipeline(pipeline) {
+    }
+
+    ~RecyclableComputePipelineSDL3_GPU() override
+    {
+        SDL_ReleaseGPUComputePipeline(ensureGPUDevice(), _pipeline);
+    }
+
+private:
+    SDL_GPUComputePipeline* _pipeline;
+};
+
 class ComputePipelineSDL3_GPU final : public Pipeline {
 public:
     ComputePipelineSDL3_GPU(const PipelineDescriptor& pipelineDescriptor, String computeShader)
@@ -563,13 +590,9 @@ public:
         return reinterpret_cast<uint64_t>(_pipeline);
     }
 
-    ResourceRecycleFunc recycle() override
+    op<Recyclable> toRecyclable() override
     {
-        SDL_GPUComputePipeline* pipeline = _pipeline;
-        return [pipeline] (GraphicsContext& graphicsContext) {
-            SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
-            SDL_ReleaseGPUComputePipeline(gpuDevice, pipeline);
-        };
+        return op<Recyclable>(new RecyclableComputePipelineSDL3_GPU(_pipeline));
     }
 
     void upload(GraphicsContext& graphicsContext) override

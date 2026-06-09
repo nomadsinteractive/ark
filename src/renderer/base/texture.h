@@ -108,7 +108,7 @@ public:
 
         virtual uint64_t id() = 0;
         virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) = 0;
-        virtual ResourceRecycleFunc recycle() = 0;
+        virtual op<Recyclable> toRecyclable() = 0;
 
         virtual void clear(GraphicsContext& graphicsContext) = 0;
         virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
@@ -137,7 +137,7 @@ public:
 
     uint64_t id() override;
     void upload(GraphicsContext& graphicsContext) override;
-    ResourceRecycleFunc recycle() override;
+    op<Recyclable> toRecyclable() override;
 
 //  [[script::bindings::property]]
     Texture::Format format() const;

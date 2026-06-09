@@ -15,6 +15,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/inf/recyclable.h"
 #include "renderer/impl/importer/atlas_importer_generic_xml.h"
 #include "renderer/impl/vertices/vertices_nine_patch_quads_lhs.h"
 #include "renderer/impl/vertices/vertices_nine_patch_quads_rhs.h"
@@ -39,8 +40,8 @@ public:
         _delegate->upload(graphicsContext, uploader);
     }
 
-    ResourceRecycleFunc recycle() override {
-        return _delegate->recycle();
+    op<Recyclable> toRecyclable() override {
+        return _delegate->toRecyclable();
     }
 
     void clear(GraphicsContext& graphicsContext) override {
