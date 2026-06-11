@@ -5,26 +5,20 @@ from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, 
 
 
 class ImGuiViewport:
+    @property
+    def id(self) -> Integer: ...
 
     @property
-    def id(self) -> Integer:
-        pass
+    def pos(self) -> Vec2: ...
 
     @property
-    def pos(self) -> Vec2:
-        pass
+    def size(self) -> Vec2: ...
 
     @property
-    def size(self) -> Vec2:
-        pass
+    def work_pos(self) -> Vec2: ...
 
     @property
-    def work_pos(self) -> Vec2:
-        pass
-
-    @property
-    def work_size(self) -> Vec2:
-        pass
+    def work_size(self) -> Vec2: ...
 
 
 class Imgui:
@@ -188,214 +182,80 @@ class Imgui:
     ImGuiTabItemFlags_NoAssumedClosure = 0
 
     @staticmethod
-    def get_main_viewport() -> ImGuiViewport:
-        pass
+    def get_main_viewport() -> ImGuiViewport: ...
 
-    def add_widget(self, widget: "Widget", discarded: Optional[TYPE_BOOLEAN] = None):
-        pass
-
-    def show(self, discarded: Optional[TYPE_BOOLEAN]):
-        pass
+    def add_widget(self, widget: "Widget", discarded: Optional[TYPE_BOOLEAN] = None): ...
+    def show(self, discarded: Optional[TYPE_BOOLEAN]): ...
 
 
 class Widget:
-    def __init__(self, delegate: Optional["Widget", Sequence["Widget"]] = None):
-        pass
-
-    def reset(self, wrapped: Optional["Widget"] = None):
-        pass
-
-    def visible_if(self, visibility: Boolean):
-        pass
-
-    def to_renderer(self) -> Renderer:
-        pass
+    def __init__(self, delegate: Optional[Union["Widget", Sequence["Widget"]]] = None): ...
+    def reset(self, wrapped: Optional["Widget"] = None): ...
+    def visible_if(self, visibility: Boolean): ...
+    def to_renderer(self) -> Renderer: ...
 
 
 class WidgetBuilder:
-    def __init__(self, renderer):
-        pass
-
-    def set_next_window_pos(self, pos: TYPE_VEC2):
-        pass
-
-    def set_next_window_size(self, pos: TYPE_VEC2):
-        pass
-
-    def begin(self, title: str, is_open: Optional[Boolean] = None, flags: int = 0):
-        pass
-
-    def end(self):
-        pass
-
-    def get_cursor_screen_pos(self) -> Vec2:
-        pass
-
-    def get_content_region_avail(self) -> Vec2:
-        pass
-
-    def get_item_rect_min(self) -> Vec2:
-        pass
-
-    def get_item_rect_max(self) -> Vec2:
-        pass
-
-    def text(self, text: str):
-        pass
-
-    def text_wrapped(self, text: str):
-        pass
-
-    def bullet_text(self, text: str):
-        pass
-
-    def button(self, title: str) -> Observer:
-        pass
-
-    def color_edit3(self, label: str, value: Vec3, flags: int = 0):
-        pass
-
-    def color_edit4(self, label: str, value: Vec4, flags: int = 0):
-        pass
-
-    def color_picker3(self, label: str, value: Vec3, flags: int = 0):
-        pass
-
-    def color_picker4(self, label: str, value: Vec4, flags: int = 0):
-        pass
-
-    def slider_int(self, label: str, value: Integer, v_min: int, v_max: int, prompt_format: str = '%d'):
-        pass
-
-    def slider_float(self, label: str, value: Numeric, v_min: float, v_max: float, prompt_format: str = '%.3f'):
-        pass
-
-    def slider_float2(self, label: str, value: Vec2, v_min: float, v_max: float, prompt_format: str = '%.3f'):
-        pass
-
-    def slider_float3(self, label: str, value: Vec3, v_min: float, v_max: float, prompt_format: str = '%.3f'):
-        pass
-
-    def slider_float4(self, label: str, value: Vec4, v_min: float, v_max: float, prompt_format: str = '%.3f'):
-        pass
-
-    def slider_scalar(self, label: str, value: Vec2, v_min: TYPE_VEC2, v_max: TYPE_VEC2, format: Optional[str] = None):
-        pass
-
-    def input_float(self, label: str, v: Numeric, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0):
-        pass
-
-    def input_float2(self, label: str, v: Vec2, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0):
-        pass
-
-    def input_float3(self, label: str, v: Vec3, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0):
-        pass
-
-    def input_float4(self, label: str, v: Vec4, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0):
-        pass
-
-    def input_int(self, label: str, value: Integer, step: int = 1, step_fast: int = 100, flags: int = 0):
-        pass
-
-    def input_text(self, label: str, text: String, max_length: int = 64, flags: int = 0):
-        pass
-
+    def __init__(self, renderer): ...
+    def set_next_window_pos(self, pos: TYPE_VEC2): ...
+    def set_next_window_size(self, pos: TYPE_VEC2): ...
+    def begin(self, title: str, is_open: Optional[Boolean] = None, flags: int = 0): ...
+    def end(self): ...
+    def get_cursor_screen_pos(self) -> Vec2: ...
+    def get_content_region_avail(self) -> Vec2: ...
+    def get_item_rect_min(self) -> Vec2: ...
+    def get_item_rect_max(self) -> Vec2: ...
+    def text(self, text: str): ...
+    def text_wrapped(self, text: str): ...
+    def bullet_text(self, text: str): ...
+    def button(self, title: str) -> Observer: ...
+    def color_edit3(self, label: str, value: Vec3, flags: int = 0): ...
+    def color_edit4(self, label: str, value: Vec4, flags: int = 0): ...
+    def color_picker3(self, label: str, value: Vec3, flags: int = 0): ...
+    def color_picker4(self, label: str, value: Vec4, flags: int = 0): ...
+    def slider_int(self, label: str, value: Integer, v_min: int, v_max: int, prompt_format: str = '%d'): ...
+    def slider_float(self, label: str, value: Numeric, v_min: float, v_max: float, prompt_format: str = '%.3f'): ...
+    def slider_float2(self, label: str, value: Vec2, v_min: float, v_max: float, prompt_format: str = '%.3f'): ...
+    def slider_float3(self, label: str, value: Vec3, v_min: float, v_max: float, prompt_format: str = '%.3f'): ...
+    def slider_float4(self, label: str, value: Vec4, v_min: float, v_max: float, prompt_format: str = '%.3f'): ...
+    def slider_scalar(self, label: str, value: Vec2, v_min: TYPE_VEC2, v_max: TYPE_VEC2, format: Optional[str] = None): ...
+    def input_float(self, label: str, v: Numeric, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0): ...
+    def input_float2(self, label: str, v: Vec2, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0): ...
+    def input_float3(self, label: str, v: Vec3, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0): ...
+    def input_float4(self, label: str, v: Vec4, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0): ...
+    def input_int(self, label: str, value: Integer, step: int = 1, step_fast: int = 100, flags: int = 0): ...
+    def input_text(self, label: str, text: String, max_length: int = 64, flags: int = 0): ...
     def image(self, texture: Texture, size: Optional[Vec2] = None, uv0: tuple[float, float] = (0, 0), uv1: tuple[float, float] = (1, 1),
-              color: Optional[Vec4] = None, border_color: Optional[Vec4] = None):
-        pass
-
-    def separator(self):
-        pass
-
-    def separator_text(self, label: str):
-        pass
-
-    def same_line(self, offset_from_start_x: float = 0, spacing: float = -1) -> Widget:
-        pass
-
-    def new_line(self) -> Widget:
-        pass
-
-    def small_button(self, label: str) -> Observer:
-        pass
-
-    def tree_node(self, label: str) -> Boolean:
-        pass
-
-    def tree_pop(self):
-        pass
-
-    def checkbox(self, label: str, option: Boolean):
-        pass
-
-    def radio_button(self, label: str, option: Integer, group: int):
-        pass
-
-    def combo(self, label: str, option: Integer, items: Sequence[str]) -> Observer:
-        pass
-
-    def list_box(self, label: str, option: Integer, items: list[str]):
-        pass
-
-    def begin_tab_bar(self, str_id: str, flags: int = 0) -> Boolean:
-        pass
-
-    def end_tab_bar(self):
-        pass
-
-    def begin_tab_item(self, label: str, p_open: Optional[Boolean] = None, flags: int = 0) -> Boolean:
-        pass
-
-    def end_tab_item(self):
-        pass
-
-    def begin_main_menu_bar(self) -> Boolean:
-        pass
-
-    def end_main_menu_bar(self):
-        pass
-
-    def begin_menu(self, label: str, enabled: TYPE_BOOLEAN = True) -> Boolean:
-        pass
-
-    def end_menu(self):
-        pass
-
-    def menu_item(self, label: str, shortcut: str = '', p_selected: Optional[TYPE_BOOLEAN] = None, enabled: TYPE_BOOLEAN = True) -> Observer:
-        pass
-
-    def begin_table(self, str_id: str, columns: int, flags: int = 0) -> Boolean:
-        pass
-
-    def end_table(self):
-        pass
-
-    def table_setup_column(self, label: str):
-        pass
-
-    def table_headers_row(self):
-        pass
-
-    def table_next_row(self):
-        pass
-
-    def table_set_column_index(self, column_n: int):
-        pass
-
-    def push_id(self, hashid: Union[str, int]):
-        pass
-
-    def pop_id(self):
-        pass
-
-    def add_widget(self, widget: Widget):
-        pass
-
-    def make_widget(self) -> Widget:
-        pass
-
-    def make_demo_widget(self, is_open: TYPE_BOOLEAN = True) -> Widget:
-        pass
-
-    def make_about_widget(self, is_open: TYPE_BOOLEAN = True) -> Widget:
-        pass
+              color: Optional[Vec4] = None, border_color: Optional[Vec4] = None): ...
+    def separator(self): ...
+    def separator_text(self, label: str): ...
+    def same_line(self, offset_from_start_x: float = 0, spacing: float = -1) -> Widget: ...
+    def new_line(self) -> Widget: ...
+    def small_button(self, label: str) -> Observer: ...
+    def tree_node(self, label: str) -> Boolean: ...
+    def tree_pop(self): ...
+    def checkbox(self, label: str, option: Boolean): ...
+    def radio_button(self, label: str, option: Integer, group: int): ...
+    def combo(self, label: str, option: Integer, items: Sequence[str]) -> Observer: ...
+    def list_box(self, label: str, option: Integer, items: list[str]): ...
+    def begin_tab_bar(self, str_id: str, flags: int = 0) -> Boolean: ...
+    def end_tab_bar(self): ...
+    def begin_tab_item(self, label: str, p_open: Optional[Boolean] = None, flags: int = 0) -> Boolean: ...
+    def end_tab_item(self): ...
+    def begin_main_menu_bar(self) -> Boolean: ...
+    def end_main_menu_bar(self): ...
+    def begin_menu(self, label: str, enabled: TYPE_BOOLEAN = True) -> Boolean: ...
+    def end_menu(self): ...
+    def menu_item(self, label: str, shortcut: str = '', p_selected: Optional[TYPE_BOOLEAN] = None, enabled: TYPE_BOOLEAN = True) -> Observer: ...
+    def begin_table(self, str_id: str, columns: int, flags: int = 0) -> Boolean: ...
+    def end_table(self): ...
+    def table_setup_column(self, label: str): ...
+    def table_headers_row(self): ...
+    def table_next_row(self): ...
+    def table_set_column_index(self, column_n: int): ...
+    def push_id(self, hashid: Union[str, int]): ...
+    def pop_id(self): ...
+    def add_widget(self, widget: Widget): ...
+    def make_widget(self) -> Widget: ...
+    def make_demo_widget(self, is_open: TYPE_BOOLEAN = True) -> Widget: ...
+    def make_about_widget(self, is_open: TYPE_BOOLEAN = True) -> Widget: ...
