@@ -15,7 +15,7 @@ public:
     PathFinder(sp<SearchingNodeProvider> searchingNodeProvider);
 
 //  [[script::bindings::auto]]
-    Vector<V3> findPath(const V3& start, const V3& end, float distanceTolerance) const;
+    Vector<V3> findPath(const V3i& startId, const V3& startPosition, const V3i& endId, const V3& endPosition, float distanceTolerance) const;
 
 private:
     sp<SearchingNodeProvider> _searching_node_provider;
