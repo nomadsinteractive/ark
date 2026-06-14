@@ -93,7 +93,7 @@ public:
 //  [[script::bindings::auto]]
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
 //  [[script::bindings::auto]]
-    Optional<String> getString(const String& resid, const Optional<String>& defValue = {}) const;
+    String getString(const String& resid, const Optional<String>& defValue = {}) const;
 //  [[script::bindings::auto]]
     Vector<String> getStringArray(const String& resid) const;
 

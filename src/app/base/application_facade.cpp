@@ -302,11 +302,11 @@ void ApplicationFacade::addStringBundle(const String& name, const sp<StringBundl
     _context->addStringBundle(name, stringBundle);
 }
 
-Optional<String> ApplicationFacade::getString(const String& resid, const Optional<String>& defValue) const
+String ApplicationFacade::getString(const String& resid, const Optional<String>& defValue) const
 {
-    if(Optional<String> val = _context->getString(resid, !static_cast<bool>(defValue)))
-        return val;
-    return defValue;
+    if(Optional<String> str = _context->getString(resid, false))
+        return str.value();
+    return defValue ? defValue.value() : Strings::sprintf("[%s]", resid.c_str());
 }
 
 Vector<String> ApplicationFacade::getStringArray(const String& resid) const
