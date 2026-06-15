@@ -306,7 +306,7 @@ String ApplicationFacade::getString(const String& resid, const Optional<String>&
 {
     if(Optional<String> str = _context->getString(resid, false))
         return str.value();
-    return defValue ? defValue.value() : Strings::sprintf("[%s]", resid.c_str());
+    return defValue ? defValue.value() : resid;
 }
 
 Vector<String> ApplicationFacade::getStringArray(const String& resid) const
