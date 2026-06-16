@@ -2,7 +2,7 @@ import inspect
 from collections.abc import Sequence, Callable
 from typing import Any, Optional
 
-from ark import Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, TYPE_BOOLEAN, Discarded, Random, Behavior, FloatArray, \
+from ark import Vec2, Boolean, Vec3, Numeric, Vec4, String, Integer, ApplicationFacade, Texture, Bitmap, TYPE_BOOLEAN, Discarded, Random, Reflection, FloatArray, \
     ByteArray
 from ark import dear_imgui
 
@@ -33,12 +33,12 @@ class ToolbarComboBox(ToolbarItem):
         self._options = options
         self._on_change = on_change
         self._option_index = Integer(0)
-        self._behavior = Behavior(self)
+        self._reflection = Reflection(self)
 
     def on_create(self, builder: dear_imgui.WidgetBuilder):
         observer = builder.combo(self._label, self._option_index, self._options)
         if self._on_change:
-            observer.add_callback(self._behavior['_on_change_callback'])
+            observer.add_callback(self._reflection['_on_change_callback'])
 
     def _on_change_callback(self):
         self._on_change(self._option_index.val)

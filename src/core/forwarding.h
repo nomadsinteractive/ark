@@ -62,7 +62,7 @@ class ApplicationManifest;
 class Asset;
 class AssetBundle;
 class BeanFactory;
-class Behavior;
+class Reflection;
 class Box;
 class Class;
 class Clock;

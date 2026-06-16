@@ -14,10 +14,10 @@
 namespace ark {
 
 //[[script::bindings::debris]]
-class ARK_API Behavior final : public Wirable, public Debris {
+class ARK_API Reflection final : public Wirable, public Debris {
 public:
 //  [[script::bindings::auto]]
-    Behavior(Box delegate);
+    Reflection(Box delegate);
 
     void onWire(const WiringContext& context, const Box& self) override;
     void traverse(const Visitor& visitor) override;

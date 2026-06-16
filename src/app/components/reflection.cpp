@@ -1,4 +1,4 @@
-#include "app/components/behavior.h"
+#include "app/components/reflection.h"
 
 #include "core/ark.h"
 #include "core/collection/args.h"
@@ -42,7 +42,7 @@ private:
 
 class CollisionCallbackImpl final : public CollisionCallback {
 public:
-    CollisionCallbackImpl(sp<Behavior::Method> onBeginContact, sp<Behavior::Method> onEndContact)
+    CollisionCallbackImpl(sp<Reflection::Method> onBeginContact, sp<Reflection::Method> onEndContact)
         : _on_begin_contact(std::move(onBeginContact)), _on_end_contact(std::move(onEndContact))
     {
     }
@@ -67,13 +67,13 @@ public:
     }
 
 private:
-    sp<Behavior::Method> _on_begin_contact;
-    sp<Behavior::Method> _on_end_contact;
+    sp<Reflection::Method> _on_begin_contact;
+    sp<Reflection::Method> _on_end_contact;
 };
 
 class EventListenerImpl final : public EventListener {
 public:
-    EventListenerImpl(sp<Behavior::Method> onEvent)
+    EventListenerImpl(sp<Reflection::Method> onEvent)
         : _on_event(std::move(onEvent))
     {
     }
@@ -85,12 +85,12 @@ public:
     }
 
 private:
-    sp<Behavior::Method> _on_event;
+    sp<Reflection::Method> _on_event;
 };
 
 class SearchingNodeProviderImpl final : public SearchingNodeProvider {
 public:
-    SearchingNodeProviderImpl(sp<Behavior::Method> onVisitAdjacentNodes)
+    SearchingNodeProviderImpl(sp<Reflection::Method> onVisitAdjacentNodes)
         : _on_visit_adjacent_nodes(std::move(onVisitAdjacentNodes)) {
     }
 
@@ -104,12 +104,12 @@ public:
     }
 
 private:
-    sp<Behavior::Method> _on_visit_adjacent_nodes;
+    sp<Reflection::Method> _on_visit_adjacent_nodes;
 };
 
 class ApplicationEventListenerImpl final : public ApplicationEventListener {
 public:
-    ApplicationEventListenerImpl(sp<Behavior::Method> onPause, sp<Behavior::Method> onResume, sp<Behavior::Method> onUnhandledEvent)
+    ApplicationEventListenerImpl(sp<Reflection::Method> onPause, sp<Reflection::Method> onResume, sp<Reflection::Method> onUnhandledEvent)
         : _on_pause(std::move(onPause)), _on_resume(std::move(onResume)), _on_unhandled_event(std::move(onUnhandledEvent))
     {
     }
@@ -131,44 +131,44 @@ public:
     }
 
 private:
-    sp<Behavior::Method> _on_pause;
-    sp<Behavior::Method> _on_resume;
-    sp<Behavior::Method> _on_unhandled_event;
+    sp<Reflection::Method> _on_pause;
+    sp<Reflection::Method> _on_resume;
+    sp<Reflection::Method> _on_unhandled_event;
 };
 
 }
 
-Behavior::Behavior(Box delegate)
+Reflection::Reflection(Box delegate)
     : _interpreter(Ark::instance().applicationContext()->interpreter()), _delegate(std::move(delegate))
 {
 }
 
-void Behavior::onWire(const WiringContext& context, const Box& self)
+void Reflection::onWire(const WiringContext& context, const Box& self)
 {
     _with_debris.onWire(context, self);
 }
 
-void Behavior::traverse(const Visitor& visitor)
+void Reflection::traverse(const Visitor& visitor)
 {
     visitor(_delegate);
     _with_debris.traverse(visitor);
 }
 
-sp<Runnable> Behavior::subscribe(const StringView name)
+sp<Runnable> Reflection::subscribe(const StringView name)
 {
     Box function = _interpreter->attr(_delegate, name);
     CHECK(function, "Object has no attribute \"%s\"", name.data());
     return doCreateRunnable(std::move(function));
 }
 
-sp<Runnable> Behavior::createRunnable(const StringView name)
+sp<Runnable> Reflection::createRunnable(const StringView name)
 {
     Box function = _interpreter->attr(_delegate, name);
     CHECK(function, "Object has no attribute \"%s\"", name.data());
     return doCreateRunnable(std::move(function));
 }
 
-sp<CollisionCallback> Behavior::createCollisionCallback(const StringView onBeginContact, const StringView onEndContact)
+sp<CollisionCallback> Reflection::createCollisionCallback(const StringView onBeginContact, const StringView onEndContact)
 {
     sp<Method> onBeginContactMethod = getMethod(onBeginContact);
     sp<Method> onEndContactMethod = getMethod(onEndContact);
@@ -176,44 +176,44 @@ sp<CollisionCallback> Behavior::createCollisionCallback(const StringView onBegin
     return sp<CollisionCallback>::make<CollisionCallbackImpl>(std::move(onBeginContactMethod), std::move(onEndContactMethod));
 }
 
-sp<EventListener> Behavior::createEventListener(const StringView onEvent)
+sp<EventListener> Reflection::createEventListener(const StringView onEvent)
 {
     return sp<EventListener>::make<EventListenerImpl>(getMethod(onEvent));
 }
 
-sp<SearchingNodeProvider> Behavior::createSearchingNodeProvider(const StringView onVisitAdjacentNodes)
+sp<SearchingNodeProvider> Reflection::createSearchingNodeProvider(const StringView onVisitAdjacentNodes)
 {
     return sp<SearchingNodeProvider>::make<SearchingNodeProviderImpl>(getMethod(onVisitAdjacentNodes));
 }
 
-sp<ApplicationEventListener> Behavior::createApplicationEventListener(const StringView onPause, const StringView onResume, const StringView onUnhandledEvent)
+sp<ApplicationEventListener> Reflection::createApplicationEventListener(const StringView onPause, const StringView onResume, const StringView onUnhandledEvent)
 {
     return sp<ApplicationEventListener>::make<ApplicationEventListenerImpl>(getMethod(onPause), getMethod(onResume), getMethod(onUnhandledEvent));
 }
 
-sp<Runnable> Behavior::doCreateRunnable(Box function)
+sp<Runnable> Reflection::doCreateRunnable(Box function)
 {
     sp<RunnableImpl> runnable = sp<RunnableImpl>::make(_interpreter, std::move(function));
     _with_debris.track(runnable);
     return runnable;
 }
 
-Behavior::Method::Method(sp<Interpreter> interpreter, Box function)
+Reflection::Method::Method(sp<Interpreter> interpreter, Box function)
     : _interpreter(std::move(interpreter)), _function(std::move(function))
 {
 }
 
-Box Behavior::Method::call(const Args& args) const
+Box Reflection::Method::call(const Args& args) const
 {
     return _interpreter->call(_function, args);
 }
 
-void Behavior::Method::traverse(const Visitor& visitor)
+void Reflection::Method::traverse(const Visitor& visitor)
 {
     visitor(_function);
 }
 
-sp<Behavior::Method> Behavior::getMethod(const StringView name)
+sp<Reflection::Method> Reflection::getMethod(const StringView name)
 {
     Box function = _interpreter->attr(_delegate, name);
     CHECK(function, "Object has no attribute \"%s\"", name.data());
