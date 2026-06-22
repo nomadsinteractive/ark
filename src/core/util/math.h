@@ -196,17 +196,30 @@ public:
     static sp<Numeric> sqrt(sp<Numeric> x);
 
 //  [[script::bindings::auto]]
-    static float distance(V2 a, V2 b);
+    static float distance(const V2& a, const V2& b);
 //  [[script::bindings::auto]]
-    static float distance(V3 a, V3 b);
+    static float distance(const V3& a, const V3& b);
 //  [[script::bindings::auto]]
-    static float distance(V4 a, V4 b);
+    static float distance(const V4& a, const V4& b);
 //  [[script::bindings::auto]]
     static sp<Numeric> distance(sp<Vec2> a, sp<Vec2> b);
 //  [[script::bindings::auto]]
     static sp<Numeric> distance(sp<Vec3> a, sp<Vec3> b);
 //  [[script::bindings::auto]]
     static sp<Numeric> distance(sp<Vec4> a, sp<Vec4> b);
+
+//  [[script::bindings::auto]]
+    static float distance2(const V2& a, const V2& b);
+//  [[script::bindings::auto]]
+    static float distance2(const V3& a, const V3& b);
+//  [[script::bindings::auto]]
+    static float distance2(const V4& a, const V4& b);
+//  [[script::bindings::auto]]
+    static sp<Numeric> distance2(sp<Vec2> a, sp<Vec2> b);
+//  [[script::bindings::auto]]
+    static sp<Numeric> distance2(sp<Vec3> a, sp<Vec3> b);
+//  [[script::bindings::auto]]
+    static sp<Numeric> distance2(sp<Vec4> a, sp<Vec4> b);
 
 //  [[script::bindings::auto]]
     static sp<Numeric> dot(sp<Vec2> a, sp<Vec2> b);

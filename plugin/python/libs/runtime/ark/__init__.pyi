@@ -1645,6 +1645,9 @@ class Math:
     def distance(a, b) -> TYPE_NUMERIC: ...
 
     @staticmethod
+    def distance2(a, b) -> TYPE_NUMERIC: ...
+
+    @staticmethod
     def atan(x): ...
 
     @staticmethod

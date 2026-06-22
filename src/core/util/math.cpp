@@ -169,17 +169,17 @@ sp<Numeric> Math::sqrt(sp<Numeric> x)
     return sp<Numeric>::make<VariableOP1<float>>(static_cast<float(*)(float)>(Math::sqrt), std::move(x));
 }
 
-float Math::distance(const V2 a, const V2 b)
+float Math::distance(const V2& a, const V2& b)
 {
     return hypot(a - b);
 }
 
-float Math::distance(const V3 a, const V3 b)
+float Math::distance(const V3& a, const V3& b)
 {
     return hypot(a - b);
 }
 
-float Math::distance(const V4 a, const V4 b)
+float Math::distance(const V4& a, const V4& b)
 {
     return hypot(a - b);
 }
@@ -195,6 +195,36 @@ sp<Numeric> Math::distance(sp<Vec3> a, sp<Vec3> b)
 }
 
 sp<Numeric> Math::distance(sp<Vec4> a, sp<Vec4> b)
+{
+    return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Distance<V4>>>(std::move(a), std::move(b));
+}
+
+float Math::distance2(const V2& a, const V2& b)
+{
+    return hypot2(a - b);
+}
+
+float Math::distance2(const V3& a, const V3& b)
+{
+    return hypot(a - b);
+}
+
+float Math::distance2(const V4& a, const V4& b)
+{
+    return hypot(a - b);
+}
+
+sp<Numeric> Math::distance2(sp<Vec2> a, sp<Vec2> b)
+{
+    return sp<Numeric>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Distance<V2>>>(std::move(a), std::move(b));
+}
+
+sp<Numeric> Math::distance2(sp<Vec3> a, sp<Vec3> b)
+{
+    return sp<Numeric>::make<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Distance<V3>>>(std::move(a), std::move(b));
+}
+
+sp<Numeric> Math::distance2(sp<Vec4> a, sp<Vec4> b)
 {
     return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Distance<V4>>>(std::move(a), std::move(b));
 }
