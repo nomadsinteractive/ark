@@ -45,9 +45,11 @@ public:
     sp<Numeric> normalNumeric(sp<Numeric> mean, sp<Numeric> sigma);
 
 //  [[script::bindings::auto]]
-    sp<Numeric> choice(Vector<float> choices);
+    sp<Integer> choice(Vector<int32_t> choices, Vector<float> weights = {});
 //  [[script::bindings::auto]]
-    sp<Integer> choice(Vector<int32_t> choices);
+    sp<Numeric> choice(Vector<float> choices, Vector<float> weights = {});
+
+    const sp<std::mt19937>& generator() const;
 
 private:
     uint32_t _seed;

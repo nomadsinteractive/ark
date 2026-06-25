@@ -1,5 +1,6 @@
 #include "core/util/random.h"
 
+#include <numeric>
 #include <utility>
 
 #include "core/inf/variable.h"
@@ -98,6 +99,40 @@ public:
 private:
     Vector<T> _choices;
     sp<Integer> _index;
+};
+
+Vector<float> toWeights(Vector<float> weights, const size_t size)
+{
+    if(weights.size() == size)
+        return weights;
+    const float lastp = std::accumulate(weights.begin(), weights.end(), 0.0f);
+    ASSERT(lastp >= 0.0f);
+    weights.push_back(lastp);
+    return weights;
+}
+
+template<typename T> class VariableWeightedChoices final : public Variable<T> {
+public:
+    VariableWeightedChoices(const Random& random, Vector<T> choices, Vector<float> weights)
+        : _generator(random.generator()), _choices(std::move(choices)), _weights(toWeights(std::move(weights), _choices.size())), _distribution(_weights.begin(), _weights.end())
+    {
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        return true;
+    }
+
+    T val() override
+    {
+        return _choices.at(_distribution(*_generator));
+    }
+
+private:
+    sp<std::mt19937> _generator;
+    Vector<T> _choices;
+    Vector<float> _weights;
+    std::discrete_distribution<uint32_t> _distribution;
 };
 
 template<typename T> sp<Variable<T>> toNonvolatile(sp<Variable<T>> generator)
@@ -200,16 +235,27 @@ sp<Numeric> Random::normalNumeric(sp<Numeric> mean, sp<Numeric> sigma)
     return g;
 }
 
-sp<Numeric> Random::choice(Vector<float> choices)
+sp<Numeric> Random::choice(Vector<float> choices, Vector<float> weights)
 {
     ASSERT(!choices.empty());
-    return sp<Numeric>::make<VariableChoices<float>>(*this, std::move(choices));
+    ASSERT(weights.empty() || weights.size() == choices.size() || weights.size() == choices.size() - 1);
+    if(weights.empty())
+        return sp<Numeric>::make<VariableChoices<float>>(*this, std::move(choices));
+    return sp<Numeric>::make<VariableWeightedChoices<float>>(*this, std::move(choices), std::move(weights));
 }
 
-sp<Integer> Random::choice(Vector<int32_t> choices)
+sp<Integer> Random::choice(Vector<int32_t> choices, Vector<float> weights)
 {
     ASSERT(!choices.empty());
-    return sp<Integer>::make<VariableChoices<int32_t>>(*this, std::move(choices));
+    ASSERT(weights.empty() || weights.size() == choices.size() || weights.size() == choices.size() - 1);
+    if(weights.empty())
+        return sp<Integer>::make<VariableChoices<int32_t>>(*this, std::move(choices));
+    return sp<Integer>::make<VariableWeightedChoices<int32_t>>(*this, std::move(choices), std::move(weights));
+}
+
+const sp<std::mt19937>& Random::generator() const
+{
+    return _generator;
 }
 
 }

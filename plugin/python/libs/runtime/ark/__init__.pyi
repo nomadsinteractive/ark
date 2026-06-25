@@ -9,7 +9,7 @@ Use it for:
 3. Unit test(maybe)
 
 """
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Sequence, Iterable
 from typing import TypeVar, Union, Optional, Tuple, Any, Self
 
 
@@ -1602,7 +1602,7 @@ class Random:
     def rand_integer(self, a: TYPE_INTEGER, b: TYPE_INTEGER) -> Integer: ...
     def rand_numeric(self, a: TYPE_NUMERIC, b: TYPE_NUMERIC) -> Numeric: ...
     def normal_numeric(self, mean: TYPE_NUMERIC, sigma: TYPE_NUMERIC) -> Numeric: ...
-    def choice(self, choices: Sequence[int | float]) -> Integer | Numeric: ...
+    def choice(self, choices: Sequence[int | float], weights: Iterable[float] = ()) -> Integer | Numeric: ...
 
 
 class Math:
