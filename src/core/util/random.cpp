@@ -146,6 +146,12 @@ float Random::uniform(const float a, const float b) const
     return dis(*_generator);
 }
 
+float Random::normal(const float mean, const float sigma) const
+{
+    std::normal_distribution<float> dis(mean, sigma);
+    return dis(*_generator);
+}
+
 sp<Integer> Random::randInteger(const int32_t a, const int32_t b) const
 {
     sp<Integer> g = sp<Integer>::make<Distribution<std::uniform_int_distribution<int32_t>, int32_t>>(std::uniform_int_distribution<int32_t>(a, b), _generator);
@@ -178,7 +184,7 @@ sp<Numeric> Random::randNumeric(sp<Numeric> a, sp<Numeric> b)
     return g;
 }
 
-sp<Numeric> Random::normal(const float mean, const float sigma)
+sp<Numeric> Random::normalNumeric(const float mean, const float sigma)
 {
     sp<Numeric> g = sp<Numeric>::make<Distribution<std::normal_distribution<float>, float>>(std::normal_distribution<float>(mean, sigma), _generator);
     if(_nonvolatile)
@@ -186,7 +192,7 @@ sp<Numeric> Random::normal(const float mean, const float sigma)
     return g;
 }
 
-sp<Numeric> Random::normal(sp<Numeric> mean, sp<Numeric> sigma)
+sp<Numeric> Random::normalNumeric(sp<Numeric> mean, sp<Numeric> sigma)
 {
     sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::normal_distribution<float>>>(std::move(mean), std::move(sigma), _generator);
     if(_nonvolatile)

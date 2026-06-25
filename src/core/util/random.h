@@ -26,6 +26,8 @@ public:
     int64_t randint(int64_t a, int64_t b) const;
 //  [[script::bindings::auto]]
     float uniform(float a, float b) const;
+//  [[script::bindings::auto]]
+    float normal(float mean, float sigma) const;
 
 //  [[script::bindings::auto]]
     sp<Integer> randInteger(int32_t a, int32_t b) const;
@@ -38,9 +40,9 @@ public:
     sp<Numeric> randNumeric(sp<Numeric> a, sp<Numeric> b);
 
 //  [[script::bindings::auto]]
-    sp<Numeric> normal(float mean, float sigma);
+    sp<Numeric> normalNumeric(float mean, float sigma);
 //  [[script::bindings::auto]]
-    sp<Numeric> normal(sp<Numeric> mean, sp<Numeric> sigma);
+    sp<Numeric> normalNumeric(sp<Numeric> mean, sp<Numeric> sigma);
 
 //  [[script::bindings::auto]]
     sp<Numeric> choice(Vector<float> choices);
