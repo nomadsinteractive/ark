@@ -121,8 +121,7 @@ def get_argument_name(statement):
 def type_compare(t1, t2):
     t1 = strip_key_words(t1, ['static', 'const', 'virtual']).strip().rstrip('&')
     t2 = strip_key_words(t2, ['static', 'const', 'virtual']).strip().rstrip('&')
-    complen = min(len(t1), len(t2))
-    return t1[:complen] == t2[:complen]
+    return t1 == t2
 
 
 def write_to_unit(unit_name, header, source):

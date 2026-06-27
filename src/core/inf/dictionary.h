@@ -10,8 +10,8 @@ public:
 
     virtual T get(const String& name) = 0;
 
-    virtual Vector<String> keys() { return {}; }
-    virtual Vector<T> values() { return {}; }
+    virtual Vector<String> keys() const { return {}; }
+    virtual Vector<T> values() const { return {}; }
 };
 
 }

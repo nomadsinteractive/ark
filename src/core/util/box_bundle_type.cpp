@@ -12,12 +12,12 @@ Box BoxBundleType::get(BoxBundle& self, const String& name)
     return self.get(name);
 }
 
-Vector<String> BoxBundleType::keys(BoxBundle& self)
+Vector<String> BoxBundleType::keys(const BoxBundle& self)
 {
     return self.keys();
 }
 
-Vector<Box> BoxBundleType::values(BoxBundle& self)
+Vector<Box> BoxBundleType::values(const BoxBundle& self)
 {
     return self.values();
 }

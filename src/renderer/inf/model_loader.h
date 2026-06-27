@@ -5,6 +5,8 @@
 #include "core/base/enum.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/forwarding.h"
+
 #include "renderer/forwarding.h"
 
 namespace ark {
@@ -38,6 +40,15 @@ public:
     [[nodiscard]]
 //  [[script::bindings::auto]]
     static sp<ModelLoader> quad(sp<Atlas> atlas);
+    [[nodiscard]]
+//  [[script::bindings::auto]]
+    static sp<ModelLoader> ninePatchQuad(sp<Atlas> atlas);
+    [[nodiscard]]
+//  [[script::bindings::auto]]
+    static sp<ModelLoader> ninePatchTriangleStrip(sp<Atlas> atlas);
+    [[nodiscard]]
+//  [[script::bindings::auto]]
+    static sp<ModelLoader> text(sp<Alphabet> alphabet, sp<Atlas> atlas, const Font& font);
 
 private:
     enums::DrawMode _render_mode;

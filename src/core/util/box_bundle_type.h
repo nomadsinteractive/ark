@@ -13,9 +13,9 @@ public:
     static Box get(BoxBundle& self, const String& name);
 
 //  [[script::bindings::classmethod]]
-    static Vector<String> keys(BoxBundle& self);
+    static Vector<String> keys(const BoxBundle& self);
 //  [[script::bindings::classmethod]]
-    static Vector<Box> values(BoxBundle& self);
+    static Vector<Box> values(const BoxBundle& self);
 };
 
 }

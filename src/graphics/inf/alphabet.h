@@ -20,9 +20,11 @@ public:
         int32_t bitmap_y;
     };
 
+//  [[script::bindings::interface]]
     virtual void setFont(const Font& font) = 0;
-
+//  [[script::bindings::interface]]
     virtual Optional<Metrics> measure(int32_t c) = 0;
+//  [[script::bindings::interface]]
     virtual bool draw(uint32_t c, Bitmap& image, int32_t x, int32_t y) = 0;
 };
 

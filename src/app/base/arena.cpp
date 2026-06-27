@@ -1,5 +1,7 @@
 #include "app/base/arena.h"
 
+#include <ranges>
+
 #include "core/base/resource_loader.h"
 #include "core/inf/dictionary.h"
 
@@ -8,11 +10,6 @@
 namespace ark {
 
 struct Arena::Stub {
-    Stub(sp<ResourceLoader> resourceLoader, Map<String, sp<RenderLayer>> renderLayers, Map<String, sp<Layer>> layers)
-        : _resource_loader(std::move(resourceLoader)), _render_layers(std::move(renderLayers)), _layers(std::move(layers))
-    {
-    }
-
     sp<Layer> getLayer(const String& name)
     {
         const auto iter = _layers.find(name);
@@ -56,6 +53,18 @@ public:
         return Box(_stub->getLayer(name));
     }
 
+    Vector<String> keys() const override
+    {
+        const auto keysView = std::views::keys(_stub->_layers);
+        return {keysView.begin(), keysView.end()};
+    }
+
+    Vector<Box> values() const override
+    {
+        const auto valuesView = std::views::values(_stub->_layers);
+        return {valuesView.begin(), valuesView.end()};
+    }
+
 private:
     sp<Stub> _stub;
 };
@@ -69,6 +78,18 @@ public:
     Box get(const String& name) override
     {
         return Box(_stub->getRenderLayer(name));
+    }
+
+    Vector<String> keys() const override
+    {
+        const auto keysView = std::views::keys(_stub->_render_layers);
+        return {keysView.begin(), keysView.end()};
+    }
+
+    Vector<Box> values() const override
+    {
+        const auto valuesView = std::views::values(_stub->_render_layers);
+        return {valuesView.begin(), valuesView.end()};
     }
 
 private:
