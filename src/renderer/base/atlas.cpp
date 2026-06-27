@@ -116,7 +116,7 @@ uint32_t Atlas::height() const
 
 bool Atlas::has(const NamedHash& resid) const
 {
-    return _items.contains(resid.hash());
+    return _items.contains(resid.hashCode());
 }
 
 const V2& Atlas::getOriginalSize(const NamedHash& resid) const
@@ -168,16 +168,16 @@ Atlas::UV Atlas::toUV(const uint32_t ux, const uint32_t uy, const uint32_t vx, c
 
 Atlas::Item& Atlas::at(const NamedHash& resid)
 {
-    const HashId idhash = resid.hash();
-    const auto iter = _items.find(resid.hash());
+    const HashId idhash = resid.hashCode();
+    const auto iter = _items.find(resid.hashCode());
     CHECK(iter != _items.end(), "Item[%u](%s) does not exist", idhash, resid.name().c_str());
     return iter->second;
 }
 
 const Atlas::Item& Atlas::at(const NamedHash& resid) const
 {
-    const HashId idhash = resid.hash();
-    const auto iter = _items.find(resid.hash());
+    const HashId idhash = resid.hashCode();
+    const auto iter = _items.find(resid.hashCode());
     CHECK(iter != _items.end(), "Item[%u](%s) does not exist", idhash, resid.name().c_str());
     return iter->second;
 }

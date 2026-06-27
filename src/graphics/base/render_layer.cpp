@@ -34,8 +34,8 @@ RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> m
         _is_dynamic_scissor = scissorTest->_dynamic;
 }
 
-RenderLayer::RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)
-    : RenderLayer(sp<Stub>::make(std::move(renderController), std::move(modelLoader), std::move(shader), std::move(visible), std::move(discarded), std::move(varyings), std::move(scissor)))
+RenderLayer::RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded, sp<Vec4> scissor)
+    : RenderLayer(sp<Stub>::make(Ark::instance().renderController(), std::move(modelLoader), std::move(shader), std::move(visible), std::move(discarded), std::move(varyings), std::move(scissor)))
 {
 }
 
@@ -123,7 +123,7 @@ RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, sp
 
 sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
-    return sp<RenderLayer>::make(Ark::instance().renderController(), _model_loader->build(args), _shader->build(args), _visible.build(args), _discarded.build(args), _varyings->build(args), _scissor.build(args));
+    return sp<RenderLayer>::make(_model_loader->build(args), _shader->build(args), _varyings->build(args), _visible.build(args), _discarded.build(args), _scissor.build(args));
 }
 
 RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest)

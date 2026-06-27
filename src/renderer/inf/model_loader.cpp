@@ -2,6 +2,7 @@
 
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/texture.h"
+#include "renderer/impl/model_loader/model_loader_quad.h"
 
 namespace ark {
 
@@ -28,6 +29,11 @@ const sp<Texture>& ModelLoader::texture() const
 ModelLoader::ModelTrait ModelLoader::trait() const
 {
     return _trait;
+}
+
+sp<ModelLoader> ModelLoader::quad(sp<Atlas> atlas)
+{
+    return sp<ModelLoader>::make<ModelLoaderQuad>(atlas);
 }
 
 }

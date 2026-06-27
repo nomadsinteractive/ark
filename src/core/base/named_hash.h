@@ -19,7 +19,7 @@ public:
 
 //  [[script::bindings::operator(index)]]
 //  [[script::bindings::property]]
-    HashId hash() const;
+    HashId hashCode() const;
 //  [[script::bindings::property]]
     const String& name() const;
 
@@ -33,7 +33,7 @@ public:
     static const String& reverse(HashId hash);
 
 private:
-    HashId _hash;
+    HashId _hash_code;
     String _name;
 };
 

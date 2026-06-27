@@ -284,7 +284,7 @@ Varyings::Divided Varyings::Snapshot::getDivided(const uint32_t divisor) const
 void Varyings::Snapshot::snapshotSubProperties(const Map<String, sp<Varyings>>& subProperties, const PipelineLayout& pipelineInput, Allocator& allocator)
 {
     for(const auto& [i, j] : subProperties)
-        _sub_properties[NamedHash(i).hash()] = j->snapshot(pipelineInput, allocator);
+        _sub_properties[NamedHash(i).hashCode()] = j->snapshot(pipelineInput, allocator);
 }
 
 Varyings::Divided::Divided()

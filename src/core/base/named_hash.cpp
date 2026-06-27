@@ -22,36 +22,36 @@ struct HashNames {
 }
 
 NamedHash::NamedHash(String value)
-    : _hash(value.hash()), _name(std::move(value))
+    : _hash_code(value.hash()), _name(std::move(value))
 {
 #ifndef ARK_FLAG_PUBLISHING_BUILD
-    Global<HashNames>()->_hash_names[_hash] = _name;
+    Global<HashNames>()->_hash_names[_hash_code] = _name;
 #endif
 }
 
 NamedHash::NamedHash(const HashId value)
-    : _hash(value)
+    : _hash_code(value)
 {
 }
 
 NamedHash::NamedHash()
-    : _hash(0)
+    : _hash_code(0)
 {
 }
 
 NamedHash::operator bool() const
 {
-    return static_cast<bool>(_hash);
+    return static_cast<bool>(_hash_code);
 }
 
 const String& NamedHash::name() const
 {
-    return _name ? _name : reverse(_hash);
+    return _name ? _name : reverse(_hash_code);
 }
 
-HashId NamedHash::hash() const
+HashId NamedHash::hashCode() const
 {
-    return _hash;
+    return _hash_code;
 }
 
 bool NamedHash::update(uint32_t /*tick*/)
@@ -61,17 +61,17 @@ bool NamedHash::update(uint32_t /*tick*/)
 
 int32_t NamedHash::val()
 {
-    return _hash;
+    return _hash_code;
 }
 
 bool NamedHash::operator==(const NamedHash& other) const
 {
-    return _hash == other._hash;
+    return _hash_code == other._hash_code;
 }
 
 bool NamedHash::operator<(const NamedHash& other) const
 {
-    return _hash < other._hash;
+    return _hash_code < other._hash_code;
 }
 
 const String& NamedHash::reverse(const HashId hash)

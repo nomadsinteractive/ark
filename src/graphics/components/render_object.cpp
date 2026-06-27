@@ -24,7 +24,7 @@
 namespace ark {
 
 RenderObject::RenderObject(const NamedHash& resid, sp<Vec3> position, sp<Vec3> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
-    : RenderObject(sp<IntegerWrapper>::make(resid.hash()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
+    : RenderObject(sp<IntegerWrapper>::make(resid.hashCode()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
 {
 }
 
@@ -58,7 +58,7 @@ const sp<Varyings>& RenderObject::varyings()
 
 void RenderObject::setType(const NamedHash& type)
 {
-    _type->set(type.hash());
+    _type->set(type.hashCode());
     _timestamp.markDirty();
 }
 

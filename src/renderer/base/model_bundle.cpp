@@ -161,7 +161,7 @@ const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(const int32_t typ
 
 sp<Model> ModelBundle::getModel(const NamedHash& type) const
 {
-    const auto iter = _stub->_model_layouts.find(type.hash());
+    const auto iter = _stub->_model_layouts.find(type.hashCode());
     return iter != _stub->_model_layouts.end() ? iter->second._model : nullptr;
 }
 
@@ -172,7 +172,7 @@ sp<Model> ModelBundle::loadModel(const int32_t type)
 
 sp<Model> ModelBundle::importModel(const NamedHash& type, String manifest, sp<Future> future)
 {
-    return importModel(type.hash(), Manifest(std::move(manifest)), std::move(future));
+    return importModel(type.hashCode(), Manifest(std::move(manifest)), std::move(future));
 }
 
 sp<Model> ModelBundle::importModel(const NamedHash& type, const Manifest& manifest, sp<Future> future)
@@ -180,12 +180,12 @@ sp<Model> ModelBundle::importModel(const NamedHash& type, const Manifest& manife
     if(future)
     {
         const ApplicationContext& applicationContext = Ark::instance().applicationContext();
-        sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(type.hash(), manifest, _stub, nullptr, applicationContext.coreExecutor(), std::move(future));
+        sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(type.hashCode(), manifest, _stub, nullptr, applicationContext.coreExecutor(), std::move(future));
         applicationContext.threadPoolExecutor()->execute(std::move(task));
         return nullptr;
     }
     sp<Model> model = _stub->importModel(manifest, nullptr);
-    _stub->addModel(type.hash(), model);
+    _stub->addModel(type.hashCode(), model);
     return model;
 }
 

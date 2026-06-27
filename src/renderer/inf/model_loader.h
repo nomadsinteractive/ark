@@ -35,6 +35,10 @@ public:
     [[nodiscard]]
     virtual sp<DrawingContextComposer> makeRenderCommandComposer(const Shader& shader) = 0;
 
+    [[nodiscard]]
+//  [[script::bindings::auto]]
+    static sp<ModelLoader> quad(sp<Atlas> atlas);
+
 private:
     enums::DrawMode _render_mode;
     sp<Texture> _texture;

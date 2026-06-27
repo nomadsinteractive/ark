@@ -12,7 +12,7 @@ sp<Rigidbody> Collider::createBody(const sp<Collider>& self, Rigidbody::BodyType
 {
     if(!shape)
         shape = sp<Shape>::make();
-    if(shape->type().hash() == Shape::TYPE_NONE)
+    if(shape->type().hashCode() == Shape::TYPE_NONE)
         return sp<Rigidbody>::make(sp<Rigidbody::Stub>::make(sp<Ref>::make(0, nullptr, std::move(discarded)), bodyType, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter)), nullptr, true);
 
     sp<RigidbodyController> controller = self->createBody(bodyType, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));

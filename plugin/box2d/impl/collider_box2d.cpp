@@ -40,8 +40,8 @@ void ColliderBox2D::run()
 
 sp<ark::RigidbodyController> ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
 {
-    const auto iter = _stub->_body_manifests.find(shape->type().hash());
-    CHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-type: %ud not found", shape->type().hash());
+    const auto iter = _stub->_body_manifests.find(shape->type().hashCode());
+    CHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-type: %ud not found", shape->type().hashCode());
     const BodyCreateInfo& manifest = iter->second;
     const sp<Rotation> rot = rotation.asInstance<Rotation>();
     const sp<RotationAxisTheta> axisTheta = rot ? rot.asInstance<RotationAxisTheta>() : sp<RotationAxisTheta>();

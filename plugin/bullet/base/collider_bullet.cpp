@@ -164,7 +164,7 @@ RigidbodyControllerBullet getRigidBodyFromCollisionObject(const btCollisionObjec
 sp<CollisionShapeRef> createCollisionShape(const NamedHash& type, const Optional<V3>& scale, ModelLoader& modelLoader)
 {
     const V3 s = scale ? scale.value() : V3(1.0f);;
-    switch(static_cast<Shape::Type>(type.hash()))
+    switch(static_cast<Shape::Type>(type.hashCode()))
     {
         case Shape::TYPE_AABB:
         case Shape::TYPE_BOX:
@@ -181,8 +181,8 @@ sp<CollisionShapeRef> createCollisionShape(const NamedHash& type, const Optional
             return sp<CollisionShapeRef>::make(sp<btCollisionShape>::make<btCapsuleShape>(radius, std::max(height, 0.0f)), scale.value());
         }
         default:
-            const sp<Model> model = modelLoader.loadModel(type.hash());
-            CHECK(model, "Failed to load model[%ud(\"%s\")]", type.hash(), type.name().c_str());
+            const sp<Model> model = modelLoader.loadModel(type.hashCode());
+            CHECK(model, "Failed to load model[%ud(\"%s\")]", type.hashCode(), type.name().c_str());
             return sp<CollisionShapeRef>::make(makeConvexHullCollisionShape(model), model->content()->size()->val());
     }
 }
@@ -488,7 +488,7 @@ void ColliderBullet::addTickContactInfo(const sp<CollisionObjectRef>& rigidBody,
 
 sp<CollisionShapeRef> ColliderBullet::ensureCollisionShapeRef(const NamedHash& type, const Optional<V3>& scale) const
 {
-    switch(static_cast<Shape::Type>(type.hash()))
+    switch(static_cast<Shape::Type>(type.hashCode()))
     {
         case Shape::TYPE_AABB:
         case Shape::TYPE_BOX:
@@ -500,10 +500,10 @@ sp<CollisionShapeRef> ColliderBullet::ensureCollisionShapeRef(const NamedHash& t
     }
 
     sp<CollisionShapeRef> cs;
-    if(const auto iter = _stub->_collision_shapes.find(type.hash()); iter == _stub->_collision_shapes.end())
+    if(const auto iter = _stub->_collision_shapes.find(type.hashCode()); iter == _stub->_collision_shapes.end())
     {
         cs = createCollisionShape(type, scale, _stub->_model_loader);
-        _stub->_collision_shapes.insert({type.hash(), cs});
+        _stub->_collision_shapes.insert({type.hashCode(), cs});
     }
     else
         cs = iter->second;

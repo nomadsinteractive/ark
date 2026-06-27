@@ -118,7 +118,7 @@ sp<Integer> IntegerType::create(int32_t value)
 
 sp<Integer> IntegerType::create(const NamedHash& value)
 {
-    return sp<Integer>::make<IntegerWrapper>(static_cast<int32_t>(value.hash()));
+    return sp<Integer>::make<IntegerWrapper>(static_cast<int32_t>(value.hashCode()));
 }
 
 sp<Integer> IntegerType::create(sp<Integer> value)
@@ -267,7 +267,7 @@ void IntegerType::reset(const sp<Integer>& self, const int32_t value)
 void IntegerType::reset(const sp<Integer>& self, const NamedHash& value)
 {
     const sp<IntegerWrapper> nw = self.ensureInstance<IntegerWrapper>("Must be an IntegerWrapper instance(result of a wrap() function call) to set its value");
-    nw->set(value.hash());
+    nw->set(value.hashCode());
 }
 
 void IntegerType::reset(const sp<Integer>& self, sp<Integer> value)

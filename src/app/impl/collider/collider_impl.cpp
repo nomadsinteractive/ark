@@ -315,7 +315,7 @@ sp<RigidbodyController> ColliderImpl::createBody(const Rigidbody::BodyType type,
 
 sp<Shape> ColliderImpl::createShape(const NamedHash& type, Optional<V3> scale, const V3& origin)
 {
-    auto [_implementation, _size] = _stub->narrowPhrase()->createShapeDef(type.hash(), scale);
+    auto [_implementation, _size] = _stub->narrowPhrase()->createShapeDef(type.hashCode(), scale);
     return sp<Shape>::make(type, scale ? std::move(scale) : Optional<V3>(_size), origin, std::move(_implementation));
 }
 

@@ -40,7 +40,7 @@ void addCandidate(BroadPhraseCallback& callback, const TilemapLayer& tilemapLaye
             const sp<Tile>& tile = tilemapLayer.getTile(static_cast<uint32_t>(col), static_cast<uint32_t>(row));
             candidateIdSet.insert(candidateId);
             if(tile)
-                if(const int32_t shapeId = tile->shape()->type().hash(); shapeId != Shape::TYPE_NONE)
+                if(const int32_t shapeId = tile->shape()->type().hashCode(); shapeId != Shape::TYPE_NONE)
                     callback.onStaticCandidate(candidateId, V3(tl + V2(col * tileSize.x(), row * tileSize.y()), 0), constants::QUATERNION_ONE, tile->shape(), tilemapLayer.collisionFilter());
         }
     }
@@ -79,7 +79,7 @@ void BroadPhraseTilemap::search(BroadPhraseCallback& callback, const V3 position
                         const sp<Tile>& tile = i.getTile(j, k);
                         if(tile)
                         {
-                            int32_t shapeId = tile->shape()->type().hash();
+                            int32_t shapeId = tile->shape()->type().hashCode();
                             if(shapeId != Shape::TYPE_NONE)
                             {
                                 int32_t candidateId = toCandidateId(layerId, k, j);
