@@ -29,7 +29,6 @@ limitations under the License.
 #include "core/impl/asset_bundle/asset_bundle_compound.h"
 #include "core/impl/asset_bundle/asset_bundle_zip_file.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/impl/dictionary/dictionary_impl.h"
 #include "core/inf/asset.h"
 #include "core/types/global.h"
 #include "core/types/optional.h"
@@ -101,6 +100,15 @@ private:
     bool _flipy;
     bool _flipz;
 };
+
+class DictionaryEmptyDocument final : public Dictionary<document> {
+public:
+
+    document get(const String& name) override {
+        return nullptr;
+    }
+};
+
 
 sp<RendererFactory> chooseRenderFactory(const Vector<sp<RendererFactory>>& rendererFactories, const enums::RenderingBackendBit renderingBackend)
 {
@@ -335,7 +343,7 @@ void Ark::initialize(sp<ApplicationManifest> manifest)
     _asset_bundle = sp<ArkAssetBundle>::make(std::move(builtinAssetBundle), _manifest->assets());
     sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("."));
 
-    const sp<BeanFactory> factory = createBeanFactory(sp<Dictionary<document>>::make<DictionaryImpl<document>>());
+    const sp<BeanFactory> factory = createBeanFactory(sp<Dictionary<document>>::make<DictionaryEmptyDocument>());
     sp<RenderBackend> renderEngine = createRenderEngine(factory, _manifest->renderer());
     _application_context = createApplicationContext(std::move(applicationBundle), std::move(renderEngine));
     _application_context->initialize(_manifest->resourceLoader());

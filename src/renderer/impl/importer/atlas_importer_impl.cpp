@@ -2,7 +2,7 @@
 
 #include "core/ark.h"
 #include "core/base/named_hash.h"
-#include "core/impl/dictionary/loader_bundle.h"
+#include "core/util/loader_bundle.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/bitmap.h"
@@ -30,7 +30,7 @@ public:
     }
 
     bitmap val() override {
-        return _bitmap_bundle->get(_src);
+        return _bitmap_bundle->load(_src);
     }
 
 private:
@@ -57,7 +57,7 @@ void AtlasImporterImpl::import(Atlas& atlas, const sp<Readable>& /*readable*/)
             {
                 auto [name, ext] = j.rcut('.');
                 String src = Strings::sprintf("%s/%s", dirpath.c_str(), j.c_str());
-                sp<Bitmap> bounds = bitmapLoaderBounds.get(src);
+                sp<Bitmap> bounds = bitmapLoaderBounds.load(src);
                 texturePacker.addBitmap(std::move(bounds), sp<Variable<bitmap>>::make<BitmapProvider>(bitmapLoader, std::move(src)), std::move(name.value()));
             }
 

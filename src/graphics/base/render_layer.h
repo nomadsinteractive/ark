@@ -37,7 +37,7 @@ private:
 
 public:
 //  [[script::bindings::auto]]
-    RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded, sp<Vec4> scissor);
+    RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Varyings> varyings, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr, sp<Vec4> scissor = nullptr);
 
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 

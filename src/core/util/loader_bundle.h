@@ -3,13 +3,12 @@
 #include "core/base/string.h"
 #include "core/inf/asset.h"
 #include "core/inf/asset_bundle.h"
-#include "core/inf/dictionary.h"
 #include "core/inf/loader.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-template<typename T> class LoaderBundle final : public Dictionary<T> {
+template<typename T> class LoaderBundle final {
 private:
     typedef Loader<T> LoaderType;
 
@@ -18,7 +17,7 @@ public:
         : _asset_bundle(std::move(assetBundle)), _default_loader(std::move(defaultLoader)) {
     }
 
-    T get(const String& name) override {
+    T load(const String& name) {
         const auto [fname, fext] = name.rcut('.');
         const sp<Asset> asset = _asset_bundle->getAsset(name);
         CHECK(asset, "Asset %s not found", name.c_str());

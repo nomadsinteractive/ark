@@ -1,11 +1,9 @@
 #include "app/base/arena.h"
 
 #include "core/base/resource_loader.h"
-#include "core/components/discarded.h"
 #include "core/inf/dictionary.h"
 
 #include "graphics/base/render_layer.h"
-#include "graphics/util/renderer_type.h"
 
 namespace ark {
 

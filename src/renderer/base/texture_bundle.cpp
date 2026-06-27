@@ -1,5 +1,7 @@
 #include "renderer/base/texture_bundle.h"
 
+#include "core/util/loader_bundle.h"
+
 #include "graphics/base/bitmap.h"
 #include "graphics/components/size.h"
 
@@ -13,18 +15,18 @@ namespace {
 
 class UploaderBitmapBundle final : public Texture::Uploader {
 public:
-    UploaderBitmapBundle(const sp<Dictionary<bitmap>>& bitmapLoader, const String& name)
+    UploaderBitmapBundle(const sp<BitmapLoaderBundle>& bitmapLoader, const String& name)
         : _bitmap_loader(bitmapLoader), _name(name) {
     }
 
     void initialize(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
-        const bitmap bitmap = _bitmap_loader->get(_name);
+        const bitmap bitmap = _bitmap_loader->load(_name);
         DCHECK(bitmap, "Texture resource \"%s\" not found", _name.c_str());
         delegate.uploadBitmap(graphicContext, bitmap, {bitmap->byteArray()});
     }
 
 private:
-    sp<Dictionary<bitmap>> _bitmap_loader;
+    sp<BitmapLoaderBundle> _bitmap_loader;
     String _name;
 };
 
@@ -46,7 +48,7 @@ const sp<Texture>& TextureBundle::createTexture(const String& src, const sp<Text
 
 sp<Texture> TextureBundle::doCreateTexture(const String& src, const sp<Texture::Parameters>& parameters) const
 {
-    const bitmap bitmapBounds = _bitmap_bounds_loader->get(src);
+    const bitmap bitmapBounds = _bitmap_bounds_loader->load(src);
     DCHECK(bitmapBounds, "Texture resource \"%s\" not found", src.c_str());
     const sp<Size> size = sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height()));
     return _render_controller->createTexture(size, parameters, sp<UploaderBitmapBundle>::make(_bitmap_loader, src));

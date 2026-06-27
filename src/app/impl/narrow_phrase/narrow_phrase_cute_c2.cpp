@@ -108,7 +108,7 @@ NarrowPhraseCuteC2::NarrowPhraseCuteC2(const document& manifest, const sp<Resour
     for(const document& i : manifest->children("import"))
     {
         const String& src = Documents::ensureAttribute(i, constants::SRC);
-        const document content = resourceLoaderContext->documents()->get(src);
+        const document content = resourceLoaderContext->documents()->load(src);
         loadShapes(content->ensureChild("bodies"), ppu);
     }
 }

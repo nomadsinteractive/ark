@@ -9,6 +9,9 @@ public:
     virtual ~Dictionary() = default;
 
     virtual T get(const String& name) = 0;
+
+    virtual Vector<String> keys() { return {}; }
+    virtual Vector<T> values() { return {}; }
 };
 
 }

@@ -22,8 +22,8 @@ private:
 private:
     sp<RenderController> _render_controller;
     sp<RendererFactory> _renderer_factory;
-    sp<Dictionary<bitmap>> _bitmap_loader;
-    sp<Dictionary<bitmap>> _bitmap_bounds_loader;
+    sp<BitmapLoaderBundle> _bitmap_loader;
+    sp<BitmapLoaderBundle> _bitmap_bounds_loader;
 
     std::map<String, sp<Texture>> _textures;
 };

@@ -187,7 +187,7 @@ Buffer::Snapshot RenderController::PrimitiveIndexBuffer::snapshot(RenderControll
     return _buffer.snapshot(size);
 }
 
-RenderController::RenderController(const sp<RenderBackend>& renderBackend, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
+RenderController::RenderController(const sp<RenderBackend>& renderBackend, const sp<BitmapLoaderBundle>& bitmapLoader, const sp<BitmapLoaderBundle>& bitmapBoundsLoader)
     : _render_backend(renderBackend), _recycler(sp<Recycler>::make()), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _gba(*this), _tick(0)
 {
 }

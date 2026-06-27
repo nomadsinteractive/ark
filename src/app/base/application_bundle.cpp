@@ -2,7 +2,7 @@
 
 #include "core/base/string.h"
 #include "core/inf/dictionary.h"
-#include "core/impl/dictionary/loader_bundle.h"
+#include "core/util/loader_bundle.h"
 #include "core/impl/loader/document_loader_xml.h"
 #include "core/impl/loader/json_loader_text.h"
 #include "core/impl/loader/string_loader_text.h"
@@ -45,17 +45,17 @@ document ApplicationBundle::loadDocument(const String& resid) const
 
 Json ApplicationBundle::loadJson(const String& resid) const
 {
-    return _json_loader_bundle->get(resid);
+    return _json_loader_bundle->load(resid);
 }
 
 String ApplicationBundle::loadString(const String& resid) const
 {
-    return _string_loader_bundle->get(resid);
+    return _string_loader_bundle->load(resid);
 }
 
 sp<Bitmap> ApplicationBundle::loadBitmap(const String& resid) const
 {
-    return _bitmap_bundle->get(resid);
+    return _bitmap_bundle->load(resid);
 }
 
 sp<DocumentLoaderBundle> ApplicationBundle::createDocumentLoaderBundle() const

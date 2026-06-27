@@ -9,15 +9,6 @@
 
 namespace ark {
 
-/*
-
-class BoxBundle {
-    [[script::bindings::map(get)]]
-    virtual Box get(const String& name) override;
-};
-
-*/
-
 class ARK_API Scope final : public BoxBundle {
 public:
     Scope() = default;

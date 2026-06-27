@@ -198,7 +198,7 @@ Bitmap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const s
 
 sp<Bitmap> Bitmap::BUILDER::build(const Scope& args)
 {
-    return _bitmap_bundle->get(_src->build(args));
+    return _bitmap_bundle->load(_src->build(args));
 }
 
 Bitmap::VALUE_BUILDER::VALUE_BUILDER(BeanFactory& /*factory*/, const String& src, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -208,7 +208,7 @@ Bitmap::VALUE_BUILDER::VALUE_BUILDER(BeanFactory& /*factory*/, const String& src
 
 sp<Bitmap> Bitmap::VALUE_BUILDER::build(const Scope& /*args*/)
 {
-    return _bitmap_bundle->get(_src);
+    return _bitmap_bundle->load(_src);
 }
 
 }

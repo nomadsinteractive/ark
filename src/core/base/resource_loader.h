@@ -4,7 +4,6 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/collection/traits.h"
-#include "core/inf/debris.h"
 #include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
@@ -12,13 +11,13 @@ namespace ark {
 
 class ARK_API ResourceLoader {
 private:
-    template<typename T> class BuilderRefs final : public BoxBundle {
+    template<typename T> class BuilderRefs final {
     public:
         BuilderRefs(const BeanFactory& beanFactory)
             : _bean_factory(beanFactory) {
         }
 
-        Box get(const String& refid) override {
+        Box ensure(const String& refid) {
             const SafeBuilder<T> builder = getBuilder(Identifier::parseRef(refid));
             sp<T> ptr = builder.build({});
             CHECK(ptr, "ResourceLoader has no object referred as \"%s\"", refid.c_str());

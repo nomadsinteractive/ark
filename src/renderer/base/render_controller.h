@@ -66,7 +66,7 @@ private:
     };
 
 public:
-    RenderController(const sp<RenderBackend>& renderBackend, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader);
+    RenderController(const sp<RenderBackend>& renderBackend, const sp<BitmapLoaderBundle>& bitmapLoader, const sp<BitmapLoaderBundle>& bitmapBoundsLoader);
 
     void reset();
 
@@ -164,8 +164,8 @@ private:
 private:
     sp<RenderBackend> _render_backend;
     sp<Recycler> _recycler;
-    sp<Dictionary<bitmap>> _bitmap_loader;
-    sp<Dictionary<bitmap>> _bitmap_bounds_loader;
+    sp<BitmapLoaderBundle> _bitmap_loader;
+    sp<BitmapLoaderBundle> _bitmap_bounds_loader;
 
     LFQueue<UploadingRenderResource> _uploading_resources;
 

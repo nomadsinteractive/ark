@@ -7,7 +7,7 @@
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
-#include "core/impl/dictionary/loader_bundle.h"
+#include "../../core/util/loader_bundle.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -19,10 +19,10 @@ namespace ark {
 
 class ARK_API ResourceLoaderContext {
 public:
-    ResourceLoaderContext(sp<Dictionary<document>> documents, sp<BitmapLoaderBundle> bitmapBundle, sp<BitmapLoaderBundle> bitmapBoundsBundle, sp<RenderController> renderController);
+    ResourceLoaderContext(sp<DocumentLoaderBundle> documents, sp<BitmapLoaderBundle> bitmapBundle, sp<BitmapLoaderBundle> bitmapBoundsBundle, sp<RenderController> renderController);
     ~ResourceLoaderContext();
 
-    const sp<Dictionary<document>>& documents() const;
+    const sp<DocumentLoaderBundle>& documents() const;
 
     const sp<RenderController>& renderController() const;
 
@@ -33,7 +33,7 @@ public:
     sp<Boolean> discarded() const;
 
 private:
-    sp<Dictionary<document>> _documents;
+    sp<DocumentLoaderBundle> _documents;
     sp<BitmapLoaderBundle> _bitmap_bundle;
     sp<BitmapLoaderBundle> _bitmap_bounds_bundle;
     sp<RenderController> _render_controller;
