@@ -8,16 +8,56 @@
 
 namespace ark {
 
+struct Random::Stub {
+    Stub(const uint32_t seed)
+        : _generator(seed) {
+    }
+
+    template<typename T> T& distribution();
+
+    std::mt19937 _generator;
+    std::uniform_int_distribution<int32_t> _uniform_int32;
+    std::uniform_int_distribution<int64_t> _uniform_int64;
+    std::uniform_real_distribution<float> _uniform_real;
+    std::normal_distribution<float> _normal;
+    std::discrete_distribution<uint32_t> _discrete;
+};
+
+template<> std::uniform_int_distribution<int32_t>& Random::Stub::distribution()
+{
+    return _uniform_int32;
+}
+
+template<> std::uniform_int_distribution<int64_t>& Random::Stub::distribution()
+{
+    return _uniform_int64;
+}
+
+template<> std::uniform_real_distribution<float>& Random::Stub::distribution()
+{
+    return _uniform_real;
+}
+
+template<> std::normal_distribution<float>& Random::Stub::distribution()
+{
+    return _normal;
+}
+
+template<> std::discrete_distribution<uint32_t>& Random::Stub::distribution()
+{
+    return _discrete;
+}
+
 namespace {
 
 template<typename T, typename U = typename T::result_type> class Distribution final : public Variable<U> {
 public:
-    Distribution(T distribution, sp<std::mt19937> generator)
-        : _distribution(std::move(distribution)), _generator(std::move(generator)) {
+    Distribution(typename T::param_type param, sp<Random::Stub> stub)
+        : _param(std::move(param)), _stub(std::move(stub)) {
     }
 
     U val() override {
-        return _distribution(*_generator);
+        return _stub->distribution<T>()(_stub->_generator, _param);
     }
 
     bool update(uint32_t /*tick*/) override {
@@ -25,19 +65,18 @@ public:
     }
 
 private:
-    T _distribution;
-    sp<std::mt19937> _generator;
+    typename T::param_type _param;
+    sp<Random::Stub> _stub;
 };
 
 template<typename T, typename U = typename T::result_type> class DynamicDistribution final : public Variable<U> {
 public:
-    DynamicDistribution(sp<Variable<U>> a, sp<Variable<U>> b, sp<std::mt19937> generator)
-        : _a(std::move(a)), _b(std::move(b)), _generator(std::move(generator)) {
+    DynamicDistribution(sp<Variable<U>> a, sp<Variable<U>> b, sp<Random::Stub> stub)
+        : _a(std::move(a)), _b(std::move(b)), _stub(std::move(stub)) {
     }
 
     U val() override {
-        T dis(_a->val(), _b->val());
-        return dis(*_generator);
+        return _stub->distribution<T>()(_stub->_generator, typename T::param_type(_a->val(), _b->val()));
     }
 
     bool update(uint32_t /*tick*/) override {
@@ -47,7 +86,7 @@ public:
 private:
     sp<Variable<U>> _a;
     sp<Variable<U>> _b;
-    sp<std::mt19937> _generator;
+    sp<Random::Stub> _stub;
 };
 
 template<typename T> class Nonvolatile final : public Variable<T> {
@@ -114,7 +153,7 @@ Vector<float> toWeights(Vector<float> weights, const size_t size)
 template<typename T> class VariableWeightedChoices final : public Variable<T> {
 public:
     VariableWeightedChoices(const Random& random, Vector<T> choices, Vector<float> weights)
-        : _generator(random.generator()), _choices(std::move(choices)), _weights(toWeights(std::move(weights), _choices.size())), _distribution(_weights.begin(), _weights.end())
+        : _stub(random.stub()), _choices(std::move(choices)), _weights(toWeights(std::move(weights), _choices.size())), _param(_weights.begin(), _weights.end())
     {
     }
 
@@ -125,14 +164,14 @@ public:
 
     T val() override
     {
-        return _choices.at(_distribution(*_generator));
+        return _choices.at(_stub->distribution<std::discrete_distribution<uint32_t>>()(_stub->_generator, _param));
     }
 
 private:
-    sp<std::mt19937> _generator;
+    sp<Random::Stub> _stub;
     Vector<T> _choices;
     Vector<float> _weights;
-    std::discrete_distribution<uint32_t> _distribution;
+    std::discrete_distribution<uint32_t>::param_type _param;
 };
 
 template<typename T> sp<Variable<T>> toNonvolatile(sp<Variable<T>> generator)
@@ -143,7 +182,7 @@ template<typename T> sp<Variable<T>> toNonvolatile(sp<Variable<T>> generator)
 }
 
 Random::Random(const uint32_t seed, const bool nonvolatile)
-    : _seed(seed), _nonvolatile(nonvolatile), _generator(sp<std::mt19937>::make(_seed))
+    : _seed(seed), _nonvolatile(nonvolatile), _stub(sp<Stub>::make(_seed))
 {
 }
 
@@ -155,41 +194,37 @@ uint32_t Random::seed() const
 void Random::setSeed(const uint32_t seed)
 {
     _seed = seed;
-    _generator->seed(seed);
+    _stub->_generator.seed(seed);
 }
 
 uint32_t Random::rand() const
 {
-    return (*_generator)();
+    return _stub->_generator();
 }
 
 int32_t Random::randint(const int32_t a, const int32_t b) const
 {
-    std::uniform_int_distribution<int32_t> dis(a, b);
-    return dis(*_generator);
+    return _stub->_uniform_int32(_stub->_generator, std::uniform_int_distribution<int32_t>::param_type(a, b));
 }
 
 int64_t Random::randint(const int64_t a, const int64_t b) const
 {
-    std::uniform_int_distribution<int64_t> dis(a, b);
-    return dis(*_generator);
+    return _stub->_uniform_int64(_stub->_generator, std::uniform_int_distribution<int64_t>::param_type(a, b));
 }
 
 float Random::uniform(const float a, const float b) const
 {
-    std::uniform_real_distribution<float> dis(a, b);
-    return dis(*_generator);
+    return _stub->_uniform_real(_stub->_generator, std::uniform_real_distribution<float>::param_type(a, b));
 }
 
 float Random::normal(const float mean, const float sigma) const
 {
-    std::normal_distribution<float> dis(mean, sigma);
-    return dis(*_generator);
+    return _stub->_normal(_stub->_generator, std::normal_distribution<float>::param_type(mean, sigma));
 }
 
 sp<Integer> Random::randInteger(const int32_t a, const int32_t b) const
 {
-    sp<Integer> g = sp<Integer>::make<Distribution<std::uniform_int_distribution<int32_t>, int32_t>>(std::uniform_int_distribution<int32_t>(a, b), _generator);
+    sp<Integer> g = sp<Integer>::make<Distribution<std::uniform_int_distribution<int32_t>, int32_t>>(std::uniform_int_distribution<int32_t>::param_type(a, b), _stub);
     if(_nonvolatile)
         return toNonvolatile<int32_t>(std::move(g));
     return g;
@@ -197,7 +232,7 @@ sp<Integer> Random::randInteger(const int32_t a, const int32_t b) const
 
 sp<Integer> Random::randInteger(sp<Integer> a, sp<Integer> b) const
 {
-    sp<Integer> g = sp<Integer>::make<DynamicDistribution<std::uniform_int_distribution<int32_t>, int32_t>>(std::move(a), std::move(b), _generator);
+    sp<Integer> g = sp<Integer>::make<DynamicDistribution<std::uniform_int_distribution<int32_t>, int32_t>>(std::move(a), std::move(b), _stub);
     if(_nonvolatile)
         return toNonvolatile<int32_t>(std::move(g));
     return g;
@@ -205,7 +240,7 @@ sp<Integer> Random::randInteger(sp<Integer> a, sp<Integer> b) const
 
 sp<Numeric> Random::randNumeric(const float a, const float b)
 {
-    sp<Numeric> g = sp<Numeric>::make<Distribution<std::uniform_real_distribution<float>, float>>(std::uniform_real_distribution<float>(a, b), _generator);
+    sp<Numeric> g = sp<Numeric>::make<Distribution<std::uniform_real_distribution<float>, float>>(std::uniform_real_distribution<float>::param_type(a, b), _stub);
     if(_nonvolatile)
         return toNonvolatile<float>(std::move(g));
     return g;
@@ -213,7 +248,7 @@ sp<Numeric> Random::randNumeric(const float a, const float b)
 
 sp<Numeric> Random::randNumeric(sp<Numeric> a, sp<Numeric> b)
 {
-    sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::uniform_real_distribution<float>, float>>(std::move(a), std::move(b), _generator);
+    sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::uniform_real_distribution<float>, float>>(std::move(a), std::move(b), _stub);
     if(_nonvolatile)
         return toNonvolatile<float>(std::move(g));
     return g;
@@ -221,7 +256,7 @@ sp<Numeric> Random::randNumeric(sp<Numeric> a, sp<Numeric> b)
 
 sp<Numeric> Random::normalNumeric(const float mean, const float sigma)
 {
-    sp<Numeric> g = sp<Numeric>::make<Distribution<std::normal_distribution<float>, float>>(std::normal_distribution<float>(mean, sigma), _generator);
+    sp<Numeric> g = sp<Numeric>::make<Distribution<std::normal_distribution<float>, float>>(std::normal_distribution<float>::param_type(mean, sigma), _stub);
     if(_nonvolatile)
         return toNonvolatile<float>(std::move(g));
     return g;
@@ -229,7 +264,7 @@ sp<Numeric> Random::normalNumeric(const float mean, const float sigma)
 
 sp<Numeric> Random::normalNumeric(sp<Numeric> mean, sp<Numeric> sigma)
 {
-    sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::normal_distribution<float>>>(std::move(mean), std::move(sigma), _generator);
+    sp<Numeric> g = sp<Numeric>::make<DynamicDistribution<std::normal_distribution<float>>>(std::move(mean), std::move(sigma), _stub);
     if(_nonvolatile)
         return toNonvolatile<float>(std::move(g));
     return g;
@@ -253,9 +288,9 @@ sp<Integer> Random::choice(Vector<int32_t> choices, Vector<float> weights)
     return sp<Integer>::make<VariableWeightedChoices<int32_t>>(*this, std::move(choices), std::move(weights));
 }
 
-const sp<std::mt19937>& Random::generator() const
+const sp<Random::Stub>& Random::stub() const
 {
-    return _generator;
+    return _stub;
 }
 
 }

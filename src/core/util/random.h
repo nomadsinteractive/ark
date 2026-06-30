@@ -49,12 +49,13 @@ public:
 //  [[script::bindings::auto]]
     sp<Numeric> choice(Vector<float> choices, Vector<float> weights = {});
 
-    const sp<std::mt19937>& generator() const;
+    struct Stub;
+    const sp<Stub>& stub() const;
 
 private:
     uint32_t _seed;
     bool _nonvolatile;
-    sp<std::mt19937> _generator;
+    sp<Stub> _stub;
 };
 
 }
