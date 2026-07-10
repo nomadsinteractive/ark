@@ -95,7 +95,6 @@ public:
         String cname = Strings::capitalizeFirst(name);
         _properties[cname] = Box(var);
         setSlotUploader(std::move(cname), sp<Uploader>::make<UploaderOfVariable<T>>(std::move(var)));
-        _timestamp.markDirty();
     }
 
 //  [[plugin::builder]]
@@ -120,11 +119,26 @@ public:
     };
 
 private:
+    Varyings(Map<String, Slot> slots);
+
     void setSlotUploader(const String& name, sp<Uploader> uploader);
 
+    template<typename T, typename... Args> void addVaryingProperties(const String& name, const Box& value) {
+        if(sp<Variable<T>> var = value.as<Variable<T>>()) {
+            String cname = Strings::capitalizeFirst(name);
+            _properties.emplace(cname, var);
+            _slots.emplace(std::move(cname), sp<Uploader>::make<UploaderOfVariable<T>>(std::move(var)));
+            return;
+        }
+
+        if constexpr(sizeof...(Args) > 0)
+            return addVaryingProperties<Args...>(name, value);
+        FATAL("Cannot add property \"%s\" for Varyings, all option types tried out.", name.c_str());
+    }
+
 private:
-    Map<String, Box> _properties;
     Map<String, Slot> _slots;
+    Map<String, Box> _properties;
     Map<uint32_t, uint32_t> _slot_strides;
 
     Map<String, sp<Varyings>> _sub_properties;

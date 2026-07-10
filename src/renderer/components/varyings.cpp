@@ -71,16 +71,6 @@ String getAllAttribute(const PipelineLayout& shaderLayout)
     return sb.str();
 }
 
-template<typename T, typename... Args> void setVaryingProperties(Varyings& varyings, const String& name, const Box& value)
-{
-    if(sp<Variable<T>> var = value.as<Variable<T>>())
-        return varyings.setProperty<T>(name, std::move(var));
-
-    if constexpr(sizeof...(Args) > 0)
-        return setVaryingProperties<Args...>(varyings, name, value);
-    FATAL("Cannot set property \"%s\", all option types tried out.", name.c_str());
-}
-
 }
 
 struct Varyings::SlotSnapshot {
@@ -93,7 +83,7 @@ struct Varyings::SlotSnapshot {
 Varyings::Varyings(const Scope& kwargs)
 {
     for(const auto& [k, v] : kwargs.variables())
-        setVaryingProperties<float, int32_t, V2, V3, V4, V2i, V4i, M3, M4>(*this, k, v);
+        addVaryingProperties<float, int32_t, V2, V3, V4, V2i, V4i, M3, M4>(k, v);
 }
 
 Varyings::Varyings(const PipelineLayout& pipelineLayout)
@@ -102,7 +92,7 @@ Varyings::Varyings(const PipelineLayout& pipelineLayout)
     {
         for(const auto& [attrname, attr] : v.attributes())
             if(!(k == 0 && (attr.offset() == 0 || attr.offset() == 12)))  // slots with offset 0 and 12 in divisor 0 will always be the "a_Position" & "a_UV" attribute, which don't need to be recorded here.
-                _slots.insert({attrname, Slot{sp<Uploader>::make<UploaderSlotDefault<uint8_t>>(attr.size()), k, static_cast<int32_t>(attr.offset())}});
+                _slots.emplace(attrname, Slot(sp<Uploader>::make<UploaderSlotDefault<uint8_t>>(attr.size()), k, static_cast<int32_t>(attr.offset())));
         _slot_strides[k] = v.stride();
     }
 }
@@ -126,19 +116,19 @@ Box Varyings::getProperty(const String& name) const
     return iter->second;
 }
 
+Varyings::Varyings(Map<String, Slot> slots)
+    : _slots(std::move(slots))
+{
+}
+
 void Varyings::setSlotUploader(const String& name, sp<Uploader> uploader)
 {
-    if(const auto iter = _slots.find(name); iter == _slots.end())
-    {
-        _slots.emplace(name, Slot{std::move(uploader)});
-        _slot_strides.clear();
-    }
-    else
-    {
-        const Slot& preslot = iter->second;
-        CHECK(preslot._uploader->size() == uploader->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), preslot._uploader->size(), uploader->size());
-        iter->second = {std::move(uploader), preslot._divisor, preslot._offset};
-    }
+    const auto iter = _slots.find(name);
+    CHECK(iter != _slots.end(), "Varying slot \"%s\" doesn't existing", name.c_str());
+    Slot& slot = iter->second;
+    CHECK(slot._uploader->size() == uploader->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), slot._uploader->size(), uploader->size());
+    slot = {std::move(uploader), slot._divisor, slot._offset};
+    _timestamp.markDirty();
 }
 
 void Varyings::setProperty(const String& name, sp<Integer> var)
@@ -238,10 +228,10 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
     if(_uploader_builders.empty())
         return nullptr;
 
-    const sp<Varyings> varyings = sp<Varyings>::make();
+    Map<String, Slot> slots;
     for(const UploaderBuilder& i : _uploader_builders)
-        varyings->setSlotUploader(Strings::capitalizeFirst(i._name),  i._uploader->build(args));
-    return varyings;
+        slots.emplace(Strings::capitalizeFirst(i._name),  i._uploader->build(args));
+    return sp<Varyings>::adopt(new Varyings(std::move(slots)));
 }
 
 Varyings::BUILDER::UploaderBuilder::UploaderBuilder(BeanFactory& factory, const document& manifest)
