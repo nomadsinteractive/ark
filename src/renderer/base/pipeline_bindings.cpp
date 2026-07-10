@@ -218,7 +218,7 @@ Map<uint32_t, Buffer::SnapshotFactory> PipelineBindings::makeDividedBufferFactor
     const sp<PipelineLayout>& shaderLayout = _stub->_pipeline_descriptor->layout();
     for(const auto& i : _stub->_instance_buffers)
     {
-        const PipelineLayout::StreamLayout& stream = shaderLayout->getStreamLayout(i.first);
+        const PipelineLayout::VertexLayout& stream = shaderLayout->getVertexLayout(i.first);
         builders.insert(std::make_pair(i.first, Buffer::SnapshotFactory(stream.stride())));
     }
     return builders;

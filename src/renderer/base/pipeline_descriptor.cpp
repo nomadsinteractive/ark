@@ -188,7 +188,7 @@ const PipelineLayout::VertexDescriptor& PipelineDescriptor::vertexDescriptor() c
 
 bool PipelineDescriptor::hasDivisors() const
 {
-    return _layout->streamLayouts().size() > 1;
+    return _layout->vertexLayouts().size() > 1;
 }
 
 const String& PipelineDescriptor::signature() const

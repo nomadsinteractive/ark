@@ -25,13 +25,13 @@ namespace {
 class VerticesUploader final : public Uploader {
 public:
     VerticesUploader(sp<ModelBundle> modelBundle, sp<PipelineLayout> pipelineInput)
-        : Uploader(modelBundle->vertexLength() * pipelineInput->getStreamLayout(0).stride()), _model_bundle(std::move(modelBundle)), _pipeline_input(std::move(pipelineInput)) {
+        : Uploader(modelBundle->vertexLength() * pipelineInput->getVertexLayout(0).stride()), _model_bundle(std::move(modelBundle)), _pipeline_input(std::move(pipelineInput)) {
     }
 
     void upload(Writable& uploader) override
     {
         uint32_t offset = 0;
-        const size_t stride = _pipeline_input->getStreamLayout(0).stride();
+        const size_t stride = _pipeline_input->getVertexLayout(0).stride();
         const PipelineLayout::VertexDescriptor attributes(_pipeline_input);
         for(const ModelBundle::ModelLayout& i : _model_bundle->modelLayouts().values())
         {

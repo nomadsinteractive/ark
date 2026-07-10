@@ -10,7 +10,7 @@ namespace {
 class UploaderVertices final : public Uploader {
 public:
     UploaderVertices(sp<PipelineLayout> shaderLayout, sp<Vertices> vertices, const V3& bounds)
-        : Uploader(shaderLayout->getStreamLayout(0).stride() * vertices->length()), _shader_layout(std::move(shaderLayout)), _vertices(std::move(vertices)), _bounds(bounds) {
+        : Uploader(shaderLayout->getVertexLayout(0).stride() * vertices->length()), _shader_layout(std::move(shaderLayout)), _vertices(std::move(vertices)), _bounds(bounds) {
     }
 
     bool update(uint32_t /*tick*/) override {
@@ -19,7 +19,7 @@ public:
 
 public:
     void upload(Writable& writable) override {
-        const size_t stride = _shader_layout->getStreamLayout(0).stride();
+        const size_t stride = _shader_layout->getVertexLayout(0).stride();
         const PipelineLayout::VertexDescriptor attributes(_shader_layout);
         const uint32_t size = static_cast<uint32_t>(_vertices->length() * stride);
         Vector<uint8_t> buf(size);

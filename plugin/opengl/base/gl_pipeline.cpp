@@ -932,7 +932,7 @@ const GLPipeline::GLUniform& GLPipeline::getUniform(const String& name) const
 
 void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const PipelineLayout& shaderLayout, const uint32_t divisor) const
 {
-    const PipelineLayout::StreamLayout& stream = shaderLayout.getStreamLayout(divisor);
+    const PipelineLayout::VertexLayout& stream = shaderLayout.getVertexLayout(divisor);
     for(const Attribute& i : stream.attributes().values())
     {
         const GLAttribute& glAttribute = _stub->getAttribute(i.name());

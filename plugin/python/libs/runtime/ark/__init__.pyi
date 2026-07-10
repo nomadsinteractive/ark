@@ -1342,6 +1342,7 @@ class RenderLayer(Renderer):
 
     def make_layer(self, model_loader: Optional[ModelLoader] = None, position: Optional[Vec3] = None, visible: Optional[Boolean] = None,
                    discarded: Optional[Boolean] = None) -> "Layer": ...
+    def add_layer(self, layer: Layer): ...
 
 
 class Layer:

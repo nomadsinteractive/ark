@@ -6,7 +6,6 @@
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/camera.h"
 #include "graphics/base/render_buffer_snapshot.h"
 #include "graphics/base/render_layer_snapshot.h"
 
@@ -27,10 +26,10 @@ public:
         uint32_t _strides[2];
     };
 
-    class ARK_API StreamLayout {
+    class ARK_API VertexLayout {
     public:
-        StreamLayout();
-        DEFAULT_COPY_AND_ASSIGN(StreamLayout);
+        VertexLayout();
+        DEFAULT_COPY_AND_ASSIGN(VertexLayout);
 
         uint32_t stride() const;
 
@@ -108,8 +107,8 @@ public:
 
     sp<RenderBufferSnapshot> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
 
-    const Vector<std::pair<uint32_t, StreamLayout>>& streamLayouts() const;
-    void setStreamLayoutAlignment(uint32_t alignment);
+    const Vector<std::pair<uint32_t, VertexLayout>>& vertexLayouts() const;
+    void setVertexLayoutAlignment(uint32_t alignment);
 
     const VertexDescriptor& vertexDescriptor() const;
 
@@ -122,7 +121,7 @@ public:
     Optional<const Attribute&> getAttribute(const String& name) const;
     sp<Uniform> getUniform(const String& name) const;
 
-    const StreamLayout& getStreamLayout(uint32_t divisor) const;
+    const VertexLayout& getVertexLayout(uint32_t divisor) const;
 
     void initializeSSBO(const PipelineBuildingContext& buildingContext);
 
@@ -130,7 +129,7 @@ private:
     Vector<sp<UBO>> _ubos;
     Vector<SSBO> _ssbos;
 
-    Vector<std::pair<uint32_t, StreamLayout>> _stream_layouts;
+    Vector<std::pair<uint32_t, VertexLayout>> _vertex_layouts;
     VertexDescriptor _vertex_descriptor;
 
     Table<String, DescriptorSet> _samplers;

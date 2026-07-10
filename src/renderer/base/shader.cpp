@@ -111,7 +111,7 @@ const sp<PipelineDescriptor>& Shader::pipelineDesciptor() const
 
 sp<PipelineBindings> Shader::makeBindings(Buffer vertexBuffer, enums::DrawMode drawMode, enums::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers) const
 {
-    for(const auto& divisor : _pipeline_desciptor->layout()->streamLayouts() | std::views::keys)
+    for(const auto& divisor : _pipeline_desciptor->layout()->vertexLayouts() | std::views::keys)
         if(divisor != 0 && !findInKeywordPairs(instanceBuffers, divisor))
             instanceBuffers.emplace_back(divisor, Ark::instance().renderController()->makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC));
 

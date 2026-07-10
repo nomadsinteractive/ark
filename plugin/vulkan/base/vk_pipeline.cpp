@@ -266,7 +266,7 @@ VertexLayout setupVertexLayout(const PipelineLayout& pipelineLayout)
 {
     uint32_t location = 0;
     VertexLayout vertexLayout;
-    for(const auto& [divsor, stream] : pipelineLayout.streamLayouts())
+    for(const auto& [divsor, stream] : pipelineLayout.vertexLayouts())
     {
         vertexLayout.bindingDescriptions.push_back(vks::initializers::vertexInputBindingDescription(
                                                    divsor,

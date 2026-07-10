@@ -353,7 +353,7 @@ public:
             Uint32 numVertexAttributes = 0;
             Uint32 location = 0;
 
-            for(const auto& [k, v] : pipelineLayout.streamLayouts())
+            for(const auto& [k, v] : pipelineLayout.vertexLayouts())
             {
                 vertexBufferDescription[numVertexBuffers] = {
                     numVertexBuffers,

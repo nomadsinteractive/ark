@@ -45,7 +45,7 @@ String findNearestAttribute(const PipelineLayout& shaderLayout, const String& na
 {
     String nearest;
     constexpr size_t nd = std::numeric_limits<size_t>::max();
-    for(const auto& i : std::views::values(shaderLayout.streamLayouts()))
+    for(const auto& i : std::views::values(shaderLayout.vertexLayouts()))
     {
         const auto [value, distance] = Math::levensteinNearest(name, i.attributes().keys());
         if(distance < nd)
@@ -58,7 +58,7 @@ String getAllAttribute(const PipelineLayout& shaderLayout)
 {
     bool first = true;
     StringBuffer sb;
-    for(const auto& [i, j] : shaderLayout.streamLayouts())
+    for(const auto& [i, j] : shaderLayout.vertexLayouts())
         if(i != 0)
             for(const String& k : j.attributes().keys())
             {
@@ -98,7 +98,7 @@ Varyings::Varyings(const Scope& kwargs)
 
 Varyings::Varyings(const PipelineLayout& pipelineLayout)
 {
-    for(const auto& [k, v] : pipelineLayout.streamLayouts())
+    for(const auto& [k, v] : pipelineLayout.vertexLayouts())
     {
         for(const auto& [attrname, attr] : v.attributes())
             if(!(k == 0 && (attr.offset() == 0 || attr.offset() == 12)))  // slots with offset 0 and 12 in divisor 0 will always be the "a_Position" & "a_UV" attribute, which don't need to be recorded here.
@@ -207,7 +207,7 @@ Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineLayout, Allo
             j._divisor = attr->divisor();
             j._offset = attr->offset();
         }
-        for(const auto& [k, v] : pipelineLayout.streamLayouts())
+        for(const auto& [k, v] : pipelineLayout.vertexLayouts())
             _slot_strides[k] = v.stride();
     }
 
