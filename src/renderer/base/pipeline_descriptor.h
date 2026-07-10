@@ -7,6 +7,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/camera.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/pipeline_layout.h"
