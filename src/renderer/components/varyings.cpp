@@ -89,12 +89,9 @@ Varyings::Varyings(const Scope& kwargs)
 Varyings::Varyings(const PipelineLayout& pipelineLayout)
 {
     for(const auto& [k, v] : pipelineLayout.vertexLayouts())
-    {
         for(const auto& [attrname, attr] : v.attributes())
             if(!(k == 0 && (attr.offset() == 0 || attr.offset() == 12)))  // slots with offset 0 and 12 in divisor 0 will always be the "a_Position" & "a_UV" attribute, which don't need to be recorded here.
-                _slots.emplace(attrname, Slot(sp<Uploader>::make<UploaderSlotDefault<uint8_t>>(attr.size()), k, static_cast<int32_t>(attr.offset())));
-        _slot_strides[k] = v.stride();
-    }
+                _slots.emplace(attrname, sp<Uploader>::make<UploaderSlotDefault<uint8_t>>(attr.size()));
 }
 
 bool Varyings::update(const uint32_t timestamp)
@@ -103,8 +100,8 @@ bool Varyings::update(const uint32_t timestamp)
     for(const auto& i : _sub_properties | std::views::values)
         if(i->update(timestamp))
             dirty = true;
-    for(const auto& v: _slots | std::views::values)
-        if(v._uploader->update(timestamp))
+    for(const auto& i : _slots | std::views::values)
+        if(i->update(timestamp))
             dirty = true;
     return dirty;
 }
@@ -116,7 +113,7 @@ Box Varyings::getProperty(const String& name) const
     return iter->second;
 }
 
-Varyings::Varyings(Map<String, Slot> slots)
+Varyings::Varyings(Map<String, sp<Uploader>> slots)
     : _slots(std::move(slots))
 {
 }
@@ -125,9 +122,9 @@ void Varyings::setSlotUploader(const String& name, sp<Uploader> uploader)
 {
     const auto iter = _slots.find(name);
     CHECK(iter != _slots.end(), "Varying slot \"%s\" doesn't existing", name.c_str());
-    Slot& slot = iter->second;
-    CHECK(slot._uploader->size() == uploader->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), slot._uploader->size(), uploader->size());
-    slot = {std::move(uploader), slot._divisor, slot._offset};
+    sp<Uploader>& slot = iter->second;
+    CHECK(slot->size() == uploader->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), slot->size(), uploader->size());
+    slot = std::move(uploader);
     _timestamp.markDirty();
 }
 
@@ -188,29 +185,21 @@ Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineLayout, Allo
         return snapshot;
     }
 
-    if(_slot_strides.empty())
-    {
-        for(auto& [i, j] : _slots)
-        {
-            Optional<const Attribute&> attr = pipelineLayout.getAttribute(i);
-            CHECK(attr, "Varying has no attribute \"%s\". Did you mean \"%s\" in [%s]?", i.c_str(), findNearestAttribute(pipelineLayout, i).c_str(), getAllAttribute(pipelineLayout).c_str());
-            j._divisor = attr->divisor();
-            j._offset = attr->offset();
-        }
-        for(const auto& [k, v] : pipelineLayout.vertexLayouts())
-            _slot_strides[k] = v.stride();
-    }
-
-    Array<Divided>::View buffers(reinterpret_cast<Divided*>(allocator.sbrkSpan(sizeof(Divided) * _slot_strides.size()).buf()), _slot_strides.size());
+    const Vector<std::pair<uint32_t, PipelineLayout::VertexLayout>>& vertexLayouts = pipelineLayout.vertexLayouts();
+    Array<Divided>::View buffers(reinterpret_cast<Divided*>(allocator.sbrkSpan(sizeof(Divided) * vertexLayouts.size()).buf()), vertexLayouts.size());
 
     size_t idx = 0;
-    for(const auto& [i, j] : _slot_strides)
-        new(&buffers.at(idx++)) Divided(i, allocator.sbrkSpan(j));
+    for(const auto& [divisor, vertexLayout] : vertexLayouts)
+        new(&buffers.at(idx++)) Divided(divisor, allocator.sbrkSpan(vertexLayout.stride()));
 
-    for(const auto& [k, v] : _slots)
+    const HashMap<String, PipelineLayout::VaryingSlot>& varyingSlots = pipelineLayout.varyingSlots();
+    for(const auto& [name, uploader] : _slots)
     {
-        DASSERT(v._divisor < buffers.length());
-        buffers.at(v._divisor).addSnapshot(allocator, k, v);
+        const auto iter = varyingSlots.find(name);
+        CHECK(iter != varyingSlots.end(), "Varying has no attribute \"%s\". Did you mean \"%s\" in [%s]?", name.c_str(), findNearestAttribute(pipelineLayout, name).c_str(), getAllAttribute(pipelineLayout).c_str());
+        const PipelineLayout::VaryingSlot& slot = iter->second;
+        DASSERT(slot._divisor < buffers.length());
+        buffers.at(slot._divisor).addSnapshot(allocator, name, uploader, slot._offset);
     }
 
     Snapshot snapshot(buffers);
@@ -228,9 +217,9 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
     if(_uploader_builders.empty())
         return nullptr;
 
-    Map<String, Slot> slots;
+    Map<String, sp<Uploader>> slots;
     for(const UploaderBuilder& i : _uploader_builders)
-        slots.emplace(Strings::capitalizeFirst(i._name),  i._uploader->build(args));
+        slots.emplace(Strings::capitalizeFirst(i._name), i._uploader->build(args));
     return sp<Varyings>::adopt(new Varyings(std::move(slots)));
 }
 
@@ -304,16 +293,15 @@ void Varyings::Divided::apply(const SlotSnapshot* slots)
     }
 }
 
-void Varyings::Divided::addSnapshot(Allocator& allocator, const String& name, const Slot& slot)
+void Varyings::Divided::addSnapshot(Allocator& allocator, const String& name, const sp<Uploader>& uploader, const uint32_t offset)
 {
-    DCHECK(slot._offset >= 0, "Attribute \"%s\" has not been initialized", name.c_str());
-    const uint32_t size = static_cast<uint32_t>(slot._uploader->size());
+    const uint32_t size = static_cast<uint32_t>(uploader->size());
     void* content = allocator.sbrk(size);
 
-    UploaderType::writeTo(slot._uploader, content);
-    memcpy(_content.buf() + slot._offset, content, size);
+    UploaderType::writeTo(uploader, content);
+    memcpy(_content.buf() + offset, content, size);
 
-    SlotSnapshot* slotSnapshot = new(allocator.sbrk(sizeof(SlotSnapshot))) SlotSnapshot{content, static_cast<uint32_t>(slot._offset), size};
+    SlotSnapshot* slotSnapshot = new(allocator.sbrk(sizeof(SlotSnapshot))) SlotSnapshot{content, offset, size};
     DCHECK(slotSnapshot->_offset + slotSnapshot->_size <= _content.length(), "Varyings buffer(size = %zu) overflow while adding attribute \"%s\" offset = %d size = %d ", _content.length(), name.c_str(), slotSnapshot->_offset, slotSnapshot->_size);
 
     if(!_slot_snapshot)

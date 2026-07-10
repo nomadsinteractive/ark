@@ -26,6 +26,13 @@ public:
         uint32_t _strides[2];
     };
 
+    // Resolved location of a vertex attribute, shared by every Varyings snapshotted against this
+    // layout so the resolution is computed once per layer instead of once per Varyings instance.
+    struct VaryingSlot {
+        uint32_t _divisor;
+        uint32_t _offset;
+    };
+
     class ARK_API VertexLayout {
     public:
         VertexLayout();
@@ -112,6 +119,13 @@ public:
 
     const VertexDescriptor& vertexDescriptor() const;
 
+    // Attribute name -> resolved (divisor, offset), precomputed in initialize(). Used by Varyings.
+    const HashMap<String, VaryingSlot>& varyingSlots() const;
+
+    // Per-shader default Varyings (default values for every attribute), created in initialize().
+    // Used as the fallback layer default when a LayerContext has no authored varyings.
+    const sp<Varyings>& defaultVaryings() const;
+
     const Table<String, DescriptorSet>& samplers() const;
     const Table<String, DescriptorSet>& images() const;
 
@@ -131,6 +145,8 @@ private:
 
     Vector<std::pair<uint32_t, VertexLayout>> _vertex_layouts;
     VertexDescriptor _vertex_descriptor;
+    HashMap<String, VaryingSlot> _varying_slots;
+    sp<Varyings> _default_varyings;
 
     Table<String, DescriptorSet> _samplers;
     Table<String, DescriptorSet> _images;

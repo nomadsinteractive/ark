@@ -78,16 +78,6 @@ void LayerContext::discard()
     _discarded.reset(Global<Constants>()->BOOLEAN_TRUE);
 }
 
-const sp<Varyings>& LayerContext::varyings() const
-{
-    return _varyings;
-}
-
-void LayerContext::setVaryings(sp<Varyings> varyings)
-{
-    _varyings = std::move(varyings);
-}
-
 void LayerContext::markDirty()
 {
     _timestamp.markDirty();
@@ -110,9 +100,8 @@ bool LayerContext::processNewCreated()
 LayerContextSnapshot LayerContext::snapshot(const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout)
 {
     const bool dirty = UpdatableUtil::update(renderRequest.tick(), _updatable, _position, _visible, _discarded, _varyings);
-    if(!_varyings)
-        _varyings = sp<Varyings>::make(pipelineLayout);
-    return {_position.val(), dirty, _visible.val(), _discarded.val(), _varyings->snapshot(pipelineLayout, renderRequest.allocator())};
+    const sp<Varyings>& varyings = _varyings ? _varyings : pipelineLayout.defaultVaryings();
+    return {_position.val(), dirty, _visible.val(), _discarded.val(), varyings->snapshot(pipelineLayout, renderRequest.allocator())};
 }
 
 LayerContext::ElementState& LayerContext::addElementState(void* key)

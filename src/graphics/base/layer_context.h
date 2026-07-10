@@ -40,9 +40,6 @@ public:
     void clear();
     void discard();
 
-    const sp<Varyings>& varyings() const;
-    void setVaryings(sp<Varyings> varyings);
-
     void markDirty();
 
     bool processNewCreated();

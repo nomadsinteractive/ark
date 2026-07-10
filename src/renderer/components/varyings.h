@@ -21,12 +21,6 @@ class ARK_API Varyings {
 private:
     struct SlotSnapshot;
 
-    struct Slot {
-        sp<Uploader> _uploader;
-        uint32_t _divisor = 0;
-        int32_t _offset = -1;
-    };
-
 public:
     struct Divided {
         Divided();
@@ -35,7 +29,7 @@ public:
         explicit operator bool() const;
 
         void apply(const SlotSnapshot* slots = nullptr);
-        void addSnapshot(Allocator& allocator, const String& name, const Slot& slot);
+        void addSnapshot(Allocator& allocator, const String& name, const sp<Uploader>& uploader, uint32_t offset);
 
         uint32_t _divisor;
 
@@ -119,7 +113,7 @@ public:
     };
 
 private:
-    Varyings(Map<String, Slot> slots);
+    Varyings(Map<String, sp<Uploader>> slots);
 
     void setSlotUploader(const String& name, sp<Uploader> uploader);
 
@@ -137,9 +131,10 @@ private:
     }
 
 private:
-    Map<String, Slot> _slots;
+    // Purely shader-independent: attribute name -> uploader. All per-shader resolution
+    // (divisor/offset/stride) is owned by the PipelineLayout, so a Varyings is shareable across shaders.
+    Map<String, sp<Uploader>> _slots;
     Map<String, Box> _properties;
-    Map<uint32_t, uint32_t> _slot_strides;
 
     Map<String, sp<Varyings>> _sub_properties;
 

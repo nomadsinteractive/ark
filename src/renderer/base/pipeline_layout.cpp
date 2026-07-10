@@ -8,6 +8,7 @@
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_controller.h"
+#include "renderer/components/varyings.h"
 
 namespace ark {
 
@@ -119,6 +120,12 @@ void PipelineLayout::initialize(const PipelineBuildingContext& buildingContext)
     }
 
     _vertex_descriptor.initialize(*this);
+
+    for(const auto& [divisor, vertexLayout] : _vertex_layouts)
+        for(const auto& [name, attr] : vertexLayout.attributes())
+            _varying_slots.insert_or_assign(name, VaryingSlot{divisor, attr.offset()});
+
+    _default_varyings = sp<Varyings>::make(*this);
 }
 
 const Vector<sp<PipelineLayout::UBO>>& PipelineLayout::ubos() const
@@ -149,6 +156,16 @@ sp<RenderBufferSnapshot> PipelineLayout::takeBufferSnapshot(const RenderRequest&
 const Vector<std::pair<uint32_t, PipelineLayout::VertexLayout>>& PipelineLayout::vertexLayouts() const
 {
     return _vertex_layouts;
+}
+
+const HashMap<String, PipelineLayout::VaryingSlot>& PipelineLayout::varyingSlots() const
+{
+    return _varying_slots;
+}
+
+const sp<Varyings>& PipelineLayout::defaultVaryings() const
+{
+    return _default_varyings;
 }
 
 void PipelineLayout::setVertexLayoutAlignment(const uint32_t alignment)
