@@ -41,7 +41,8 @@ private:
     Vector<T> _data;
 };
 
-String findNearestAttribute(const PipelineLayout& shaderLayout, const String& name)
+// Kept for the (currently disabled) misspelled-varying check in snapshot().
+[[maybe_unused]] String findNearestAttribute(const PipelineLayout& shaderLayout, const String& name)
 {
     String nearest;
     constexpr size_t nd = std::numeric_limits<size_t>::max();
@@ -54,7 +55,7 @@ String findNearestAttribute(const PipelineLayout& shaderLayout, const String& na
     return nearest;
 }
 
-String getAllAttribute(const PipelineLayout& shaderLayout)
+[[maybe_unused]] String getAllAttribute(const PipelineLayout& shaderLayout)
 {
     bool first = true;
     StringBuffer sb;
@@ -120,11 +121,16 @@ Varyings::Varyings(Map<String, sp<Uploader>> slots)
 
 void Varyings::setSlotUploader(const String& name, sp<Uploader> uploader)
 {
-    const auto iter = _slots.find(name);
-    CHECK(iter != _slots.end(), "Varying slot \"%s\" doesn't existing", name.c_str());
-    sp<Uploader>& slot = iter->second;
-    CHECK(slot->size() == uploader->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), slot->size(), uploader->size());
-    slot = std::move(uploader);
+    if(const auto iter = _slots.find(name); iter == _slots.end())
+    {
+        _slots.emplace(name, std::move(uploader));
+    }
+    else
+    {
+        sp<Uploader>& preUploader = iter->second;
+        CHECK(preUploader->size() == uploader->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), preUploader->size(), uploader->size());
+        preUploader = std::move(uploader);
+    }
     _timestamp.markDirty();
 }
 
@@ -195,8 +201,16 @@ Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineLayout, Allo
     const HashMap<String, PipelineLayout::VaryingSlot>& varyingSlots = pipelineLayout.varyingSlots();
     for(const auto& [name, uploader] : _slots)
     {
+        // A Varyings may be shared across shaders. A slot the current pipeline doesn't declare is
+        // simply not consumed by this shader (e.g. per-instance data used by the MRT pass but not
+        // the shadow-map pass), so skip it rather than treating it as an error. Re-enable the check
+        // below when a Varyings is bound to a single shader to catch misspelled varying names.
         const auto iter = varyingSlots.find(name);
-        CHECK(iter != varyingSlots.end(), "Varying has no attribute \"%s\". Did you mean \"%s\" in [%s]?", name.c_str(), findNearestAttribute(pipelineLayout, name).c_str(), getAllAttribute(pipelineLayout).c_str());
+        if(iter == varyingSlots.end())
+        {
+            // CHECK(false, "Varying has no attribute \"%s\". Did you mean \"%s\" in [%s]?", name.c_str(), findNearestAttribute(pipelineLayout, name).c_str(), getAllAttribute(pipelineLayout).c_str());
+            continue;
+        }
         const PipelineLayout::VaryingSlot& slot = iter->second;
         DASSERT(slot._divisor < buffers.length());
         buffers.at(slot._divisor).addSnapshot(allocator, name, uploader, slot._offset);
