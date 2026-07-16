@@ -97,11 +97,63 @@ bool LayerContext::processNewCreated()
     return true;
 }
 
+void LayerContext::updateFrameState(const RenderRequest& renderRequest)
+{
+    // A LayerContext may be shared by multiple RenderLayers. The state mutating operations below are
+    // single-consumer(newly created draining, dirty timestamp updating, discard erasing), so they run
+    // once per frame, and their outcome is cached for every RenderLayerSnapshot taken within this frame.
+    if(_frame_state._tick == renderRequest.tick())
+        return;
+
+    _frame_state._tick = renderRequest.tick();
+    _frame_state._dirty = UpdatableUtil::update(renderRequest.tick(), _updatable, _position, _visible, _discarded, _varyings, _timestamp);
+    _frame_state._instances_dirty = processNewCreated();
+    _frame_state._renderable_states.clear();
+    _frame_state._discarded_element_states.clear();
+
+    const bool layerVisible = _visible.val();
+    for(auto iter = _renderables.begin(); iter != _renderables.end(); )
+    {
+        Renderable& renderable = iter->first;
+        Renderable::State& s = iter->second;
+        const Renderable::State newState = renderable.updateState(renderRequest);
+        const bool visibilityChanged = s.contains(Renderable::RENDERABLE_STATE_VISIBLE) != newState.contains(Renderable::RENDERABLE_STATE_VISIBLE);
+        s = {newState, static_cast<Renderable::StateBits>(s.bits() & (Renderable::RENDERABLE_STATE_NEW | Renderable::RENDERABLE_STATE_DISCARDED))};
+        if(Renderable::State state = s; state.contains(Renderable::RENDERABLE_STATE_DISCARDED))
+        {
+            _frame_state._instances_dirty = true;
+            if(const auto fiter = _element_states.find(&renderable); fiter != _element_states.end())
+            {
+                _frame_state._discarded_element_states.push_back(std::move(fiter->second));
+                _element_states.erase(fiter);
+            }
+            iter = _renderables.erase(iter);
+        }
+        else
+        {
+            if(visibilityChanged)
+                state.set(Renderable::RENDERABLE_STATE_NEW, true);
+            if(state.contains(Renderable::RENDERABLE_STATE_VISIBLE))
+                state.set(Renderable::RENDERABLE_STATE_VISIBLE, layerVisible);
+            if(s.contains(Renderable::RENDERABLE_STATE_NEW))
+            {
+                state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
+                s.set(Renderable::RENDERABLE_STATE_NEW, false);
+            }
+
+            const auto fiter = _element_states.find(&renderable);
+            DASSERT(fiter != _element_states.end());
+            _frame_state._renderable_states.push_back({&renderable, &fiter->second, state});
+            ++iter;
+        }
+    }
+}
+
 LayerContextSnapshot LayerContext::snapshot(const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout)
 {
-    const bool dirty = UpdatableUtil::update(renderRequest.tick(), _updatable, _position, _visible, _discarded, _varyings);
+    updateFrameState(renderRequest);
     const sp<Varyings>& varyings = _varyings ? _varyings : pipelineLayout.defaultVaryings();
-    return {_position.val(), dirty, _visible.val(), _discarded.val(), varyings->snapshot(pipelineLayout, renderRequest.allocator())};
+    return {_position.val(), _frame_state._dirty, _visible.val(), _discarded.val(), varyings->snapshot(pipelineLayout, renderRequest.allocator())};
 }
 
 LayerContext::ElementState& LayerContext::addElementState(void* key)

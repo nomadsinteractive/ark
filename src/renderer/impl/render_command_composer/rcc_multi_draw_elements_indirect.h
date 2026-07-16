@@ -53,7 +53,7 @@ private:
 
     struct ModelInstance {
         ModelInstance() = default;
-        ModelInstance(size_t snapshotIndex, const ModelBundle::ModelLayout& modelLayout);
+        ModelInstance(size_t snapshotIndex, const ModelBundle::ModelLayout& modelLayout, int32_t type);
 
         bool isDynamicLayout() const;
         void toDynamicLayout();
@@ -63,6 +63,7 @@ private:
         sp<Model> _model;
         size_t _snapshot_index;
         Map<HashId, NodeLayoutInstance> _node_layout_instances;
+        int32_t _type = 0;
     };
 
     struct IndirectCmds {

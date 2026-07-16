@@ -145,13 +145,17 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             if(!snapshot._varyings_snapshot._sub_properties.empty())
                 if(const auto iter = _model_instances.find(i); iter != _model_instances.end())
                 {
-                    if(!iter->second.isDynamicLayout())
-                        iter->second.toDynamicLayout();
+                    ModelInstance& modelInstance = iter->second;
+                    CHECK(modelInstance._type == snapshot._type, "ModelInstance(%zu) type mismatch: cached \"%s\"(%d) vs snapshot \"%s\"(%d), reload: %d, elements: %zu, model_instances: %zu",
+                          i, NamedHash::reverse(static_cast<HashId>(modelInstance._type)).c_str(), modelInstance._type, NamedHash::reverse(static_cast<HashId>(snapshot._type)).c_str(), snapshot._type,
+                          static_cast<int32_t>(reload), renderLayerItems.size(), _model_instances.size());
+                    if(!modelInstance.isDynamicLayout())
+                        modelInstance.toDynamicLayout();
 
                     if(snapshot._state.contains(Renderable::RENDERABLE_STATE_VISIBLE))
                         for(const auto& [j, k] : snapshot._varyings_snapshot._sub_properties)
                             if(Varyings::Divided subProperty = k.getDivided(1); subProperty._content.length() >= sizeof(M4))
-                                iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
+                                modelInstance.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
                 }
     }
 
@@ -202,7 +206,7 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
             const int32_t type = j._snapshot._type;
             const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(type);
             ModelInstance& modelInstance = _model_instances[i];
-            modelInstance = ModelInstance(i, modelLayout);
+            modelInstance = ModelInstance(i, modelLayout, type);
             for(const Node::WithTransform& j : modelLayout._node_layouts)
             {
                 const sp<NodeInstance> nodeInstance = sp<NodeInstance>::make(modelInstance, j._node->name().hash());
@@ -240,8 +244,8 @@ sp<Mat4> RCCMultiDrawElementsIndirect::NodeLayoutInstance::makeGlobalTransform(s
     return parentTransform ? Mat4Type::matmul(std::move(parentTransform), std::move(nodeTransform)) : nodeTransform;
 }
 
-RCCMultiDrawElementsIndirect::ModelInstance::ModelInstance(const size_t snapshotIndex, const ModelBundle::ModelLayout& modelLayout)
-    : _model(modelLayout._model), _snapshot_index(snapshotIndex)
+RCCMultiDrawElementsIndirect::ModelInstance::ModelInstance(const size_t snapshotIndex, const ModelBundle::ModelLayout& modelLayout, const int32_t type)
+    : _model(modelLayout._model), _snapshot_index(snapshotIndex), _type(type)
 {
     for(const Node::WithTransform& i : modelLayout._node_layouts)
     {

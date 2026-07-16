@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <limits>
 
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
@@ -19,6 +20,20 @@ public:
         Optional<element_index_t> _index;
     };
 
+    struct FrameState {
+        struct RenderableState {
+            Renderable* _renderable;
+            ElementState* _element_state;
+            Renderable::State _state;
+        };
+
+        uint32_t _tick = std::numeric_limits<uint32_t>::max();
+        bool _dirty = false;
+        bool _instances_dirty = false;
+        Vector<RenderableState> _renderable_states;
+        Vector<ElementState> _discarded_element_states;
+    };
+
 public:
     LayerContext(sp<Shader> shader = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr, sp<Varyings> varyings = nullptr, sp<Updatable> updatable = nullptr);
 
@@ -35,18 +50,17 @@ public:
     const sp<ModelLoader>& modelLoader() const;
     void setModelLoader(sp<ModelLoader> modelLoader);
 
-    void pushFront(sp<Renderable> renderable);
     void pushBack(sp<Renderable> renderable);
     void clear();
     void discard();
 
     void markDirty();
 
-    bool processNewCreated();
-
     LayerContextSnapshot snapshot(const RenderRequest& renderRequest, const PipelineLayout& pipelineLayout);
 
-    bool ensureState(void* stateKey);
+private:
+    void updateFrameState(const RenderRequest& renderRequest);
+    bool processNewCreated();
     ElementState& addElementState(void* key);
 
 private:
@@ -64,6 +78,7 @@ private:
     Vector<sp<Renderable>> _newly_created_renderables;
 
     HashMap<const void*, ElementState> _element_states;
+    FrameState _frame_state;
 
     Timestamp _timestamp;
 

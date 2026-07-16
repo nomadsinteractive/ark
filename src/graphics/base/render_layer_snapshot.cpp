@@ -97,19 +97,6 @@ void RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, Ve
     }
 }
 
-bool RenderLayerSnapshot::addDiscardedState(LayerContext& lc, const void* stateKey)
-{
-    if(const auto iter = lc._element_states.find(stateKey); iter != lc._element_states.end())
-    {
-        LayerContext::ElementState& elementState = iter->second;
-        const bool v = static_cast<bool>(elementState._index);
-        _elements_deleted.push_back(std::move(elementState));
-        lc._element_states.erase(iter);
-        return v;
-    }
-    return true;
-}
-
 void RenderLayerSnapshot::addDiscardedLayerContext(LayerContext& lc)
 {
     for(auto& v : lc._element_states | std::views::values)
@@ -124,46 +111,21 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
 
     _layer_context_snapshots.push_back(layerContext.snapshot(renderRequest, shaderLayout));
     const LayerContextSnapshot& layerSnapshot = _layer_context_snapshots.back();
+    const LayerContext::FrameState& frameState = layerContext._frame_state;
 
     const bool reload = verticesDirty();
-    bool verticesDirty = layerContext.processNewCreated();
-
-    for(auto iter = layerContext._renderables.begin(); iter != layerContext._renderables.end(); )
+    for(const LayerContext::FrameState::RenderableState& i : frameState._renderable_states)
     {
-        Renderable& renderable = iter->first;
-        Renderable::State& s = iter->second;
-        const Renderable::State newState = renderable.updateState(renderRequest);
-        const bool visibilityChanged = s.contains(Renderable::RENDERABLE_STATE_VISIBLE) != newState.contains(Renderable::RENDERABLE_STATE_VISIBLE);
-        s = {newState, static_cast<Renderable::StateBits>(s.bits() & (Renderable::RENDERABLE_STATE_NEW | Renderable::RENDERABLE_STATE_DISCARDED))};
-        if(Renderable::State state = s; state.contains(Renderable::RENDERABLE_STATE_DISCARDED))
-        {
-            verticesDirty = true;
-            addDiscardedState(layerContext, &renderable);
-            iter = layerContext._renderables.erase(iter);
-        }
-        else
-        {
-            if(visibilityChanged)
-                state.set(Renderable::RENDERABLE_STATE_NEW, true);
-            if(reload)
-                state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
-            if(state.contains(Renderable::RENDERABLE_STATE_VISIBLE))
-                state.set(Renderable::RENDERABLE_STATE_VISIBLE, layerSnapshot._visible);
-            if(s.contains(Renderable::RENDERABLE_STATE_NEW))
-            {
-                state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
-                s.set(Renderable::RENDERABLE_STATE_NEW, false);
-            }
-
-            const auto fiter = layerContext._element_states.find(&renderable);
-            DASSERT(fiter != layerContext._element_states.end());
-            _elements.emplace_back(renderable, layerSnapshot, fiter->second, Renderable::Snapshot{state});
-
-            ++iter;
-        }
+        Renderable::State state = i._state;
+        if(reload)
+            state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
+        _elements.emplace_back(*i._renderable, layerSnapshot, *i._element_state, Renderable::Snapshot{state});
     }
 
-    return verticesDirty;
+    for(const LayerContext::ElementState& i : frameState._discarded_element_states)
+        _elements_deleted.push_back(i);
+
+    return frameState._instances_dirty;
 }
 
 void RenderLayerSnapshot::snapshot(const RenderRequest& renderRequest)
@@ -181,7 +143,7 @@ RenderLayerSnapshot::Element::Element(Renderable& renderable, const LayerContext
 {
 }
 
-const Renderable::Snapshot& RenderLayerSnapshot::Element::ensureSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& renderLayerSnapshot, const bool reload)
+const Renderable::Snapshot& RenderLayerSnapshot::Element::ensureSnapshot(const RenderRequest& renderRequest, const RenderLayerSnapshot& renderLayerSnapshot, const bool reload)
 {
     if(reload)
         _snapshot._state.set(Renderable::RENDERABLE_STATE_DIRTY, true);

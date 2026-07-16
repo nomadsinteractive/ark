@@ -23,7 +23,7 @@ public:
     struct Element {
         Element(Renderable& renderable, const LayerContextSnapshot& layerContext, LayerContext::ElementState& state, const Renderable::Snapshot& snapshot);
 
-        const Renderable::Snapshot& ensureSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& renderLayerSnapshot, bool reload);
+        const Renderable::Snapshot& ensureSnapshot(const RenderRequest& renderRequest, const RenderLayerSnapshot& renderLayerSnapshot, bool reload);
 
         Renderable& _renderable;
         const LayerContextSnapshot& _layer_context;
@@ -63,7 +63,6 @@ private:
     RenderLayerSnapshot(const RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub);
 
     bool doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext);
-    bool addDiscardedState(LayerContext& lc, const void* stateKey);
     void addDiscardedLayerContext(LayerContext& lc);
 
     friend class RenderLayer;
