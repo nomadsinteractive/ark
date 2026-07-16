@@ -1,7 +1,6 @@
 #pragma once
 
 #include <deque>
-#include <limits>
 
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
@@ -18,20 +17,6 @@ class ARK_API LayerContext final  {
 public:
     struct ElementState {
         Optional<element_index_t> _index;
-    };
-
-    struct FrameState {
-        struct RenderableState {
-            Renderable* _renderable;
-            ElementState* _element_state;
-            Renderable::State _state;
-        };
-
-        uint32_t _tick = std::numeric_limits<uint32_t>::max();
-        bool _dirty = false;
-        bool _instances_dirty = false;
-        Vector<RenderableState> _renderable_states;
-        Vector<ElementState> _discarded_element_states;
     };
 
 public:
@@ -78,7 +63,17 @@ private:
     Vector<sp<Renderable>> _newly_created_renderables;
 
     HashMap<const void*, ElementState> _element_states;
-    FrameState _frame_state;
+    struct RenderableState {
+        Renderable* _renderable;
+        ElementState* _element_state;
+        Renderable::State _state;
+    };
+
+    uint32_t _tick;
+    bool _layer_dirty;
+    bool _instances_dirty;
+    Vector<RenderableState> _renderable_states;
+    Vector<ElementState> _discarded_element_states;
 
     Timestamp _timestamp;
 

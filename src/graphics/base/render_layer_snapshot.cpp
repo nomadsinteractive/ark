@@ -111,10 +111,9 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
 
     _layer_context_snapshots.push_back(layerContext.snapshot(renderRequest, shaderLayout));
     const LayerContextSnapshot& layerSnapshot = _layer_context_snapshots.back();
-    const LayerContext::FrameState& frameState = layerContext._frame_state;
 
     const bool reload = verticesDirty();
-    for(const LayerContext::FrameState::RenderableState& i : frameState._renderable_states)
+    for(const LayerContext::RenderableState& i : layerContext._renderable_states)
     {
         Renderable::State state = i._state;
         if(reload)
@@ -122,10 +121,10 @@ bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, 
         _elements.emplace_back(*i._renderable, layerSnapshot, *i._element_state, Renderable::Snapshot{state});
     }
 
-    for(const LayerContext::ElementState& i : frameState._discarded_element_states)
+    for(const LayerContext::ElementState& i : layerContext._discarded_element_states)
         _elements_deleted.push_back(i);
 
-    return frameState._instances_dirty;
+    return layerContext._instances_dirty;
 }
 
 void RenderLayerSnapshot::snapshot(const RenderRequest& renderRequest)

@@ -16,7 +16,7 @@ namespace ark {
 
 LayerContext::LayerContext(sp<Shader> shader, sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Updatable> updatable)
     : _shader(std::move(shader)), _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(std::move(discarded), false),
-      _varyings(std::move(varyings)), _updatable(std::move(updatable))
+      _varyings(std::move(varyings)), _updatable(std::move(updatable)), _tick(std::numeric_limits<uint32_t>::max()), _layer_dirty(false), _instances_dirty(false)
 {
 }
 
@@ -102,14 +102,14 @@ void LayerContext::updateFrameState(const RenderRequest& renderRequest)
     // A LayerContext may be shared by multiple RenderLayers. The state mutating operations below are
     // single-consumer(newly created draining, dirty timestamp updating, discard erasing), so they run
     // once per frame, and their outcome is cached for every RenderLayerSnapshot taken within this frame.
-    if(_frame_state._tick == renderRequest.tick())
+    if(_tick == renderRequest.tick())
         return;
 
-    _frame_state._tick = renderRequest.tick();
-    _frame_state._dirty = UpdatableUtil::update(renderRequest.tick(), _updatable, _position, _visible, _discarded, _varyings, _timestamp);
-    _frame_state._instances_dirty = processNewCreated();
-    _frame_state._renderable_states.clear();
-    _frame_state._discarded_element_states.clear();
+    _tick = renderRequest.tick();
+    _layer_dirty = UpdatableUtil::update(renderRequest.tick(), _updatable, _position, _visible, _discarded, _varyings, _timestamp);
+    _instances_dirty = processNewCreated();
+    _renderable_states.clear();
+    _discarded_element_states.clear();
 
     const bool layerVisible = _visible.val();
     for(auto iter = _renderables.begin(); iter != _renderables.end(); )
@@ -121,10 +121,10 @@ void LayerContext::updateFrameState(const RenderRequest& renderRequest)
         s = {newState, static_cast<Renderable::StateBits>(s.bits() & (Renderable::RENDERABLE_STATE_NEW | Renderable::RENDERABLE_STATE_DISCARDED))};
         if(Renderable::State state = s; state.contains(Renderable::RENDERABLE_STATE_DISCARDED))
         {
-            _frame_state._instances_dirty = true;
+            _instances_dirty = true;
             if(const auto fiter = _element_states.find(&renderable); fiter != _element_states.end())
             {
-                _frame_state._discarded_element_states.push_back(std::move(fiter->second));
+                _discarded_element_states.push_back(std::move(fiter->second));
                 _element_states.erase(fiter);
             }
             iter = _renderables.erase(iter);
@@ -143,7 +143,7 @@ void LayerContext::updateFrameState(const RenderRequest& renderRequest)
 
             const auto fiter = _element_states.find(&renderable);
             DASSERT(fiter != _element_states.end());
-            _frame_state._renderable_states.push_back({&renderable, &fiter->second, state});
+            _renderable_states.emplace_back(&renderable, &fiter->second, state);
             ++iter;
         }
     }
@@ -153,7 +153,7 @@ LayerContextSnapshot LayerContext::snapshot(const RenderRequest& renderRequest, 
 {
     updateFrameState(renderRequest);
     const sp<Varyings>& varyings = _varyings ? _varyings : pipelineLayout.defaultVaryings();
-    return {_position.val(), _frame_state._dirty, _visible.val(), _discarded.val(), varyings->snapshot(pipelineLayout, renderRequest.allocator())};
+    return {_position.val(), _layer_dirty, _visible.val(), _discarded.val(), varyings->snapshot(pipelineLayout, renderRequest.allocator())};
 }
 
 LayerContext::ElementState& LayerContext::addElementState(void* key)
