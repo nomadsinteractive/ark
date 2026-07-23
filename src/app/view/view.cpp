@@ -3,7 +3,6 @@
 #include "core/base/bean_factory.h"
 #include "core/components/discarded.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
-#include "core/types/global.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/components/layer.h"
@@ -258,7 +257,7 @@ const sp<Size>& View::layoutSize()
 
 void View::addView(sp<View> view) const
 {
-    view->setParent(*this);
+    view->_stub->_node->_parent_stub = _stub;
     _stub->_node->_hierarchy->addView(std::move(view));
 
     if(const sp<Stub> layoutTopView = findLayoutTopView(_stub))
@@ -300,11 +299,6 @@ sp<View> View::parent() const
     return nullptr;
 }
 
-void View::setParent(const View& view)
-{
-    _stub->_node->_parent_stub = view._stub;
-}
-
 Vector<sp<View>> View::children() const
 {
     if(_stub->_node->_hierarchy)
@@ -318,7 +312,7 @@ sp<Updatable> View::makeTopViewUpdatable()
 }
 
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _name(Documents::getAttribute(manifest, constants::NAME)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
+    : _name(Documents::getAttribute(manifest, constants::NAME)), _parent(factory.getBuilder<View>(manifest, "parent")), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
       _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)), _children(factory.makeBuilderList<View>(manifest, constants::VIEW))
 {
     CHECK(!factory.getBuilder<Vec3>(manifest, constants::POSITION), "Setting position of view is no longer supported, use offset as an alternative.");
@@ -327,8 +321,10 @@ View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<View> View::BUILDER::build(const Scope& args)
 {
     sp<View> view = sp<View>::make(_layout_param.build(args), _name, _discarded.build(args));
-    for(const builder<View>& i : _children)
+    for(const sp<Builder<View>>& i : _children)
         view->addView(i->build(args));
+    if(_parent)
+        _parent.build(args)->addView(view);
     return view;
 }
 

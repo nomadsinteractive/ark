@@ -65,9 +65,6 @@ public:
 //  [[script::bindings::property]]
     sp<View> parent() const;
 //  [[script::bindings::property]]
-    void setParent(const View& view);
-
-//  [[script::bindings::property]]
     Vector<sp<View>> children() const;
 
 //  [[plugin::builder]]
@@ -79,9 +76,10 @@ public:
 
     private:
         String _name;
+        SafeBuilder<View> _parent;
         SafeBuilder<Boolean> _discarded;
         SafeBuilder<LayoutParam> _layout_param;
-        Vector<builder<View>> _children;
+        Vector<sp<Builder<View>>> _children;
     };
 
 //  [[plugin::builder("with-view")]]
