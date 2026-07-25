@@ -7,7 +7,7 @@
 
 namespace ark {
 
-class ARK_API Recycler {
+class ARK_API Recycler final {
 public:
 
     void recycle(op<Recyclable> recyclable);
@@ -16,7 +16,7 @@ private:
     void doRecycling();
 
 private:
-    LFStack<op<Recyclable>> _recyclables;
+    LFStack<std::pair<op<Recyclable>, int32_t>> _recyclables;
 
     friend class ResourceManager;
     friend class RenderController;

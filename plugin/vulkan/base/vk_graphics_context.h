@@ -5,11 +5,12 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-#include "vulkan/forwarding.h"
-#include "vulkan/base/vk_submit_queue.h"
+#include "renderer/base/render_backend_info.h"
 
 #include "platform/vulkan/vulkan.h"
-#include "renderer/base/render_backend_info.h"
+
+#include "vulkan/forwarding.h"
+#include "vulkan/base/vk_submit_queue.h"
 
 namespace ark::plugin::vulkan {
 
@@ -81,12 +82,6 @@ public:
     void endFrame();
 
 private:
-    // Capped at 1 for now: per-frame GPU resources (uniform/vertex buffers updated via RenderController::onDrawFrame)
-    // are single-buffered and written in place, so allowing more than one frame in flight would let the CPU
-    // overwrite memory the GPU is still reading. Raising this to 2+ to actually overlap CPU/GPU work additionally
-    // requires per-frame-in-flight ring-buffering of those dynamically-updated resources.
-    static constexpr uint32_t kMaxFramesInFlight = 1;
-
     sp<VKRenderer> _renderer;
     sp<VKSwapChain> _render_target;
 

@@ -226,13 +226,13 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
     DPROFILER_TRACE("PreFrameUpdate");
 
     ++_tick;
+    _recycler->doRecycling();
+
     prepare(graphicsContext, _uploading_resources);
     _on_every_frame.foreach(graphicsContext, false, true);
 
     if(const uint32_t tick = graphicsContext.tick() % 300; tick == 0)
         _on_surface_ready.foreach(graphicsContext, false, false);
-    else if (tick == 150)
-        _recycler->doRecycling();
 
     for(const sp<Runnable>& runnable : _on_pre_render_runnable.update(0))
         runnable->run();
