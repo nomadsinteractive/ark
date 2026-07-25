@@ -448,6 +448,7 @@ class MarkStudio:
     def add_window(self, window: Window):
         for i, j in enumerate(self._windows):
             if type(j) is type(window):
+                j.discard()
                 self._windows[i] = window
                 break
         else:

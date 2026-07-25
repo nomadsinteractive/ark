@@ -1,5 +1,6 @@
 #include "vulkan/base/vk_buffer.h"
 
+#include "core/impl/writable/writable_with_offset.h"
 #include "core/util/uploader_type.h"
 
 #include "renderer/base/recycler.h"
@@ -51,6 +52,29 @@ private:
     VkCommandBuffer _command_buffer;
 };
 
+class UploaderClamped final : public Uploader {
+public:
+    UploaderClamped(Uploader& delegate, const size_t offset, const size_t size)
+        : Uploader(size), _delegate(delegate), _offset(offset) {
+
+    }
+
+    bool update(const uint32_t tick) override
+    {
+        return _delegate.update(tick);
+    }
+
+    void upload(Writable& buf) override
+    {
+        WritableWithOffset writable(buf, -static_cast<int32_t>(_offset));
+        _delegate.upload(writable);
+    }
+
+private:
+    Uploader& _delegate;
+    size_t _offset;
+};
+
 }
 
 VKBuffer::VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, const VkBufferUsageFlags usageFlags, const VkMemoryPropertyFlags memoryPropertyFlags)
@@ -83,15 +107,18 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader
             VKUtil::checkResult(flush());
         _memory->unmap();
     }
-    else if(const auto records = UploaderType::recordRanges(uploader); !records.empty())
+    else if(const Map<size_t, size_t> records = UploaderType::recordRanges(uploader); !records.empty())
     {
+        const size_t stagingBufferOffset = records.begin()->first;
+        const size_t stagingBufferSize = records.rbegin()->first + records.rbegin()->second - stagingBufferOffset;
         VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        stagingBuffer.uploadBuffer(graphicsContext, uploader);
+        UploaderClamped clampedUploader(uploader, stagingBufferOffset, stagingBufferSize);
+        stagingBuffer.uploadBuffer(graphicsContext, clampedUploader);
 
         Vector<VkBufferCopy> copyRegions;
         copyRegions.reserve(records.size());
         for(const auto& [k, v] : records)
-            copyRegions.push_back({k, k, v});
+            copyRegions.push_back({k, k + stagingBufferOffset, v});
 
         sp<VKCommandPool> commandPool = _renderer->commandPool();
         const VkCommandBuffer copyCmd = commandPool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
