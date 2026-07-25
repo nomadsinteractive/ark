@@ -118,7 +118,7 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader
         Vector<VkBufferCopy> copyRegions;
         copyRegions.reserve(records.size());
         for(const auto& [k, v] : records)
-            copyRegions.push_back({k, k + stagingBufferOffset, v});
+            copyRegions.push_back({k - stagingBufferOffset, k, v});
 
         sp<VKCommandPool> commandPool = _renderer->commandPool();
         const VkCommandBuffer copyCmd = commandPool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
