@@ -1098,6 +1098,8 @@ class Boundaries:
 
     def freeze(self) -> Self: ...
 
+    def ptin(self, point: TYPE_VEC3) -> Boolean: ...
+
 
 class Vertices:
     @property

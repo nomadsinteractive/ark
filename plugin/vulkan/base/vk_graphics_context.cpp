@@ -124,6 +124,11 @@ void VKGraphicsContext::begin(const uint32_t imageId, const V4& backgroundColor)
 void VKGraphicsContext::end()
 {
     DASSERT(_state_stack.size() == 1);
+    // The main render pass is entered lazily on the first draw so that offscreen passes can be recorded ahead of it.
+    // When nothing was drawn into the swapchain target this frame the render pass would never begin, leaving the
+    // swapchain image in VK_IMAGE_LAYOUT_UNDEFINED at present time. Force it here so the image is always cleared and
+    // transitioned to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR by the render pass' finalLayout.
+    currentState().ensureRenderPassCommandBuffer();
     popState();
 }
 

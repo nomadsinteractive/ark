@@ -59,7 +59,7 @@ std::vector<VkCommandBuffer> VKCommandPool::makeCommandBuffers(uint32_t count) c
     return commandBuffers;
 }
 
-void VKCommandPool::flushCommandBuffer(VkCommandBuffer commandBuffer, bool free) const
+void VKCommandPool::flushCommandBuffer(const VkCommandBuffer commandBuffer, const bool free) const
 {
     if(commandBuffer == VK_NULL_HANDLE)
         return;

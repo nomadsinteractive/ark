@@ -229,6 +229,23 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         if(_parameters->_usage.contains(Texture::USAGE_SAMPLER))
             doCreateSamplerDescriptor(logicalDevice);
 
+        // The image is created in VK_IMAGE_LAYOUT_UNDEFINED. Unlike color textures (which are transitioned in
+        // doUploadBitmap), the depth/stencil path uploads no pixel data, so nothing ever moves the image into the
+        // layout its descriptor advertises. Transition it here so it is valid the first time it is sampled or read as
+        // a descriptor, even before it has been rendered into as an attachment.
+        const VkCommandBuffer layoutCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        VkImageMemoryBarrier imageMemoryBarrier = vks::initializers::imageMemoryBarrier();
+        imageMemoryBarrier.image = _image;
+        imageMemoryBarrier.subresourceRange = {VKUtil::toTextureAspect(_parameters->_usage), 0, 1, 0, _num_faces};
+        imageMemoryBarrier.srcAccessMask = 0;
+        imageMemoryBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
+        imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        imageMemoryBarrier.newLayout = _descriptor.imageLayout;
+        vkCmdPipelineBarrier(layoutCmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                             VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                             0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+        _renderer->commandPool()->flushCommandBuffer(layoutCmd, true);
+
         return;
     }
 
