@@ -205,16 +205,23 @@ const VkBuffer& VKBuffer::vkBuffer() const
     return _descriptor.buffer;
 }
 
-void VKBuffer::allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs)
+void VKBuffer::ensureMemoryRequirements(GraphicsContext& graphicsContext)
 {
-    if(_memory)
-        _renderer->heap()->recycle(_memory);
-    _memory = _renderer->heap()->allocate(graphicsContext, memReqs, _memory_property_flags);
+    VkMemoryRequirements memReqs;
+    vkGetBufferMemoryRequirements(_renderer->vkLogicalDevice(), _descriptor.buffer, &memReqs);
+
+    if(_memory_requirements.alignment != memReqs.alignment || _memory_requirements.size < memReqs.size)
+    {
+        if(_memory)
+            _renderer->heap()->recycle(_memory);
+        _memory = _renderer->heap()->allocate(graphicsContext, memReqs, _memory_property_flags);
+        _memory_requirements = memReqs;
+    }
 }
 
 void VKBuffer::ensureSize(GraphicsContext& graphicsContext, const size_t size)
 {
-    if(const size_t allocatingSize = std::max<size_t>(size, 16); !_memory || _memory.size() < allocatingSize)
+    if(const size_t allocatingSize = std::max<size_t>(size, 16); !_memory || _size < allocatingSize)
     {
         _size = size;
         if (_descriptor.buffer)
@@ -225,13 +232,7 @@ void VKBuffer::ensureSize(GraphicsContext& graphicsContext, const size_t size)
 
         _observer.notify();
 
-        VkMemoryRequirements memReqs;
-        vkGetBufferMemoryRequirements(_renderer->vkLogicalDevice(), _descriptor.buffer, &memReqs);
-        if(_memory_requirements.alignment != memReqs.alignment || _memory_requirements.size != memReqs.size)
-        {
-            allocateMemory(graphicsContext, memReqs);
-            _memory_requirements = memReqs;
-        }
+        ensureMemoryRequirements(graphicsContext);
         bind();
     }
 }

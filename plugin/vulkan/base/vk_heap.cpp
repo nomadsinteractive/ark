@@ -22,7 +22,7 @@ VKMemoryPtr VKHeap::allocate(GraphicsContext& graphicsContext, const VkMemoryReq
     return doAllocate(graphicsContext, memReqs.size, memReqs.alignment, typeIndex);
 }
 
-VKMemoryPtr VKHeap::doAllocate(GraphicsContext& graphicsContext, VkDeviceSize size, VkDeviceSize alignment, uint32_t typeIndex)
+VKMemoryPtr VKHeap::doAllocate(GraphicsContext& graphicsContext, const VkDeviceSize size, const VkDeviceSize alignment, uint32_t typeIndex)
 {
     DASSERT(typeIndex < VK_MAX_MEMORY_TYPES);
 

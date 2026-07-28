@@ -34,7 +34,7 @@ public:
     Observer& observer();
 
 private:
-    void allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs);
+    void ensureMemoryRequirements(GraphicsContext& graphicsContext);
     void ensureSize(GraphicsContext& graphicsContext, size_t size);
 
     void bind();
