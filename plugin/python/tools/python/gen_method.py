@@ -79,8 +79,7 @@ class GenMethod(object):
         self.return_type = return_type
         self.is_static = is_static
         self.arguments = parse_method_arguments(args)
-        # TODO: Args also counts as *args
-        self._has_args_argument = args and self.arguments[-1].type_compare('Traits')
+        self._has_args_argument = args and any(i.type_compare('Traits') or i.type_compare('Args') for i in self.arguments)
         self._has_kwargs_argument = args and self.arguments[-1].type_compare('Scope')
         self._has_scope_or_traits_argument = self._has_args_argument or self._has_kwargs_argument
         self._has_keyword_arguments = self._has_scope_or_traits_argument or self._has_keyword_names()
@@ -197,7 +196,7 @@ class GenMethod(object):
 
     def _gen_parse_tuple_args(self) -> tuple[str, str]:
         if self._has_args_argument:
-            args_idx = len(self.arguments) - 1
+            args_idx = len(self.arguments) - (2 if self._has_keyword_arguments else 1)
             args_name = f'args0_{args_idx}'
             return f'{args_name}.pyObject()', f'const PyInstance {args_name} = PyInstance::steal(PyBridge::PyTuple_GetSlice(args, 0, {args_idx}));\n    '
         return 'args', ''

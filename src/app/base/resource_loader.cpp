@@ -32,9 +32,13 @@ sp<Entity> ResourceLoader::loadEntity(const String& resid, Args args, const Scop
 
     const Identifier id = Identifier::parse(resid, Identifier::ID_TYPE_REFERENCE);
     BeanFactory& beanFactory = (id.package() ? *_bean_factory.getPackage(id.package()) : _bean_factory);
-    const document manifest = beanFactory._stub->_document_refs->get(id.val());
-    for(const document& i : manifest->children("component"))
-        components.emplace_back(Box(beanFactory.ensure<Wirable>(i, kwargs)), i);
+    const document manifest = beanFactory._stub->_document_refs->get(id.ref());
+    CHECK(manifest, "Resid \"%s\" does not exist", id.ref().c_str());
+    for(const document& i : manifest->children())
+    {
+        const Box wirable = Box(beanFactory.findBuilderByDocument<sp<Wirable>>(i, i->name(), false)->build(kwargs));
+        components.emplace_back(wirable.cast(wirable.getClass()->id()), i);
+    }
 
     return sp<Entity>::make(std::move(components));
 }
