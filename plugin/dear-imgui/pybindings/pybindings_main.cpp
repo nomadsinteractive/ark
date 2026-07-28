@@ -2,8 +2,9 @@
 #include "core/base/plugin.h"
 
 #include "core/base/api.h"
-#include "core/base/resource_loader.h"
 #include "core/types/shared_ptr.h"
+
+#include "app/base/resource_loader.h"
 
 #include "generated/py_dear-imgui_bindings.h"
 

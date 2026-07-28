@@ -38,6 +38,7 @@ class LevelObject;
 class NarrowPhrase;
 class Model;
 class RayCastManifold;
+class ResourceLoader;
 class Rigidbody;
 class RigidbodyController;
 class SearchingNodeProvider;

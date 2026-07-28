@@ -3,7 +3,6 @@
 #include <cwctype>
 
 #include "core/ark.h"
-#include "core/base/resource_loader.h"
 #include "core/components/discarded.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
@@ -33,6 +32,7 @@
 #include "renderer/inf/model_loader.h"
 
 #include "app/base/application_context.h"
+#include "app/base/resource_loader.h"
 #include "app/view/view.h"
 
 namespace ark {

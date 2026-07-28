@@ -1,7 +1,6 @@
 #include "app/base/application_delegate.h"
 
 #include "core/ark.h"
-#include "core/base/resource_loader.h"
 #include "core/base/scope.h"
 #include "core/collection/args.h"
 #include "core/inf/interpreter.h"
@@ -12,6 +11,7 @@
 #include "app/base/application_context.h"
 #include "app/base/application_facade.h"
 #include "app/base/application_manifest.h"
+#include "app/base/resource_loader.h"
 #include "app/base/surface.h"
 #include "app/inf/application_event_listener.h"
 

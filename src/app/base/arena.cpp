@@ -2,10 +2,11 @@
 
 #include <ranges>
 
-#include "core/base/resource_loader.h"
 #include "core/inf/dictionary.h"
 
 #include "graphics/base/render_layer.h"
+
+#include "app/base/resource_loader.h"
 
 namespace ark {
 

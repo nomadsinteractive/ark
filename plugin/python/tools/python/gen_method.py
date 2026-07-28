@@ -79,6 +79,7 @@ class GenMethod(object):
         self.return_type = return_type
         self.is_static = is_static
         self.arguments = parse_method_arguments(args)
+        # TODO: Args also counts as *args
         self._has_args_argument = args and self.arguments[-1].type_compare('Traits')
         self._has_kwargs_argument = args and self.arguments[-1].type_compare('Scope')
         self._has_scope_or_traits_argument = self._has_args_argument or self._has_kwargs_argument

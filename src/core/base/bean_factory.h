@@ -478,6 +478,8 @@ private:
 
 private:
     sp<Stub> _stub;
+
+    friend class ResourceLoader;
 };
 
 }

@@ -5,6 +5,8 @@
 #include "core/inf/wirable.h"
 #include "core/types/shared_ptr.h"
 
+#include "app/forwarding.h"
+
 namespace ark {
 
 class ARK_API Arena final : public Wirable::Niche {

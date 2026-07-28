@@ -3,13 +3,16 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
+#include "core/collection/args.h"
 #include "core/collection/traits.h"
 #include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
+#include "app/forwarding.h"
+
 namespace ark {
 
-class ARK_API ResourceLoader {
+class ARK_API ResourceLoader final {
 private:
     template<typename T> class BuilderRefs final {
     public:
@@ -57,6 +60,9 @@ public:
         const Identifier id = name.at(0) == Identifier::ID_TYPE_REFERENCE ? Identifier::parse(name) : Identifier::parseRef(name);
         return _builder_refs.ensure<BuilderRefs<T>>(_bean_factory)->getBuilder(id).build(args);
     }
+
+//  [[script::bindings::auto]]
+    sp<Entity> loadEntity(const String& resid, Args args, const Scope& kwargs);
 
     void importManifest(const document& manifest, BeanFactory& beanFactory);
 

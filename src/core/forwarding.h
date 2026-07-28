@@ -99,7 +99,6 @@ class Tags;
 class Thread;
 class Traits;
 class Ref;
-class ResourceLoader;
 class Updatable;
 class UploaderWrapper;
 class Visibility;

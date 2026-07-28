@@ -1,4 +1,4 @@
-#include "core/base/resource_loader.h"
+#include "app/base/resource_loader.h"
 
 #include "core/util/documents.h"
 #include "core/util/log.h"
@@ -8,6 +8,7 @@
 
 #include "app/base/application_context.h"
 #include "app/base/application_manifest.h"
+#include "app/base/entity.h"
 
 namespace ark {
 
@@ -19,6 +20,23 @@ ResourceLoader::ResourceLoader(const BeanFactory& beanFactory)
 ResourceLoader::~ResourceLoader()
 {
     LOGD("");
+}
+
+sp<Entity> ResourceLoader::loadEntity(const String& resid, Args args, const Scope& kwargs)
+{
+    Vector<Entity::Component> components;
+
+    for(Box& i : args._values)
+        if(i)
+            components.emplace_back(std::move(i));
+
+    const Identifier id = Identifier::parse(resid, Identifier::ID_TYPE_REFERENCE);
+    BeanFactory& beanFactory = (id.package() ? *_bean_factory.getPackage(id.package()) : _bean_factory);
+    const document manifest = beanFactory._stub->_document_refs->get(id.val());
+    for(const document& i : manifest->children("component"))
+        components.emplace_back(Box(beanFactory.ensure<Wirable>(i, kwargs)), i);
+
+    return sp<Entity>::make(std::move(components));
 }
 
 void ResourceLoader::importManifest(const document& manifest, BeanFactory& beanFactory)

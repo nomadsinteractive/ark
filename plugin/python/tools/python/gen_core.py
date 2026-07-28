@@ -144,7 +144,7 @@ class GenArgumentMeta:
 ARK_PY_ARGUMENTS = (
     (r'String\s*&?', GenArgumentMeta('const char*', 'const char*', 's')),
     (r'Scope\s*&', GenArgumentMeta('PyObject*', 'Scope', '**')),
-    (r'Args\s*&?', GenArgumentMeta('PyObject*', 'Args', '*')),
+    (r'Args\s*&?', GenArgumentMeta('PyObject*', 'Args', '*', movable=True)),
     (r'Traits\s*&?', GenArgumentMeta('PyObject*', 'Traits', '*')),
     (r'std::wstring\s*&?', GenArgumentMeta('PyObject*', 'std::wstring', 'O')),
     (r'Box\s*&?', GenArgumentMeta('PyObject*', 'Box', 'O')),

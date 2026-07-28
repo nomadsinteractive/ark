@@ -30,7 +30,7 @@ public:
         : _condition(std::move(condition)), _future(std::move(future)) {
     }
 
-    bool update(uint32_t tick) override {
+    bool update(const uint32_t tick) override {
         const bool dirty = _condition->update(tick);
         if(_condition->val())
             _future->notify();

@@ -286,14 +286,13 @@ ${member_declare}
     content = acg.format('''#pragma once
 
 #include "core/base/plugin.h"
-#include "core/base/resource_loader.h"
 #include "core/forwarding.h"
 
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
 
-#include "app/forwarding.h"
+#include "app/base/resource_loader.h"
 
 ${classdeclare}
 
