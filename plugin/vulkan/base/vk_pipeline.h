@@ -41,7 +41,7 @@ private:
     void setupComputePipeline(GraphicsContext& graphicsContext);
 
     void buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) const;
-    void buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& drawingContext);
+    void buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& computeContext);
 
     sp<VKDescriptorPool> makeDescriptorPool() const;
     void bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots) const;
