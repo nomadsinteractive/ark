@@ -28,6 +28,18 @@ VKDevice::VKDevice(const sp<VKInstance>& instance, const VkPhysicalDevice physic
     {
         if(_features_vk12.separateDepthStencilLayouts)
             _enabled_features_vk12.separateDepthStencilLayouts = VK_TRUE;
+
+        // Descriptor sets are updated in place (VKPipeline::setupDescriptorSet) while they may still be bound to a
+        // command buffer, which is only legal when the corresponding bindings are flagged UPDATE_AFTER_BIND. Enable
+        // the update-after-bind features that back those binding flags for the descriptor types the pipelines use.
+        if(_features_vk12.descriptorBindingUniformBufferUpdateAfterBind)
+            _enabled_features_vk12.descriptorBindingUniformBufferUpdateAfterBind = VK_TRUE;
+        if(_features_vk12.descriptorBindingStorageBufferUpdateAfterBind)
+            _enabled_features_vk12.descriptorBindingStorageBufferUpdateAfterBind = VK_TRUE;
+        if(_features_vk12.descriptorBindingSampledImageUpdateAfterBind)
+            _enabled_features_vk12.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
+        if(_features_vk12.descriptorBindingStorageImageUpdateAfterBind)
+            _enabled_features_vk12.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE;
     }
 
     VKUtil::checkResult(_vulkan_device->createLogicalDevice(enableFeatures12 ? nullptr : &_enabled_features.features, _enabled_extensions, enableFeatures12 ? &_enabled_features : nullptr));
@@ -79,6 +91,23 @@ const VkPhysicalDeviceFeatures& VKDevice::features() const
 const VkPhysicalDeviceMemoryProperties& VKDevice::memoryProperties() const
 {
     return _vulkan_device->memoryProperties;
+}
+
+bool VKDevice::isDescriptorUpdateAfterBindSupported(const VkDescriptorType descriptorType) const
+{
+    switch(descriptorType)
+    {
+        case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+            return _enabled_features_vk12.descriptorBindingUniformBufferUpdateAfterBind;
+        case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+            return _enabled_features_vk12.descriptorBindingStorageBufferUpdateAfterBind;
+        case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+            return _enabled_features_vk12.descriptorBindingSampledImageUpdateAfterBind;
+        case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+            return _enabled_features_vk12.descriptorBindingStorageImageUpdateAfterBind;
+        default:
+            return false;
+    }
 }
 
 VkFormat VKDevice::vkDepthFormat() const

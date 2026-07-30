@@ -380,7 +380,28 @@ void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
 
 void VKPipeline::addDescriptorSetLayout(const VkDevice device, const Vector<VkDescriptorSetLayoutBinding>& setLayoutBindings)
 {
-    const VkDescriptorSetLayoutCreateInfo descriptorLayout = {VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO, nullptr, VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT, static_cast<uint32_t>(setLayoutBindings.size()), setLayoutBindings.data()};
+    // Flag each binding UPDATE_AFTER_BIND so that re-writing an already-bound descriptor set (see setupDescriptorSet)
+    // does not invalidate the command buffer it is bound to. Only enable it where the device actually advertises
+    // update-after-bind for the binding's descriptor type; otherwise vkCreateDescriptorSetLayout would be invalid.
+    const sp<VKDevice>& vkDevice = _renderer->device();
+    Vector<VkDescriptorBindingFlags> bindingFlags;
+    bindingFlags.reserve(setLayoutBindings.size());
+    for(const VkDescriptorSetLayoutBinding& i : setLayoutBindings)
+        bindingFlags.push_back(vkDevice->isDescriptorUpdateAfterBindSupported(i.descriptorType) ? VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT : 0);
+
+    const VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO,
+        .pNext = nullptr,
+        .bindingCount = static_cast<uint32_t>(bindingFlags.size()),
+        .pBindingFlags = bindingFlags.data()
+    };
+    const VkDescriptorSetLayoutCreateInfo descriptorLayout = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .pNext = &bindingFlagsCreateInfo,
+        .flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT,
+        .bindingCount = static_cast<uint32_t>(setLayoutBindings.size()),
+        .pBindings = setLayoutBindings.data()
+    };
     VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
     VKUtil::checkResult(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &setLayout));
     _descriptor_set_layouts.push_back(setLayout);

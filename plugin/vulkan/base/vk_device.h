@@ -32,6 +32,8 @@ public:
     const VkPhysicalDeviceFeatures& features() const;
     const VkPhysicalDeviceMemoryProperties& memoryProperties() const;
 
+    bool isDescriptorUpdateAfterBindSupported(VkDescriptorType descriptorType) const;
+
     uint32_t getMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32 *memTypeFound = nullptr) const;
 
     VkQueue getQueueByFamilyIndex(uint32_t familyIndex) const;
