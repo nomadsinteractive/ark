@@ -196,7 +196,7 @@ class GenMethod(object):
 
     def _gen_parse_tuple_args(self) -> tuple[str, str]:
         if self._has_args_argument:
-            args_idx = len(self.arguments) - (2 if self._has_keyword_arguments else 1)
+            args_idx = len(self.arguments) - (2 if self._has_kwargs_argument else 1)
             args_name = f'args0_{args_idx}'
             return f'{args_name}.pyObject()', f'const PyInstance {args_name} = PyInstance::steal(PyBridge::PyTuple_GetSlice(args, 0, {args_idx}));\n    '
         return 'args', ''
