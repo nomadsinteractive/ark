@@ -664,23 +664,9 @@ class RenderTarget(Renderer):
 
 
 class ResourceLoader:
+
     def load(self, cls: type[T], type_id: str, **kwargs) -> T: ...
-
     def load_entity(self, *args, **kwargs) -> Entity: ...
-
-    @property
-    def refs(self): ...
-
-    @property
-    def layers(self): ...
-
-    @property
-    def render_layers(self): ...
-
-    @property
-    def packages(self): ...
-
-    def get_reference(self, name: str): ...
 
 
 class Camera:
@@ -982,6 +968,10 @@ class AnimationInput(Uploader):
 
 
 class Animation:
+
+    @property
+    def name(self) -> str: ...
+
     @property
     def ticks(self) -> int: ...
 
