@@ -30,6 +30,7 @@ uint32_t ShaderDataType::sizeOfComponent() const
 			return 1;
 		case TYPE_FLOAT:
 		case TYPE_INTEGER:
+		case TYPE_UINTEGER:
 			return 4;
 		case TYPE_USHORT:
 			return 2;

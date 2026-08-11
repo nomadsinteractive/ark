@@ -83,10 +83,7 @@ template<typename T> T mix(const T x, const T y, float a)
 	return x * (1.0 - a) + y * a;
 }
 
-template<typename T, typename TReadElementType> void readBufferData(SBufferReadData<T>& bufferReadData) {
-	if constexpr(!std::is_same_v<TReadElementType, void>)
-		ASSERT(sizeof(TReadElementType) == bufferReadData._shader_data_type.size());
-
+template<typename T> void readBufferData(SBufferReadData<T>& bufferReadData) {
 	size_t SrcOffset = 0;
 	size_t DstOffset = 0;
 	const size_t dstSize = bufferReadData._shader_data_type.size();
@@ -102,7 +99,7 @@ template<typename T, typename TReadElementType> void readBufferData(SBufferReadD
 }
 
 template<typename T> SBufferReadData<T> getBufferReadData(const tinygltf::Accessor* accessor, const tinygltf::BufferView& BufferView, const tinygltf::Buffer& Buffer,
-                                                          const ShaderDataType& shaderDataType, size_t componentSize) {
+                                                          const ShaderDataType& shaderDataType, const size_t componentSize) {
     // clang-format off
     ///////////////////////////////////////////////////////////////////////
     // [--Buffer Data-----------------------------------------------------]
@@ -207,19 +204,16 @@ ShaderDataType getShaderDataTypeFromAccessor(const tinygltf::Accessor& accessor)
 	return {componentType, numOfComponents};
 }
 
-template<typename T, typename ComponentType = void> SBufferReadData<T> getAttributeData(const tinygltf::Model& model, uint32_t attributeValue) {
+template<typename T, typename ComponentType = float> SBufferReadData<T> getAttributeData(const tinygltf::Model& model, const uint32_t attributeValue) {
     const tinygltf::Accessor& accessor = model.accessors.at(attributeValue);
     const tinygltf::BufferView& bufferView = model.bufferViews.at(accessor.bufferView);
     const tinygltf::Buffer& buffer = model.buffers.at(bufferView.buffer);
     const ShaderDataType shaderDataType = getShaderDataTypeFromAccessor(accessor);
 
-    size_t componentSize = 4;
-    if constexpr(!std::is_same_v<ComponentType, void>)
-        componentSize = sizeof(ComponentType);
-
+    constexpr size_t componentSize = sizeof(ComponentType);
     SBufferReadData<T> bufferReadParams = getBufferReadData<T>(&accessor, bufferView, buffer, shaderDataType, componentSize);
 
-    readBufferData<T, ComponentType>(bufferReadParams);
+    readBufferData<T>(bufferReadParams);
     return bufferReadParams;
 }
 
