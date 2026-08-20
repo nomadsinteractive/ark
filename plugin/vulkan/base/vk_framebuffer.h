@@ -26,7 +26,6 @@ public:
     op<Recyclable> toRecyclable() override;
 
     void beginRenderPass(GraphicsContext& graphicsContext) const;
-    VkCommandBuffer endRenderPass(GraphicsContext& graphicsContext) const;
 
 private:
 

@@ -51,20 +51,16 @@ public:
         VkRenderPass ensureRenderPass();
         VkCommandBuffer ensureRenderPassCommandBuffer();
 
-    private:
         sp<RenderPassPhrase> _render_pass_phrase;
         VkCommandBuffer _command_buffer;
         bool _command_buffer_began;
         VkRenderPass _render_pass;
-
-        friend class VKGraphicsContext;
-        friend class VKPipeline;
     };
 
     State& currentState();
 
     void pushState(sp<RenderPassPhrase> renderPassPhrase);
-    VkCommandBuffer popState();
+    State popState();
 
     // Blocks until the GPU has finished the work previously submitted on the current frame-in-flight slot. Must be
     // called before RenderController::onDrawFrame writes this frame's (in-place, single-buffered) GPU resources, so

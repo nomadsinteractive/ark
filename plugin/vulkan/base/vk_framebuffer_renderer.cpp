@@ -3,6 +3,7 @@
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_layer_snapshot.h"
 #include "graphics/inf/render_command.h"
+#include "renderer/base/graphics_context.h"
 
 #include "renderer/impl/draw_decorator/draw_decorator_composite.h"
 #include "renderer/inf/draw_decorator.h"
@@ -27,13 +28,15 @@ public:
 
     void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
     {
-        const VkCommandBuffer commandBuffer = _fbo->endRenderPass(graphicsContext);
+        const VKGraphicsContext::State state = graphicsContext.traits().ensure<VKGraphicsContext>()->popState();
         constexpr VkMemoryBarrier memoryBarrier = {
-            .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER, .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+            .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
+            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
             .dstAccessMask = VK_ACCESS_SHADER_READ_BIT
         };
-        vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-                             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 1, &memoryBarrier, 0, nullptr, 0, nullptr);
+        if(state._command_buffer_began)
+            vkCmdPipelineBarrier(state._command_buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+                                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 1, &memoryBarrier, 0, nullptr, 0, nullptr);
     }
 
 private:

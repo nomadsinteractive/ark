@@ -82,11 +82,6 @@ void VKFramebuffer::beginRenderPass(GraphicsContext& graphicsContext) const
     graphicsContext.traits().ensure<VKGraphicsContext>()->pushState(_stub);
 }
 
-VkCommandBuffer VKFramebuffer::endRenderPass(GraphicsContext& graphicsContext) const
-{
-    return graphicsContext.traits().ensure<VKGraphicsContext>()->popState();
-}
-
 VkRect2D VKFramebuffer::Stub::getFramebufferScissor() const
 {
     ASSERT(!_configure._color_attachments.empty());

@@ -171,10 +171,10 @@ void VKGraphicsContext::pushState(sp<RenderPassPhrase> renderPassPhrase)
     _state_stack.push(State(std::move(renderPassPhrase), commandBuffer, commandBufferBegan));
 }
 
-VkCommandBuffer VKGraphicsContext::popState()
+VKGraphicsContext::State VKGraphicsContext::popState()
 {
     DASSERT(!_state_stack.empty());
-    const State state = _state_stack.top();
+    State state = _state_stack.top();
     _state_stack.pop();
 
     const VkCommandBuffer commandBuffer = state._command_buffer;
@@ -185,9 +185,10 @@ VkCommandBuffer VKGraphicsContext::popState()
     {
         VKUtil::checkResult(vkEndCommandBuffer(commandBuffer));
         _submit_queue.submitCommandBuffer(commandBuffer);
+        state._command_buffer_began = false;
     }
 
-    return commandBuffer;
+    return state;
 }
 
 void VKGraphicsContext::waitForFrameAvailable() const
