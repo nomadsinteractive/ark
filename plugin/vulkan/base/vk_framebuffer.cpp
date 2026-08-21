@@ -15,7 +15,6 @@
 #include "vulkan/base/vk_renderer.h"
 #include "vulkan/base/vk_texture.h"
 #include "vulkan/util/vulkan_initializers.hpp"
-#include "vulkan/util/vulkan_tools.h"
 #include "vulkan/util/vk_util.h"
 
 namespace ark::plugin::vulkan {
@@ -94,15 +93,16 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
       _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(vks::initializers::rect2D(_resolution.width, _resolution.height, 0, 0)),
       _viewport(vks::initializers::viewport(static_cast<float>(_resolution.width), static_cast<float>(_resolution.height), 0, 1.0f))
 {
-
-    if(_configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
+    const bool hasClearColorBit = _configure._color_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR);
+    const bool hasClearDepthStencilBit = _configure._depth_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR);
+    if(hasClearColorBit || hasClearDepthStencilBit)
         for(const auto& [t, b, cv] : _configure._color_attachments)
             _clear_values.push_back({{{cv.x(), cv.y(), cv.z(), cv.w()}}});
 
-    VkClearValue clearDepthStencil;
-    clearDepthStencil.depthStencil = { 1.0f, 0 };
-    if(_configure._depth_attachment_op.contains(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
-        _clear_values.push_back(clearDepthStencil);
+    if(hasClearDepthStencilBit)
+        _clear_values.push_back({
+            .depthStencil = { .depth = 1.0f, .stencil = 0 }
+        });
 
     _render_pass_begin_info.renderArea = _scissor;
     _render_pass_begin_info.clearValueCount = static_cast<uint32_t>(_clear_values.size());
